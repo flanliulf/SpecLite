@@ -1,0 +1,15 @@
+[core]
+project_name = ""
+user_name = ""
+communication_language = "Chinese"
+document_output_language = "Chinese"
+user_skill_level = "intermediate"
+output_folder = "{project-root}/_speclite-output"
+
+[modules.sdlc]
+planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
+implementation_artifacts = "{project-root}/_speclite-output/implementation-artifacts"
+project_knowledge = "{project-root}/docs"
+
+# Runtime location: {project-root}/_speclite/config.toml
+# This file is a field-structure reference only and must not be used as runtime fallback.

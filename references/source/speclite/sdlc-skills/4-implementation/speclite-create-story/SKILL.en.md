@@ -1,0 +1,46 @@
+---
+name: speclite-create-story
+description: "Create a comprehensive Story file with all the context the dev agent will need to implement it later, by exhaustively analyzing epics, PRD, architecture, UX, the previous story, and code being modified. Use when user mentions 'create story', 'create the next story', 'create story by identifier', 'next story', 'draft story', '创建 Story', '创建下一个 Story', '生成 Story', '起草 Story', '创建故事', '生成故事文件', '准备开发故事', or provides an epic-story identifier such as '1-2', '1.6', 'epic 1 story 5'. Capable of config-driven activation, sprint-status auto-discovery, artifact analysis, architecture guardrails, web research, previous-story intelligence, modified-file impact analysis, and ready-for-dev Story generation."
+allowed-tools: Read, Write, Grep, Glob, Bash, WebSearch
+metadata:
+  version: "1.0.0"
+  author: "fancyliu"
+  catalog: "speclite"
+---
+
+[Skill Description]
+    # Create Story Workflow
+
+    **Goal:** Create a comprehensive Story file that gives the dev agent everything needed for flawless implementation.
+
+    **Your Role:** Story context engine that prevents LLM developer mistakes, omissions, and implementation disasters.
+    - Communicate in `{communication_language}` and generate documents in `{document_output_language}`.
+    - Do not copy from epics; create a complete, optimized Story that gives the DEV agent everything needed.
+    - Prevent reinventing wheels, wrong libraries, wrong file locations, regressions, ignored UX, vague implementation, false completion, and failure to learn from past work.
+    - Exhaustively analyze all artifacts; use research subagents, subprocesses, or parallel processing when available.
+    - Save questions during analysis and ask them after the complete Story is written; automate the flow except for initial selection or missing documents.
+
+[Core Capabilities]
+    - **Configuration and activation resolution**: resolve three-tier customize (base→team→user) and the `workflow` block; load `persistent_facts`, `config.toml`, activation prepend/append steps, and `workflow.on_complete`.
+    - **Story target discovery and state-machine maintenance**: support explicit Story identifiers or sequentially find the first backlog Story in `sprint-status.yaml`; maintain the `backlog/contexted → in-progress → done` Epic state machine.
+    - **Core artifact and historical intelligence analysis**: load Epics, PRD, Architecture, UX, project-context, previous Story, and recent git commits; extract business goals, ACs, dependencies, learnings, file patterns, and testing approaches.
+    - **Architecture guardrails and UPDATE-file protection**: extract tech stack, code structure, API, schema, security, performance, testing, deployment, and integration patterns; for every UPDATE file record “current state — what this Story changes — what must be preserved”.
+    - **Latest-technology research**: identify key libraries, frameworks, and APIs; research stable versions, breaking changes, security updates, deprecations, performance improvements, and current best practices.
+    - **Templated Story generation**: initialize output from the fenced markdown template in `assets/story-template.md`, then render a `ready-for-dev` Story using the 13 template-output sections.
+    - **Quality validation and sprint sync**: self-check with `references/checklist.md`, save the Story, update the matching `sprint-status.yaml` entry to `ready-for-dev`, and preserve comments and structure.
+
+[Execution Flow]
+    1. First read `references/workflow-details.md` in full; it is the complete operating specification and must not be skipped or summarized during execution.
+    2. During activation, resolve `workflow`, three-tier customize, `workflow.persistent_facts`, and the target project's runtime `{project-root}/_speclite/config.toml`; this Skill directory only keeps `config.toml.example` as a reference. Exact commands, fields, and merge rules are in the full specification.
+    3. Load all input artifacts via `references/discover-inputs.md`; read `sprint-status.yaml` from start to end to preserve Story order.
+    4. When writing the Story, render the 13 template-output sections in the exact order listed in the full specification.
+    5. Before finalizing, validate and fix the Story with `references/checklist.md`, update sprint status, and run the `workflow.on_complete` terminal directive from the full specification.
+
+[Notes]
+    - Directory name and YAML `name` must stay aligned in kebab-case: `speclite-create-story`.
+    - Every detail in `references/workflow-details.md` is an effective instruction, not background material; follow it completely.
+    - Do not omit three-tier customize, `persistent_facts`, `config.toml` fields, Epic state machine, previous Story intelligence, git intelligence, web research, UPDATE-file three-part notes, the 13 section names, or `workflow.on_complete`.
+    - Story implementation must keep the system working end to end; behavior required by the existing system is a requirement even when absent from explicit ACs.
+    - `sprint-status.yaml` updates must preserve all comments and structure, including STATUS DEFINITIONS; never overwrite it with a stripped version.
+    - The Story document must end with `*Generated by the speclite-create-story Skill*`.
+    - Completion output must include Story ID, Story Key, file path, `ready-for-dev` status, `dev-story`, `code-review`, and optional Test Architect guardrail-testing next-step guidance.

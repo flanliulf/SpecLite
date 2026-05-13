@@ -1,0 +1,4 @@
+# Temporary team-level workflow customization for speclite-create-story.
+# This file is intentionally empty by default; add keys under [workflow] to override customize.toml.
+
+[workflow]

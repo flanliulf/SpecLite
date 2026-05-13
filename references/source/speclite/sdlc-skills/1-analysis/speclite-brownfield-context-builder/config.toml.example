@@ -1,0 +1,12 @@
+# Example only. Runtime configuration is read from {project-root}/_speclite/config.toml.
+
+[modules.sdlc]
+project_knowledge = "{project-root}/docs"
+planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
+
+[skills.speclite-brownfield-context-builder]
+# Defaults used by the skill after resolving module paths.
+brownfield_output = "{project_knowledge}/brownfield"
+history_sources = ["{project-root}/docs/history"]
+scan_level = "deep"
+planning_output_mode = "brief-only"

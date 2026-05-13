@@ -1,0 +1,41 @@
+# 请勿编辑 —— 每次升级 (upgrade) 都会被覆盖。
+#
+# speclite-create-epics-and-stories 的工作流 (workflow) 定制层 (customization surface)。
+# 与智能体 (agent) 定制结构保持一致，统一收纳在 [workflow] 命名空间 (namespace) 下。
+
+[workflow]
+
+# --- 以下为可配置项。覆盖 (override) 按照 SpecLite 结构化合并 (structural merge) 规则进行： ---
+#   标量 (scalar)：覆盖生效 • 数组（persistent_facts、activation_steps_*）：追加 (append)
+#   以 `code` / `id` 为键的表数组：按键替换匹配项，追加新项。
+
+# 在标准激活流程 (activation)（加载配置、问候用户）之前执行的步骤 (step)。
+# 覆盖 (override) 时执行追加 (append)。可用于预加载 (pre-flight load)、合规检查 (compliance check) 等前置动作。
+
+activation_steps_prepend = []
+
+# 在问候用户之后、工作流 (workflow) 正式开始之前执行的步骤 (step)。
+# 覆盖 (override) 时执行追加 (append)。适合放置依赖大量上下文 (context)、且必须在用户被确认之后才执行的初始化 (initialization) 逻辑。
+
+activation_steps_append = []
+
+# 工作流 (workflow) 在整个运行期间持续保留的持久事实 (persistent facts)
+# （规范 (standards)、合规约束 (compliance constraints)、风格护栏 (stylistic guardrails) 等）。
+# 与运行时的记忆边车 (memory sidecar) 不同 —— 这些是激活 (activation) 时一次性加载的静态上下文 (static context)。
+# 覆盖 (override) 时执行追加 (append)。
+#
+# 每一项可以是：
+#   - 一句字面事实 (literal fact)，例如 "所有 Story 必须包含可测试的验收标准 (acceptance criteria)。"
+#   - 以 `file:` 为前缀的文件引用 (file reference)，例如 "file:{project-root}/docs/standards.md"
+#  （支持 glob 模式 (glob pattern)；文件内容会被加载并作为事实 (facts) 使用）。
+
+persistent_facts = [
+  "file:{project-root}/**/project-context.md",
+  "file:{project-root}/docs/**/*.md",
+]
+
+# 标量 (scalar)：当工作流 (workflow) 推进到 Step 4（Final Validation）、
+# epics.md 已保存且用户确认 [C] Complete 之后执行。覆盖 (override) 生效。
+# 留空表示不执行任何自定义的收尾 (post-completion) 行为。
+
+on_complete = ""

@@ -1,0 +1,34 @@
+code: core
+name: "SpecLite Core Module"
+description: "Core configuration schema and shared runtime resources for SpecLite installations"
+
+header: "SpecLite Core Configuration"
+subheader: "Configure the shared settings used across installed SpecLite skills, workflows, and agents. These values are written to {project-root}/_speclite/config.toml under [core]."
+config_table: core
+
+user_name:
+  prompt: "What should agents call you? (Use your name or a team name)"
+  scope: user
+  default: "SpecLite"
+  result: "{value}"
+
+project_name:
+  prompt: "What is your project called?"
+  default: "{directory_name}"
+  result: "{value}"
+
+communication_language:
+  prompt: "What language should agents use when chatting with you?"
+  scope: user
+  default: "Chinese"
+  result: "{value}"
+
+document_output_language:
+  prompt: "Preferred document output language?"
+  default: "Chinese"
+  result: "{value}"
+
+output_folder:
+  prompt: "Where should output files be saved?"
+  default: "_speclite-output"
+  result: "{project-root}/{value}"

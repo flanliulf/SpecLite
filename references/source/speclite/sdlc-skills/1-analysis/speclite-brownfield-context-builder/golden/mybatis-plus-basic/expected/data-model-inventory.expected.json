@@ -1,0 +1,11 @@
+{
+  "expected_models": [
+    {
+      "model_name": "UserInfo",
+      "table_name": "user_info",
+      "orm": "mybatis-plus"
+    }
+  ],
+  "rationale": "Verifies KFP-003 fix: MyBatis-Plus @TableName entities must be extracted (not silently dropped).",
+  "associated_kfp": "KFP-003"
+}

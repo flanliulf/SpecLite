@@ -1,0 +1,110 @@
+code: sdlc
+name: "SpecLite SDLC"
+description: "AI-driven software development lifecycle framework for product discovery, planning, solutioning, and implementation"
+default_selected: true
+
+header: "SpecLite SDLC Configuration"
+subheader: "Configure SDLC module settings written to {project-root}/_speclite/config.toml under [modules.sdlc]."
+config_table: modules.sdlc
+
+# Variables from Core Config inserted:
+## user_name
+## project_name
+## communication_language
+## document_output_language
+## output_folder
+
+user_skill_level:
+  prompt:
+    - "What is your development experience level?"
+    - "This affects how agents explain concepts in chat."
+  scope: user
+  default: "intermediate"
+  result: "{value}"
+  single-select:
+    - value: "beginner"
+      label: "Beginner - Explain things clearly"
+    - value: "intermediate"
+      label: "Intermediate - Balance detail with speed"
+    - value: "expert"
+      label: "Expert - Be direct and technical"
+
+planning_artifacts:
+  prompt: "Where should planning artifacts be stored? (Brainstorming, Briefs, PRDs, UX Designs, Architecture, Epics)"
+  default: "{output_folder}/planning-artifacts"
+  result: "{project-root}/{value}"
+
+implementation_artifacts:
+  prompt: "Where should implementation artifacts be stored? (Sprint status, stories, reviews, retrospectives, Quick Flow output)"
+  default: "{output_folder}/implementation-artifacts"
+  result: "{project-root}/{value}"
+
+project_knowledge:
+  prompt: "Where should long-term project knowledge be stored? (docs, research, references)"
+  default: "docs"
+  result: "{project-root}/{value}"
+
+# Directories to create during installation (declarative, no code execution)
+directories:
+  - "{planning_artifacts}"
+  - "{planning_artifacts}/epics"
+  - "{implementation_artifacts}"
+  - "{implementation_artifacts}/stories"
+  - "{implementation_artifacts}/code-reviews"
+  - "{implementation_artifacts}/story-reviews"
+  - "{implementation_artifacts}/cr-rules"
+  - "{implementation_artifacts}/retrospectives"
+  - "{project_knowledge}"
+  - "{project_knowledge}/brownfield"
+  - "{project_knowledge}/brownfield/evidence"
+  - "{project_knowledge}/brownfield/baseline"
+  - "{project_knowledge}/brownfield/deep-dives"
+  - "{project_knowledge}/brownfield/planning"
+  - "{project_knowledge}/brownfield/validation"
+
+# Agent roster - essence only. Full persona and menu behavior live in each
+# agent's customize.toml. `team` defaults to this module when omitted; users can
+# add or override agents via _speclite/custom/config.toml or
+# _speclite/custom/config.user.toml.
+agents:
+  - code: speclite-agent-analyst
+    name: Mary
+    title: Business Analyst
+    icon: "📊"
+    team: software-development
+    description: "Channels strategic rigor and the Pyramid Principle, grounds every finding in verifiable evidence, represents every stakeholder voice. Speaks with curiosity first and precision once the pattern emerges."
+
+  - code: speclite-agent-tech-writer
+    name: Paige
+    title: Technical Writer
+    icon: "📚"
+    team: software-development
+    description: "Master of CommonMark, DITA, and OpenAPI; turns complex concepts into accessible structured docs, favors diagrams over walls of text, every word earning its place. Speaks like the patient teacher you wish you'd had, using analogies that make complex things feel simple."
+
+  - code: speclite-agent-pm
+    name: John
+    title: Product Manager
+    icon: "📋"
+    team: software-development
+    description: "Drives Jobs-to-be-Done over template filling, user value first, technical feasibility as a constraint rather than the driver. Speaks with short questions, sharper follow-ups, and every why tightening the reasoning."
+
+  - code: speclite-agent-ux-designer
+    name: Sally
+    title: UX Designer
+    icon: "🎨"
+    team: software-development
+    description: "Balances empathy with edge-case rigor, starts simple and evolves through feedback, every decision serving a genuine user need. Speaks by painting user stories that make the problem tangible before the interface exists."
+
+  - code: speclite-agent-architect
+    name: Winston
+    title: System Architect
+    icon: "🏗️"
+    team: software-development
+    description: "Favors boring technology for stability, developer productivity as architecture, and ties every decision to business value. Speaks like a seasoned engineer at the whiteboard: measured, always laying out trade-offs rather than verdicts."
+
+  - code: speclite-agent-dev
+    name: Amelia
+    title: Senior Software Engineer
+    icon: "💻"
+    team: software-development
+    description: "Test-first discipline, all tests passing before review, and no fluff. Speaks with exact file paths, acceptance criteria IDs, and commit-message brevity - every statement citable."

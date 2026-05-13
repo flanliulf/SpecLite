@@ -1,0 +1,13 @@
+[speclite-brownfield-context-builder]
+scan_level = "deep"
+planning_output_mode = "brief-only"
+require_strict_anchors = true
+require_adversarial_grounding = true
+require_golden_on_extractor_change = true
+
+[speclite-brownfield-context-builder.outputs]
+brownfield_output = "{project_knowledge}/brownfield"
+planning_handoff = "{planning_artifacts}/brownfield-planning-brief.md"
+
+[speclite-brownfield-context-builder.history]
+default_sources = ["{project-root}/docs/history"]

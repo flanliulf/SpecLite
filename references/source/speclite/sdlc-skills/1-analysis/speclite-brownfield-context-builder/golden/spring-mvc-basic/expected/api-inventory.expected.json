@@ -1,0 +1,10 @@
+{
+  "expected_endpoints": [
+    {"endpoint": "/lucky", "method": "ANY"},
+    {"endpoint": "/lucky/list", "method": "GET"},
+    {"endpoint": "/lucky/addActivity", "method": "POST"},
+    {"endpoint": "/lucky/getManagerResource", "method": "ANY"}
+  ],
+  "rationale": "Verifies KFP-002 fix: class-level @RequestMapping('/lucky') must be joined with method-level paths.",
+  "associated_kfp": "KFP-002"
+}
