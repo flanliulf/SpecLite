@@ -1,0 +1,31 @@
+installation:
+  version: 6.6.0
+  installDate: 2026-05-08T02:26:30.575Z
+  lastUpdated: 2026-05-08T02:26:30.575Z
+modules:
+  - name: core
+    version: 6.6.0
+    installDate: 2026-05-08T02:26:30.548Z
+    lastUpdated: 2026-05-08T02:26:30.575Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+  - name: bmm
+    version: 6.6.0
+    installDate: 2026-05-08T02:26:30.529Z
+    lastUpdated: 2026-05-08T02:26:30.575Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+ides:
+  - claude-code
+  - codex
+  - cursor
+  - github-copilot
+  - auggie
+  - gemini
+  - antigravity
+  - kiro
+  - opencode
+  - windsurf
+  - warp
