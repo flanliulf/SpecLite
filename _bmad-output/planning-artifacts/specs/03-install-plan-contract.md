@@ -1,0 +1,184 @@
+# Install Plan Contract（安装计划契约）
+
+## Status（状态）
+
+MVP implementation 草案。
+
+## Ownership（所有权）
+
+本 SPEC 定义 install 和 update write authorization 的 internal planning contract。它用于保持 source trust decisions、external access、planned writes 和 write authorization 相互分离。
+
+CommandResult JSON 负责 public command output。本 install plan contract 负责 pre-write planning semantics。
+
+## Planning Stages（规划阶段）
+
+Install 和 update planning 包含两个有序阶段：
+
+1. `SourceResolutionPlan` 在 network、registry、remote Git、tarball 或 bundle resolution 发生之前声明 external access intent。
+2. `InstallPlan` 在任何文件写入之前记录 resolved `SourceDescriptor`、selected modules、target adapter plan、planned writes、confirmation state 和 write authorization。
+
+MVP 不需要在 public command JSON 中暴露 `SourceResolutionPlan`，但 implementation 必须保留此 ordering。不允许在这些阶段之外执行 hidden source downloads、remote freshness checks 或 provenance revalidation。
+
+```ts
+type SourceResolutionPlan = {
+  requestedSourceType: string;
+  // 仅允许 redacted/display-safe value。
+  requestedSourceValue: string;
+  externalAccesses: ExternalAccess[];
+  requiresConfirmation: boolean;
+  confirmed: boolean;
+};
+```
+
+## Install Plan（安装计划）
+
+MVP install/update planning 必须在写入文件之前生成 internal plan：
+
+```ts
+type InstallPlan = {
+  sourceDescriptor: SourceDescriptor;
+  selectedModules: string[];
+  targetAdapters: Array<{
+    targetId: "claude" | "agents";
+    targetDirectory: string;
+    status: "planned" | "unsupported" | "failed";
+  }>;
+  externalAccesses: ExternalAccess[];
+  plannedWrites: PlannedWrite[];
+  requiresConfirmation: boolean;
+  writeAuthorized: boolean;
+};
+
+type ExternalAccess = {
+  sourceType: string;
+  // 仅允许 redacted/display-safe value。
+  sourceValue: string;
+  reason: string;
+  confirmationState: "not-required" | "pending" | "confirmed" | "denied";
+};
+
+type PlannedWrite = {
+  path: string;
+  ownership: "installer-owned" | "human-owned" | "workflow-owned";
+  action: "create" | "update" | "restore-canonical" | "regenerate" | "skip" | "conflict";
+  currentHash?: string;
+  expectedHash?: string;
+  reason?: string;
+};
+```
+
+对 target project paths，path fields 必须使用 project-relative POSIX paths。
+
+`requestedSourceValue` 和 `ExternalAccess.sourceValue` 必须 redacted/display-safe。它们不得包含 authentication tokens、credential-bearing URLs、private query strings、local absolute paths、home directories、drive letters、npm cache paths、temporary extraction paths 或 OS-specific separators。Raw source locators 只能存在于 private in-memory planning state。
+
+## Planning Model Boundaries（规划模型边界）
+
+| Model（模型） | Owner（所有者） | Visibility（可见性） | Meaning（含义） |
+| --- | --- | --- | --- |
+| `SourceResolutionPlan` | 本 SPEC | Internal planning contract | 解析 source 前的 external access intent。 |
+| `InstallPlan` | 本 SPEC | Internal planning contract | 写入前的 resolved source descriptor、target adapter plan、planned writes、confirmation 和 write authorization。 |
+| `UpdatePlan` | `docs/specs/01-command-result-json-contract.md` | Public command result projection | `update --json` 输出的 planned update effects。 |
+| `RepairPlan` | `docs/specs/01-command-result-json-contract.md` | Public command result projection | `update --repair --json` 输出的 planned repair effects。 |
+| `changedPaths` / `skippedPaths` | `docs/specs/01-command-result-json-contract.md` | Public command result fields | 仅表示当前命令的 actual apply result。 |
+
+Internal `InstallPlan.plannedWrites` 可以包含 private planning detail。Public reporters 只能 project CommandResult JSON contract 中声明的字段。
+
+## Authorization Semantics（授权语义）
+
+`requiresConfirmation` 和 `writeAuthorized` 只描述 command-level write authorization。
+
+`--yes` 或 interactive confirmation 授权 planned writes。它不得自动接受 unverified source、floating Git source、unsupported source、failed evidence verification 或 source policy rejection。
+
+Unverified source selection 是独立的 source selection decision。它必须由 `SourceDescriptor.trustStatus: "unverified"` 加 recorded reproducible evidence 表达，而不是由 `writeAuthorized` 表达。
+
+## Dry-Run Semantics（Dry Run 语义）
+
+MVP 支持 plan-before-write semantics。
+
+如果 CLI 暴露 `--dry-run`，它必须表示：
+
+- 生成 plan
+- 不写入文件
+- 设置 `writeAuthorized: false`
+- 在 plan 中保留真实 planned actions
+- 在 public command JSON 中保持 `changedPaths` 和 `skippedPaths` 为空
+
+如果没有使用显式 `--dry-run` flag，interactive confirmation pending 或没有 `--yes` 的 script mode 仍表现为 unapplied plan。它不得把 planned actions 改写为带 `reason: "not-authorized"` 的 `skip`。
+
+## External Access（外部访问）
+
+当 source 需要 network、registry、remote Git、tarball 或 bundle resolution 时，install planning 必须先声明 external accesses，再执行它们。
+
+每个 external access 记录 source type、source value、reason 和 confirmation state。
+
+MVP 不得在显式 source resolution、install 或 update planning 之外执行 hidden source downloads 或 remote freshness checks。
+
+## Project Operation Lock（项目操作锁）
+
+Install、update 和 repair 在 planning 可以写入或应用变更之前，必须获取 project-level operation lock。MVP lock path 是 `_speclite/.lock`。
+
+如果由于另一个 SpecLite operation 正在运行而无法获取 lock，命令不得写入文件。对 write-capable commands，它必须输出 `operation-lock.project-locked` issue 和 non-zero failure status。由于 safe planning 尚未开始，此 failure 的 public JSON 不得包含 planned writes、update plans、repair plans、changed paths、skipped paths 或 conflicts。
+
+MVP lock file shape：
+
+```ts
+type OperationLockFile = {
+  schemaVersion: "speclite.operation-lock.v1";
+  operation: "install" | "update" | "update.repair";
+  pid?: number;
+  createdAt: string;
+  projectRootHash: string;
+};
+```
+
+`createdAt` 是 ISO 8601 timestamp，必须从 stable fixture snapshot comparison 中排除。测试 stale-lock behavior 时必须使用 injected 或 normalized fixture clock；不得在 stable snapshots 中比较真实当前时间。`projectRootHash` 派生自 normalized project root，且不得在 public JSON 中暴露原始 path。它只是 lock ownership hint，不是 cross-checkout stable public value；fixtures 必须 normalize 或 ignore 它。
+
+`pid` 是 best-effort process hint。它不得作为唯一 stale-lock criterion，因为 PID reuse 和 cross-platform process visibility 可能导致错误判断。Stale-lock handling 应结合 lock age、可用时的 process checks、project ownership hints，以及保守的 manual action guidance。
+
+Lock file 是 volatile installer-owned control file。它不得记录在 files index 中，也不得影响 stable files-index hashes。Validation 可以单独检查它的 shape 和 stale state。MVP 中的 stale lock handling 必须保守：报告该 lock 并提供 suggested manual action，而不是自动删除。
+
+`speclite validate` 不得仅因为 stale lock 存在而失败。它可以将 `operation-lock.stale-lock` 报告为 warning。无法获取 lock 的 write-capable commands 必须以 `operation-lock.project-locked` 失败。
+
+`speclite status --json` 是 lightweight summary，默认不得检查 project operation lock。Lock checks 属于 write-capable commands 和显式 `speclite validate`。
+
+## Safe Write Semantics（安全写入语义）
+
+Installer-owned file mutation 必须使用 safe writes：将 candidate content 写入同一目录下的 temporary file，在支持时 flush，然后 rename into place。Implementations 不得在原位置 truncate 或 partial rewrite target files。
+
+`changedPaths` 只包含当前命令中 mutation 实际完成的 paths。未尝试或未完成的 planned writes 仍保留在 `InstallPlan.plannedWrites`、`UpdatePlan.actions` 或 `RepairPlan.actions` 中；除非命令实际到达 planned skip outcome，否则不得将它们转换为 `skippedPaths`。
+
+如果某些 paths 已经变更后 write 失败，command result 必须为 `failure`；`changedPaths` 列出 completed mutations，issues/conflicts 描述 blocking failure，不得假装 operation 是 transactional。
+
+MVP 不提供 transactional rollback。Partial write failure 后，recovery 是显式的：用户在处理 reported issue 后运行 `speclite validate`、`speclite update` 或 `speclite update --repair`。除非未来存在显式 rollback feature，否则 reporters 不得声称发生了 rollback。
+
+Temporary safe-write files 不得记录到 files index。若 stale temp files 需要 manual cleanup 但不阻塞 safe write，`validate` 可以将其报告为 `file-integrity.stale-temp-file` warning。如果 stale temp file 阻塞 safe-write target naming、rename 或 safe mutation，必须报告为 `error`。MVP update/repair 不得自动清理 lock files 或 stale temp files。
+
+Operation locks 应在 controlled success 或 controlled failure 后释放。Process crash 可能留下 stale lock；MVP 通过 `operation-lock.stale-lock` validation warning 和 manual cleanup guidance 处理，而不是自动删除。
+
+## Repair Source Policy（修复来源策略）
+
+`restore-canonical` 需要 resolved canonical source，或能够证明 expected content hash 的 installed canonical package baseline。它不得从 stale IDE mirror files 重构 canonical skill content。
+
+`regenerate` 只允许用于可由 current source descriptor 和 installer templates 派生的 installer-owned generated metadata/control files。
+
+如果缺少 source evidence 或 canonical baseline，planner 必须产生带 `reason: "missing-source-evidence"` 的 conflict，而不是 repair action。
+
+## Target Status Mapping（目标状态映射）
+
+Target status vocabulary 按 layer 区分：
+
+| Layer（层） | Field（字段） | Values（取值） | Meaning（含义） |
+| --- | --- | --- | --- |
+| Install planning | `InstallPlan.targetAdapters[].status` | `planned`, `unsupported`, `failed` | adapter 是否可以参与 planned write。 |
+| Installed projection | `PhaseCoverageRow.ideTargets[].status` | `mapped`, `unsupported`, `failed` | installed phase entry 是否可通过 target 可见。 |
+| Status summary | `StatusCommandData.highLevelHealth` / `IdeTargetStatus.status` | `not-configured`, `configured`, `partial`, `failed` | installed project 或 target 的 health summary。 |
+
+这些 vocabularies 不得跨 layer 复用。`unsupported` 表示 adapter-declared capability gap，不是 write failure。`failed` 表示 attempted 或 planned operation failed。
+
+如果用户显式选择某个 target 且该 target unsupported，install/update planning 必须产生 blocking error。如果 target 未被选择，或对 current module set 来说是 optional，则 adapter-declared unsupported status 可以按 `docs/specs/07-validation-issue-taxonomy.md` 报告为 warning、info 或 known limitation。
+
+## Human-Owned TOML Stubs（人工维护 TOML Stub）
+
+当 target path 不存在时，MVP 可以在 fresh install 期间创建 human-owned TOML stub files。这仅限 `create-if-absent`。
+
+Install、update 和 repair 不得 overwrite、rewrite、reformat 或 normalize 现有 human-owned TOML files，例如 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml`。Existing files 只为 resolver behavior 而读取，并由 ownership metadata 保护。

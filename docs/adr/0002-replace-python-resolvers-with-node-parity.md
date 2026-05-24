@@ -1,3 +1,0 @@
-# Replace Python Resolvers With Node Parity（用 Node 兼容替代 Python 解析器）
-
-SpecLite MVP 将实现 Node/TypeScript config 与 customization resolver 作为正式运行入口，不把 `resolve_config.py` 或 `resolve_customization.py` 作为安装后 skills 的长期运行时依赖。现有 Python resolver 的四层 config merge、三层 customization merge、`--key` 抽取、缺失 key 行为、错误处理和 JSON 输出语义作为 Python Resolver Baseline（Python 解析器基线）保留；Node resolver 必须通过 parity fixtures 证明兼容后，才能替代 skill instructions 中的 Python 调用。`speclite resolve config` 与 `speclite resolve customization` 是 MVP runtime support command（运行时支撑命令），用于给 skills 暴露稳定 Resolver Runtime Entry（解析器运行入口）；skills 不得绑定 `node dist/...` 等内部构建产物路径。
