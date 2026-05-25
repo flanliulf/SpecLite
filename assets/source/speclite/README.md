@@ -1,6 +1,6 @@
 # Speclite Skill 目录
 
-`forge/speclite/` 是 Speclite Skill、支撑工具、运行时辅助脚本和默认定制示例的源码目录。这里是创作区；安装后的目标项目应通过自己的 `.claude/skills/` 和 `_speclite/` 目录消费 Skill 与共享脚本。
+`assets/source/speclite/` 是 Speclite Skill、支撑工具、运行时辅助脚本和默认定制示例的源码目录。这里是创作区；安装后的目标项目应通过自己的 `.claude/skills/` 和 `_speclite/` 目录消费 Skill 与共享脚本。
 
 英文版见 [README.en.md](README.en.md)。
 
@@ -24,7 +24,7 @@ Speclite Skill 文档应描述安装后的运行模型，而不是本仓库的�
 - 运行时 customization 覆盖：`{project-root}/_speclite/custom/{skill-name}.toml` 和 `{project-root}/_speclite/custom/{skill-name}.user.toml`
 - 运行时脚本：`{project-root}/_speclite/scripts`
 
-不要在当前执行规约中把 `forge/speclite/scripts`、`forge/speclite/custom` 或其他源码仓库路径写成 runtime 依赖。
+不要在当前执行规约中把 `assets/source/speclite/scripts`、`assets/source/speclite/custom` 或其他源码仓库路径写成 runtime 依赖。
 
 ## Skill 包布局
 
@@ -35,7 +35,7 @@ Speclite Skill 文档应描述安装后的运行模型，而不是本仓库的�
 - 工作流规则、协议、检查清单和微步骤文件放入 `references/`。
 - 可填充模板和骨架文档放入 `assets/`。
 - 结构化查表数据如果不是模板，放入 `data/`。
-- Skill 本地可执行脚本放入 `scripts/`；共享运行时脚本放在 `forge/speclite/scripts/`，安装到 `_speclite/scripts/`。
+- Skill 本地可执行脚本放入 `scripts/`；共享运行时脚本放在 `assets/source/speclite/scripts/`，安装到 `_speclite/scripts/`。
 
 ## 当前目录分区
 
@@ -119,8 +119,8 @@ Review 产物目录约定如下：
 修改单个 Skill 包时，优先做 scoped 检查，避免查看全仓库大 diff：
 
 ```sh
-rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|forge/speclite/(src|scripts|custom)' forge/speclite/<path-to-skill> --glob '!CHANGELOG.md'
-/usr/bin/find forge/speclite/<path-to-skill> -maxdepth 1 -type f -name '*.md' -print | sort
+rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|assets/source/speclite/(src|scripts|custom)' assets/source/speclite/<path-to-skill> --glob '!CHANGELOG.md'
+/usr/bin/find assets/source/speclite/<path-to-skill> -maxdepth 1 -type f -name '*.md' -print | sort
 ```
 
 同时检查目标 Skill 包的编辑器诊断，并确认 `metadata.version` 与 `CHANGELOG.md` 最新版本一致。

@@ -15,16 +15,16 @@
 - 将 BMAD 路径和运行模型改为 Speclite：`_bmad-output` -> `_speclite-output`，`_bmad` -> `_speclite`，`config.yaml` -> `config.toml`。
 - 新增 Speclite review 支撑 skill：`speclite-review-acceptance-auditor`。
 - 新增 CR 01-06 编号链路和 SR 01-03 编号链路。
-- 更新 `forge/speclite/README.md` 与 `forge/speclite/README.en.md`，新增 Review Skills 小节。
-- 更新 `forge/speclite/sdlc-skills/module.yaml` 与 `module-help.csv`，补充安装目录和菜单索引。
+- 更新 `assets/source/speclite/README.md` 与 `assets/source/speclite/README.en.md`，新增 Review Skills 小节。
+- 更新 `assets/source/speclite/sdlc-skills/module.yaml` 与 `module-help.csv`，补充安装目录和菜单索引。
 
 ## Speclite Catalog README
 
 关键文件：
 
-- `forge/speclite/README.md`：中文主 README。
-- `forge/speclite/README.en.md`：英文版 README。
-- `forge/speclite/HANDOFF.md`：本 handoff 的持久副本，与 README 同级。
+- `assets/source/speclite/README.md`：中文主 README。
+- `assets/source/speclite/README.en.md`：英文版 README。
+- `assets/source/speclite/HANDOFF.md`：本 handoff 的持久副本，与 README 同级。
 
 README 当前包含：
 
@@ -40,11 +40,11 @@ README 当前包含：
 
 Core support：
 
-- `forge/speclite/core-skills/speclite-review-acceptance-auditor/`
+- `assets/source/speclite/core-skills/speclite-review-acceptance-auditor/`
   - 来源：`forge/bmenhance/review-acceptance-auditor/`
   - 职责：对照 Story AC 审计代码实现偏差、遗漏和矛盾。
 
-Code Review 01-06，位于 `forge/speclite/sdlc-skills/4-implementation/`：
+Code Review 01-06，位于 `assets/source/speclite/sdlc-skills/4-implementation/`：
 
 - `speclite-code-review-01-reviewer/`
 - `speclite-code-review-02-evaluator/`
@@ -53,7 +53,7 @@ Code Review 01-06，位于 `forge/speclite/sdlc-skills/4-implementation/`：
 - `speclite-code-review-05-todo-tracker/`
 - `speclite-code-review-06-finalizer/`
 
-Story Review 01-03，位于 `forge/speclite/sdlc-skills/3-solutioning/`：
+Story Review 01-03，位于 `assets/source/speclite/sdlc-skills/3-solutioning/`：
 
 - `speclite-story-review-01-reviewer/`
 - `speclite-story-review-02-evaluator/`
@@ -61,7 +61,7 @@ Story Review 01-03，位于 `forge/speclite/sdlc-skills/3-solutioning/`：
 
 保留关系：
 
-- 现有非编号 `forge/speclite/sdlc-skills/4-implementation/speclite-code-review/` 未被覆盖。
+- 现有非编号 `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review/` 未被覆盖。
 - 非编号 `speclite-code-review` 仍可作为单次交互式代码审查入口。
 - 编号 `speclite-code-review-01-reviewer` 承接 BMEnhance CR-01 的跨轮产物链路语义。
 
@@ -83,8 +83,8 @@ Review 相关子目录：
 
 配置文件：
 
-- `forge/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/cr-config.md`
-- `forge/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/references/sr-config.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/cr-config.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/references/sr-config.md`
 
 注意：用户或格式化器在最近修改过上述两个 config 文件。后续改动前必须重新读取当前内容，不要基于旧上下文直接 patch。CR/SR config 当前顶部带有 `<!-- markdownlint-disable MD032 MD060 -->`，用于保留迁移来的表格规约格式。
 
@@ -100,7 +100,7 @@ Review 相关子目录：
 
 已验证：
 
-- `get_errors` on `forge/speclite/README.md` 与 `README.en.md`：No errors found。
+- `get_errors` on `assets/source/speclite/README.md` 与 `README.en.md`：No errors found。
 - 之前对新增 review skill 与索引文件执行过编辑器诊断：No errors found。
 - 残留扫描已为空：无 `_bmad`、`config.yaml`、`_bmad-output`、`bmm-workflow-status`、`speclite-speclite` 等残留。
 - 结构检查通过：新增 skill 根目录只保留 `SKILL.md` / `CHANGELOG.md`，规约在 `references/`，模板在 `assets/`。
@@ -109,13 +109,13 @@ Review 相关子目录：
 建议复查命令：
 
 ```sh
-rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|_bmad-output|bmm-workflow-status|speclite-speclite' forge/speclite/core-skills/speclite-review-acceptance-auditor forge/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer forge/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator forge/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer forge/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor forge/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker forge/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer forge/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer forge/speclite/sdlc-skills/3-solutioning/speclite-story-review-02-evaluator forge/speclite/sdlc-skills/3-solutioning/speclite-story-review-03-fixer --glob '!CHANGELOG.md'
-/usr/bin/find forge/speclite/<target-skill> -maxdepth 1 -type f -name '*.md' -print | sort
+rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|_bmad-output|bmm-workflow-status|speclite-speclite' assets/source/speclite/core-skills/speclite-review-acceptance-auditor assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-02-evaluator assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-03-fixer --glob '!CHANGELOG.md'
+/usr/bin/find assets/source/speclite/<target-skill> -maxdepth 1 -type f -name '*.md' -print | sort
 ```
 
 ## 当前 Git 工作区注意事项
 
-- 本轮 Speclite review 相关文件在当前状态里显示为未跟踪，因为 `forge/speclite/` 下多项内容此前也处于未跟踪状态。
+- 本轮 Speclite review 相关文件在当前状态里显示为未跟踪，因为 `assets/source/speclite/` 下多项内容此前也处于未跟踪状态。
 - 不要回滚用户或其他工具做出的无关改动。
 - 现有 `speclite-code-review/` 目录仍保留，未被编号版替换。
 - 仓库此前可能存在大量与本任务无关的既有删除或未跟踪改动，尤其是 `vault/` 相关内容；本 handoff 不要求处理它们。
@@ -130,8 +130,8 @@ rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|_bmad-output|bmm-workflow-statu
 
 ## 建议新代理接手方式
 
-1. 先读 `forge/speclite/README.md` 和本文件，了解 Speclite catalog 与 review 迁移状态。
+1. 先读 `assets/source/speclite/README.md` 和本文件，了解 Speclite catalog 与 review 迁移状态。
 2. 若继续改 review skill，先读对应 `SKILL.md`、`references/cr-config.md` 或 `references/sr-config.md` 的当前内容。
-3. 若要运行 Speclite lint 思路，参考 `forge/speclite/support/speclite-skill-lint/SKILL.md` 与 `references/lint-rules.md`。
+3. 若要运行 Speclite lint 思路，参考 `assets/source/speclite/support/speclite-skill-lint/SKILL.md` 与 `references/lint-rules.md`。
 4. 若只改 README，同步检查 `README.en.md`，避免中英文 catalog 漂移。
 5. 复查时优先 scoped 检查，不要全仓库大 diff。

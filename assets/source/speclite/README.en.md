@@ -1,6 +1,6 @@
 # Speclite Skill Catalog
 
-`forge/speclite/` contains the source packages for Speclite skills, support tools, runtime helper scripts, and default customization examples. This catalog is the authoring area; installed runtime projects should consume skills and shared scripts through their own `.claude/skills/` and `_speclite/` directories.
+`assets/source/speclite/` contains the source packages for Speclite skills, support tools, runtime helper scripts, and default customization examples. This catalog is the authoring area; installed runtime projects should consume skills and shared scripts through their own `.claude/skills/` and `_speclite/` directories.
 
 ## Directory Layout
 
@@ -22,7 +22,7 @@ Speclite skill documents should describe the installed runtime model, not this r
 - Runtime customization overlays: `{project-root}/_speclite/custom/{skill-name}.toml` and `{project-root}/_speclite/custom/{skill-name}.user.toml`
 - Runtime scripts: `{project-root}/_speclite/scripts`
 
-Do not write `forge/speclite/scripts`, `forge/speclite/custom`, or other source-repository paths as runtime dependencies inside active skill instructions.
+Do not write `assets/source/speclite/scripts`, `assets/source/speclite/custom`, or other source-repository paths as runtime dependencies inside active skill instructions.
 
 ## Skill Package Layout
 
@@ -33,7 +33,7 @@ Within an individual skill package, use these conventions:
 - Put workflow rules, protocols, checklists, and micro-step files under `references/`.
 - Put fillable templates and skeleton documents under `assets/`.
 - Put structured lookup/reference data under `data/` when it is not a template.
-- Put skill-local executable scripts under `scripts/`; shared runtime scripts belong in `forge/speclite/scripts/` and install to `_speclite/scripts/`.
+- Put skill-local executable scripts under `scripts/`; shared runtime scripts belong in `assets/source/speclite/scripts/` and install to `_speclite/scripts/`.
 
 ## Current Catalog Areas
 
@@ -117,8 +117,8 @@ Review artifact directories are:
 For a changed skill package, run scoped checks rather than broad repository diffs:
 
 ```sh
-rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|forge/speclite/(src|scripts|custom)' forge/speclite/<path-to-skill> --glob '!CHANGELOG.md'
-/usr/bin/find forge/speclite/<path-to-skill> -maxdepth 1 -type f -name '*.md' -print | sort
+rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|assets/source/speclite/(src|scripts|custom)' assets/source/speclite/<path-to-skill> --glob '!CHANGELOG.md'
+/usr/bin/find assets/source/speclite/<path-to-skill> -maxdepth 1 -type f -name '*.md' -print | sort
 ```
 
 Also check editor diagnostics for the target skill package and verify that `metadata.version` matches the latest `CHANGELOG.md` entry.

@@ -8,7 +8,7 @@
 
 ### 初始版本
 
-- 将源工作流迁移为 SpecLite 运行模型，目标目录为 `forge/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories/`
+- 将源工作流迁移为 SpecLite 运行模型，目标目录为 `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories/`
 - 增加中文 `SKILL.md` 与英文 `SKILL.en.md` 双入口
 - 增加 `references/activation.md`，定义三层 customize、`persistent_facts`、runtime `config.toml` 与 `workflow.on_complete` 解析流程
 - 增加 `references/workflow-steps.md`，保留需求抽取、Epic 设计、Story 生成、最终校验四步交互工作流
