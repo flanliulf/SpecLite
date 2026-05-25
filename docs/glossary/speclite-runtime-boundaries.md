@@ -8,7 +8,7 @@
 
 这些概念容易混淆，因为它们都会出现在安装链路中，但它们的职责、所有权和更新策略不同。
 
-## canonical source
+## Canonical Source（规范来源）
 
 `canonical source` 是 SpecLite 方法论内容的权威来源。
 
@@ -18,7 +18,7 @@
 
 canonical source 的关键职责是定义“应该安装什么”。它不是目标项目中的运行状态，也不是 IDE-specific mirror。
 
-## IDE skills 目录
+## IDE Skills Directory（IDE Skills 目录）
 
 IDE skills 目录是目标 AI IDE 的 execution plane。
 
@@ -33,7 +33,7 @@ IDE skills 目录应该可再生成。也就是说，如果 IDE mirror 发生 dr
 
 IDE skills 目录不应成为新的权威来源，也不应承载 human-owned customization 或 workflow-owned artifacts。
 
-## `_speclite`
+## Speclite Control Hub（Speclite 控制中心）
 
 `_speclite` 是目标项目中的 metadata/control hub。
 
@@ -43,7 +43,7 @@ IDE skills 目录不应成为新的权威来源，也不应承载 human-owned cu
 
 安装器可以管理 `_speclite` 中的 installer-owned 文件，但必须保护 human-owned custom 文件，例如 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml`。
 
-## `_speclite-output`
+## Speclite Output Repository（Speclite 产物仓库）
 
 `_speclite-output` 是过程产物仓库，也就是 workflow artifact repository。
 
@@ -53,7 +53,7 @@ IDE skills 目录不应成为新的权威来源，也不应承载 human-owned cu
 
 这些文件通常应视为 workflow-owned artifacts。更新流程必须保护它们，避免覆盖用户或 workflow 已生成的过程记录。
 
-## 对比表
+## Comparison Table（对比表）
 
 | 概念 | 主要职责 | 是否权威来源 | 是否可再生成 | 典型所有权 |
 | --- | --- | --- | --- | --- |
@@ -62,7 +62,7 @@ IDE skills 目录不应成为新的权威来源，也不应承载 human-owned cu
 | `_speclite` | 保存安装元数据、配置、manifest/index 和 runtime 控制信息 | 否 | 部分可再生成，human custom 受保护 | installer-owned + human-owned |
 | `_speclite-output` | 保存 workflow 过程产物 | 否 | 否，产物应保留 | workflow-owned |
 
-## 关键规则
+## Key Rules（关键规则）
 
 - canonical source 决定安装内容，IDE skills 目录只是安装投影。
 - IDE skills 目录可以被 update/repair 修复，但不能反向定义 canonical source。

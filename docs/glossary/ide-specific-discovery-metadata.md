@@ -1,4 +1,4 @@
-# IDE-specific Discovery Metadata
+# IDE-specific Discovery Metadata（IDE 特定发现元数据）
 
 `IDE-specific discovery metadata` 可以理解为：
 
@@ -6,7 +6,7 @@
 
 它不是 skill 本身的定义内容，而是让特定 IDE 能识别这个 skill 的“入口说明”。
 
-## 在 SpecLite 中的边界
+## SpecLite Boundary（SpecLite 中的边界）
 
 **Canonical Skill Package（规范 Skill 包）**
 
@@ -36,7 +36,7 @@
 
 这些内容通常是 **Adapter Artifact（适配器产物）**，不应污染 canonical skill package。
 
-## 具体例子
+## Concrete Example（具体例子）
 
 ```text
 Canonical skill package:
@@ -56,7 +56,7 @@ Codex adapter 可能生成:
 
 其中 `SKILL.md` 内容应一致；但 `.claude` 或 `.agents` 为了让各自 IDE 发现这个 skill 而生成的索引、wrapper、pointer、metadata，可以不同。
 
-## 相关子概念
+## Related Subconcepts（相关子概念）
 
 **Command pointer（命令指针）**
 
@@ -82,7 +82,7 @@ Wrapper file 不应承载 skill 语义，也不应复制或改写 `SKILL.md` 的
 
 Capability catalog entry 的作用是帮助 IDE 发现和呈现能力，不负责定义 skill 的实际执行规则。执行规则仍应来自 canonical skill package 和稳定 runtime entry。
 
-## 子概念边界
+## Subconcept Boundaries（子概念边界）
 
 这些子概念可以按职责区分：
 
@@ -93,7 +93,7 @@ Capability catalog entry 的作用是帮助 IDE 发现和呈现能力，不负�
 
 除 self-contained skill entry 中承载的 canonical package 内容外，其余子概念都应被视为 adapter artifact，不参与 canonical skill package hash。
 
-## 关键规则
+## Key Rules（关键规则）
 
 **IDE-specific discovery metadata 不定义 skill 的语义，只帮助某个 IDE 找到、展示或调用 skill。**
 

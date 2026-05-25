@@ -142,7 +142,8 @@ docs/
     TSD-command-result-json-output.md
 
   dev-map.md
-  glossary.md
+  glossary/
+    glossary.md
 ```
 
 ## 三、各层职责
@@ -586,7 +587,7 @@ Scripts / CI 是整个体系的硬验证层。Rule 和 Instructions 只能要求
 | 构件 | 职责 |
 |---|---|
 | `docs/dev-map.md` | 项目级开发导航，告诉 AI 和开发者从哪里理解项目 |
-| `docs/glossary.md` | 统一业务术语、技术术语、缩写 |
+| `docs/glossary/glossary.md` | 统一业务术语、技术术语、缩写 |
 | `docs/adr/*.md` | 记录重大技术决策、取舍和后果 |
 | 任务看板 | 记录需求、状态、阶段、负责人、阻塞点 |
 | 规则变更记录 | 记录 Instructions / Skills / Scripts 的变更原因 |

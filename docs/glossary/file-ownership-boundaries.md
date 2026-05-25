@@ -2,9 +2,9 @@
 
 `File Ownership Boundaries（文件所有权边界）` 是 SpecLite 用于区分 installer-owned、human-owned 和 workflow-owned 文件的更新保护模型。
 
-根据 PRD，系统可以区分 installer-owned、human-owned 和 workflow-owned 文件。该能力支撑 update、repair、validate 和 uninstall 等流程，避免安装器把用户定制内容或 workflow 过程产物当成可覆盖的安装文件。
+根据 PRD，系统可以区分 installer-owned、human-owned 和 workflow-owned 文件。MVP 使用该能力支撑 `update --repair`、`validate` 和 update planning；Post-MVP 的 `uninstall` 可以复用同一模型，但不得被视为 MVP write flow。
 
-## installer-owned files
+## Installer-Owned Files（安装器所有文件）
 
 `installer-owned files` 是由 SpecLite installer 生成、管理、验证或修复的文件。
 
@@ -18,7 +18,7 @@
 
 installer-owned 不等于可以静默覆盖。若这类文件发生 drift，普通 `update` 应先输出 update plan、impact summary 或 conflict；只有在用户确认、显式 repair 或满足安全写入条件时，installer 才能恢复或重建这些文件。
 
-## human-owned files
+## Human-Owned Files（人工所有文件）
 
 `human-owned files` 是由项目维护者或团队人工维护的文件。
 
@@ -33,7 +33,7 @@ MVP 默认不修改 human-owned TOML。Fresh install 可以在目标路径不存
 
 human-owned 的核心边界是：安装器可以读取它们来解析配置，但不能把它们当成 installer-owned 输出重新生成。
 
-## workflow-owned files
+## Workflow-Owned Files（Workflow 所有文件）
 
 `workflow-owned files` 是已激活 workflow 运行后产生的过程产物。
 
@@ -47,7 +47,7 @@ human-owned 的核心边界是：安装器可以读取它们来解析配置，�
 
 workflow-owned artifacts 不参与 update 覆盖。它们记录团队的实际研发过程，不是安装器 metadata，也不是 canonical source mirror。
 
-## 更新保护规则
+## Update Protection Rules（更新保护规则）
 
 SpecLite 的 install、update 和 repair 必须遵守以下规则：
 
@@ -57,7 +57,7 @@ SpecLite 的 install、update 和 repair 必须遵守以下规则：
 - 无法确认安全时，更新流程应保守跳过或报告 conflict。
 - `update` 应输出 planned effects、changed paths、skipped paths 和 conflicts，帮助项目维护者理解影响范围。
 
-## 与 PRD 功能需求的关系
+## PRD Relationship（与 PRD 功能需求的关系）
 
 该术语对应 PRD 中的文件所有权能力：
 

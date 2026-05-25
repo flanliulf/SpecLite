@@ -12,7 +12,7 @@ MVP artifact contract 至少校验：
 - `sourceSkill`
 - `generatedAt` 元数据字段
 
-## 元数据字段
+## Metadata Fields（元数据字段）
 
 **workflowType**
 
@@ -24,9 +24,15 @@ MVP artifact contract 至少校验：
 
 **generatedAt**
 
-表示产物生成时间。若存在，必须是 ISO 8601 string。由于它依赖当前时间，默认应排除出 stable fixture snapshot comparison。
+表示产物生成时间。MVP workflow artifact 必须包含该字段，且值必须是 ISO 8601 string。由于它依赖当前时间，默认应在 stable fixture snapshot comparison 中 normalize 或 exclude。
 
-## MVP 边界
+## Metadata Encoding（Metadata 编码）
+
+Markdown workflow artifact 必须在文件开头使用 YAML frontmatter 写入 metadata。非 Markdown file artifact 必须在同一目录写出 `<artifact-filename>.metadata.json` sidecar。Directory artifact 必须在目录内写出 `metadata.json`。
+
+这些 metadata files 与 artifact 本体一样属于 workflow-owned artifacts。Manifest/index 可以记录 metadata location，但不能替代 artifact 本身携带 metadata。
+
+## MVP Boundary（MVP 边界）
 
 MVP validation 只校验 artifact contract 的结构性要求，包括产物类型、默认输出路径和必要元数据字段。
 
