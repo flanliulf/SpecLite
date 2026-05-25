@@ -11,8 +11,12 @@
 - PRD 负责 product requirement 和 acceptance intent。
 - Architecture 负责 implementation mapping 和 module responsibility。
 - 本 SPEC 负责 resolve command behavior、config/customization merge semantics、stdout/stderr shape、fallback rules 和 parity fixture requirements。
-- `docs/specs/01-command-result-json-contract.md` 负责 `CommandResult`；`resolve` 是显式例外，必须不使用 `CommandResult` envelope。
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 负责 `CommandResult`；`resolve` 是显式例外，必须不使用 `CommandResult` envelope。
 - 如果 PRD、Architecture 或 ADR 文本与本 SPEC 冲突，resolve behavior 以本 SPEC 为准。
+
+## Implementation Anchor（实现锚点）
+
+Implementation 必须提供 `src/config/resolve-output-schema.ts` 作为 resolve stdout JSON、stderr JSON Lines diagnostic 和 merge-result parser 的 executable schema/parser anchor。该 module 不是第二份契约真源；若它与本 SPEC 冲突，以本 SPEC 为准。
 
 ## Scope（范围）
 
@@ -30,7 +34,7 @@ stdout 必须只包含 resolved JSON object。
 stderr 必须以 JSON Lines 输出 diagnostics：
 
 - 每行一个 JSON object
-- 每行使用 `docs/specs/01-command-result-json-contract.md` 中的 `ValidationIssue` shape
+- 每行使用 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 中的 `ValidationIssue` shape
 - machine mode 中不得混入 human-readable prose
 
 Exit code rules：

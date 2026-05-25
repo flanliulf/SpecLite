@@ -2,13 +2,17 @@
 
 ## Status（状态）
 
-Draft for MVP implementation.
+Accepted for MVP planning.
 
 ## Ownership（所有权）
 
 This SPEC is the canonical contract for `SourceDescriptor` and `SourceIntegrityEvidence` semantics across install, update, status, validate, manifest/index, and public command JSON.
 
-`docs/specs/01-command-result-json-contract.en.md` owns the public JSON envelope and command payload shape. This SPEC owns source identity, trust, evidence, write eligibility, and source freshness boundaries.
+`_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md` owns the public JSON envelope and command payload shape. This SPEC owns source identity, trust, evidence, write eligibility, and source freshness boundaries.
+
+## Implementation Anchor（实现锚点）
+
+Implementation must provide `src/source/source-descriptor-schema.ts` as the executable schema/parser anchor for `SourceDescriptor` and `SourceIntegrityEvidence`. This module is not a second contract source; if it conflicts with this SPEC, this SPEC wins.
 
 ## Source Descriptor（来源描述符）
 
@@ -22,6 +26,7 @@ type SourceDescriptor = {
     | "local-tarball"
     | "offline-bundle"
     | "git"
+    | "bundled"
     | "local";
   channel?: string;
   requestedVersion?: string;
@@ -78,8 +83,8 @@ type SourceIntegrityEvidence =
 
 `trusted`:
 
-- Produced only by expected hash or lock match in MVP.
-- Not produced merely because a source type is npm, private registry, Git, tarball, offline bundle, or local source.
+- Produced only by expected hash, lock match, or the equivalent packaging manifest / package hash / package lock match for bundled source in MVP.
+- Not produced merely because a source type is npm, private registry, Git, tarball, offline bundle, bundled source, or local source.
 
 `unverified`:
 
@@ -92,6 +97,14 @@ type SourceIntegrityEvidence =
 - Must stop install/update before writing.
 
 ## Source Type Rules（来源类型规则）
+
+Bundled source:
+
+- `bundled` means official source assets shipped with the current SpecLite package, with the canonical source tree from `assets/source/speclite/`.
+- Bundled source must still be projected as a `SourceDescriptor`; it must not bypass the source descriptor, manifest, or public JSON contract.
+- Bundled source must record at least one reproducible integrity evidence entry. MVP should use the packaging manifest package file inventory hash or package lock/hash as `content-hash` or `version-lock` evidence.
+- Bundled source may be `trusted` only when the packaging manifest / package hash / lock match is verifiable; otherwise it can only be `unverified` or `blocked`.
+- `resolvedRoot` for bundled source must be a package-internal display-safe label such as `assets/source/speclite`; it must not expose a local package cache, global npm path, or build extraction path.
 
 Registry sources:
 
@@ -118,6 +131,7 @@ Local source:
 
 - Must record snapshot hash or equivalent manifest hash as reproducible evidence.
 - Snapshot hash scope is the canonical source tree allowlist only. It must exclude `.git`, temporary files, `node_modules`, fixture output, local cache directories, build output, and editor/OS metadata.
+- Local source must not point at installed-state, execution-plane, workflow-output, dependency, cache, temporary, or build directories inside the target project. At minimum, `_speclite/`, `.claude/skills/`, `.agents/skills/`, `_speclite-output/`, fixture output, `node_modules/`, cache, temporary, and build output must be blocked as canonical local source roots. Violations must produce `source-integrity.local-source-self-reference`.
 - Local absolute source paths must not enter stable public JSON snapshots.
 
 ## Source Staging And Cache（来源暂存与缓存）

@@ -2,13 +2,17 @@
 
 ## Status（状态）
 
-MVP implementation 草案。
+已接受用于 MVP planning。
 
 ## Ownership（所有权）
 
 本 SPEC 是 install、update、status、validate、manifest/index 和 public command JSON 中 `SourceDescriptor` 与 `SourceIntegrityEvidence` semantics 的 canonical contract。
 
-`docs/specs/01-command-result-json-contract.md` 负责 public JSON envelope 和 command payload shape。本 SPEC 负责 source identity、trust、evidence、write eligibility 和 source freshness boundaries。
+`_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 负责 public JSON envelope 和 command payload shape。本 SPEC 负责 source identity、trust、evidence、write eligibility 和 source freshness boundaries。
+
+## Implementation Anchor（实现锚点）
+
+Implementation 必须提供 `src/source/source-descriptor-schema.ts` 作为 `SourceDescriptor` 与 `SourceIntegrityEvidence` 的 executable schema/parser anchor。该 module 不是第二份契约真源；若它与本 SPEC 冲突，以本 SPEC 为准。
 
 ## Source Descriptor（来源描述符）
 
@@ -22,6 +26,7 @@ type SourceDescriptor = {
     | "local-tarball"
     | "offline-bundle"
     | "git"
+    | "bundled"
     | "local";
   channel?: string;
   requestedVersion?: string;
@@ -72,14 +77,14 @@ type SourceIntegrityEvidence =
     };
 ```
 
-`verified: false` 表示 evidence 已记录且可复现，但未与 expected hash 或 lock 匹配。它不得表示 failed verification。Hash mismatch、lock mismatch、unsupported source、floating Git source 或 source policy rejection 必须产生 `source-integrity` issue 和 `trustStatus: "blocked"`。
+`verified: false` 表示 evidence 已记录且可复现，但未与 expected hash、lock match 或 bundled packaging trust anchor 匹配。它不得表示 failed verification。Hash mismatch、lock mismatch、unsupported source、local source self-reference、floating Git source、bundled packaging evidence 缺失或 source policy rejection 必须产生 `source-integrity` issue 和 `trustStatus: "blocked"`。
 
 ## Trust Status（信任状态）
 
 `trusted`：
 
-- 在 MVP 中只能由 expected hash 或 lock match 产生。
-- 不得仅因为 source type 是 npm、private registry、Git、tarball、offline bundle 或 local source 就产生。
+- 在 MVP 中只能由 expected hash、lock match，或 bundled source 的等价 packaging manifest / package hash / package lock match 产生。
+- 不得仅因为 source type 是 npm、private registry、Git、tarball、offline bundle、bundled source 或 local source 就产生。
 
 `unverified`：
 
@@ -88,10 +93,18 @@ type SourceIntegrityEvidence =
 
 `blocked`：
 
-- 表示 hash mismatch、lock mismatch、unsupported source、没有 resolved commit SHA 的 floating Git source、failed evidence verification 或 source policy rejection。
+- 表示 hash mismatch、lock mismatch、unsupported source、local source self-reference、没有 resolved commit SHA 的 floating Git source、bundled packaging evidence 缺失、failed evidence verification 或 source policy rejection。
 - 必须在写入前停止 install/update。
 
 ## Source Type Rules（来源类型规则）
+
+Bundled source：
+
+- `bundled` 表示随当前 SpecLite package 发布的 official source assets，canonical source tree 来自 `assets/source/speclite/`。
+- Bundled source 仍必须投影为 `SourceDescriptor`，不得绕过 source descriptor、manifest 或 public JSON contract。
+- Bundled source 必须记录至少一项 reproducible integrity evidence。MVP 必须使用 packaging manifest 中的 package file inventory hash、package hash 或 package lock/hash 中至少一项作为 `content-hash` 或 `version-lock` evidence。
+- 只有当 packaging manifest / package hash / lock match 可验证时，bundled source 才能为 `trusted`。缺少 bundled source packaging evidence 时必须产生 `source-integrity.missing-evidence` 并阻止写入；evidence 存在但未匹配 trust anchor 时只能是 `unverified` 或 `blocked`。
+- `resolvedRoot` 对 bundled source 必须是 package-internal display-safe label，例如 `assets/source/speclite`，不得暴露本机 package cache、global npm path 或 build extraction path。
 
 Registry sources：
 
@@ -103,7 +116,7 @@ Tarball and offline bundle：
 
 - 必须记录 `content-hash` evidence。
 - 对 content-addressable artifacts，`contentHash` 是 required。
-- MVP 要求 tarball 或 offline bundle 文件本身具备 artifact hash。推荐将 unpacked canonical source tree 的 tree hash 作为 expected installed state 的输入，但它不是 artifact `contentHash` 字段。
+- MVP 要求 tarball 或 offline bundle 文件本身具备 artifact hash。Unpacked canonical source tree hash 是可选 expected installed-state input，不是必需 source artifact hash，也不是 artifact `contentHash` 字段。
 - 如果使用 unpacked tree hash 作为 expected installed-state input，则必须在 extraction 后基于 canonical source tree allowlist 计算。不得基于 raw extraction directories、cache directories、file mtimes 或 platform metadata 计算。
 - Public source metadata 不得暴露 local absolute tarball、bundle、cache 或 extraction paths。
 
@@ -118,6 +131,7 @@ Local source：
 
 - 必须记录 snapshot hash 或等价的 manifest hash 作为 reproducible evidence。
 - Snapshot hash scope 仅限 canonical source tree allowlist。它必须排除 `.git`、temporary files、`node_modules`、fixture output、local cache directories、build output 和 editor/OS metadata。
+- Local source 不得指向 target project 内的 installed-state、execution-plane、workflow-output、dependency、cache、temporary 或 build directories。至少必须阻止 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary 和 build output 被当作 canonical local source root。违反时必须产生 `source-integrity.local-source-self-reference`。
 - Local absolute source paths 不得进入 stable public JSON snapshots。
 
 ## Source Staging And Cache（来源暂存与缓存）
@@ -135,6 +149,8 @@ Source staging directories、extraction directories、package-manager cache path
 Public output 可以改用 redacted/display-safe source label。
 
 Successful resolution 和 controlled failures 应在 best-effort 基础上清理 staging directories。Crash leftovers 不是 installer-owned project files，且不得记录到 files index。`speclite validate` 仍然是 local installed-state validation；它不得扫描 package-manager caches、temporary extraction roots 或 remote source origins。
+
+Source staging/cache cleanup failure 只有在影响 target project safety、write eligibility 或 redaction safety 时才产生 public `ValidationIssue`。纯 project-external cleanup failure 可以记录为 non-stable diagnostic，但必须 redacted，并默认排除出 fixture snapshots、manifest/index 和 public path fields。
 
 ## Source Lock Boundary（Source Lock 边界）
 

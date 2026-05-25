@@ -11,8 +11,12 @@
 - PRD 负责 product requirement 和 acceptance intent。
 - Architecture 负责 implementation mapping 和 module responsibility。
 - 本 SPEC 负责 adapter ids、target ids、adapter capability fields、target ordering、status semantics 和 command pointer extension boundaries。
-- `docs/specs/04-manifest-index-contract.md` 负责消费 adapter registry data 的 installed manifest/index projections。
+- `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 负责消费 adapter registry data 的 installed manifest/index projections。
 - 如果 PRD 或 Architecture 文本与本 SPEC 冲突，adapter registry behavior 以本 SPEC 为准。
+
+## Implementation Anchor（实现锚点）
+
+Implementation 必须提供 `src/ide/adapter-registry.ts` 作为 adapter ids、target ids、capability fields、target ordering 和 target status mapping 的 executable registry/schema anchor。该 module 不是第二份契约真源；若它与本 SPEC 冲突，以本 SPEC 为准。
 
 ## MVP Targets（MVP 目标）
 
@@ -22,6 +26,8 @@ MVP target ids 是 physical execution targets，不是 branded IDE claims：
 2. `agents`：`.agents/skills`
 
 当 GitHub Copilot 和 Cursor 支持 `.agents/skills` 时，可以使用 `agents` target。除非存在 dedicated adapter，否则 MVP 不得虚构 `copilot` 或 `cursor` target ids。
+
+Human-readable output 和 docs 必须把 `agents` 显示为 agents directory target 或 `.agents/skills` target，不得把它渲染成 Copilot/Cursor readiness、health 或 dedicated adapter 状态。只有 future dedicated adapter 存在，并且本 SPEC 先更新 target id、status 和 fixture rules 后，才可以输出 branded Copilot/Cursor target id 或 branded readiness。
 
 Canonical target order 是：
 
@@ -53,6 +59,26 @@ type IdeAdapterDefinition = {
 
 Adapter definitions 不得重命名 canonical skill ids、canonical skill package directories 或 customization lookup keys。
 
+## Self-Contained Skill Entry Layout（自包含 Skill Entry 布局）
+
+MVP self-contained skill entry 必须使用 canonical skill id 作为 target directory basename：
+
+- `.claude/skills/<canonicalSkillId>/`
+- `.agents/skills/<canonicalSkillId>/`
+
+每个 installed entry 必须至少包含 `SKILL.md`。当 canonical source package 中存在以下路径时，adapter 必须按相同 relative path 复制到 installed entry：
+
+- `CHANGELOG.md`
+- `references/`
+- `assets/`
+- `scripts/`
+- `config.toml.example`
+- `customize.toml`
+
+这些 copied files 属于 canonical package content，必须参与 canonical package hash 或 file-level hash。Adapter-specific discovery metadata、wrapper files 或 capability catalog entries 必须作为 adapter artifacts 单独记录，不得混入 canonical package hash。若某个 IDE 要求 entry-local wrapper 或 metadata，adapter 必须在 manifest/index 中把它标为 adapter artifact，并为其记录独立 file hash 与 ownership。
+
+Installed entry 不得读取 source checkout 中的 skill files 作为运行时依赖。Fixture reverse validation 必须证明 installed entry 在离开 source checkout 后仍能被目标 IDE discovery path 发现，并能通过 `speclite resolve` 读取项目级 config/customization。
+
 ## Status Semantics（状态语义）
 
 Target status vocabulary 按 layer 区分：
@@ -63,13 +89,13 @@ Target status vocabulary 按 layer 区分：
 | Installed phase coverage | `mapped`, `unsupported`, `failed` | installed phase entry 是否可通过 target 可见。 |
 | Status summary | `not-configured`, `configured`, `partial`, `failed` | installed target 的 health summary。 |
 
-这些 vocabularies 不得跨 layer 复用。
+同名 literal 可以出现在不同 layer，但必须由 layer-scoped type 解释：`InstallPlanningTargetStatus`、`InstalledPhaseCoverageStatus`、`StatusSummaryTargetHealth`。不得把某一层的 `unsupported` 或 `failed` 直接当作另一层语义。
 
 `unsupported` 表示 adapter 声明了 capability gap。它不是 write failure。
 
 `failed` 表示 target directory resolution、schema generation、write 或 reverse validation step 已尝试或已计划但失败。
 
-如果用户显式选择某个 target，而该 target 对 requested module set 不支持，install planning 必须产生 blocking error。如果 target 是 optional 或未被选择，则 unsupported 可以按 `docs/specs/07-validation-issue-taxonomy.md` 报告为 warning、info 或 known limitation。
+如果用户显式选择某个 target，而该 target 对 requested module set 不支持，install planning 必须产生 blocking error。如果 target 是 optional 或未被选择，则 unsupported 可以按 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 报告为 warning、info 或 known limitation。
 
 ## Adapter Responsibilities（适配器职责）
 

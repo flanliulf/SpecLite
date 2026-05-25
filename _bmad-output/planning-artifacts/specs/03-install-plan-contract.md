@@ -2,13 +2,17 @@
 
 ## Status（状态）
 
-MVP implementation 草案。
+已接受用于 MVP planning。
 
 ## Ownership（所有权）
 
 本 SPEC 定义 install 和 update write authorization 的 internal planning contract。它用于保持 source trust decisions、external access、planned writes 和 write authorization 相互分离。
 
 CommandResult JSON 负责 public command output。本 install plan contract 负责 pre-write planning semantics。
+
+## Implementation Anchor（实现锚点）
+
+Implementation 必须提供 `src/installer/install-plan-schema.ts` 作为 `SourceResolutionPlan`、`InstallPlan`、planned writes、confirmation state 和 write authorization 的 executable schema/parser anchor。该 module 不是第二份契约真源；若它与本 SPEC 冲突，以本 SPEC 为准。
 
 ## Planning Stages（规划阶段）
 
@@ -71,15 +75,17 @@ type PlannedWrite = {
 
 `requestedSourceValue` 和 `ExternalAccess.sourceValue` 必须 redacted/display-safe。它们不得包含 authentication tokens、credential-bearing URLs、private query strings、local absolute paths、home directories、drive letters、npm cache paths、temporary extraction paths 或 OS-specific separators。Raw source locators 只能存在于 private in-memory planning state。
 
+Local source 在进入 `InstallPlan` 前必须完成 self-reference guard。Source resolution 不得把 target project 中的 installed-state、execution-plane、workflow-output、dependency、cache、temporary 或 build directories 当作 canonical source root；至少必须阻止 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary 和 build output。违反该规则时 source 必须被标记为 `blocked`，并产生 `source-integrity.local-source-self-reference`；不得继续进入 planned writes。
+
 ## Planning Model Boundaries（规划模型边界）
 
 | Model（模型） | Owner（所有者） | Visibility（可见性） | Meaning（含义） |
 | --- | --- | --- | --- |
 | `SourceResolutionPlan` | 本 SPEC | Internal planning contract | 解析 source 前的 external access intent。 |
 | `InstallPlan` | 本 SPEC | Internal planning contract | 写入前的 resolved source descriptor、target adapter plan、planned writes、confirmation 和 write authorization。 |
-| `UpdatePlan` | `docs/specs/01-command-result-json-contract.md` | Public command result projection | `update --json` 输出的 planned update effects。 |
-| `RepairPlan` | `docs/specs/01-command-result-json-contract.md` | Public command result projection | `update --repair --json` 输出的 planned repair effects。 |
-| `changedPaths` / `skippedPaths` | `docs/specs/01-command-result-json-contract.md` | Public command result fields | 仅表示当前命令的 actual apply result。 |
+| `UpdatePlan` | `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` | Public command result projection | `update --json` 输出的 planned update effects。 |
+| `RepairPlan` | `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` | Public command result projection | `update --repair --json` 输出的 planned repair effects。 |
+| `changedPaths` / `skippedPaths` | `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` | Public command result fields | 仅表示当前命令的 actual apply result。 |
 
 Internal `InstallPlan.plannedWrites` 可以包含 private planning detail。Public reporters 只能 project CommandResult JSON contract 中声明的字段。
 
@@ -117,6 +123,8 @@ MVP 不得在显式 source resolution、install 或 update planning 之外执行
 
 Install、update 和 repair 在 planning 可以写入或应用变更之前，必须获取 project-level operation lock。MVP lock path 是 `_speclite/.lock`。
 
+MVP project operation lock 是 non-reentrant。即使同一 process 已持有 lock，也不得通过再次执行 public write-capable command 绕过 lock acquisition。若内部 orchestration 需要复用同一次写入流程，必须传递 private lock handle，而不是重新进入 public command path。
+
 如果由于另一个 SpecLite operation 正在运行而无法获取 lock，命令不得写入文件。对 write-capable commands，它必须输出 `operation-lock.project-locked` issue 和 non-zero failure status。由于 safe planning 尚未开始，此 failure 的 public JSON 不得包含 planned writes、update plans、repair plans、changed paths、skipped paths 或 conflicts。
 
 MVP lock file shape：
@@ -145,13 +153,15 @@ Lock file 是 volatile installer-owned control file。它不得记录在 files i
 
 Installer-owned file mutation 必须使用 safe writes：将 candidate content 写入同一目录下的 temporary file，在支持时 flush，然后 rename into place。Implementations 不得在原位置 truncate 或 partial rewrite target files。
 
+Safe-write temporary files 必须位于 target file 同一目录，文件名必须带 `.speclite-tmp-` 前缀或后缀，并且只能包含 private nonce 或 operation-local id。Temporary filename、nonce、pid、timestamp 或 absolute temp path 不得出现在 public JSON、manifest/index、files index 或 stable fixture snapshots。
+
 `changedPaths` 只包含当前命令中 mutation 实际完成的 paths。未尝试或未完成的 planned writes 仍保留在 `InstallPlan.plannedWrites`、`UpdatePlan.actions` 或 `RepairPlan.actions` 中；除非命令实际到达 planned skip outcome，否则不得将它们转换为 `skippedPaths`。
 
 如果某些 paths 已经变更后 write 失败，command result 必须为 `failure`；`changedPaths` 列出 completed mutations，issues/conflicts 描述 blocking failure，不得假装 operation 是 transactional。
 
 MVP 不提供 transactional rollback。Partial write failure 后，recovery 是显式的：用户在处理 reported issue 后运行 `speclite validate`、`speclite update` 或 `speclite update --repair`。除非未来存在显式 rollback feature，否则 reporters 不得声称发生了 rollback。
 
-Temporary safe-write files 不得记录到 files index。若 stale temp files 需要 manual cleanup 但不阻塞 safe write，`validate` 可以将其报告为 `file-integrity.stale-temp-file` warning。如果 stale temp file 阻塞 safe-write target naming、rename 或 safe mutation，必须报告为 `error`。MVP update/repair 不得自动清理 lock files 或 stale temp files。
+Temporary safe-write files 不得记录到 files index。Controlled success 或 controlled failure 应 best-effort 清理 temporary files。若 cleanup failure 只留下不阻塞后续 safe write 的 stale temp file，`validate` 可以将其报告为 `file-integrity.stale-temp-file` warning。如果 stale temp file 阻塞 safe-write target naming、rename 或 safe mutation，必须报告为 `error`。MVP update/repair 不得自动清理 lock files 或 stale temp files。
 
 Operation locks 应在 controlled success 或 controlled failure 后释放。Process crash 可能留下 stale lock；MVP 通过 `operation-lock.stale-lock` validation warning 和 manual cleanup guidance 处理，而不是自动删除。
 
@@ -173,12 +183,14 @@ Target status vocabulary 按 layer 区分：
 | Installed projection | `PhaseCoverageRow.ideTargets[].status` | `mapped`, `unsupported`, `failed` | installed phase entry 是否可通过 target 可见。 |
 | Status summary | `StatusCommandData.highLevelHealth` / `IdeTargetStatus.status` | `not-configured`, `configured`, `partial`, `failed` | installed project 或 target 的 health summary。 |
 
-这些 vocabularies 不得跨 layer 复用。`unsupported` 表示 adapter-declared capability gap，不是 write failure。`failed` 表示 attempted 或 planned operation failed。
+同名 literal 可以出现在不同 layer，但必须由 layer-scoped type 解释：`InstallPlanningTargetStatus`、`InstalledPhaseCoverageStatus`、`StatusSummaryTargetHealth`。不得把某一层的 `unsupported` 或 `failed` 直接当作另一层语义。`unsupported` 表示 adapter-declared capability gap，不是 write failure。`failed` 表示 attempted 或 planned operation failed。
 
-如果用户显式选择某个 target 且该 target unsupported，install/update planning 必须产生 blocking error。如果 target 未被选择，或对 current module set 来说是 optional，则 adapter-declared unsupported status 可以按 `docs/specs/07-validation-issue-taxonomy.md` 报告为 warning、info 或 known limitation。
+如果用户显式选择某个 target 且该 target unsupported，install/update planning 必须产生 blocking error。如果 target 未被选择，或对 current module set 来说是 optional，则 adapter-declared unsupported status 可以按 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 报告为 warning、info 或 known limitation。
 
 ## Human-Owned TOML Stubs（人工维护 TOML Stub）
 
-当 target path 不存在时，MVP 可以在 fresh install 期间创建 human-owned TOML stub files。这仅限 `create-if-absent`。
+当 target path 不存在时，MVP 可以在 fresh install 期间创建 human-owned TOML stub files。这仅限 `create-if-absent`，且只适用于 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` project-level stubs。
 
 Install、update 和 repair 不得 overwrite、rewrite、reformat 或 normalize 现有 human-owned TOML files，例如 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml`。Existing files 只为 resolver behavior 而读取，并由 ownership metadata 保护。
+
+Fresh install 不得为每个 installed skill 自动创建 `_speclite/custom/{skill}.toml` 或 `_speclite/custom/{skill}.user.toml`。这些 skill-specific stubs 只能由用户手工创建，或由未来显式 customization 命令在更新本 SPEC 后创建。

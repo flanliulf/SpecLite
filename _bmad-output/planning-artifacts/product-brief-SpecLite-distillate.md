@@ -102,16 +102,16 @@ inputs:
 - Line ending、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得通过 normalized hashing 隐藏。
 - Canonical source text files 使用 LF；installer 不得按平台重写 canonical text line endings。
 - Runtime/generated scripts 在 files index 中记录 `executable` intent；Windows 不要求 POSIX chmod 语义，但仍保留该 intent。
-- Manifest/index contract 的细节归 `_bmad-output/planning-artifacts/specs/manifest-index-contract.md` 管理；下游实现不得创建第二套字段真源。
+- Manifest/index contract 的细节归 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 管理；下游实现不得创建第二套字段真源。
 
 ## Validation And Diagnostics Requirements（验证与诊断要求）
 
-- `ValidationIssue` category、issue id baseline、default severity 和 fixture ownership 由 `_bmad-output/planning-artifacts/specs/validation-issue-taxonomy.md` 控制。
-- MVP 问题类别包括 manifest-schema、source-integrity、ide-mirror、runtime-path、menu-target、legacy-namespace、artifact-path、file-integrity、operation-lock 和 update。
+- `ValidationIssue` category、issue id baseline、default severity 和 fixture ownership 由 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 控制。
+- MVP 问题类别包括 environment、manifest-schema、source-integrity、ide-mirror、runtime-path、menu-target、legacy-namespace、artifact-path、file-integrity、operation-lock 和 update。
 - `source-integrity` 与 `file-integrity` 必须区分：前者覆盖 install source trust/evidence，后者覆盖 installed files/manifest baseline drift。
 - IDE mirror drift 必须报告稳定的 issue id/category/severity/affected path，且不会被 `validate` 自动修复。
 - Human-readable output、`--json` output、exit code 和 fixture assertions 必须从同一个 issue/status model 推导。
-- `CommandResult.status` 与 `status.data.highLevelHealth` 是不同概念；`status` 可以用 exit code 0 成功报告 `not-configured`、`partial` 或 `failed` 的安装健康状态。
+- `CommandResult.status` 与 `status.data.highLevelHealth` 是不同概念；`status` 可以用 exit code 0 成功报告 `not-configured`、`partial` 或 `failed` 的安装健康状态，但不提供 full validation category coverage，也不证明 installation healthy。
 - `validate.data.issueCounts` 必须包含固定 key：`info`、`warning`、`error` 和 `critical`，即使计数为 0 也不能省略。
 - Public JSON paths 必须使用 project-relative POSIX-style paths；public outputs 不得暴露 absolute home paths、cache paths、temp extraction paths、credentials、tokens、environment values、raw stack traces、random ids 或 schema 未显式允许的 timestamps。
 - Issues、targets、checked categories、paths、arrays 和 next actions 的排序必须 deterministic 且由 schema 定义，不能依赖 filesystem traversal 或 async completion order。
@@ -119,9 +119,9 @@ inputs:
 ## Update, Ownership, And Safe Write Requirements（更新、所有权与安全写入要求）
 
 - 文件所有权分为 installer-owned、human-owned、workflow-owned。
-- Fresh install 只能在 human-owned TOML stubs 不存在时创建它们；已存在 human-owned files 不得覆盖、重写、重排或格式化。
+- Fresh install 只能在 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` 不存在时 create-if-absent 创建 project-level human-owned TOML stubs；skill-specific custom stubs 不由 fresh install 默认创建，已存在 human-owned files 不得覆盖、重写、重排或格式化。
 - Update 写入前必须比较 ownership 和 hashes；不安全或无法确认的情况进入 conflict/skip，而不是静默覆盖。
-- 即使 installer-owned drift 发生在 installer-owned 区域，ordinary update 也不得静默覆盖；默认行为是 conflict，除非执行 `update --repair` 或获得明确用户确认。
+- 即使 installer-owned drift 发生在 installer-owned 区域，ordinary update 也不得静默覆盖；默认行为是 conflict。普通 `update` 的用户确认或 `--yes` 只授权无 conflict 的 planned update writes，只有 `update --repair` 可以修复可安全 repair 的 drift。
 - Write-capable commands 必须使用 project operation lock `_speclite/.lock`；获取 lock 失败时不得写入。
 - Lock file 是 volatile control state，不进入 files index 或 stable fixture snapshot。
 - Safe writes 使用 temp-write + rename；temp files 不作为 files-index entries。
@@ -144,7 +144,7 @@ inputs:
 
 - Fixture expected outputs 是契约资产，不是普通文档示例。
 - Release gate fixtures 应覆盖 Node 22 与 Node 24；portability evidence 必须包含 macOS 和 Windows path behavior。
-- Baseline fixture set：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity`、`resolve-parity`、`path-portability`；`skill-artifact-loop` 验证 IDE entry -> activation -> artifact output，除非被提升，否则可作为 regression asset。
+- Baseline release gate fixture set：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` required sub-cases、`resolve-parity`、`path-portability` 和最小 `skill-artifact-loop`；richer multi-skill/documentation scenarios 可作为 regression assets。
 - Fixtures 必须验证 generated file trees、manifest/index snapshots、command output summaries、validation assertions、update protection、path normalization、target order 和 deterministic issue sets。
 - Contract changes 必须先更新 owning SPEC 与 executable schema/parser，再更新 expected snapshots。
 - Required install steps 失败时不得展示 ready summary。
@@ -177,9 +177,9 @@ inputs:
 
 ## Open Questions For Implementation Planning（实现规划开放问题）
 
-- 第一版 public MVP cut 中，哪些 fixture cases 是 release gates，哪些只是 regression assets，尤其是 `skill-artifact-loop`？
+- Release gate 已收口：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` required sub-cases、`resolve-parity`、`path-portability` 和最小 `skill-artifact-loop`；richer multi-skill/documentation scenarios 是 regression assets。
 - 最小 official module/skill subset 应包含哪些能力，才能展示 SPEC、solution review、story planning、implementation、testing 和 review coverage，同时不压垮 MVP？
-- 哪种 npm package shape 最适合承载 `assets/source/speclite/`，并且如何在 install planning 前验证 package contents？
+- Packaging acceptance 已收口：npm package、local tarball 和 offline bundle 必须生成 packaging manifest，验证 `assets/source/speclite/`、compiled CLI、runtime schemas/scripts/templates 与必要 runtime assets 被打包，且 fixtures 默认不进入 package。
 - 哪种 TOML parser/writer strategy 能默认保护 human-owned files，同时安全生成 installer-owned TOML？
 - Offline bundle 与 local tarball 的 source evidence 应如何生成，并如何面向早期用户说明？
 - 最小 human-readable CLI experience 应做到什么程度，才能既清晰可用，又把 automation dependencies 严格放在 `CommandResult` JSON/file contracts 中？

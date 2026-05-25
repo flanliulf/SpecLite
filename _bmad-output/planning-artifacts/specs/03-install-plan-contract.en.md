@@ -2,13 +2,17 @@
 
 ## Status（状态）
 
-Draft for MVP implementation.
+Accepted for MVP planning.
 
 ## Ownership（所有权）
 
 This SPEC defines the internal planning contract for install and update write authorization. It exists to keep source trust decisions, external access, planned writes, and write authorization separate.
 
 CommandResult JSON owns public command output. This install plan contract owns pre-write planning semantics.
+
+## Implementation Anchor（实现锚点）
+
+Implementation must provide `src/installer/install-plan-schema.ts` as the executable schema/parser anchor for `SourceResolutionPlan`, `InstallPlan`, planned writes, confirmation state, and write authorization. This module is not a second contract source; if it conflicts with this SPEC, this SPEC wins.
 
 ## Planning Stages（规划阶段）
 
@@ -71,15 +75,17 @@ Path fields must use project-relative POSIX paths for target project paths.
 
 `requestedSourceValue` and `ExternalAccess.sourceValue` must be redacted/display-safe. They must not contain authentication tokens, credential-bearing URLs, private query strings, local absolute paths, home directories, drive letters, npm cache paths, temporary extraction paths, or OS-specific separators. Raw source locators may exist only in private in-memory planning state.
 
+Local source must pass a self-reference guard before entering `InstallPlan`. Source resolution must not treat installed-state, execution-plane, workflow-output, dependency, cache, temporary, or build directories inside the target project as canonical source roots; at minimum `_speclite/`, `.claude/skills/`, `.agents/skills/`, `_speclite-output/`, fixture output, `node_modules/`, cache, temporary, and build output must be blocked. When this rule is violated, the source must be marked `blocked` and produce `source-integrity.local-source-self-reference`; it must not proceed to planned writes.
+
 ## Planning Model Boundaries（规划模型边界）
 
 | Model | Owner | Visibility | Meaning |
 | --- | --- | --- | --- |
 | `SourceResolutionPlan` | This SPEC | Internal planning contract | External access intent before resolving a source. |
 | `InstallPlan` | This SPEC | Internal planning contract | Resolved source descriptor, target adapter plan, planned writes, confirmation, and write authorization before writes. |
-| `UpdatePlan` | `docs/specs/01-command-result-json-contract.en.md` | Public command result projection | Planned update effects emitted in `update --json`. |
-| `RepairPlan` | `docs/specs/01-command-result-json-contract.en.md` | Public command result projection | Planned repair effects emitted in `update --repair --json`. |
-| `changedPaths` / `skippedPaths` | `docs/specs/01-command-result-json-contract.en.md` | Public command result fields | Actual apply result for the current command only. |
+| `UpdatePlan` | `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md` | Public command result projection | Planned update effects emitted in `update --json`. |
+| `RepairPlan` | `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md` | Public command result projection | Planned repair effects emitted in `update --repair --json`. |
+| `changedPaths` / `skippedPaths` | `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md` | Public command result fields | Actual apply result for the current command only. |
 
 Internal `InstallPlan.plannedWrites` may include private planning detail. Public reporters must project only the fields declared in the CommandResult JSON contract.
 
@@ -173,12 +179,14 @@ Target status vocabulary is layer-specific:
 | Installed projection | `PhaseCoverageRow.ideTargets[].status` | `mapped`, `unsupported`, `failed` | Whether an installed phase entry is visible through a target. |
 | Status summary | `StatusCommandData.highLevelHealth` / `IdeTargetStatus.status` | `not-configured`, `configured`, `partial`, `failed` | Health summary for an installed project or target. |
 
-These vocabularies must not be reused across layers. `unsupported` means an adapter-declared capability gap, not a write failure. `failed` means an attempted or planned operation failed.
+The same literal may appear in different layers, but it must be interpreted by the layer-scoped type: `InstallPlanningTargetStatus`, `InstalledPhaseCoverageStatus`, or `StatusSummaryTargetHealth`. Do not treat one layer's `unsupported` or `failed` as another layer's semantics. `unsupported` means an adapter-declared capability gap, not a write failure. `failed` means an attempted or planned operation failed.
 
-If the user explicitly selected a target and that target is unsupported, install/update planning must produce a blocking error. If a target was not selected or is optional for the current module set, adapter-declared unsupported status may be reported as a warning, info, or known limitation according to `docs/specs/07-validation-issue-taxonomy.en.md`.
+If the user explicitly selected a target and that target is unsupported, install/update planning must produce a blocking error. If a target was not selected or is optional for the current module set, adapter-declared unsupported status may be reported as a warning, info, or known limitation according to `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.en.md`.
 
 ## Human-Owned TOML Stubs（人工维护 TOML Stub）
 
-MVP may create human-owned TOML stub files during fresh install when the target path does not exist. This is `create-if-absent` only.
+MVP may create human-owned TOML stub files during fresh install when the target path does not exist. This is `create-if-absent` only and applies only to the `_speclite/custom/config.toml` and `_speclite/custom/config.user.toml` project-level stubs.
 
 Install, update, and repair must not overwrite, rewrite, reformat, or normalize existing human-owned TOML files such as `_speclite/custom/*.toml` and `_speclite/custom/*.user.toml`. Existing files are read for resolver behavior and protected by ownership metadata.
+
+Fresh install must not automatically create `_speclite/custom/{skill}.toml` or `_speclite/custom/{skill}.user.toml` for every installed skill. These skill-specific stubs may only be created manually by the user or by a future explicit customization command after this SPEC is updated.

@@ -15,12 +15,12 @@
 
 Related contracts：
 
-- `docs/specs/02-source-descriptor-contract.md` 负责 `SourceDescriptor` trust 和 evidence semantics。
-- `docs/specs/03-install-plan-contract.md` 负责 pre-write planning、external access 和 write authorization semantics。
-- `docs/specs/04-manifest-index-contract.md` 负责 manifest/index installed-state projections。
-- `docs/specs/07-validation-issue-taxonomy.md` 负责 `ValidationIssue` category 和 issue id semantics。
-- `docs/specs/06-resolve-command-contract.md` 负责 `speclite resolve` exception behavior。
-- `docs/specs/08-fixture-contract.md` 负责 fixture layout 和 snapshot comparison policy。
+- `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.md` 负责 `SourceDescriptor` trust 和 evidence semantics。
+- `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 负责 pre-write planning、external access 和 write authorization semantics。
+- `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 负责 manifest/index installed-state projections。
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 负责 `ValidationIssue` category 和 issue id semantics。
+- `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md` 负责 `speclite resolve` exception behavior。
+- `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 负责 fixture layout 和 snapshot comparison policy。
 
 本 SPEC 中的 public projection snippets 是 `CommandResult` 暴露的 JSON fields 的快照。它们不是 domain objects 的独立 semantic sources。如果 projection snippet 与 related contract 冲突，domain semantics 以 related contract 为准，并且必须修正本 SPEC 以保持一致。
 
@@ -68,6 +68,20 @@ Covered commands：
 Explicit exception：
 
 - `speclite resolve` 不使用 `CommandResult`。它是 installed skills 的 runtime support command。它的 stdout 必须保持为 pure resolve-result JSON；diagnostics 使用 `ValidationIssue` shape，以 JSON Lines 输出到 stderr。
+
+## MVP CLI Flag Matrix（MVP CLI Flag 矩阵）
+
+| Command（命令） | MVP flags（MVP flags） | JSON behavior（JSON 行为） | Write behavior（写入行为） |
+| --- | --- | --- | --- |
+| `speclite install` | `--json`、`--yes` | `--json` 输出 `CommandResult<InstallCommandData>`。 | Write-capable；必须先通过 runtime/platform guard、source resolution plan、install plan、operation lock 和 explicit confirmation / `--yes`。 |
+| `speclite status` | `--json` | `--json` 输出 `CommandResult<StatusCommandData>`。 | Read-only；默认不检查 project operation lock，不执行 full validation。 |
+| `speclite validate` | `--json` | `--json` 输出 `CommandResult<ValidateCommandData>`。 | Read-only；可以报告 stale lock warning，但不得自动删除 lock。 |
+| `speclite update` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<UpdateCommandData>`。 | Write-capable；普通 dry-run、交互确认前或脚本模式缺少 `--yes` 时必须保留 unapplied plan，并保持 `writeAuthorized: false`。 |
+| `speclite update --repair` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<RepairCommandData>`，且 `command` 为 `update.repair`。 | Write-capable；只修复可安全恢复或重建的 installer-owned drift。 |
+| `speclite resolve config` | `--project-root`、`--key` | 不使用 `CommandResult`；stdout 只输出 resolve-result JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command。 |
+| `speclite resolve customization` | `--project-root`、`--skill`、`--key` | 不使用 `CommandResult`；stdout 只输出 resolve-result JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command。 |
+
+新增 MVP flag、改变 flag meaning、或让某个 flag 影响 public JSON 字段时，必须先更新对应 owning SPEC，再更新 executable parser/schema 和 fixture expected outputs。
 
 ## CommandResult Envelope（命令结果信封）
 
@@ -163,6 +177,17 @@ Exit code 必须跟随 `CommandResult.status`：
 
 `partial` 和 `failed` 不得自动创建 warning issues。Detailed diagnostics 属于显式 `speclite validate`。
 
+`status.data.highLevelHealth` 必须按以下 deterministic aggregation order 计算；first match wins：
+
+1. `not-configured`：`manifestPresent === false`，且本次 lightweight status 没有发现可读的 installed-state manifest。
+2. `failed`：manifest/index/source descriptor 形状损坏或不可读，导致 status 无法产生稳定 installed summary；或任何已安装/显式选择的 IDE target summary 为 `failed`。
+3. `partial`：manifest 可读，但 installed summary 不完整，例如 `installedModules` 为空、任一已安装/显式选择的 IDE target 为 `not-configured` 或 `partial`，或 required runtime path summary 缺失。
+4. `configured`：manifest、source descriptor、installed modules、required runtime paths 和所有已安装/显式选择的 IDE target summary 都可读且为 configured。
+
+该聚合只能使用本地 manifest/index、source descriptor projection、adapter summary 和 required path presence；不得执行 full hash scan、远程 source access、implicit update check 或 repair planning。需要详细错误列表时必须运行 `speclite validate`。
+
+`status` 不提供 full validation category coverage，也不证明 installation healthy。Automation 若需要安装健康断言，必须读取 `data.highLevelHealth`；若需要可修复的问题列表，必须运行 `speclite validate`。
+
 `speclite status --json` 默认不得检查 project operation lock。Lock checks 保留给 write-capable commands 和显式 `speclite validate`，因此 concurrent write operation 本身不会强制 lightweight status output 包含 `operation-lock.project-locked`。
 
 ## ValidationIssue Model（验证问题模型）
@@ -196,18 +221,21 @@ Dynamic context 必须通过 `affectedPath`、`component` 或 `details` 承载�
 
 MVP canonical issue category order：
 
-1. `manifest-schema`
-2. `source-integrity`
-3. `ide-mirror`
-4. `runtime-path`
-5. `menu-target`
-6. `legacy-namespace`
-7. `artifact-path`
-8. `file-integrity`
-9. `operation-lock`
-10. `update`
+1. `environment`
+2. `manifest-schema`
+3. `source-integrity`
+4. `ide-mirror`
+5. `runtime-path`
+6. `menu-target`
+7. `legacy-namespace`
+8. `artifact-path`
+9. `file-integrity`
+10. `operation-lock`
+11. `update`
 
-`source-integrity` 用于 source resolver 或 install planning issues：missing integrity evidence、hash mismatch、lock mismatch、unsupported source、registry/proxy/authentication failure、unreadable tarball/offline bundle 或 Post-MVP source policy rejection。
+`environment` 用于 runtime/platform guard failures，例如 unsupported Node.js runtime 或 unsupported OS/platform。它是 command-level diagnostic category，不表示 installed state drift。
+
+`source-integrity` 用于 source resolver 或 install planning issues：missing integrity evidence、hash mismatch、lock mismatch、unsupported source、local source self-reference、bundled packaging evidence 缺失、registry/proxy/authentication failure、unreadable tarball/offline bundle 或 Post-MVP source policy rejection。
 
 `file-integrity` 用于 installed files、manifest files index、installer-owned files 或 IDE mirror hash mismatch。
 
@@ -306,6 +334,7 @@ type ValidationIssueCounts = {
 };
 
 type IssueCategory =
+  | "environment"
   | "manifest-schema"
   | "source-integrity"
   | "ide-mirror"
@@ -343,11 +372,21 @@ type RepairCommandData = {
 };
 ```
 
+Per-command data contract：
+
+| Command（命令） | Data type（Data 类型） | Required fields（必填字段） | Optional fields（可选字段） | Non-goals（非目标） |
+| --- | --- | --- | --- | --- |
+| `install` | `InstallCommandData` | `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps`、`pendingSteps` | 无；新增 optional fields 必须先更新本 SPEC。 | 不输出未契约化 `readySummary` blob，不输出 timing。 |
+| `status` | `StatusCommandData` | `manifestPresent`、`installedModules`、`ideTargets`、`highLevelHealth`、`paths` | `sourceDescriptor`、`manifestVersion` | 不输出 `issueCounts`，不执行 full validation。 |
+| `validate` | `ValidateCommandData` | `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths` | 无；新增 optional fields 必须先更新本 SPEC。 | 不访问 remote source，不做 repair。 |
+| `update` | `UpdateCommandData` | `updatePlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` | 无；新增 optional fields 必须先更新本 SPEC。 | 不把 conflicts 复制成多个 command-level issues，不修复 drift。 |
+| `update.repair` | `RepairCommandData` | `repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` | 无；新增 optional fields 必须先更新本 SPEC。 | 不修复 human-owned 或 workflow-owned paths，不生成 standalone report artifact。 |
+
 Command data 引用的 nested types 是 public projections。它们是 consumers 可以依赖的唯一字段；internal resolver、installer、validation 和 update models 可以携带额外 private fields，但 reporters 不得把 private fields 泄露到 public JSON。
 
 ### Public Projection Types（公开投影类型）
 
-下面的 `SourceDescriptor` 和 `SourceIntegrityEvidence` 是 public JSON projections。Trust、evidence、write eligibility、source type rules 和 validate no-network boundaries 由 `docs/specs/02-source-descriptor-contract.md` 负责。
+下面的 `SourceDescriptor` 和 `SourceIntegrityEvidence` 是 public JSON projections。Trust、evidence、write eligibility、source type rules 和 validate no-network boundaries 由 `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.md` 负责。
 
 ```ts
 type SourceDescriptor = {
@@ -357,6 +396,7 @@ type SourceDescriptor = {
     | "local-tarball"
     | "offline-bundle"
     | "git"
+    | "bundled"
     | "local";
   channel?: string;
   requestedVersion?: string;
@@ -444,7 +484,7 @@ type RepairPlan = {
 
 `SourceDescriptor.contentHash` 只对 content-addressable source artifacts required，例如 local tarballs、offline bundles 和 local source snapshots。Registry 和 Git sources 不得虚构 `contentHash`。
 
-在 install 或 update 写入文件前，`SourceDescriptor.integrityEvidence` 必须至少包含一个 entry。在 MVP 中，`trustStatus: "trusted"` 只能由 expected hash 或 lock match 产生；MVP contract 不定义通用 trusted source allowlist schema。只有当用户显式选择该 source、至少记录一个 reproducible integrity evidence entry，且未检测到 hash mismatch、lock mismatch、unsupported source 或 source policy rejection 时，`trustStatus: "unverified"` 才能进入 install 或 update write planning。`verified: false` 表示 evidence 已记录且可复现，但未与 expected hash 或 lock 匹配。它不得表示 hash mismatch、lock mismatch、Post-MVP source policy rejection 或 failed verification；这些状态必须产生 `source-integrity` issue 和 `trustStatus: "blocked"`。
+在 install 或 update 写入文件前，`SourceDescriptor.integrityEvidence` 必须至少包含一个 entry。在 MVP 中，`trustStatus: "trusted"` 只能由 expected hash、lock match，或 bundled source 的等价 packaging manifest / package hash / package lock match 产生；MVP contract 不定义通用 trusted source allowlist schema。只有当用户显式选择该 source、至少记录一个 reproducible integrity evidence entry，且未检测到 hash mismatch、lock mismatch、unsupported source、local source self-reference 或 source policy rejection 时，`trustStatus: "unverified"` 才能进入 install 或 update write planning。`verified: false` 表示 evidence 已记录且可复现，但未与 expected hash、lock match 或 bundled packaging trust anchor 匹配。它不得表示 hash mismatch、lock mismatch、local source self-reference、Post-MVP source policy rejection 或 failed verification；这些状态必须产生 `source-integrity` issue 和 `trustStatus: "blocked"`。
 
 Public projection types 中的每个 path 都必须遵循本 SPEC 的 Path Policy。这包括在引用 target project path 时的 `resolvedRoot`、`lockPath`、`targetPath`、`specliteRoot`、`artifactRoot`、`manifestPath`、`affectedPath`，以及任何未来 public path field。
 
@@ -454,12 +494,12 @@ Planning model boundaries：
 
 | Model（模型） | Owner（所有者） | Visibility（可见性） | Meaning（含义） |
 | --- | --- | --- | --- |
-| `InstallPlan` | `docs/specs/03-install-plan-contract.md` | Internal planning contract | Pre-write source resolution、external access declaration、target adapter planning、planned writes、confirmation 和 write authorization。 |
+| `InstallPlan` | `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` | Internal planning contract | Pre-write source resolution、external access declaration、target adapter planning、planned writes、confirmation 和 write authorization。 |
 | `UpdatePlan` | 本 SPEC | Public `update --json` projection | 对 automation 可见的 planned update effects；不是 execution log。 |
 | `RepairPlan` | 本 SPEC | Public `update --repair --json` projection | 对 automation 可见的 planned installer-owned repair effects；不是 execution log。 |
 | `changedPaths` / `skippedPaths` | 本 SPEC | Public command result fields | 仅表示当前 command 的 actual apply result。当 `writeAuthorized === false` 时为空。 |
 
-Normal `update` 必须将 installer-owned drift 视为 conflict，除非用户显式授权 repair。在 `update --repair` 中，可以从 resolved canonical source 和 installer templates 安全 restore 或 regenerate 的 installer-owned drift 应成为 `repairPlan.actions[]` entry，而不是 `conflicts[]` entry。Repair output 中的 `conflicts[]` 保留给无法安全 repair 的 blockers，例如 human-owned 或 workflow-owned paths、unknown ownership、missing source evidence 或 unsupported repair。
+Normal `update` 必须将 installer-owned drift 视为 conflict；普通 `update` 的 interactive confirmation 或 `--yes` 只授权无 conflict 的 planned update writes，不得把 drift conflict 转成 repair action。只有 command 为 `update --repair`，且 repair writes 通过 interactive confirmation 或 `--yes` 显式授权时，才可以修复 drift。在 `update --repair` 中，可以从 resolved canonical source 和 installer templates 安全 restore 或 regenerate 的 installer-owned drift 应成为 `repairPlan.actions[]` entry，而不是 `conflicts[]` entry。Repair output 中的 `conflicts[]` 保留给无法安全 repair 的 blockers，例如 human-owned 或 workflow-owned paths、unknown ownership、missing source evidence 或 unsupported repair。
 
 `conflicts` 描述 planning diagnostics，不是 apply execution results。它们不依赖 write authorization。Dry-run output 和 `writeAuthorized === false` 的 output 仍必须包含 discovered conflicts，以便 automation 在 applying writes 前检测 blockers。`conflicts` 不得被解释为当前 apply phase 中失败的 paths。
 
@@ -521,6 +561,8 @@ Special orders：
 - `installedModules`：source manifest module order；如果不存在，则按 normalized module id lexicographically 排序。
 
 Public JSON arrays 不得依赖 filesystem traversal、object insertion、validation rule execution、adapter completion 或 async completion order。
+
+Duration、elapsed time、per-step timing、p95 measurement 和 profiling samples 默认不属于 stable public JSON。若未来 command payload 显式加入 timing field，该 field 必须在 schema 中标记为 non-stable，并由 fixture comparison normalize 或 exclude；不得把阶段耗时混入 `completedSteps`、`pendingSteps` 或其他 stable lifecycle fields。
 
 ## Path Policy（路径策略）
 
@@ -597,7 +639,7 @@ Human-readable output 不得成为 automation-relevant state 出现的唯一位�
 
 Human-readable output 对 credentials、cache paths、temporary extraction paths、home directories 和 local absolute source paths 应遵循相同的 redaction/display-safe policy。它可以在有用时显示 user-selected target project path，但 public fixture snapshots 仍必须使用 project-relative POSIX paths 或 redacted labels。
 
-Progress events 和 spinner output 不是 MVP automation API。Automation 必须改为消费 `CommandResult`、`speclite resolve` JSON、manifest/index files 或 fixture outputs。
+Progress events 和 spinner output 不是 MVP automation API。Machine-readable progress `stepId` 是 fixture-observable deterministic signal，用于断言阶段顺序、ready summary gate 和 human-readable output 的稳定性；它不得被当作长期自动化集成 API。Automation 必须改为消费 `CommandResult.data.completedSteps`、`CommandResult.data.pendingSteps`、`speclite resolve` JSON、manifest/index files 或 fixture outputs。
 
 ## Fixture Comparison Policy（Fixture 比较策略）
 

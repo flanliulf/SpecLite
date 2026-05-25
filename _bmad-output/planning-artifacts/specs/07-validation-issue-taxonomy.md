@@ -2,13 +2,13 @@
 
 ## Status（状态）
 
-MVP implementation 草案。
+已接受用于 MVP planning。
 
 ## Ownership（所有权）
 
 本 SPEC 是 `ValidationIssue.category`、issue id boundaries、default severity guidance 和 fixture ownership 的 canonical taxonomy。
 
-`docs/specs/01-command-result-json-contract.md` 负责 `ValidationIssue` 的 public JSON shape。本 SPEC 负责 issue categories 和 stable issue ids 背后的 meaning 与 registry discipline。
+`_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 负责 `ValidationIssue` 的 public JSON shape。本 SPEC 负责 issue categories 和 stable issue ids 背后的 meaning 与 registry discipline。
 
 ## Issue Id Policy（问题 ID 策略）
 
@@ -28,20 +28,41 @@ Issue ids 不得包含 path、IDE target、source name、hash、count、timestam
 
 MVP category order：
 
-1. `manifest-schema`
-2. `source-integrity`
-3. `ide-mirror`
-4. `runtime-path`
-5. `menu-target`
-6. `legacy-namespace`
-7. `artifact-path`
-8. `file-integrity`
-9. `operation-lock`
-10. `update`
+1. `environment`
+2. `manifest-schema`
+3. `source-integrity`
+4. `ide-mirror`
+5. `runtime-path`
+6. `menu-target`
+7. `legacy-namespace`
+8. `artifact-path`
+9. `file-integrity`
+10. `operation-lock`
+11. `update`
 
 Command JSON sorting 必须在 normalized affected path 和 issue id 之前使用此顺序。
 
 ## Category Boundaries（类别边界）
+
+### `environment`（environment 类别）
+
+用于 command runtime/platform guard failures。它描述当前 execution environment 无法安全运行 MVP command，不描述 installed project state。
+
+Examples（示例）：
+
+- detected Node.js runtime 不满足 MVP required range
+- detected OS/platform 不在 MVP supported platform policy 内
+
+Default severity（默认严重级别）：
+
+- 当命令必须在读取或写入项目文件前停止时为 `error`
+
+Reserved MVP issue ids：
+
+- `environment.unsupported-node`
+- `environment.unsupported-platform`
+
+`environment.unsupported-node` details 必须至少包含 `detectedVersion` 和 `requiredRange`。`environment.unsupported-platform` details 必须至少包含 `detectedPlatform` 和 `supportedPlatforms`。Details 不得包含 absolute paths、home directories、environment variable values、timestamps、stack traces 或 raw process dumps。
 
 ### `manifest-schema`（manifest-schema 类别）
 
@@ -75,6 +96,8 @@ Reserved MVP issue ids：
 - `migrationKind`: `manual` | `automated-available` | `unsupported`
 - `manualActionRequired`: boolean
 
+MVP producers 只能输出 `migrationKind: "manual"` 或 `"unsupported"`。`"automated-available"` 是 forward-compatible enum value，只有 Post-MVP migration tooling 明确实现并更新本 SPEC 后才能由 producer 输出。
+
 Details 不得包含 absolute paths、timestamps、free-form stack traces 或 environment-specific text。
 
 ### `source-integrity`（source-integrity 类别）
@@ -88,6 +111,7 @@ Examples（示例）：
 - lock mismatch
 - unsupported source
 - floating Git source without resolved commit SHA
+- local source 指向 target project 内的 installed-state、execution-plane、workflow-output、dependency、cache、temporary 或 build directory
 - Post-MVP source policy rejection
 - registry unreachable
 - authentication required
@@ -112,8 +136,13 @@ Reserved MVP issue ids：
 - `source-integrity.authentication-required`
 - `source-integrity.offline-bundle-unreadable`
 - `source-integrity.tarball-unreadable`
+- `source-integrity.local-source-self-reference`
 
 Credentials、registry tokens、proxy secrets 和 credential-bearing URLs 必须从 `details`、`impact` 和 `suggestedNextStep` 中 redacted。
+
+`source-integrity.local-source-self-reference` details 必须至少包含 `reason: "local-source-self-reference"` 和 `blockedRootKind`。`blockedRootKind` 必须是稳定枚举值，例如 `installed-state`、`execution-plane`、`workflow-output`、`dependency`、`cache`、`temporary` 或 `build-output`；不得包含 raw absolute path、home directory、checkout root、cache path 或 temporary path。
+
+当 local source 指向 target project blocked roots 时，producer 必须使用 `source-integrity.local-source-self-reference`，不得回退到 `source-integrity.unsupported-source`。`source-integrity.unsupported-source` 只用于 source type、source selector 或 source policy shape 不被 MVP 支持且没有更具体 reserved issue id 的场景。
 
 ### `ide-mirror`（ide-mirror 类别）
 

@@ -2,13 +2,13 @@
 
 ## Status（状态）
 
-Draft for MVP implementation.
+Accepted for MVP planning.
 
 ## Ownership（所有权）
 
 This SPEC is the canonical taxonomy for `ValidationIssue.category`, issue id boundaries, default severity guidance, and fixture ownership.
 
-`docs/specs/01-command-result-json-contract.en.md` owns the public JSON shape of `ValidationIssue`. This SPEC owns the meaning and registry discipline behind issue categories and stable issue ids.
+`_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md` owns the public JSON shape of `ValidationIssue`. This SPEC owns the meaning and registry discipline behind issue categories and stable issue ids.
 
 ## Issue Id Policy（问题 ID 策略）
 
@@ -28,20 +28,41 @@ Each MVP category must reserve a minimum issue id baseline before implementation
 
 MVP category order:
 
-1. `manifest-schema`
-2. `source-integrity`
-3. `ide-mirror`
-4. `runtime-path`
-5. `menu-target`
-6. `legacy-namespace`
-7. `artifact-path`
-8. `file-integrity`
-9. `operation-lock`
-10. `update`
+1. `environment`
+2. `manifest-schema`
+3. `source-integrity`
+4. `ide-mirror`
+5. `runtime-path`
+6. `menu-target`
+7. `legacy-namespace`
+8. `artifact-path`
+9. `file-integrity`
+10. `operation-lock`
+11. `update`
 
 Command JSON sorting must use this order before normalized affected path and issue id.
 
 ## Category Boundaries（类别边界）
+
+### `environment`
+
+Use for command runtime/platform guard failures. It describes that the current execution environment cannot safely run an MVP command; it does not describe installed project state.
+
+Examples:
+
+- detected Node.js runtime does not satisfy the MVP required range
+- detected OS/platform is outside the MVP supported platform policy
+
+Default severity:
+
+- `error` when the command must stop before reading or writing project files
+
+Reserved MVP issue ids:
+
+- `environment.unsupported-node`
+- `environment.unsupported-platform`
+
+`environment.unsupported-node` details must include at least `detectedVersion` and `requiredRange`. `environment.unsupported-platform` details must include at least `detectedPlatform` and `supportedPlatforms`. Details must not include absolute paths, home directories, environment variable values, timestamps, stack traces, or raw process dumps.
 
 ### `manifest-schema`
 
@@ -75,6 +96,8 @@ Reserved MVP issue ids:
 - `migrationKind`: `manual` | `automated-available` | `unsupported`
 - `manualActionRequired`: boolean
 
+MVP producers may emit only `migrationKind: "manual"` or `"unsupported"`. `"automated-available"` is a forward-compatible enum value and may be emitted by producers only after Post-MVP migration tooling is explicitly implemented and this SPEC is updated first.
+
 Details must not include absolute paths, timestamps, free-form stack traces, or environment-specific text.
 
 ### `source-integrity`
@@ -88,6 +111,7 @@ Examples:
 - lock mismatch
 - unsupported source
 - floating Git source without resolved commit SHA
+- local source points at installed-state, execution-plane, workflow-output, dependency, cache, temporary, or build directories inside the target project
 - Post-MVP source policy rejection
 - registry unreachable
 - authentication required
@@ -112,8 +136,13 @@ Reserved MVP issue ids:
 - `source-integrity.authentication-required`
 - `source-integrity.offline-bundle-unreadable`
 - `source-integrity.tarball-unreadable`
+- `source-integrity.local-source-self-reference`
 
 Credentials, registry tokens, proxy secrets, and credential-bearing URLs must be redacted from `details`, `impact`, and `suggestedNextStep`.
+
+`source-integrity.local-source-self-reference` details must include at least `reason: "local-source-self-reference"` and `blockedRootKind`. `blockedRootKind` must be a stable enum value such as `installed-state`, `execution-plane`, `workflow-output`, `dependency`, `cache`, `temporary`, or `build-output`; it must not contain raw absolute paths, home directories, checkout roots, cache paths, or temporary paths.
+
+When local source points at target project blocked roots, producers must use `source-integrity.local-source-self-reference` and must not fall back to `source-integrity.unsupported-source`. `source-integrity.unsupported-source` is only for source types, source selectors, or source policy shapes that MVP does not support and that have no more specific reserved issue id.
 
 ### `ide-mirror`
 

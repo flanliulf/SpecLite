@@ -2,7 +2,7 @@
 
 ## Status（状态）
 
-Draft for MVP implementation.
+Accepted for MVP planning.
 
 ## Ownership（所有权）
 
@@ -16,6 +16,10 @@ It owns:
 - Hash and ownership projection rules used by validation and update protection.
 
 PRD owns product intent. Architecture owns implementation mapping. If either conflicts with this SPEC, this SPEC wins.
+
+## Implementation Anchor（实现锚点）
+
+Implementation must provide `src/manifest/manifest-schema.ts` as the executable schema/parser anchor for manifest, skill index, help index, files index, and phase coverage projection. This module is not a second contract source; if it conflicts with this SPEC, this SPEC wins.
 
 ## Scope（范围）
 
@@ -35,8 +39,8 @@ Source-side truth:
 
 - Module metadata and source skill packages under `assets/source/speclite/` define canonical modules, canonical skill ids, source package content, phase metadata, help/menu labels, and default artifact contracts.
 - Help index source data must reference canonical skill ids. It must not define a second skill identity.
-- `docs/specs/05-ide-adapter-registry-contract.en.md` owns adapter ids, target ids, target order, and adapter capability semantics.
-- `docs/specs/08-fixture-contract.en.md` owns fixture layout and release gate policy.
+- `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.en.md` owns adapter ids, target ids, target order, and adapter capability semantics.
+- `_bmad-output/planning-artifacts/specs/08-fixture-contract.en.md` owns fixture layout and release gate policy.
 
 Installed projection truth:
 
@@ -66,7 +70,9 @@ MVP IDE target ids are physical execution targets, not branded IDE claims:
 
 GitHub Copilot and Cursor may use the `agents` target when they support `.agents/skills`. MVP must not fabricate `copilot` or `cursor` target ids unless a dedicated adapter exists.
 
-Canonical target order is owned by `docs/specs/05-ide-adapter-registry-contract.en.md`:
+Manifest/index projections must not render the `agents` target as branded Copilot/Cursor readiness; branding and dedicated target ids may only be introduced by a future dedicated adapter.
+
+Canonical target order is owned by `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.en.md`:
 
 1. `claude`
 2. `agents`
@@ -109,6 +115,25 @@ Metadata value rules:
 - `workflowType` must be a non-empty stable string.
 - `sourceSkill` must be a non-empty stable canonical skill id.
 - `generatedAt`, when present in an artifact, must be an ISO 8601 string and must be excluded from stable fixture snapshot comparison unless a fixture explicitly normalizes it.
+
+## Artifact Contract Semantics（Artifact Contract 语义）
+
+This SPEC owns the fields and minimum validation semantics for the MVP artifact contract. PRD, Architecture, CommandResult, and Epics may only reference this section; they must not define a second artifact contract.
+
+`artifactContract.artifactType` is a stable artifact kind, not a human-readable title. `defaultOutputPath` must be a project-relative POSIX path and must live under `_speclite-output/` or the configured workflow artifact root.
+
+The configured workflow artifact root is also a contract path: it must be a project-relative POSIX path, must resolve inside the target project boundary, and must not point outside the project through symlink escape or path escape. Boundary violations must be reported as `artifact-path.escapes-project` or `artifact-path.symlink-escape`; escaped absolute paths must not be written into public JSON, manifest/index, or fixture snapshots.
+
+MVP validation only checks:
+
+- artifact type matches `artifactContract.artifactType`
+- output path matches `defaultOutputPath` or a configured project-relative path
+- required metadata keys exist and have valid value ranges
+- `workflowType` and `sourceSkill` are non-empty stable strings
+- `sourceSkill` matches the installed canonical skill id
+- `generatedAt`, when present, is parseable as an ISO 8601 string and normalized or excluded during stable fixture snapshot comparison
+
+Artifact files are workflow-owned. Install, update, and repair must not treat workflow artifacts as installer-owned changed paths and must not use artifact validation results to trigger overwrite. MVP does not validate narrative quality, content completeness, human review conclusions, or business correctness.
 
 Target status semantics:
 
@@ -178,26 +203,6 @@ Human-owned and workflow-owned files may be listed for protection, but automatic
 
 ## Fixture Policy（Fixture 策略）
 
-Manifest/index fixtures are contract tests, not documentation examples.
+Manifest/index fixtures are contract tests, not documentation examples. This SPEC owns only manifest/index fields and projection semantics; fixture directory names, release gate classification, expected output classes, snapshot comparison rules, release checklist gates, and regression asset policy are owned by `_bmad-output/planning-artifacts/specs/08-fixture-contract.en.md`.
 
-Fixture case directories must use stable lower-kebab names. MVP baseline cases:
-
-| Fixture case | MVP release gate | Purpose |
-| --- | --- | --- |
-| `fresh-install-empty-project` | Yes | Fresh install baseline and ready summary gating. |
-| `existing-install-update` | Yes | Update safety, ownership protection, and planned/applied result separation. |
-| `ide-drift` | Yes | IDE mirror drift detection and repair planning. |
-| `source-integrity` | Yes | Source descriptor trust/evidence and blocked/unverified behavior. |
-| `resolve-parity` | Yes | Config/customization resolver parity for installed skills. |
-| `skill-artifact-loop` | Regression asset | End-to-end skill activation and artifact metadata loop. |
-| `path-portability` | Yes | Cross-platform path normalization, separators, permissions, executable bit, symlink/path escape, and case behavior. |
-
-Every new module, adapter, source type, validation rule, ownership behavior, or installed artifact kind must update:
-
-- fixture input source
-- expected installed tree
-- expected manifest/index snapshots
-- expected command JSON output
-- expected validation issue set
-
-Generated outputs must be deterministic except for schema-declared timestamp fields that are excluded from stable fixture comparison.
+When manifest/index public fields, schema version, hash/ownership projection, or phase coverage semantics change, the corresponding fixture inputs, expected manifest/index snapshots, command JSON expected outputs, and validation assertions must be updated according to the fixture contract. Generated manifest/index outputs must be deterministic unless a field is explicitly declared by an owning SPEC and excluded from stable fixture comparison.

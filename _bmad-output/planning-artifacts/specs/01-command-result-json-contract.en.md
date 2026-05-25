@@ -15,12 +15,12 @@ This SPEC is the canonical contract for public JSON emitted by MVP user-facing c
 
 Related contracts:
 
-- `docs/specs/02-source-descriptor-contract.en.md` owns `SourceDescriptor` trust and evidence semantics.
-- `docs/specs/03-install-plan-contract.en.md` owns pre-write planning, external access, and write authorization semantics.
-- `docs/specs/04-manifest-index-contract.en.md` owns manifest/index installed-state projections.
-- `docs/specs/07-validation-issue-taxonomy.en.md` owns `ValidationIssue` category and issue id semantics.
-- `docs/specs/06-resolve-command-contract.en.md` owns the `speclite resolve` exception behavior.
-- `docs/specs/08-fixture-contract.en.md` owns fixture layout and snapshot comparison policy.
+- `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.en.md` owns `SourceDescriptor` trust and evidence semantics.
+- `_bmad-output/planning-artifacts/specs/03-install-plan-contract.en.md` owns pre-write planning, external access, and write authorization semantics.
+- `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.en.md` owns manifest/index installed-state projections.
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.en.md` owns `ValidationIssue` category and issue id semantics.
+- `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.en.md` owns the `speclite resolve` exception behavior.
+- `_bmad-output/planning-artifacts/specs/08-fixture-contract.en.md` owns fixture layout and snapshot comparison policy.
 
 Public projection snippets in this SPEC are snapshots of the JSON fields exposed by `CommandResult`. They are not independent semantic sources for domain objects. If a projection snippet conflicts with its related contract, the related contract wins for domain semantics and this SPEC must be corrected to match it.
 
@@ -163,6 +163,17 @@ Allowed `highLevelHealth` values:
 
 `partial` and `failed` must not automatically create warning issues. Detailed diagnostics belong to explicit `speclite validate`.
 
+`status.data.highLevelHealth` must be computed with this deterministic aggregation order; first match wins:
+
+1. `not-configured`: `manifestPresent === false`, and this lightweight status run did not find a readable installed-state manifest.
+2. `failed`: the manifest/index/source descriptor shape is corrupted or unreadable, preventing status from producing a stable installed summary; or any installed/explicitly selected IDE target summary is `failed`.
+3. `partial`: the manifest is readable, but the installed summary is incomplete, such as empty `installedModules`, any installed/explicitly selected IDE target in `not-configured` or `partial`, or missing required runtime path summary.
+4. `configured`: the manifest, source descriptor, installed modules, required runtime paths, and all installed/explicitly selected IDE target summaries are readable and configured.
+
+This aggregation may only use local manifest/index data, source descriptor projection, adapter summary, and required path presence; it must not run a full hash scan, remote source access, implicit update check, or repair planning. Detailed issue lists require `speclite validate`.
+
+`status` does not provide full validation category coverage and does not prove that installation is healthy. Automation that needs a health assertion must read `data.highLevelHealth`; automation that needs actionable findings must run `speclite validate`.
+
 `speclite status --json` must not check the project operation lock by default. Lock checks are reserved for write-capable commands and explicit `speclite validate`, so a concurrent write operation does not by itself force lightweight status output to include `operation-lock.project-locked`.
 
 ## ValidationIssue Model（验证问题模型）
@@ -196,18 +207,21 @@ Dynamic context must be carried by `affectedPath`, `component`, or `details`.
 
 MVP canonical issue category order:
 
-1. `manifest-schema`
-2. `source-integrity`
-3. `ide-mirror`
-4. `runtime-path`
-5. `menu-target`
-6. `legacy-namespace`
-7. `artifact-path`
-8. `file-integrity`
-9. `operation-lock`
-10. `update`
+1. `environment`
+2. `manifest-schema`
+3. `source-integrity`
+4. `ide-mirror`
+5. `runtime-path`
+6. `menu-target`
+7. `legacy-namespace`
+8. `artifact-path`
+9. `file-integrity`
+10. `operation-lock`
+11. `update`
 
-`source-integrity` is for source resolver or install planning issues: missing integrity evidence, hash mismatch, lock mismatch, unsupported source, registry/proxy/authentication failure, unreadable tarball/offline bundle, or Post-MVP source policy rejection.
+`environment` is for runtime/platform guard failures such as unsupported Node.js runtime or unsupported OS/platform. It is a command-level diagnostic category and does not represent installed state drift.
+
+`source-integrity` is for source resolver or install planning issues: missing integrity evidence, hash mismatch, lock mismatch, unsupported source, local source self-reference, missing bundled packaging evidence, registry/proxy/authentication failure, unreadable tarball/offline bundle, or Post-MVP source policy rejection.
 
 `file-integrity` is for installed files, manifest files index, installer-owned files, or IDE mirror hash mismatch.
 
@@ -306,6 +320,7 @@ type ValidationIssueCounts = {
 };
 
 type IssueCategory =
+  | "environment"
   | "manifest-schema"
   | "source-integrity"
   | "ide-mirror"
@@ -347,7 +362,7 @@ The nested types referenced by command data are public projections. They are the
 
 ### Public Projection Types（公开投影类型）
 
-`SourceDescriptor` and `SourceIntegrityEvidence` below are public JSON projections. Trust, evidence, write eligibility, source type rules, and validate no-network boundaries are owned by `docs/specs/02-source-descriptor-contract.en.md`.
+`SourceDescriptor` and `SourceIntegrityEvidence` below are public JSON projections. Trust, evidence, write eligibility, source type rules, and validate no-network boundaries are owned by `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.en.md`.
 
 ```ts
 type SourceDescriptor = {
@@ -357,6 +372,7 @@ type SourceDescriptor = {
     | "local-tarball"
     | "offline-bundle"
     | "git"
+    | "bundled"
     | "local";
   channel?: string;
   requestedVersion?: string;
@@ -444,7 +460,7 @@ type RepairPlan = {
 
 `SourceDescriptor.contentHash` is required only for content-addressable source artifacts such as local tarballs, offline bundles, and local source snapshots. Registry and Git sources must not fabricate `contentHash`.
 
-`SourceDescriptor.integrityEvidence` must contain at least one entry before an install or update writes files. In MVP, `trustStatus: "trusted"` is produced only by an expected hash or lock match; the MVP contract does not define a general trusted source allowlist schema. `trustStatus: "unverified"` may still enter install or update write planning only when the user explicitly selected that source, at least one reproducible integrity evidence entry is recorded, and no hash mismatch, lock mismatch, unsupported source, or source policy rejection was detected. `verified: false` means the evidence is recorded and reproducible but not matched against an expected hash or lock. It must not represent hash mismatch, lock mismatch, Post-MVP source policy rejection, or failed verification; those states must produce a `source-integrity` issue and `trustStatus: "blocked"`.
+`SourceDescriptor.integrityEvidence` must contain at least one entry before an install or update writes files. In MVP, `trustStatus: "trusted"` is produced only by an expected hash, lock match, or the equivalent packaging manifest / package hash / package lock match for bundled source; the MVP contract does not define a general trusted source allowlist schema. `trustStatus: "unverified"` may still enter install or update write planning only when the user explicitly selected that source, at least one reproducible integrity evidence entry is recorded, and no hash mismatch, lock mismatch, unsupported source, local source self-reference, or source policy rejection was detected. `verified: false` means the evidence is recorded and reproducible but not matched against an expected hash, lock match, or bundled packaging trust anchor. It must not represent hash mismatch, lock mismatch, local source self-reference, Post-MVP source policy rejection, or failed verification; those states must produce a `source-integrity` issue and `trustStatus: "blocked"`.
 
 Every path in public projection types must follow the Path Policy in this SPEC. This includes `resolvedRoot` when it refers to a target project path, `lockPath`, `targetPath`, `specliteRoot`, `artifactRoot`, `manifestPath`, `affectedPath`, and any future public path field.
 
@@ -454,12 +470,12 @@ Planning model boundaries:
 
 | Model | Owner | Visibility | Meaning |
 | --- | --- | --- | --- |
-| `InstallPlan` | `docs/specs/03-install-plan-contract.en.md` | Internal planning contract | Pre-write source resolution, external access declaration, target adapter planning, planned writes, confirmation, and write authorization. |
+| `InstallPlan` | `_bmad-output/planning-artifacts/specs/03-install-plan-contract.en.md` | Internal planning contract | Pre-write source resolution, external access declaration, target adapter planning, planned writes, confirmation, and write authorization. |
 | `UpdatePlan` | This SPEC | Public `update --json` projection | Planned update effects visible to automation; not an execution log. |
 | `RepairPlan` | This SPEC | Public `update --repair --json` projection | Planned installer-owned repair effects visible to automation; not an execution log. |
 | `changedPaths` / `skippedPaths` | This SPEC | Public command result fields | Actual apply result for the current command only. Empty when `writeAuthorized === false`. |
 
-Normal `update` must treat installer-owned drift as a conflict unless the user explicitly authorizes repair. In `update --repair`, installer-owned drift that can be safely restored or regenerated from the resolved canonical source and installer templates should become a `repairPlan.actions[]` entry, not a `conflicts[]` entry. `conflicts[]` in repair output is reserved for blockers that cannot be safely repaired, such as human-owned or workflow-owned paths, unknown ownership, missing source evidence, or unsupported repair.
+Normal `update` must treat installer-owned drift as a conflict; interactive confirmation or `--yes` for normal `update` only authorizes conflict-free planned update writes and must not convert a drift conflict into a repair action. Drift may be repaired only when the command is `update --repair` and repair writes are explicitly authorized through interactive confirmation or `--yes`. In `update --repair`, installer-owned drift that can be safely restored or regenerated from the resolved canonical source and installer templates should become a `repairPlan.actions[]` entry, not a `conflicts[]` entry. `conflicts[]` in repair output is reserved for blockers that cannot be safely repaired, such as human-owned or workflow-owned paths, unknown ownership, missing source evidence, or unsupported repair.
 
 `conflicts` describe planning diagnostics, not apply execution results. They do not depend on write authorization. Dry-run output and output with `writeAuthorized === false` must still include discovered conflicts so automation can detect blockers before applying writes. `conflicts` must not be interpreted as paths that failed during the current apply phase.
 
@@ -521,6 +537,8 @@ Special orders:
 - `installedModules`: source manifest module order; if absent, normalized module id lexicographically.
 
 Public JSON arrays must not rely on filesystem traversal, object insertion, validation rule execution, adapter completion, or async completion order.
+
+Duration, elapsed time, per-step timing, p95 measurements, and profiling samples are not stable public JSON by default. If a future command payload explicitly adds a timing field, that field must be marked non-stable in the schema and normalized or excluded by fixture comparison; per-step duration must not be mixed into `completedSteps`, `pendingSteps`, or other stable lifecycle fields.
 
 ## Path Policy（路径策略）
 

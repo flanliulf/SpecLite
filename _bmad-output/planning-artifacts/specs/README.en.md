@@ -19,7 +19,19 @@ Implementation agents must read the owning SPEC before implementing or changing 
 5. `05-ide-adapter-registry-contract.en.md`: MVP target ids, adapter definitions, target order, unsupported/failed status boundary, and command pointer non-goal.
 6. `06-resolve-command-contract.en.md`: `speclite resolve` stdout/stderr, merge order, fallback, array merge, layer failure, and parity fixtures.
 7. `07-validation-issue-taxonomy.en.md`: issue categories, issue ids, default severity, and validation fixture ownership.
-8. `08-fixture-contract.en.md`: fixture layout, expected outputs, snapshot comparison, release gates, and regression asset policy.
+8. `08-fixture-contract.en.md`: fixture layout, expected outputs, snapshot comparison, release gate ownership matrix, release gates, and regression asset policy.
+
+## Implementation Anchors（实现锚点）
+
+The `Implementation Anchor` in each owning SPEC is the executable schema/parser/registry entrypoint that implementation must reuse. MVP includes at least:
+
+- `src/diagnostics/command-result-schema.ts`
+- `src/source/source-descriptor-schema.ts`
+- `src/installer/install-plan-schema.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/ide/adapter-registry.ts`
+- `src/config/resolve-output-schema.ts`
+- `src/fixtures/fixture-contract.ts`
 
 ## MVP Non-Goals（MVP 非目标）
 

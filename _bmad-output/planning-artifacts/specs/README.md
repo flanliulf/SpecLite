@@ -19,7 +19,19 @@ Implementation agents 在实现或变更某个领域的行为之前，必须阅�
 5. `05-ide-adapter-registry-contract.md`：MVP target ids、adapter definitions、target order、unsupported/failed status boundary，以及 command pointer non-goal。
 6. `06-resolve-command-contract.md`：`speclite resolve` stdout/stderr、merge order、fallback、array merge、layer failure 和 parity fixtures。
 7. `07-validation-issue-taxonomy.md`：issue categories、issue ids、default severity，以及 validation fixture ownership。
-8. `08-fixture-contract.md`：fixture layout、expected outputs、snapshot comparison、release gates 和 regression asset policy。
+8. `08-fixture-contract.md`：fixture layout、expected outputs、snapshot comparison、release gate ownership matrix、release gates 和 regression asset policy。
+
+## Implementation Anchors（实现锚点）
+
+Owning SPEC 内的 `Implementation Anchor` 是实现侧必须复用的 executable schema/parser/registry 入口。MVP 至少包含：
+
+- `src/diagnostics/command-result-schema.ts`
+- `src/source/source-descriptor-schema.ts`
+- `src/installer/install-plan-schema.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/ide/adapter-registry.ts`
+- `src/config/resolve-output-schema.ts`
+- `src/fixtures/fixture-contract.ts`
 
 ## MVP Non-Goals（MVP 非目标）
 
@@ -33,6 +45,26 @@ Implementation agents 在实现或变更某个领域的行为之前，必须阅�
 - 完整的 source lockfile lifecycle management
 - enterprise source policy、signatures、provenance verification 或 allowlists
 - coverage dashboards、trend reports 或 multi-project rollups
+
+## Live Gate Boundary（Live Gate 边界）
+
+`_bmad-output/planning-artifacts/archive/` 只保存 historical snapshot，不参与 live planning consistency gate、implementation readiness gate、contract ownership 判断或 release gate 断言。Implementation agents、Grill 修复和 link/consistency scans 必须读取本索引列出的 live sharded documents 与 owning SPECs；若 archive wording 与 live documents 冲突，以 live documents 和 owning SPECs 为准。
+
+## Canonical Language And Mirrors（规范语言与镜像）
+
+中文 `.md` 文件是 MVP live contract 的 canonical source。`.en.md` 文件只是辅助 mirror，用于外部阅读或对照；它不得单独定义行为、字段、issue id、fixture gate、schema version 或 implementation anchor。若 `.en.md` 与中文 `.md` 冲突，implementation agents 必须以中文 `.md` 为准，并把 mirror 更新视为后续同步任务，而不是从 mirror 反推契约。
+
+## Historical Evidence Boundary（历史证据边界）
+
+`_bmad-output/planning-artifacts/research/` 保存 historical research evidence。它可以解释背景、样本和被比较系统，但不参与 MVP planning consistency gate、implementation readiness gate、contract ownership 判断或 release gate 断言。Research 中的旧术语、外部样本名称或历史实现描述不得覆盖 live PRD、Architecture、Epics、ADRs 或 owning SPECs。
+
+## ADR Relationship（ADR 关系）
+
+ADR 记录 hard-to-reverse decisions 的背景、理由和 trade-off。它可以解释为什么选择某个契约边界，但不得重新定义 field-level schema、issue taxonomy、fixture layout、command payload 或 implementation anchor。若 ADR 与 owning SPEC 冲突，以 owning SPEC 为准；需要保留决策背景时，同步修订 ADR wording，使它引用而不是复制契约字段。
+
+## Post-MVP Extension SPEC Reservation（Post-MVP 扩展 SPEC 预留）
+
+未来若提升 `speclite init`、`speclite list`、`speclite doctor`、`speclite sync`、`speclite uninstall` 或 migration commands 为实现范围，必须先新增 owning SPEC，再进入 implementation schema/parser 和 fixtures。推荐命名为 `09-post-mvp-command-contracts.md` 或按 command 拆分为独立 contract；这些预留 SPEC 不属于 MVP gate，除非后续 PRD/Architecture 明确改写范围。
 
 ## Change Rule（变更规则）
 

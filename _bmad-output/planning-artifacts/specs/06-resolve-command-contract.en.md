@@ -11,8 +11,12 @@ This SPEC is the canonical contract for `speclite resolve config` and `speclite 
 - PRD owns product requirement and acceptance intent.
 - Architecture owns implementation mapping and module responsibility.
 - This SPEC owns resolve command behavior, config/customization merge semantics, stdout/stderr shape, fallback rules, and parity fixture requirements.
-- `docs/specs/01-command-result-json-contract.en.md` owns `CommandResult`; `resolve` is an explicit exception and must not use the `CommandResult` envelope.
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md` owns `CommandResult`; `resolve` is an explicit exception and must not use the `CommandResult` envelope.
 - If PRD, Architecture, or ADR text conflicts with this SPEC, this SPEC wins for resolve behavior.
+
+## Implementation Anchor（实现锚点）
+
+Implementation must provide `src/config/resolve-output-schema.ts` as the executable schema/parser anchor for resolve stdout JSON, stderr JSON Lines diagnostics, and merge-result parsing. This module is not a second contract source; if it conflicts with this SPEC, this SPEC wins.
 
 ## Scope（范围）
 
@@ -30,7 +34,7 @@ stdout must contain only the resolved JSON object.
 stderr must contain diagnostics as JSON Lines:
 
 - one JSON object per line
-- each line uses the `ValidationIssue` shape from `docs/specs/01-command-result-json-contract.en.md`
+- each line uses the `ValidationIssue` shape from `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.en.md`
 - no human-readable prose may be mixed into stderr in machine mode
 
 Exit code rules:
