@@ -20,7 +20,7 @@ date: '2026-05-24'
 
 ## Overview（概览）
 
-This document provides the complete epic and story breakdown for SpecLite, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories.
+本文档提供 SpecLite 的完整 Epic 与 Story 拆解，将 PRD、UX Design（如存在）和 Architecture 中的需求拆解为可实施的 stories（故事）。
 
 ## Requirements Inventory（需求清单）
 
@@ -398,9 +398,9 @@ NFR40a: MVP release gate fixtures 必须在 Node 22 和 Node 24 上通过，并�
 
 ### Additional Requirements（补充需求）
 
-- Starter Template: 使用 Custom TypeScript Node CLI Starter with commander，不采用 oclif/yargs/cac/clipanion 作为主框架；CLI framework 保持轻量，业务架构由 SpecLite 自己拥有。
+- 启动模板：使用自定义 TypeScript Node CLI 启动模板，并采用 commander；不采用 oclif/yargs/cac/clipanion 作为主框架；CLI 框架保持轻量，业务架构由 SpecLite 自己拥有。
 
-- Runtime baseline: Node.js 22 LTS 是最低支持运行时，Node.js 24 LTS 是推荐运行时；TypeScript 类型基线使用 Node 22，避免使用 Node 24-only API，除非提供兼容路径或调整 runtime policy。
+- 运行时基线：Node.js 22 LTS 是最低支持运行时，Node.js 24 LTS 是推荐运行时；TypeScript 类型基线使用 Node 22，避免使用 Node 24-only API，除非提供兼容路径或调整 runtime policy。
 
 - 初始化故事必须建立 ESM package、commander 命令层、tsup 构建、tsx 本地执行、vitest 测试，并设置 bin.speclite 指向 dist/bin/speclite.js。
 
@@ -473,6 +473,10 @@ NFR40a: MVP release gate fixtures 必须在 Node 22 和 Node 24 上通过，并�
 - 第一实现优先级必须先阅读 _bmad-output/planning-artifacts/specs/README.md，再按其中顺序阅读 owning SPEC，随后再读 PRD 与 Architecture 摘要。
 
 - 第一批代码应优先建立 src/bin、src/commands、src/fs、src/diagnostics 和测试骨架，并优先落地 CommandResult executable contract anchor、producer/consumer contract tests 和最小 fixture expected outputs。
+
+- CLI 提示、进度事件、就绪摘要、诊断消息和人类可读输出的文案必须由 diagnostics/output 或 owning SPEC 统一管理；stories 可以定义行为和必需信息层级，但不得让实现者在各命令中临场拼接互相冲突的文案。
+
+- 交互模式与脚本模式必须明确分层：交互模式可以展示提示、确认和解释性摘要；脚本模式必须依赖 flags、exit code、`CommandResult` data payload 和稳定 JSON，不得依赖 human-readable output 承载自动化字段。
 
 ### UX Design Requirements（UX 设计需求）
 
@@ -672,49 +676,51 @@ FR78: Epic 7 - 查看规范落地与流程覆盖报告。
 
 ### Epic 1: Project Installation Onboarding（项目安装引导）
 
-项目维护者可以从选择目录、官方模块和 AI IDE targets 到生成 `_speclite` runtime、IDE skill mirrors、`_speclite-output` 和 ready summary，完成一次可信 fresh install。
+项目维护者可以使用默认官方内置来源，从选择目录、官方模块和 AI IDE targets 到生成 `_speclite` runtime、IDE skill mirrors、`_speclite-output` 和 ready summary，完成一次可信 fresh install。npm/private registry、local tarball、offline bundle、Git source 和 local path 等替代来源路径由 Epic 5 扩展，不属于 Epic 1 的最小垂直切片。
 
-**FRs covered:** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR42, FR43, FR44, FR45, FR46, FR47, FR48, FR60, FR61, FR62, FR63, FR63a, FR64, FR65
+**覆盖 FR：** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR42, FR43, FR44, FR45, FR46, FR47, FR48, FR60, FR61, FR62, FR63, FR63a, FR64, FR65
 
 ### Epic 2: Methodology Discovery And Skill Execution（方法论发现与 Skill 执行）
 
 AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选择并激活 SpecLite 方法论能力，并让 workflow 读取统一配置、应用 customization、输出带 metadata 的过程产物。
 
-**FRs covered:** FR18, FR19, FR20, FR21, FR22, FR23, FR23a, FR24, FR49, FR52, FR52a, FR52b, FR52c
+**覆盖 FR：** FR18, FR19, FR20, FR21, FR22, FR23, FR23a, FR24, FR49, FR52, FR52a, FR52b, FR52c
 
 ### Epic 3: Installed State And Deterministic Validation（已安装状态与确定性验证）
 
 工具链维护者可以查看安装状态，并用本地 deterministic validation 诊断 manifest、IDE mirror、runtime path、menu target、legacy residue、artifact path、file integrity 和 JSON issue contract 问题。
 
-**FRs covered:** FR25, FR26, FR27, FR28, FR28a, FR29, FR30, FR31, FR32, FR33, FR34, FR35, FR35a, FR35b, FR35c
+**覆盖 FR：** FR25, FR26, FR27, FR28, FR28a, FR29, FR30, FR31, FR32, FR33, FR34, FR35, FR35a, FR35b, FR35c
 
 ### Epic 4: Safe Update And Repair（安全更新与修复）
 
 项目维护者可以安全更新 installer-owned 文件，在写入前获得 plan、ownership/hash 判断、operation lock 和 conflict 可见性，同时保护 human-owned custom 与 workflow-owned artifacts，并通过 `update --repair` 显式修复可恢复 drift。
 
-**FRs covered:** FR36, FR37, FR38, FR39, FR40, FR41, FR41a, FR41b, FR41c, FR50, FR51, FR51a, FR51b
+**覆盖 FR：** FR36, FR37, FR38, FR39, FR40, FR41, FR41a, FR41b, FR41c, FR50, FR51, FR51a, FR51b
 
 ### Epic 5: Source Integrity And Distribution Channels（来源完整性与分发渠道）
 
 项目维护者可以从 npm public/private registry、local tarball、offline bundle、Git source 或 local path 安装 SpecLite，并获得可诊断的 source descriptor、integrity evidence、trust status、channel/version 和失败原因。
 
-**FRs covered:** FR8, FR9, FR53, FR54, FR55, FR56, FR57, FR58, FR59
+**覆盖 FR：** FR8, FR9, FR53, FR54, FR55, FR56, FR57, FR58, FR59
 
 ### Epic 6: Maintainer Fixture And Release Confidence（维护者 Fixture 与发布信心）
 
 SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh install、existing update、IDE drift、source integrity、resolve parity、path portability 和 skill artifact loop，形成发布前可信证据。
 
-**FRs covered:** FR66, FR67, FR68, FR69, FR70, FR71, FR71a, FR71b
+**覆盖 FR：** FR66, FR67, FR68, FR69, FR70, FR71, FR71a, FR71b
 
 ### Epic 7: Post-MVP Governance Expansion（Post-MVP 治理扩展）
 
 团队后续可以在不破坏 MVP 契约的前提下扩展 init/list/doctor/sync/uninstall、CI/企业自动化集成和规范落地覆盖报告。
 
-**FRs covered:** FR72, FR73, FR74, FR75, FR76, FR77, FR78
+**实施范围：** 仅作为 Post-MVP backlog。Epic 7 不进入 MVP implementation readiness gate，也不阻塞 MVP sprint planning；只有当团队单独启动 Phase 2/Post-MVP planning 时，才把本 Epic 纳入 implementation readiness 检查。
+
+**覆盖 FR：** FR72, FR73, FR74, FR75, FR76, FR77, FR78
 
 ## Epic 1: Project Installation Onboarding（项目安装引导）
 
-项目维护者可以从选择目录、官方模块和 AI IDE targets，到生成 `_speclite` runtime、IDE skill mirrors、`_speclite-output` 和 ready summary，完成一次可信 fresh install。
+项目维护者可以使用默认官方内置来源，从选择目录、官方模块和 AI IDE targets，到生成 `_speclite` runtime、IDE skill mirrors、`_speclite-output` 和 ready summary，完成一次可信 fresh install。替代来源路径由 Epic 5 扩展。
 
 ### Story 1.1: CLI Install Entry And Runtime Guard（CLI 安装入口与运行时守卫）
 
@@ -722,32 +728,42 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望运行 `speclite install` 时先获得清晰的运行时与平台就绪反馈，
 以便在任何项目文件被修改前，确认当前环境是否可以安全开始 SpecLite 安装。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户在目标项目中运行 `speclite install`
-**When** CLI 启动
-**Then** 命令会根据 MVP 运行时策略校验检测到的 Node.js 版本
-**And** 当版本不受支持时，报告检测到的版本和要求的版本范围。
+**前提** 代码库尚未具备 MVP CLI 脚手架
+**当** 维护者开始 Story 1.1
+**则** 必须建立 ESM package、commander 命令层、tsup 构建、tsx 本地执行和 vitest 测试骨架
+**并且** `bin.speclite` 必须指向 `dist/bin/speclite.js`。
 
-**Given** 检测到的 Node.js 版本满足最低要求
-**When** CLI 继续启动流程
-**Then** 命令会验证当前平台是否支持 MVP 安装路径
-**And** 当平台不受支持时，报告 `unsupported-platform` 诊断。
+**前提** CLI 脚手架已建立
+**当** 维护者运行本地构建或冒烟测试
+**则** `speclite` 入口可以加载安装命令骨架
+**并且** 最小测试能验证命令入口、运行时守卫接入和确定性失败输出形状。
 
-**Given** 运行时与平台检查均通过
-**When** 安装命令初始化
-**Then** 命令会创建 install command context，但尚不写入 installer-owned 项目文件
-**And** 后续安装阶段会按定义顺序准备执行。
+**前提** 用户在目标项目中运行 `speclite install`
+**当** CLI 启动
+**则** 命令会根据 MVP 运行时策略校验检测到的 Node.js 版本
+**并且** 当版本不受支持时，报告检测到的版本和要求的版本范围。
 
-**Given** 运行时或平台校验失败
-**When** 命令退出
-**Then** 不会创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills` 文件
-**And** 失败结果包含清晰的下一步建议。
+**前提** 检测到的 Node.js 版本满足最低要求
+**当** CLI 继续启动流程
+**则** 命令会验证当前平台是否支持 MVP 安装路径
+**并且** 当平台不受支持时，报告 `unsupported-platform` 诊断。
 
-**Given** 用户请求机器可读输出
-**When** `speclite install --json` 在运行时或平台守卫阶段失败
-**Then** 命令返回符合 `CommandResult` 契约的 install failure envelope
-**And** 输出可用于 fixture assertion 的确定性 issue 字段。
+**前提** 运行时与平台检查均通过
+**当** 安装命令初始化
+**则** 命令会创建 install command context，但尚不写入 installer-owned 项目文件
+**并且** 后续安装阶段会按定义顺序准备执行。
+
+**前提** 运行时或平台校验失败
+**当** 命令退出
+**则** 不会创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills` 文件
+**并且** 失败结果包含清晰的下一步建议。
+
+**前提** 用户请求机器可读输出
+**当** `speclite install --json` 在运行时或平台守卫阶段失败
+**则** 命令返回符合 `CommandResult` 契约的 install failure envelope
+**并且** 输出可用于 fixture assertion 的确定性 issue 字段。
 
 ### Story 1.2: Project Target Directory Resolution And Existing Install Detection（项目目标目录解析与既有安装检测）
 
@@ -755,37 +771,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 `speclite install` 能解析我要安装到的项目目录，并在写入前识别目录状态，
 以便确认 SpecLite 会安装到正确位置，且不会误覆盖已有安装或非空项目内容。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户启动 `speclite install` 且未显式指定安装目录
-**When** 命令进入目标目录解析阶段
-**Then** 系统会使用当前工作目录作为默认目标项目目录
-**And** 以 project-relative POSIX-style path 展示解析后的安装位置。
+**前提** 用户启动 `speclite install` 且未显式指定安装目录
+**当** 命令进入目标目录解析阶段
+**则** 系统会使用当前工作目录作为默认目标项目目录
+**并且** 以 project-relative POSIX-style path 展示解析后的安装位置。
 
-**Given** 用户通过参数或交互输入指定安装目录
-**When** 系统解析该目录
-**Then** 系统会规范化最终安装路径
-**And** 展示可供用户确认的目标路径摘要。
+**前提** 用户通过参数或交互输入指定安装目录
+**当** 系统解析该目录
+**则** 系统会规范化最终安装路径
+**并且** 展示可供用户确认的目标路径摘要。
 
-**Given** 解析后的安装目录不存在
-**When** 系统检查目录状态
-**Then** 系统会报告目录将被创建
-**And** 在用户确认前不写入任何项目文件。
+**前提** 解析后的安装目录不存在
+**当** 系统检查目录状态
+**则** 系统会报告目录将被创建
+**并且** 在用户确认前不写入任何项目文件。
 
-**Given** 解析后的安装目录已存在但没有 SpecLite 安装状态
-**When** 系统检查目录内容
-**Then** 系统会区分空目录与非空目录
-**And** 向用户展示继续安装可能影响的项目根目录。
+**前提** 解析后的安装目录已存在但没有 SpecLite 安装状态
+**当** 系统检查目录内容
+**则** 系统会区分空目录与非空目录
+**并且** 向用户展示继续安装可能影响的项目根目录。
 
-**Given** 解析后的安装目录已有 SpecLite 安装内容
-**When** 系统检测到 `_speclite` 或 manifest/index 等安装状态
-**Then** 系统会报告 existing-install 状态
-**And** 列出检测到的 runtime、manifest version、IDE targets 和建议下一步。
+**前提** 解析后的安装目录已有 SpecLite 安装内容
+**当** 系统检测到 `_speclite` 或 manifest/index 等安装状态
+**则** 系统会报告 existing-install 状态
+**并且** 列出检测到的 runtime、manifest version、IDE targets 和建议下一步。
 
-**Given** 用户尚未确认目标目录
-**When** 目标目录解析与状态检查完成
-**Then** 系统不会创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills` 文件
-**And** 后续安装阶段必须等待明确确认后才能继续。
+**前提** 用户尚未确认目标目录
+**当** 目标目录解析与状态检查完成
+**则** 系统不会创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills` 文件
+**并且** 后续安装阶段必须等待明确确认后才能继续。
 
 ### Story 1.3: Official Module Selection And Install Summary（官方模块选择与安装摘要）
 
@@ -793,32 +809,32 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望在安装前选择要安装的官方 SpecLite 模块或能力包，并看到清晰的版本与选择摘要，
 以便确认本次安装范围符合项目需要。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 目标目录已解析且用户已确认可以继续安装流程
-**When** 系统进入官方模块发现阶段
-**Then** 系统会从正式可分发的 SpecLite source tree 读取可安装模块
-**And** 不会把已删除、非目标辅助来源或非正式分发内容列为可安装模块。
+**前提** 目标目录已解析且用户已确认可以继续安装流程
+**当** 系统进入官方模块发现阶段
+**则** 系统会从正式可分发的 SpecLite source tree 读取可安装模块
+**并且** 不会把已删除、非目标辅助来源或非正式分发内容列为可安装模块。
 
-**Given** 系统发现可安装模块
-**When** 向用户展示模块列表
-**Then** 每个模块会显示模块标识、名称和版本信息
-**And** 用户可以选择一个或多个官方模块或能力包。
+**前提** 系统发现可安装模块
+**当** 向用户展示模块列表
+**则** 每个模块会显示模块标识、名称和版本信息
+**并且** 用户可以选择一个或多个官方模块或能力包。
 
-**Given** 用户选择模块后继续
-**When** 系统生成安装范围摘要
-**Then** 摘要会列出已选择的模块、版本和将参与安装的能力范围
-**And** 该摘要在写入项目前展示给用户确认。
+**前提** 用户选择模块后继续
+**当** 系统生成安装范围摘要
+**则** 摘要会列出已选择的模块、版本和将参与安装的能力范围
+**并且** 该摘要在写入项目前展示给用户确认。
 
-**Given** 没有发现任何可安装官方模块
-**When** 系统无法形成有效安装范围
-**Then** 命令会停止后续安装阶段
-**And** 输出可诊断的失败原因和建议下一步。
+**前提** 没有发现任何可安装官方模块
+**当** 系统无法形成有效安装范围
+**则** 命令会停止后续安装阶段
+**并且** 输出可诊断的失败原因和建议下一步。
 
-**Given** 用户请求 `install --json` 输出
-**When** 模块选择阶段完成或失败
-**Then** 机器可读输出会包含可用于自动化判断的 installedModules 或 pending module selection 信息
-**And** 不依赖 human-readable summary 承载自动化必需字段。
+**前提** 用户请求 `install --json` 输出
+**当** 模块选择阶段完成或失败
+**则** 机器可读输出会包含可用于自动化判断的 installedModules 或 pending module selection 信息
+**并且** 不依赖 human-readable summary 承载自动化必需字段。
 
 ### Story 1.4: Project Config Initialization（项目配置初始化）
 
@@ -826,37 +842,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望在安装过程中配置项目名称、用户称呼、交流语言、文档语言和产物输出目录，
 以便安装后的 SpecLite skills 能读取统一项目配置并按团队约定工作。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户已确认安装目录和模块选择
-**When** 系统进入配置初始化阶段
-**Then** 系统会提供快速配置与详细配置两种模式
-**And** 用户可以选择适合当前项目的配置方式。
+**前提** 用户已确认安装目录和模块选择
+**当** 系统进入配置初始化阶段
+**则** 系统会提供快速配置与详细配置两种模式
+**并且** 用户可以选择适合当前项目的配置方式。
 
-**Given** 用户选择快速配置模式
-**When** 系统收集最小配置输入
-**Then** 系统会确定用户称呼或团队名称、项目名称、交流语言、文档输出语言和过程产物输出目录
-**And** 对未显式提供的值使用可展示、可确认的默认值。
+**前提** 用户选择快速配置模式
+**当** 系统收集最小配置输入
+**则** 系统会确定用户称呼或团队名称、项目名称、交流语言、文档输出语言和过程产物输出目录
+**并且** 对未显式提供的值使用可展示、可确认的默认值。
 
-**Given** 用户选择详细配置模式
-**When** 系统收集项目级配置输入
-**Then** 用户可以定义用户称呼、项目名称、交流语言、文档输出语言、产物路径、安装模块和 IDE targets
-**And** 系统会在写入前展示最终配置摘要。
+**前提** 用户选择详细配置模式
+**当** 系统收集项目级配置输入
+**则** 用户可以定义用户称呼、项目名称、交流语言、文档输出语言、产物路径、安装模块和 IDE targets
+**并且** 系统会在写入前展示最终配置摘要。
 
-**Given** 配置值已收集完成
-**When** 系统准备生成项目级配置
-**Then** 配置会进入 `_speclite/config.toml` 与 `_speclite/config.user.toml` 的 installer-owned 初始化计划
-**And** 不会在本 Story 中修改 `_speclite/custom/*.toml` 或 `_speclite/custom/*.user.toml`。
+**前提** 配置值已收集完成
+**当** 系统准备生成项目级配置
+**则** 配置会进入 `_speclite/config.toml` 与 `_speclite/config.user.toml` 的 installer-owned 初始化计划
+**并且** 不会在本 Story 中修改 `_speclite/custom/*.toml` 或 `_speclite/custom/*.user.toml`。
 
-**Given** 用户尚未确认最终配置摘要
-**When** 配置初始化阶段结束
-**Then** 系统不会写入配置文件
-**And** 后续写入阶段必须等待明确确认后才能继续。
+**前提** 用户尚未确认最终配置摘要
+**当** 配置初始化阶段结束
+**则** 系统不会写入配置文件
+**并且** 后续写入阶段必须等待明确确认后才能继续。
 
-**Given** 用户请求 `install --json` 输出
-**When** 配置初始化完成或失败
-**Then** 机器可读输出会包含配置初始化状态、关键配置路径和 pending/completed step 信息
-**And** 不泄露 home directory、环境变量或认证信息。
+**前提** 用户请求 `install --json` 输出
+**当** 配置初始化完成或失败
+**则** 机器可读输出会包含配置初始化状态、关键配置路径和 pending/completed step 信息
+**并且** 不泄露 home directory、环境变量或认证信息。
 
 ### Story 1.5: Runtime Structure, Artifact Directory And IDE Mirror Creation（运行时结构、产物目录与 IDE 镜像创建）
 
@@ -864,42 +880,42 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望在确认安装计划后由系统创建 SpecLite 运行时结构、过程产物目录和 AI IDE skill mirrors，
 以便目标项目获得可运行、可发现、可验证的 SpecLite 安装结果。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户已确认安装目录、模块选择和项目配置
-**When** 系统进入写入阶段
-**Then** 系统会创建 `_speclite` metadata/control hub
-**And** 写入 shared scripts、module directories、configuration、help catalog 和 manifest/index 所需的 installer-owned 文件。
+**前提** 用户已确认安装目录、模块选择和项目配置
+**当** 系统进入写入阶段
+**则** 系统会创建 `_speclite` metadata/control hub
+**并且** 写入 shared scripts、module directories、configuration、help catalog 和 manifest/index 所需的 installer-owned 文件。
 
-**Given** 项目配置中定义了过程产物输出目录
-**When** 系统创建 artifact repository
-**Then** 系统会创建 `_speclite-output` 或配置约定的输出结构
-**And** 不会覆盖已有 workflow-owned 过程产物。
+**前提** 项目配置中定义了过程产物输出目录
+**当** 系统创建 artifact repository
+**则** 系统会创建 `_speclite-output` 或配置约定的输出结构
+**并且** 不会覆盖已有 workflow-owned 过程产物。
 
-**Given** 用户选择了 `claude` IDE target
-**When** 系统创建 IDE execution mirror
-**Then** 系统会把所选 canonical skills 安装到 `.claude/skills`
-**And** 记录每个 skill 的 canonical identity、target path 和 source reference。
+**前提** 用户选择了 `claude` IDE target
+**当** 系统创建 IDE execution mirror
+**则** 系统会把所选 canonical skills 安装到 `.claude/skills`
+**并且** 记录每个 skill 的 canonical identity、target path 和 source reference。
 
-**Given** 用户选择了 `agents` IDE target
-**When** 系统创建 IDE execution mirror
-**Then** 系统会把同一批 canonical skills 安装到 `.agents/skills`
-**And** canonical skill package 内容不会因 IDE target 不同而变化。
+**前提** 用户选择了 `agents` IDE target
+**当** 系统创建 IDE execution mirror
+**则** 系统会把同一批 canonical skills 安装到 `.agents/skills`
+**并且** canonical skill package 内容不会因 IDE target 不同而变化。
 
-**Given** 写入过程中目标路径已存在
-**When** 系统判断文件所有权和路径安全性
-**Then** installer-owned 文件按计划生成或更新
-**And** human-owned custom 文件、workflow-owned artifacts、symlink escape、path escape、case conflict 和 unsafe overwrite 会被保护或阻断。
+**前提** 写入过程中目标路径已存在
+**当** 系统判断文件所有权和路径安全性
+**则** installer-owned 文件按计划生成或更新
+**并且** human-owned custom 文件、workflow-owned artifacts、symlink escape、path escape、case conflict 和 unsafe overwrite 会被保护或阻断。
 
-**Given** IDE mirror creation 完成
-**When** 系统生成安装投影
-**Then** manifest/index 会记录安装模块、IDE targets、skill/help/files index、ownership 和 hash 信息
-**And** 所有 public path 使用 project-relative POSIX-style path。
+**前提** IDE mirror creation 完成
+**当** 系统生成安装投影
+**则** manifest/index 会记录安装模块、IDE targets、skill/help/files index、ownership 和 hash 信息
+**并且** 所有 public path 使用 project-relative POSIX-style path。
 
-**Given** 任一关键写入步骤失败
-**When** 命令返回失败结果
-**Then** 系统不会展示 ready summary
-**And** 输出 completed steps、failed step、pending steps 和 manual action。
+**前提** 任一关键写入步骤失败
+**当** 命令返回失败结果
+**则** 系统不会展示 ready summary
+**并且** 输出 completed steps、failed step、pending steps 和 manual action。
 
 ### Story 1.6: Install Progress And Ready Summary（安装进度与就绪摘要）
 
@@ -907,37 +923,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望安装过程展示清晰的阶段进度，并在成功后给出完整 ready summary，
 以便确认 SpecLite 已正确安装、哪些 IDE targets 已配置，以及接下来该如何开始使用。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户执行 `speclite install`
-**When** 安装流程运行
-**Then** 系统会按顺序展示 source discovery、manifest generation、IDE mirror creation、config initialization 和 ready check 阶段状态
-**And** 每个阶段只在实际开始或完成时报告对应状态。
+**前提** 用户执行 `speclite install`
+**当** 安装流程运行
+**则** 系统会按顺序展示 source discovery、manifest generation、IDE mirror creation、config initialization 和 ready check 阶段状态
+**并且** 每个阶段只在实际开始或完成时报告对应状态。
 
-**Given** source discovery、manifest generation、IDE mirror creation、config initialization 和 basic validation 全部成功
-**When** 安装流程完成
-**Then** 系统会展示 SpecLite ready summary
-**And** 摘要包含安装位置、manifest version、source descriptor、已安装模块、IDE targets、关键目录和下一步命令。
+**前提** source discovery、manifest generation、IDE mirror creation、config initialization 和 basic validation 全部成功
+**当** 安装流程完成
+**则** 系统会展示 SpecLite ready summary
+**并且** 摘要包含安装位置、manifest version、source descriptor、已安装模块、IDE targets、关键目录和下一步命令。
 
-**Given** 已配置一个或多个 AI IDE targets
-**When** 系统生成 ready summary
-**Then** 摘要会展示每个 AI IDE 的 skill 数量和目标目录
-**And** 标明用户下一步如何启动 AI agent 或调用帮助 skill。
+**前提** 已配置一个或多个 AI IDE targets
+**当** 系统生成 ready summary
+**则** 摘要会展示每个 AI IDE 的 skill 数量和目标目录
+**并且** 标明用户下一步如何启动 AI agent 或调用帮助 skill。
 
-**Given** 任一 required step 失败
-**When** 命令结束
-**Then** 系统不会展示 ready summary
-**And** 失败结果会列出 completed steps、failed step、pending steps 和 manual action。
+**前提** 任一 required step 失败
+**当** 命令结束
+**则** 系统不会展示 ready summary
+**并且** 失败结果会列出 completed steps、failed step、pending steps 和 manual action。
 
-**Given** 用户请求 `install --json` 输出
-**When** 安装完成、warning 或 failure
-**Then** 机器可读输出会包含 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps` 和 `pendingSteps` 等契约字段
-**And** 不新增未契约化的 `readySummary` JSON blob。
+**前提** 用户请求 `install --json` 输出
+**当** 安装完成、warning 或 failure
+**则** 机器可读输出会包含 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps` 和 `pendingSteps` 等契约字段
+**并且** 不新增未契约化的 `readySummary` JSON blob。
 
-**Given** human-readable output 与 `--json` output 同时需要表达安装结果
-**When** 命令生成最终输出
-**Then** 两种输出共享同一 command status 与 issue model
-**And** automation 依赖的字段必须进入 structured JSON 或 file contract。
+**前提** human-readable output 与 `--json` output 同时需要表达安装结果
+**当** 命令生成最终输出
+**则** 两种输出共享同一 command status 与 issue model
+**并且** automation 依赖的字段必须进入 structured JSON 或 file contract。
 
 ## Epic 2: Methodology Discovery And Skill Execution（方法论发现与 Skill 执行）
 
@@ -949,32 +965,32 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望安装后的 SpecLite 能提供稳定的方法论发现元数据，
 以便 IDE 可以展示研发阶段、可用 skills、入口路径和激活目标，而不需要用户手工查找 Markdown 文件。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** SpecLite 已完成所选模块的安装规划
-**When** 系统生成 discovery metadata
-**Then** 每个可发现能力都会记录 phaseId、phaseLabel、moduleId、canonicalSkillId、skill 名称、entry label 和 activation target
-**And** canonicalSkillId 必须来自 source skill package，不得由 IDE adapter 重新命名。
+**前提** SpecLite 已完成所选模块的安装规划
+**当** 系统生成 discovery metadata
+**则** 每个可发现能力都会记录 phaseId、phaseLabel、moduleId、canonicalSkillId、skill 名称、entry label 和 activation target
+**并且** canonicalSkillId 必须来自 source skill package，不得由 IDE adapter 重新命名。
 
-**Given** 某个 skill 属于 SPEC、方案评审、故事规划、实现、测试或审查阶段
-**When** 系统生成 MVP 最小阶段覆盖数据
-**Then** 该 skill 会被映射到对应阶段
-**And** 每个关键研发阶段至少可以表达是否存在 mapped skill entry。
+**前提** 某个 skill 属于 SPEC、方案评审、故事规划、实现、测试或审查阶段
+**当** 系统生成 MVP 最小阶段覆盖数据
+**则** 该 skill 会被映射到对应阶段
+**并且** 每个关键研发阶段至少可以表达是否存在 mapped skill entry。
 
-**Given** 系统生成 help index 或菜单发现数据
-**When** discovery metadata 写入 installed projection
-**Then** help index 只能引用 canonicalSkillId、phase、entry label 和 activation target
-**And** 不得定义第二套 skill identity、alias-only identity 或 IDE-specific identity。
+**前提** 系统生成 help index 或菜单发现数据
+**当** discovery metadata 写入 installed projection
+**则** help index 只能引用 canonicalSkillId、phase、entry label 和 activation target
+**并且** 不得定义第二套 skill identity、alias-only identity 或 IDE-specific identity。
 
-**Given** 某个 workflow 具有默认产物输出约定
-**When** 系统生成 discovery metadata
-**Then** 可以记录可选 artifactContract 摘要
-**And** artifactContract 至少能支持后续校验 artifact type、默认输出路径、workflowType、sourceSkill 和 generatedAt。
+**前提** 某个 workflow 具有默认产物输出约定
+**当** 系统生成 discovery metadata
+**则** 可以记录可选 artifactContract 摘要
+**并且** artifactContract 至少能支持后续校验 artifact type、默认输出路径、workflowType、sourceSkill 和 generatedAt。
 
-**Given** discovery metadata 已生成
-**When** 后续 IDE adapter 或 validation rule 读取它
-**Then** 字段、target order、hash 和 ownership 投影遵守 manifest/index owning SPEC
-**And** 不依赖 filesystem traversal order、glob 顺序或异步完成顺序。
+**前提** discovery metadata 已生成
+**当** 后续 IDE adapter 或 validation rule 读取它
+**则** 字段、target order、hash 和 ownership 投影遵守 manifest/index owning SPEC
+**并且** 不依赖 filesystem traversal order、glob 顺序或异步完成顺序。
 
 ### Story 2.2: IDE Skill Entry Mapping（IDE Skill Entry 映射）
 
@@ -982,37 +998,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 SpecLite 把方法论发现元数据映射成 `.claude/skills` 与 `.agents/skills` 中可加载的 skill entries，
 以便我可以在不同 AI IDE 中看到一致的 SpecLite 能力入口。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** discovery metadata 已生成
-**When** 系统处理 `claude` IDE target
-**Then** 每个可映射的 canonical skill 会生成 `.claude/skills` 下的 self-contained skill entry
-**And** entry 会保留 canonical skill package 内容，不因 target 不同而改写。
+**前提** discovery metadata 已生成
+**当** 系统处理 `claude` IDE target
+**则** 每个可映射的 canonical skill 会生成 `.claude/skills` 下的 self-contained skill entry
+**并且** entry 会保留 canonical skill package 内容，不因 target 不同而改写。
 
-**Given** discovery metadata 已生成
-**When** 系统处理 `agents` IDE target
-**Then** 每个可映射的 canonical skill 会生成 `.agents/skills` 下的 self-contained skill entry
-**And** GitHub Copilot 或 Cursor 在 MVP 中只通过 `agents` target 兼容使用，不生成专用 target id。
+**前提** discovery metadata 已生成
+**当** 系统处理 `agents` IDE target
+**则** 每个可映射的 canonical skill 会生成 `.agents/skills` 下的 self-contained skill entry
+**并且** GitHub Copilot 或 Cursor 在 MVP 中只通过 `agents` target 兼容使用，不生成专用 target id。
 
-**Given** 某个 IDE target 支持映射
-**When** adapter 完成 entry 写入或规划
-**Then** 系统会报告 mapped 状态
-**And** 记录 targetId、entryPath、activationTarget 和 canonicalSkillId。
+**前提** 某个 IDE target 支持映射
+**当** adapter 完成 entry 写入或规划
+**则** 系统会报告 mapped 状态
+**并且** 记录 targetId、entryPath、activationTarget 和 canonicalSkillId。
 
-**Given** 某个 IDE target 不支持当前 entry type 或 capability
-**When** adapter 无法完成映射
-**Then** 系统会报告 unsupported 或 failed 状态
-**And** 状态语义遵守 adapter registry owning SPEC，不与 install planning 或 status summary 的状态词混用。
+**前提** 某个 IDE target 不支持当前 entry type 或 capability
+**当** adapter 无法完成映射
+**则** 系统会报告 unsupported 或 failed 状态
+**并且** 状态语义遵守 adapter registry owning SPEC，不与 install planning 或 status summary 的状态词混用。
 
-**Given** 同一 canonical skill 被映射到多个 IDE targets
-**When** 系统生成 manifest/index 投影
-**Then** 不同 target 的 canonical skill package hash 必须一致
-**And** target-specific 差异只能出现在 adapter metadata、target directory 或 Post-MVP command pointer 扩展位中。
+**前提** 同一 canonical skill 被映射到多个 IDE targets
+**当** 系统生成 manifest/index 投影
+**则** 不同 target 的 canonical skill package hash 必须一致
+**并且** target-specific 差异只能出现在 adapter metadata、target directory 或 Post-MVP command pointer 扩展位中。
 
-**Given** MVP 不支持 command pointer artifact
-**When** adapter registry 声明 commandPointerBehavior
-**Then** 系统只允许记录 `none` 或 `unsupported` 语义
-**And** 不会生成 GitHub Copilot/Cursor 专用 command pointer artifact。
+**前提** MVP 不支持 command pointer artifact
+**当** adapter registry 声明 commandPointerBehavior
+**则** 系统只允许记录 `none` 或 `unsupported` 语义
+**并且** 不会生成 GitHub Copilot/Cursor 专用 command pointer artifact。
 
 ### Story 2.3: Skill Activation And Phase Capability Coverage（Skill 激活与阶段能力覆盖）
 
@@ -1020,32 +1036,32 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望从已映射的 IDE entry 中选择并激活 SpecLite skills，
 以便按照 SPEC、方案评审、故事规划、实现、测试和审查等研发阶段推进工作。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** `.claude/skills` 或 `.agents/skills` 中存在 mapped skill entry
-**When** 用户在 AI IDE 中选择该 entry
-**Then** IDE 可以加载对应 self-contained skill package
-**And** 激活目标指向该 canonical skill 的 `SKILL.md` 或等价入口。
+**前提** `.claude/skills` 或 `.agents/skills` 中存在 mapped skill entry
+**当** 用户在 AI IDE 中选择该 entry
+**则** IDE 可以加载对应 self-contained skill package
+**并且** 激活目标指向该 canonical skill 的 `SKILL.md` 或等价入口。
 
-**Given** 用户需要执行 SPEC、方案评审、故事规划、实现、测试或审查阶段能力
-**When** 系统生成或读取最小阶段覆盖矩阵
-**Then** 每个关键阶段都会显示是否存在 mapped skill entry
-**And** 对应 canonical skill id、moduleId、entryPath、activationTarget 和 target status 可被检查。
+**前提** 用户需要执行 SPEC、方案评审、故事规划、实现、测试或审查阶段能力
+**当** 系统生成或读取最小阶段覆盖矩阵
+**则** 每个关键阶段都会显示是否存在 mapped skill entry
+**并且** 对应 canonical skill id、moduleId、entryPath、activationTarget 和 target status 可被检查。
 
-**Given** 某个关键阶段没有 mapped skill entry
-**When** 用户或验证器查看阶段覆盖结果
-**Then** 系统会清晰表达该阶段未覆盖或 unsupported
-**And** 不会用 alias-only identity 或 IDE-specific identity 伪造覆盖。
+**前提** 某个关键阶段没有 mapped skill entry
+**当** 用户或验证器查看阶段覆盖结果
+**则** 系统会清晰表达该阶段未覆盖或 unsupported
+**并且** 不会用 alias-only identity 或 IDE-specific identity 伪造覆盖。
 
-**Given** 用户从 IDE entry 激活某个 skill
-**When** skill 的激活协议开始执行
-**Then** skill 可以按照自身 `SKILL.md` activation protocol 继续运行
-**And** 不要求用户手工查找 source skill 文件或复制提示词内容。
+**前提** 用户从 IDE entry 激活某个 skill
+**当** skill 的激活协议开始执行
+**则** skill 可以按照自身 `SKILL.md` activation protocol 继续运行
+**并且** 不要求用户手工查找 source skill 文件或复制提示词内容。
 
-**Given** 阶段覆盖矩阵被写入 manifest/index 或 command output
-**When** 自动化或 validation 读取它
-**Then** 输出顺序遵守 manifest/adapter registry canonical target order
-**And** 字段值使用稳定、可比较的 project-relative POSIX path。
+**前提** 阶段覆盖矩阵被写入 manifest/index 或 command output
+**当** 自动化或 validation 读取它
+**则** 输出顺序遵守 manifest/adapter registry canonical target order
+**并且** 字段值使用稳定、可比较的 project-relative POSIX path。
 
 ### Story 2.4: Runtime Config And Customization Resolve（Runtime Config 与 Customization Resolve）
 
@@ -1053,42 +1069,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望已激活的 SpecLite skill 能通过稳定命令读取项目配置和 customization 覆盖，
 以便不同 IDE 中运行的同一 skill 使用一致的项目名称、语言、输出路径、persona 和 workflow 设置。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 已安装项目包含 `_speclite` 配置层
-**When** 已激活 skill 调用 `speclite resolve config --project-root <project>`
-**Then** 命令会按 installer base、installer user、team custom、user custom 的顺序合并配置
-**And** stdout 只输出解析结果 JSON。
+**前提** 已安装项目包含 `_speclite` 配置层
+**当** 已激活 skill 调用 `speclite resolve config --project-root <project>`
+**则** 命令会按 installer base、installer user、team custom、user custom 的顺序合并配置
+**并且** stdout 只输出解析结果 JSON。
 
-**Given** 已安装 skill 需要读取 workflow 或 agent customization
-**When** skill 调用 `speclite resolve customization --skill <skill-dir> --project-root <project>`
-**Then** 命令会按 skill defaults、team custom、user custom 的顺序合并 customization
-**And** 使用 skill directory basename 作为 customization lookup key。
+**前提** 已安装 skill 需要读取 workflow 或 agent customization
+**当** skill 调用 `speclite resolve customization --skill <skill-dir> --project-root <project>`
+**则** 命令会按 skill defaults、team custom、user custom 的顺序合并 customization
+**并且** 使用 skill directory basename 作为 customization lookup key。
 
-**Given** 用户请求一个不存在的 dotted key
-**When** `speclite resolve` 执行成功
-**Then** 命令默认输出 `{}` 并返回 exit code 0
-**And** 不向 stderr 输出 issue，除非未来显式 strict missing flag 被引入。
+**前提** 用户请求一个不存在的 dotted key
+**当** `speclite resolve` 执行成功
+**则** 命令默认输出 `{}` 并返回 exit code 0
+**并且** 不向 stderr 输出 issue，除非未来显式 strict missing flag 被引入。
 
-**Given** 用户重复传入多个 `--key`
-**When** `speclite resolve` 输出结果
-**Then** 输出对象使用原 dotted key 字符串作为字段名
-**And** 缺失 key 会被省略。
+**前提** 用户重复传入多个 `--key`
+**当** `speclite resolve` 输出结果
+**则** 输出对象使用原 dotted key 字符串作为字段名
+**并且** 缺失 key 会被省略。
 
-**Given** optional TOML layer 读取或解析失败
-**When** resolver 继续合并其余配置层
-**Then** stderr 会输出 ValidationIssue 形状的 warning JSON diagnostic
-**And** 命令在没有 error 或 critical diagnostics 时仍返回 exit code 0。
+**前提** optional TOML layer 读取或解析失败
+**当** resolver 继续合并其余配置层
+**则** stderr 会输出 ValidationIssue 形状的 warning JSON diagnostic
+**并且** 命令在没有 error 或 critical diagnostics 时仍返回 exit code 0。
 
-**Given** required TOML layer 读取或解析失败
-**When** resolver 无法继续安全解析
-**Then** 命令返回非 0 exit code
-**And** stdout/stderr shape 仍遵守 resolve-command owning SPEC。
+**前提** required TOML layer 读取或解析失败
+**当** resolver 无法继续安全解析
+**则** 命令返回非 0 exit code
+**并且** stdout/stderr shape 仍遵守 resolve-command owning SPEC。
 
-**Given** customization 包含数组字段
-**When** resolver 合并数组
-**Then** 只有所有元素都是 table 且共享同一个 `code` 或同一个 `id` 时才 keyed merge
-**And** 命中同 key 时 override item 整项替换 base item，不做 item-level deep merge。
+**前提** customization 包含数组字段
+**当** resolver 合并数组
+**则** 只有所有元素都是 table 且共享同一个 `code` 或同一个 `id` 时才 keyed merge
+**并且** 命中同 key 时 override item 整项替换 base item，不做 item-level deep merge。
 
 ### Story 2.5: Workflow Artifact Output And Metadata Validation（Workflow Artifact 输出与 Metadata 校验）
 
@@ -1096,37 +1112,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望已激活的 workflow 能把产物写入配置约定的位置，并记录稳定 metadata，
 以便团队可以追踪每个产物来自哪个 workflow、哪个 skill，以及是否满足 MVP artifact contract。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 已激活 workflow 读取到项目级输出路径配置
-**When** workflow 生成 planning、implementation 或 review artifact
-**Then** artifact 会写入 `_speclite-output` 或配置约定的输出目录
-**And** 输出路径使用 project-relative POSIX-style path 记录。
+**前提** 已激活 workflow 读取到项目级输出路径配置
+**当** workflow 生成 planning、implementation 或 review artifact
+**则** artifact 会写入 `_speclite-output` 或配置约定的输出目录
+**并且** 输出路径使用 project-relative POSIX-style path 记录。
 
-**Given** workflow 写入 artifact
-**When** artifact metadata 被生成
-**Then** metadata 至少包含非空稳定字符串 `workflowType`
-**And** 至少包含非空 canonical skill id 形式的 `sourceSkill`。
+**前提** workflow 写入 artifact
+**当** artifact metadata 被生成
+**则** metadata 至少包含非空稳定字符串 `workflowType`
+**并且** 至少包含非空 canonical skill id 形式的 `sourceSkill`。
 
-**Given** artifact metadata 包含 `generatedAt`
-**When** validator 或 fixture comparison 读取该字段
-**Then** `generatedAt` 必须是 ISO 8601 string
-**And** 默认排除出 stable fixture snapshot comparison。
+**前提** artifact metadata 包含 `generatedAt`
+**当** validator 或 fixture comparison 读取该字段
+**则** `generatedAt` 必须是 ISO 8601 string
+**并且** 默认排除出 stable fixture snapshot comparison。
 
-**Given** workflow artifact 已存在
-**When** 新 workflow 产物准备写入
-**Then** 系统不得被 installer/update 逻辑静默覆盖 workflow-owned artifact
-**And** artifact 写入行为必须遵守该 workflow 自己的输出策略。
+**前提** workflow artifact 已存在
+**当** 新 workflow 产物准备写入
+**则** 系统不得被 installer/update 逻辑静默覆盖 workflow-owned artifact
+**并且** artifact 写入行为必须遵守该 workflow 自己的输出策略。
 
-**Given** validate 检查 artifact contract
-**When** artifact metadata 缺失或值域不合法
-**Then** 系统会报告 artifact-path 或相关 validation issue
-**And** 不把产物叙事质量、人工评审结论或内容完整度作为 MVP validation 范围。
+**前提** validate 检查 artifact contract
+**当** artifact metadata 缺失或值域不合法
+**则** 系统会报告 artifact-path 或相关 validation issue
+**并且** 不把产物叙事质量、人工评审结论或内容完整度作为 MVP validation 范围。
 
-**Given** artifact contract 被写入 manifest/index 或 discovery metadata
-**When** 后续 skill、validator 或自动化读取它
-**Then** artifact type、默认输出路径、workflowType、sourceSkill 和 generatedAt 语义保持一致
-**And** 不在 PRD、Architecture、Manifest/index 或 CommandResult 中各自定义第二套 artifact contract。
+**前提** artifact contract 被写入 manifest/index 或 discovery metadata
+**当** 后续 skill、validator 或自动化读取它
+**则** artifact type、默认输出路径、workflowType、sourceSkill 和 generatedAt 语义保持一致
+**并且** 不在 PRD、Architecture、Manifest/index 或 CommandResult 中各自定义第二套 artifact contract。
 
 ## Epic 3: Installed State And Deterministic Validation（已安装状态与确定性验证）
 
@@ -1138,37 +1154,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望运行 `speclite status` 时快速看到当前项目的 SpecLite 安装状态，
 以便判断项目是否已配置、哪些 IDE targets 可用，以及下一步应运行安装、验证还是修复流程。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户在目标项目中运行 `speclite status`
-**When** 项目尚未安装 SpecLite
-**Then** 命令返回成功状态并显示 `not-configured` high-level health
-**And** 下一步建议包含运行 `speclite install`。
+**前提** 用户在目标项目中运行 `speclite status`
+**当** 项目尚未安装 SpecLite
+**则** 命令返回成功状态并显示 `not-configured` high-level health
+**并且** 下一步建议包含运行 `speclite install`。
 
-**Given** 项目存在 SpecLite manifest 或安装状态
-**When** status 读取本地安装摘要
-**Then** 输出包含 source/channel/version、manifest presence、manifest version、installed modules、IDE target summary 和关键路径
-**And** 不执行完整 file hash scan。
+**前提** 项目存在 SpecLite manifest 或安装状态
+**当** status 读取本地安装摘要
+**则** 输出包含 source/channel/version、manifest presence、manifest version、installed modules、IDE target summary 和关键路径
+**并且** 不执行完整 file hash scan。
 
-**Given** 已配置一个或多个 IDE targets
-**When** status 生成 target coverage 摘要
-**Then** 每个 target 使用 `not-configured`、`configured`、`partial` 或 `failed` 状态表达 high-level 状态
-**And** partial 或 failed target 会提供原因摘要和 affected path。
+**前提** 已配置一个或多个 IDE targets
+**当** status 生成 target coverage 摘要
+**则** 每个 target 使用 `not-configured`、`configured`、`partial` 或 `failed` 状态表达 high-level 状态
+**并且** partial 或 failed target 会提供原因摘要和 affected path。
 
-**Given** status 命令运行
-**When** 需要判断安装健康摘要
-**Then** `status.data.highLevelHealth` 与 `CommandResult.status` 不互相推导
-**And** 命令成功读取到 `not-configured`、`partial` 或 `failed` 安装状态时，`CommandResult.status` 仍可为 `success` 且 exit code 为 0。
+**前提** status 命令运行
+**当** 需要判断安装健康摘要
+**则** `status.data.highLevelHealth` 与 `CommandResult.status` 不互相推导
+**并且** 命令成功读取到 `not-configured`、`partial` 或 `failed` 安装状态时，`CommandResult.status` 仍可为 `success` 且 exit code 为 0。
 
-**Given** 用户请求 `speclite status --json`
-**When** 命令成功生成轻量摘要
-**Then** JSON 可以包含 `issues: []`
-**And** 空 issues 只表示本次轻量 status 命令无命令级 warning/error/critical issue，不表示安装健康通过。
+**前提** 用户请求 `speclite status --json`
+**当** 命令成功生成轻量摘要
+**则** JSON 可以包含 `issues: []`
+**并且** 空 issues 只表示本次轻量 status 命令无命令级 warning/error/critical issue，不表示安装健康通过。
 
-**Given** status 命令执行
-**When** 生成 lightweight summary
-**Then** 命令不得访问 npm registry、private registry、Git remote、offline bundle origin 或其他远程 source
-**And** 不得执行 remote freshness check、provenance revalidation、完整文件 hash scan 或隐式 update check。
+**前提** status 命令执行
+**当** 生成 lightweight summary
+**则** 命令不得访问 npm registry、private registry、Git remote、offline bundle origin 或其他远程 source
+**并且** 不得执行 remote freshness check、provenance revalidation、完整文件 hash scan 或隐式 update check。
 
 ### Story 3.2: Manifest And Index Schema Validation（Manifest 与索引 Schema 验证）
 
@@ -1176,37 +1192,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望运行 `speclite validate` 时能够验证 manifest、skill index、help index 和 files index 的结构与版本，
 以便确认当前安装投影可被后续 status、validate、update 和 IDE adapter 稳定读取。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 项目中存在 `_speclite/_config/manifest.yaml`
-**When** 用户运行 `speclite validate`
-**Then** 系统会验证 manifest schema version、必需字段和 installed-state 投影结构
-**And** 缺失或不兼容 schema 时报告 `manifest-schema` category issue。
+**前提** 项目中存在 `_speclite/_config/manifest.yaml`
+**当** 用户运行 `speclite validate`
+**则** 系统会验证 manifest schema version、必需字段和 installed-state 投影结构
+**并且** 缺失或不兼容 schema 时报告 `manifest-schema` category issue。
 
-**Given** manifest/index schema 版本旧于当前支持版本
-**When** validate 判断需要迁移
-**Then** 系统会报告稳定 issue id `manifest-schema.migration-needed`
-**And** details 至少包含 `currentSchemaVersion`、`supportedSchemaVersion`、`migrationKind` 和 `manualActionRequired`。
+**前提** manifest/index schema 版本旧于当前支持版本
+**当** validate 判断需要迁移
+**则** 系统会报告稳定 issue id `manifest-schema.migration-needed`
+**并且** details 至少包含 `currentSchemaVersion`、`supportedSchemaVersion`、`migrationKind` 和 `manualActionRequired`。
 
-**Given** skill index 存在
-**When** validate 检查 skill index
-**Then** 系统会验证 canonical skill id、moduleId、source reference、target projection 和 hash 字段是否满足 manifest/index owning SPEC
-**And** 不允许 skill index 定义第二套 skill identity。
+**前提** skill index 存在
+**当** validate 检查 skill index
+**则** 系统会验证 canonical skill id、moduleId、source reference、target projection 和 hash 字段是否满足 manifest/index owning SPEC
+**并且** 不允许 skill index 定义第二套 skill identity。
 
-**Given** help index 存在
-**When** validate 检查 help index
-**Then** 系统会验证 help entry 只引用 canonicalSkillId、phase、entry label 和 activation target
-**And** menu target 必须能在后续检查中解析到唯一 installed self-contained skill entry。
+**前提** help index 存在
+**当** validate 检查 help index
+**则** 系统会验证 help entry 只引用 canonicalSkillId、phase、entry label 和 activation target
+**并且** menu target 必须能在后续检查中解析到唯一 installed self-contained skill entry。
 
-**Given** files index 存在
-**When** validate 检查 files index
-**Then** 系统会验证 ownership、file-level hash、executable intent 和 project-relative POSIX path 字段
-**And** line ending、executable bit、file mode、symlink handling 和 case conflict 作为独立 validation dimensions，不被 hash normalization 隐式吸收。
+**前提** files index 存在
+**当** validate 检查 files index
+**则** 系统会验证 ownership、file-level hash、executable intent 和 project-relative POSIX path 字段
+**并且** line ending、executable bit、file mode、symlink handling 和 case conflict 作为独立 validation dimensions，不被 hash normalization 隐式吸收。
 
-**Given** manifest、skill index、help index 或 files index 缺失
-**When** validate 生成诊断结果
-**Then** 系统会报告稳定 issue id、category、severity 和 affected path
-**And** 不使用自由文本 issue id 表达 schema 或 index 问题。
+**前提** manifest、skill index、help index 或 files index 缺失
+**当** validate 生成诊断结果
+**则** 系统会报告稳定 issue id、category、severity 和 affected path
+**并且** 不使用自由文本 issue id 表达 schema 或 index 问题。
 
 ### Story 3.3: IDE Mirror And File Integrity Validation（IDE 镜像与文件完整性验证）
 
@@ -1214,37 +1230,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 `speclite validate` 能检查 IDE mirrors 与 installed manifest/hash baseline 是否一致，
 以便发现 `.claude/skills`、`.agents/skills` 或 installer-owned 文件发生的 drift，并获得稳定、可复现的诊断结果。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** manifest 记录了 canonical skill package hash
-**When** validate 检查 `.claude/skills` 中的 mapped skill entry
-**Then** 系统会验证该 entry 的 canonical skill package 内容是否匹配 manifest baseline
-**And** mismatch 时报告 `ide-mirror` 或 `file-integrity` category issue。
+**前提** manifest 记录了 canonical skill package hash
+**当** validate 检查 `.claude/skills` 中的 mapped skill entry
+**则** 系统会验证该 entry 的 canonical skill package 内容是否匹配 manifest baseline
+**并且** mismatch 时报告 `ide-mirror` 或 `file-integrity` category issue。
 
-**Given** manifest 记录了 canonical skill package hash
-**When** validate 检查 `.agents/skills` 中的 mapped skill entry
-**Then** 系统会验证该 entry 与同一 canonical skill 在其他 target 中的 package hash 是否一致
-**And** 不因 target directory 不同而允许 canonical package 内容漂移。
+**前提** manifest 记录了 canonical skill package hash
+**当** validate 检查 `.agents/skills` 中的 mapped skill entry
+**则** 系统会验证该 entry 与同一 canonical skill 在其他 target 中的 package hash 是否一致
+**并且** 不因 target directory 不同而允许 canonical package 内容漂移。
 
-**Given** files index 记录了 installer-owned 文件的 file-level hash
-**When** validate 检查已安装文件
-**Then** 系统会基于 raw bytes 计算当前 hash
-**And** 将 mismatch 报告为稳定的 `file-integrity` issue。
+**前提** files index 记录了 installer-owned 文件的 file-level hash
+**当** validate 检查已安装文件
+**则** 系统会基于 raw bytes 计算当前 hash
+**并且** 将 mismatch 报告为稳定的 `file-integrity` issue。
 
-**Given** validate 发现 IDE mirror drift
-**When** 命令输出诊断结果
-**Then** issue 包含稳定 issue id、category、severity 和 affected path
-**And** validate 不会自动修复或重写 drift 文件。
+**前提** validate 发现 IDE mirror drift
+**当** 命令输出诊断结果
+**则** issue 包含稳定 issue id、category、severity 和 affected path
+**并且** validate 不会自动修复或重写 drift 文件。
 
-**Given** validate 检查 target mirrors
-**When** 某个 expected skill entry 缺失或额外 entry 与 canonical skill id 重叠
-**Then** 系统会报告 missing、mismatched 或 drift 诊断
-**And** 建议用户运行后续明确的 update/repair 路径，而不是静默覆盖。
+**前提** validate 检查 target mirrors
+**当** 某个 expected skill entry 缺失或额外 entry 与 canonical skill id 重叠
+**则** 系统会报告 missing、mismatched 或 drift 诊断
+**并且** 建议用户运行后续明确的 update/repair 路径，而不是静默覆盖。
 
-**Given** 同一安装状态连续运行 `speclite validate` 三次
-**When** IDE mirrors 和 files index 未发生变化
-**Then** 返回的 issue id、category、severity 和 affected path 集合保持一致
-**And** 输出不依赖 filesystem traversal order。
+**前提** 同一安装状态连续运行 `speclite validate` 三次
+**当** IDE mirrors 和 files index 未发生变化
+**则** 返回的 issue id、category、severity 和 affected path 集合保持一致
+**并且** 输出不依赖 filesystem traversal order。
 
 ### Story 3.4: Runtime Path, Menu Target, Legacy Entry And Artifact Path Validation（运行时路径、菜单目标、遗留入口与产物路径验证）
 
@@ -1252,37 +1268,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 `speclite validate` 能检查 runtime path、menu target、legacy namespace residue、遗留入口冲突和 artifact path，
 以便快速定位安装漂移、重复加载、菜单冲突或产物路径不可用的问题。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** manifest 或 installed skill entry 记录了 runtime path
-**When** validate 检查 runtime path
-**Then** 系统会确认路径指向当前 `_speclite` runtime namespace
-**And** 发现旧 runtime path 或错误 namespace 时报告 `runtime-path` category issue。
+**前提** manifest 或 installed skill entry 记录了 runtime path
+**当** validate 检查 runtime path
+**则** 系统会确认路径指向当前 `_speclite` runtime namespace
+**并且** 发现旧 runtime path 或错误 namespace 时报告 `runtime-path` category issue。
 
-**Given** help index 或 menu metadata 中存在 menu target
-**When** validate 解析该 menu target
-**Then** 每个 target 必须解析到唯一 installed self-contained skill entry
-**And** 缺失、重复或不可激活 target 会报告 `menu-target` category issue。
+**前提** help index 或 menu metadata 中存在 menu target
+**当** validate 解析该 menu target
+**则** 每个 target 必须解析到唯一 installed self-contained skill entry
+**并且** 缺失、重复或不可激活 target 会报告 `menu-target` category issue。
 
-**Given** 项目中存在旧版或遗留 AI IDE entry
-**When** validate 检测到它与当前 canonical skill id 或 IDE target 重叠
-**Then** 系统会报告 `legacy-namespace` category issue
-**And** issue 会说明重复加载、菜单冲突或能力漂移风险。
+**前提** 项目中存在旧版或遗留 AI IDE entry
+**当** validate 检测到它与当前 canonical skill id 或 IDE target 重叠
+**则** 系统会报告 `legacy-namespace` category issue
+**并且** issue 会说明重复加载、菜单冲突或能力漂移风险。
 
-**Given** validate 报告 legacy entry 问题
-**When** 生成 suggested next step
-**Then** 系统会提供 path、risk category、manual action 和 verification command
-**And** 不会在未确认的情况下删除用户目录中的文件。
+**前提** validate 报告 legacy entry 问题
+**当** 生成 suggested next step
+**则** 系统会提供 path、risk category、manual action 和 verification command
+**并且** 不会在未确认的情况下删除用户目录中的文件。
 
-**Given** manifest 或 discovery metadata 记录 artifact contract
-**When** validate 检查 artifact path
-**Then** 系统会确认默认输出路径可解析为 project-relative POSIX path
-**And** 缺失、越界或不可写路径会报告 `artifact-path` category issue。
+**前提** manifest 或 discovery metadata 记录 artifact contract
+**当** validate 检查 artifact path
+**则** 系统会确认默认输出路径可解析为 project-relative POSIX path
+**并且** 缺失、越界或不可写路径会报告 `artifact-path` category issue。
 
-**Given** validate 检查 legacy、runtime、menu 和 artifact path 问题
-**When** 输出诊断结果
-**Then** affected path 不泄露无关 absolute local path、home directory、环境变量或认证信息
-**And** 必须使用稳定 issue id、category、severity 和 suggested next step。
+**前提** validate 检查 legacy、runtime、menu 和 artifact path 问题
+**当** 输出诊断结果
+**则** affected path 不泄露无关 absolute local path、home directory、环境变量或认证信息
+**并且** 必须使用稳定 issue id、category、severity 和 suggested next step。
 
 ### Story 3.5: CommandResult And ValidationIssue JSON Contract（CommandResult 与 ValidationIssue JSON 契约）
 
@@ -1290,42 +1306,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望核心命令的人类可读输出、`--json` 输出、exit code 和 fixture assertions 使用同一套 `CommandResult` 与 `ValidationIssue` 语义，
 以便自动化、CI 和人工排查看到一致、稳定、可测试的结果。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户运行 MVP 核心命令并传入 `--json`
-**When** 命令生成机器可读输出
-**Then** 输出必须使用统一 `CommandResult` envelope
-**And** `issues` 必须复用同一 `ValidationIssue` model。
+**前提** 用户运行 MVP 核心命令并传入 `--json`
+**当** 命令生成机器可读输出
+**则** 输出必须使用统一 `CommandResult` envelope
+**并且** `issues` 必须复用同一 `ValidationIssue` model。
 
-**Given** 命令产生 error 或 critical issue
-**When** 系统推导 command status 与 exit code
-**Then** `CommandResult.status` 不得为 `success`
-**And** exit code 必须为非 0。
+**前提** 命令产生 error 或 critical issue
+**当** 系统推导 command status 与 exit code
+**则** `CommandResult.status` 不得为 `success`
+**并且** exit code 必须为非 0。
 
-**Given** 命令只产生 success 或 warning 状态
-**When** 系统推导 exit code
-**Then** exit code 必须为 0
-**And** warning issue 不得阻断命令成功返回。
+**前提** 命令只产生 success 或 warning 状态
+**当** 系统推导 exit code
+**则** exit code 必须为 0
+**并且** warning issue 不得阻断命令成功返回。
 
-**Given** 同一检查结果需要同时输出 human-readable 和 `--json`
-**When** reporter 渲染结果
-**Then** issue id、category、severity 和 affected path 必须一致
-**And** human-readable output 不得成为自动化依赖的唯一承载位置。
+**前提** 同一检查结果需要同时输出 human-readable 和 `--json`
+**当** reporter 渲染结果
+**则** issue id、category、severity 和 affected path 必须一致
+**并且** human-readable output 不得成为自动化依赖的唯一承载位置。
 
-**Given** `CommandResult.command` 被写入 JSON
-**When** 用户使用不同 shell、参数顺序或命令别名
-**Then** command id 仍保持稳定
-**And** `update --repair` 的 command id 必须为 `update.repair`。
+**前提** `CommandResult.command` 被写入 JSON
+**当** 用户使用不同 shell、参数顺序或命令别名
+**则** command id 仍保持稳定
+**并且** `update --repair` 的 command id 必须为 `update.repair`。
 
-**Given** `CommandResult.targetProject` 被写入 JSON
-**When** 同一项目在不同 checkout root 下运行命令
-**Then** targetProject 使用稳定显示标识
-**And** 不通过 slugify、字符集限制或长度改写改变该标识。
+**前提** `CommandResult.targetProject` 被写入 JSON
+**当** 同一项目在不同 checkout root 下运行命令
+**则** targetProject 使用稳定显示标识
+**并且** 不通过 slugify、字符集限制或长度改写改变该标识。
 
-**Given** `ValidationIssue.details`、impact 或 suggestedNextStep 被写入 JSON
-**When** fixture snapshot 比较输出
-**Then** 这些字段必须稳定可比较
-**And** 不包含 absolute path、home directory、环境变量、认证信息、stack trace、timestamp、随机 id、hash 或长段非确定性解释。
+**前提** `ValidationIssue.details`、impact 或 suggestedNextStep 被写入 JSON
+**当** fixture snapshot 比较输出
+**则** 这些字段必须稳定可比较
+**并且** 不包含 absolute path、home directory、环境变量、认证信息、stack trace、timestamp、随机 id、hash 或长段非确定性解释。
 
 ### Story 3.6: Validation Progress, Category Coverage And Local Determinism（验证进度、类别覆盖与本地确定性）
 
@@ -1333,42 +1349,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 `speclite validate` 按稳定顺序展示检查进度、覆盖类别、目标和路径，
 以便验证结果可以被人读懂，也可以被 fixture、CI 和自动化脚本稳定比较。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户运行 `speclite validate`
-**When** validate 开始执行检查
-**Then** 系统会按 canonical issue category order 处理并报告 checkedCategories
-**And** 顺序为 `manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`menu-target`、`legacy-namespace`、`artifact-path`、`file-integrity`、`operation-lock`、`update`。
+**前提** 用户运行 `speclite validate`
+**当** validate 开始执行检查
+**则** 系统会按 canonical issue category order 处理并报告 checkedCategories
+**并且** 顺序为 `manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`menu-target`、`legacy-namespace`、`artifact-path`、`file-integrity`、`operation-lock`、`update`。
 
-**Given** validate 只执行部分类别
-**When** 输出 checkedCategories
-**Then** 已执行类别仍保留 canonical relative order
-**And** 不使用文件系统遍历、规则注册或对象 key 顺序作为输出顺序。
+**前提** validate 只执行部分类别
+**当** 输出 checkedCategories
+**则** 已执行类别仍保留 canonical relative order
+**并且** 不使用文件系统遍历、规则注册或对象 key 顺序作为输出顺序。
 
-**Given** validate 输出 issueCounts
-**When** 某个 severity 没有 issue
-**Then** `validate.data.issueCounts` 仍固定包含 `info`、`warning`、`error` 和 `critical` 四个 key
-**And** 计数为 0 的 severity 不得省略。
+**前提** validate 输出 issueCounts
+**当** 某个 severity 没有 issue
+**则** `validate.data.issueCounts` 仍固定包含 `info`、`warning`、`error` 和 `critical` 四个 key
+**并且** 计数为 0 的 severity 不得省略。
 
-**Given** validate 输出 checkedTargets
-**When** 已安装多个 IDE targets
-**Then** target 顺序必须遵守 manifest/adapter registry canonical target order
-**And** 不依赖 glob、文件系统、平台返回或 adapter 完成顺序。
+**前提** validate 输出 checkedTargets
+**当** 已安装多个 IDE targets
+**则** target 顺序必须遵守 manifest/adapter registry canonical target order
+**并且** 不依赖 glob、文件系统、平台返回或 adapter 完成顺序。
 
-**Given** validate 输出 validatedPaths
-**When** 路径集合生成完成
-**Then** 每个路径先规范化为 project-relative POSIX path
-**And** 再按字典序输出。
+**前提** validate 输出 validatedPaths
+**当** 路径集合生成完成
+**则** 每个路径先规范化为 project-relative POSIX path
+**并且** 再按字典序输出。
 
-**Given** validate 输出 CommandResult.issues
-**When** 多个 issue 同时存在
-**Then** issues 必须按 severity order、canonical issue category order、normalized affected path、issue id 排序
-**And** 不按发现顺序、rule execution order 或异步完成顺序输出。
+**前提** validate 输出 CommandResult.issues
+**当** 多个 issue 同时存在
+**则** issues 必须按 severity order、canonical issue category order、normalized affected path、issue id 排序
+**并且** 不按发现顺序、rule execution order 或异步完成顺序输出。
 
-**Given** 同一安装状态连续运行 `speclite validate`
-**When** source、manifest、IDE mirrors 和 artifacts 未发生变化
-**Then** 除明确允许的 timestamp 字段外，JSON 语义内容保持一致
-**And** validate 不访问远程 source、不执行 remote freshness check 或 provenance revalidation。
+**前提** 同一安装状态连续运行 `speclite validate`
+**当** source、manifest、IDE mirrors 和 artifacts 未发生变化
+**则** 除明确允许的 timestamp 字段外，JSON 语义内容保持一致
+**并且** validate 不访问远程 source、不执行 remote freshness check 或 provenance revalidation。
 
 ## Epic 4: Safe Update And Repair（安全更新与修复）
 
@@ -1380,37 +1396,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 SpecLite 明确区分 installer-owned、human-owned 和 workflow-owned 文件，
 以便 update 和 repair 可以安全修改工具生成内容，同时保护人工配置和研发过程产物。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** SpecLite 安装生成文件清单
-**When** 系统记录 installed state
-**Then** 每个受管理文件会被标记为 installer-owned、human-owned 或 workflow-owned
-**And** ownership 信息可被 update、repair 和 validate 读取。
+**前提** SpecLite 安装生成文件清单
+**当** 系统记录 installed state
+**则** 每个受管理文件会被标记为 installer-owned、human-owned 或 workflow-owned
+**并且** ownership 信息可被 update、repair 和 validate 读取。
 
-**Given** 文件位于 `_speclite/config.toml` 或 `_speclite/config.user.toml`
-**When** 系统判断 ownership
-**Then** 这些 installer 初始化配置文件可被标记为 installer-owned 或 installer-managed 配置层
-**And** 后续 update 必须按 manifest/hash 与配置契约判断是否可安全修改。
+**前提** 文件位于 `_speclite/config.toml` 或 `_speclite/config.user.toml`
+**当** 系统判断 ownership
+**则** 这些 installer 初始化配置文件可被标记为 installer-owned 或 installer-managed 配置层
+**并且** 后续 update 必须按 manifest/hash 与配置契约判断是否可安全修改。
 
-**Given** 文件位于 `_speclite/custom/*.toml` 或 `_speclite/custom/*.user.toml`
-**When** 系统判断 ownership
-**Then** 这些文件默认视为 human-owned
-**And** install/update/repair 不得覆盖、重写、重排或格式化已存在文件。
+**前提** 文件位于 `_speclite/custom/*.toml` 或 `_speclite/custom/*.user.toml`
+**当** 系统判断 ownership
+**则** 这些文件默认视为 human-owned
+**并且** install/update/repair 不得覆盖、重写、重排或格式化已存在文件。
 
-**Given** fresh install 发现 human-owned TOML stub 不存在
-**When** 系统需要初始化 custom 层入口
-**Then** 可以按 create-if-absent 规则创建 stub
-**And** 如果目标文件已存在，则不得修改其内容、顺序或注释。
+**前提** fresh install 发现 human-owned TOML stub 不存在
+**当** 系统需要初始化 custom 层入口
+**则** 可以按 create-if-absent 规则创建 stub
+**并且** 如果目标文件已存在，则不得修改其内容、顺序或注释。
 
-**Given** 文件位于 `_speclite-output` 或配置约定的 workflow artifact 目录
-**When** 系统判断 ownership
-**Then** workflow 产物默认视为 workflow-owned
-**And** update/repair 不得将其纳入覆盖或重写计划。
+**前提** 文件位于 `_speclite-output` 或配置约定的 workflow artifact 目录
+**当** 系统判断 ownership
+**则** workflow 产物默认视为 workflow-owned
+**并且** update/repair 不得将其纳入覆盖或重写计划。
 
-**Given** validate 或 update 发现 ownership 缺失或冲突
-**When** 系统生成诊断结果
-**Then** issue 会包含稳定 issue id、category、severity 和 affected path
-**And** suggested next step 不会建议用户删除或覆盖 human-owned/workflow-owned 文件作为默认修复方式。
+**前提** validate 或 update 发现 ownership 缺失或冲突
+**当** 系统生成诊断结果
+**则** issue 会包含稳定 issue id、category、severity 和 affected path
+**并且** suggested next step 不会建议用户删除或覆盖 human-owned/workflow-owned 文件作为默认修复方式。
 
 ### Story 4.2: Config And Customization Merge Order For Updates（更新中的配置与定制化合并顺序）
 
@@ -1418,37 +1434,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 update 和 repair 在规划前使用统一 resolver 读取项目配置和 customization 覆盖，
 以便更新行为尊重团队/个人配置，并且不会破坏 human-owned TOML 文件。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** update 或 repair 需要读取项目配置
-**When** 系统解析 config
-**Then** 必须按 `_speclite/config.toml`、`_speclite/config.user.toml`、`_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` 的顺序合并
-**And** custom 层覆盖 installer user 层。
+**前提** update 或 repair 需要读取项目配置
+**当** 系统解析 config
+**则** 必须按 `_speclite/config.toml`、`_speclite/config.user.toml`、`_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` 的顺序合并
+**并且** custom 层覆盖 installer user 层。
 
-**Given** update 或 repair 需要读取 skill customization
-**When** 系统解析 customization
-**Then** 必须按 skill `customize.toml` defaults、`_speclite/custom/{skill}.toml`、`_speclite/custom/{skill}.user.toml` 的顺序合并
-**And** 使用 skill directory basename 作为 customization lookup key。
+**前提** update 或 repair 需要读取 skill customization
+**当** 系统解析 customization
+**则** 必须按 skill `customize.toml` defaults、`_speclite/custom/{skill}.toml`、`_speclite/custom/{skill}.user.toml` 的顺序合并
+**并且** 使用 skill directory basename 作为 customization lookup key。
 
-**Given** human-owned TOML 文件存在
-**When** update 或 repair 完成 resolver 读取
-**Then** 系统只能读取并保护这些文件
-**And** 不得覆盖、重写、重排、格式化或删除它们。
+**前提** human-owned TOML 文件存在
+**当** update 或 repair 完成 resolver 读取
+**则** 系统只能读取并保护这些文件
+**并且** 不得覆盖、重写、重排、格式化或删除它们。
 
-**Given** optional custom layer 缺失
-**When** resolver 合并配置或 customization
-**Then** 缺失 layer 被视为 `{}` 并继续
-**And** 不产生阻断性 error。
+**前提** optional custom layer 缺失
+**当** resolver 合并配置或 customization
+**则** 缺失 layer 被视为 `{}` 并继续
+**并且** 不产生阻断性 error。
 
-**Given** optional custom layer 存在但无法读取或解析
-**When** update 或 repair 需要继续规划
-**Then** 系统会输出 ValidationIssue 形状 warning diagnostic
-**And** 在没有 error 或 critical diagnostics 时仍可继续进入保守规划。
+**前提** optional custom layer 存在但无法读取或解析
+**当** update 或 repair 需要继续规划
+**则** 系统会输出 ValidationIssue 形状 warning diagnostic
+**并且** 在没有 error 或 critical diagnostics 时仍可继续进入保守规划。
 
-**Given** resolver 行为发生变更
-**When** 更新 config/customization 解析实现
-**Then** 必须同步 resolve parity fixture、owning SPEC 和 expected outputs
-**And** update/repair 不得实现第二套私有 merge logic。
+**前提** resolver 行为发生变更
+**当** 更新 config/customization 解析实现
+**则** 必须同步 resolve parity fixture、owning SPEC 和 expected outputs
+**并且** update/repair 不得实现第二套私有 merge logic。
 
 ### Story 4.3: Update Plan Before Write（写入前更新计划）
 
@@ -1456,42 +1472,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 `speclite update` 在修改任何文件前先生成明确的 update plan，
 以便看到哪些文件将被修改、跳过或标记冲突，并在授权前确认影响范围。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户运行 `speclite update`
-**When** 系统开始更新流程
-**Then** 系统会先读取 installed state、source descriptor、files index、ownership 信息和 resolved config
-**And** 在生成 update plan 前不修改项目文件。
+**前提** 用户运行 `speclite update`
+**当** 系统开始更新流程
+**则** 系统会先读取 installed state、source descriptor、files index、ownership 信息和 resolved config
+**并且** 在生成 update plan 前不修改项目文件。
 
-**Given** update plan 生成中
-**When** 系统比较 expected state 与 current installed state
-**Then** plan 会列出 planned effects、affected paths、ownership、current hash、expected hash 和 proposed action
-**And** 路径使用 project-relative POSIX path。
+**前提** update plan 生成中
+**当** 系统比较 expected state 与 current installed state
+**则** plan 会列出 planned effects、affected paths、ownership、current hash、expected hash 和 proposed action
+**并且** 路径使用 project-relative POSIX path。
 
-**Given** 某个 installer-owned 文件未发生本地 drift 且 source 有更新
-**When** 系统生成 update plan
-**Then** 该文件可被标记为 planned change
-**And** 只有获得明确写入授权后才允许进入写入阶段。
+**前提** 某个 installer-owned 文件未发生本地 drift 且 source 有更新
+**当** 系统生成 update plan
+**则** 该文件可被标记为 planned change
+**并且** 只有获得明确写入授权后才允许进入写入阶段。
 
-**Given** 某个文件无法确认安全更新
-**When** 系统生成 update plan
-**Then** 该文件会进入 skipped 或 conflicts 集合
-**And** 原文件在本次命令中保持不变。
+**前提** 某个文件无法确认安全更新
+**当** 系统生成 update plan
+**则** 该文件会进入 skipped 或 conflicts 集合
+**并且** 原文件在本次命令中保持不变。
 
-**Given** 用户以交互模式运行 update
-**When** plan 已生成但用户尚未确认
-**Then** 系统会展示 impact summary、changed/skipped/conflict paths 的预期结果
-**And** 不会把未授权的 planned action 改写成 `skip:not-authorized`。
+**前提** 用户以交互模式运行 update
+**当** plan 已生成但用户尚未确认
+**则** 系统会展示 impact summary、changed/skipped/conflict paths 的预期结果
+**并且** 不会把未授权的 planned action 改写成 `skip:not-authorized`。
 
-**Given** 用户以脚本模式运行 update 且未传入 `--yes`
-**When** plan 需要写入授权
-**Then** 命令保持 unapplied plan 状态
-**And** 不写入 installer-owned 文件。
+**前提** 用户以脚本模式运行 update 且未传入 `--yes`
+**当** plan 需要写入授权
+**则** 命令保持 unapplied plan 状态
+**并且** 不写入 installer-owned 文件。
 
-**Given** 用户请求 `update --json` 输出
-**When** plan 生成完成
-**Then** machine-readable data 会区分 planned effects、actual apply results、skipped paths 和 conflicts
-**And** 不把逐路径 conflicts 复制成多个 command-level issues。
+**前提** 用户请求 `update --json` 输出
+**当** plan 生成完成
+**则** machine-readable data 会区分 planned effects、actual apply results、skipped paths 和 conflicts
+**并且** 不把逐路径 conflicts 复制成多个 command-level issues。
 
 ### Story 4.4: Project Operation Lock And Safe Write（项目操作锁与安全写入）
 
@@ -1499,42 +1515,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望所有会写入项目的 SpecLite 命令都使用 project operation lock 和 safe write，
 以便避免并发更新、路径逃逸、符号链接逃逸或部分写入破坏项目状态。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** write-capable command 准备进入写入阶段
-**When** 系统尝试获取项目锁
-**Then** 必须创建或获取 `_speclite/.lock` project operation lock
-**And** 未获取锁时不得写入任何文件。
+**前提** write-capable command 准备进入写入阶段
+**当** 系统尝试获取项目锁
+**则** 必须创建或获取 `_speclite/.lock` project operation lock
+**并且** 未获取锁时不得写入任何文件。
 
-**Given** `_speclite/.lock` 已被其他操作持有
-**When** 当前命令无法安全获取锁
-**Then** 命令返回 failure 且非 0 exit code
-**And** 输出 `operation-lock.project-locked` command-level issue。
+**前提** `_speclite/.lock` 已被其他操作持有
+**当** 当前命令无法安全获取锁
+**则** 命令返回 failure 且非 0 exit code
+**并且** 输出 `operation-lock.project-locked` command-level issue。
 
-**Given** validate 发现 stale lock
-**When** stale lock 不阻断当前只读验证
-**Then** validate 可以输出 `operation-lock.stale-lock` warning
-**And** 不得自动删除 lock file。
+**前提** validate 发现 stale lock
+**当** stale lock 不阻断当前只读验证
+**则** validate 可以输出 `operation-lock.stale-lock` warning
+**并且** 不得自动删除 lock file。
 
-**Given** installer-owned 文件准备写入
-**When** 系统执行 safe write
-**Then** 必须使用 temp-write + rename 或等价安全写入策略
-**And** safe-write temporary files 不进入 files index。
+**前提** installer-owned 文件准备写入
+**当** 系统执行 safe write
+**则** 必须使用 temp-write + rename 或等价安全写入策略
+**并且** safe-write temporary files 不进入 files index。
 
-**Given** 目标路径存在 symlink escape、path escape、case conflict 或 unsafe overwrite 风险
-**When** 系统规划或执行写入
-**Then** 写入必须被阻断
-**And** 输出稳定 issue 或 conflict reason。
+**前提** 目标路径存在 symlink escape、path escape、case conflict 或 unsafe overwrite 风险
+**当** 系统规划或执行写入
+**则** 写入必须被阻断
+**并且** 输出稳定 issue 或 conflict reason。
 
-**Given** 写入过程中发生 partial failure
-**When** 命令生成结果
-**Then** 输出 completed steps、failed step、pending steps、changed paths 和 manual action
-**And** 不声称未完成的文件已成功更新。
+**前提** 写入过程中发生 partial failure
+**当** 命令生成结果
+**则** 输出 completed steps、failed step、pending steps、changed paths 和 manual action
+**并且** 不声称未完成的文件已成功更新。
 
-**Given** lock file shape 被记录或诊断
-**When** 输出 public JSON 或 fixture snapshot
-**Then** 不暴露不稳定的 createdAt、pid 或 checkout-specific absolute path
-**And** lock file 不进入 files index 或 stable files-index hash。
+**前提** lock file shape 被记录或诊断
+**当** 输出 public JSON 或 fixture snapshot
+**则** 不暴露不稳定的 createdAt、pid 或 checkout-specific absolute path
+**并且** lock file 不进入 files index 或 stable files-index hash。
 
 ### Story 4.5: Conflict Detection And Default Non-Overwrite Behavior（冲突检测与默认不覆盖行为）
 
@@ -1542,42 +1558,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望普通 `speclite update` 在发现本地 drift 或不确定安全性的文件时默认标记 conflict，
 以便避免静默覆盖用户修改、IDE mirror drift 或其它已安装状态异常。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** installer-owned 文件的 current hash 与 files index baseline 不一致
-**When** 用户运行普通 `speclite update`
-**Then** 系统会将该路径标记为 conflict
-**And** 不会静默覆盖当前文件内容。
+**前提** installer-owned 文件的 current hash 与 files index baseline 不一致
+**当** 用户运行普通 `speclite update`
+**则** 系统会将该路径标记为 conflict
+**并且** 不会静默覆盖当前文件内容。
 
-**Given** IDE mirror 中的 canonical skill package 与 manifest baseline 不一致
-**When** 普通 update 生成计划
-**Then** 系统会报告 IDE mirror drift conflict
-**And** 不会直接恢复 canonical 内容。
+**前提** IDE mirror 中的 canonical skill package 与 manifest baseline 不一致
+**当** 普通 update 生成计划
+**则** 系统会报告 IDE mirror drift conflict
+**并且** 不会直接恢复 canonical 内容。
 
-**Given** human-owned custom 文件存在本地内容
-**When** update 检查该路径
-**Then** 系统不会把它加入 overwrite plan
-**And** 不会因为 source 有更新而修改、重排或格式化该文件。
+**前提** human-owned custom 文件存在本地内容
+**当** update 检查该路径
+**则** 系统不会把它加入 overwrite plan
+**并且** 不会因为 source 有更新而修改、重排或格式化该文件。
 
-**Given** workflow-owned artifact 存在
-**When** update 检查 artifact path
-**Then** 系统不会覆盖或删除该产物
-**And** artifact path 不进入 installer-owned changed paths。
+**前提** workflow-owned artifact 存在
+**当** update 检查 artifact path
+**则** 系统不会覆盖或删除该产物
+**并且** artifact path 不进入 installer-owned changed paths。
 
-**Given** update 发现一个或多个 conflicts
-**When** 生成 command-level issue
-**Then** 使用 `update.conflicts` 作为 command-level planning blocker
-**And** 逐路径冲突只放入 `data.conflicts`，不得复制成多个 issues。
+**前提** update 发现一个或多个 conflicts
+**当** 生成 command-level issue
+**则** 使用 `update.conflicts` 作为 command-level planning blocker
+**并且** 逐路径冲突只放入 `data.conflicts`，不得复制成多个 issues。
 
-**Given** update 输出 conflict summary
-**When** 用户查看 human-readable 或 `--json` 结果
-**Then** 每个 conflict 包含 affected path、ownership、reason code 和 suggested next step
-**And** suggested next step 指向明确的 repair、manual action 或验证命令。
+**前提** update 输出 conflict summary
+**当** 用户查看 human-readable 或 `--json` 结果
+**则** 每个 conflict 包含 affected path、ownership、reason code 和 suggested next step
+**并且** suggested next step 指向明确的 repair、manual action 或验证命令。
 
-**Given** 相同 drift 状态下重复运行 update planning
-**When** files、manifest 和 source 未变化
-**Then** conflicts 的 affected path、reason code 和 action 集合保持稳定
-**And** 不依赖 filesystem traversal order。
+**前提** 相同 drift 状态下重复运行 update planning
+**当** files、manifest 和 source 未变化
+**则** conflicts 的 affected path、reason code 和 action 集合保持稳定
+**并且** 不依赖 filesystem traversal order。
 
 ### Story 4.6: Explicit Repair For Recoverable Installer-Owned Drift（可恢复 Installer-Owned Drift 的显式修复）
 
@@ -1585,42 +1601,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望通过 `speclite update --repair` 显式修复可安全恢复的 installer-owned drift，
 以便恢复 `_speclite` metadata、runtime scripts 或 IDE mirrors 的 canonical 状态，同时继续保护人工配置和 workflow 产物。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户运行 `speclite update --repair`
-**When** 系统进入 repair planning
-**Then** 只评估 installer-owned drift 是否可安全恢复或重建
-**And** human-owned custom 文件与 workflow-owned artifacts 始终排除在 repair overwrite 范围外。
+**前提** 用户运行 `speclite update --repair`
+**当** 系统进入 repair planning
+**则** 只评估 installer-owned drift 是否可安全恢复或重建
+**并且** human-owned custom 文件与 workflow-owned artifacts 始终排除在 repair overwrite 范围外。
 
-**Given** drift 文件可以从 resolved canonical source 或 installed canonical package baseline 恢复
-**When** 系统生成 repair plan
-**Then** 该路径可被标记为 `restore-canonical` 或 `regenerate` action
-**And** plan 会列出 affected path、ownership、current hash、expected hash 和 action。
+**前提** drift 文件可以从 resolved canonical source 或 installed canonical package baseline 恢复
+**当** 系统生成 repair plan
+**则** 该路径可被标记为 `restore-canonical` 或 `regenerate` action
+**并且** plan 会列出 affected path、ownership、current hash、expected hash 和 action。
 
-**Given** 缺少 resolved canonical source 或 installed canonical package baseline
-**When** repair 无法证明可安全恢复
-**Then** 该路径进入 conflict
-**And** reason code 为 `missing-source-evidence` 或 owning SPEC 定义的等价稳定值。
+**前提** 缺少 resolved canonical source 或 installed canonical package baseline
+**当** repair 无法证明可安全恢复
+**则** 该路径进入 conflict
+**并且** reason code 为 `missing-source-evidence` 或 owning SPEC 定义的等价稳定值。
 
-**Given** 用户以脚本模式运行 `update --repair` 且未传入 `--yes`
-**When** repair plan 需要写入授权
-**Then** 命令输出 unapplied repair plan
-**And** 不写入任何文件。
+**前提** 用户以脚本模式运行 `update --repair` 且未传入 `--yes`
+**当** repair plan 需要写入授权
+**则** 命令输出 unapplied repair plan
+**并且** 不写入任何文件。
 
-**Given** 用户确认 repair plan 或传入 `--yes`
-**When** 系统执行 repair 写入
-**Then** 只修改 repair plan 中获授权的 installer-owned paths
-**And** 使用 project operation lock 与 safe write。
+**前提** 用户确认 repair plan 或传入 `--yes`
+**当** 系统执行 repair 写入
+**则** 只修改 repair plan 中获授权的 installer-owned paths
+**并且** 使用 project operation lock 与 safe write。
 
-**Given** repair 完成
-**When** 系统生成结果
-**Then** 输出 changed paths、skipped paths、remaining conflicts 和 suggested validation command
-**And** 不生成 standalone report artifact、backup/restore 或顶级 `speclite repair` 命令。
+**前提** repair 完成
+**当** 系统生成结果
+**则** 输出 changed paths、skipped paths、remaining conflicts 和 suggested validation command
+**并且** 不生成 standalone report artifact、backup/restore 或顶级 `speclite repair` 命令。
 
-**Given** 相同 drift 状态下重复生成 repair plan
-**When** source evidence、manifest 和 files index 未变化
-**Then** affected path、hash、reason code 和 action 集合保持稳定
-**And** 可被 fixture 验证。
+**前提** 相同 drift 状态下重复生成 repair plan
+**当** source evidence、manifest 和 files index 未变化
+**则** affected path、hash、reason code 和 action 集合保持稳定
+**并且** 可被 fixture 验证。
 
 ## Epic 5: Source Integrity And Distribution Channels（来源完整性与分发渠道）
 
@@ -1632,37 +1648,37 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望在安装过程中选择 SpecLite 的安装来源和 channel，
 以便明确本次安装来自 npm registry、本地包、离线包、Git source 还是本地路径，并在写入前确认来源摘要。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户运行 `speclite install` 并进入来源选择阶段
-**When** 系统展示可用来源选项
-**Then** 用户可以选择 npm public registry、private registry、local tarball、offline bundle、Git source 或 local path
-**And** 每种来源都以清晰的 source type 展示。
+**前提** 用户运行 `speclite install` 并进入来源选择阶段
+**当** 系统展示可用来源选项
+**则** 用户可以选择 npm public registry、private registry、local tarball、offline bundle、Git source 或 local path
+**并且** 每种来源都以清晰的 source type 展示。
 
-**Given** 用户选择默认来源
-**When** 系统生成安装来源摘要
-**Then** 摘要会显示默认 channel、source type 和即将解析的 package 或 source 标识
-**And** 不会隐式访问未声明的远程 source。
+**前提** 用户选择默认来源
+**当** 系统生成安装来源摘要
+**则** 摘要会显示默认 channel、source type 和即将解析的 package 或 source 标识
+**并且** 不会隐式访问未声明的远程 source。
 
-**Given** 用户选择自定义来源
-**When** 系统收集 source 输入
-**Then** 系统会记录 requested source、requested version 或 requested channel
-**And** 在解析前展示 external access intent 和需要确认的原因。
+**前提** 用户选择自定义来源
+**当** 系统收集 source 输入
+**则** 系统会记录 requested source、requested version 或 requested channel
+**并且** 在解析前展示 external access intent 和需要确认的原因。
 
-**Given** source resolution 完成
-**When** 系统生成 install summary 或 `install --json` 输出
-**Then** 输出包含 source type、channel、requested version、resolved version 或可展示的 source label
-**And** 不泄露 credential-bearing URL、home directory 或本机 absolute source path。
+**前提** source resolution 完成
+**当** 系统生成 install summary 或 `install --json` 输出
+**则** 输出包含 source type、channel、requested version、resolved version 或可展示的 source label
+**并且** 不泄露 credential-bearing URL、home directory 或本机 absolute source path。
 
-**Given** 用户尚未确认来源摘要
-**When** 系统准备进入 install planning
-**Then** 不得访问未确认的外部 source 或下载额外资源
-**And** 不得写入任何项目文件。
+**前提** 用户尚未确认来源摘要
+**当** 系统准备进入 install planning
+**则** 不得访问未确认的外部 source 或下载额外资源
+**并且** 不得写入任何项目文件。
 
-**Given** 来源选择或 channel 输入不合法
-**When** 系统无法继续 source resolution
-**Then** 命令输出明确失败原因和建议下一步
-**And** 使用稳定 `source-integrity` issue category 或对应 command-level diagnostic。
+**前提** 来源选择或 channel 输入不合法
+**当** 系统无法继续 source resolution
+**则** 命令输出明确失败原因和建议下一步
+**并且** 使用稳定 `source-integrity` issue category 或对应 command-level diagnostic。
 
 ### Story 5.2: Registry Source Resolution And Diagnostics（Registry 来源解析与诊断）
 
@@ -1670,42 +1686,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 SpecLite 能从 npm public registry 或 private registry 解析安装来源，
 以便在标准环境或企业内网环境中获得可诊断、可记录、可验证的 registry source。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户选择 npm public registry source
-**When** 系统执行 source resolution
-**Then** 系统会解析 package name、requested version 或 channel，并得到 resolved version
-**And** 记录 registry integrity 或 version-lock evidence。
+**前提** 用户选择 npm public registry source
+**当** 系统执行 source resolution
+**则** 系统会解析 package name、requested version 或 channel，并得到 resolved version
+**并且** 记录 registry integrity 或 version-lock evidence。
 
-**Given** 用户选择 private registry source
-**When** 系统执行 source resolution
-**Then** 系统会使用用户显式配置的 registry/channel 信息
-**And** public output 中不得泄露 token、credential-bearing URL 或 private query string。
+**前提** 用户选择 private registry source
+**当** 系统执行 source resolution
+**则** 系统会使用用户显式配置的 registry/channel 信息
+**并且** public output 中不得泄露 token、credential-bearing URL 或 private query string。
 
-**Given** registry source 成功解析
-**When** 系统生成 SourceDescriptor
-**Then** descriptor 会包含 source type、package、resolved version、integrity evidence 和 trust status
-**And** npm public/private registry source 不会因为来源类型本身自动成为 `trusted`。
+**前提** registry source 成功解析
+**当** 系统生成 SourceDescriptor
+**则** descriptor 会包含 source type、package、resolved version、integrity evidence 和 trust status
+**并且** npm public/private registry source 不会因为来源类型本身自动成为 `trusted`。
 
-**Given** registry integrity 或 expected lock match 验证成功
-**When** 系统计算 trust status
-**Then** source 可以标记为 `trusted`
-**And** 信任结论必须来自 expected hash 或 lock match，而不是 registry 类型。
+**前提** registry integrity 或 expected lock match 验证成功
+**当** 系统计算 trust status
+**则** source 可以标记为 `trusted`
+**并且** 信任结论必须来自 expected hash 或 lock match，而不是 registry 类型。
 
-**Given** registry source 可解析但没有信任锚
-**When** source 仍满足最小 integrity evidence 要求
-**Then** source 可以标记为 `unverified`
-**And** 只有在用户显式选择并确认该 source 后才能进入 install planning。
+**前提** registry source 可解析但没有信任锚
+**当** source 仍满足最小 integrity evidence 要求
+**则** source 可以标记为 `unverified`
+**并且** 只有在用户显式选择并确认该 source 后才能进入 install planning。
 
-**Given** registry 不可达、认证失败或 package/version 不存在
-**When** source resolution 失败
-**Then** 系统会报告稳定 `source-integrity` issue id，例如 registry unreachable 或 authentication required
-**And** credentials 与 credential-bearing URLs 必须 redacted。
+**前提** registry 不可达、认证失败或 package/version 不存在
+**当** source resolution 失败
+**则** 系统会报告稳定 `source-integrity` issue id，例如 registry unreachable 或 authentication required
+**并且** credentials 与 credential-bearing URLs 必须 redacted。
 
-**Given** validate 检查已安装 registry source descriptor
-**When** 本地 manifest 中已有 source descriptor
-**Then** validate 只检查 descriptor 和 integrity evidence shape
-**And** 不重新访问 registry 或执行 remote freshness check。
+**前提** validate 检查已安装 registry source descriptor
+**当** 本地 manifest 中已有 source descriptor
+**则** validate 只检查 descriptor 和 integrity evidence shape
+**并且** 不重新访问 registry 或执行 remote freshness check。
 
 ### Story 5.3: Local Tarball, Offline Bundle And Local Path Integrity（本地包、离线包与本地路径完整性）
 
@@ -1713,42 +1729,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望 SpecLite 能从 local tarball、offline bundle 或 local path 安装，并记录可复现的完整性证据，
 以便在离线、受限网络或内部交付场景中安全验证安装来源。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户选择 local tarball source
-**When** 系统执行 source resolution
-**Then** 系统会验证 tarball 可读取并记录包文件 artifact hash
-**And** public output 不泄露本机 absolute source path。
+**前提** 用户选择 local tarball source
+**当** 系统执行 source resolution
+**则** 系统会验证 tarball 可读取并记录包文件 artifact hash
+**并且** public output 不泄露本机 absolute source path。
 
-**Given** 用户选择 offline bundle source
-**When** 系统执行 source resolution
-**Then** 系统会验证 bundle 可读取并记录 offline bundle artifact hash
-**And** 不在 public JSON、manifest/index 或 fixture snapshot 中暴露临时解包目录。
+**前提** 用户选择 offline bundle source
+**当** 系统执行 source resolution
+**则** 系统会验证 bundle 可读取并记录 offline bundle artifact hash
+**并且** 不在 public JSON、manifest/index 或 fixture snapshot 中暴露临时解包目录。
 
-**Given** 用户选择 local path source
-**When** 系统计算 local source snapshot hash
-**Then** hash 只覆盖 canonical source tree allowlist
-**And** 排除 `.git`、临时文件、`node_modules`、fixture output、本地 cache、build output 和 editor/OS metadata。
+**前提** 用户选择 local path source
+**当** 系统计算 local source snapshot hash
+**则** hash 只覆盖 canonical source tree allowlist
+**并且** 排除 `.git`、临时文件、`node_modules`、fixture output、本地 cache、build output 和 editor/OS metadata。
 
-**Given** tarball 或 offline bundle 被解包用于安装规划
-**When** 系统需要记录 expected installed state 输入
-**Then** 可以额外记录解包后的 canonical source tree hash
-**And** 不得与 artifact `contentHash` 混用或把 cache/extraction directory hash 当成 source evidence。
+**前提** tarball 或 offline bundle 被解包用于安装规划
+**当** 系统需要记录 expected installed state 输入
+**则** 可以额外记录解包后的 canonical source tree hash
+**并且** 不得与 artifact `contentHash` 混用或把 cache/extraction directory hash 当成 source evidence。
 
-**Given** local tarball、offline bundle 或 local path source 缺少 integrity evidence
-**When** source resolution 结束
-**Then** source 必须被标记为 `blocked`
-**And** 命令输出 `source-integrity` error 并阻止写入。
+**前提** local tarball、offline bundle 或 local path source 缺少 integrity evidence
+**当** source resolution 结束
+**则** source 必须被标记为 `blocked`
+**并且** 命令输出 `source-integrity` error 并阻止写入。
 
-**Given** local tarball、offline bundle 或 local path source 有可复现 evidence 但没有 expected hash 或 lock match
-**When** 系统计算 trust status
-**Then** source 可以标记为 `unverified`
-**And** 只有用户显式选择并确认后才能进入 install planning。
+**前提** local tarball、offline bundle 或 local path source 有可复现 evidence 但没有 expected hash 或 lock match
+**当** 系统计算 trust status
+**则** source 可以标记为 `unverified`
+**并且** 只有用户显式选择并确认后才能进入 install planning。
 
-**Given** source staging 或临时解包过程中发生失败
-**When** 命令输出诊断结果
-**Then** issue 使用稳定 `source-integrity` issue id，例如 tarball unreadable 或 offline bundle unreadable
-**And** cache path、temporary extraction path 和本机 absolute path 必须 redacted。
+**前提** source staging 或临时解包过程中发生失败
+**当** 命令输出诊断结果
+**则** issue 使用稳定 `source-integrity` issue id，例如 tarball unreadable 或 offline bundle unreadable
+**并且** cache path、temporary extraction path 和本机 absolute path 必须 redacted。
 
 ### Story 5.4: Git Source Pinning And Floating Source Rejection（Git 来源固定与浮动来源拒绝）
 
@@ -1756,42 +1772,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望从 Git source 安装 SpecLite 时必须固定到具体 commit SHA，
 以便安装结果可复现，并避免 branch、tag 或 remote URL 浮动导致不可审查的安装状态。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户选择 Git source
-**When** 系统执行 source resolution
-**Then** 系统会解析 remote、requested ref 和 resolved commit SHA
-**And** 只有 resolved commit SHA 存在时才允许进入 install planning。
+**前提** 用户选择 Git source
+**当** 系统执行 source resolution
+**则** 系统会解析 remote、requested ref 和 resolved commit SHA
+**并且** 只有 resolved commit SHA 存在时才允许进入 install planning。
 
-**Given** 用户只提供 remote URL、branch 或 tag
-**When** 系统无法固定到具体 commit SHA
-**Then** source 必须被标记为 `blocked`
-**And** 不得进入 install planning 或写入步骤。
+**前提** 用户只提供 remote URL、branch 或 tag
+**当** 系统无法固定到具体 commit SHA
+**则** source 必须被标记为 `blocked`
+**并且** 不得进入 install planning 或写入步骤。
 
-**Given** Git source 成功解析到 commit SHA
-**When** 系统生成 integrity evidence
-**Then** evidence 至少包含 `git-commit` 记录
-**And** requested branch、tag 或输入 ref 不得覆盖 resolved version 或 commit evidence。
+**前提** Git source 成功解析到 commit SHA
+**当** 系统生成 integrity evidence
+**则** evidence 至少包含 `git-commit` 记录
+**并且** requested branch、tag 或输入 ref 不得覆盖 resolved version 或 commit evidence。
 
-**Given** Git source 解析需要访问远程 source
-**When** 系统准备执行 external access
-**Then** external access intent 必须在 source resolution plan 中显式声明
-**And** 用户未确认前不得访问未声明 remote。
+**前提** Git source 解析需要访问远程 source
+**当** 系统准备执行 external access
+**则** external access intent 必须在 source resolution plan 中显式声明
+**并且** 用户未确认前不得访问未声明 remote。
 
-**Given** Git remote 不可达、认证失败或 ref 无法解析
-**When** source resolution 失败
-**Then** 系统会输出稳定 `source-integrity` issue
-**And** redacted output 不泄露 credential-bearing URL、token 或 private query string。
+**前提** Git remote 不可达、认证失败或 ref 无法解析
+**当** source resolution 失败
+**则** 系统会输出稳定 `source-integrity` issue
+**并且** redacted output 不泄露 credential-bearing URL、token 或 private query string。
 
-**Given** Git source 已写入 manifest 的 source descriptor
-**When** 后续运行 `speclite validate`
-**Then** validate 只检查本地记录的 source descriptor、integrity evidence shape 和 hash baseline
-**And** 不访问 Git remote 或重新验证 freshness/provenance。
+**前提** Git source 已写入 manifest 的 source descriptor
+**当** 后续运行 `speclite validate`
+**则** validate 只检查本地记录的 source descriptor、integrity evidence shape 和 hash baseline
+**并且** 不访问 Git remote 或重新验证 freshness/provenance。
 
-**Given** Git source 没有 expected hash 或 lock match
-**When** resolved commit SHA evidence 可复现且无 mismatch
-**Then** source 可以是 `unverified`
-**And** 不得自动标记为 `trusted`。
+**前提** Git source 没有 expected hash 或 lock match
+**当** resolved commit SHA evidence 可复现且无 mismatch
+**则** source 可以是 `unverified`
+**并且** 不得自动标记为 `trusted`。
 
 ### Story 5.5: SourceDescriptor Trust Status And Redacted Reporting（SourceDescriptor 信任状态与脱敏报告）
 
@@ -1799,42 +1815,42 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 我希望所有安装来源都被归一为稳定的 SourceDescriptor，并以脱敏方式报告 trust status 和 integrity evidence，
 以便团队能审查安装来源是否可信，同时不会泄露凭据、本机路径或临时实现细节。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** source resolution 成功
-**When** 系统生成 SourceDescriptor
-**Then** descriptor 会包含 source type、channel、resolved version 或 display-safe source label、integrityEvidence 和 trustStatus
-**And** source/channel/version 信息可在 install summary、status 和 validate 中可见。
+**前提** source resolution 成功
+**当** 系统生成 SourceDescriptor
+**则** descriptor 会包含 source type、channel、resolved version 或 display-safe source label、integrityEvidence 和 trustStatus
+**并且** source/channel/version 信息可在 install summary、status 和 validate 中可见。
 
-**Given** source 通过 expected hash 或 lock match 验证
-**When** 系统计算 trustStatus
-**Then** trustStatus 可以是 `trusted`
-**And** MVP 不提供通用 trusted source allowlist schema。
+**前提** source 通过 expected hash 或 lock match 验证
+**当** 系统计算 trustStatus
+**则** trustStatus 可以是 `trusted`
+**并且** MVP 不提供通用 trusted source allowlist schema。
 
-**Given** source 缺少信任锚但具备可复现 integrity evidence
-**When** 用户显式选择并确认该 source
-**Then** trustStatus 可以是 `unverified`
-**And** evidence 中的 `verified: false` 只表示未被 expected hash 或 lock match 背书，不表示校验失败。
+**前提** source 缺少信任锚但具备可复现 integrity evidence
+**当** 用户显式选择并确认该 source
+**则** trustStatus 可以是 `unverified`
+**并且** evidence 中的 `verified: false` 只表示未被 expected hash 或 lock match 背书，不表示校验失败。
 
-**Given** source 存在 hash mismatch、lock mismatch、unsupported source 或 source policy 拒绝
-**When** 系统计算 trustStatus
-**Then** trustStatus 必须是 `blocked`
-**And** install/update 不得继续写入步骤。
+**前提** source 存在 hash mismatch、lock mismatch、unsupported source 或 source policy 拒绝
+**当** 系统计算 trustStatus
+**则** trustStatus 必须是 `blocked`
+**并且** install/update 不得继续写入步骤。
 
-**Given** public JSON、manifest/index、issues 或 fixture snapshot 需要展示 source 信息
-**When** 系统渲染 source descriptor 或 diagnostics
-**Then** credential、credential-bearing URL、private query string、home directory、本机 absolute source path、cache path、temporary extraction path 和临时 Git checkout path 必须 redacted
-**And** source staging 和 package-manager cache path 不进入 public contract。
+**前提** public JSON、manifest/index、issues 或 fixture snapshot 需要展示 source 信息
+**当** 系统渲染 source descriptor 或 diagnostics
+**则** credential、credential-bearing URL、private query string、home directory、本机 absolute source path、cache path、temporary extraction path 和临时 Git checkout path 必须 redacted
+**并且** source staging 和 package-manager cache path 不进入 public contract。
 
-**Given** validate 读取已安装 SourceDescriptor
-**When** 检查 source integrity 状态
-**Then** validate 只检查本地 descriptor、integrity evidence shape 与 installed state 是否一致
-**And** 不重新访问远程 source 或执行 provenance revalidation。
+**前提** validate 读取已安装 SourceDescriptor
+**当** 检查 source integrity 状态
+**则** validate 只检查本地 descriptor、integrity evidence shape 与 installed state 是否一致
+**并且** 不重新访问远程 source 或执行 provenance revalidation。
 
-**Given** source descriptor 字段语义需要被 PRD、Architecture、Manifest/index 或 CommandResult 引用
-**When** 文档或实现描述该对象
-**Then** 必须引用 source-descriptor owning SPEC 作为字段与语义真源
-**And** 不在多个文件中定义第二套 trust/evidence 规则。
+**前提** source descriptor 字段语义需要被 PRD、Architecture、Manifest/index 或 CommandResult 引用
+**当** 文档或实现描述该对象
+**则** 必须引用 source-descriptor owning SPEC 作为字段与语义真源
+**并且** 不在多个文件中定义第二套 trust/evidence 规则。
 
 ## Epic 6: Maintainer Fixture And Release Confidence（维护者 Fixture 与发布信心）
 
@@ -1846,37 +1862,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望每个 fixture case 都有稳定的目录布局、输入数据和 expected outputs，
 以便新增或修改安装能力时，可以用同一套契约测试资产验证行为是否仍然正确。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 维护者创建新的 fixture case
-**When** fixture case 被加入测试资产
-**Then** case directory 使用稳定 lower-kebab 命名
-**And** layout 遵守 fixture contract owning SPEC。
+**前提** 维护者创建新的 fixture case
+**当** fixture case 被加入测试资产
+**则** case directory 使用稳定 lower-kebab 命名
+**并且** layout 遵守 fixture contract owning SPEC。
 
-**Given** fixture case 描述安装前后状态
-**When** 维护者定义 expected outputs
-**Then** expected outputs 至少可以包含 expected file tree、expected manifest/index snapshot、expected command output 摘要和 validation assertions
-**And** 每类 expected output 的比较规则由 owning SPEC 管理。
+**前提** fixture case 描述安装前后状态
+**当** 维护者定义 expected outputs
+**则** expected outputs 至少可以包含 expected file tree、expected manifest/index snapshot、expected command output 摘要和 validation assertions
+**并且** 每类 expected output 的比较规则由 owning SPEC 管理。
 
-**Given** fixture snapshot 包含路径字段
-**When** 生成或比较 expected outputs
-**Then** 路径必须使用 project-relative POSIX-style path
-**And** 不依赖 absolute local path、home directory、OS-specific separators 或 checkout root。
+**前提** fixture snapshot 包含路径字段
+**当** 生成或比较 expected outputs
+**则** 路径必须使用 project-relative POSIX-style path
+**并且** 不依赖 absolute local path、home directory、OS-specific separators 或 checkout root。
 
-**Given** fixture snapshot 包含 public JSON
-**When** 进行 stable comparison
-**Then** 允许的 timestamp 字段必须由 schema 显式声明并排除比较
-**And** 未声明字段不得引入随机值、环境相关文本或不稳定顺序。
+**前提** fixture snapshot 包含 public JSON
+**当** 进行 stable comparison
+**则** 允许的 timestamp 字段必须由 schema 显式声明并排除比较
+**并且** 未声明字段不得引入随机值、环境相关文本或不稳定顺序。
 
-**Given** 契约行为发生变化
-**When** 维护者需要更新 fixture expected outputs
-**Then** 必须先更新 owning SPEC 和 executable schema/parser
-**And** 不得先更新 snapshots 再反推契约行为。
+**前提** 契约行为发生变化
+**当** 维护者需要更新 fixture expected outputs
+**则** 必须先更新 owning SPEC 和 executable schema/parser
+**并且** 不得先更新 snapshots 再反推契约行为。
 
-**Given** 新增模块、adapter、source type、validation rule、ownership 行为或 installed artifact kind
-**When** 维护者提交变更
-**Then** 必须同步新增或更新相关 fixture 输入和 expected outputs
-**And** release gate 或 regression asset 分类保持明确。
+**前提** 新增模块、adapter、source type、validation rule、ownership 行为或 installed artifact kind
+**当** 维护者提交变更
+**则** 必须同步新增或更新相关 fixture 输入和 expected outputs
+**并且** release gate 或 regression asset 分类保持明确。
 
 ### Story 6.2: Fresh Install And Existing Update Fixture Gates（Fresh Install 与 Existing Update Fixture Gate）
 
@@ -1884,37 +1900,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 fixture gates 覆盖空项目 fresh install 和既有安装 update，
 以便证明安装控制面能生成正确结构，并在更新时保护 human-owned custom 文件和 workflow artifacts。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** `fresh-install-empty-project` fixture
-**When** 测试运行 fresh install
-**Then** expected outputs 验证 `_speclite`、`_speclite-output`、manifest/index、`.claude/skills` 和 `.agents/skills` 已按预期生成
-**And** ready summary 只在 basic validation 成功后出现。
+**前提** `fresh-install-empty-project` fixture
+**当** 测试运行 fresh install
+**则** expected outputs 验证 `_speclite`、`_speclite-output`、manifest/index、`.claude/skills` 和 `.agents/skills` 已按预期生成
+**并且** ready summary 只在 basic validation 成功后出现。
 
-**Given** fresh install fixture 完成
-**When** 比较 expected file tree 和 manifest/index snapshot
-**Then** 生成结果在相同 source、配置、目标 IDE 和平台上保持确定性
-**And** 允许差异仅限 schema 明确排除的 timestamp 字段。
+**前提** fresh install fixture 完成
+**当** 比较 expected file tree 和 manifest/index snapshot
+**则** 生成结果在相同 source、配置、目标 IDE 和平台上保持确定性
+**并且** 允许差异仅限 schema 明确排除的 timestamp 字段。
 
-**Given** `existing-install-update` fixture
-**When** 测试运行 update
-**Then** installer-owned 文件可以按 plan 更新
-**And** human-owned custom 文件保留不变。
+**前提** `existing-install-update` fixture
+**当** 测试运行 update
+**则** installer-owned 文件可以按 plan 更新
+**并且** human-owned custom 文件保留不变。
 
-**Given** `existing-install-update` fixture 中存在 workflow-owned artifacts
-**When** update 执行
-**Then** workflow artifacts 不会被覆盖、删除或重排
-**And** fixture assertions 明确验证这些 artifacts 仍然存在且内容未被修改。
+**前提** `existing-install-update` fixture 中存在 workflow-owned artifacts
+**当** update 执行
+**则** workflow artifacts 不会被覆盖、删除或重排
+**并且** fixture assertions 明确验证这些 artifacts 仍然存在且内容未被修改。
 
-**Given** fixture 测试 update behavior
-**When** installer-owned 文件存在本地 drift
-**Then** 普通 update 会产生 conflict 而不是静默覆盖
-**And** repair 行为由显式 `update --repair` fixture 或后续 fixture 覆盖。
+**前提** fixture 测试 update behavior
+**当** installer-owned 文件存在本地 drift
+**则** 普通 update 会产生 conflict 而不是静默覆盖
+**并且** repair 行为由显式 `update --repair` fixture 或后续 fixture 覆盖。
 
-**Given** fresh install 或 update fixture 失败
-**When** 测试生成结果
-**Then** 不展示 ready summary 或 release-ready summary
-**And** failure 输出包含 completed steps、failed step、pending steps 和 suggested manual action。
+**前提** fresh install 或 update fixture 失败
+**当** 测试生成结果
+**则** 不展示 ready summary 或 release-ready summary
+**并且** failure 输出包含 completed steps、failed step、pending steps 和 suggested manual action。
 
 ### Story 6.3: Drift, Source Integrity And Resolve Parity Fixtures（Drift、来源完整性与 Resolve Parity Fixtures）
 
@@ -1922,37 +1938,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 fixture suite 覆盖 IDE drift、source integrity 和 resolver parity，
 以便验证安装漂移、来源信任和配置解析这些高风险路径在变更后仍然稳定。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** `ide-drift` fixture
-**When** 测试人为修改某个 IDE mirror 中的 canonical skill package 文件
-**Then** `speclite validate` 会报告稳定的 `ide-mirror` 或 `file-integrity` issue
-**And** expected output 包含 target、canonical skill id、hash mismatch 和 suggested next step。
+**前提** `ide-drift` fixture
+**当** 测试人为修改某个 IDE mirror 中的 canonical skill package 文件
+**则** `speclite validate` 会报告稳定的 `ide-mirror` 或 `file-integrity` issue
+**并且** expected output 包含 target、canonical skill id、hash mismatch 和 suggested next step。
 
-**Given** `source-integrity` fixture
-**When** 测试 registry、tarball、offline bundle、local source 或 Git source 的 integrity evidence
-**Then** expected outputs 覆盖 `trusted`、`unverified` 和 `blocked` trust status
-**And** blocked source 不得进入 install planning 或写入步骤。
+**前提** `source-integrity` fixture
+**当** 测试 registry、tarball、offline bundle、local source 或 Git source 的 integrity evidence
+**则** expected outputs 覆盖 `trusted`、`unverified` 和 `blocked` trust status
+**并且** blocked source 不得进入 install planning 或写入步骤。
 
-**Given** `source-integrity` fixture 覆盖失败来源
-**When** registry unreachable、authentication required、tarball unreadable 或 offline bundle unreadable 发生
-**Then** expected issues 使用稳定 `source-integrity` issue id
-**And** credentials、credential-bearing URLs、cache path 和临时路径被 redacted。
+**前提** `source-integrity` fixture 覆盖失败来源
+**当** registry unreachable、authentication required、tarball unreadable 或 offline bundle unreadable 发生
+**则** expected issues 使用稳定 `source-integrity` issue id
+**并且** credentials、credential-bearing URLs、cache path 和临时路径被 redacted。
 
-**Given** `resolve-parity` fixture
-**When** 测试 `speclite resolve config`
-**Then** expected outputs 验证 config merge order、missing key、repeated key、required/optional layer failure 和 stdout/stderr shape
-**And** 与 Python resolver baseline 语义保持一致。
+**前提** `resolve-parity` fixture
+**当** 测试 `speclite resolve config`
+**则** expected outputs 验证 config merge order、missing key、repeated key、required/optional layer failure 和 stdout/stderr shape
+**并且** 与 Python resolver baseline 语义保持一致。
 
-**Given** `resolve-parity` fixture
-**When** 测试 `speclite resolve customization`
-**Then** expected outputs 验证 customization merge order、skill directory basename lookup key、array merge rules 和 optional layer warning diagnostics
-**And** 不允许 adapter 或 skill helper 实现第二套 merge logic。
+**前提** `resolve-parity` fixture
+**当** 测试 `speclite resolve customization`
+**则** expected outputs 验证 customization merge order、skill directory basename lookup key、array merge rules 和 optional layer warning diagnostics
+**并且** 不允许 adapter 或 skill helper 实现第二套 merge logic。
 
-**Given** validation issue taxonomy 或 resolve contract 发生变化
-**When** 维护者更新 fixture expected outputs
-**Then** 必须同一变更中更新 owning SPEC、executable schema/parser 和 fixture assertions
-**And** 不得只改 snapshot 让测试通过。
+**前提** validation issue taxonomy 或 resolve contract 发生变化
+**当** 维护者更新 fixture expected outputs
+**则** 必须同一变更中更新 owning SPEC、executable schema/parser 和 fixture assertions
+**并且** 不得只改 snapshot 让测试通过。
 
 ### Story 6.4: Path Portability And Runtime Matrix Evidence（路径可移植性与运行时矩阵证据）
 
@@ -1960,42 +1976,42 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 fixture gates 覆盖 Node 22/24、macOS/Windows 和关键路径可移植性场景，
 以便证明 MVP 在声明支持的运行时与平台上可重复安装、验证和更新。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** release gate fixture suite 运行
-**When** CI 或本地验证执行 MVP fixture gates
-**Then** 必须覆盖 Node 22 minimum 和 Node 24 recommended runtime
-**And** 不得使用 Node 24-only API，除非提供 Node 22 兼容路径或更新 runtime policy。
+**前提** release gate fixture suite 运行
+**当** CI 或本地验证执行 MVP fixture gates
+**则** 必须覆盖 Node 22 minimum 和 Node 24 recommended runtime
+**并且** 不得使用 Node 24-only API，除非提供 Node 22 兼容路径或更新 runtime policy。
 
-**Given** path-portability fixture 运行在 macOS 13+ 和 Windows 11
-**When** 执行 install、status、validate、update 或 resolve 相关路径
-**Then** public path fields 必须使用 project-relative POSIX-style path
-**And** fixture snapshot 不依赖 OS-specific separators、drive letter、home directory 或 checkout root。
+**前提** path-portability fixture 运行在 macOS 13+ 和 Windows 11
+**当** 执行 install、status、validate、update 或 resolve 相关路径
+**则** public path fields 必须使用 project-relative POSIX-style path
+**并且** fixture snapshot 不依赖 OS-specific separators、drive letter、home directory 或 checkout root。
 
-**Given** fixture 覆盖 canonical source text files
-**When** 安装器复制 canonical source 内容
-**Then** canonical text line endings 保持 LF
-**And** installer 不按平台改写 canonical text line endings。
+**前提** fixture 覆盖 canonical source text files
+**当** 安装器复制 canonical source 内容
+**则** canonical text line endings 保持 LF
+**并且** installer 不按平台改写 canonical text line endings。
 
-**Given** fixture 覆盖 generated scripts 或 runtime scripts
-**When** files index 记录脚本信息
-**Then** 必须记录 `executable` intent
-**And** Windows fixture 不要求 POSIX chmod 语义，但必须验证受支持脚本入口可用。
+**前提** fixture 覆盖 generated scripts 或 runtime scripts
+**当** files index 记录脚本信息
+**则** 必须记录 `executable` intent
+**并且** Windows fixture 不要求 POSIX chmod 语义，但必须验证受支持脚本入口可用。
 
-**Given** fixture 覆盖大小写敏感路径冲突
-**When** install、update 或 repair 规划写入
-**Then** case conflict 必须被阻断并产生稳定 issue 或 conflict reason
-**And** 不允许同一项目在不同操作系统上产生不可比较安装结果。
+**前提** fixture 覆盖大小写敏感路径冲突
+**当** install、update 或 repair 规划写入
+**则** case conflict 必须被阻断并产生稳定 issue 或 conflict reason
+**并且** 不允许同一项目在不同操作系统上产生不可比较安装结果。
 
-**Given** fixture 覆盖 symlink escape 或 path escape
-**When** safe write 或 validation 处理目标路径
-**Then** 写入必须被阻断或 validate 必须报告稳定 issue
-**And** 不得把项目外路径写入 public JSON、manifest/index 或 fixture snapshot。
+**前提** fixture 覆盖 symlink escape 或 path escape
+**当** safe write 或 validation 处理目标路径
+**则** 写入必须被阻断或 validate 必须报告稳定 issue
+**并且** 不得把项目外路径写入 public JSON、manifest/index 或 fixture snapshot。
 
-**Given** fixture 覆盖 shell invocation 差异
-**When** 命令在支持平台上执行
-**Then** command id、path normalization、exit code 和 JSON output 语义保持稳定
-**And** 不依赖 shell-specific path separators 或别名行为。
+**前提** fixture 覆盖 shell invocation 差异
+**当** 命令在支持平台上执行
+**则** command id、path normalization、exit code 和 JSON output 语义保持稳定
+**并且** 不依赖 shell-specific path separators 或别名行为。
 
 ### Story 6.5: Skill Artifact Loop And Documentation Examples（Skill Artifact Loop 与文档示例）
 
@@ -2003,37 +2019,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望至少有一个阶段化 skill 从 IDE entry 发现、激活到输出 artifact 的闭环 fixture，
 以便证明 SpecLite 安装后不只是文件存在，而是真正能驱动研发流程并产出可检查文档。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** `skill-artifact-loop` fixture
-**When** fixture 从 installed IDE entry 发现某个阶段化 skill
-**Then** entry 可以解析到 canonicalSkillId、activationTarget 和 installed skill package
-**And** 不需要手工查找 source skill 文件或复制提示词内容。
+**前提** `skill-artifact-loop` fixture
+**当** fixture 从 installed IDE entry 发现某个阶段化 skill
+**则** entry 可以解析到 canonicalSkillId、activationTarget 和 installed skill package
+**并且** 不需要手工查找 source skill 文件或复制提示词内容。
 
-**Given** fixture 激活该 skill
-**When** skill 按自身 activation protocol 执行
-**Then** skill 可以读取项目级 config 和 customization
-**And** 不依赖 Python resolver 或内部构建路径。
+**前提** fixture 激活该 skill
+**当** skill 按自身 activation protocol 执行
+**则** skill 可以读取项目级 config 和 customization
+**并且** 不依赖 Python resolver 或内部构建路径。
 
-**Given** skill workflow 完成最小闭环
-**When** workflow 写出 planning 或 review artifact
-**Then** artifact 位于配置约定路径
-**And** metadata 包含 `workflowType`、`sourceSkill` 和可选 `generatedAt`。
+**前提** skill workflow 完成最小闭环
+**当** workflow 写出 planning 或 review artifact
+**则** artifact 位于配置约定路径
+**并且** metadata 包含 `workflowType`、`sourceSkill` 和可选 `generatedAt`。
 
-**Given** fixture validate artifact loop
-**When** 检查生成 artifact
-**Then** 只校验 artifact type、默认输出路径和 metadata 值域
-**And** 不把叙事质量、人工评审结论或内容完整度作为 MVP validation 范围。
+**前提** fixture validate artifact loop
+**当** 检查生成 artifact
+**则** 只校验 artifact type、默认输出路径和 metadata 值域
+**并且** 不把叙事质量、人工评审结论或内容完整度作为 MVP validation 范围。
 
-**Given** 文档读者查看安装示例
-**When** 文档展示 fresh install、目录树、manifest/index、status/validate 输出或 update 保护示例
-**Then** 示例应引用或来自 fixture expected outputs
-**And** 不复制 schema 真源或定义第二套 contract。
+**前提** 文档读者查看安装示例
+**当** 文档展示 fresh install、目录树、manifest/index、status/validate 输出或 update 保护示例
+**则** 示例应引用或来自 fixture expected outputs
+**并且** 不复制 schema 真源或定义第二套 contract。
 
-**Given** 维护者新增阶段化 skill 或 artifact kind
-**When** 更新 documentation examples
-**Then** 同步更新相关 fixture 输入、expected outputs 和 validation assertions
-**And** 保持 release gate / regression asset 分类明确。
+**前提** 维护者新增阶段化 skill 或 artifact kind
+**当** 更新 documentation examples
+**则** 同步更新相关 fixture 输入、expected outputs 和 validation assertions
+**并且** 保持 release gate / regression asset 分类明确。
 
 ## Epic 7: Post-MVP Governance Expansion（Post-MVP 治理扩展）
 
@@ -2045,32 +2061,32 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 Post-MVP 提供 `speclite init` 和 `speclite list`，
 以便在不重新安装全部内容的情况下初始化或重建项目配置，并查看可用模块、skills、IDE targets 或版本。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 项目需要初始化或重建 SpecLite 项目级配置
-**When** 用户运行 Post-MVP `speclite init`
-**Then** 命令可以创建或重建项目级配置入口
-**And** 不得静默覆盖 human-owned custom 文件。
+**前提** 项目需要初始化或重建 SpecLite 项目级配置
+**当** 用户运行 Post-MVP `speclite init`
+**则** 命令可以创建或重建项目级配置入口
+**并且** 不得静默覆盖 human-owned custom 文件。
 
-**Given** 项目已有 `_speclite` 安装状态
-**When** 用户运行 `speclite init`
-**Then** 命令必须读取现有 manifest、config 和 ownership 信息
-**And** 在修改 installer-owned 配置前展示 plan 和影响范围。
+**前提** 项目已有 `_speclite` 安装状态
+**当** 用户运行 `speclite init`
+**则** 命令必须读取现有 manifest、config 和 ownership 信息
+**并且** 在修改 installer-owned 配置前展示 plan 和影响范围。
 
-**Given** 用户想查看可安装模块、skills、IDE targets 或版本
-**When** 用户运行 Post-MVP `speclite list`
-**Then** 命令会从 manifest/index、source metadata 或 adapter registry 中读取可列信息
-**And** 不定义第二套 skill identity 或 IDE target identity。
+**前提** 用户想查看可安装模块、skills、IDE targets 或版本
+**当** 用户运行 Post-MVP `speclite list`
+**则** 命令会从 manifest/index、source metadata 或 adapter registry 中读取可列信息
+**并且** 不定义第二套 skill identity 或 IDE target identity。
 
-**Given** `speclite list` 输出机器可读结果
-**When** 用户传入 `--json`
-**Then** 输出复用 MVP `CommandResult` envelope 和已契约化 data payload 扩展机制
-**And** 不破坏 `speclite.command-result.v1` 的既有字段语义。
+**前提** `speclite list` 输出机器可读结果
+**当** 用户传入 `--json`
+**则** 输出复用 MVP `CommandResult` envelope 和已契约化 data payload 扩展机制
+**并且** 不破坏 `speclite.command-result.v1` 的既有字段语义。
 
-**Given** `speclite init` 或 `speclite list` 需要新增 public JSON 字段
-**When** 实现该字段
-**Then** 必须先更新 owning SPEC、executable schema/parser 和 fixture expected outputs
-**And** 不依赖 human-readable output 承载自动化字段。
+**前提** `speclite init` 或 `speclite list` 需要新增 public JSON 字段
+**当** 实现该字段
+**则** 必须先更新 owning SPEC、executable schema/parser 和 fixture expected outputs
+**并且** 不依赖 human-readable output 承载自动化字段。
 
 ### Story 7.2: Doctor, Sync And Uninstall Commands（Doctor、Sync 与 Uninstall 命令）
 
@@ -2078,37 +2094,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 Post-MVP 提供 `speclite doctor`、`speclite sync` 和 `speclite uninstall`，
 以便进行更深入环境诊断、显式同步 source 与 IDE mirrors，并安全移除 installer-owned 安装结果。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 用户运行 Post-MVP `speclite doctor`
-**When** 命令执行环境、source、权限、IDE target、manifest、路径规范化和文件完整性诊断
-**Then** 输出复用 `ValidationIssue` category、issue id、severity 和 affected path 语义
-**And** 不发明第二套诊断模型。
+**前提** 用户运行 Post-MVP `speclite doctor`
+**当** 命令执行环境、source、权限、IDE target、manifest、路径规范化和文件完整性诊断
+**则** 输出复用 `ValidationIssue` category、issue id、severity 和 affected path 语义
+**并且** 不发明第二套诊断模型。
 
-**Given** `doctor` 需要访问远程 source 或执行 freshness/provenance revalidation
-**When** 命令规划外部访问
-**Then** external access intent 必须显式展示并等待授权
-**And** 不改变 MVP `validate` local-only 边界。
+**前提** `doctor` 需要访问远程 source 或执行 freshness/provenance revalidation
+**当** 命令规划外部访问
+**则** external access intent 必须显式展示并等待授权
+**并且** 不改变 MVP `validate` local-only 边界。
 
-**Given** 用户运行 Post-MVP `speclite sync`
-**When** 命令显式同步 source 与 IDE mirrors
-**Then** 同步行为必须复用 manifest/index、files index、ownership/hash 和 adapter registry
-**And** 不修改 human-owned custom 文件或 workflow-owned artifacts。
+**前提** 用户运行 Post-MVP `speclite sync`
+**当** 命令显式同步 source 与 IDE mirrors
+**则** 同步行为必须复用 manifest/index、files index、ownership/hash 和 adapter registry
+**并且** 不修改 human-owned custom 文件或 workflow-owned artifacts。
 
-**Given** 用户运行 Post-MVP `speclite uninstall`
-**When** 命令移除安装结果
-**Then** 只能移除 installer-owned 文件或目录
-**And** 对 human-owned custom 文件和 workflow-owned artifacts 必须保留或提示人工处理。
+**前提** 用户运行 Post-MVP `speclite uninstall`
+**当** 命令移除安装结果
+**则** 只能移除 installer-owned 文件或目录
+**并且** 对 human-owned custom 文件和 workflow-owned artifacts 必须保留或提示人工处理。
 
-**Given** `doctor`、`sync` 或 `uninstall` 需要写入项目
-**When** 命令进入写入阶段
-**Then** 必须使用 project operation lock、plan-before-write 和 safe write
-**And** 失败时输出 completed steps、failed step、pending steps 和 manual action。
+**前提** `doctor`、`sync` 或 `uninstall` 需要写入项目
+**当** 命令进入写入阶段
+**则** 必须使用 project operation lock、plan-before-write 和 safe write
+**并且** 失败时输出 completed steps、failed step、pending steps 和 manual action。
 
-**Given** Post-MVP 新命令输出 `--json`
-**When** 机器可读结果被生成
-**Then** 复用 `CommandResult` 兼容扩展机制
-**And** 不破坏 MVP fixture 和既有 automation 依赖。
+**前提** Post-MVP 新命令输出 `--json`
+**当** 机器可读结果被生成
+**则** 复用 `CommandResult` 兼容扩展机制
+**并且** 不破坏 MVP fixture 和既有 automation 依赖。
 
 ### Story 7.3: CI And Enterprise Automation Integration（CI 与企业自动化集成）
 
@@ -2116,37 +2132,37 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望把 MVP 的机器可读输出接入 CI 和企业自动化工具链，
 以便团队可以自动检查安装健康、验证结果、更新冲突和发布门禁，而不依赖人工读取 CLI 文案。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** CI 运行 `speclite status --json`
-**When** 项目处于未安装、partial 或 failed high-level health 状态
-**Then** CI 可以读取 `status.data.highLevelHealth` 判断安装摘要
-**And** 不把 `issues: []` 误判为安装健康通过。
+**前提** CI 运行 `speclite status --json`
+**当** 项目处于未安装、partial 或 failed high-level health 状态
+**则** CI 可以读取 `status.data.highLevelHealth` 判断安装摘要
+**并且** 不把 `issues: []` 误判为安装健康通过。
 
-**Given** CI 运行 `speclite validate --json`
-**When** validate 输出 issueCounts、checkedCategories、checkedTargets 和 validatedPaths
-**Then** 自动化可以基于稳定字段判断验证是否通过
-**And** 不依赖 human-readable output。
+**前提** CI 运行 `speclite validate --json`
+**当** validate 输出 issueCounts、checkedCategories、checkedTargets 和 validatedPaths
+**则** 自动化可以基于稳定字段判断验证是否通过
+**并且** 不依赖 human-readable output。
 
-**Given** CI 运行 `speclite update --json` 或 `speclite update --repair --json`
-**When** 命令输出 planned effects、changed paths、skipped paths 和 conflicts
-**Then** 自动化可以区分 unapplied plan、actual apply result 和 blocking conflicts
-**And** 不把 path-level conflicts 当成多个 command-level issues。
+**前提** CI 运行 `speclite update --json` 或 `speclite update --repair --json`
+**当** 命令输出 planned effects、changed paths、skipped paths 和 conflicts
+**则** 自动化可以区分 unapplied plan、actual apply result 和 blocking conflicts
+**并且** 不把 path-level conflicts 当成多个 command-level issues。
 
-**Given** 企业工具链接入 SpecLite JSON output
-**When** 需要解析 command status 和 exit code
-**Then** 必须遵守 MVP `CommandResult.status`、issue severity 和 exit code 推导规则
-**And** 不定义企业私有的第二套状态语义。
+**前提** 企业工具链接入 SpecLite JSON output
+**当** 需要解析 command status 和 exit code
+**则** 必须遵守 MVP `CommandResult.status`、issue severity 和 exit code 推导规则
+**并且** 不定义企业私有的第二套状态语义。
 
-**Given** CI 或企业自动化需要新增字段
-**When** 扩展 command-specific data payload
-**Then** 必须通过 `CommandResult.schemaVersion`、owning SPEC 和 fixture expected outputs 管理兼容性
-**And** 不破坏 `speclite.command-result.v1` 的既有字段语义。
+**前提** CI 或企业自动化需要新增字段
+**当** 扩展 command-specific data payload
+**则** 必须通过 `CommandResult.schemaVersion`、owning SPEC 和 fixture expected outputs 管理兼容性
+**并且** 不破坏 `speclite.command-result.v1` 的既有字段语义。
 
-**Given** 自动化记录路径或 source 信息
-**When** 生成日志、报告或 artifacts
-**Then** 仍需遵守 project-relative POSIX path 与 redaction 策略
-**And** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
+**前提** 自动化记录路径或 source 信息
+**当** 生成日志、报告或 artifacts
+**则** 仍需遵守 project-relative POSIX path 与 redaction 策略
+**并且** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
 
 ### Story 7.4: Process Governance Coverage Report（流程治理覆盖报告）
 
@@ -2154,34 +2170,34 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 我希望 Post-MVP 能基于已安装状态、阶段覆盖矩阵、标准产物和 validate 结果生成流程治理覆盖报告，
 以便判断 SpecLite 是否真正把 SPEC、方案评审、故事规划、实现、测试和审查规范落到团队执行过程中。
 
-**Acceptance Criteria（验收标准）：**
+**验收标准：**
 
-**Given** 项目已安装 SpecLite 并生成 MVP 最小阶段覆盖矩阵
-**When** 系统生成 Post-MVP 流程治理覆盖报告
-**Then** 报告可以展示阶段入口覆盖率、标准产物存在率、validate 通过率和未解决缺口数量
-**And** 这些指标建立在 MVP manifest/index、phase coverage 和 validate output 之上。
+**前提** 项目已安装 SpecLite 并生成 MVP 最小阶段覆盖矩阵
+**当** 系统生成 Post-MVP 流程治理覆盖报告
+**则** 报告可以展示阶段入口覆盖率、标准产物存在率、validate 通过率和未解决缺口数量
+**并且** 这些指标建立在 MVP manifest/index、phase coverage 和 validate output 之上。
 
-**Given** 某个研发阶段缺少 mapped skill entry
-**When** 报告计算阶段入口覆盖
-**Then** 该阶段被标记为缺口
-**And** 报告显示对应 phaseId、phaseLabel、moduleId、canonicalSkillId 或缺失原因。
+**前提** 某个研发阶段缺少 mapped skill entry
+**当** 报告计算阶段入口覆盖
+**则** 该阶段被标记为缺口
+**并且** 报告显示对应 phaseId、phaseLabel、moduleId、canonicalSkillId 或缺失原因。
 
-**Given** 某个标准过程产物缺失或 metadata 不合法
-**When** 报告计算标准产物存在率
-**Then** 报告引用 artifact contract、artifact path 和 validation issue
-**And** 不把文档内容质量或人工评审结论作为自动覆盖率指标。
+**前提** 某个标准过程产物缺失或 metadata 不合法
+**当** 报告计算标准产物存在率
+**则** 报告引用 artifact contract、artifact path 和 validation issue
+**并且** 不把文档内容质量或人工评审结论作为自动覆盖率指标。
 
-**Given** 团队需要查看趋势、导出、多项目或团队视角
-**When** Post-MVP 扩展报告能力
-**Then** 这些能力只能在 MVP 最小阶段覆盖矩阵与 validate output 的基础上扩展
-**And** 不改变 MVP install/status/validate/update 的核心契约。
+**前提** 团队需要查看趋势、导出、多项目或团队视角
+**当** Post-MVP 扩展报告能力
+**则** 这些能力只能在 MVP 最小阶段覆盖矩阵与 validate output 的基础上扩展
+**并且** 不改变 MVP install/status/validate/update 的核心契约。
 
-**Given** 治理报告需要机器可读输出
-**When** 输出 `--json` 或报告 artifact
-**Then** 必须复用 `CommandResult`、`ValidationIssue` 或明确新增的 owning SPEC
-**And** 不定义第二套 issue category、skill identity 或 artifact identity。
+**前提** 治理报告需要机器可读输出
+**当** 输出 `--json` 或报告 artifact
+**则** 必须复用 `CommandResult`、`ValidationIssue` 或明确新增的 owning SPEC
+**并且** 不定义第二套 issue category、skill identity 或 artifact identity。
 
-**Given** 报告暴露团队或项目路径信息
-**When** 生成 human-readable 或 machine-readable output
-**Then** 路径和 source 信息遵守 project-relative POSIX path 与 redaction 策略
-**And** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
+**前提** 报告暴露团队或项目路径信息
+**当** 生成 human-readable 或 machine-readable output
+**则** 路径和 source 信息遵守 project-relative POSIX path 与 redaction 策略
+**并且** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
