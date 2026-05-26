@@ -81,8 +81,22 @@
 
 ## Attempt 6（尝试 6）：Git Commit
 
-- **状态**：待执行。
+- **状态**：已完成。
 - **方案**：使用 fresh sub agent、模型 `GPT-5.4 (gpt-5.4)` 运行 `git-commit-convention`，默认中文，不推送。
 - **选择原因**：符合用户指定的最后一步。
 - **提交范围决策**：只提交本次 Epic 6 SR 工作直接产生或修订的文件，不纳入工作区已有的无关 Epic / planning / sprint 改动。
-- **结果**：待记录。
+- **结果**：
+  - 已完成本地提交，不推送。
+  - Commit：`554e409 docs(sr): 完成 Epic 6 Story 设计审查闭环`
+  - 提交文件：Epic 6 的 5 个 Story 文档与 `epic-6-story-review/` 下 7 个 SR / 进度文件，共 12 个。
+  - 仍有未提交无关改动：有，均未纳入本次提交。
+  - 后续观察：提交后当前分支出现独立的 `e8db35c docs(epic-3): 记录 Story 审查提交收尾`，`554e409` 仍在当前分支历史中且为有效提交。
+- **结论**：用户要求的 Epic 6 SR 循环与本地提交均已完成。
+
+## Attempt 7（尝试 7）：进度记录收尾
+
+- **状态**：已完成。
+- **方案**：在 commit 完成后补记 `Attempt 6` 的实际结果，并保持只修改 Epic 6 SR 进度文件。
+- **选择原因**：`git-commit-convention` sub agent 执行 commit 时，`Attempt 6` 仍处于待执行状态；需要补齐用户要求的进度记录。
+- **结果**：本文件与 `EXPERIMENT_NOTES.md` 已补记最终状态。
+- **结论**：进度记录完整。

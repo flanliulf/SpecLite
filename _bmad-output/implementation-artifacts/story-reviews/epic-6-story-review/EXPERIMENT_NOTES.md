@@ -18,3 +18,7 @@
 - Round 2 evaluator 已完成，生成 `epic-6-story-review-evaluation-20260526-round-2.md`。
 - Evaluator 结论已通过，需要 SR-03 修订的条目数为 0；SR 循环停止条件已满足。
 - 下一步：启动 `git-commit-convention` fresh sub agent。提交范围收口到本次 Epic 6 SR 直接相关文件，避免把工作区中已有的其它 Epic / planning 改动混入本次提交。
+- `git-commit-convention` sub agent 已完成本地提交：`554e409 docs(sr): 完成 Epic 6 Story 设计审查闭环`，未推送。
+- 已核实 `554e409` 在当前分支历史中；当前 `HEAD` 是后续独立提交 `e8db35c docs(epic-3): 记录 Story 审查提交收尾`，不是本轮 Epic 6 SR 任务的一部分。
+- 工作区仍有未提交无关改动，本轮未回退、未整理、未纳入 Epic 6 SR 提交。
+- 收尾动作：补记进度文件最终状态，并做一个只包含本进度记录收尾的小提交，避免进度文件停留在 `Git Commit 待执行`。
