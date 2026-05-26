@@ -50,8 +50,16 @@
 
 ## Experiment 6（尝试 6）：Commit（本地提交）
 
-- **时间**: 待执行。
+- **时间**: 2026-05-26。
 - **方案**: 启动全新的 sub agent，使用 `git-commit-convention`，模型 `GPT-5.4`，默认中文 commit message，本地提交，不推送。
 - **选择原因**: SR reviewer 和 evaluator 均已通过，满足用户指定的终止循环条件；下一步按要求提交代码。
-- **执行结果**: 待记录。
-- **状态**: 待执行。
+- **执行结果**: 已生成本地提交 `fc6da602b71a8f6e7b5fef3dfa52febc77a07f0b`，commit message 为 `docs(sr): 完成 Epic 4 Story 设计审查`。提交范围仅包含 Epic 4 SR 产物和第 1 轮 fixer 修订的两个 Epic 4 Story 文件；未推送。
+- **状态**: 已完成。
+
+## Experiment 7（尝试 7）：Final Progress Record（最终进度补记）
+
+- **时间**: 2026-05-26。
+- **方案**: 在 commit 完成后补记最终提交结果，确保进度文件覆盖最后一步。
+- **选择原因**: 用户要求 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md` 记录进度直到最后一步完成。
+- **执行结果**: 已补记 commit hash、commit message 和未推送状态。
+- **状态**: 已完成。
