@@ -21,6 +21,13 @@
 6. 若未通过，重复 Reviewer -> Evaluator -> Fixer。
 7. 通过后执行 `git-commit-convention`，模型 `GPT-5.4`，默认中文 commit message，本地提交，不推送。
 
+## 完成记录
+
+- 第 2 轮 reviewer 已通过，新增阻塞/修订 finding 为 0。
+- 第 2 轮 evaluator 已通过，确认第 1 轮 3 个修订项全部关闭。
+- 已执行本地提交 `4e94af3d7ecfd4c2f9f57809ce6eca1181976752`，commit message 为 `docs(epic-3): 完成 Story 设计审查闭环`。
+- 已确认未 push。
+
 ## 当前已知仓库事实
 
 - Epic 3 定义文件位于 `_bmad-output/planning-artifacts/epics/06-epic-3-installed-state-and-deterministic-validation已安装状态与确定性验证.md`。
