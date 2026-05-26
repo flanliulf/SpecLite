@@ -203,6 +203,16 @@
 **则** 这些字段必须稳定可比较
 **并且** 不包含 absolute path、home directory、环境变量、认证信息、stack trace、timestamp、随机 id、hash 或长段非确定性解释。
 
+**前提** 同一 semantic command result 需要渲染为不同 presentation profile
+**当** 系统生成 compact、evidence 或 structured 输出
+**则** 三类 profile 必须复用同一 `CommandResult`、`ValidationIssue`、nextActions 和 path normalization source
+**并且** command implementation 不得绕过 `src/diagnostics/output.ts` 或 reporter 层自行拼接状态词、issue layout、path display 或 summary template。
+
+**前提** 用户请求 `--json`
+**当** structured renderer 输出 command result
+**则** JSON 必须不包含 ANSI escape、terminal width formatting、颜色标记、图标或 human-only 装饰字段
+**并且** human-readable output 中出现的 automation 必需字段必须在 structured JSON 或 file contract 中有对应来源。
+
 ## Story 3.6: Validation Progress, Category Coverage And Local Determinism（验证进度、类别覆盖与本地确定性）
 
 作为工具链维护者，
@@ -215,6 +225,8 @@
 **当** validate 开始执行检查
 **则** 系统会按 canonical issue category order 处理并报告 checkedCategories
 **并且** 顺序为 `environment`、`manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`menu-target`、`legacy-namespace`、`artifact-path`、`file-integrity`、`operation-lock`、`update`。
+**并且** `source-integrity` 在 Epic 3 中仅作为 canonical order 的 reserved position；若没有实际执行本地只读 `source-integrity` rule/category group，`checkedCategories` 不得包含它，human-readable output 必须显示 skipped / not checked。
+**并且** source descriptor / integrity evidence shape、source lockfile lifecycle、remote freshness、provenance revalidation 和 distribution channel rules 由 Epic 5 收口，不在 Story 3.6 中补实现。
 
 **前提** validate 只执行部分类别
 **当** 输出 checkedCategories
@@ -245,3 +257,13 @@
 **当** source、manifest、IDE mirrors 和 artifacts 未发生变化
 **则** 除明确允许的 timestamp 字段外，JSON 语义内容保持一致
 **并且** validate 不访问远程 source、不执行 remote freshness check 或 provenance revalidation。
+
+**前提** validate 需要渲染 human-readable output
+**当** terminal width 小于 80 columns、处于 80-119 columns 或大于等于 120 columns
+**则** 输出可以在 key-value block 与 table 间切换，但不得丢失 severity、category、issueId、affectedPath、impact、suggestedNextStep、checkedCategories、checkedTargets 或 nextActions
+**并且** `--json` 输出不受 terminal width、TTY、locale 或平台影响。
+
+**前提** validate 输出使用颜色、图标或符号辅助扫描
+**当** 用户在无颜色、screen reader、复制到 issue tracker 或 CI log 的场景阅读输出
+**则** severity、status、empty state、issue category 和 next action 必须仍有文本等价物
+**并且** `No issues found`、`No conflicts detected` 或未检查项必须显式呈现，不得以空白表示。
