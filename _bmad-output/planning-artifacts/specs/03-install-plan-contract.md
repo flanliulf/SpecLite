@@ -123,6 +123,8 @@ MVP 不得在显式 source resolution、install 或 update planning 之外执行
 
 Install、update 和 repair 在 planning 可以写入或应用变更之前，必须获取 project-level operation lock。MVP lock path 是 `_speclite/.lock`。
 
+Fresh install 中如果 `_speclite/` 尚不存在，install 可以在 target confirmation、source trust / integrity gate 和 final configuration summary confirmation 完成后，创建 `_speclite/` 作为 `_speclite/.lock` 的 parent directory。该受限目录创建是 lock acquisition 的一部分，不是 runtime/config/manifest/mirror mutation。除 lock parent 和 lock file 外，任何 `_speclite` runtime file、config file、manifest/index、artifact directory、IDE mirror 或 source package mutation 仍必须在 lock 获取成功后执行。
+
 MVP project operation lock 是 non-reentrant。即使同一 process 已持有 lock，也不得通过再次执行 public write-capable command 绕过 lock acquisition。若内部 orchestration 需要复用同一次写入流程，必须传递 private lock handle，而不是重新进入 public command path。
 
 如果由于另一个 SpecLite operation 正在运行而无法获取 lock，命令不得写入文件。对 write-capable commands，它必须输出 `operation-lock.project-locked` issue 和 non-zero failure status。由于 safe planning 尚未开始，此 failure 的 public JSON 不得包含 planned writes、update plans、repair plans、changed paths、skipped paths 或 conflicts。

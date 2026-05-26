@@ -1,0 +1,44 @@
+# Epic 1 SR 闭环实时笔记
+
+## 2026-05-26
+
+- 已确认 goal active。
+- 已读取本地 SR-01/SR-02/SR-03 和 `git-commit-convention` skill 说明。
+- 已读取 SR 路径配置。
+- 已确认当前仓库没有现成的 `_bmad-output/implementation-artifacts/story-reviews/` 目录，已创建 Epic 1 SR 输出目录。
+- 决策：SR 配置中的 Story 目录与当前仓库实际布局不一致。本次不修改 skill 配置，也不迁移 Story 文件；sub-agent 执行时明确要求以当前仓库真实 Story 位置 `_bmad-output/implementation-artifacts/1-*.md` 为 Epic 1 Story 输入。
+- 风险：当前工作区已有大量既有未提交改动。提交阶段只暂存本次 SR 闭环直接相关文件，避免误提交无关改动。
+- 已完成：全新 sub-agent `Huygens` 执行 `/bmenhance-sr-01-reviewer epic 1`，模型 `gpt-5.5`。
+- Reviewer 结果：不通过，生成 `epic-1-story-review-summary-20260526-round-1.md`。
+- Reviewer 记录 4 个阻塞/修订/裁决项：lock bootstrap、默认 `sdlc` canonical packages、Story 1.6 lifecycle order、pre-write JSON 边界。
+- 观察：SR-01 内部未能使用 Agent 工具启动三层子审查，已降级为单一 LLM 回退审查。由于 skill 明确允许全部失败时降级，继续进入 evaluator。
+- 已完成：全新 sub-agent `Ohm` 执行 `/bmenhance-sr-02-evaluator 1`，模型 `gpt-5.5`。
+- Evaluator 结果：不通过，需修订后再审；4 条 finding 全部确认有效，误报 0。
+- 推荐裁决记录：
+  - Lock bootstrap 走受限创建 `_speclite/` parent 的方案，避免改成 project-root 临时锁路径造成更大契约扩散。
+  - `sdlc` 缺包问题不在本轮补资产；先收紧默认 installed/mirror/ReadyCheck 语义，缺 canonical package 的 module 不可作为默认可镜像安装结果。
+  - Story 1.6 lifecycle 直接按 Story 1.4/1.5 gate 顺序修。
+  - Pre-write JSON 不新增未契约字段，避免临时扩张 public contract。
+- 已完成：全新 sub-agent `Lagrange` 执行 `/bmenhance-sr-03-fixer 1`，模型 `gpt-5.5`。
+- Fixer 结果：4 个 P1 item 已完成，无待确认项；修订记录已追加到 `epic-1-story-review-evaluation-20260526-round-1.md`。
+- 实际修改集中在 Epic 1 Story 文档、两个 owning SPEC、Epic 1 定义和第 1 轮 evaluation 文件。
+- 已关闭第 1 轮 reviewer/evaluator/fixer 三个已完成 sub-agent，避免后续长链路耗尽 agent 槽位。
+- 已完成：全新 sub-agent `Curie` 执行第 2 轮 `/bmenhance-sr-01-reviewer epic 1`，模型 `gpt-5.5`。
+- Round 2 reviewer 结果：通过；旧 4 个 P1 finding 均关闭，无新 blocker/patch/decision_needed。
+- 仍记录降级：内部 Agent 工具不可用，因此 SR-01 内部三层审查继续使用单一 LLM 回退。
+- 已完成：全新 sub-agent `Euler` 执行第 2 轮 `/bmenhance-sr-02-evaluator 1`，模型 `gpt-5.5`。
+- Round 2 evaluator 结果：不通过；需要修订 1 项，误报 1 项。
+- 本地核对：`find assets/source/speclite/sdlc-skills -name SKILL.md -type f` 返回 40 个结果，说明 round 2 reviewer 和部分 Story 文档仍保留陈旧 source inventory 描述。
+- 已关闭第 2 轮 reviewer/evaluator 两个已完成 sub-agent。
+- 已完成：全新 sub-agent `Lorentz` 执行第 2 轮 `/bmenhance-sr-03-fixer 1`，模型 `gpt-5.5`。
+- Fixer 结果：1 个 P1 item 已修订，无待确认项；round-2 evaluation 文件已追加修订执行记录。
+- 修订范围保持在 Story 1.3/1.5/1.6 与 round-2 evaluation，未触碰源码和 `assets/source/speclite`。
+- 已关闭第 2 轮 fixer sub-agent。
+- 已完成：全新 sub-agent `Einstein` 执行第 3 轮 `/bmenhance-sr-01-reviewer epic 1`，模型 `gpt-5.5`。
+- Round 3 reviewer 结果：通过；`sdlc-skills` inventory stale 已关闭；无 blocker/patch/decision_needed。
+- Reviewer 标出 2 个 defer：`project-context.md` placeholder 和 Architecture 04 progress step 示例残留。当前 reviewer 判断不阻塞 Epic 1 Story 进入 dev-story；仍需 evaluator 独立确认。
+- 已完成：全新 sub-agent `Hume` 执行第 3 轮 `/bmenhance-sr-02-evaluator 1`，模型 `gpt-5.5`。
+- Round 3 evaluator 结果：通过，可直接进入开发；确认 reviewer 通过；需要修订 item 0，误报 0。
+- 停止条件：已满足。最新 reviewer 与 evaluator 均通过。
+- 已关闭第 3 轮 reviewer/evaluator 两个已完成 sub-agent。
+- 下一步：启动全新 sub-agent 使用 `git-commit-convention`，模型 `gpt-5.4`，默认中文，本地提交，不推送。

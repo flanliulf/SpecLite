@@ -384,6 +384,8 @@ Per-command data contract：
 
 Command data 引用的 nested types 是 public projections。它们是 consumers 可以依赖的唯一字段；internal resolver、installer、validation 和 update models 可以携带额外 private fields，但 reporters 不得把 private fields 泄露到 public JSON。
 
+对 `install`，pre-write module/config state 必须停留在当前契约内。在 manifest/index installed-state projection 存在前，`data.installedModules` 只能表示从现有有效 manifest 读取到的已安装模块事实，或在 fresh pre-write flow 中为空。它不得被重载为 selected、pending、planned 或 configured modules。写入授权前的 pending / selected / config state 通过 `completedSteps`、`pendingSteps`、command `issues`、`nextActions` 和 human-readable summary 表达。未来如需 `selectedModules`、`pendingModuleSelection` 或 config status/path 字段，必须先更新本 SPEC，再更新 executable schema module、reporters、tests 和 fixtures。
+
 ### Public Projection Types（公开投影类型）
 
 下面的 `SourceDescriptor` 和 `SourceIntegrityEvidence` 是 public JSON projections。Trust、evidence、write eligibility、source type rules 和 validate no-network boundaries 由 `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.md` 负责。
@@ -558,7 +560,7 @@ Special orders：
 - `skippedPaths`：normalized project-relative POSIX path。
 - `completedSteps`：command-defined stable lifecycle step order，不是 execution timing。
 - `pendingSteps`：command-defined stable lifecycle step order，不是 execution timing。
-- `installedModules`：source manifest module order；如果不存在，则按 normalized module id lexicographically 排序。
+- `installedModules`：来自 manifest/source projection 的 installed-state module order；pre-write fresh install output 使用 `[]`，除非正在报告 existing valid installed state。该数组不得承载 selected/pending/config state。
 
 Public JSON arrays 不得依赖 filesystem traversal、object insertion、validation rule execution、adapter completion 或 async completion order。
 

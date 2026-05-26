@@ -58,6 +58,13 @@
 **则** 命令返回符合 `CommandResult` 契约的 install failure envelope
 **并且** 输出可用于 fixture assertion 的确定性 issue 字段。
 
+**Implementation Tasking Guidance（实现拆分建议）：**
+
+- 先建立 ESM package、commander command layer、tsup/tsx/vitest 和 `bin.speclite`。
+- 再建立 executable contract anchors 与 producer/consumer contract tests。
+- 再接入 runtime/platform guard，并复用 diagnostics contract 输出 failure envelope。
+- 最后补最小 fixture expected output skeleton；不得在 guard 或 CLI orchestration 中临时定义第二套 JSON shape。
+
 ## Story 1.2: Project Target Directory Resolution And Existing Install Detection（项目目标目录解析与既有安装检测）
 
 作为项目维护者，
@@ -127,8 +134,8 @@
 
 **前提** 用户请求 `install --json` 输出
 **当** 模块选择阶段完成或失败
-**则** 机器可读输出会包含可用于自动化判断的 installedModules 或 pending module selection 信息
-**并且** 不依赖 human-readable summary 承载自动化必需字段。
+**则** 机器可读输出仅使用当前 `CommandResult<InstallCommandData>` 字段表达状态
+**并且** pre-write fresh install 中 `installedModules` 为空，pending / selected module state 通过 `completedSteps`、`pendingSteps`、`issues`、`nextActions` 和 human-readable summary 表达。
 
 ## Story 1.4: Project Config Initialization（项目配置初始化）
 
@@ -170,7 +177,8 @@
 
 **前提** 用户请求 `install --json` 输出
 **当** 配置初始化完成或失败
-**则** 机器可读输出会包含配置初始化状态、关键配置路径和 pending/completed step 信息
+**则** 机器可读输出通过 `completedSteps`、`pendingSteps`、`paths`、`issues` 和 `nextActions` 表达配置初始化状态
+**并且** 不新增未契约化 config blob、selected module field 或 pending module field
 **并且** 不泄露 home directory、环境变量或认证信息。
 
 ## Story 1.5: Runtime Structure, Artifact Directory And IDE Mirror Creation（运行时结构、产物目录与 IDE 镜像创建）
@@ -184,7 +192,8 @@
 **前提** 用户已确认安装目录、模块选择和项目配置
 **当** 系统进入写入阶段
 **则** 系统会创建 `_speclite` metadata/control hub
-**并且** 写入 shared scripts、module directories、configuration、help catalog 和 manifest/index 所需的 installer-owned 文件。
+**并且** fresh install 可在 gate 完成后先创建 `_speclite/` 作为 `_speclite/.lock` parent，并将该受限目录创建视为 lock acquisition 的一部分
+**并且** 除 lock parent 和 lock file 外，shared scripts、module directories、configuration、help catalog 和 manifest/index 等 installer-owned mutation 都必须在 lock 获取成功后执行。
 
 **前提** 项目配置中定义了过程产物输出目录
 **当** 系统创建 artifact repository
@@ -194,7 +203,8 @@
 **前提** 用户选择了 `claude` IDE target
 **当** 系统创建 IDE execution mirror
 **则** 系统会把所选 canonical skills 安装到 `.claude/skills`
-**并且** 记录每个 skill 的 canonical identity、target path 和 source reference。
+**并且** 记录每个 skill 的 canonical identity、target path 和 source reference
+**并且** 缺 canonical skill package 的 module 不得作为默认 installed module 进入 IDE mirror 或 ReadyCheck，除非后续补齐 packages 或 owning SPEC 明确 metadata-only module contract。
 
 **前提** 用户选择了 `agents` IDE target
 **当** 系统创建 IDE execution mirror
@@ -214,7 +224,7 @@
 **前提** 任一关键写入步骤失败
 **当** 命令返回失败结果
 **则** 系统不会展示 ready summary
-**并且** 输出 completed steps、failed step、pending steps 和 manual action。
+**并且** 通过 `CommandResult.status`、`issues`、`completedSteps`、`pendingSteps` 和 manual action 表达失败，不新增未契约化 `failedStep` 字段。
 
 ## Story 1.6: Install Progress And Ready Summary（安装进度与就绪摘要）
 
@@ -226,13 +236,13 @@
 
 **前提** 用户执行 `speclite install`
 **当** 安装流程运行
-**则** 系统会按顺序展示 source discovery、manifest generation、IDE mirror creation、config initialization 和 ready check 阶段状态
+**则** 系统会按顺序展示 source discovery / module selection、config initialization、runtime structure、IDE mirror creation、manifest generation、ready check 和 ready summary 阶段状态
 **并且** 每个阶段只在实际开始或完成时报告对应状态
 **并且** machine-readable progress `stepId` 使用 stable lower-kebab id，例如 `ready-check`
 **并且** progress `stepId` 只作为 fixture-observable deterministic signal，automation 依赖必须读取 `CommandResult.data.completedSteps` 和 `CommandResult.data.pendingSteps`
 **并且** human-readable step label 可以是 `ready check`，但 contract/internal guard 名称必须是 `ReadyCheck`。
 
-**前提** source discovery、manifest generation、IDE mirror creation、config initialization 和 ReadyCheck 全部成功
+**前提** source discovery / module selection、config initialization、runtime structure、IDE mirror creation、manifest generation 和 ReadyCheck 全部成功
 **当** 安装流程完成
 **则** 系统会展示 SpecLite ready summary
 **并且** 摘要包含安装位置、manifest version、source descriptor、已安装模块、IDE targets、关键目录和下一步命令。
@@ -240,6 +250,7 @@
 **前提** install 内部运行 ReadyCheck
 **当** 系统判断是否可以展示 ready summary
 **则** ReadyCheck 只检查 manifest/index 可读、source descriptor projection 有效、selected IDE mirrors 和 required installed skill entries 可见、required runtime paths 存在，以及本次 install 没有 blocking issue 或 failed required step
+**并且** 默认 installed modules 必须具备 canonical skill package evidence，缺 packages 的 module 不得计入 ready result，除非 owning SPEC 明确 metadata-only module contract
 **并且** ReadyCheck 不执行 full hash scan、remote source access、implicit update check 或 repair planning。
 
 **前提** 已配置一个或多个 AI IDE targets
@@ -250,7 +261,7 @@
 **前提** 任一 required step 失败
 **当** 命令结束
 **则** 系统不会展示 ready summary
-**并且** 失败结果会列出 completed steps、failed step、pending steps 和 manual action。
+**并且** 失败结果通过 `CommandResult.status`、`issues`、completed steps、pending steps 和 manual action 表达，不新增未契约化 `failedStep` 字段。
 
 **前提** 用户请求 `install --json` 输出
 **当** 安装完成、warning 或 failure
@@ -261,3 +272,13 @@
 **当** 命令生成最终输出
 **则** 两种输出共享同一 command status 与 issue model
 **并且** automation 依赖的字段必须进入 structured JSON 或 file contract。
+
+**前提** install ready summary 使用 human-readable output
+**当** renderer 采用 Evidence profile 展示安装结果
+**则** 输出必须按稳定顺序包含 Summary、completed steps、installed modules、IDE targets、key paths 和 Next actions
+**并且** 每个 path 应标明所属空间或角色，例如 metadata/control hub、IDE execution plane 或 artifact repository。
+
+**前提** install output 运行在 `NO_COLOR`、non-TTY 或 CI 环境
+**当** 系统渲染 progress、failure 或 ready summary
+**则** 输出不得包含 ANSI escape、spinner-only progress 或依赖颜色/符号才能理解的状态
+**并且** status、step id、target id、path 和 next action 必须有文本等价表达。
