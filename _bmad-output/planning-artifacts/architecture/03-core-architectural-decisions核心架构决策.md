@@ -118,6 +118,8 @@ MVP 不适用。未来企业策略控制可以叠加在 source/channel allowlist
 **Error Handling Standard（错误处理标准）：**
 所有失败在内部返回 structured diagnostic objects，再渲染为 human-readable CLI output 或 `--json` output。MVP JSON output 必须复用同一 issue model。Human-readable output 可以更丰富，但不得承载 structured JSON 或 file contract 中不存在的自动化依赖；progress events/spinner output 不是 MVP automation API。Machine-readable progress `stepId` 只作为 fixture-observable deterministic signal；自动化必须依赖 `CommandResult.data.completedSteps`、`CommandResult.data.pendingSteps` 或 owning SPEC 中定义的 file contracts。
 
+`src/diagnostics/output.ts` 拥有 Compact、Evidence 和 Structured output profiles 的渲染边界。Human-readable renderer 必须支持 terminal width fallback、`NO_COLOR`、non-TTY、CI 和颜色/符号的文本等价表达；窄终端表格可以降级为 key-value block，但不得丢失 severity、issueId、affectedPath、targetId、entryPath、next action、planned effect、conflict reason 或 artifact metadata。Structured JSON renderer 不受 terminal width、TTY、颜色、locale 或平台影响，且不得包含 ANSI escape、图标或 human-only 装饰字段。
+
 **Rate Limiting（限流）：**
 MVP 不适用，因为没有服务器请求面。
 

@@ -192,6 +192,10 @@ FR78: 企业规范负责人可以查看包含阶段入口覆盖率、标准产�
 
 Post-MVP FR72-FR78 只作为 backlog inventory，不得进入 MVP sprint backlog、MVP implementation readiness gate 或 MVP release gate。MVP 只需保持 `CommandResult`、manifest/index、fixture 和 owning SPEC 边界可被这些未来能力消费。
 
+### Traceability Count Convention（可追踪计数口径）
+
+本文档保留 PRD 的 base numbering：FR1-FR78 与 NFR1-NFR40 表示主编号范围。为 implementation readiness、fixture planning 和 story acceptance tracking，lettered extensions 也作为独立可追踪条目统计；当前显式条目为 94 个 FR entries 与 95 个 NFR entries。后续报告应同时说明 base range 与 explicit tracked entry count，避免把 lettered extensions 误判为缺失或额外范围。
+
 ## NonFunctional Requirements（非功能需求）
 
 NFR1: 在常规 fixture 项目中，fresh install 必须至少输出 source discovery、manifest generation、IDE mirror creation、config initialization 和 ready check 5 个阶段状态；fixture baseline 应记录阶段顺序和完成结果。Machine-readable progress `stepId` 必须使用 stable lower-kebab id，例如 `ready-check`，作为 fixture-observable deterministic signal；它不是 MVP automation API。Automation 依赖必须读取 `CommandResult.data.completedSteps` 和 `CommandResult.data.pendingSteps`。human-readable step label 可以是 ready check；contract/internal guard 名称统一为 ReadyCheck。阶段耗时只作为 performance evidence 或 human-readable/profiling 数据，默认不得进入 stable command JSON snapshots。
@@ -484,7 +488,25 @@ NFR40d: Release packaging acceptance 必须作为 release checklist gate 生成 
 
 ## UX Design Requirements（UX 设计需求）
 
-无独立 UX Design 文档；本轮未提取 UX-DR。
+已纳入独立 UX Design 文档：`_bmad-output/planning-artifacts/ux-design-specification.md`。
+
+UX 设计确认 SpecLite MVP 不提供传统 Web、mobile 或 desktop GUI；核心体验是 terminal + local filesystem control plane。UX 要求通过 CLI 输出、文件系统空间模型、structured JSON、fixture expected outputs 和文档示例共同实现。
+
+本轮提取的 UX-DR 如下：
+
+- UX-DR1: Human-readable output 与 `--json` output 必须共享同一 semantic model；automation 依赖字段必须进入 structured JSON 或 file contract，不得只存在于 human-readable 文案。
+- UX-DR2: 输出层必须支持 Compact、Evidence、Structured 三类 presentation profiles；`status` 默认偏 compact，`install`/`validate`/`update` 默认偏 evidence，`--json`/fixture/CI 使用 structured。
+- UX-DR3: Ready summary 必须展示可复核证据，包括 completed steps、installed modules、IDE targets、key paths 和 next actions，而不是只输出 `done` 或 `success`。
+- UX-DR4: Phase Coverage Matrix 必须可作为方法论导航和治理证据，展示 phaseId、phaseLabel、moduleId、canonicalSkillId、targetId、entryPath、activationTarget、status 和 artifactContract。
+- UX-DR5: Validation Issue Row 必须包含 severity、category、issueId、affectedPath、impact 和 suggestedNextStep；颜色或符号不得成为唯一语义载体。
+- UX-DR6: Update Plan Block 必须在授权前展示 planned effects、write authorization status、changed/skipped/conflict paths 和 protected boundaries。
+- UX-DR7: Filesystem Space Map 必须把 `_speclite`、IDE execution plane、`_speclite-output` 和 project knowledge 的 path role / ownership / safe action 表达清楚。
+- UX-DR8: Artifact Evidence Card 必须展示 artifact path、workflowType、sourceSkill、generatedAt、configured root 和 default output path，并明确 workflow-owned artifacts 不由 install/update 静默覆盖。
+- UX-DR9: Human-readable output 必须在 compact terminal width、standard width、wide width 下保持关键字段可读；窄终端宽表格必须降级为 key-value block。
+- UX-DR10: `NO_COLOR`、non-TTY 和 CI 环境下 human-readable output 不得包含 ANSI escape，且不依赖 spinner-only progress、颜色、图标或动态覆盖行传达唯一信息。
+- UX-DR11: 文档示例默认使用无颜色、固定顺序、可复制输出，并应与 fixture expected outputs 的结构语言一致。
+
+这些 UX-DR 通过现有 stories 承接，不新增 MVP Epic：Story 1.6 承接 ready summary 与 install progress；Story 3.5 承接 shared semantic model 与 renderer profiles；Story 3.6 承接 validate ordering、terminal fallback 和 no-color/non-TTY 可读性；Story 4.3 承接 update plan block；Story 6.1 与 Story 6.4 承接 fixture/snapshot、terminal width、no-color/CI 和 cross-platform evidence。
 
 ## FR Coverage Map（FR 覆盖映射）
 

@@ -126,6 +126,16 @@
 **则** machine-readable data 会区分 planned effects、actual apply results、skipped paths 和 conflicts
 **并且** 不把逐路径 conflicts 复制成多个 command-level issues。
 
+**前提** update plan 使用 human-readable output 展示
+**当** 系统进入写入授权前的 Evidence profile
+**则** 输出必须明确展示 planned effects、write authorization status、changed paths、skipped paths、conflicts 和 protected boundaries
+**并且** conflicts 与 skipped paths 必须包含稳定 reason code 或文本等价说明，不能只依赖颜色、图标或表格位置传达含义。
+
+**前提** update plan 在窄终端、`NO_COLOR`、non-TTY 或 CI 环境展示
+**当** renderer 降级表格或移除颜色
+**则** affected path、ownership、proposed action、conflict reason、suggested next step 和是否需要 `--yes` 仍必须可读
+**并且** human-readable output 不得把 automation 依赖字段作为唯一承载位置。
+
 ## Story 4.4: Project Operation Lock And Safe Write（项目操作锁与安全写入）
 
 作为项目维护者，

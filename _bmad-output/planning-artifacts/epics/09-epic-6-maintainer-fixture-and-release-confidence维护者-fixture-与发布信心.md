@@ -30,6 +30,16 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 允许的 timestamp 字段必须由 schema 显式声明并排除比较
 **并且** 未声明字段不得引入随机值、环境相关文本或不稳定顺序。
 
+**前提** fixture snapshot 包含 human-readable command output
+**当** 比较 `status`、`validate`、`install` 或 `update` expected outputs
+**则** fixture 必须覆盖 Compact、Evidence 和 Structured profiles 的代表性输出
+**并且** stable comparison 不得依赖颜色、ANSI escape、terminal width、spinner-only progress、absolute local path 或 checkout root。
+
+**前提** fixture expected output 包含表格化或列表化诊断
+**当** 窄终端触发 key-value fallback
+**则** severity、issueId、affectedPath、targetId、entryPath、next action、planned effect、conflict reason 和 artifact metadata 等关键字段仍必须可读且可断言
+**并且** 不得因为布局降级而丢失 automation 所需字段。
+
 **前提** 契约行为发生变化
 **当** 维护者需要更新 fixture expected outputs
 **则** 必须先更新 owning SPEC 和 executable schema/parser
@@ -141,6 +151,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 必须同一变更中更新 owning SPEC、executable schema/parser 和 fixture assertions
 **并且** 不得只改 snapshot 让测试通过。
 
+**Implementation Tasking Guidance（实现拆分建议）：**
+
+- 先实现 `ide-drift` fixture 的最小闭环，锁定 canonical skill hash mismatch、target、suggested next step 和 human/json output parity。
+- 再分批实现 `source-integrity` sub-cases，每个 sub-case 保持独立 input、expected command JSON、expected issues 和 redaction assertions，避免把 trustStatus、write planning 和 redaction 断言混在一个大 fixture。
+- 最后实现 `resolve-parity` fixture，把 config merge、customization merge、diagnostic stderr shape 和 Python parity baseline 分成可独立失败的断言组。
+
 ## Story 6.4: Path Portability And Runtime Matrix Evidence（路径可移植性与运行时矩阵证据）
 
 作为 SpecLite 维护者，
@@ -188,6 +204,16 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **当** 命令在支持平台上执行
 **则** command id、path normalization、exit code 和 JSON output 语义保持稳定
 **并且** 不依赖 shell-specific path separators 或别名行为。
+
+**前提** fixture 覆盖 terminal width 差异
+**当** human-readable command output 在小于 80 columns、80-119 columns 和大于等于 120 columns 下生成
+**则** Compact 与 Evidence output 的关键字段仍可读且顺序稳定
+**并且** 表格 fallback 不得丢失 path、issue id、target id、next action 或 conflict reason。
+
+**前提** fixture 覆盖 `NO_COLOR`、non-TTY、CI 和 copy-paste review 场景
+**当** human-readable command output 在这些环境下生成
+**则** 输出不得包含 ANSI escape，并且 status、severity、empty state、checked categories 和 suggested next step 均有文本等价表达
+**并且** screen reader 或纯文本复制审查不依赖颜色、图标或动态覆盖行才能理解结果。
 
 **前提** release packaging acceptance 运行
 **当** 维护者构建 npm package、local tarball 或 offline bundle

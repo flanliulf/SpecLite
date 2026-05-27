@@ -21,6 +21,8 @@ Implementation Patterns 支持核心架构决策。路径规范化、issue model
 **Functional Requirements Coverage（功能需求覆盖）：**
 FR1-FR78 及当前 PRD 中的 lettered FR extensions（FR23a、FR28a、FR35a-FR35c、FR41a-FR41c、FR51a-FR51b、FR52a-FR52c、FR63a、FR71a-FR71b）均有架构支撑：
 
+按 traceability 口径，FR1-FR78 是 base numbering；纳入 lettered extensions 后，explicit tracked FR entries 共 94 条。Architecture 与 Epics 使用这一口径做覆盖校验，避免把 base numbering 与 explicit entry count 混用。
+
 - FR1-FR17 → installer/source/modules/ide/manifest。
 - FR18-FR24 → help index、IDE adapter、skill artifact fixture；FR24 的阶段覆盖矩阵由 manifest/help index/installed skill entries 本地生成和验证。
 - FR25-FR35、FR28a 与 FR35a-FR35c → status/validate、validation rules、diagnostics、human/json reporters。
@@ -32,7 +34,7 @@ FR1-FR78 及当前 PRD 中的 lettered FR extensions（FR23a、FR28a、FR35a-FR3
 - FR72-FR78 → Post-MVP 命令与 reporter 扩展边界；FR78 的流程覆盖报告在 MVP 最小阶段覆盖矩阵和 validate output 之上扩展覆盖率、趋势、导出和团队/多项目治理视图。
 
 **Non-Functional Requirements Coverage（非功能需求覆盖）：**
-NFR 已被架构显式覆盖：
+NFR 已被架构显式覆盖。按 traceability 口径，NFR1-NFR40 是 base numbering；纳入 lettered sub-requirements 后，explicit tracked NFR entries 共 95 条：
 
 - Performance（性能）：`status` 轻量读取，`validate` 分层检查，`update` 使用 hash skip。
 - Reliability & Determinism（可靠性与确定性）：manifest/index、fixture expected outputs、stable issue model。
@@ -40,6 +42,7 @@ NFR 已被架构显式覆盖：
 - Compatibility & Portability（兼容性与可移植性）：Node 22/24 policy、project-relative POSIX paths、跨平台 path normalization。
 - Integration Quality（集成质量）：data-driven IDE adapters、mirror validator、canonical skill hash boundary。
 - Diagnostics & Observability（诊断与可观测性）：`CommandResult`、`ValidationIssue`、human/json reporters。
+- UX Output & Accessibility（UX 输出与可访问性）：CLI renderer profiles、terminal width fallback、`NO_COLOR`、non-TTY、CI、文本等价表达和 fixture expected outputs 已由 Epics/Story AC 承接。
 - Maintainability & Extensibility（可维护性与可扩展性）：模块边界与 schema/version 扩展点。
 
 ## Implementation Readiness Validation（实现就绪验证）✅

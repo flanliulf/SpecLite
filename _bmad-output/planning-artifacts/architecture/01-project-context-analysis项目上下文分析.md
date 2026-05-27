@@ -3,7 +3,7 @@
 ## Requirements Overview（需求概览）
 
 **Functional Requirements（功能需求）：**
-SpecLite 的功能需求覆盖一个完整的本地安装控制面，而不是单点脚本能力。PRD 中共有 78 条 FR，主要分布在以下领域：
+SpecLite 的功能需求覆盖一个完整的本地安装控制面，而不是单点脚本能力。PRD 使用 FR1-FR78 作为 base numbering；纳入 lettered extensions 后，explicit tracked FR entries 共 94 条，主要分布在以下领域：
 
 - Installation & Project Onboarding（安装与项目接入）：指定安装目录、选择模块、选择 AI IDE target、生成 `_speclite` runtime、`_speclite-output` artifact repository 和 IDE skill mirrors。
 - Methodology Discovery & Execution（方法论发现与执行）：生成 IDE discovery metadata，将阶段化研发能力映射为 canonical skill id、IDE entry path 和 activation target，并支持 SPEC、方案评审、故事规划、实现、测试和审查等能力调用。
@@ -18,7 +18,7 @@ SpecLite 的功能需求覆盖一个完整的本地安装控制面，而不是�
 架构上，这些需求意味着系统至少需要 source discovery、module manager、installer pipeline、IDE adapter registry、manifest/index generator、config/customization resolver、validator、update protection 和 fixture test harness 等组件。
 
 **Non-Functional Requirements（非功能需求）：**
-NFR 共 40 条，对架构有直接约束：
+PRD 使用 NFR1-NFR40 作为 base numbering；纳入 lettered sub-requirements 后，explicit tracked NFR entries 共 95 条，对架构有直接约束：
 
 - Performance（性能）：`status` 需要轻量返回，`validate` 和 `update` 需要分阶段输出并避免重复写未变化文件。
 - Reliability & Determinism（可靠性与确定性）：相同 source、配置和 IDE target 应生成可重复结果；validate issue set 必须稳定。
