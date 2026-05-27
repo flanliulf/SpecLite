@@ -1,6 +1,6 @@
 # Story 2.5: Workflow Artifact Output And Metadata Validation（Workflow Artifact 输出与 Metadata 校验）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -71,73 +71,73 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置 stories 与当前仓库实现状态（AC: 1-8）
-  - [ ] 确认 Story 1.1-1.6 已真实实现，而不只是 story context 处于 `ready-for-dev`：至少需要存在 `package.json`、`src/`、`test/`、`src/fs/path-normalizer.ts`、`src/diagnostics/command-result-schema.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/config/resolve-output-schema.ts`、`src/validation/issue-model.ts` 和 fixture harness。
-  - [ ] 确认 Story 2.1 已真实提供 discovery metadata / `artifactContract` projection，Story 2.2 已真实提供 self-contained IDE entries，Story 2.3 已真实提供 installed activation target，Story 2.4 已真实提供 `speclite resolve config/customization` runtime support。
-  - [ ] 如果上述 implementation anchors 仍不存在，停止 Story 2.5 实现，先完成前置 stories；不得在 Story 2.5 中重建 CLI scaffold、manifest generator、IDE target writer、activation resolver 或 config/customization resolver。
-  - [ ] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置 stories 与当前仓库实现状态（AC: 1-8）
+  - [x] 确认 Story 1.1-1.6 已真实实现，而不只是 story context 处于 `ready-for-dev`：至少需要存在 `package.json`、`src/`、`test/`、`src/fs/path-normalizer.ts`、`src/diagnostics/command-result-schema.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/config/resolve-output-schema.ts`、`src/validation/issue-model.ts`、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests。
+  - [x] 确认 Story 2.1 已真实提供 discovery metadata / `artifactContract` projection，Story 2.2 已真实提供 self-contained IDE entries，Story 2.3 已真实提供 installed activation target，Story 2.4 已真实提供 `speclite resolve config/customization` runtime support。
+  - [x] 如果上述 implementation anchors 仍不存在，停止 Story 2.5 实现，先完成前置 stories；不得在 Story 2.5 中重建 CLI scaffold、manifest generator、IDE target writer、activation resolver 或 config/customization resolver。
+  - [x] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 收口 artifact contract executable shape 与 metadata helper（AC: 2, 3, 4, 5, 8）
-  - [ ] 在 `src/manifest/manifest-schema.ts` 或 existing manifest/index schema anchor 中定义/复用 artifact contract 与 required metadata field parser；不要在 workflow helper、renderer 或 fixture helper 中手写第二套 schema。
-  - [ ] 如需新增 helper module，优先放在现有边界内，例如 `src/manifest/artifact-contract.ts`、`src/validation/artifact-metadata.ts` 或等价模块；不要引入宽泛的 workflow framework 目录，除非前序实现已建立该边界。
-  - [ ] 复用 Story 2.1 的 `artifactContract` eligibility / normalization matrix：只有可解析到 configured artifact root 的单一 project-relative output 可进入 contract；多输出 rows 保持 absent / Post-MVP；`_speclite/custom`、`_speclite/_memory` 等 control/custom paths 不进入 artifact contract。
-  - [ ] 定义最小 artifact metadata shape：`workflowType`、`sourceSkill`、`generatedAt`；如实现需要 `artifactType` 或 `metadataVersion`，必须确认 owning SPEC 已允许，或先更新 SPEC。
-  - [ ] `workflowType` 必须是 non-empty stable string；建议使用 source/workflow metadata 中的 stable lower-kebab value，但不得从 file title 或 prose 猜测。
-  - [ ] `sourceSkill` 必须使用 installed canonical skill id；不得使用 `display-name`、`menu-code`、target id 或 branded IDE name。
-  - [ ] `generatedAt` 使用 runtime-generated ISO 8601 string；不要使用 locale-specific format、filesystem mtime、human-readable date 或 fixture-local fake string 作为 public value。
+- [x] Task 2: 收口 artifact contract executable shape 与 metadata helper（AC: 2, 3, 4, 5, 8）
+  - [x] 在 `src/manifest/manifest-schema.ts` 或 existing manifest/index schema anchor 中定义/复用 artifact contract 与 required metadata field parser；不要在 workflow helper、renderer 或 fixture helper 中手写第二套 schema。
+  - [x] 如需新增 helper module，优先放在现有边界内，例如 `src/manifest/artifact-contract.ts`、`src/validation/artifact-metadata.ts` 或等价模块；不要引入宽泛的 workflow framework 目录，除非前序实现已建立该边界。
+  - [x] 复用 Story 2.1 的 `artifactContract` eligibility / normalization matrix：只有可解析到 configured artifact root 的单一 project-relative output 可进入 contract；多输出 rows 保持 absent / Post-MVP；`_speclite/custom`、`_speclite/_memory` 等 control/custom paths 不进入 artifact contract。
+  - [x] 定义最小 artifact metadata shape：`workflowType`、`sourceSkill`、`generatedAt`；如实现需要 `artifactType` 或 `metadataVersion`，必须确认 owning SPEC 已允许，或先更新 SPEC。
+  - [x] `workflowType` 必须是 non-empty stable string；建议使用 source/workflow metadata 中的 stable lower-kebab value，但不得从 file title 或 prose 猜测。
+  - [x] `sourceSkill` 必须使用 installed canonical skill id；不得使用 `display-name`、`menu-code`、target id 或 branded IDE name。
+  - [x] `generatedAt` 使用 runtime-generated ISO 8601 string；不要使用 locale-specific format、filesystem mtime、human-readable date 或 fixture-local fake string 作为 public value。
 
-- [ ] Task 3: 实现 configured artifact root 与 output path resolution（AC: 1, 6, 7）
-  - [ ] 通过 Story 2.4 的 `speclite resolve config --project-root <project>` 读取 `output_folder`、`planning_artifacts`、`implementation_artifacts`、`project_knowledge` 或 module-specific output convention；不得调用 legacy Python resolver 或读取 source checkout config 作为 installed runtime contract。
-  - [ ] 解析 `module-help.csv` / phase coverage / artifactContract 中的 output-location 时，只允许使用已解析 config 中的 project-bound variables；没有明确 contract 时保持 artifactContract absent 或返回 reserved diagnostic，不得猜测路径。
-  - [ ] 对 `{planning_artifacts}|{project_knowledge}` 这类多输出 source row，MVP 不投影为单一 `artifactContract`；只有 future owning SPEC 定义 multi-output shape 后才能纳入。
-  - [ ] 对 `{project-root}/_speclite/custom`、`{project-root}/_speclite/_memory/...` 等 control/custom paths，保持 `artifactContract` absent，并避免 workflow artifact validator 将其视为产物输出目录。
-  - [ ] 所有 artifact root、default output path、actual artifact path 先 normalize 为 project-relative POSIX path，再执行 project boundary、symlink escape、path escape 和 unwritable directory 检查。
-  - [ ] 对 `_speclite-output` 或 configured output root 只创建缺失目录；不要清空、重排、格式化或覆盖已有 workflow-owned artifacts。
-  - [ ] 若 artifact root 位于项目外、通过 symlink escape 指向项目外、不可写或缺失 required directory，使用 `artifact-path.*` reserved issue id。
+- [x] Task 3: 实现 configured artifact root 与 output path resolution（AC: 1, 6, 7）
+  - [x] 通过 Story 2.4 的 `speclite resolve config --project-root <project>` 读取 `output_folder`、`planning_artifacts`、`implementation_artifacts`、`project_knowledge` 或 module-specific output convention；不得调用 legacy Python resolver 或读取 source checkout config 作为 installed runtime contract。
+  - [x] 解析 `module-help.csv` / phase coverage / artifactContract 中的 output-location 时，只允许使用已解析 config 中的 project-bound variables；没有明确 contract 时保持 artifactContract absent 或返回 reserved diagnostic，不得猜测路径。
+  - [x] 对 `{planning_artifacts}|{project_knowledge}` 这类多输出 source row，MVP 不投影为单一 `artifactContract`；只有 future owning SPEC 定义 multi-output shape 后才能纳入。
+  - [x] 对 `{project-root}/_speclite/custom`、`{project-root}/_speclite/_memory/...` 等 control/custom paths，保持 `artifactContract` absent，并避免 workflow artifact validator 将其视为产物输出目录。
+  - [x] 所有 artifact root、default output path、actual artifact path 先 normalize 为 project-relative POSIX path，再执行 project boundary、symlink escape、path escape 和 unwritable directory 检查。
+  - [x] 对 `_speclite-output` 或 configured output root 只创建缺失目录；不要清空、重排、格式化或覆盖已有 workflow-owned artifacts。
+  - [x] 若 artifact root 位于项目外、通过 symlink escape 指向项目外、不可写或缺失 required directory，使用 `artifact-path.*` reserved issue id。
 
-- [ ] Task 4: 实现 Markdown frontmatter metadata encoding（AC: 2, 3, 5, 8）
-  - [ ] 对 Markdown artifact，在文件第一个字节开始写入或更新 single leading YAML frontmatter block；如果文件已有 frontmatter，合并 required metadata fields 而不是追加第二个 block。
-  - [ ] 使用 Architecture-pinned `yaml@2.9.0` 或现有 YAML parser 解析/写入 frontmatter；不要静默新增 `gray-matter` 或其他 frontmatter dependency。
-  - [ ] 保留正文 Markdown 内容，不因写入 metadata 改写标题、列表、表格、中文内容或人工编辑段落。
-  - [ ] Frontmatter 中 required metadata fields 必须可被 validator 读取；不得只在完成消息、human-readable prose 或 comment 中记录。
-  - [ ] Tests 覆盖无 frontmatter、已有 frontmatter、已有 workflow state fields、缺失 metadata、invalid generatedAt 和多 frontmatter anti-pattern。
+- [x] Task 4: 实现 Markdown frontmatter metadata encoding（AC: 2, 3, 5, 8）
+  - [x] 对 Markdown artifact，在文件第一个字节开始写入或更新 single leading YAML frontmatter block；如果文件已有 frontmatter，合并 required metadata fields 而不是追加第二个 block。
+  - [x] 使用 Architecture-pinned `yaml@2.9.0` 或现有 YAML parser 解析/写入 frontmatter；不要静默新增 `gray-matter` 或其他 frontmatter dependency。
+  - [x] 保留正文 Markdown 内容，不因写入 metadata 改写标题、列表、表格、中文内容或人工编辑段落。
+  - [x] Frontmatter 中 required metadata fields 必须可被 validator 读取；不得只在完成消息、human-readable prose 或 comment 中记录。
+  - [x] Tests 覆盖无 frontmatter、已有 frontmatter、已有 workflow state fields、缺失 metadata、invalid generatedAt 和多 frontmatter anti-pattern。
 
-- [ ] Task 5: 实现 sidecar metadata encoding for non-Markdown and directory artifacts（AC: 2, 4, 5, 6）
-  - [ ] 对非 Markdown file artifact，在同目录写出 `<artifact-filename>.metadata.json`，并包含与 Markdown frontmatter 相同的 required metadata keys。
-  - [ ] 对 directory artifact，在 artifact directory 内写出 `metadata.json`。
-  - [ ] Sidecar JSON 必须 deterministic、UTF-8、无 absolute path、无 timestamp 以外的 non-stable field；`generatedAt` 作为允许的 non-stable field 只做 semantic parse。
-  - [ ] Sidecar metadata file 本身以 `workflow-owned` 处理，install/update/repair 不得把它当成 installer-owned changed path 或 repair candidate。
-  - [ ] 如果 sidecar 已存在，workflow helper 必须按该 workflow 的明确 output strategy 处理；installer/update logic 不能替 workflow 决定覆盖。
+- [x] Task 5: 实现 sidecar metadata encoding for non-Markdown and directory artifacts（AC: 2, 4, 5, 6）
+  - [x] 对非 Markdown file artifact，在同目录写出 `<artifact-filename>.metadata.json`，并包含与 Markdown frontmatter 相同的 required metadata keys。
+  - [x] 对 directory artifact，在 artifact directory 内写出 `metadata.json`。
+  - [x] Sidecar JSON 必须 deterministic、UTF-8、无 absolute path、无 timestamp 以外的 non-stable field；`generatedAt` 作为允许的 non-stable field 只做 semantic parse。
+  - [x] Sidecar metadata file 本身以 `workflow-owned` 处理，install/update/repair 不得把它当成 installer-owned changed path 或 repair candidate。
+  - [x] 如果 sidecar 已存在，workflow helper 必须按该 workflow 的明确 output strategy 处理；installer/update logic 不能替 workflow 决定覆盖。
 
-- [ ] Task 6: 接入 artifact-path validation 与 diagnostics（AC: 1, 5, 7, 8）
-  - [ ] 在 `src/validation/rules/artifact-path.ts` 或 existing artifact validation rule 中检查 configured artifact root、default output path、actual artifact path 和 required metadata value domains。
-  - [ ] Validation rule 只读取 installed manifest/index、phase coverage/discovery metadata、artifact files 和 sidecar metadata；不得访问 npm registry、Git remote、private registry、offline bundle origin 或 source checkout。
-  - [ ] 使用 taxonomy 中 reserved issue ids：`artifact-path.escapes-project`、`artifact-path.symlink-escape`、`artifact-path.missing-required-directory`、`artifact-path.unwritable-directory`、`artifact-path.fixture-write-failed`、`artifact-path.missing-required-metadata`、`artifact-path.invalid-required-metadata`。
-  - [ ] `details` 只能包含 deterministic、redaction-safe fields，例如 metadata key、artifact type、normalized path role 或 parse result；不得包含 raw absolute path、home directory、stack trace、timestamp、hash、raw parser error 或 artifact content excerpt。
-  - [ ] 不新增 `workflow-artifact` category、`metadata` category 或 free-form issue id；确需新增时先更新 validation taxonomy SPEC 和 fixture assertions。
+- [x] Task 6: 接入 artifact-path validation 与 diagnostics（AC: 1, 5, 7, 8）
+  - [x] 在 `src/validation/rules/artifact-path.ts` 或 existing artifact validation rule 中检查 configured artifact root、default output path、actual artifact path 和 required metadata value domains。
+  - [x] Validation rule 只读取 installed manifest/index、phase coverage/discovery metadata、artifact files 和 sidecar metadata；不得访问 npm registry、Git remote、private registry、offline bundle origin 或 source checkout。
+  - [x] 使用 taxonomy 中 reserved issue ids：`artifact-path.escapes-project`、`artifact-path.symlink-escape`、`artifact-path.missing-required-directory`、`artifact-path.unwritable-directory`、`artifact-path.fixture-write-failed`、`artifact-path.missing-required-metadata`、`artifact-path.invalid-required-metadata`。
+  - [x] `details` 只能包含 deterministic、redaction-safe fields，例如 metadata key、artifact type、normalized path role 或 parse result；不得包含 raw absolute path、home directory、stack trace、timestamp、hash、raw parser error 或 artifact content excerpt。
+  - [x] 不新增 `workflow-artifact` category、`metadata` category 或 free-form issue id；确需新增时先更新 validation taxonomy SPEC 和 fixture assertions。
 
-- [ ] Task 7: 暴露 artifact evidence，但不创建治理 dashboard（AC: 1, 5, 7）
-  - [ ] 在 `src/diagnostics/output.ts` 或 existing Evidence profile renderer 中支持 artifact evidence block / row，字段优先顺序为 artifact path、artifact type、workflowType、sourceSkill、generatedAt、configured root、default output path、metadata location。
-  - [ ] Human-readable output 可展示 artifact evidence，但 automation 必需字段必须进入 manifest/index、artifact metadata file、`CommandResult.data` 中已契约化字段或 fixture expected outputs。
-  - [ ] 窄终端、`NO_COLOR`、non-TTY 和 CI 输出不得丢失 artifact path、metadata key、issue id 或 next action。
-  - [ ] 不实现 Post-MVP coverage dashboard、trend report、multi-project governance rollup 或 richer artifact quality scoring。
+- [x] Task 7: 暴露 artifact evidence，但不创建治理 dashboard（AC: 1, 5, 7）
+  - [x] 在 `src/diagnostics/output.ts` 或 existing Evidence profile renderer 中支持 artifact evidence block / row，字段优先顺序为 artifact path、artifact type、workflowType、sourceSkill、generatedAt、configured root、default output path、metadata location。
+  - [x] Human-readable output 可展示 artifact evidence，但 automation 必需字段必须进入 manifest/index、artifact metadata file、`CommandResult.data` 中已契约化字段或 fixture expected outputs。
+  - [x] 窄终端、`NO_COLOR`、non-TTY 和 CI 输出不得丢失 artifact path、metadata key、issue id 或 next action。
+  - [x] 不实现 Post-MVP coverage dashboard、trend report、multi-project governance rollup 或 richer artifact quality scoring。
 
-- [ ] Task 8: 编写 focused tests、integration tests 和 `skill-artifact-loop` fixture assertions（AC: 1-8）
-  - [ ] Unit tests 覆盖 artifact metadata parser/writer：Markdown frontmatter、non-Markdown sidecar、directory metadata、required field presence、invalid value domains、generatedAt ISO parsing 和 snapshot normalization/exclusion。
-  - [ ] Unit tests 覆盖 path normalization：configured root、default output path、actual artifact path、project boundary、symlink/path escape、unwritable directory 和 project-relative POSIX output。
-  - [ ] Unit tests / fixture assertions 覆盖 Story 2.1 eligibility matrix：single configured artifact root eligible、multi-output absent / Post-MVP、control/custom paths absent、unknown or escaping path diagnostic。
-  - [ ] Unit tests 覆盖 workflow-owned protection：existing artifact / metadata sidecar 不被 install/update/repair changed paths 或 repair plan 收编。
-  - [ ] Integration tests 覆盖 installed skill 通过 `speclite resolve` 读取 config/customization 后写出一个 planning 或 review artifact，并记录 metadata。
-  - [ ] Fixture `test/fixtures/skill-artifact-loop/` 必须覆盖 installed IDE entry discovery、activation protocol、resolver access、artifact write、metadata value-domain validation 和 generatedAt normalization/exclusion。
-  - [ ] Fixture 只校验 artifact type、default output path、metadata location 和 metadata value domains；不要校验复杂 workflow 叙事质量、人工评审结论或内容完整度。
-  - [ ] 若新增 artifact kind、metadata field、issue id、fixture comparison behavior 或 public output field，必须在同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+- [x] Task 8: 编写 focused tests、integration tests 和 `skill-artifact-loop` fixture assertions（AC: 1-8）
+  - [x] Unit tests 覆盖 artifact metadata parser/writer：Markdown frontmatter、non-Markdown sidecar、directory metadata、required field presence、invalid value domains、generatedAt ISO parsing 和 snapshot normalization/exclusion。
+  - [x] Unit tests 覆盖 path normalization：configured root、default output path、actual artifact path、project boundary、symlink/path escape、unwritable directory 和 project-relative POSIX output。
+  - [x] Unit tests / fixture assertions 覆盖 Story 2.1 eligibility matrix：single configured artifact root eligible、multi-output absent / Post-MVP、control/custom paths absent、unknown or escaping path diagnostic。
+  - [x] Unit tests 覆盖 workflow-owned protection：existing artifact / metadata sidecar 不被 install/update/repair changed paths 或 repair plan 收编。
+  - [x] Integration tests 覆盖 installed skill 通过 `speclite resolve` 读取 config/customization 后写出一个 planning 或 review artifact，并记录 metadata。
+  - [x] Fixture `test/fixtures/skill-artifact-loop/` 必须覆盖 installed IDE entry discovery、activation protocol、resolver access、artifact write、metadata value-domain validation 和 generatedAt normalization/exclusion。
+  - [x] Fixture 只校验 artifact type、default output path、metadata location 和 metadata value domains；不要校验复杂 workflow 叙事质量、人工评审结论或内容完整度。
+  - [x] 若新增 artifact kind、metadata field、issue id、fixture comparison behavior 或 public output field，必须在同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-8）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 2.5 touched modules 的 focused Vitest tests 与相关 fixture tests。
-  - [ ] 运行或更新 `skill-artifact-loop` fixture；如前置 implementation 尚未完成，保留失败为有效前置信号，不要伪造 artifact loop pass。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Epic 3 full `status` / `validate` category coverage、Epic 4 update/repair behavior、Epic 6 full fixture matrix、Post-MVP command pointer、branded Copilot/Cursor target、governance dashboard、top-level `repair` / `sync` / `doctor` / `uninstall`。
+- [x] Task 9: 本地验证与范围控制（AC: 1-8）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 2.5 touched modules 的 focused Vitest tests 与相关 fixture tests。
+  - [x] 运行或更新 `skill-artifact-loop` fixture；如前置 implementation 尚未完成，保留失败为有效前置信号，不要伪造 artifact loop pass。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Epic 3 full `status` / `validate` category coverage、Epic 4 update/repair behavior、Epic 6 full fixture matrix、Post-MVP command pointer、branded Copilot/Cursor target、governance dashboard、top-level `repair` / `sync` / `doctor` / `uninstall`。
 
 ## Dev Notes（开发备注）
 
@@ -362,13 +362,44 @@ GPT-5 Codex
 - `python3 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-create-story --key workflow` failed because local `python3` lacks stdlib `tomllib`.
 - `python3.12 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-create-story --key workflow` resolved workflow successfully; `workflow.on_complete` is empty.
 - Full `sprint-status.yaml` was read before creation; `2-5-workflow-artifact-output-and-metadata-validation` was `backlog`, and `epic-2` was `in-progress`.
+- `python3 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` failed because local `python3` lacks stdlib `tomllib`; `python3.12 ... --key workflow` resolved successfully.
+- Preflight confirmed required Story 1.x / 2.1-2.4 implementation anchors exist: `package.json`, `src/`, `test/`, `src/fs/path-normalizer.ts`, `src/diagnostics/command-result-schema.ts`, `src/manifest/manifest-schema.ts`, `src/ide/adapter-registry.ts`, `src/config/resolve-output-schema.ts`, `src/validation/issue-model.ts`, `src/fixtures/fixture-contract.ts`, fixture assets/tests, `artifactContract`, installed activation targets and `speclite resolve` support.
+- Red phase: `npm test -- --run test/artifact-metadata.test.ts test/artifact-path-validation.test.ts test/skill-artifact-loop.test.ts` failed with missing `artifact-metadata` and `artifact-path` modules.
+- Green/refactor focused validation: `npm test -- --run test/artifact-metadata.test.ts test/artifact-path-validation.test.ts test/skill-artifact-loop.test.ts` passed with 3 files / 11 tests.
+- Validation: `npm run build` passed.
+- Validation: `npm test -- --run test/artifact-metadata.test.ts test/artifact-path-validation.test.ts test/skill-artifact-loop.test.ts test/manifest-discovery.test.ts test/runtime-structure.test.ts` passed with 5 files / 26 tests.
+- Validation: `npm test` passed with 19 files / 109 tests.
+- Validation: `git diff --check` passed.
 
 ### Completion Notes List（完成备注清单）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 - Story 2.5 created with `Status: ready-for-dev`.
 - Scope respected: this create-story run should not modify planning artifacts、Story 2.1/2.2/2.3/2.4、Epic 1 story files、source code or unrelated files.
+- Added canonical executable artifact metadata schema and artifact contract validation anchors in `src/manifest/manifest-schema.ts`, including required `workflowType` / `sourceSkill` / `generatedAt` parsing and project-relative POSIX output path validation.
+- Added `src/validation/artifact-metadata.ts` for Markdown leading YAML frontmatter merge/read, non-Markdown and directory sidecar metadata paths, deterministic sidecar JSON, generatedAt snapshot normalization and workflow-owned artifact path classification.
+- Added `src/validation/rules/artifact-path.ts` for structural configured root / default output / actual artifact path validation, project-boundary checks, symlink escape checks, missing/unwritable directory checks and reserved `artifact-path.*` metadata diagnostics with redaction-safe details.
+- Extended `src/diagnostics/output.ts` with artifact evidence rows containing artifact path, type, workflowType, sourceSkill, generatedAt, configured root, default output path and metadata location; no dashboard or scoring behavior was added.
+- Added focused unit tests for artifact metadata, sidecar behavior, workflow-owned protection, artifact-path diagnostics and artifact evidence output.
+- Extended `skill-artifact-loop` integration coverage to install an entry, resolve config/customization, write a metadata-bearing workflow artifact under the configured artifact root, validate metadata value domains and normalize `generatedAt`.
+- Added `test/fixtures/skill-artifact-loop/` fixture metadata documenting the minimal Story 2.5 release-gate surface.
 
 ### File List（文件清单）
 
-- `_bmad-output/implementation-artifacts/2-5-workflow-artifact-output-and-metadata-validation.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/2-5-workflow-artifact-output-and-metadata-validation.md`
+- `_bmad-output/implementation-artifacts/code-reviews/2-5-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/2-5-code-review/EXPERIMENT_NOTES.md`
+- `src/diagnostics/output.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/validation/artifact-metadata.ts`
+- `src/validation/rules/artifact-path.ts`
+- `test/artifact-metadata.test.ts`
+- `test/artifact-path-validation.test.ts`
+- `test/skill-artifact-loop.test.ts`
+- `test/fixtures/skill-artifact-loop/README.md`
+- `test/fixtures/skill-artifact-loop/fixture-case.json`
+
+### Change Log（变更日志）
+
+- 2026-05-27: Implemented workflow artifact metadata encoding, artifact path validation, artifact evidence output and the focused `skill-artifact-loop` metadata fixture; Story 2.5 moved to review.

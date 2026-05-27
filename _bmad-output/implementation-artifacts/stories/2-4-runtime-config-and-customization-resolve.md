@@ -1,6 +1,6 @@
 # Story 2.4: Runtime Config And Customization Resolve（Runtime Config 与 Customization Resolve）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -74,87 +74,87 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置 stories 与当前仓库实现状态（AC: 1-8）
-  - [ ] 确认 Story 1.1-1.6 已真实实现，而不只是 story context 处于 `ready-for-dev`：至少需要存在 `package.json`、`src/`、`test/`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/commands/resolve.ts` 或命令注册 anchor、`src/config/resolve-output-schema.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/config-schema.ts`、`src/config/customization-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 和 fixture harness。
-  - [ ] 确认 Story 1.4 已真实提供 `_speclite/config.toml` / `_speclite/config.user.toml` planned config model 和 human-owned `_speclite/custom/config*.toml` 边界；Story 1.5 已真实写入 `_speclite` runtime structure；Story 1.6 已真实完成 ReadyCheck / ready summary gate。
-  - [ ] 确认 Story 2.1 已真实生成 discovery metadata 与 phase coverage projection；Story 2.2 已真实生成 `.claude/skills/<canonicalSkillId>/` 和 `.agents/skills/<canonicalSkillId>/` self-contained entries；Story 2.3 已真实验证 activation target 指向 installed `SKILL.md`，并只保留 resolver access boundary。
-  - [ ] 如果上述实现 anchors 仍不存在，停止 Story 2.4 实现，先完成前置 stories；不得在 Story 2.4 中重建 CLI scaffold、install pipeline、IDE target writer、manifest generator、phase coverage reader 或 workflow artifact writer。
-  - [ ] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置 stories 与当前仓库实现状态（AC: 1-8）
+  - [x] 确认 Story 1.1-1.6 已真实实现，而不只是 story context 处于 `ready-for-dev`：至少需要存在 `package.json`、`src/`、`test/`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/commands/resolve.ts` 或命令注册 anchor、`src/config/resolve-output-schema.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/config-schema.ts`、`src/config/customization-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts`、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests。
+  - [x] 确认 Story 1.4 已真实提供 `_speclite/config.toml` / `_speclite/config.user.toml` planned config model 和 human-owned `_speclite/custom/config*.toml` 边界；Story 1.5 已真实写入 `_speclite` runtime structure；Story 1.6 已真实完成 ReadyCheck / ready summary gate。
+  - [x] 确认 Story 2.1 已真实生成 discovery metadata 与 phase coverage projection；Story 2.2 已真实生成 `.claude/skills/<canonicalSkillId>/` 和 `.agents/skills/<canonicalSkillId>/` self-contained entries；Story 2.3 已真实验证 activation target 指向 installed `SKILL.md`，并只保留 resolver access boundary。
+  - [x] 如果上述实现 anchors 仍不存在，停止 Story 2.4 实现，先完成前置 stories；不得在 Story 2.4 中重建 CLI scaffold、install pipeline、IDE target writer、manifest generator、phase coverage reader 或 workflow artifact writer。
+  - [x] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 建立 resolver command orchestration 且保持 runtime support 边界（AC: 1, 2, 6）
-  - [ ] 在 `src/commands/resolve.ts` 或现有 command registration module 中注册 `speclite resolve config` 与 `speclite resolve customization`。
-  - [ ] `src/commands/resolve.ts` 只负责 argv parsing、mode dispatch、exit code 和 stdout/stderr 写入；merge、TOML read、schema validation 和 diagnostics 归属 `src/config/` 与 diagnostics/schema anchors。
-  - [ ] `speclite resolve config` 必须要求显式 `--project-root`，缺失时返回 non-zero，并用 stable diagnostics / CLI usage error 处理；不要 fallback 到 cwd 作为 installed skill contract。
-  - [ ] `speclite resolve customization` 必须支持显式 `--project-root`；当省略时，为 Python resolver parity 可以 fallback：先从 skill directory 向上查找 `_speclite` 或 `.git`，找不到再从 cwd 向上查找 `_speclite` 或 `.git`。
-  - [ ] Resolve command 不使用 `CommandResult` envelope；不得把 `status`、`summary`、`issues`、`nextActions`、`data` 包到 stdout。
-  - [ ] Human-readable guidance 如需存在，只能在非 machine contract 场景之外；machine mode stdout/stderr 必须遵守 SPEC。MVP 推荐保持 resolver 输出纯 machine-readable。
+- [x] Task 2: 建立 resolver command orchestration 且保持 runtime support 边界（AC: 1, 2, 6）
+  - [x] 在 `src/commands/resolve.ts` 或现有 command registration module 中注册 `speclite resolve config` 与 `speclite resolve customization`。
+  - [x] `src/commands/resolve.ts` 只负责 argv parsing、mode dispatch、exit code 和 stdout/stderr 写入；merge、TOML read、schema validation 和 diagnostics 归属 `src/config/` 与 diagnostics/schema anchors。
+  - [x] `speclite resolve config` 必须要求显式 `--project-root`，缺失时返回 non-zero，并用 stable diagnostics / CLI usage error 处理；不要 fallback 到 cwd 作为 installed skill contract。
+  - [x] `speclite resolve customization` 必须支持显式 `--project-root`；当省略时，为 Python resolver parity 可以 fallback：先从 skill directory 向上查找 `_speclite` 或 `.git`，找不到再从 cwd 向上查找 `_speclite` 或 `.git`。
+  - [x] Resolve command 不使用 `CommandResult` envelope；不得把 `status`、`summary`、`issues`、`nextActions`、`data` 包到 stdout。
+  - [x] Human-readable guidance 如需存在，只能在非 machine contract 场景之外；machine mode stdout/stderr 必须遵守 SPEC。MVP 推荐保持 resolver 输出纯 machine-readable。
 
-- [ ] Task 3: 实现 shared TOML reader、schema anchor 和 redaction-safe diagnostics（AC: 1, 2, 5, 6）
-  - [ ] 在 `src/config/resolve-output-schema.ts` 中提供 resolver stdout JSON、stderr JSON Lines diagnostic 和 merge-result parser 的 executable schema/parser anchor。
-  - [ ] 在 `src/config/config-reader.ts` 与 `src/config/customization-reader.ts` 或等价 modules 中集中读取 TOML layers；不要在 command module、IDE adapter、installed skill helper、renderer 或 tests 中手写第二套 resolver。
-  - [ ] 使用 Architecture-pinned TOML parser dependency（当前 planning docs 指向 `toml@4.1.1`），并通过 tests 覆盖 parse success、parse failure、non-ASCII strings 和 nested tables。
-  - [ ] 对 required layer 的 missing/read/parse failure 生成 error 或 critical diagnostic，并返回 non-zero。
-  - [ ] 对 optional layer 的 read/parse failure 生成 warning diagnostic JSON Lines，并继续 merge；optional layer missing 视为 `{}`，默认不产生 issue。
-  - [ ] Diagnostics 必须复用 `ValidationIssue` shape；category 优先使用 `runtime-path` 或 `manifest-schema` 等 owning taxonomy 中已有类别。若确需新增 issue id，先更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 与 fixture assertions。
-  - [ ] Diagnostics `details` 只能包含 deterministic、redaction-safe、fixture-stable fields，例如 layer kind、layer role、parse status、normalized component；不得包含 raw local path、stack trace、timestamp 或 raw parser message 中的环境路径。
+- [x] Task 3: 实现 shared TOML reader、schema anchor 和 redaction-safe diagnostics（AC: 1, 2, 5, 6）
+  - [x] 在 `src/config/resolve-output-schema.ts` 中提供 resolver stdout JSON、stderr JSON Lines diagnostic 和 merge-result parser 的 executable schema/parser anchor。
+  - [x] 在 `src/config/config-reader.ts` 与 `src/config/customization-reader.ts` 或等价 modules 中集中读取 TOML layers；不要在 command module、IDE adapter、installed skill helper、renderer 或 tests 中手写第二套 resolver。
+  - [x] 使用 Architecture-pinned TOML parser dependency（当前 planning docs 指向 `toml@4.1.1`），并通过 tests 覆盖 parse success、parse failure、non-ASCII strings 和 nested tables。
+  - [x] 对 required layer 的 missing/read/parse failure 生成 error 或 critical diagnostic，并返回 non-zero。
+  - [x] 对 optional layer 的 read/parse failure 生成 warning diagnostic JSON Lines，并继续 merge；optional layer missing 视为 `{}`，默认不产生 issue。
+  - [x] Diagnostics 必须复用 `ValidationIssue` shape；category 优先使用 `runtime-path` 或 `manifest-schema` 等 owning taxonomy 中已有类别。若确需新增 issue id，先更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 与 fixture assertions。
+  - [x] Diagnostics `details` 只能包含 deterministic、redaction-safe、fixture-stable fields，例如 layer kind、layer role、parse status、normalized component；不得包含 raw local path、stack trace、timestamp 或 raw parser message 中的环境路径。
 
-- [ ] Task 4: 实现 config four-layer merge order（AC: 1, 3, 4, 5, 6, 7）
-  - [ ] 按固定顺序读取并合并：
+- [x] Task 4: 实现 config four-layer merge order（AC: 1, 3, 4, 5, 6, 7）
+  - [x] 按固定顺序读取并合并：
     1. `_speclite/config.toml`（required, installer-owned）
     2. `_speclite/config.user.toml`（optional, installer-owned）
     3. `_speclite/custom/config.toml`（optional, human-owned）
     4. `_speclite/custom/config.user.toml`（optional, human-owned）
-  - [ ] 后面的 layer 覆盖前面的 layer；scalar override wins，table deep merge，array 使用 Story 2.4 的 Python parity merge rules。
-  - [ ] `--project-root` 的 public behavior 只接受 target project root；public output 不得回显 absolute project root。
-  - [ ] 对 key selection 先完整 merge，再按 `--key` 提取；缺失 key 默认省略，所有 key 都缺失时输出 `{}`。
-  - [ ] repeated `--key` 输出 object 使用原始 dotted key string 作为字段名，例如 `"core.project_name"` 或 `"modules.sdlc.planning_artifacts"`。
-  - [ ] stdout JSON 使用 2-space indentation、trailing newline，并保留非 ASCII 字符不转义；fixture 比较 parsed JSON semantics，不要求 byte-for-byte。
+  - [x] 后面的 layer 覆盖前面的 layer；scalar override wins，table deep merge，array 使用 Story 2.4 的 Python parity merge rules。
+  - [x] `--project-root` 的 public behavior 只接受 target project root；public output 不得回显 absolute project root。
+  - [x] 对 key selection 先完整 merge，再按 `--key` 提取；缺失 key 默认省略，所有 key 都缺失时输出 `{}`。
+  - [x] repeated `--key` 输出 object 使用原始 dotted key string 作为字段名，例如 `"core.project_name"` 或 `"modules.sdlc.planning_artifacts"`。
+  - [x] stdout JSON 使用 2-space indentation、trailing newline，并保留非 ASCII 字符不转义；fixture 比较 parsed JSON semantics，不要求 byte-for-byte。
 
-- [ ] Task 5: 实现 customization three-layer merge order 与 lookup key（AC: 2, 3, 4, 5, 6, 7）
-  - [ ] `--skill` 必须指向 installed self-contained skill directory；customization success path 只适用于声明 customization-capable 且 installed entry 包含 `<skill-dir>/customize.toml` 的 skill。
-  - [ ] Fixture success path 必须选择 source package 已包含 `customize.toml` 的 canonical skill，例如 `speclite-create-prd` 或 `speclite-create-story`；不得任意选择缺少 defaults 的 skill。
-  - [ ] 使用 `Path.basename(skillDir)` 或等价 project-safe helper 得到 `<skill-name>`；该 basename 是 customization lookup key。
-  - [ ] 按固定顺序读取并合并：
+- [x] Task 5: 实现 customization three-layer merge order 与 lookup key（AC: 2, 3, 4, 5, 6, 7）
+  - [x] `--skill` 必须指向 installed self-contained skill directory；customization success path 只适用于声明 customization-capable 且 installed entry 包含 `<skill-dir>/customize.toml` 的 skill。
+  - [x] Fixture success path 必须选择 source package 已包含 `customize.toml` 的 canonical skill，例如 `speclite-create-prd` 或 `speclite-create-story`；不得任意选择缺少 defaults 的 skill。
+  - [x] 使用 `Path.basename(skillDir)` 或等价 project-safe helper 得到 `<skill-name>`；该 basename 是 customization lookup key。
+  - [x] 按固定顺序读取并合并：
     1. `<skill-dir>/customize.toml`（required, skill defaults）
     2. `_speclite/custom/<skill-name>.toml`（optional, team custom）
     3. `_speclite/custom/<skill-name>.user.toml`（optional, user custom）
-  - [ ] 不从 source checkout、archive planning docs、display name、menu label、IDE-specific alias、target id 或 source package path 反推 customization key。
-  - [ ] 如果 future adapter 需要重命名 canonical skill directory，必须先更新 manifest/index SPEC、resolve command SPEC 和 executable schema；Story 2.4 MVP 不支持第二 key。
-  - [ ] `config.toml.example` 只作为字段结构参考，不作为 runtime fallback；对 customization-capable skill，missing required `customize.toml` 是 blocking failure。
-  - [ ] 对未声明 customization-capable 或 source package 缺少 `customize.toml` 的 skill，不得创建 synthetic defaults；如果用户显式调用 customization resolve，返回 layer-correct diagnostic / non-success result，而不是假装合并成功。
+  - [x] 不从 source checkout、archive planning docs、display name、menu label、IDE-specific alias、target id 或 source package path 反推 customization key。
+  - [x] 如果 future adapter 需要重命名 canonical skill directory，必须先更新 manifest/index SPEC、resolve command SPEC 和 executable schema；Story 2.4 MVP 不支持第二 key。
+  - [x] `config.toml.example` 只作为字段结构参考，不作为 runtime fallback；对 customization-capable skill，missing required `customize.toml` 是 blocking failure。
+  - [x] 对未声明 customization-capable 或 source package 缺少 `customize.toml` 的 skill，不得创建 synthetic defaults；如果用户显式调用 customization resolve，返回 layer-correct diagnostic / non-success result，而不是假装合并成功。
 
-- [ ] Task 6: 实现 structural merge rules 并集中到 `src/config/merge-rules.ts`（AC: 1, 2, 7）
-  - [ ] 将 merge 规则集中在 `src/config/merge-rules.ts` 或等价 module，供 config 与 customization resolver 共享。
-  - [ ] Scalar / non-compatible type：override wins。
-  - [ ] Table + table：递归 deep merge。
-  - [ ] Array + array：先检查 base + override 全部 elements；只有全部是 tables 且全部拥有同一个 `code` 或全部拥有同一个 `id` 时 keyed merge。
-  - [ ] Keyed merge 时，override item 以相同 key 整项替换 base item；不做 item-level deep merge，也不保留 base item 中 override 未写的字段。
-  - [ ] Mixed `code` and `id`、部分 item 缺 key、non-table item、空数组或 schema smell 都走 append fallback。
-  - [ ] 不实现 deletion。若用户需要禁用默认项，应通过同 key no-op replacement 表达，或等待未来 deletion schema。
-  - [ ] Unit tests 必须覆盖 Python baseline 的 `_detect_keyed_merge_field`、`_merge_by_key`、append fallback、override replacement、nested tables 和 non-ASCII values。
+- [x] Task 6: 实现 structural merge rules 并集中到 `src/config/merge-rules.ts`（AC: 1, 2, 7）
+  - [x] 将 merge 规则集中在 `src/config/merge-rules.ts` 或等价 module，供 config 与 customization resolver 共享。
+  - [x] Scalar / non-compatible type：override wins。
+  - [x] Table + table：递归 deep merge。
+  - [x] Array + array：先检查 base + override 全部 elements；只有全部是 tables 且全部拥有同一个 `code` 或全部拥有同一个 `id` 时 keyed merge。
+  - [x] Keyed merge 时，override item 以相同 key 整项替换 base item；不做 item-level deep merge，也不保留 base item 中 override 未写的字段。
+  - [x] Mixed `code` and `id`、部分 item 缺 key、non-table item、空数组或 schema smell 都走 append fallback。
+  - [x] 不实现 deletion。若用户需要禁用默认项，应通过同 key no-op replacement 表达，或等待未来 deletion schema。
+  - [x] Unit tests 必须覆盖 Python baseline 的 `_detect_keyed_merge_field`、`_merge_by_key`、append fallback、override replacement、nested tables 和 non-ASCII values。
 
-- [ ] Task 7: 接入 skill activation protocol 与 runtime path validation boundary（AC: 1, 2, 5, 6, 8）
-  - [ ] Installed skill instructions 应调用 `speclite resolve config --project-root <project>` 与 `speclite resolve customization --skill <skill-dir> --project-root <project>`；不要绑定 `node dist/...`、legacy Python script path、source checkout path 或 package cache path。
-  - [ ] 如果 validation 发现 installed skill 仍引用 `_bmad`、legacy runtime namespace、`assets/source/speclite/scripts/resolve_*.py` 或 old `python3 resolve_customization.py` runtime dependency，应使用 `runtime-path.legacy-resolver-path` 或 owning taxonomy 中更具体 issue id。
-  - [ ] Story 2.4 可提供 resolver runtime entry 和 validation hooks；不得修改 every source skill instruction，除非实现 Story 明确把 installed skill template update 纳入同一 AC 并保持范围可审查。
-  - [ ] Resolver access 是 `skill-artifact-loop` release gate 的一部分，但 Story 2.4 不负责 Story 2.5 的 artifact metadata write / validation。
-  - [ ] Output 和 diagnostics 不得泄露 installed project absolute path；paths 应使用 project-relative POSIX path 或 redacted/display-safe component。
+- [x] Task 7: 接入 skill activation protocol 与 runtime path validation boundary（AC: 1, 2, 5, 6, 8）
+  - [x] Installed skill instructions 应调用 `speclite resolve config --project-root <project>` 与 `speclite resolve customization --skill <skill-dir> --project-root <project>`；不要绑定 `node dist/...`、legacy Python script path、source checkout path 或 package cache path。
+  - [x] 如果 validation 发现 installed skill 仍引用 `_bmad`、legacy runtime namespace、`assets/source/speclite/scripts/resolve_*.py` 或 old `python3 resolve_customization.py` runtime dependency，应使用 `runtime-path.legacy-resolver-path` 或 owning taxonomy 中更具体 issue id。
+  - [x] Story 2.4 可提供 resolver runtime entry 和 validation hooks；不得修改 every source skill instruction，除非实现 Story 明确把 installed skill template update 纳入同一 AC 并保持范围可审查。
+  - [x] Resolver access 是 `skill-artifact-loop` release gate 的一部分，但 Story 2.4 不负责 Story 2.5 的 artifact metadata write / validation。
+  - [x] Output 和 diagnostics 不得泄露 installed project absolute path；paths 应使用 project-relative POSIX path 或 redacted/display-safe component。
 
-- [ ] Task 8: 编写 focused unit tests、integration tests 和 `resolve-parity` fixture（AC: 1-8）
-  - [ ] Unit tests 覆盖 `src/config/merge-rules.ts`：scalar override、table deep merge、keyed array replacement、append fallback、mixed key fallback、non-table fallback、no deletion。
-  - [ ] Unit tests 覆盖 config reader：four-layer order、required `_speclite/config.toml` failure、optional read/parse warning、project-relative / redaction-safe diagnostics、non-ASCII JSON output。
-  - [ ] Unit tests 覆盖 customization reader：customization-capable skill required `<skill-dir>/customize.toml` failure、non-capable skill no synthetic defaults、basename lookup key、team/user override order、explicit `--project-root`、fallback search behavior。
-  - [ ] Integration tests 覆盖 `speclite resolve config --project-root <fixture>`、`speclite resolve customization --skill <installed-skill-dir> --project-root <fixture>`、missing key success、repeated key output、stderr JSON Lines parse 和 exit codes。
-  - [ ] Fixture `test/fixtures/resolve-parity/` 必须覆盖 config four-layer merge、customization three-layer merge、missing key、repeated key、optional layer warning、required layer failure、keyed array replacement、append fallback、non-ASCII JSON output、explicit project root 和 customization fallback search。
-  - [ ] `resolve-parity` 与 `skill-artifact-loop` fixture 的 customization success case 必须使用带 `customize.toml` 的 canonical skill；`skill-artifact-loop` 至少验证 installed IDE entry 可以调用 resolver runtime entry 并读取 config/customization，不验证完整 workflow artifact 内容质量。
-  - [ ] Tests 必须 parse stdout JSON semantically，逐行 parse stderr JSON Lines 为 `ValidationIssue` objects；不得比较 local absolute paths、具体 current time、random ids 或 raw stack trace。
-  - [ ] 运行 `npm run build`、`npm test`，或至少运行 Story 2.4 touched modules 的 focused Vitest tests 与相关 fixture tests。
+- [x] Task 8: 编写 focused unit tests、integration tests 和 `resolve-parity` fixture（AC: 1-8）
+  - [x] Unit tests 覆盖 `src/config/merge-rules.ts`：scalar override、table deep merge、keyed array replacement、append fallback、mixed key fallback、non-table fallback、no deletion。
+  - [x] Unit tests 覆盖 config reader：four-layer order、required `_speclite/config.toml` failure、optional read/parse warning、project-relative / redaction-safe diagnostics、non-ASCII JSON output。
+  - [x] Unit tests 覆盖 customization reader：customization-capable skill required `<skill-dir>/customize.toml` failure、non-capable skill no synthetic defaults、basename lookup key、team/user override order、explicit `--project-root`、fallback search behavior。
+  - [x] Integration tests 覆盖 `speclite resolve config --project-root <fixture>`、`speclite resolve customization --skill <installed-skill-dir> --project-root <fixture>`、missing key success、repeated key output、stderr JSON Lines parse 和 exit codes。
+  - [x] Fixture `test/fixtures/resolve-parity/` 必须覆盖 config four-layer merge、customization three-layer merge、missing key、repeated key、optional layer warning、required layer failure、keyed array replacement、append fallback、non-ASCII JSON output、explicit project root 和 customization fallback search。
+  - [x] `resolve-parity` 与 `skill-artifact-loop` fixture 的 customization success case 必须使用带 `customize.toml` 的 canonical skill；`skill-artifact-loop` 至少验证 installed IDE entry 可以调用 resolver runtime entry 并读取 config/customization，不验证完整 workflow artifact 内容质量。
+  - [x] Tests 必须 parse stdout JSON semantically，逐行 parse stderr JSON Lines 为 `ValidationIssue` objects；不得比较 local absolute paths、具体 current time、random ids 或 raw stack trace。
+  - [x] 运行 `npm run build`、`npm test`，或至少运行 Story 2.4 touched modules 的 focused Vitest tests 与相关 fixture tests。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-8）
-  - [ ] 如新增或改变 public stdout/stderr field、resolver exit code、issue id、fixture comparison behavior、parser/schema 或 merge semantics，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 2.5 workflow artifact writing / metadata validation、Epic 3 full `status` / `validate` installed-state validation、Epic 4 update/repair behavior、Post-MVP strict missing flag、Post-MVP deletion schema、Post-MVP config init/list commands、branded Copilot/Cursor adapters 或 command pointer artifacts。
-  - [ ] 检查 resolver output，确认 stdout 没有 `CommandResult` envelope、stderr machine diagnostics 为 JSON Lines、warning 不阻断、error/critical 阻断并产生 non-zero exit。
+- [x] Task 9: 本地验证与范围控制（AC: 1-8）
+  - [x] 如新增或改变 public stdout/stderr field、resolver exit code、issue id、fixture comparison behavior、parser/schema 或 merge semantics，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Story 2.5 workflow artifact writing / metadata validation、Epic 3 full `status` / `validate` installed-state validation、Epic 4 update/repair behavior、Post-MVP strict missing flag、Post-MVP deletion schema、Post-MVP config init/list commands、branded Copilot/Cursor adapters 或 command pointer artifacts。
+  - [x] 检查 resolver output，确认 stdout 没有 `CommandResult` envelope、stderr machine diagnostics 为 JSON Lines、warning 不阻断、error/critical 阻断并产生 non-zero exit。
 
 ## Dev Notes（开发备注）
 
@@ -444,13 +444,50 @@ GPT-5 Codex
 - `python3 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-create-story --key workflow` failed because local `python3` lacks stdlib `tomllib`.
 - `python3.12 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-create-story --key workflow` resolved workflow successfully; `workflow.on_complete` is empty.
 - Full `sprint-status.yaml` was read before creation; `2-4-runtime-config-and-customization-resolve` was `backlog`, and `epic-2` was `in-progress`.
+- `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` failed because local `python3` lacks stdlib `tomllib`; workflow fallback used `.agents/skills/bmad-dev-story/customize.toml`.
+- `npm test -- test/config-merge-rules.test.ts test/resolve-readers.test.ts test/resolve-cli.test.ts` failed in RED phase because resolve command and resolver modules were absent.
+- `npm test -- test/config-merge-rules.test.ts test/resolve-readers.test.ts test/resolve-cli.test.ts test/contract-anchors.test.ts` passed after implementation.
+- `npm test -- test/skill-artifact-loop.test.ts test/resolve-cli.test.ts test/resolve-readers.test.ts test/config-merge-rules.test.ts` passed after adding skill-artifact-loop resolver assertions.
+- `npm run build` passed.
+- `npm test` passed: 17 files, 98 tests.
+- `git diff --check` passed.
+- `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow.on_complete` returned an empty `workflow.on_complete`.
 
 ### Completion Notes List（完成备注清单）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 - Story 2.4 created with `Status: ready-for-dev`.
 - Scope respected: this create-story run should not modify planning artifacts、Story 2.1/2.2/2.3、Epic 1 story files、source code or unrelated files.
+- Implemented `speclite resolve config` and `speclite resolve customization` as runtime support commands with pure JSON stdout and JSON Lines `ValidationIssue` stderr.
+- Added shared TOML layer reading, redaction-safe diagnostics, dotted-key selection, config four-layer merge, customization three-layer merge, basename customization lookup key, and project-root fallback for customization parity.
+- Centralized Python parity merge semantics in `src/config/merge-rules.ts`: scalar override, table deep merge, keyed array whole-item replacement, append fallback, and no deletion mechanism.
+- Added focused unit/integration tests plus `resolve-parity` fixture coverage for config/customization merge order, missing/repeated keys, optional warning diagnostics, required failures, non-ASCII output, stdout contract, CLI exit codes, and skill-artifact-loop resolver runtime access.
 
 ### File List（文件清单）
 
-- `_bmad-output/implementation-artifacts/2-4-runtime-config-and-customization-resolve.md`
+- `src/bin/speclite.ts`
+- `src/commands/resolve.ts`
+- `src/config/config-reader.ts`
+- `src/config/customization-reader.ts`
+- `src/config/customization-schema.ts`
+- `src/config/merge-rules.ts`
+- `src/config/resolve-diagnostics.ts`
+- `src/config/resolve-output-schema.ts`
+- `test/config-merge-rules.test.ts`
+- `test/resolve-readers.test.ts`
+- `test/resolve-cli.test.ts`
+- `test/contract-anchors.test.ts`
+- `test/skill-artifact-loop.test.ts`
+- `test/fixtures/resolve-parity/README.md`
+- `test/fixtures/resolve-parity/fixture-case.json`
+- `_bmad-output/implementation-artifacts/stories/2-4-runtime-config-and-customization-resolve.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/code-reviews/2-4-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/2-4-code-review/EXPERIMENT_NOTES.md`
+- `dist/bin/speclite.js`
+- `dist/bin/speclite.js.map`
+- `dist/bin/speclite.d.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-27: Implemented Story 2.4 runtime config/customization resolver support and moved Story status to `review`.

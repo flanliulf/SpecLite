@@ -3,7 +3,7 @@ name: speclite-dev-story
 description: "Execute story implementation following a context filled story spec file as the developer agent. Use when user mentions 'dev this story', 'dev story', 'implement story', 'implement the next story in the sprint plan', 'develop story file', '开发 Story', '实现 Story', '执行 Story 实现', '继续开发 Story', '开发下一个 Story', '实现故事', '编码实现 Story', or provides a story file path. Capable of customize.toml three-tier resolution and config-driven activation, sprint-status driven story discovery and review-continuation detection, red-green-refactor implementation with multi-level testing and HALT triggers, definition-of-done validation per references/checklist.md, sprint-status synchronization preserving comments, and on_complete terminal directive execution."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 metadata:
-    version: "1.0.2"
+    version: "1.0.3"
     author: "fancyliu"
     catalog: "speclite"
 ---
@@ -18,10 +18,10 @@ metadata:
     - `{user_skill_level}` 仅影响对话风格，**不影响**代码更新内容
 
 [核心能力]
-    - **三层 customize 解析与配置激活**：执行 `{speclite-runtime-root}/scripts/resolve_customization.py` 解析 `workflow` 块，失败时按 base→team→user 合并 `customize.toml` / `{skill-name}.toml` / `{skill-name}.user.toml`；加载 `persistent_facts`（支持 `file:` 前缀）；从 `{project-root}/_speclite/config.toml` 解析 `project_name` / `user_name` / `communication_language` / `document_output_language` / `user_skill_level` / `implementation_artifacts` / `date`。详见 `references/activation.md`
-    - **Story 自动发现与评审延续检测**：支持显式 `{story_path}`；否则按从头到尾顺序扫描 `sprint-status.yaml` `development_status` 找第一条 `ready-for-dev` 且 key 形如 `数字-数字-名称` 的 Story；无 sprint-status 时直接搜索 `{implementation_artifacts}`；检测 "Senior Developer Review (AI)" 与 "Review Follow-ups (AI)" 段并提取结论、未完成项、严重度
+    - **三层 customize 解析与配置激活**：执行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow` 解析 `workflow` 块，失败时按 base→team→user 合并 `customize.toml` / `{skill-name}.toml` / `{skill-name}.user.toml`；加载 `persistent_facts`（支持 `file:` 前缀）；执行 `speclite resolve config --project-root {project-root}` 解析四层合并后的 config，并从 resolved JSON 读取 `project_name` / `user_name` / `communication_language` / `document_output_language` / `user_skill_level` / `output_folder` / `implementation_artifacts`；`date` 使用系统当前日期时间。详见 `references/activation.md`
+    - **Story 自动发现与评审延续检测**：支持显式 `{story_path}`；否则按 `sprint-status.yaml` 的 `story_location` 或 `{implementation_artifacts}/stories` 查找第一条 `ready-for-dev` Story；检测 "Senior Developer Review (AI)" 与 "Review Follow-ups (AI)" 段并提取结论、未完成项、严重度
     - **测试驱动实现与质量门**：严格按红-绿-重构循环（先写失败测试 → 最小代码使其通过 → 在测试保持绿色下重构）；编写单元/集成/端到端测试；运行已有测试集杜绝回归、运行新测试、运行 lint/静态检查；按 Acceptance Criteria 显式量化校验
-    - **HALT 与 DoD 校验**：HALT 触发器为依赖越界、连续 3 次实现失败、必要配置缺失；按 `references/checklist.md` 执行 DoD；测试未真实存在并通过时**绝不**标记 `[x]`
+    - **HALT、Flow Gate 与 DoD 校验**：在状态推进前执行 `story-kickoff` gate，在 `review` 前执行 `story-completion` gate；HALT 触发器为依赖越界、连续 3 次实现失败、必要配置缺失或 gate 失败；测试未真实存在并通过时**绝不**标记 `[x]`
     - **Sprint 状态同步**：开始时 `ready-for-dev → in-progress`；完成时 `in-progress → review`；**保留 sprint-status.yaml 全部注释与结构**（含 STATUS DEFINITIONS）；评审跟进任务 `[AI-Review]` 必须在 Review Follow-ups 段与 Senior Developer Review → Action Items 段**双向勾选**
     - **on_complete 终止指令**：完成沟通后解析并执行 `workflow.on_complete`，作为退出前的最终终端指令
 
@@ -40,7 +40,7 @@ metadata:
         1. 解析 `workflow` 配置块（脚本失败时按 base→team→user 合并三份 toml）
         2. 执行 `{workflow.activation_steps_prepend}`
         3. 加载 `{workflow.persistent_facts}`（`file:` 前缀按路径/glob 加载文件内容）
-        4. 从 `{project-root}/_speclite/config.toml` 加载配置
+        4. 执行 `speclite resolve config --project-root {project-root}` 加载合并后的配置
         5. 用 `{communication_language}` 问候 `{user_name}`
         6. 执行 `{workflow.activation_steps_append}`
 
@@ -50,12 +50,12 @@ metadata:
         - **Step 1**：定位下一条就绪 Story 并完整加载（显式输入 / sprint-status 自动发现 / 直接搜索三分支）
         - **Step 2**：加载项目上下文（`{project_context}`）与 Story Dev Notes 信息
         - **Step 3**：检测评审延续，提取评审结论、未完成项与严重度，设置 `review_continuation` 与 `{pending_review_items}`
-        - **Step 4**：把 Story 状态从 `ready-for-dev` 同步为 `in-progress`（无 sprint-status 时设 `{current_sprint_status}` = `no-sprint-tracking`）
+        - **Step 4**：先执行 `speclite-flow-gate mode=story-kickoff`，通过后把 Story 状态从 `ready-for-dev` 同步为 `in-progress`
         - **Step 5**：按红-绿-重构循环实现当前任务/子任务；技术方案写入 Dev Agent Record → Implementation Plan；触发 HALT 条件立即停止
         - **Step 6**：编写单元/集成/端到端测试，覆盖 Dev Notes 中的边界情况
         - **Step 7**：运行已有测试 + 新测试 + lint/静态检查；按 AC 显式量化校验；测试失败立即停止并修复
         - **Step 8**：全部校验门通过后才标记 `[x]`，更新 File List、Completion Notes；`[AI-Review]` 任务双向勾选；剩余任务回到 Step 5
-        - **Step 9**：完整性核对 + 增强版 DoD 校验（详见 `references/checklist.md`）+ 把 sprint-status 同步为 `review`（保留全部注释与结构）；任意校验失败 HALT
+        - **Step 9**：填写 Anchor Evidence Summary，执行 `story-completion` gate，完成 DoD 校验后把 sprint-status 同步为 `review`；任意校验失败 HALT
         - **Step 10**：完成沟通、按 `{user_skill_level}` 讲解、建议下一步；最终解析并执行 `workflow.on_complete`
 
     === 路径 ===
@@ -71,7 +71,7 @@ metadata:
     - `[AI-Review]` 任务必须在 Review Follow-ups 段与 Senior Developer Review → Action Items 段**双向勾选**
     - File List 必须包含**所有**新建/修改/删除文件，使用相对仓库根的路径
     - `sprint-status.yaml` 更新必须**保留所有注释与结构**（含 STATUS DEFINITIONS），禁止覆写为缩略版
-    - Definition of Done 校验依据 `references/checklist.md`，缺一不可；任意 DoD 失败即 HALT
+    - Definition of Done 和 Flow Gate 校验依据 `references/checklist.md` 与 `speclite-flow-gate`；任意 DoD 或 gate 失败即 HALT
     - 收尾必须执行 `workflow.on_complete` 解析并按返回值执行最终指令
     - Skill 目录中的 `config.toml.example` 仅作为目标项目 `_speclite/config.toml` 字段结构参考，不得作为运行时 fallback
     - Step / 输出话术 / 分支 / 错误处理 的所有细节以 `references/workflow-steps.md` 与 `references/activation.md` 为准

@@ -14,6 +14,7 @@
 - **模糊实现**：用了"妥善处理""适当验证"等模糊词
 - **谎报完成**：AC 不可测、无验证手段
 - **不学习历史**：忽略上一个 Story 的教训
+- **门控误判**：把未契约化的建议文件名写成 hard gate，导致后续 `dev-story` 误 HALT
 
 ## 输入
 
@@ -83,6 +84,13 @@
 - 是否消除模糊词，所有 AC 可测？
 - 是否定义"完成"的可验证标准？
 
+#### 3.6 Anchor 与 Flow Gate 灾难
+
+- 是否包含 `Dependency Gate`、`Anchor Contract Map`、`Equivalent Implementation Policy`、`Evidence Plan` 和 `Anchor Evidence Summary`？
+- 每个前置依赖是否按 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor` 或 `Guidance Anchor` 分类？
+- 是否明确：固定文件名只有在 owning SPEC 指定时才是 hard gate？
+- 是否为 `story-kickoff` gate 写明预期证据，而不是只检查文件是否存在？
+
 ### Step 4：LLM-Dev-Agent 优化
 
 - **冗余**：删除无信息量的赘述
@@ -114,6 +122,7 @@
 - 复用既有实现而非重复造轮子
 - 避免破坏性回归与已知反模式
 - 满足全部 AC 且端到端可工作
+- 在开发前能通过 `speclite-flow-gate` 验证前置依赖，或清晰指出需要人工裁决的缺口
 - 在最少 token 下获得最大指引
 
 ---

@@ -26,7 +26,9 @@ export type ModuleHelpEntry = {
   displayName: string;
   menuCode?: string;
   phaseId: string;
+  required: boolean;
   outputLocation?: string;
+  outputArtifactType?: string;
 };
 
 export type ModuleConfigPrompt = {
@@ -291,9 +293,13 @@ async function readModuleHelpEntries(
             ? {}
             : { menuCode: row["menu-code"] }),
           phaseId: row.phase || "anytime",
+          required: row.required === "true",
           ...(row["output-location"] === undefined || row["output-location"].length === 0
             ? {}
             : { outputLocation: row["output-location"] }),
+          ...(row.outputs === undefined || row.outputs.length === 0
+            ? {}
+            : { outputArtifactType: row.outputs }),
         },
       ];
     })

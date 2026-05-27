@@ -7,6 +7,7 @@ required-inputs:
   - 'Completed Tasks/Subtasks section with all items marked [x]'
   - 'Updated File List section with all changed files'
   - 'Updated Dev Agent Record with implementation notes'
+  - 'Latest speclite-flow-gate story-completion report'
 optional-inputs:
   - 'Test results output'
   - 'CI logs'
@@ -51,6 +52,7 @@ validation-rules:
 
 - [ ] **File List Complete:** File List includes EVERY new, modified, or deleted file (paths relative to repo root)
 - [ ] **Dev Agent Record Updated:** Contains relevant Implementation Notes and/or Debug Log for this work
+- [ ] **Anchor Evidence Summary:** Records flow gate result, contract anchors, functional anchors, evidence anchors, and equivalent implementation decisions
 - [ ] **Change Log Updated:** Change Log includes clear summary of what changed and why
 - [ ] **Review Follow-ups:** All review follow-up tasks (marked [AI-Review]) completed and corresponding review items marked resolved (if applicable)
 - [ ] **Story Structure Compliance:** Only permitted sections of story file were modified
@@ -60,6 +62,7 @@ validation-rules:
 - [ ] **Story Status Updated:** Story Status set to "review"
 - [ ] **Sprint Status Updated:** Sprint status updated to "review" (when sprint tracking is used)
 - [ ] **Quality Gates Passed:** All quality checks and validations completed successfully
+- [ ] **Flow Gate Passed:** `story-completion` gate result is PASS or PASS_EQUIVALENT
 - [ ] **No HALT Conditions:** No blocking issues or incomplete work remaining
 - [ ] **User Communication Ready:** Implementation summary prepared for user review
 

@@ -26,22 +26,21 @@ metadata:
     - **核心制品与历史情报分析**：按发现协议加载 Epics、PRD、Architecture、UX、project-context、上一 Story 和最近 git 提交，提取业务目标、AC、依赖、经验、文件模式与测试方式。
     - **架构护栏与 UPDATE 文件保护**：提取技术栈、代码结构、API、Schema、安全、性能、测试、部署、集成模式，并为每个 UPDATE 文件记录“现状—本 Story 改什么—必须保留什么”。
     - **最新技术研究**：识别关键库、框架和 API，研究最新稳定版本、破坏性变更、安全更新、弃用信息、性能改进与当前最佳实践。
-    - **模板化 Story 生成**：从 `assets/story-template.md` 的 fenced markdown 模板初始化输出，并按 13 个 template-output 段名生成 `ready-for-dev` Story。
+    - **模板化 Story 生成**：从 `assets/story-template.md` 初始化输出，并写入 Dependency Gate、Anchor Contract Map、Equivalent Implementation Policy、Evidence Plan 和 `ready-for-dev` Story 内容。
     - **质量校验与 sprint 同步**：用 `references/checklist.md` 自检生成结果，保存 Story，更新 `sprint-status.yaml` 中对应条目为 `ready-for-dev`，并保留原注释与结构。
 
 [执行流程]
     1. 先完整阅读 `references/workflow-details.md`；该文件是完整操作规约，不能跳过或缩写执行。
     2. 激活时解析 `workflow`、三层 customize、`workflow.persistent_facts` 与运行项目根下的 `{project-root}/_speclite/config.toml`；本 Skill 目录仅保留 `config.toml.example` 作为参考，具体命令、字段和合并规则见完整规约。
     3. 按 `references/discover-inputs.md` 加载所有输入制品；对 `sprint-status.yaml` 必须从头到尾完整读取，以保留 Story 顺序。
-    4. 写入 Story 时，必须按完整规约列出的 13 个 template-output 段名顺序渲染。
+    4. 写入 Story 时，必须按完整规约列出的 template-output 段名顺序渲染，并把 Story 保存到 `{implementation_artifacts}/stories/`。
     5. 收尾前用 `references/checklist.md` 校验并修复 Story，更新 sprint 状态，并执行完整规约中的 `workflow.on_complete` 终止指令。
 
 [注意事项]
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-create-story`。
     - `references/workflow-details.md` 中的所有细节均为有效指令，不是背景材料；执行时必须完整遵循。
-    - 不得省略三层 customize、`persistent_facts`、`config.toml` 字段、Epic 状态机、上一 Story、git 情报、网络研究、UPDATE 文件三段式记录、13 个段名、`workflow.on_complete`。
+    - 不得省略三层 customize、`persistent_facts`、`config.toml` 字段、Epic 状态机、上一 Story、git 情报、网络研究、UPDATE 文件三段式记录、Flow Gate 段、`workflow.on_complete`。
     - Story 实现要求系统端到端继续工作；既有系统中维持功能正确所需的行为，即使未写入 AC，也必须视为需求。
     - `sprint-status.yaml` 更新必须保留所有注释与结构，包含 STATUS DEFINITIONS，禁止覆写为缩略版。
     - Story 文档末尾必须追加 `*本文档由 speclite-create-story Skill 自动生成*` 标注。
     - 完成输出必须包含 Story ID、Story Key、文件路径、`ready-for-dev` 状态、`dev-story`、`code-review` 和可选 Test Architect 护栏测试后续指引。
-

@@ -142,7 +142,7 @@ Status: done
   - [x] Duplicate canonical skill id、missing required `SKILL.md`、unsupported selected target 或 target write failure 必须产生 reserved issue id 或先更新 taxonomy SPEC。
 
 - [x] Task 6: 生成 manifest、skill/help/files indexes 和 phase coverage（AC: 8, 9, 11, 12）
-  - [x] 在 `src/manifest/` 中实现或扩展 `manifest-generator.ts`、`skill-index.ts`、`help-index.ts`、`files-index.ts`、`phase-coverage.ts` 和 `hash.ts`。
+  - [x] 在 `src/manifest/` 中实现或扩展 `manifest-generator.ts`、`manifest-schema.ts`、`hash.ts`，并可按既有实现选择集中式 helper 或拆分 `skill-index.ts`、`help-index.ts`、`files-index.ts`、`phase-coverage.ts` 模块；验收以 owning SPEC 字段、生成函数、写出路径和 fixture/tests 为准，不以独立文件名存在为唯一标准。
   - [x] Manifest/index artifact paths 固定为 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`。
   - [x] 生成 schema versions：`speclite.manifest.v1`、`speclite.skill-index.v1`、`speclite.help-index.v1`、`speclite.files-index.v1`、`speclite.phase-coverage.v1`。
   - [x] `skill-index` 记录 `canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash`、`installedTargets[]` 和 `phaseIds[]`。
@@ -428,6 +428,7 @@ GPT-5 Codex
 - Added runtime structure writer that applies Story 1.4 config planned writes, creates `_speclite` metadata hub, create-if-absent human-owned stubs and configured artifact directories without overwriting workflow artifacts.
 - Added canonical IDE mirror writer for `claude` and `agents`, preserving nested canonical package roots, target order, package hashes, source refs and file-level hashes.
 - Added manifest, skill/help/files indexes and phase coverage projections with schema versions and project-relative POSIX paths.
+- Clarified implementation anchor interpretation: current manifest/index builders are centralized in `src/manifest/manifest-generator.ts` with schemas in `src/manifest/manifest-schema.ts`; separate `skill-index.ts` / `help-index.ts` / `files-index.ts` / `phase-coverage.ts` files are optional split modules, not required proof of completion.
 - Updated install output to use contracted `CommandResult<InstallCommandData>` fields, mark `ide-mirror-creation` and `manifest-generation` completed, and keep `ready-check` / `ready-summary` pending for Story 1.6.
 - Added focused integration and fixture assertions for fresh install shape, target subset, operation lock failure, human-owned stub protection, workflow artifact preservation, artifact symlink escape and no-ready-summary gate.
 

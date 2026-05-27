@@ -1,20 +1,20 @@
 {
   "schemaVersion": "speclite.phase-coverage.v1",
   "phaseId": "4-implementation",
-  "phaseLabel": "4-implementation",
+  "phaseLabel": "Implementation",
   "moduleId": "sdlc",
   "canonicalSkillId": "speclite-dev-story",
   "ideTargets": [
     {
       "targetId": "claude",
       "entryPath": ".claude/skills/speclite-dev-story",
-      "activationTarget": "DS",
+      "activationTarget": ".claude/skills/speclite-dev-story/SKILL.md",
       "status": "mapped"
     },
     {
       "targetId": "agents",
       "entryPath": ".agents/skills/speclite-dev-story",
-      "activationTarget": "DS",
+      "activationTarget": ".agents/skills/speclite-dev-story/SKILL.md",
       "status": "mapped"
     }
   ]

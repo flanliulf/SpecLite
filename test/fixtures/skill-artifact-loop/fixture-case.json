@@ -1,0 +1,5 @@
+{
+  "caseId": "skill-artifact-loop",
+  "releaseGate": true,
+  "purpose": "Covers installed skill activation, resolver access, workflow artifact write, required metadata validation and generatedAt normalization for Story 2.5."
+}

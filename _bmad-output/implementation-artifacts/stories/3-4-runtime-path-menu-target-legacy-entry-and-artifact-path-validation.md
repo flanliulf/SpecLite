@@ -71,7 +71,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-6）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、files index/hash helpers、diagnostics/output、path normalization、validation aggregation 和 fixture harness；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、files index/hash helpers、diagnostics/output、path normalization、validation aggregation、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
   - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/output.ts`、`src/validation/validate-project.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.4 中创建孤立的 runtime/menu/artifact validator。
   - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/runtime-path.ts`、`src/validation/rules/menu-target.ts`、`src/validation/rules/legacy-namespace.ts`、`src/validation/rules/artifact-path.ts`、`src/validation/validate-project.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 和 `src/fs/safe-write.ts`。
   - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。

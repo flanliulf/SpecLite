@@ -179,7 +179,7 @@ Status: ready-for-dev
 - `src/commands/install.ts`、`src/installer/install-runner.ts`：fresh install orchestration, SourceResolutionPlan -> InstallPlan -> write/apply -> CommandResult projection。
 - `src/commands/update.ts`、`src/update/update-plan.ts`、`src/update/conflict-detector.ts`、`src/update/apply-update.ts`：normal update planning、conflict detection、protected files、actual apply results。
 - `src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`：public JSON envelope、status/exit code, issue ordering, human-readable profiles。
-- `src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts`、`src/manifest/files-index.ts`：manifest/index snapshots, file ownership/hash projection。
+- `src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts` 或等价 files-index helper：manifest/index snapshots, file ownership/hash projection。
 - `src/ide/adapter-registry.ts`、`src/ide/target-writer.ts`：canonical target order `claude`, `agents` and generated IDE mirror entries。
 - `src/fs/path-normalizer.ts`、`src/fs/safe-write.ts`：project-relative POSIX paths, redaction, safe writes。
 

@@ -65,7 +65,8 @@
 - `architecture_file` = `{planning_artifacts}/architecture.md`
 - `ux_file` = `{planning_artifacts}/*ux*.md`
 - `story_title` = ""（如果不能推断则向用户索取）
-- `default_output_file` = `{implementation_artifacts}/{story_key}.md`
+- `story_root` = `{implementation_artifacts}/stories`
+- `default_output_file` = `{story_root}/{story_key}.md`
 - `project_knowledge` = `{project-root}/docs`（可由 `{project-root}/_speclite/config.toml` 覆盖）
 
 ## 输入文件
@@ -175,8 +176,8 @@
 
 #### 2.4 上一 Story 情报（条件：`story_num > 1`）
 
-- 查找 `{previous_story_num}`：在 `{implementation_artifacts}` 中扫描 epic `{epic_num}` 内 story 编号小于 `{story_num}` 的最大编号 story 文件。
-- 加载上一个 story 文件：`{implementation_artifacts}/{epic_num}-{previous_story_num}-*.md`。
+- 查找 `{previous_story_num}`：在 `{story_root}` 中扫描 epic `{epic_num}` 内 story 编号小于 `{story_num}` 的最大编号 story 文件。
+- 加载上一个 story 文件：`{story_root}/{epic_num}-{previous_story_num}-*.md`。
 - 提取：dev notes 与经验、评审反馈与修正点、创建/修改过的文件及模式、有效/无效的测试方式、遇到的问题与解决方案、已建立的代码模式。
 - 提取所有可能影响当前 story 实现的经验。
 
@@ -247,6 +248,7 @@
 
 #### 5.1 从模板初始化
 
+- 确保 `{story_root}` 目录存在；如果缺失，先创建该目录。不得把 Story 文件写回 `{implementation_artifacts}` 根目录。
 - 读取 `assets/story-template.md` 中 fenced markdown 代码块内的内容作为模板基底，初始化 `{default_output_file}`。
 - 模板中的双括号变量（如 `{{role}}`、`{{action}}`、`{{benefit}}`、`{{agent_model_name_version}}`）属于运行时动态填充变量；不要在 Skill 定义中硬编码这些值。
 
@@ -262,17 +264,30 @@
 6. `library_framework_requirements`
 7. `file_structure_requirements`
 8. `testing_requirements`
+9. `dependency_gate`
+10. `anchor_contract_map`
+11. `equivalent_implementation_policy`
+12. `evidence_plan`
 
 条件段：
 
-- 第 9 段：`previous_story_intelligence`（条件：存在上一个 story 的可用经验）
-- 第 10 段：`git_intelligence_summary`（条件：已完成 git 分析）
-- 第 11 段：`latest_tech_information`（条件：已完成网络研究）
+- 第 13 段：`previous_story_intelligence`（条件：存在上一个 story 的可用经验）
+- 第 14 段：`git_intelligence_summary`（条件：已完成 git 分析）
+- 第 15 段：`latest_tech_information`（条件：已完成网络研究）
 
 收尾段：
 
-- 第 12 段：`project_context_reference`
-- 第 13 段：`story_completion_status`
+- 第 16 段：`project_context_reference`
+- 第 17 段：`anchor_evidence_summary_placeholder`
+- 第 18 段：`story_completion_status`
+
+#### 5.2.1 Anchor 与 Gate 写法规则
+
+- `dependency_gate` 必须列出本 Story 启动前依赖的前序能力，并说明如何用 `Contract -> Functional -> Evidence` 检查。
+- `anchor_contract_map` 必须把每个前置依赖分类为 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor` 或 `Guidance Anchor`。
+- 固定文件名只有在 owning SPEC 明确要求时才能作为 hard gate；否则必须写成 suggested path，并补充 equivalent implementation policy。
+- `evidence_plan` 必须列出预期测试、fixture、snapshot 或命令证据。
+- `anchor_evidence_summary_placeholder` 保留给 `speclite-dev-story` 在 Story 完成前填写；create-story 只写占位说明，不伪造实现证据。
 
 #### 5.3 状态与备注
 

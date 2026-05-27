@@ -178,7 +178,7 @@ Status: ready-for-dev
 - `src/diagnostics/command-result-schema.ts`：ensure issue/data projections do not expose volatile lock/temp fields；do not add public fields without SPEC update。
 - `src/diagnostics/command-result.ts`：status/exit-code derivation for `operation-lock.project-locked`, pre-plan failure projection, partial failure issue details。
 - `src/diagnostics/output.ts`：human-readable Evidence output for lock contention, stale lock, safe write partial failure and manual action.
-- `src/manifest/files-index.ts`：exclude `_speclite/.lock` and `.speclite-tmp-` temporary files from files index and stable hash inputs。
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper：exclude `_speclite/.lock` and `.speclite-tmp-` temporary files from files index and stable hash inputs。
 - `test/fixtures/existing-install-update/`、`test/fixtures/path-portability/`、`test/fixtures/ide-drift/`：lock/safe-write/path blocker fixture assertions。
 
 如果这些文件已经由前置 stories 创建，修改前必须完整读取并保留既有 behavior。如果这些文件尚不存在，按前置 story implementation 顺序补齐，不要绕过 owning SPECs 创建私有实现。

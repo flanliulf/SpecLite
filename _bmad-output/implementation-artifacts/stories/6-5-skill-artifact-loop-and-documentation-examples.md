@@ -163,9 +163,7 @@ src/fixtures/comparators/json.ts
 src/fixtures/comparators/file-tree.ts
 src/fixtures/comparators/human-output.ts
 src/manifest/manifest-schema.ts
-src/manifest/skill-index.ts
-src/manifest/help-index.ts
-src/manifest/phase-coverage.ts
+src/manifest/manifest-generator.ts or equivalent skill/help/phase index helpers
 src/manifest/artifact-contract.ts
 src/ide/adapter-registry.ts
 src/ide/mirror-validator.ts

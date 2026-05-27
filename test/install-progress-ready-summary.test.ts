@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -157,6 +157,233 @@ describe("ReadyCheck minimal local gate", () => {
     }
   });
 
+  it("reports invalid help activation targets with reserved menu-target diagnostics", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-menu-target-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, "_speclite/_config/manifest.yaml"),
+        [
+          'schemaVersion: "speclite.manifest.v1"',
+          "sourceDescriptor:",
+          '  sourceType: "bundled"',
+          '  resolvedRoot: "assets/source/speclite"',
+          "  integrityEvidence: []",
+          '  trustStatus: "trusted"',
+          "installedModules:",
+          '  - "sdlc"',
+          "targetIds:",
+          '  - "claude"',
+          "paths:",
+          '  projectRoot: "."',
+          '  specliteRoot: "_speclite"',
+          '  artifactRoot: "_speclite-output"',
+          '  manifestPath: "_speclite/_config/manifest.yaml"',
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      await writeReadyCheckIndex(tempRoot, "skill-index.json", {
+        schemaVersion: "speclite.skill-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: "speclite-dev-story",
+            moduleId: "sdlc",
+            sourcePackagePath: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
+            canonicalPackageHash: "sha256:dev",
+            installedTargets: ["claude"],
+            phaseIds: ["4-implementation"],
+          },
+        ],
+      });
+      await writeReadyCheckIndex(tempRoot, "help-index.json", {
+        schemaVersion: "speclite.help-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.help-index.v1",
+            phaseId: "4-implementation",
+            entryLabel: "Dev Story",
+            canonicalSkillId: "speclite-dev-story",
+            activationTarget: "DS",
+            targetIds: ["claude"],
+          },
+        ],
+      });
+      await writeReadyCheckIndex(tempRoot, "files-index.json", {
+        schemaVersion: "speclite.files-index.v1",
+        entries: [],
+      });
+      await writeReadyCheckIndex(tempRoot, "phase-coverage.json", {
+        schemaVersion: "speclite.phase-coverage.v1",
+        rows: [
+          {
+            schemaVersion: "speclite.phase-coverage.v1",
+            phaseId: "4-implementation",
+            phaseLabel: "Implementation",
+            moduleId: "sdlc",
+            canonicalSkillId: "speclite-dev-story",
+            ideTargets: [
+              {
+                targetId: "claude",
+                entryPath: ".claude/skills/speclite-dev-story",
+                activationTarget: ".claude/skills/speclite-dev-story/SKILL.md",
+                status: "mapped",
+              },
+            ],
+          },
+        ],
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: {
+          sourceType: "bundled",
+          resolvedRoot: "assets/source/speclite",
+          integrityEvidence: [],
+          trustStatus: "trusted",
+        },
+        installedModules: ["sdlc"],
+        ideTargets: [{ id: "claude", status: "configured", targetPath: ".claude/skills", skillCount: 1 }],
+        paths: {
+          projectRoot: ".",
+          specliteRoot: "_speclite",
+          artifactRoot: "_speclite-output",
+          manifestPath: "_speclite/_config/manifest.yaml",
+        },
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "menu-target.missing-target",
+        category: "menu-target",
+        affectedPath: "_speclite/_config/help-index.json",
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails when help and phase targets point at another canonical skill directory", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-cross-skill-target-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      await mkdir(path.join(tempRoot, "_speclite-output"), { recursive: true });
+      await mkdir(path.join(tempRoot, ".claude/skills/speclite-dev-story"), { recursive: true });
+      await mkdir(path.join(tempRoot, ".claude/skills/other-skill"), { recursive: true });
+      await writeFile(path.join(tempRoot, ".claude/skills/speclite-dev-story/SKILL.md"), "# Dev\n", "utf8");
+      await writeFile(path.join(tempRoot, ".claude/skills/other-skill/SKILL.md"), "# Other\n", "utf8");
+      await writeFile(
+        path.join(tempRoot, "_speclite/_config/manifest.yaml"),
+        [
+          'schemaVersion: "speclite.manifest.v1"',
+          "sourceDescriptor:",
+          '  sourceType: "bundled"',
+          '  resolvedRoot: "assets/source/speclite"',
+          "  integrityEvidence: []",
+          '  trustStatus: "trusted"',
+          "installedModules:",
+          '  - "sdlc"',
+          "targetIds:",
+          '  - "claude"',
+          "paths:",
+          '  projectRoot: "."',
+          '  specliteRoot: "_speclite"',
+          '  artifactRoot: "_speclite-output"',
+          '  manifestPath: "_speclite/_config/manifest.yaml"',
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      await writeReadyCheckIndex(tempRoot, "skill-index.json", {
+        schemaVersion: "speclite.skill-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: "speclite-dev-story",
+            moduleId: "sdlc",
+            sourcePackagePath: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
+            canonicalPackageHash: "sha256:dev",
+            installedTargets: ["claude"],
+            phaseIds: ["4-implementation"],
+          },
+        ],
+      });
+      await writeReadyCheckIndex(tempRoot, "help-index.json", {
+        schemaVersion: "speclite.help-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.help-index.v1",
+            phaseId: "4-implementation",
+            entryLabel: "Dev Story",
+            canonicalSkillId: "speclite-dev-story",
+            activationTarget: ".claude/skills/other-skill/SKILL.md",
+            targetIds: ["claude"],
+          },
+        ],
+      });
+      await writeReadyCheckIndex(tempRoot, "files-index.json", {
+        schemaVersion: "speclite.files-index.v1",
+        entries: [],
+      });
+      await writeReadyCheckIndex(tempRoot, "phase-coverage.json", {
+        schemaVersion: "speclite.phase-coverage.v1",
+        rows: [
+          {
+            schemaVersion: "speclite.phase-coverage.v1",
+            phaseId: "4-implementation",
+            phaseLabel: "Implementation",
+            moduleId: "sdlc",
+            canonicalSkillId: "speclite-dev-story",
+            ideTargets: [
+              {
+                targetId: "claude",
+                entryPath: ".claude/skills/other-skill",
+                activationTarget: ".claude/skills/other-skill/SKILL.md",
+                status: "mapped",
+              },
+            ],
+          },
+        ],
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: {
+          sourceType: "bundled",
+          resolvedRoot: "assets/source/speclite",
+          integrityEvidence: [],
+          trustStatus: "trusted",
+        },
+        installedModules: ["sdlc"],
+        ideTargets: [{ id: "claude", status: "configured", targetPath: ".claude/skills", skillCount: 2 }],
+        paths: {
+          projectRoot: ".",
+          specliteRoot: "_speclite",
+          artifactRoot: "_speclite-output",
+          manifestPath: "_speclite/_config/manifest.yaml",
+        },
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "menu-target.missing-target",
+        category: "menu-target",
+        affectedPath: "_speclite/_config/help-index.json",
+        details: expect.objectContaining({
+          activationSkillDirectory: "other-skill",
+          reason: "skill-id-mismatch",
+        }),
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("does not depend on full validate, hash scan, remote source access, update check or repair planning", async () => {
     const source = await readFile(path.join(process.cwd(), "src/installer/ready-check.ts"), "utf8");
 
@@ -168,6 +395,14 @@ describe("ReadyCheck minimal local gate", () => {
     expect(source).not.toContain("repairPlan");
   });
 });
+
+async function writeReadyCheckIndex(tempRoot: string, fileName: string, data: unknown): Promise<void> {
+  await writeFile(
+    path.join(tempRoot, "_speclite/_config", fileName),
+    `${JSON.stringify(data, null, 2)}\n`,
+    "utf8",
+  );
+}
 
 describe("install ready summary rendering", () => {
   it("renders accessible ready summary after successful install and no ANSI in NO_COLOR/CI contexts", async () => {

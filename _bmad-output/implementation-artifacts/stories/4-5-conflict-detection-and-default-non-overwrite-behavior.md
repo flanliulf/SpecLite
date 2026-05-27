@@ -167,8 +167,8 @@ Status: ready-for-dev
 - `src/update/update-plan.ts`：normal update plan construction，consume conflict detector output，keep planned effects separate from actual apply result。
 - `src/update/ownership-model.ts`：ownership truth 和 protected boundary predicates，来自 Story 4.1。
 - `src/update/repair-plan.ts`：仅用于 suggested next step / future repair boundary，不在本 Story 中实现 full repair apply。
-- `src/manifest/files-index.ts` 与 `src/manifest/hash.ts`：files index raw-byte hash baseline、ownership projection、volatile file exclusion。
-- `src/manifest/skill-index.ts` 或 equivalent：canonical package hash 与 installed target mirror projection。
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper，以及 `src/manifest/hash.ts`：files index raw-byte hash baseline、ownership projection、volatile file exclusion。
+- `src/manifest/manifest-generator.ts` 或 equivalent skill-index helper：canonical package hash 与 installed target mirror projection。
 - `src/ide/mirror-validator.ts` 或 `src/validation/rules/ide-mirror.ts`：IDE mirror drift detection source，必须和 update conflict detector 共享 semantic result 或 helper，避免 validate/update 产生不同 drift facts。
 - `src/fs/path-normalizer.ts`：project-relative POSIX normalization、escape/case conflict helper；Story 4.5 只调用，不复制实现。
 - `src/commands/update.ts`：update orchestration、lock-before-planning/apply boundary consumption、write authorization routing。

@@ -17,6 +17,8 @@
 - 基于模板渲染完整 Story 并置为 `ready-for-dev`
 - Checklist 自检与 `sprint-status.yaml` 状态同步
 - 同时提供中文 SKILL.md 与英文 SKILL.en.md 双版定义
+- Story 文件默认写入 `{implementation_artifacts}/stories/`
+- Story 模板包含 Flow Gate 和 Anchor 证据段
 
 ### 已知问题
 

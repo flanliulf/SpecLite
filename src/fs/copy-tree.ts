@@ -4,6 +4,10 @@ import type { FilesIndexEntry } from "../manifest/manifest-schema.js";
 import { hashFile, isExecutableMode, listFiles } from "../manifest/hash.js";
 import { ensureSafeDirectory, safeWriteFile } from "./safe-write.js";
 
+const REQUIRED_CANONICAL_PACKAGE_FILE = "SKILL.md";
+const OPTIONAL_CANONICAL_PACKAGE_FILES = new Set(["CHANGELOG.md", "config.toml.example", "customize.toml"]);
+const OPTIONAL_CANONICAL_PACKAGE_DIRECTORIES = ["references/", "assets/", "scripts/"] as const;
+
 export async function copyCanonicalPackage(input: {
   projectRoot: string;
   sourcePackageRoot: string;
@@ -20,6 +24,24 @@ export async function copyCanonicalPackage(input: {
     }
 > {
   const sourceFiles = await listFiles(input.sourcePackageRoot);
+  if (!sourceFiles.includes(REQUIRED_CANONICAL_PACKAGE_FILE)) {
+    return {
+      ok: false,
+      issue: {
+        issueId: "menu-target.missing-target",
+        category: "menu-target",
+        severity: "error",
+        affectedPath: input.sourceRefRoot,
+        component: "ide-mirror-writer",
+        details: {
+          reason: "missing-skill-md",
+        },
+        impact: "The canonical skill package cannot be mapped because SKILL.md is missing.",
+        suggestedNextStep: "Restore SKILL.md in the canonical source package before installing IDE skill entries.",
+      },
+    };
+  }
+  const copiedSourceFiles = sourceFiles.filter(isInstallableCanonicalPackageFile);
   const copiedFiles: FilesIndexEntry[] = [];
 
   const targetRoot = await ensureSafeDirectory({
@@ -29,7 +51,7 @@ export async function copyCanonicalPackage(input: {
   });
   if (!targetRoot.ok) return targetRoot;
 
-  for (const relativeFile of sourceFiles) {
+  for (const relativeFile of copiedSourceFiles) {
     const sourceFile = path.join(input.sourcePackageRoot, relativeFile);
     const targetPath = `${input.targetEntryRoot}/${relativeFile}`;
     const sourceStat = await stat(sourceFile);
@@ -61,4 +83,12 @@ export async function copyCanonicalPackage(input: {
     ok: true,
     files: copiedFiles,
   };
+}
+
+export function isInstallableCanonicalPackageFile(relativeFile: string): boolean {
+  if (relativeFile === REQUIRED_CANONICAL_PACKAGE_FILE) return true;
+  if (OPTIONAL_CANONICAL_PACKAGE_FILES.has(relativeFile)) return true;
+  return OPTIONAL_CANONICAL_PACKAGE_DIRECTORIES.some((directory) =>
+    relativeFile.startsWith(directory),
+  );
 }

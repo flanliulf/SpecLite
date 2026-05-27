@@ -52,7 +52,11 @@
 
 - Story 文件本身作为规格文件 → `$review_mode` = `"full"`（始终为 full，因为 CR 工作流必然有 Story 上下文）
 - 提取 Story 文档中的验收标准（AC）章节内容 → `$spec_content`
+- 提取 Story 文档中的 `Anchor Evidence Summary` 章节内容 → `$anchor_evidence_summary`
+- 读取最新 story-completion gate report（`{implementation_artifacts}/flow-gates/{story-id}-story-completion-gate.md`）→ `$story_completion_gate_report`
+- 若 gate report 缺失或结果不是 `PASS` / `PASS_EQUIVALENT`，把该事实追加到 `$spec_content` 的审查约束中，交由 Acceptance Auditor 判断是否阻断验收
 - **写入临时文件**：将 `$spec_content` 写入 `$cr_dir/.tmp/spec-content.md`。后续 Phase B3 Acceptance Auditor 通过读取此文件获取验收标准。
+- **写入临时文件**：将 `$anchor_evidence_summary` 和 `$story_completion_gate_report` 写入 `$cr_dir/.tmp/anchor-evidence.md`。后续 Phase B3 Acceptance Auditor 必须读取该文件。
 
 ---
 
@@ -113,7 +117,13 @@
 >
 > 待审查内容位于文件：`$cr_dir/.tmp/review-input.diff`
 > 验收标准（AC）位于文件：`$cr_dir/.tmp/spec-content.md`
-> 请用 Read 工具读取这两个文件，然后按 speclite-review-acceptance-auditor skill 的指令执行审查。
+> Anchor evidence 与 story-completion gate report 位于文件：`$cr_dir/.tmp/anchor-evidence.md`
+> 请用 Read 工具读取这三个文件，然后按 speclite-review-acceptance-auditor skill 的指令执行审查。
+>
+> 额外审计要求：
+> 1. 核对 Story `Anchor Evidence Summary` 是否覆盖 File List、测试证据和等价实现说明。
+> 2. 若 story-completion gate 缺失、失败或非 `PASS` / `PASS_EQUIVALENT`，作为 Acceptance finding 输出。
+> 3. 固定文件名只有在 owning SPEC 明确要求时才是 hard gate；否则必须检查 functional implementation 与 evidence 是否构成等价实现。
 >
 > 完成后将审查结果（Markdown 列表）写入文件：`$cr_dir/.tmp/b3-acceptance-auditor.md`
 

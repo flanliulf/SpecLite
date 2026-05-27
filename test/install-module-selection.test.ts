@@ -296,8 +296,8 @@ describe("install official module selection orchestration", () => {
       expect(outcome.exitCode).toBe(1);
       expect(outcome.result.issues).toEqual([
         expect.objectContaining({
-          issueId: "source-integrity.unsupported-source",
-          category: "source-integrity",
+          issueId: "menu-target.unknown-skill",
+          category: "menu-target",
           severity: "error",
           details: {
             reason: "module-metadata.unknown-help-skill",

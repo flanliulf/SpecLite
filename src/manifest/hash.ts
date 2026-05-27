@@ -14,9 +14,12 @@ export function hashBytes(value: Buffer | string): FileHash {
   return `sha256:${hash.digest("hex")}`;
 }
 
-export async function hashPackageDirectory(packageRoot: string): Promise<FileHash> {
+export async function hashPackageDirectory(
+  packageRoot: string,
+  options: { include?: (relativeFile: string) => boolean } = {},
+): Promise<FileHash> {
   const hash = createHash("sha256");
-  const files = await listFiles(packageRoot);
+  const files = (await listFiles(packageRoot)).filter((file) => options.include?.(file) ?? true);
 
   for (const file of files) {
     const absolutePath = path.join(packageRoot, file);

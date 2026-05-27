@@ -1,10 +1,14 @@
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { InstallCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
 import { SourceDescriptorSchema } from "../src/source/source-descriptor-schema.js";
 import { SourceResolutionPlanSchema, InstallPlanSchema } from "../src/installer/install-plan-schema.js";
 import { ManifestSchema, MANIFEST_SCHEMA_VERSION } from "../src/manifest/manifest-schema.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry } from "../src/ide/adapter-registry.js";
-import { ResolveOutputSchema } from "../src/config/resolve-output-schema.js";
+import { ResolveMergeResultSchema, ResolveOutputSchema } from "../src/config/resolve-output-schema.js";
+import { resolveProjectConfig } from "../src/config/config-reader.js";
 import { parseExpectedCommandJson } from "../src/fixtures/fixture-contract.js";
 
 describe("owning SPEC executable anchors", () => {
@@ -92,9 +96,35 @@ describe("owning SPEC executable anchors", () => {
     expect(getIdeAdapterRegistry().map((adapter) => adapter.id)).toEqual(["claude", "agents"]);
 
     expect(ResolveOutputSchema.parse({
-      value: { ok: true },
-      sources: ["base"],
-      diagnostics: [],
-    })).toEqual({ value: { ok: true }, sources: ["base"], diagnostics: [] });
+      ok: true,
+    })).toEqual({ ok: true });
+  });
+
+  it("parses the resolver merge result returned by the runtime readers", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-resolve-anchor-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite"), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, "_speclite/config.toml"),
+        "[core]\nproject_name = \"anchor-fixture\"\n",
+        "utf8",
+      );
+
+      const result = await resolveProjectConfig({ projectRoot: tempRoot });
+
+      expect(ResolveMergeResultSchema.parse(result)).toEqual(result);
+      expect(result).toEqual({
+        value: {
+          core: {
+            project_name: "anchor-fixture",
+          },
+        },
+        issues: [],
+        exitCode: 0,
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
   });
 });

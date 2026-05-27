@@ -3,7 +3,7 @@ name: speclite-dev-story
 description: "Execute story implementation following a context filled story spec file as the developer agent. Use when user mentions 'dev this story', 'dev story', 'implement story', 'implement the next story in the sprint plan', 'develop story file', '开发 Story', '实现 Story', '执行 Story 实现', '继续开发 Story', '开发下一个 Story', '实现故事', '编码实现 Story', or provides a story file path. Capable of customize.toml three-tier resolution and config-driven activation, sprint-status driven story discovery and review-continuation detection, red-green-refactor implementation with multi-level testing and HALT triggers, definition-of-done validation per references/checklist.md, sprint-status synchronization preserving comments, and on_complete terminal directive execution."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 metadata:
-    version: "1.0.2"
+    version: "1.0.3"
     author: "fancyliu"
     catalog: "speclite"
 ---
@@ -18,10 +18,10 @@ metadata:
     - `{user_skill_level}` only affects conversation style, not code updates
 
 [Core Capabilities]
-    - **Three-tier customize resolution and config-driven activation**: run `{speclite-runtime-root}/scripts/resolve_customization.py` to resolve the `workflow` block; on failure, merge `customize.toml` / `{skill-name}.toml` / `{skill-name}.user.toml` in base→team→user order; load `persistent_facts` (with `file:` prefix support); resolve `project_name` / `user_name` / `communication_language` / `document_output_language` / `user_skill_level` / `implementation_artifacts` / `date` from `{project-root}/_speclite/config.toml`. See `references/activation.md`
-    - **Story auto-discovery and review-continuation detection**: support explicit `{story_path}`; otherwise scan `sprint-status.yaml` `development_status` from top to bottom for the first story keyed `number-number-name` whose status equals `ready-for-dev`; without sprint-status, search `{implementation_artifacts}` directly; detect "Senior Developer Review (AI)" and "Review Follow-ups (AI)" sections and extract verdict, unchecked items, and severity counts
+    - **Three-tier customize resolution and config-driven activation**: run `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow` to resolve the `workflow` block; on failure, merge `customize.toml` / `{skill-name}.toml` / `{skill-name}.user.toml` in base→team→user order; load `persistent_facts` (with `file:` prefix support); resolve `project_name` / `user_name` / `communication_language` / `document_output_language` / `user_skill_level` / `implementation_artifacts` / `date` from `{project-root}/_speclite/config.toml`. See `references/activation.md`
+    - **Story auto-discovery and review-continuation detection**: support explicit `{story_path}`; otherwise use `sprint-status.yaml` `story_location` or `{implementation_artifacts}/stories` to find the first `ready-for-dev` Story; detect "Senior Developer Review (AI)" and "Review Follow-ups (AI)" sections and extract verdict, unchecked items, and severity counts
     - **Test-driven implementation and quality gates**: enforce red-green-refactor (failing test first → minimal code to pass → refactor while green); author unit / integration / end-to-end tests; run existing tests to prevent regressions, run new tests, run lint/static checks; validate every Acceptance Criterion with explicit quantitative thresholds
-    - **HALT and DoD validation**: HALT triggers are dependencies beyond story spec, 3 consecutive implementation failures, and missing required configuration; enforce Definition of Done via `references/checklist.md`; NEVER mark a task `[x]` unless tests truly exist and pass
+    - **HALT, Flow Gate, and DoD validation**: run `story-kickoff` gate before state advancement and `story-completion` gate before `review`; HALT on out-of-scope dependencies, 3 consecutive failures, missing required config, or gate failure; NEVER mark a task `[x]` unless tests truly exist and pass
     - **Sprint-status synchronization**: flip `ready-for-dev → in-progress` at start and `in-progress → review` at completion; **preserve ALL comments and structure of sprint-status.yaml** (incl. STATUS DEFINITIONS); `[AI-Review]` follow-up tasks MUST be checked in BOTH Review Follow-ups and Senior Developer Review → Action Items
     - **on_complete terminal directive**: after the completion conversation, resolve and execute `workflow.on_complete` as the final terminal directive before exit
 
@@ -50,12 +50,12 @@ metadata:
         - **Step 1**: find the next ready story and load it fully (three branches: explicit input / sprint-status discovery / non-sprint search; read `sprint-status.yaml` end-to-end; parse all story sections; identify the first incomplete task)
         - **Step 2**: load `{project_context}` and Story Dev Notes
         - **Step 3**: detect review continuation; extract verdict, unchecked items, severity; set `review_continuation` and `{pending_review_items}`
-        - **Step 4**: sync story status `ready-for-dev → in-progress` (when no sprint-status, set `{current_sprint_status}` = `no-sprint-tracking`)
+        - **Step 4**: run `speclite-flow-gate mode=story-kickoff`, then sync story status `ready-for-dev → in-progress`
         - **Step 5**: implement current task/subtask via red-green-refactor; record technical approach in Dev Agent Record → Implementation Plan; HALT immediately on triggers
         - **Step 6**: author unit / integration / end-to-end tests covering edge cases from Dev Notes
         - **Step 7**: run existing tests + new tests + lint/static checks; validate ACs with explicit thresholds; STOP and fix on any failure
         - **Step 8**: only when all validation gates pass and tests truly exist and pass, mark task `[x]`, update File List and Completion Notes; for `[AI-Review]` tasks check BOTH Review Follow-ups and Senior Developer Review → Action Items; record Change Log entry on review continuation; loop back to Step 5 if more tasks remain
-        - **Step 9**: completeness verification + enhanced DoD validation (see `references/checklist.md`) + sync sprint-status to `review` (preserve all comments and structure); HALT on any failure
+        - **Step 9**: fill Anchor Evidence Summary, run `story-completion` gate, pass DoD, then sync sprint-status to `review`; HALT on any failure
         - **Step 10**: completion communication, explanations tailored to `{user_skill_level}`, suggest next steps (recommend running `code-review` with a DIFFERENT LLM), then resolve and execute `workflow.on_complete`
 
     === Paths ===

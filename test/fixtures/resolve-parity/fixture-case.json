@@ -1,0 +1,5 @@
+{
+  "caseId": "resolve-parity",
+  "releaseGate": true,
+  "purpose": "Covers local-only resolver parity for config and customization merge semantics, key selection, diagnostics, and stdout/stderr contracts."
+}

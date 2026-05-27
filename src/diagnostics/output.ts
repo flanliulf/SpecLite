@@ -1,4 +1,16 @@
 import type { InstallCommandResult, ValidationIssue } from "./command-result-schema.js";
+import type { PhaseCoverage } from "../manifest/manifest-schema.js";
+
+export type ArtifactEvidence = {
+  artifactPath: string;
+  artifactType: string;
+  workflowType: string;
+  sourceSkill: string;
+  generatedAt: string;
+  configuredRoot: string;
+  defaultOutputPath: string;
+  metadataLocation: "frontmatter" | "sidecar";
+};
 
 export function renderCommandResultJson(result: InstallCommandResult): string {
   return `${JSON.stringify(result, null, 2)}\n`;
@@ -33,6 +45,65 @@ export function renderInstallHumanOutput(result: InstallCommandResult): string {
     for (const action of result.nextActions) {
       lines.push(`- ${action}`);
     }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderPhaseCoverageEvidence(phaseCoverage: PhaseCoverage): string {
+  const lines = ["Phase coverage evidence"];
+
+  for (const row of phaseCoverage.rows) {
+    for (const target of row.ideTargets) {
+      lines.push(
+        [
+          `phase=${row.phaseId}`,
+          `module=${row.moduleId}`,
+          `canonicalSkillId=${row.canonicalSkillId}`,
+          `target=${target.targetId}`,
+          `entryPath=${target.entryPath}`,
+          `activationTarget=${target.activationTarget}`,
+          `status=${target.status}`,
+        ].join(", "),
+      );
+
+      if (target.status !== "mapped") {
+        lines.push(
+          `nextAction=Run speclite validate and inspect ${target.entryPath} before treating this phase as covered.`,
+        );
+      }
+    }
+  }
+
+  if (phaseCoverage.rows.length === 0) {
+    lines.push("No phase coverage rows are available.");
+    lines.push("nextAction=Run speclite validate or rerun speclite install --yes.");
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderArtifactEvidence(artifacts: ArtifactEvidence[]): string {
+  const lines = ["Artifact evidence"];
+
+  for (const artifact of artifacts) {
+    lines.push(
+      [
+        `artifactPath=${artifact.artifactPath}`,
+        `artifactType=${artifact.artifactType}`,
+        `workflowType=${artifact.workflowType}`,
+        `sourceSkill=${artifact.sourceSkill}`,
+        `generatedAt=${artifact.generatedAt}`,
+        `configuredRoot=${artifact.configuredRoot}`,
+        `defaultOutputPath=${artifact.defaultOutputPath}`,
+        `metadataLocation=${artifact.metadataLocation}`,
+      ].join(", "),
+    );
+  }
+
+  if (artifacts.length === 0) {
+    lines.push("No artifact evidence rows are available.");
+    lines.push("nextAction=Run a workflow that writes a contracted artifact and metadata.");
   }
 
   return `${lines.join("\n")}\n`;

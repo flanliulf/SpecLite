@@ -61,8 +61,8 @@ Activation is complete. Begin the workflow below.
 
 - `tracking_system` = `file-system`
 - `project_key` = `NOKEY`
-- `story_location` = `{implementation_artifacts}`
-- `story_location_absolute` = `{implementation_artifacts}`
+- `story_location` = `{implementation_artifacts}/stories`
+- `story_location_absolute` = `{implementation_artifacts}/stories`
 - `epics_location` = `{planning_artifacts}`
 - `epics_pattern` = `*epic*.md`
 - `status_file` = `{implementation_artifacts}/sprint-status.yaml`
@@ -181,7 +181,7 @@ development_status:
 #
 # Story Status:
 #   - backlog: Story only exists in epic file
-#   - ready-for-dev: Story file created in stories folder
+#   - ready-for-dev: Story file created in story_location, usually {implementation_artifacts}/stories
 #   - in-progress: Developer actively working on implementation
 #   - review: Ready for code review (via Dev's code-review workflow)
 #   - done: Story completed
@@ -273,7 +273,7 @@ backlog → ready-for-dev → in-progress → review → done
 ```
 
 - **backlog**: Story only exists in epic file
-- **ready-for-dev**: Story file created (e.g., `stories/1-3-plant-naming.md`)
+- **ready-for-dev**: Story file created under `story_location` (usually `stories/`, e.g., `stories/1-3-plant-naming.md`)
 - **in-progress**: Developer actively working
 - **review**: Ready for code review (via Dev's code-review workflow)
 - **done**: Completed

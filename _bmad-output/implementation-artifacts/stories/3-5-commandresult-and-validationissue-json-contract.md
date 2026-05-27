@@ -81,7 +81,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-9）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 的实际代码已经建立 TypeScript CLI scaffold、core command orchestration、manifest/index parser、IDE adapter registry、validation aggregation、path normalization、diagnostics/output 和 fixture harness；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 的实际代码已经建立 TypeScript CLI scaffold、core command orchestration、manifest/index parser、IDE adapter registry、validation aggregation、path normalization、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
   - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/commands/status.ts`、`src/commands/validate.ts`、`src/commands/update.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.5 中创建孤立的 diagnostics-only scaffold。
   - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/validation/issue-model.ts` 或等价 issue model、`src/validation/validate-project.ts`、`src/commands/*.ts`、`src/manifest/manifest-schema.ts`、`src/source/source-descriptor-schema.ts`、`src/installer/install-plan-schema.ts`、`src/ide/adapter-registry.ts` 和 `src/fs/path-normalizer.ts`。
   - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。

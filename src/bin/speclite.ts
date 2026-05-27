@@ -10,6 +10,7 @@ import {
   type InstallCommandRuntime,
   type ModuleSelectionPromptInput,
 } from "../commands/install.js";
+import { registerResolveCommand } from "../commands/resolve.js";
 
 export type CliIo = {
   stdout: (text: string) => void;
@@ -29,6 +30,8 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
 
   program.name("speclite").description("SpecLite local-first CLI control plane.");
   program.exitOverride();
+
+  registerResolveCommand(program, io);
 
   program
     .command("install")

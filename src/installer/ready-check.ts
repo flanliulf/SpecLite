@@ -13,10 +13,13 @@ import {
   ManifestSchema,
   PhaseCoverageSchema,
   SkillIndexSchema,
+  type HelpIndex,
   type Manifest,
+  type PhaseCoverage,
   type SkillIndex,
 } from "../manifest/manifest-schema.js";
 import { SourceDescriptorSchema, type SourceDescriptor } from "../source/source-descriptor-schema.js";
+import { validateMenuTargets } from "../validation/rules/menu-target.js";
 import type { InstallLifecycleStepId } from "./progress-events.js";
 
 export type ReadyCheckResult =
@@ -86,6 +89,17 @@ export async function runReadyCheck(input: {
 
   const indexesResult = await readRequiredIndexes(input.projectRoot);
   if (!indexesResult.ok) return createReadyCheckFailure(indexesResult.issue);
+  const menuTargetIssues = validateMenuTargets({
+    skillIndex: indexesResult.skillIndex,
+    helpIndex: indexesResult.helpIndex,
+    phaseCoverage: indexesResult.phaseCoverage,
+  });
+  const blockingMenuTargetIssue = menuTargetIssues.find((issue) =>
+    issue.severity === "error" || issue.severity === "critical"
+  );
+  if (blockingMenuTargetIssue !== undefined) {
+    return createReadyCheckFailure(blockingMenuTargetIssue);
+  }
 
   const runtimePaths = [
     paths.specliteRoot,
@@ -215,7 +229,10 @@ async function readManifest(
 
 async function readRequiredIndexes(
   projectRoot: string,
-): Promise<{ ok: true; skillIndex: SkillIndex } | { ok: false; issue: ValidationIssue }> {
+): Promise<
+  | { ok: true; skillIndex: SkillIndex; helpIndex: HelpIndex; phaseCoverage: PhaseCoverage }
+  | { ok: false; issue: ValidationIssue }
+> {
   const indexes = [
     {
       path: "_speclite/_config/skill-index.json",
@@ -240,18 +257,25 @@ async function readRequiredIndexes(
   ] as const;
 
   let skillIndex: SkillIndex | undefined;
+  let helpIndex: HelpIndex | undefined;
+  let phaseCoverage: PhaseCoverage | undefined;
   for (const index of indexes) {
     try {
-      const parsed = index.schema.safeParse(JSON.parse(await readFile(projectRootPath(projectRoot, index.path), "utf8")));
+      const raw = JSON.parse(await readFile(projectRootPath(projectRoot, index.path), "utf8"));
+      const parsed = index.schema.safeParse(raw);
       if (!parsed.success) {
         return {
           ok: false,
-          issue: createInvalidIndexIssue(index.path, index.label),
+          issue: createInvalidIndexIssue(index.path, index.label, parsed.error.issues),
         };
       }
 
       if (index.path.endsWith("skill-index.json")) {
         skillIndex = parsed.data as SkillIndex;
+      } else if (index.path.endsWith("help-index.json")) {
+        helpIndex = parsed.data as HelpIndex;
+      } else if (index.path.endsWith("phase-coverage.json")) {
+        phaseCoverage = parsed.data as PhaseCoverage;
       }
     } catch {
       return {
@@ -264,10 +288,19 @@ async function readRequiredIndexes(
   return {
     ok: true,
     skillIndex: skillIndex ?? { schemaVersion: "speclite.skill-index.v1", entries: [] },
+    helpIndex: helpIndex ?? { schemaVersion: "speclite.help-index.v1", entries: [] },
+    phaseCoverage: phaseCoverage ?? { schemaVersion: "speclite.phase-coverage.v1", rows: [] },
   };
 }
 
-function createInvalidIndexIssue(affectedPath: string, label: string): ValidationIssue {
+function createInvalidIndexIssue(
+  affectedPath: string,
+  label: string,
+  schemaIssues?: Array<{ path: PropertyKey[] }>,
+): ValidationIssue {
+  const menuTargetIssue = createMenuTargetIndexIssue(affectedPath, schemaIssues ?? []);
+  if (menuTargetIssue !== undefined) return menuTargetIssue;
+
   return {
     issueId: "manifest-schema.unreadable",
     category: "manifest-schema",
@@ -276,6 +309,38 @@ function createInvalidIndexIssue(affectedPath: string, label: string): Validatio
     component: "ReadyCheck",
     impact: `Required installed-state index ${label} is missing, unreadable or schema-invalid.`,
     suggestedNextStep: "Regenerate installed-state indexes by rerunning speclite install --yes.",
+  };
+}
+
+function createMenuTargetIndexIssue(
+  affectedPath: string,
+  schemaIssues: Array<{ path: PropertyKey[] }>,
+): ValidationIssue | undefined {
+  if (!affectedPath.endsWith("help-index.json") && !affectedPath.endsWith("phase-coverage.json")) {
+    return undefined;
+  }
+
+  const semanticFields = new Set(["activationTarget", "entryPath", "targetId", "targetIds", "status"]);
+  const semanticIssue = schemaIssues.find((issue) =>
+    issue.path.some((segment) => semanticFields.has(String(segment))),
+  );
+  if (semanticIssue === undefined) return undefined;
+
+  const statusIssue = semanticIssue.path.some((segment) => String(segment) === "status");
+  return {
+    issueId: statusIssue ? "menu-target.no-mapped-target" : "menu-target.missing-target",
+    category: "menu-target",
+    severity: "error",
+    affectedPath,
+    component: "ReadyCheck",
+    details: {
+      invalidFieldPath: semanticIssue.path.map(String).join("."),
+      reason: statusIssue ? "invalid-coverage-status" : "invalid-installed-target-reference",
+    },
+    impact: statusIssue
+      ? "A phase coverage entry has an invalid target mapping status."
+      : "An installed-state menu target entry does not point to a valid installed target reference.",
+    suggestedNextStep: "Regenerate help-index.json and phase-coverage.json from installed skill target metadata.",
   };
 }
 

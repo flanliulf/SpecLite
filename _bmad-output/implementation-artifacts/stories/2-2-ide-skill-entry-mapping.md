@@ -1,6 +1,6 @@
 # Story 2.2: IDE Skill Entry Mapping（IDE Skill Entry 映射）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -71,69 +71,69 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证 Story 2.1 和 Epic 1 前置实现（AC: 1-8）
-  - [ ] 确认 Story 1.1-1.6 已真实实现，而不只是 story context 处于 `ready-for-dev`：需要存在 `package.json`、`src/`、`test/`、`src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts`、`src/manifest/skill-index.ts`、`src/manifest/help-index.ts`、`src/manifest/files-index.ts`、`src/manifest/phase-coverage.ts`、`src/ide/adapter-registry.ts`、`src/ide/target-writer.ts` 或等价 adapter modules，以及 fixture harness。
-  - [ ] 确认 Story 2.1 已真实提供 discovery metadata / phase coverage generator、canonical skill id preservation、help index identity boundary 和 artifactContract minimal projection。
-  - [ ] 如果上述实现 anchors 仍不存在，停止 Story 2.2 实现，先完成前置 stories；不得在 Story 2.2 中重建 CLI scaffold、source resolver、module parser、manifest generator、discovery metadata generator 或 config resolver。
-  - [ ] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证 Story 2.1 和 Epic 1 前置实现（AC: 1-8）
+  - [x] 确认 Story 1.1-1.6 已真实实现，而不只是 story context 处于 `ready-for-dev`：需要存在 `package.json`、`src/`、`test/`、`src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts` 或等价拆分 manifest/index builder、`src/installer/runtime-structure.ts` installed-state 写出路径、`src/ide/adapter-registry.ts`、`src/ide/target-writer.ts` 或等价 adapter modules，以及 `src/fixtures/fixture-contract.ts` 和 fixture assets/tests。
+  - [x] 确认 Story 2.1 已真实提供 discovery metadata / phase coverage generator、canonical skill id preservation、help index identity boundary 和 artifactContract minimal projection。
+  - [x] 如果上述实现 anchors 仍不存在，停止 Story 2.2 实现，先完成前置 stories；不得在 Story 2.2 中重建 CLI scaffold、source resolver、module parser、manifest generator、discovery metadata generator 或 config resolver。
+  - [x] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 收口 adapter registry target definitions（AC: 2, 4, 6）
-  - [ ] 在 `src/ide/adapter-registry.ts` 中提供或复用 `claude` 与 `agents` adapter definitions，target directory 分别固定为 `.claude/skills` 与 `.agents/skills`。
-  - [ ] 导出 `CANONICAL_TARGET_ORDER = ["claude", "agents"] as const`，并让 manifest generation、`CommandResult.data.ideTargets`、validation `checkedTargets`、phase coverage rows 和 fixture snapshots 复用该顺序。
-  - [ ] Adapter definition shape 至少包含 `id`、`targetDirectory`、`entryType: "self-contained-skill"`、`supportedActivationTargets`、`sharedTargetPolicy: "dedupe-by-canonical-skill-id"`、`commandPointerBehavior: "none" | "unsupported"`、`knownLimitations`、`validationChecks` 和 `targetOrder`。
-  - [ ] 不新增 `copilot`、`cursor`、`kiro`、`opencode`、`vscode` 或任何 branded/dedicated MVP target id；除非 future owning SPEC 先更新。
-  - [ ] Adapter registry 不得拥有 config/customization merge logic、source trust 判断、files-index ownership 规则或 command pointer artifact generation。
+- [x] Task 2: 收口 adapter registry target definitions（AC: 2, 4, 6）
+  - [x] 在 `src/ide/adapter-registry.ts` 中提供或复用 `claude` 与 `agents` adapter definitions，target directory 分别固定为 `.claude/skills` 与 `.agents/skills`。
+  - [x] 导出 `CANONICAL_TARGET_ORDER = ["claude", "agents"] as const`，并让 manifest generation、`CommandResult.data.ideTargets`、validation `checkedTargets`、phase coverage rows 和 fixture snapshots 复用该顺序。
+  - [x] Adapter definition shape 至少包含 `id`、`targetDirectory`、`entryType: "self-contained-skill"`、`supportedActivationTargets`、`sharedTargetPolicy: "dedupe-by-canonical-skill-id"`、`commandPointerBehavior: "none" | "unsupported"`、`knownLimitations`、`validationChecks` 和 `targetOrder`。
+  - [x] 不新增 `copilot`、`cursor`、`kiro`、`opencode`、`vscode` 或任何 branded/dedicated MVP target id；除非 future owning SPEC 先更新。
+  - [x] Adapter registry 不得拥有 config/customization merge logic、source trust 判断、files-index ownership 规则或 command pointer artifact generation。
 
-- [ ] Task 3: 实现 self-contained skill entry writer（AC: 1, 2, 3, 5）
-  - [ ] 在 `src/ide/target-writer.ts` 或 existing adapter modules 中实现 registry-driven target writer；`src/commands/install.ts` 只负责编排，不直接复制 skill package。
-  - [ ] 输入必须来自 Story 2.1 生成的 canonical discovery metadata / selected module metadata / skill index facts；不得从 display name、menu label、filesystem glob order 或 IDE label 重新推导 identity。
-  - [ ] Target entry directory basename 必须是 `<canonicalSkillId>`，路径分别为 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/`。
-  - [ ] 每个 entry 至少包含 `SKILL.md`；当 canonical source package 中存在 `CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example` 或 `customize.toml` 时，按相同 relative path 复制。
-  - [ ] 仅当 canonical source package 存在 `customize.toml` 时，installed entry 才可被视为 customization-capable；不得为缺少 defaults 的 skill 生成空 `customize.toml`、placeholder defaults 或 adapter-owned fallback。
-  - [ ] 复制过程必须保留 canonical text bytes、LF line endings、relative path、script executable intent 和 sourceRef；不得按平台改写 canonical package content。
-  - [ ] Target writer 必须复用 `src/fs/` 的 path normalization、safe write、copy-tree、project boundary、symlink escape、case conflict 和 unsafe overwrite checks。
+- [x] Task 3: 实现 self-contained skill entry writer（AC: 1, 2, 3, 5）
+  - [x] 在 `src/ide/target-writer.ts` 或 existing adapter modules 中实现 registry-driven target writer；`src/commands/install.ts` 只负责编排，不直接复制 skill package。
+  - [x] 输入必须来自 Story 2.1 生成的 canonical discovery metadata / selected module metadata / skill index facts；不得从 display name、menu label、filesystem glob order 或 IDE label 重新推导 identity。
+  - [x] Target entry directory basename 必须是 `<canonicalSkillId>`，路径分别为 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/`。
+  - [x] 每个 entry 至少包含 `SKILL.md`；当 canonical source package 中存在 `CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example` 或 `customize.toml` 时，按相同 relative path 复制。
+  - [x] 仅当 canonical source package 存在 `customize.toml` 时，installed entry 才可被视为 customization-capable；不得为缺少 defaults 的 skill 生成空 `customize.toml`、placeholder defaults 或 adapter-owned fallback。
+  - [x] 复制过程必须保留 canonical text bytes、LF line endings、relative path、script executable intent 和 sourceRef；不得按平台改写 canonical package content。
+  - [x] Target writer 必须复用 `src/fs/` 的 path normalization、safe write、copy-tree、project boundary、symlink escape、case conflict 和 unsafe overwrite checks。
 
-- [ ] Task 4: 投影 manifest/index、phase coverage 和 files index（AC: 3, 5）
-  - [ ] `skill-index.json` 的 `installedTargets[]` 记录每个 mapped target 的 `targetId`、entry path、activation target、status 和 target-specific metadata reference（如存在）。
-  - [ ] `help-index.json` 继续只引用 `canonicalSkillId`、phase、entry label、activation target 和 target ids；不得创建 alias-only identity 或 IDE-specific skill identity。
-  - [ ] `phase-coverage.json` rows 使用 `speclite.phase-coverage.v1`，每个 `ideTargets[]` item 包含 `targetId`、`entryPath`、`activationTarget` 和 installed phase coverage status。
-  - [ ] `files-index.json` 记录 installed entries 的 file-level `path`、`ownership: "installer-owned"`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
-  - [ ] `canonicalPackageHash` 是 package-level hash，只证明同一 canonical package 在不同 IDE targets 中内容一致；不要用 files-index file-level hash 替代它。
-  - [ ] Public arrays 使用明确排序：targets 按 `claude`、`agents`；phase coverage rows 按 `phaseId`、`moduleId`、`canonicalSkillId`；paths normalize 后排序。
+- [x] Task 4: 投影 manifest/index、phase coverage 和 files index（AC: 3, 5）
+  - [x] `skill-index.json` 的 `installedTargets[]` 记录每个 mapped target 的 `targetId`、entry path、activation target、status 和 target-specific metadata reference（如存在）。
+  - [x] `help-index.json` 继续只引用 `canonicalSkillId`、phase、entry label、activation target 和 target ids；不得创建 alias-only identity 或 IDE-specific skill identity。
+  - [x] `phase-coverage.json` rows 使用 `speclite.phase-coverage.v1`，每个 `ideTargets[]` item 包含 `targetId`、`entryPath`、`activationTarget` 和 installed phase coverage status。
+  - [x] `files-index.json` 记录 installed entries 的 file-level `path`、`ownership: "installer-owned"`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
+  - [x] `canonicalPackageHash` 是 package-level hash，只证明同一 canonical package 在不同 IDE targets 中内容一致；不要用 files-index file-level hash 替代它。
+  - [x] Public arrays 使用明确排序：targets 按 `claude`、`agents`；phase coverage rows 按 `phaseId`、`moduleId`、`canonicalSkillId`；paths normalize 后排序。
 
-- [ ] Task 5: 处理 unsupported、failed 和 duplicate cases（AC: 4, 7）
-  - [ ] 如果 selected target 不支持 self-contained skill entry 或 command pointer behavior，按 adapter registry layer 输出 `unsupported`，并在用户显式选择该 target 时产生 blocking issue。
-  - [ ] 如果 target directory resolution、schema generation、write、safe write 或 reverse validation 失败，输出 `failed`，并使用 `ide-mirror.target-write-failed` 或更精确的 reserved issue id。
-  - [ ] 本 Story 的 reverse validation failure 只覆盖 installed entry 是否存在、可读、路径 project-relative、canonical package hash 稳定和 activation target 指向 installed `SKILL.md`；不得把 Story 2.4 的 resolver success 或 Story 2.5 的 artifact loop success 作为 2.2 release gate。
-  - [ ] 如果 canonical package 缺少 required `SKILL.md`，不要创建空 entry；使用 source/manifest/menu 相关 reserved diagnostic，或先更新 owning SPEC 再新增 issue id。
-  - [ ] 如果同一 target 中出现重复 canonicalSkillId entry，使用 `ide-mirror.duplicate-entry`；不要通过重命名 target directory、添加后缀或 alias 来绕过冲突。
-  - [ ] 如果 help/menu target 无法解析到唯一 installed entry，使用 `menu-target.missing-target`、`menu-target.ambiguous-target`、`menu-target.unknown-skill` 或 `menu-target.no-mapped-target`。
-  - [ ] Diagnostics details 只能包含 stable, redaction-safe fields；动态 context 放入 `affectedPath`、`component` 或 `details`，不得拼进 issue id。
+- [x] Task 5: 处理 unsupported、failed 和 duplicate cases（AC: 4, 7）
+  - [x] 如果 selected target 不支持 self-contained skill entry 或 command pointer behavior，按 adapter registry layer 输出 `unsupported`，并在用户显式选择该 target 时产生 blocking issue。
+  - [x] 如果 target directory resolution、schema generation、write、safe write 或 reverse validation 失败，输出 `failed`，并使用 `ide-mirror.target-write-failed` 或更精确的 reserved issue id。
+  - [x] 本 Story 的 reverse validation failure 只覆盖 installed entry 是否存在、可读、路径 project-relative、canonical package hash 稳定和 activation target 指向 installed `SKILL.md`；不得把 Story 2.4 的 resolver success 或 Story 2.5 的 artifact loop success 作为 2.2 release gate。
+  - [x] 如果 canonical package 缺少 required `SKILL.md`，不要创建空 entry；使用 source/manifest/menu 相关 reserved diagnostic，或先更新 owning SPEC 再新增 issue id。
+  - [x] 如果同一 target 中出现重复 canonicalSkillId entry，使用 `ide-mirror.duplicate-entry`；不要通过重命名 target directory、添加后缀或 alias 来绕过冲突。
+  - [x] 如果 help/menu target 无法解析到唯一 installed entry，使用 `menu-target.missing-target`、`menu-target.ambiguous-target`、`menu-target.unknown-skill` 或 `menu-target.no-mapped-target`。
+  - [x] Diagnostics details 只能包含 stable, redaction-safe fields；动态 context 放入 `affectedPath`、`component` 或 `details`，不得拼进 issue id。
 
-- [ ] Task 6: 保持 UX evidence 与 output 边界（AC: 2, 3, 4, 6）
-  - [ ] Human-readable output 可以展示 mapped target table 或 evidence block，字段优先顺序为 target id、target directory、skill count、entry path、activation target、status。
-  - [ ] 输出必须在 `NO_COLOR`、non-TTY、CI 和窄终端中仍可理解；颜色、icon、spinner 或 terminal width 不得承载唯一语义。
-  - [ ] `agents` target 显示为 `.agents/skills` 或 agents directory target，不渲染为 Copilot/Cursor readiness。
-  - [ ] Automation-relevant state 必须进入 manifest/index、`CommandResult.data` 或 fixture outputs；不得要求自动化解析 human-readable summary。
-  - [ ] Empty state 必须明确，例如某 phase 无 mapped target 时输出 layer-correct status 或 `menu-target.no-mapped-target`，不得用 alias-only identity 伪造覆盖。
+- [x] Task 6: 保持 UX evidence 与 output 边界（AC: 2, 3, 4, 6）
+  - [x] Human-readable output 可以展示 mapped target table 或 evidence block，字段优先顺序为 target id、target directory、skill count、entry path、activation target、status。
+  - [x] 输出必须在 `NO_COLOR`、non-TTY、CI 和窄终端中仍可理解；颜色、icon、spinner 或 terminal width 不得承载唯一语义。
+  - [x] `agents` target 显示为 `.agents/skills` 或 agents directory target，不渲染为 Copilot/Cursor readiness。
+  - [x] Automation-relevant state 必须进入 manifest/index、`CommandResult.data` 或 fixture outputs；不得要求自动化解析 human-readable summary。
+  - [x] Empty state 必须明确，例如某 phase 无 mapped target 时输出 layer-correct status 或 `menu-target.no-mapped-target`，不得用 alias-only identity 伪造覆盖。
 
-- [ ] Task 7: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-8）
-  - [ ] Unit tests 覆盖 `CANONICAL_TARGET_ORDER`、adapter definition schema、command pointer `none` / `unsupported`、no branded target ids 和 agents generic display。
-  - [ ] Unit tests 覆盖 target writer 复制 `SKILL.md` 与 optional paths、保留 relative path、LF text bytes、script executable intent、canonical directory basename 和 customization lookup key。
-  - [ ] Fixture 中的 customization-capable success path 必须选择 source package 已包含 `customize.toml` 的 canonical skill，例如 `speclite-create-prd` 或 `speclite-create-story`；同时断言缺少 `customize.toml` 的 skill 不会被安装器补空 defaults。
-  - [ ] Unit tests 覆盖 canonical package hash across `claude` / `agents`、files-index file-level hash、adapter artifact 独立 sourceRef/hash、duplicate canonicalSkillId handling。
-  - [ ] Contract tests 解析 `skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`，断言 schema versions、target order、required target fields、status vocabulary 和 no alternate identity。
-  - [ ] Integration tests 覆盖 fresh install selected core+sdlc modules 后生成 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/`，并验证 package hash 一致。
-  - [ ] Integration tests 覆盖只选 `claude`、只选 `agents`、unsupported optional target、selected unsupported target blocking、target write failure 和 reverse validation failure。
-  - [ ] Fixture `fresh-install-empty-project`、`ide-drift`、`path-portability` 和 `skill-artifact-loop` 更新 expected installed tree、manifest/index snapshots、command JSON 或 validation assertions。
-  - [ ] 检查 fixture snapshots 没有 absolute path、home directory、cache path、temporary path、timestamp、random id、Copilot/Cursor target id 或 command pointer artifact。
+- [x] Task 7: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-8）
+  - [x] Unit tests 覆盖 `CANONICAL_TARGET_ORDER`、adapter definition schema、command pointer `none` / `unsupported`、no branded target ids 和 agents generic display。
+  - [x] Unit tests 覆盖 target writer 复制 `SKILL.md` 与 optional paths、保留 relative path、LF text bytes、script executable intent、canonical directory basename 和 customization lookup key。
+  - [x] Fixture 中的 customization-capable success path 必须选择 source package 已包含 `customize.toml` 的 canonical skill，例如 `speclite-create-prd` 或 `speclite-create-story`；同时断言缺少 `customize.toml` 的 skill 不会被安装器补空 defaults。
+  - [x] Unit tests 覆盖 canonical package hash across `claude` / `agents`、files-index file-level hash、adapter artifact 独立 sourceRef/hash、duplicate canonicalSkillId handling。
+  - [x] Contract tests 解析 `skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`，断言 schema versions、target order、required target fields、status vocabulary 和 no alternate identity。
+  - [x] Integration tests 覆盖 fresh install selected core+sdlc modules 后生成 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/`，并验证 package hash 一致。
+  - [x] Integration tests 覆盖只选 `claude`、只选 `agents`、unsupported optional target、selected unsupported target blocking、target write failure 和 reverse validation failure。
+  - [x] Fixture `fresh-install-empty-project`、`ide-drift`、`path-portability` 和 `skill-artifact-loop` 更新 expected installed tree、manifest/index snapshots、command JSON 或 validation assertions。
+  - [x] 检查 fixture snapshots 没有 absolute path、home directory、cache path、temporary path、timestamp、random id、Copilot/Cursor target id 或 command pointer artifact。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-8）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 2.2 touched modules 的 focused Vitest tests 与相关 fixture tests。
-  - [ ] 如新增或改变 public JSON field、manifest/index field、target status、issue id、fixture comparison behavior、adapter definition field 或 command pointer behavior，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 2.3 activation protocol、Story 2.4 resolver、Story 2.5 workflow artifact validation、Epic 3 full validation、Post-MVP command pointer、branded Copilot/Cursor adapter、coverage dashboard 或治理报告。
+- [x] Task 8: 本地验证与范围控制（AC: 1-8）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 2.2 touched modules 的 focused Vitest tests 与相关 fixture tests。
+  - [x] 如新增或改变 public JSON field、manifest/index field、target status、issue id、fixture comparison behavior、adapter definition field 或 command pointer behavior，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Story 2.3 activation protocol、Story 2.4 resolver、Story 2.5 workflow artifact validation、Epic 3 full validation、Post-MVP command pointer、branded Copilot/Cursor adapter、coverage dashboard 或治理报告。
 
 ## Dev Notes（开发备注）
 
@@ -347,12 +347,48 @@ type IdeAdapterDefinition = {
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
+
+- 2026-05-27 12:07 CST：执行 `bmad-dev-story` activation；`python3` resolver 因缺少 `tomllib` 失败，改用 `python3.12` 成功解析 workflow。
+- 2026-05-27 12:09 CST：RED 阶段运行 `npx vitest run test/manifest-discovery.test.ts test/runtime-structure.test.ts`，确认 `SKILL.en.md` 被错误复制与 unsupported target 未阻断两个缺口。
+- 2026-05-27 12:10 CST：GREEN 阶段 focused tests 通过，覆盖 adapter registry、self-contained copy 白名单、customization-capable 边界、manifest/phase/files projection 与 unsupported target diagnostic。
+- 2026-05-27 12:11 CST：补充 `test/ide-target-writer.test.ts`，验证 optional path copy、script executable intent 和缺少 `SKILL.md` 时不创建空 entry。
+- 2026-05-27 12:11 CST：运行 `npm run build` 通过。
+- 2026-05-27 12:11 CST：运行 `npm test` 通过，12 个 test files / 71 个 tests 全绿。
+- 2026-05-27 12:12 CST：运行 `git diff --check` 通过。
+
+### Implementation Plan（实现计划）
+
+- 复用 Story 2.1/Epic 1 已有实现锚点，不重建 CLI scaffold、module parser、manifest generator 或 discovery metadata。
+- 将 target writer 收敛为 registry-driven：target directory 来自 `src/ide/adapter-registry.ts`，`src/commands/install.ts` 只做编排与 unsupported target 前置阻断。
+- 将 canonical entry copy 限定为 Story 2.2 允许的 self-contained package surface：`SKILL.md` 加允许的 optional files/directories；不复制 `SKILL.en.md`，不为缺少 `customize.toml` 的 skill 生成空 defaults。
+- 以 focused unit/integration tests 证明 target order、no branded target、project-relative POSIX paths、file-level hash/sourceRef、package hash stability、reserved diagnostics 和 redaction-safe output。
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已验证 Epic 1 与 Story 2.1 的 functional anchors 存在，采用集中式 `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` / runtime write path / fixture tests 作为 manifest/index anchor。
+- 已补强 `copyCanonicalPackage`：只复制 `SKILL.md`、`CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example`、`customize.toml`；保留 relative path、hash、sourceRef 与 script executable intent；缺少 `SKILL.md` 时返回 `menu-target.missing-target` 且不创建空 entry。
+- 已补强 `writeIdeMirrors`：通过 adapter registry 解析 `.claude/skills` 与 `.agents/skills` target directory，phase coverage 的 `entryPath` / `activationTarget` 使用 project-relative POSIX path，并保留 layer-correct status。
+- 已补强 install 编排：用户显式选择 unsupported target（如 `cursor`）时，在写入前返回 `ide-mirror.unsupported-target`，不生成 branded adapter output 或 command pointer artifact。
+- 已补充 focused tests 与 fixture assertions，覆盖 registry order、self-contained layout、optional copied paths、customization-capable 边界、canonical/file hash、unsupported target、redaction-safe output、no Copilot/Cursor target 和 no command pointer artifact。
+- 已运行 `npm run build`、`npm test` 和 `git diff --check`，全部通过。
 
 ### File List（文件列表）
+
+- `_bmad-output/implementation-artifacts/code-reviews/2-2-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/2-2-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/2-2-ide-skill-entry-mapping.md`
+- `src/commands/install.ts`
+- `src/fs/copy-tree.ts`
+- `src/ide/target-writer.ts`
+- `test/ide-target-writer.test.ts`
+- `test/manifest-discovery.test.ts`
+- `test/runtime-structure.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-27：实现 Story 2.2 IDE skill entry mapping contract；Story 状态更新为 `review`。

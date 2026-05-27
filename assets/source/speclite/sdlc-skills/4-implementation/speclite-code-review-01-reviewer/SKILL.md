@@ -17,6 +17,7 @@ metadata:
     - **严重性标签映射**：四桶分类与 [高/中/低] 严重性标签并存，基于来源数量和安全关键词进行映射
     - **自动轮次检测**：自动扫描已有审查结果文件，确定当前轮次编号（n）
     - **首轮/复审自适应**：首轮审查聚焦全量代码，复审聚焦上轮修复点和残留问题
+    - **Anchor 证据审计**：Acceptance Auditor 读取 Story 的 `Anchor Evidence Summary` 与最新 story-completion gate report，核对 contract/function/evidence 是否支持当前实现
     - **结构化结果保存**：按规范文件名格式自动创建审查结果文件
     - **历史记录感知**：复审时自动参考历次 CR 结果和修复记录，避免重复指出已修复的问题
     - **子审查失败降级**：任一子代理失败时使用剩余层继续；Agent 工具不可用时降级为串行模式；全部失败时降级为单一 LLM 审查
@@ -52,10 +53,14 @@ metadata:
             - 将 `$review_context` 写入 `$cr_dir/.tmp/review-context.md`
         - IF 首轮（`$round_number` == 1）：
             - 跳过此步骤
+        - 读取 Story 文件中的 `Anchor Evidence Summary`
+        - 读取 `{implementation_artifacts}/flow-gates/{story-id}-story-completion-gate.md`（如存在）
+        - IF story-completion gate 缺失，记录为 Acceptance Auditor 必查风险，不直接替代 CR 结论
 
     Step 4：执行代码审查（三层并行审查引擎）
         - 传入 review-engine.md 的变量（上下文传递）：
             - `$story_id`、`$cr_dir`、`$round_number`、`$review_type`
+            - `$anchor_evidence_summary`、`$story_completion_gate_report`
         - 传入 review-engine.md 的文件（复审时）：
             - `$cr_dir/.tmp/review-context.md`
         - 读取并执行 `references/review-engine.md`

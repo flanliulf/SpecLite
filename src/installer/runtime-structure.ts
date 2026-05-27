@@ -2,7 +2,7 @@ import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import { serializeConfigToml } from "../config/config-writer.js";
 import type { ProjectConfigModel } from "../config/config-schema.js";
 import { ensureSafeDirectory, acquireProjectOperationLock, safeWriteFile } from "../fs/safe-write.js";
-import { createConfiguredIdeTargets, createFilesIndex, createHelpIndex, createInstalledManifest, createPhaseCoverage, createSkillIndex } from "../manifest/manifest-generator.js";
+import { createConfiguredIdeTargets, createFilesIndex, createHelpIndex, createInstalledManifest, createPhaseCoverage, createSkillIndex, type ArtifactRootContext } from "../manifest/manifest-generator.js";
 import type { FilesIndexEntry } from "../manifest/manifest-schema.js";
 import type { OfficialModule } from "../modules/module-metadata.js";
 import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
@@ -74,6 +74,7 @@ export async function applyInstallPlan(input: {
     artifactRoot: input.configPlan.model.core.output_folder,
     manifestPath: "_speclite/_config/manifest.yaml" as const,
   };
+  const artifactRoots = createArtifactRootContext(input.configPlan.model);
 
   try {
     for (const directory of [
@@ -162,6 +163,7 @@ export async function applyInstallPlan(input: {
       packageRoot: input.packageRoot,
       selectedModules: input.selectedModules,
       targetAdapters: input.installPlan.targetAdapters,
+      artifactRoots,
     });
     if (!mirror.ok) return createApplyFailure(mirror.issue, completedSteps);
 
@@ -273,13 +275,7 @@ function createApplyPendingSteps(completedSteps: string[]): string[] {
 }
 
 function createArtifactDirectories(model: ProjectConfigModel, modules: OfficialModule[]): string[] {
-  const values = {
-    output_folder: model.core.output_folder,
-    planning_artifacts: model.modules.sdlc?.planning_artifacts ?? `${model.core.output_folder}/planning-artifacts`,
-    implementation_artifacts:
-      model.modules.sdlc?.implementation_artifacts ?? `${model.core.output_folder}/implementation-artifacts`,
-    project_knowledge: model.modules.sdlc?.project_knowledge ?? "docs",
-  };
+  const values = createArtifactRootContext(model);
   const directories = [
     model.core.output_folder,
     values.planning_artifacts,
@@ -289,6 +285,17 @@ function createArtifactDirectories(model: ProjectConfigModel, modules: OfficialM
   ];
 
   return [...new Set(directories.map((directory) => interpolateDirectory(directory, values)))].sort();
+}
+
+function createArtifactRootContext(model: ProjectConfigModel): ArtifactRootContext {
+  return {
+    output_folder: model.core.output_folder,
+    planning_artifacts:
+      model.modules.sdlc?.planning_artifacts ?? `${model.core.output_folder}/planning-artifacts`,
+    implementation_artifacts:
+      model.modules.sdlc?.implementation_artifacts ?? `${model.core.output_folder}/implementation-artifacts`,
+    project_knowledge: model.modules.sdlc?.project_knowledge ?? "docs",
+  };
 }
 
 function interpolateDirectory(

@@ -7,6 +7,8 @@
 
 - `story_file` = ""（用户显式指定的 Story 路径；为空则自动发现）
 - `sprint_status` = `{implementation_artifacts}/sprint-status.yaml`
+- `story_root` = `story_location` from `{sprint_status}` when present, otherwise `{implementation_artifacts}/stories`
+- `flow_gate_root` = `{implementation_artifacts}/flow-gates`
 
 ## 关键约束（贯穿全部 Step）
 
@@ -33,6 +35,7 @@
 - **关键**：必须从头到尾**完整读取** `sprint-status.yaml` 文件以保留顺序
 - 加载完整文件 `{sprint_status}`，从首行读到末行，禁止跳读
 - 完整解析 `development_status` 段以理解 Story 顺序
+- 解析 `story_location`；若缺失，设置 `story_root = {implementation_artifacts}/stories`。后续 Story 文件查找必须使用 `story_root`。
 - 按从上到下顺序找到**第一条**满足以下全部条件的 Story：
     · key 形如 `数字-数字-名称`（如 "1-2-user-auth"）
     · 不是 epic key（`epic-X`）或 retrospective（`epic-X-retrospective`）
@@ -59,7 +62,7 @@
     · 用户提供 Story 路径 → 存为 `{story_path}`，跳到 1.4
 
 ### 1.3 无 sprint-status 的发现（条件：`{sprint_status}` 文件**不存在**）
-- 直接在 `{implementation_artifacts}` 下搜索 Story 文件
+- 设置 `story_root = {implementation_artifacts}/stories`，直接在 `{story_root}` 下搜索 Story 文件
 - 查找文件名匹配 `*-*-*.md` 模式的候选 Story
 - 逐个读取候选 Story 文件，检查 Status 段，找到状态为 `ready-for-dev` 的
 - 若**未找到**：
@@ -79,7 +82,7 @@
 
 ### 1.4 task_check 锚点：完整加载 Story
 - 保存找到的 `story_key`（如 "1-2-user-authentication"）以备后续状态更新
-- 在 `{implementation_artifacts}` 中按 `{story_key}.md` 模式匹配 Story 文件
+- 在 `{story_root}` 中按 `{story_key}.md` 模式匹配 Story 文件
 - **完整读取**发现路径下的 Story 文件
 - 解析以下区段：Story、Acceptance Criteria、Tasks/Subtasks、Dev Notes、Dev Agent Record、File List、Change Log、Status
 - 从 Story 文件 Dev Notes 段加载完整上下文
@@ -141,6 +144,12 @@
 ---
 
 ## Step 4：把 Story 标记为 in-progress（sprint-status 同步）
+
+### 4.0 Flow Gate 前置检查
+- 在任何状态写入之前，执行 `speclite-flow-gate` 的 `story-kickoff` mode，目标为 `{story_key}` 或当前 Story 文件路径。
+- 读取 gate report，确认结果为 `PASS` 或 `PASS_EQUIVALENT`。
+- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。
+- 若缺少 gate report，先运行 `speclite-flow-gate mode=story-kickoff` 并等待结果；不得以“文件名存在”代替 gate 结果。
 
 ### 4.1 若 `{sprint_status}` 文件存在
 - 加载完整文件 `{sprint_status}`
@@ -266,7 +275,9 @@
 - 重新扫描 Story 文档，验证**所有**任务和子任务都已标记 `[x]`
 - 运行**完整回归测试集**（不可跳过）
 - 确认 File List 包含所有变更文件
+- 填写 Dev Agent Record → Anchor Evidence Summary，记录 contract anchors、functional anchors、evidence anchors 和 equivalent implementation decisions
 - 执行增强版 Definition of Done 校验
+- 执行 `speclite-flow-gate mode=story-completion`，目标为 `{story_key}` 或当前 Story 文件路径；只有 `PASS` 或 `PASS_EQUIVALENT` 允许继续
 - 把 Story Status 更新为：`review`
 
 ### 9.2 增强版 Definition of Done 校验（必要要求）
@@ -279,6 +290,7 @@
 - 代码质量检查通过（若已配置 lint、静态分析）
 - File List 包含每个新建/修改/删除的文件（相对路径）
 - Dev Agent Record 包含实现说明
+- Anchor Evidence Summary 包含 gate 结果、已验证 anchors 和等价实现裁决
 - Change Log 包含变更摘要
 - **仅修改了允许的 Story 区段**
 
@@ -303,6 +315,7 @@
 - 存在回归失败 → HALT - 修复回归后再完成
 - File List 不完整 → HALT - 用所有变更文件更新 File List
 - Definition of Done 校验未通过 → HALT - 处理 DoD 失败项后再完成
+- `story-completion` gate 缺失或失败 → HALT - 先补齐 contract/function/evidence 或修订 Story
 
 ---
 
@@ -339,5 +352,5 @@
 - 10.11 保持灵活 —— 允许用户选择自己的路径或寻求其他帮助
 
 ### 10.12 执行 on_complete 终止指令
-- 执行：`python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`
+- 执行：`speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`
 - 如果解析出的值非空，把它作为退出前的最终终端指令执行

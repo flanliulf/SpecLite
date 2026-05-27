@@ -256,6 +256,30 @@ export async function runInstallCommand(input: {
             targetAdapters: defaultTargetAdapters,
           }),
         );
+  const unsupportedTargetIds = findUnsupportedTargetIds(
+    configSelection?.ideTargetIds,
+    defaultTargetAdapters,
+  );
+  if (unsupportedTargetIds.length > 0) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createUnsupportedTargetSelectionIssue(unsupportedTargetIds, defaultTargetAdapters)],
+      completedSteps: moduleSelectionCompletedSteps,
+      pendingSteps: moduleSelectionPendingSteps,
+      nextActions: [
+        "Select IDE targets from the supported adapter registry: claude or agents.",
+        "Dedicated Copilot, Cursor or other branded IDE targets are outside the MVP adapter registry.",
+      ],
+      summary:
+        "SpecLite install stopped before write planning because the selected IDE target is unsupported. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
   const finalSelectedModuleIds = selectKnownIds({
     requestedIds: configSelection?.selectedModuleIds,
     defaultIds: moduleSelection.selectedModuleIds,
@@ -546,6 +570,23 @@ async function discoverModulesForInstall(projectRoot: string): Promise<
 
     return { ok: true, modules };
   } catch (error) {
+    if (error instanceof ModuleMetadataError && error.code === "module-metadata.unknown-help-skill") {
+      return {
+        ok: false,
+        issue: {
+          issueId: "menu-target.unknown-skill",
+          category: "menu-target",
+          severity: "error",
+          component: "official-module-discovery",
+          details: {
+            reason: error.code,
+          },
+          impact: "Bundled help/menu metadata references a canonical skill package that is not installed from source.",
+          suggestedNextStep: "Fix module-help.csv so every skill entry references exactly one bundled SKILL.md package root.",
+        },
+      };
+    }
+
     return {
       ok: false,
       issue: createUnsupportedSourceIssue({
@@ -586,6 +627,38 @@ function createInvalidModuleSelectionIssue(invalidModuleIds: string[]): Validati
     },
     impact: "The requested official module selection contains unknown module ids.",
     suggestedNextStep: "Select only module ids from the displayed official module list.",
+  };
+}
+
+function findUnsupportedTargetIds(
+  requestedTargetIds: string[] | undefined,
+  targetAdapters: InstallPlanTargetAdapter[],
+): string[] {
+  if (requestedTargetIds === undefined) {
+    return [];
+  }
+
+  const supportedTargetIds = new Set<string>(targetAdapters.map((adapter) => adapter.targetId));
+  return [
+    ...new Set(requestedTargetIds.filter((targetId) => !supportedTargetIds.has(targetId))),
+  ].sort();
+}
+
+function createUnsupportedTargetSelectionIssue(
+  unsupportedTargetIds: string[],
+  targetAdapters: InstallPlanTargetAdapter[],
+): ValidationIssue {
+  return {
+    issueId: "ide-mirror.unsupported-target",
+    category: "ide-mirror",
+    severity: "error",
+    component: "adapter-registry",
+    details: {
+      unsupportedTargetIds,
+      supportedTargetIds: targetAdapters.map((adapter) => adapter.targetId),
+    },
+    impact: "The selected IDE target is not supported by the MVP self-contained skill entry adapter registry.",
+    suggestedNextStep: "Use claude or agents as the IDE target for MVP installs.",
   };
 }
 

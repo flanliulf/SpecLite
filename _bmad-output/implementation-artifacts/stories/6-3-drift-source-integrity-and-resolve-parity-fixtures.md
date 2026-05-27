@@ -224,7 +224,7 @@ Status: ready-for-dev
 - `src/commands/resolve.ts`：`speclite resolve config` / `speclite resolve customization` argv parsing、mode dispatch、stdout/stderr write 和 exit code。
 - `src/commands/validate.ts`：validate orchestration and local-only rule execution。
 - `src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`：public JSON envelope, status/exit code, issue ordering, human-readable profiles。
-- `src/manifest/manifest-schema.ts`、`src/manifest/files-index.ts`、`src/manifest/hash.ts`、`src/manifest/skill-index.ts`：manifest/index projection, file-level hashes, canonical package hash and ownership metadata。
+- `src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts` 或等价 files/skill index helper、`src/manifest/hash.ts`：manifest/index projection, file-level hashes, canonical package hash and ownership metadata。
 - `src/ide/adapter-registry.ts`：canonical target order `claude`, `agents` and target id validation。
 - `src/fs/path-normalizer.ts`：project-relative POSIX paths, redacted external source labels, Windows drive/separator leak rejection。
 

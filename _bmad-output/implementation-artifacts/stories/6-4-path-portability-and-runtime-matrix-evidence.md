@@ -175,7 +175,7 @@ Status: ready-for-dev
 - Runtime schema validation 继续使用 architecture-pinned `zod@4.4.3` 与 executable schema/parser anchors。新增 dependency 前必须证明 Node 22 support、offline determinism、cross-platform path behavior、redaction behavior 和 CI failure semantics。
 - `src/fs/path-normalizer.ts` 是 project-relative POSIX path、redacted external path diagnostic、Windows separator / drive-letter leak rejection、path escape、symlink escape、case conflict 和 redaction-safe path display 的共享边界。Fixture helper 不得复制第二套路劲逻辑。
 - `src/diagnostics/output.ts` 拥有 Compact、Evidence、Structured profiles。Terminal width、`NO_COLOR`、non-TTY、CI 和 copy-paste review coverage 必须驱动 shared renderer，而不是允许各 command 手写 status text、issue layout、path display、next action order 或 profile-specific private fields。
-- `src/manifest/files-index.ts` 与 `src/manifest/hash.ts` 必须保持 raw-byte hash semantics。Line endings、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得通过 hash normalization 隐式吸收。
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper 与 `src/manifest/hash.ts` 必须保持 raw-byte hash semantics。Line endings、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得通过 hash normalization 隐式吸收。
 - `src/commands/resolve.ts` / `src/config/resolve-output-schema.ts` 必须保持 `speclite resolve` 的 CommandResult exception：stdout pure JSON，stderr JSON Lines diagnostics，不使用 `CommandResult` envelope。
 - `npm run release:packaging-check` 与 `dist/packaging-manifest.json` 属于 release checklist implementation。它可以消费 npm package inventory evidence，但 package inclusion/exclusion assertions 由 project contract 管理。
 
@@ -187,7 +187,7 @@ Status: ready-for-dev
 - `src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`：`CommandResult` / `ValidationIssue` schema, status / exit-code derivation, output profiles, no-color / terminal width rendering。
 - `src/config/resolve-output-schema.ts`、`src/config/merge-rules.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`：resolve parity, pure stdout JSON, stderr JSON Lines diagnostics。
 - `src/fs/path-normalizer.ts`、`src/fs/safe-write.ts`、`src/fs/permissions.ts`、`src/fs/copy-tree.ts`：project-relative POSIX paths, LF preservation, symlink/path escape, case conflict, executable intent, safe writes。
-- `src/manifest/manifest-schema.ts`、`src/manifest/files-index.ts`、`src/manifest/hash.ts`、`src/manifest/skill-index.ts`、`src/manifest/help-index.ts`：manifest/index projection, raw-byte hashes, files index `executable`, target order, source refs。
+- `src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts` 或等价 files/skill/help index helper、`src/manifest/hash.ts`：manifest/index projection, raw-byte hashes, files index `executable`, target order, source refs。
 - `src/installer/install-plan-schema.ts`、`src/installer/install-runner.ts`、`src/installer/progress-events.ts`、`src/installer/ready-summary.ts`：install planning, runtime guard, progress, ReadyCheck and stable path output。
 - `src/update/update-plan.ts`、`src/update/conflict-detector.ts`、`src/update/repair-plan.ts`、`src/update/apply-update.ts`、`src/update/ownership-model.ts`：normal update vs explicit repair, conflicts, repair handoff and path ordering。
 - `src/validation/rules/runtime-path.ts`、`src/validation/rules/artifact-path.ts`、`src/validation/rules/file-integrity.ts`、`src/validation/rules/operation-lock.ts`：path escape, symlink escape, case conflict, executable-bit mismatch, stale temp and lock diagnostics。

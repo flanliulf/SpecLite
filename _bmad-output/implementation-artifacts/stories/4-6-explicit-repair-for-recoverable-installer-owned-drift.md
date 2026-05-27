@@ -180,8 +180,8 @@ Status: ready-for-dev
 - `src/update/update-plan.ts`：keep normal `UpdatePlan` behavior isolated; only share common planning primitives when semantics match owning SPEC.
 - `src/update/apply-update.ts`：consume authorized update/repair actions and private lock handle; all mutations go through `src/fs/safe-write.ts`.
 - `src/update/ownership-model.ts`：ownership truth and protected boundary predicates; human-owned/workflow-owned/unknown never enter `RepairPlan.actions[]`.
-- `src/manifest/files-index.ts` and `src/manifest/hash.ts`：files index raw-byte hash baseline, current hash calculation and expectedHash comparison.
-- `src/manifest/skill-index.ts` or equivalent：canonical package hash and installed target mirror projection used by `restore-canonical`.
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` or equivalent files-index helper, and `src/manifest/hash.ts`：files index raw-byte hash baseline, current hash calculation and expectedHash comparison.
+- `src/manifest/manifest-generator.ts` or equivalent skill-index helper：canonical package hash and installed target mirror projection used by `restore-canonical`.
 - `src/source/source-descriptor-schema.ts` and source resolver anchors：resolved canonical source and source integrity evidence used by repair eligibility; missing evidence blocks repair.
 - `src/ide/mirror-validator.ts` or `src/validation/rules/ide-mirror.ts`：IDE mirror drift facts must align with repair planner facts.
 - `src/fs/path-normalizer.ts`、`src/fs/operation-lock.ts`、`src/fs/safe-write.ts`：project-relative POSIX paths, lock acquisition/release/stale diagnostics, temp-write + rename safe writes and unsafe target preflight.

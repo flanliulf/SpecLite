@@ -11,6 +11,7 @@ import {
   ModuleMetadataError,
 } from "../src/modules/module-metadata.js";
 import { createModuleSelection } from "../src/modules/module-selection.js";
+import { runInstallCommand } from "../src/commands/install.js";
 
 describe("bundled source descriptor discovery", () => {
   it("projects bundled official source through a display-safe SourceDescriptor", async () => {
@@ -90,6 +91,18 @@ describe("official module metadata parser", () => {
     expect(modules.find((module) => module.code === "sdlc")?.packageRoots).toContain(
       "4-implementation/speclite-dev-story",
     );
+    expect(
+      modules
+        .find((module) => module.code === "sdlc")
+        ?.helpEntries.find((entry) => entry.canonicalSkillId === "speclite-create-prd"),
+    ).toMatchObject({
+      canonicalSkillId: "speclite-create-prd",
+      displayName: "Create PRD",
+      phaseId: "2-planning",
+      outputLocation: "{planning_artifacts}",
+      outputArtifactType: "prd",
+      required: true,
+    });
   });
 
   it("rejects metadata missing an explicit module version", async () => {
@@ -223,6 +236,58 @@ describe("official module metadata parser", () => {
       );
     } finally {
       await rm(path.dirname(sourceRoot), { recursive: true, force: true });
+    }
+  });
+
+  it("reports missing canonical skill package references with reserved menu-target diagnostics during install", async () => {
+    const sourceRoot = await createModuleFixture({
+      "sdlc/module.yaml": [
+        "code: sdlc",
+        'name: "SDLC"',
+        "version: 1.0.0",
+        'description: "SDLC"',
+        "",
+      ].join("\n"),
+      "sdlc/module-help.csv": [
+        "module,skill,display-name,phase",
+        "SDLC,_meta,,",
+        "SDLC,missing-skill,Missing Skill,4-implementation",
+        "SDLC,sdlc-skill,SDLC Skill,4-implementation",
+        "",
+      ].join("\n"),
+      "sdlc/sdlc-skill/SKILL.md": "# SDLC\n",
+    });
+    const packageRoot = path.resolve(sourceRoot, "../../..");
+    await writeFile(
+      path.join(packageRoot, "package-lock.json"),
+      JSON.stringify({ name: "speclite", version: "0.0.0" }),
+      "utf8",
+    );
+
+    try {
+      const outcome = await runInstallCommand({
+        projectRoot: packageRoot,
+        options: { yes: true },
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: packageRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(1);
+      expect(outcome.result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "menu-target.unknown-skill",
+          category: "menu-target",
+          severity: "error",
+          component: "official-module-discovery",
+        }),
+      ]);
+      expect(JSON.stringify(outcome.result)).not.toContain(packageRoot);
+    } finally {
+      await rm(packageRoot, { recursive: true, force: true });
     }
   });
 });

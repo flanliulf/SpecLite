@@ -181,7 +181,7 @@ Status: ready-for-dev
 - `src/update/update-plan.ts`：UpdatePlan construction、planned effects、ownership/hash/source/resolver inputs 和 action ordering。
 - `src/update/conflict-detector.ts`：如前置已存在，消费其 path-level blocker output；本 Story 不应完成 Story 4.5 full matrix。
 - `src/update/ownership-model.ts`：由 Story 4.1 建立的 ownership truth，必须复用。
-- `src/manifest/files-index.ts` 与 `src/manifest/hash.ts`：files index/raw-byte hash baseline，必须复用。
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper，以及 `src/manifest/hash.ts`：files index/raw-byte hash baseline，必须复用。
 - `src/source/source-descriptor-schema.ts` 与 `src/source/` resolver：source descriptor、trust/evidence 和 blocked source gating。
 - `src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/resolve-output-schema.ts`：Story 4.2 shared resolver anchors，update planner 只能消费。
 - `src/installer/install-plan-schema.ts`：internal planning/write authorization schema anchor，确保 dry-run、`--yes` 和 `writeAuthorized` 语义一致。

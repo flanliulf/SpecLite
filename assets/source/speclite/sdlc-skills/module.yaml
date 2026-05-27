@@ -53,6 +53,7 @@ directories:
   - "{planning_artifacts}/epics"
   - "{implementation_artifacts}"
   - "{implementation_artifacts}/stories"
+  - "{implementation_artifacts}/flow-gates"
   - "{implementation_artifacts}/code-reviews"
   - "{implementation_artifacts}/story-reviews"
   - "{implementation_artifacts}/cr-rules"

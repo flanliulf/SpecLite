@@ -60,9 +60,9 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-6）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、files index generation、IDE adapter registry、diagnostics/output 和 fixture harness；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、files index generation、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
   - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/validation/rules/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.3 中创建孤立的 mirror/hash validation scaffold。
-  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/ide-mirror.ts`、`src/validation/rules/file-integrity.ts`、`src/ide/mirror-validator.ts`、`src/manifest/files-index.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 和 `src/fs/path-normalizer.ts`。
+  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/ide-mirror.ts`、`src/validation/rules/file-integrity.ts`、`src/ide/mirror-validator.ts`、`src/manifest/manifest-generator.ts` 或等价 files-index helper、`src/manifest/manifest-schema.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 和 `src/fs/path-normalizer.ts`。
   - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
 - [ ] Task 2: 建立 canonical package hash comparison（AC: 1, 2, 5, 6）
@@ -171,7 +171,7 @@ Status: ready-for-dev
 - `src/bin/speclite.ts` 通过 commander 注册 `speclite validate`。
 - `src/commands/validate.ts` 拥有 command orchestration，并返回 `CommandResult<ValidateCommandData>`。
 - `src/manifest/manifest-schema.ts` 拥有 manifest、skill index、help index、files index 和 phase coverage projection 的 executable schemas/parsers。
-- `src/manifest/files-index.ts` 拥有 files index domain access 或 projection helpers。
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价拆分模块拥有 files index domain access 或 projection helpers。
 - `src/manifest/hash.ts` 拥有 canonical package hash 与 raw-byte file hash helpers。
 - `src/ide/adapter-registry.ts` 拥有 canonical target order、target id validation 和 self-contained entry layout policy。
 - `src/ide/mirror-validator.ts` 或 `src/validation/rules/ide-mirror.ts` 拥有 Story 3.3 的 IDE mirror validation rule。

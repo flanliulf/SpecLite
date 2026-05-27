@@ -71,7 +71,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
-  - [ ] 确认 Epic 1 / Epic 2 的实际代码已建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index generation、source descriptor projection、IDE adapter registry、diagnostics/output 和 fixture harness；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [ ] 确认 Epic 1 / Epic 2 的实际代码已建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index generation、source descriptor projection、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
   - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/validate-project.ts` 或 `src/ide/adapter-registry.ts` 尚不存在，先完成前置 stories；不得在 Story 3.2 中一次性重建全部 installer、status、IDE mirror 或 update pipeline。
   - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/manifest/manifest-schema.ts`、`src/validation/rules/manifest-schema.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 和 `src/ide/adapter-registry.ts`。
   - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。

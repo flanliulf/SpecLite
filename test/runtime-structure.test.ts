@@ -58,6 +58,24 @@ describe("runtime structure and IDE mirror creation", () => {
       await expect(
         readFile(path.join(tempRoot, ".agents/skills/speclite-dev-story/SKILL.md"), "utf8"),
       ).resolves.toContain("speclite-dev-story");
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-dev-story/SKILL.en.md"), "utf8"),
+      ).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-dev-story/SKILL.en.md"), "utf8"),
+      ).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-dev-story/customize.toml"), "utf8"),
+      ).resolves.toContain("[workflow]");
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-help/customize.toml"), "utf8"),
+      ).rejects.toMatchObject({
+        code: "ENOENT",
+      });
 
       const manifest = await readJson(path.join(tempRoot, "_speclite/_config/manifest.yaml"));
       const skillIndex = await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json"));
@@ -82,11 +100,70 @@ describe("runtime structure and IDE mirror creation", () => {
       const devStoryPhaseRow = phaseCoverage.rows.find(
         (row: { canonicalSkillId: string }) => row.canonicalSkillId === "speclite-dev-story",
       );
+      const devStoryEntries = skillIndex.entries.filter(
+        (entry: { canonicalSkillId: string }) => entry.canonicalSkillId === "speclite-dev-story",
+      );
+      const devStoryTargetFiles = filesIndex.entries.filter(
+        (entry: { path: string }) =>
+          entry.path.startsWith(".claude/skills/speclite-dev-story/") ||
+          entry.path.startsWith(".agents/skills/speclite-dev-story/"),
+      );
+      const createPrdPhaseRow = phaseCoverage.rows.find(
+        (row: { canonicalSkillId: string }) => row.canonicalSkillId === "speclite-create-prd",
+      );
+      const customizePhaseRow = phaseCoverage.rows.find(
+        (row: { canonicalSkillId: string }) => row.canonicalSkillId === "speclite-customize",
+      );
+      const storyReviewPhaseRow = phaseCoverage.rows.find(
+        (row: { canonicalSkillId: string }) => row.canonicalSkillId === "speclite-story-review-01-reviewer",
+      );
 
       expect(manifest).toMatchObject(expectedManifest);
+      expect(devStoryEntries).toHaveLength(1);
       expect(devStoryEntry).toEqual(expectedDevStorySkillIndex);
       expect(devStoryFileEntry).toEqual(expectedDevStoryFileIndex);
       expect(devStoryPhaseRow).toEqual(expectedDevStoryPhaseCoverage);
+      expect(devStoryTargetFiles.map((entry: { path: string }) => entry.path)).not.toContain(
+        ".claude/skills/speclite-dev-story/SKILL.en.md",
+      );
+      expect(devStoryTargetFiles.map((entry: { path: string }) => entry.path)).not.toContain(
+        ".agents/skills/speclite-dev-story/SKILL.en.md",
+      );
+      expect(
+        devStoryTargetFiles
+          .filter((entry: { path: string }) => entry.path.endsWith("/SKILL.md"))
+          .map((entry: { hash: string }) => entry.hash),
+      ).toHaveLength(2);
+      expect(
+        new Set(
+          devStoryTargetFiles
+            .filter((entry: { path: string }) => entry.path.endsWith("/SKILL.md"))
+            .map((entry: { hash: string }) => entry.hash),
+        ).size,
+      ).toBe(1);
+      expect(JSON.stringify(skillIndex)).not.toContain(process.cwd());
+      expect(JSON.stringify(filesIndex)).not.toContain(process.cwd());
+      expect(createPrdPhaseRow).toMatchObject({
+        schemaVersion: "speclite.phase-coverage.v1",
+        phaseId: "2-planning",
+        phaseLabel: "Planning",
+        moduleId: "sdlc",
+        canonicalSkillId: "speclite-create-prd",
+        artifactContract: {
+          artifactType: "prd",
+          defaultOutputPath: "_speclite-output/planning-artifacts",
+          requiredMetadata: ["workflowType", "sourceSkill", "generatedAt"],
+        },
+      });
+      expect(storyReviewPhaseRow).toMatchObject({
+        phaseId: "3-solutioning",
+        phaseLabel: "Solutioning",
+        artifactContract: {
+          artifactType: "story-review-summary",
+          defaultOutputPath: "_speclite-output/implementation-artifacts/story-reviews",
+        },
+      });
+      expect(customizePhaseRow).not.toHaveProperty("artifactContract");
       expect(filesIndex.entries).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -125,6 +202,29 @@ describe("runtime structure and IDE mirror creation", () => {
           }),
         ]),
       );
+      expect(devStoryPhaseRow.ideTargets).toEqual([
+        expect.objectContaining({
+          targetId: "claude",
+          entryPath: ".claude/skills/speclite-dev-story",
+          activationTarget: ".claude/skills/speclite-dev-story/SKILL.md",
+          status: "mapped",
+        }),
+        expect.objectContaining({
+          targetId: "agents",
+          entryPath: ".agents/skills/speclite-dev-story",
+          activationTarget: ".agents/skills/speclite-dev-story/SKILL.md",
+          status: "mapped",
+        }),
+      ]);
+      expect(phaseCoverage.rows.map((row: { phaseId: string; moduleId: string; canonicalSkillId: string }) =>
+        `${row.phaseId}:${row.moduleId}:${row.canonicalSkillId}`,
+      )).toEqual(
+        [...phaseCoverage.rows]
+          .map((row: { phaseId: string; moduleId: string; canonicalSkillId: string }) =>
+            `${row.phaseId}:${row.moduleId}:${row.canonicalSkillId}`,
+          )
+          .sort(),
+      );
 
       for (const directory of [
         "_speclite-output/planning-artifacts",
@@ -145,6 +245,11 @@ describe("runtime structure and IDE mirror creation", () => {
 
       const serializedResult = JSON.stringify(outcome.result);
       expect(serializedResult).not.toContain(tempRoot);
+      expect(JSON.stringify(phaseCoverage)).not.toContain("copilot");
+      expect(JSON.stringify(phaseCoverage)).not.toContain("cursor");
+      expect(JSON.stringify(phaseCoverage)).not.toContain("command-pointer");
+      expect(JSON.stringify(outcome.result)).not.toContain("Copilot");
+      expect(JSON.stringify(outcome.result)).not.toContain("Cursor");
       expect(serializedResult).not.toContain("readySummary");
       expect(serializedResult).not.toContain("changedPaths");
       expect(serializedResult).not.toContain(".speclite-tmp-");
@@ -188,6 +293,46 @@ describe("runtime structure and IDE mirror creation", () => {
 
       const skillIndex = await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json"));
       expect(skillIndex.entries[0].installedTargets).toEqual(["agents"]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks explicitly selected unsupported IDE targets before write planning", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-unsupported-target-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+        configureProject: async () => ({
+          ideTargetIds: ["cursor"],
+        }),
+      });
+
+      expect(outcome.exitCode).toBe(1);
+      expect(outcome.installPlan).toBeUndefined();
+      expect(outcome.result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "ide-mirror.unsupported-target",
+          category: "ide-mirror",
+          severity: "error",
+          component: "adapter-registry",
+          details: {
+            unsupportedTargetIds: ["cursor"],
+            supportedTargetIds: ["claude", "agents"],
+          },
+        }),
+      ]);
+      expect(JSON.stringify(outcome.result)).not.toContain(tempRoot);
+      await expect(readFile(path.join(tempRoot, ".agents/skills/speclite-help/SKILL.md"), "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

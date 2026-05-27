@@ -8,11 +8,11 @@
 - `{project-root}` 前缀路径相对于目标项目工作目录解析。
 - `{speclite-runtime-root}` 解析为目标项目安装后的 SpecLite 运行目录，即 `{project-root}/_speclite`。
 - `{skill-name}` 解析为 skill 目录的 basename（即 `speclite-dev-story`）。
-- `{project-root}/_speclite/config.toml` 是目标项目提供并维护的运行时配置；Skill 目录中的 `config.toml.example` 仅作字段结构参考，不参与运行时读取。
+- `speclite resolve config --project-root {project-root}` 是运行时配置入口，按 `_speclite/config.toml`、`_speclite/config.user.toml`、`_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` 顺序解析四层合并结果；Skill 目录中的 `config.toml.example` 仅作字段结构参考，不参与运行时读取。
 
 ## Activation Step 1：解析 Workflow 配置块
 
-- 执行：`python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow`
+- 执行：`speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`
 - 如脚本失败，按 base → team → user 顺序读取以下三个文件，并应用与解析器相同的结构化合并规则自行解析 `workflow` 块：
     1. `{skill-root}/customize.toml`（默认值）
     2. `{speclite-runtime-root}/custom/{skill-name}.toml`（团队覆盖）
@@ -35,13 +35,14 @@
 
 ## Activation Step 4：加载配置
 
-- 从 `{project-root}/_speclite/config.toml` 加载并解析。该文件必须在本 Skill 运行前已由用户人工维护或安装/初始化工具生成；若不存在或关键字段为空，应提示用户先初始化/补全配置并 HALT，不得回退读取 Skill 定义目录中的 `config.toml.example`：
+- 执行：`speclite resolve config --project-root {project-root}`
+- 从 stdout resolved JSON 中读取下列字段。若命令失败、required base config 缺失或关键字段为空，应提示用户先初始化/补全配置并 HALT，不得回退读取 Skill 定义目录中的 `config.toml.example`：
     · `project_name`、`user_name`
     · `communication_language`、`document_output_language`
     · `user_skill_level`
     · `output_folder`
     · `implementation_artifacts`
-    · `date`（系统当前日期时间）
+- `date` 使用系统当前日期时间，不从 config resolver stdout 读取。
 
 ## Activation Step 5：问候用户
 

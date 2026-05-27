@@ -59,7 +59,7 @@ Status: ready-for-dev
 - [ ] Task 1: 验证前置实现、工作树与只读边界（AC: 1-6）
   - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否已由前序 stories 创建。创建本 Story 时这些 TypeScript CLI 实现目录尚不存在，不能把 ready-for-dev story context 当成源码已完成证据。
   - [ ] 确认 Story 2.4 的 resolver implementation anchors 已真实存在：`src/commands/resolve.ts`、`src/config/resolve-output-schema.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/config-schema.ts`、`src/config/customization-schema.ts`。
-  - [ ] 确认 Story 4.1 的 ownership model / protected boundary anchors 已真实存在或已在当前 implementation sequence 中计划完成：`src/update/ownership-model.ts`、`src/manifest/files-index.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts`。
+  - [ ] 确认 Story 4.1 的 ownership model / protected boundary anchors 已真实存在或已在当前 implementation sequence 中计划完成：`src/update/ownership-model.ts`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts`。
   - [ ] 如果前置 implementation anchors 尚不存在，先完成前置 stories 或在本 Story 的范围内只补 resolver consumption 所需最小 integration；不得创建孤立的 update-only resolver copy。
   - [ ] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、Story 4.1、源码或用户改动；不得格式化、重写、同步或回滚无关文件。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output 和 tests；不得用本 Story 重构无关模块。

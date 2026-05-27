@@ -66,7 +66,7 @@ Status: ready-for-dev
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
   - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`fixtures/` 是否已由前序 Stories 创建。当前创建 Story 时这些 TypeScript CLI 实现目录尚不存在，不能把 ready-for-dev story context 当成已完成源码证据。
   - [ ] 确认 Epic 1 / Story 1.4 已经或将要只负责 fresh-install create-if-absent project-level custom TOML stubs；Story 4.1 不得反向要求 Story 1.4 依赖完整 update/repair 模型。
-  - [ ] 如果 `src/commands/update.ts`、`src/update/`、`src/manifest/files-index.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 或等价前置 anchors 不存在，先完成前置 stories 或在本 Story 的既定范围内创建对应 Epic 4 所需 anchors；不得创建孤立的 update-only scaffold 并绕过 CommandResult、manifest 和 fixture contracts。
+  - [ ] 如果 `src/commands/update.ts`、`src/update/`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 或等价前置 anchors 不存在，先完成前置 stories 或在本 Story 的既定范围内创建对应 Epic 4 所需 anchors；不得创建孤立的 update-only scaffold 并绕过 CommandResult、manifest 和 fixture contracts。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录当前 behavior、数据 shape、public output 和测试覆盖；不得格式化、重写、同步或回滚与 Story 4.1 无关的文件。
 
 - [ ] Task 2: 建立 ownership model 与 path classifier（AC: 1-6）
@@ -78,7 +78,7 @@ Status: ready-for-dev
   - [ ] 对无法判定或路径逃逸的情况返回 protected unknown/conflict outcome，不得默认当作 installer-owned。
 
 - [ ] Task 3: 收口 files index ownership projection（AC: 1, 2, 6）
-  - [ ] 复用或扩展 `src/manifest/files-index.ts` 与 `src/manifest/manifest-schema.ts`，确保 files index entry 包含 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
+  - [ ] 复用或扩展 `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper，确保 files index entry 包含 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
   - [ ] File hash 必须基于 raw bytes；line ending、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得被 hash normalization 隐式吸收。
   - [ ] `_speclite/.lock` 和 `.speclite-tmp-` safe-write temporary files 不得进入 files index，也不得影响 stable files-index hash。
   - [ ] Human-owned 和 workflow-owned files 可以为了 protection 被列出，但 automatic update 和 repair 不得 mutate 它们。
@@ -164,7 +164,7 @@ Status: ready-for-dev
 - `src/update/conflict-detector.ts`：installer-owned drift、human-owned/workflow-owned/unknown ownership conflict reason mapping。
 - `src/update/apply-update.ts`：仅在后续 Story 4.4-4.6 的 safe-write/repair 边界内应用变更；Story 4.1 不应提前实现 full apply flow。
 - `src/commands/update.ts`：command orchestration，含 normal update 与 `update.repair` command id routing。
-- `src/manifest/files-index.ts`：files index ownership/hash projection。
+- `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价拆分模块：files index ownership/hash projection。
 - `src/manifest/hash.ts`：raw-byte hash helper。
 - `src/diagnostics/command-result-schema.ts`：`UpdatePlan`、`RepairPlan`、`UpdateConflict`、reason code producer guards。
 - `src/diagnostics/command-result.ts`：single `update.conflicts` issue projection、status/exit-code derivation。

@@ -2,6 +2,14 @@
 
 本文件记录 `speclite-dev-story` 的版本变更。
 
+## [1.0.3] - 2026-05-27
+
+### 新增
+
+- 开发前执行 `speclite-flow-gate mode=story-kickoff`，通过后才允许推进到 `in-progress`。
+- 完成前填写 Anchor Evidence Summary，并执行 `story-completion` gate 后才允许推进到 `review`。
+- Story 自动发现优先使用 `sprint-status.yaml` 的 `story_location`，默认回退到 `{implementation_artifacts}/stories`。
+
 ## [1.0.2] - 2026-05-06
 
 ### 修复

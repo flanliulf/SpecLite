@@ -79,7 +79,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-9）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 / Story 3.5 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、validation rules、CommandResult schema/projection、diagnostics output、path normalization 和 fixture harness；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 / Story 3.5 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、validation rules、CommandResult schema/projection、diagnostics output、path normalization、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
   - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 或 `src/ide/adapter-registry.ts` 尚不存在，先完成前置 stories；不得在 Story 3.6 中创建孤立的 validation-order-only scaffold。
   - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/validate-project.ts`、所有已存在的 `src/validation/rules/*.ts`、`src/validation/issue-model.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts`、`src/ide/adapter-registry.ts` 和 fixture comparison helpers。
   - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
@@ -319,7 +319,7 @@ Issues sorting key：
 - Stable snapshots may normalize or exclude only fields explicitly declared non-stable by owning SPEC.
 - Repeated validate fixture runs must compare issue arrays, issueCounts, checkedCategories, checkedTargets, validatedPaths, nextActions and command status.
 - Terminal width / no-color / non-TTY / CI renderer checks can assert required field presence and text equivalents without turning wall-clock or terminal layout into stable JSON contract.
-- Path-portability fixtures must include macOS / Windows path normalization evidence before MVP release, but Story 3.6 should only add focused coverage where the fixture harness already exists.
+- Path-portability fixtures must include macOS / Windows path normalization evidence before MVP release, but Story 3.6 should only add focused coverage where fixture contract/assets/tests already exist.
 
 ### Latest Technical Information（最新技术信息）
 
