@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "speclite.manifest.v1",
+  "installedModules": [
+    "core",
+    "sdlc"
+  ],
+  "targetIds": [
+    "claude",
+    "agents"
+  ],
+  "paths": {
+    "projectRoot": ".",
+    "specliteRoot": "_speclite",
+    "artifactRoot": "_speclite-output",
+    "manifestPath": "_speclite/_config/manifest.yaml"
+  }
+}

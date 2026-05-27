@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "success",
+  "command": "install",
+  "targetProject": "fresh-install-empty-project",
+  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC 0.0.0). IDE targets: claude (53 skills at .claude/skills), agents (53 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
+  "issues": [],
+  "nextActions": [
+    "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
+    "Run speclite status to inspect the installed-state summary.",
+    "Run speclite validate for deeper local validation when needed."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [
+        {
+          "kind": "version-lock",
+          "packageName": "speclite",
+          "version": "0.0.0",
+          "lockPath": "package-lock.json",
+          "verified": false
+        }
+      ],
+      "trustStatus": "unverified"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [
+      "core",
+      "sdlc"
+    ],
+    "ideTargets": [
+      {
+        "id": "claude",
+        "status": "configured",
+        "targetPath": ".claude/skills",
+        "skillCount": 53
+      },
+      {
+        "id": "agents",
+        "status": "configured",
+        "targetPath": ".agents/skills",
+        "skillCount": 53
+      }
+    ],
+    "paths": {
+      "projectRoot": ".",
+      "specliteRoot": "_speclite",
+      "artifactRoot": "_speclite-output",
+      "manifestPath": "_speclite/_config/manifest.yaml"
+    },
+    "completedSteps": [
+      "source-discovery",
+      "module-selection",
+      "config-initialization",
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary"
+    ],
+    "pendingSteps": []
+  }
+}

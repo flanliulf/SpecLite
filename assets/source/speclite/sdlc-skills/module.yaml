@@ -1,7 +1,10 @@
 code: sdlc
 name: "SpecLite SDLC"
+version: "0.0.0"
 description: "AI-driven software development lifecycle framework for product discovery, planning, solutioning, and implementation"
 default_selected: true
+required_dependencies:
+  - core
 
 header: "SpecLite SDLC Configuration"
 subheader: "Configure SDLC module settings written to {project-root}/_speclite/config.toml under [modules.sdlc]."

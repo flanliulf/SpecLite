@@ -1,0 +1,392 @@
+import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import { runInstallCommand } from "../src/commands/install.js";
+
+const supportedRuntime = {
+  nodeVersion: "v22.12.0",
+  platform: "darwin",
+  platformRelease: "23.0.0",
+} as const;
+const fixtureExpectedRoot = path.join(
+  process.cwd(),
+  "test/fixtures/fresh-install-empty-project/expected",
+);
+
+describe("runtime structure and IDE mirror creation", () => {
+  it("writes the confirmed fresh install shape and completes ReadyCheck", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-shape-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { json: true, yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+          targetProject: "fresh-install-empty-project",
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.result.status).toBe("success");
+      expect(outcome.result.data.installedModules).toEqual(["core", "sdlc"]);
+      expect(outcome.result.data.ideTargets).toEqual([
+        { id: "claude", status: "configured", targetPath: ".claude/skills", skillCount: expect.any(Number) },
+        { id: "agents", status: "configured", targetPath: ".agents/skills", skillCount: expect.any(Number) },
+      ]);
+      expect(outcome.result.data.completedSteps).toContain("ide-mirror-creation");
+      expect(outcome.result.data.completedSteps).toContain("manifest-generation");
+      expect(outcome.result.data.completedSteps).toContain("ready-check");
+      expect(outcome.result.data.completedSteps).toContain("ready-summary");
+      expect(outcome.result.data.pendingSteps).toEqual([]);
+      await expect(readJson(path.join(fixtureExpectedRoot, "command-json/fresh-install-success.json"))).resolves.toEqual(
+        outcome.result,
+      );
+
+      await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toContain(
+        "[core]",
+      );
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/config.user.toml"), "utf8"),
+      ).resolves.toContain("communication_language");
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-dev-story/SKILL.md"), "utf8"),
+      ).resolves.toContain("speclite-dev-story");
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-dev-story/SKILL.md"), "utf8"),
+      ).resolves.toContain("speclite-dev-story");
+
+      const manifest = await readJson(path.join(tempRoot, "_speclite/_config/manifest.yaml"));
+      const skillIndex = await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json"));
+      const filesIndex = await readJson(path.join(tempRoot, "_speclite/_config/files-index.json"));
+      const phaseCoverage = await readJson(path.join(tempRoot, "_speclite/_config/phase-coverage.json"));
+      const expectedManifest = await readJson(path.join(fixtureExpectedRoot, "installed-state/manifest.json"));
+      const expectedDevStorySkillIndex = await readJson(
+        path.join(fixtureExpectedRoot, "installed-state/skill-index-speclite-dev-story.json"),
+      );
+      const expectedDevStoryFileIndex = await readJson(
+        path.join(fixtureExpectedRoot, "installed-state/files-index-dev-story-skill.json"),
+      );
+      const expectedDevStoryPhaseCoverage = await readJson(
+        path.join(fixtureExpectedRoot, "installed-state/phase-coverage-dev-story.json"),
+      );
+      const devStoryEntry = skillIndex.entries.find(
+        (entry: { canonicalSkillId: string }) => entry.canonicalSkillId === "speclite-dev-story",
+      );
+      const devStoryFileEntry = filesIndex.entries.find(
+        (entry: { path: string }) => entry.path === ".claude/skills/speclite-dev-story/SKILL.md",
+      );
+      const devStoryPhaseRow = phaseCoverage.rows.find(
+        (row: { canonicalSkillId: string }) => row.canonicalSkillId === "speclite-dev-story",
+      );
+
+      expect(manifest).toMatchObject(expectedManifest);
+      expect(devStoryEntry).toEqual(expectedDevStorySkillIndex);
+      expect(devStoryFileEntry).toEqual(expectedDevStoryFileIndex);
+      expect(devStoryPhaseRow).toEqual(expectedDevStoryPhaseCoverage);
+      expect(filesIndex.entries).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "_speclite/config.toml",
+            ownership: "installer-owned",
+            hashAlgorithm: "sha256",
+            artifactKind: "runtime-config",
+          }),
+          expect.objectContaining({
+            path: "_speclite/custom/config.toml",
+            ownership: "human-owned",
+            artifactKind: "project-custom-stub",
+          }),
+          expect.objectContaining({
+            path: ".claude/skills/speclite-dev-story/SKILL.md",
+            ownership: "installer-owned",
+            sourceRef: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.md",
+          }),
+          expect.objectContaining({
+            path: ".agents/skills/speclite-dev-story/SKILL.md",
+            ownership: "installer-owned",
+            sourceRef: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.md",
+          }),
+        ]),
+      );
+      expect(phaseCoverage.rows).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            phaseId: "4-implementation",
+            moduleId: "sdlc",
+            canonicalSkillId: "speclite-dev-story",
+            ideTargets: [
+              expect.objectContaining({ targetId: "claude", status: "mapped" }),
+              expect.objectContaining({ targetId: "agents", status: "mapped" }),
+            ],
+          }),
+        ]),
+      );
+
+      for (const directory of [
+        "_speclite-output/planning-artifacts",
+        "_speclite-output/implementation-artifacts/stories",
+        "_speclite-output/implementation-artifacts/code-reviews",
+        "docs/brownfield/evidence",
+      ]) {
+        await expect(lstat(path.join(tempRoot, directory))).resolves.toMatchObject({
+          isDirectory: expect.any(Function),
+        });
+      }
+      const expectedTree = (await readFile(path.join(fixtureExpectedRoot, "installed-tree.txt"), "utf8"))
+        .split("\n")
+        .filter((entry) => entry.length > 0);
+      for (const expectedPath of expectedTree) {
+        await expect(lstat(path.join(tempRoot, expectedPath))).resolves.toBeDefined();
+      }
+
+      const serializedResult = JSON.stringify(outcome.result);
+      expect(serializedResult).not.toContain(tempRoot);
+      expect(serializedResult).not.toContain("readySummary");
+      expect(serializedResult).not.toContain("changedPaths");
+      expect(serializedResult).not.toContain(".speclite-tmp-");
+      expect(JSON.stringify(filesIndex)).not.toContain("_speclite/.lock");
+      expect(JSON.stringify(filesIndex)).not.toContain(".speclite-tmp-");
+      await expect(readFile(path.join(tempRoot, "_speclite/.lock"), "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("uses canonical target order while respecting a selected target subset", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-target-subset-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+        configureProject: async () => ({
+          ideTargetIds: ["agents"],
+        }),
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.result.data.ideTargets).toEqual([
+        { id: "agents", status: "configured", targetPath: ".agents/skills", skillCount: expect.any(Number) },
+      ]);
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-help/SKILL.md"), "utf8"),
+      ).resolves.toContain("speclite-help");
+      await expect(readFile(path.join(tempRoot, ".claude/skills/speclite-help/SKILL.md"), "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+
+      const skillIndex = await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json"));
+      expect(skillIndex.entries[0].installedTargets).toEqual(["agents"]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails before write phase when another project operation lock exists", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-locked-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite"), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, "_speclite/.lock"),
+        JSON.stringify({
+          schemaVersion: "speclite.operation-lock.v1",
+          operation: "install",
+          createdAt: "2026-05-26T00:00:00.000Z",
+          projectRootHash: "sha256:fixture",
+        }),
+        "utf8",
+      );
+
+      const outcome = await runInstallCommand({
+        options: { json: true, yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(1);
+      expect(outcome.result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "operation-lock.project-locked",
+          category: "operation-lock",
+          severity: "error",
+          affectedPath: "_speclite/.lock",
+        }),
+      ]);
+      expect(outcome.result.data.pendingSteps).toContain("ide-mirror-creation");
+      await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+      expect(JSON.stringify(outcome.result)).not.toContain("createdAt");
+      expect(JSON.stringify(outcome.result)).not.toContain(tempRoot);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves existing human-owned stubs and workflow-owned artifacts", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-preserve-"));
+    const humanStub = "# hand edited\n[core]\nproject_name = \"keep\"\n";
+    const workflowArtifact = "# existing plan\n";
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/custom"), { recursive: true });
+      await mkdir(path.join(tempRoot, "_speclite-output/planning-artifacts"), { recursive: true });
+      await writeFile(path.join(tempRoot, "_speclite/custom/config.toml"), humanStub, "utf8");
+      await writeFile(
+        path.join(tempRoot, "_speclite-output/planning-artifacts/existing.md"),
+        workflowArtifact,
+        "utf8",
+      );
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      await expect(readFile(path.join(tempRoot, "_speclite/custom/config.toml"), "utf8")).resolves.toBe(
+        humanStub,
+      );
+      await expect(
+        readFile(path.join(tempRoot, "_speclite-output/planning-artifacts/existing.md"), "utf8"),
+      ).resolves.toBe(workflowArtifact);
+
+      const filesIndex = await readJson(path.join(tempRoot, "_speclite/_config/files-index.json"));
+      expect(filesIndex.entries).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "_speclite/custom/config.toml",
+            ownership: "human-owned",
+            artifactKind: "project-custom-stub",
+          }),
+        ]),
+      );
+      expect(JSON.stringify(filesIndex)).not.toContain("existing.md");
+      expect(JSON.stringify(outcome.result)).not.toContain(humanStub);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects artifact roots that escape through symlinks before runtime writes", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-symlink-"));
+    const outsideRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-outside-"));
+
+    try {
+      await symlink(outsideRoot, path.join(tempRoot, "_speclite-output"));
+
+      const outcome = await runInstallCommand({
+        options: { json: true, yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(1);
+      expect(outcome.result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "artifact-path.symlink-escape",
+          category: "artifact-path",
+          severity: "error",
+        }),
+      ]);
+      await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+      await rm(outsideRoot, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { mirrorRoot: ".claude", selectedTargetIds: undefined },
+    { mirrorRoot: ".agents", selectedTargetIds: ["agents"] },
+  ])(
+    "rejects $mirrorRoot symlink before creating external mirror directories and reports partial progress",
+    async ({ mirrorRoot, selectedTargetIds }) => {
+      const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-mirror-symlink-"));
+      const outsideRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-mirror-outside-"));
+
+      try {
+        await symlink(outsideRoot, path.join(tempRoot, mirrorRoot));
+
+        const outcome = await runInstallCommand({
+          options: { yes: true },
+          runtime: {
+            ...supportedRuntime,
+            cwd: tempRoot,
+          },
+          ...(selectedTargetIds === undefined
+            ? {}
+            : {
+                configureProject: async () => ({
+                  ideTargetIds: selectedTargetIds,
+                }),
+              }),
+        });
+
+        expect(outcome.exitCode).toBe(1);
+        expect(outcome.result.issues).toEqual([
+          expect.objectContaining({
+            issueId: "ide-mirror.target-write-failed",
+            category: "ide-mirror",
+            severity: "error",
+            affectedPath: expect.stringMatching(`^\\${mirrorRoot}/skills/`),
+            details: {
+              reason: "existing-path-segment-is-symlink",
+            },
+          }),
+        ]);
+        expect(outcome.result.data.completedSteps).toEqual([
+          "source-discovery",
+          "module-selection",
+          "config-initialization",
+          "runtime-structure",
+        ]);
+        expect(outcome.result.data.pendingSteps).toEqual([
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ]);
+        await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toContain(
+          "[core]",
+        );
+        await expect(lstat(path.join(tempRoot, "_speclite-output/planning-artifacts"))).resolves.toBeDefined();
+        await expect(lstat(path.join(outsideRoot, "skills"))).rejects.toMatchObject({
+          code: "ENOENT",
+        });
+        const serializedResult = JSON.stringify(outcome.result);
+        expect(serializedResult).not.toContain("failedStep");
+        expect(serializedResult).not.toContain("changedPaths");
+        expect(serializedResult).not.toContain("readySummary");
+      } finally {
+        await rm(tempRoot, { recursive: true, force: true });
+        await rm(outsideRoot, { recursive: true, force: true });
+      }
+    },
+  );
+});
+
+async function readJson(filePath: string): Promise<any> {
+  return JSON.parse(await readFile(filePath, "utf8"));
+}

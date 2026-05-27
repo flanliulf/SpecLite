@@ -1,6 +1,6 @@
 # Story 1.5: Runtime Structure, Artifact Directory And IDE Mirror Creation（运行时结构、产物目录与 IDE 镜像创建）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -102,79 +102,79 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证 Story 1.1-1.4 前置实现和 confirmed install state（AC: 1, 10, 11）
-  - [ ] 确认 Story 1.1 已实际提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`SourceDescriptor` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
-  - [ ] 确认 Story 1.2 已实际提供 target directory resolution、existing-install detection、path normalization、target confirmation 和 no-write gate。
-  - [ ] 确认 Story 1.3 已实际提供 bundled source discovery、module metadata parser、module selection model、source integrity gate 和 pre-write install scope summary。
-  - [ ] 确认 Story 1.4 已实际提供 project config schema、quick/detailed config collection、config planned writes、human-owned stub plan 和 final configuration summary confirmation。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`src/diagnostics/command-result-schema.ts`、`src/installer/install-plan-schema.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts` 或前序 Story 预期实现文件仍不存在，停止 Story 1.5 实现并先完成前序 Story。
+- [x] Task 1: 验证 Story 1.1-1.4 前置实现和 confirmed install state（AC: 1, 10, 11）
+  - [x] 确认 Story 1.1 已实际提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`SourceDescriptor` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
+  - [x] 确认 Story 1.2 已实际提供 target directory resolution、existing-install detection、path normalization、target confirmation 和 no-write gate。
+  - [x] 确认 Story 1.3 已实际提供 bundled source discovery、module metadata parser、module selection model、source integrity gate 和 pre-write install scope summary。
+  - [x] 确认 Story 1.4 已实际提供 project config schema、quick/detailed config collection、config planned writes、human-owned stub plan 和 final configuration summary confirmation。
+  - [x] 如果 `package.json`、`src/`、`test/`、`src/diagnostics/command-result-schema.ts`、`src/installer/install-plan-schema.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts` 或前序 Story 预期实现文件仍不存在，停止 Story 1.5 实现并先完成前序 Story。
 
-- [ ] Task 2: 实现 write phase safety primitives（AC: 2, 4, 5, 10, 11）
-  - [ ] 在 `src/fs/` 中新增或扩展 `path-normalizer.ts`、`safe-write.ts`、`copy-tree.ts`、`permissions.ts` 等 helpers；所有 public path projection 复用同一 POSIX path normalization。
-  - [ ] 在 `src/installer/` 中实现 operation lock acquisition/release，lock shape 遵守 install plan SPEC，lock path 固定为 `_speclite/.lock`。
-  - [ ] Fresh install 允许 lock acquisition 创建 `_speclite/` lock parent；该目录创建只能发生在 target confirmation、source trust / integrity gate 和 final configuration summary confirmation 之后，且不得夹带 `_speclite/_config`、config、manifest、mirror 或 artifact writes。
-  - [ ] 对 planned writes 执行 `lstat` / `realpath` 或 Node 22-compatible 等价检查，阻断 symlink escape、path escape、case conflict 和 unsafe overwrite。
-  - [ ] Installer-owned file mutation 使用 temp-write + rename；temp file 位于同一目录，并使用 `.speclite-tmp-` 前缀或后缀。
-  - [ ] Lock file、safe-write temp file、private nonce、pid、timestamp、absolute temp path 不得进入 public output、manifest/index、files index 或 stable fixture snapshot。
+- [x] Task 2: 实现 write phase safety primitives（AC: 2, 4, 5, 10, 11）
+  - [x] 在 `src/fs/` 中新增或扩展 `path-normalizer.ts`、`safe-write.ts`、`copy-tree.ts`、`permissions.ts` 等 helpers；所有 public path projection 复用同一 POSIX path normalization。
+  - [x] 在 `src/installer/` 中实现 operation lock acquisition/release，lock shape 遵守 install plan SPEC，lock path 固定为 `_speclite/.lock`。
+  - [x] Fresh install 允许 lock acquisition 创建 `_speclite/` lock parent；该目录创建只能发生在 target confirmation、source trust / integrity gate 和 final configuration summary confirmation 之后，且不得夹带 `_speclite/_config`、config、manifest、mirror 或 artifact writes。
+  - [x] 对 planned writes 执行 `lstat` / `realpath` 或 Node 22-compatible 等价检查，阻断 symlink escape、path escape、case conflict 和 unsafe overwrite。
+  - [x] Installer-owned file mutation 使用 temp-write + rename；temp file 位于同一目录，并使用 `.speclite-tmp-` 前缀或后缀。
+  - [x] Lock file、safe-write temp file、private nonce、pid、timestamp、absolute temp path 不得进入 public output、manifest/index、files index 或 stable fixture snapshot。
 
-- [ ] Task 3: 创建 `_speclite` metadata/control hub 和 config/runtime files（AC: 3, 4, 8, 9）
-  - [ ] 在 `src/installer/` 中新增或扩展 runtime structure writer，例如 `runtime-structure.ts` 或 `apply-install-plan.ts`；`src/commands/install.ts` 只负责 orchestration。
-  - [ ] 创建 `_speclite/`、`_speclite/_config/`、`_speclite/custom/` 等 required directories。
-  - [ ] 应用 Story 1.4 的 config planned writes，写入 installer-owned `_speclite/config.toml` 与 `_speclite/config.user.toml`。
-  - [ ] 对 `_speclite/custom/config.toml` 和 `_speclite/custom/config.user.toml` 只执行 create-if-absent；existing file 必须 protected skip，且不得读取内容到 public output。
-  - [ ] 若复制或生成 shared runtime scripts，必须明确其 installer-owned status、sourceRef、executable intent 和 Node resolver relationship；不得让 legacy Python resolver 重新成为 MVP 主合并实现。
-  - [ ] Runtime script/config/template paths 必须写入 files index，hash 使用 raw bytes，canonical text files 保持 LF。
+- [x] Task 3: 创建 `_speclite` metadata/control hub 和 config/runtime files（AC: 3, 4, 8, 9）
+  - [x] 在 `src/installer/` 中新增或扩展 runtime structure writer，例如 `runtime-structure.ts` 或 `apply-install-plan.ts`；`src/commands/install.ts` 只负责 orchestration。
+  - [x] 创建 `_speclite/`、`_speclite/_config/`、`_speclite/custom/` 等 required directories。
+  - [x] 应用 Story 1.4 的 config planned writes，写入 installer-owned `_speclite/config.toml` 与 `_speclite/config.user.toml`。
+  - [x] 对 `_speclite/custom/config.toml` 和 `_speclite/custom/config.user.toml` 只执行 create-if-absent；existing file 必须 protected skip，且不得读取内容到 public output。
+  - [x] 若复制或生成 shared runtime scripts，必须明确其 installer-owned status、sourceRef、executable intent 和 Node resolver relationship；不得让 legacy Python resolver 重新成为 MVP 主合并实现。
+  - [x] Runtime script/config/template paths 必须写入 files index，hash 使用 raw bytes，canonical text files 保持 LF。
 
-- [ ] Task 4: 创建 configured artifact repository 和 module declarative directories（AC: 5, 8, 11）
-  - [ ] 使用 resolved config model 中的 `output_folder`、`planning_artifacts`、`implementation_artifacts`、`project_knowledge` 和 selected module declarative `directories` 计算 directory plan。
-  - [ ] 对 `_speclite-output` 或配置约定的 artifact root 执行 project-boundary 和 symlink/path escape 检查。
-  - [ ] 创建缺失目录，但不得清空、重写或 normalize 现有 workflow-owned files。
-  - [ ] 将 artifact root 与 relevant directory existence 投影到 manifest/index 或 `CommandResult.data.paths` 中已契约化字段；不得新增未契约化 public JSON fields。
-  - [ ] Tests 覆盖 existing workflow artifact 保留不变、artifact root escape 阻断，以及 configured root 使用 project-relative POSIX path。
+- [x] Task 4: 创建 configured artifact repository 和 module declarative directories（AC: 5, 8, 11）
+  - [x] 使用 resolved config model 中的 `output_folder`、`planning_artifacts`、`implementation_artifacts`、`project_knowledge` 和 selected module declarative `directories` 计算 directory plan。
+  - [x] 对 `_speclite-output` 或配置约定的 artifact root 执行 project-boundary 和 symlink/path escape 检查。
+  - [x] 创建缺失目录，但不得清空、重写或 normalize 现有 workflow-owned files。
+  - [x] 将 artifact root 与 relevant directory existence 投影到 manifest/index 或 `CommandResult.data.paths` 中已契约化字段；不得新增未契约化 public JSON fields。
+  - [x] Tests 覆盖 existing workflow artifact 保留不变、artifact root escape 阻断，以及 configured root 使用 project-relative POSIX path。
 
-- [ ] Task 5: 实现 IDE adapter registry driven mirror writer（AC: 6, 7, 9, 12）
-  - [ ] 在 `src/ide/adapter-registry.ts` 中复用 `claude`、`agents` target definitions 和 `CANONICAL_TARGET_ORDER`；不得新增 `copilot`、`cursor` 或 command pointer target。
-  - [ ] 在 `src/ide/target-writer.ts` 或 adapter modules 中实现 self-contained skill entry writer。
-  - [ ] 在 mirror planning 前验证 selected/default modules 都具备 canonical package roots；discovery 必须递归识别 nested `SKILL.md` package roots，不得只检查 module top-level；缺 package module 不得进入 default installed module set、IDE mirror 或 ReadyCheck。
-  - [ ] Target entry directory basename 必须是 `canonicalSkillId`，路径分别为 `.claude/skills/<canonicalSkillId>/` 和 `.agents/skills/<canonicalSkillId>/`。
-  - [ ] 复制 canonical package content 时保留 relative path、LF canonical text bytes、file modes/executable intent 和 package contents；不得添加 IDE-specific wrapper 到 canonical package hash。
-  - [ ] 若某 target 需要 adapter artifact，必须独立记录 sourceRef、ownership 和 file-level hash；MVP 不生成 command pointer artifact。
-  - [ ] Duplicate canonical skill id、missing required `SKILL.md`、unsupported selected target 或 target write failure 必须产生 reserved issue id 或先更新 taxonomy SPEC。
+- [x] Task 5: 实现 IDE adapter registry driven mirror writer（AC: 6, 7, 9, 12）
+  - [x] 在 `src/ide/adapter-registry.ts` 中复用 `claude`、`agents` target definitions 和 `CANONICAL_TARGET_ORDER`；不得新增 `copilot`、`cursor` 或 command pointer target。
+  - [x] 在 `src/ide/target-writer.ts` 或 adapter modules 中实现 self-contained skill entry writer。
+  - [x] 在 mirror planning 前验证 selected/default modules 都具备 canonical package roots；discovery 必须递归识别 nested `SKILL.md` package roots，不得只检查 module top-level；缺 package module 不得进入 default installed module set、IDE mirror 或 ReadyCheck。
+  - [x] Target entry directory basename 必须是 `canonicalSkillId`，路径分别为 `.claude/skills/<canonicalSkillId>/` 和 `.agents/skills/<canonicalSkillId>/`。
+  - [x] 复制 canonical package content 时保留 relative path、LF canonical text bytes、file modes/executable intent 和 package contents；不得添加 IDE-specific wrapper 到 canonical package hash。
+  - [x] 若某 target 需要 adapter artifact，必须独立记录 sourceRef、ownership 和 file-level hash；MVP 不生成 command pointer artifact。
+  - [x] Duplicate canonical skill id、missing required `SKILL.md`、unsupported selected target 或 target write failure 必须产生 reserved issue id 或先更新 taxonomy SPEC。
 
-- [ ] Task 6: 生成 manifest、skill/help/files indexes 和 phase coverage（AC: 8, 9, 11, 12）
-  - [ ] 在 `src/manifest/` 中实现或扩展 `manifest-generator.ts`、`skill-index.ts`、`help-index.ts`、`files-index.ts`、`phase-coverage.ts` 和 `hash.ts`。
-  - [ ] Manifest/index artifact paths 固定为 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`。
-  - [ ] 生成 schema versions：`speclite.manifest.v1`、`speclite.skill-index.v1`、`speclite.help-index.v1`、`speclite.files-index.v1`、`speclite.phase-coverage.v1`。
-  - [ ] `skill-index` 记录 `canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash`、`installedTargets[]` 和 `phaseIds[]`。
-  - [ ] `help-index` 记录 `phaseId`、`entryLabel`、`canonicalSkillId`、`activationTarget` 和 `targetIds[]`，不得定义 alternate skill identity。
-  - [ ] `files-index` 记录 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
-  - [ ] `phase-coverage` rows 按 `phaseId`、`moduleId`、`canonicalSkillId` 排序，target status 使用 installed phase coverage vocabulary：`mapped`、`unsupported`、`failed`。
-  - [ ] File hashes 基于 raw file bytes；line ending、executable bit、file mode、symlink handling 和 case conflict 作为独立 validation dimensions，不通过 hash normalization 隐藏。
+- [x] Task 6: 生成 manifest、skill/help/files indexes 和 phase coverage（AC: 8, 9, 11, 12）
+  - [x] 在 `src/manifest/` 中实现或扩展 `manifest-generator.ts`、`skill-index.ts`、`help-index.ts`、`files-index.ts`、`phase-coverage.ts` 和 `hash.ts`。
+  - [x] Manifest/index artifact paths 固定为 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`。
+  - [x] 生成 schema versions：`speclite.manifest.v1`、`speclite.skill-index.v1`、`speclite.help-index.v1`、`speclite.files-index.v1`、`speclite.phase-coverage.v1`。
+  - [x] `skill-index` 记录 `canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash`、`installedTargets[]` 和 `phaseIds[]`。
+  - [x] `help-index` 记录 `phaseId`、`entryLabel`、`canonicalSkillId`、`activationTarget` 和 `targetIds[]`，不得定义 alternate skill identity。
+  - [x] `files-index` 记录 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
+  - [x] `phase-coverage` rows 按 `phaseId`、`moduleId`、`canonicalSkillId` 排序，target status 使用 installed phase coverage vocabulary：`mapped`、`unsupported`、`failed`。
+  - [x] File hashes 基于 raw file bytes；line ending、executable bit、file mode、symlink handling 和 case conflict 作为独立 validation dimensions，不通过 hash normalization 隐藏。
 
-- [ ] Task 7: 接入 install command output，并明确推迟 ReadyCheck / ready summary（AC: 10, 11）
-  - [ ] `install --json` 使用 `CommandResult<InstallCommandData>`，不新增未在 command-result SPEC 中声明的 required fields。
-  - [ ] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；Story 1.5 可将 `ide-mirror-creation`、`manifest-generation` 或等价 lower-kebab steps 标记为 completed/pending，但不得把 `ready-check` 标记为 completed。
-  - [ ] Human-readable output 使用 Evidence profile，展示 runtime paths、artifact root、IDE targets、manifest/index paths 和 next action。
-  - [ ] 成功完成 Story 1.5 写入后，输出应表明 ReadyCheck / ready summary 仍 pending，属于 Story 1.6。
-  - [ ] 任一关键写入失败时不得声称 rollback；MVP 不提供 transactional rollback。输出应报告 completed mutations、blocking issue、pending steps 和 manual action。
+- [x] Task 7: 接入 install command output，并明确推迟 ReadyCheck / ready summary（AC: 10, 11）
+  - [x] `install --json` 使用 `CommandResult<InstallCommandData>`，不新增未在 command-result SPEC 中声明的 required fields。
+  - [x] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；Story 1.5 可将 `ide-mirror-creation`、`manifest-generation` 或等价 lower-kebab steps 标记为 completed/pending，但不得把 `ready-check` 标记为 completed。
+  - [x] Human-readable output 使用 Evidence profile，展示 runtime paths、artifact root、IDE targets、manifest/index paths 和 next action。
+  - [x] 成功完成 Story 1.5 写入后，输出应表明 ReadyCheck / ready summary 仍 pending，属于 Story 1.6。
+  - [x] 任一关键写入失败时不得声称 rollback；MVP 不提供 transactional rollback。输出应报告 completed mutations、blocking issue、pending steps 和 manual action。
 
-- [ ] Task 8: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-12）
-  - [ ] Unit tests 覆盖 path normalization、project-boundary checks、symlink escape、path escape、case conflict、safe-write temp naming、lock shape 和 cleanup。
-  - [ ] Unit tests 覆盖 canonical package hash、file-level hash、files index ownership projection、executable intent 和 target order。
-  - [ ] Unit tests 覆盖 human-owned stub create-if-absent：missing -> create，existing -> protected skip，existing content/order/comment untouched。
-  - [ ] Integration tests 覆盖 confirmed fresh install 写入 `_speclite`、configured artifact root、`.claude/skills`、`.agents/skills` 和 manifest/index files。
-  - [ ] Integration tests 覆盖 selected target subset：只选 `claude` 或只选 `agents` 时，只生成 selected mirror，并保持 target ordering in projections。
-  - [ ] Regression tests 覆盖 Story 1.1-1.4 failure/pending branches，确保未确认 target、source blocker、module selection pending、config summary pending 或 `writeAuthorized: false` 均不触发 Story 1.5 writes。
-  - [ ] Fixture `fresh-install-empty-project` 更新 expected installed tree、expected manifest/index snapshots、expected command JSON 和 no-ready-summary gate。
-  - [ ] Fixture 覆盖 IDE mirrors 中同一 canonical skill package hash 一致、workflow-owned artifact 保留、path portability、unsafe overwrite 和 target write failure。
+- [x] Task 8: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-12）
+  - [x] Unit tests 覆盖 path normalization、project-boundary checks、symlink escape、path escape、case conflict、safe-write temp naming、lock shape 和 cleanup。
+  - [x] Unit tests 覆盖 canonical package hash、file-level hash、files index ownership projection、executable intent 和 target order。
+  - [x] Unit tests 覆盖 human-owned stub create-if-absent：missing -> create，existing -> protected skip，existing content/order/comment untouched。
+  - [x] Integration tests 覆盖 confirmed fresh install 写入 `_speclite`、configured artifact root、`.claude/skills`、`.agents/skills` 和 manifest/index files。
+  - [x] Integration tests 覆盖 selected target subset：只选 `claude` 或只选 `agents` 时，只生成 selected mirror，并保持 target ordering in projections。
+  - [x] Regression tests 覆盖 Story 1.1-1.4 failure/pending branches，确保未确认 target、source blocker、module selection pending、config summary pending 或 `writeAuthorized: false` 均不触发 Story 1.5 writes。
+  - [x] Fixture `fresh-install-empty-project` 更新 expected installed tree、expected manifest/index snapshots、expected command JSON 和 no-ready-summary gate。
+  - [x] Fixture 覆盖 IDE mirrors 中同一 canonical skill package hash 一致、workflow-owned artifact 保留、path portability、unsafe overwrite 和 target write failure。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-12）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 1.5 touched modules 的 focused Vitest tests。
-  - [ ] 如新增或改变 public JSON field、manifest/index field、issue id、target status、fixture comparison behavior、resolver behavior 或 manifest schema version，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
-  - [ ] 检查 diff，确认没有实现 Story 1.6 ReadyCheck、ready summary、full install progress summary 或 final installed-state summary。
-  - [ ] 检查 diff，确认没有新增 Post-MVP `init`、`list`、`doctor`、`sync`、`uninstall`、top-level `repair`、branded `copilot` / `cursor` target id 或 command pointer artifact。
-  - [ ] 检查 diff，确认没有格式化、重写或同步 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+- [x] Task 9: 本地验证与范围控制（AC: 1-12）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 1.5 touched modules 的 focused Vitest tests。
+  - [x] 如新增或改变 public JSON field、manifest/index field、issue id、target status、fixture comparison behavior、resolver behavior 或 manifest schema version，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+  - [x] 检查 diff，确认没有实现 Story 1.6 ReadyCheck、ready summary、full install progress summary 或 final installed-state summary。
+  - [x] 检查 diff，确认没有新增 Post-MVP `init`、`list`、`doctor`、`sync`、`uninstall`、top-level `repair`、branded `copilot` / `cursor` target id 或 command pointer artifact。
+  - [x] 检查 diff，确认没有格式化、重写或同步 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
 
 ## Dev Notes（开发备注）
 
@@ -409,12 +409,58 @@ _speclite-output/
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
+
+- `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` failed because default `python3` lacks `tomllib`; reran with `python3.12` successfully.
+- `npm test -- test/runtime-structure.test.ts` initially failed before dependency install with `vitest: command not found`; ran `npm install` against existing `package-lock.json`.
+- RED: `npm test -- test/runtime-structure.test.ts` failed before implementation because runtime writes, IDE targets and lock failure behavior were absent.
+- GREEN/REFACTOR: `npm run build` passed.
+- GREEN/REFACTOR: `npm test -- test/runtime-structure.test.ts` passed, 5 tests.
+- REGRESSION: `npm test` passed, 9 files / 52 tests.
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Verified Story 1.1-1.4 anchors existed before implementing Story 1.5 write phase.
+- Implemented confirmed install write phase with project operation lock, same-directory safe writes, path/case/symlink/overwrite guards and lock/temp exclusion from public projections.
+- Added runtime structure writer that applies Story 1.4 config planned writes, creates `_speclite` metadata hub, create-if-absent human-owned stubs and configured artifact directories without overwriting workflow artifacts.
+- Added canonical IDE mirror writer for `claude` and `agents`, preserving nested canonical package roots, target order, package hashes, source refs and file-level hashes.
+- Added manifest, skill/help/files indexes and phase coverage projections with schema versions and project-relative POSIX paths.
+- Updated install output to use contracted `CommandResult<InstallCommandData>` fields, mark `ide-mirror-creation` and `manifest-generation` completed, and keep `ready-check` / `ready-summary` pending for Story 1.6.
+- Added focused integration and fixture assertions for fresh install shape, target subset, operation lock failure, human-owned stub protection, workflow artifact preservation, artifact symlink escape and no-ready-summary gate.
 
 ### File List（文件列表）
+
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/1-5-runtime-structure-artifact-directory-and-ide-mirror-creation.md`
+- `src/commands/install.ts`
+- `src/diagnostics/command-result.ts`
+- `src/fs/copy-tree.ts`
+- `src/fs/path-normalizer.ts`
+- `src/fs/safe-write.ts`
+- `src/ide/target-writer.ts`
+- `src/installer/install-context.ts`
+- `src/installer/runtime-structure.ts`
+- `src/installer/target-directory.ts`
+- `src/manifest/hash.ts`
+- `src/manifest/manifest-generator.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/modules/module-metadata.ts`
+- `test/cli-smoke.test.ts`
+- `test/config-initialization.test.ts`
+- `test/contract-anchors.test.ts`
+- `test/install-module-selection.test.ts`
+- `test/runtime-structure.test.ts`
+- `test/target-directory.test.ts`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-dev-story-skill.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/manifest.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/phase-coverage-dev-story.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-speclite-dev-story.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-tree.txt`
+
+### Change Log（变更日志）
+
+- 2026-05-26: Implemented Story 1.5 runtime structure, artifact directories, IDE mirrors, manifest/index projections and validation coverage.

@@ -1,6 +1,6 @@
 # Story 1.2: Project Target Directory Resolution And Existing Install Detection（项目目标目录解析与既有安装检测）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -55,60 +55,60 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证 Story 1.1 前置 scaffold 与契约锚点（AC: 1-6）
-  - [ ] 确认 Story 1.1 已经完成实现并提供 `package.json`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/installer/install-context.ts`、`src/installer/install-plan-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/validation/issue-model.ts`、`src/manifest/manifest-schema.ts`、`src/fixtures/fixture-contract.ts` 和基础 Vitest 配置。
-  - [ ] 如果这些文件不存在，停止 Story 1.2 实现并先完成 Story 1.1；不得在本 Story 中重建第二套 scaffold 或绕过 Story 1.1 的 diagnostics/runtime guard。
-  - [ ] 复用 Story 1.1 的 `CommandResult`、`ValidationIssue`、runtime/platform guard、install command skeleton 和 fixture contract anchors；不得 hand-roll 第二套 output shape。
+- [x] Task 1: 验证 Story 1.1 前置 scaffold 与契约锚点（AC: 1-6）
+  - [x] 确认 Story 1.1 已经完成实现并提供 `package.json`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/installer/install-context.ts`、`src/installer/install-plan-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/validation/issue-model.ts`、`src/manifest/manifest-schema.ts`、`src/fixtures/fixture-contract.ts` 和基础 Vitest 配置。
+  - [x] 如果这些文件不存在，停止 Story 1.2 实现并先完成 Story 1.1；不得在本 Story 中重建第二套 scaffold 或绕过 Story 1.1 的 diagnostics/runtime guard。
+  - [x] 复用 Story 1.1 的 `CommandResult`、`ValidationIssue`、runtime/platform guard、install command skeleton 和 fixture contract anchors；不得 hand-roll 第二套 output shape。
 
-- [ ] Task 2: 实现 target directory input 与路径规范化（AC: 1, 2）
-  - [ ] 在 `src/commands/install.ts` 接入 target directory input：优先复用 Story 1.1 已定义的 parser；若尚无 explicit target 输入，使用 commander optional argument `[target-directory]`。
-  - [ ] 不给 `speclite install` 新增 `--project-root` flag；该 flag 在当前 owning SPEC 中属于 `speclite resolve config` / `speclite resolve customization`。
-  - [ ] 在 `src/fs/path-normalizer.ts` 或同等 `src/fs/` module 中实现 target root normalization helper：未指定时以 `process.cwd()` 为目标，显式相对路径相对当前 cwd 解析，public report path 输出转换为 project-relative POSIX path。
-  - [ ] 确保 path helper 支持 macOS 与 Windows path semantics；测试中可使用 `node:path` 的 `posix` / `win32` helpers 模拟分隔符与 drive-letter 输入，但 public fixture output 不得泄露 drive letter。
-  - [ ] 所有 public JSON path fields 通过同一 normalization function 生成；命令、installer、manifest、validation 不得各自拼接 report path。
+- [x] Task 2: 实现 target directory input 与路径规范化（AC: 1, 2）
+  - [x] 在 `src/commands/install.ts` 接入 target directory input：优先复用 Story 1.1 已定义的 parser；若尚无 explicit target 输入，使用 commander optional argument `[target-directory]`。
+  - [x] 不给 `speclite install` 新增 `--project-root` flag；该 flag 在当前 owning SPEC 中属于 `speclite resolve config` / `speclite resolve customization`。
+  - [x] 在 `src/fs/path-normalizer.ts` 或同等 `src/fs/` module 中实现 target root normalization helper：未指定时以 `process.cwd()` 为目标，显式相对路径相对当前 cwd 解析，public report path 输出转换为 project-relative POSIX path。
+  - [x] 确保 path helper 支持 macOS 与 Windows path semantics；测试中可使用 `node:path` 的 `posix` / `win32` helpers 模拟分隔符与 drive-letter 输入，但 public fixture output 不得泄露 drive letter。
+  - [x] 所有 public JSON path fields 通过同一 normalization function 生成；命令、installer、manifest、validation 不得各自拼接 report path。
 
-- [ ] Task 3: 实现 directory state inspector（AC: 3, 4, 5）
-  - [ ] 新增或扩展 `src/installer/target-directory.ts`（或现有 `src/installer/install-context.ts` 中的 Story-scoped helper），输出 stable internal state：`missing`、`empty`、`non-empty`、`existing-install`。
-  - [ ] 对 missing target 只报告将创建，不调用 `mkdir`，不创建任何 runtime、artifact 或 IDE mirror directory。
-  - [ ] 对 existing target 使用 deterministic directory listing 判断 empty / non-empty；过滤 `.` / `..` 语义，不依赖 filesystem traversal order。
-  - [ ] 检测 SpecLite installed-state 时至少检查 `_speclite/`、`_speclite/_config/manifest.yaml`、`_speclite/_config/skill-index.json`、`_speclite/_config/help-index.json`、`_speclite/_config/files-index.json` 和 `_speclite/_config/phase-coverage.json`。
-  - [ ] `_speclite/` 存在但 manifest/index 缺失时仍视为 possible existing install，不继续 fresh write；报告 detected runtime present 与 manifest unavailable，而不是静默覆盖。
-  - [ ] 使用 `lstat` / `realpath` 或等价 Node 22-compatible API 区分普通目录、文件和 symlink；不得跟随 symlink 产生 path escape 写入风险。
+- [x] Task 3: 实现 directory state inspector（AC: 3, 4, 5）
+  - [x] 新增或扩展 `src/installer/target-directory.ts`（或现有 `src/installer/install-context.ts` 中的 Story-scoped helper），输出 stable internal state：`missing`、`empty`、`non-empty`、`existing-install`。
+  - [x] 对 missing target 只报告将创建，不调用 `mkdir`，不创建任何 runtime、artifact 或 IDE mirror directory。
+  - [x] 对 existing target 使用 deterministic directory listing 判断 empty / non-empty；过滤 `.` / `..` 语义，不依赖 filesystem traversal order。
+  - [x] 检测 SpecLite installed-state 时至少检查 `_speclite/`、`_speclite/_config/manifest.yaml`、`_speclite/_config/skill-index.json`、`_speclite/_config/help-index.json`、`_speclite/_config/files-index.json` 和 `_speclite/_config/phase-coverage.json`。
+  - [x] `_speclite/` 存在但 manifest/index 缺失时仍视为 possible existing install，不继续 fresh write；报告 detected runtime present 与 manifest unavailable，而不是静默覆盖。
+  - [x] 使用 `lstat` / `realpath` 或等价 Node 22-compatible API 区分普通目录、文件和 symlink；不得跟随 symlink 产生 path escape 写入风险。
 
-- [ ] Task 4: 读取 existing install summary，复用 manifest schema（AC: 5）
-  - [ ] 若 `_speclite/_config/manifest.yaml` 存在，使用 `src/manifest/manifest-schema.ts` 的 parser/schema 读取 manifest schemaVersion / manifestVersion 投影；不得在 installer 中复制 manifest YAML 字段真源。
-  - [ ] 按 canonical target order `claude`、`agents` 检测 `.claude/skills` 和 `.agents/skills` target visibility；如果 manifest/index 可读，优先从 manifest/index 投影获取 target 信息。
-  - [ ] 对 unreadable 或 malformed manifest/index 产生 `manifest-schema` issue，例如 `manifest-schema.missing-version`、`manifest-schema.unsupported-version`、`manifest-schema.malformed-field` 或 `manifest-schema.schema-corruption`；details 不得包含 absolute path、timestamp、stack trace 或 environment-specific text。
-  - [ ] next actions 使用 stable short templates，例如建议运行 `speclite status` / `speclite validate` 或先确认是否要处理 existing install；不要把 future Post-MVP `doctor`、`sync`、`uninstall` 当作 MVP 可用路径。
+- [x] Task 4: 读取 existing install summary，复用 manifest schema（AC: 5）
+  - [x] 若 `_speclite/_config/manifest.yaml` 存在，使用 `src/manifest/manifest-schema.ts` 的 parser/schema 读取 manifest schemaVersion / manifestVersion 投影；不得在 installer 中复制 manifest YAML 字段真源。
+  - [x] 按 canonical target order `claude`、`agents` 检测 `.claude/skills` 和 `.agents/skills` target visibility；如果 manifest/index 可读，优先从 manifest/index 投影获取 target 信息。
+  - [x] 对 unreadable 或 malformed manifest/index 产生 `manifest-schema` issue，例如 `manifest-schema.missing-version`、`manifest-schema.unsupported-version`、`manifest-schema.malformed-field` 或 `manifest-schema.schema-corruption`；details 不得包含 absolute path、timestamp、stack trace 或 environment-specific text。
+  - [x] next actions 使用 stable short templates，例如建议运行 `speclite status` / `speclite validate` 或先确认是否要处理 existing install；不要把 future Post-MVP `doctor`、`sync`、`uninstall` 当作 MVP 可用路径。
 
-- [ ] Task 5: 将 target state 接入 install orchestration 与 confirmation gate（AC: 1-6）
-  - [ ] 扩展 install command context，使 runtime/platform guard 通过后进入 `target-directory-resolution` 和 `directory-state-check`，再进入后续 install stages。
-  - [ ] 在用户未确认目标目录时设置 command-level `requiresConfirmation: true`、`writeAuthorized: false` 或等价 internal state；不得产生任何 filesystem mutation。
-  - [ ] `--yes` 只能表达 command-level write authorization；它不得自动接受 unverified source、floating Git source、unsupported source、failed evidence 或 source policy rejection。
-  - [ ] existing-install 状态必须阻止 fresh install 覆盖已有 installed state；如果后续要进入 update/repair，应由未来对应命令或明确故事处理，不在本 Story 中实现。
-  - [ ] 保持 `InstallPlan` ordering：target resolution / directory inspection 先于 source discovery、module selection、target adapter planning 和 planned writes。
+- [x] Task 5: 将 target state 接入 install orchestration 与 confirmation gate（AC: 1-6）
+  - [x] 扩展 install command context，使 runtime/platform guard 通过后进入 `target-directory-resolution` 和 `directory-state-check`，再进入后续 install stages。
+  - [x] 在用户未确认目标目录时设置 command-level `requiresConfirmation: true`、`writeAuthorized: false` 或等价 internal state；不得产生任何 filesystem mutation。
+  - [x] `--yes` 只能表达 command-level write authorization；它不得自动接受 unverified source、floating Git source、unsupported source、failed evidence 或 source policy rejection。
+  - [x] existing-install 状态必须阻止 fresh install 覆盖已有 installed state；如果后续要进入 update/repair，应由未来对应命令或明确故事处理，不在本 Story 中实现。
+  - [x] 保持 `InstallPlan` ordering：target resolution / directory inspection 先于 source discovery、module selection、target adapter planning 和 planned writes。
 
-- [ ] Task 6: 实现 human-readable 与 `--json` output 的 no-write evidence（AC: 1-6）
-  - [ ] Human-readable output 使用克制、具体、可操作的 target summary：target root、directory state、detected SpecLite state、next action；不得依赖颜色、符号或 spinner 才能理解。
-  - [ ] `install --json` 继续输出 `CommandResult<InstallCommandData>`，不得添加未在 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 声明的 required public fields。
-  - [ ] 对 public path fields 使用 `data.paths.projectRoot: "."`，并按需要填充 `specliteRoot: "_speclite"`、`artifactRoot: "_speclite-output"`、`manifestPath: "_speclite/_config/manifest.yaml"`。
-  - [ ] 若需要暴露 target directory state 的新 machine-readable field，先停止并更新 owning SPEC；不得只在 schema module 或 fixture snapshot 中发明字段。
-  - [ ] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；如果加入 `target-directory-resolution` 或 `directory-state-check`，同步测试其排序，不依赖 execution timing。
+- [x] Task 6: 实现 human-readable 与 `--json` output 的 no-write evidence（AC: 1-6）
+  - [x] Human-readable output 使用克制、具体、可操作的 target summary：target root、directory state、detected SpecLite state、next action；不得依赖颜色、符号或 spinner 才能理解。
+  - [x] `install --json` 继续输出 `CommandResult<InstallCommandData>`，不得添加未在 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 声明的 required public fields。
+  - [x] 对 public path fields 使用 `data.paths.projectRoot: "."`，并按需要填充 `specliteRoot: "_speclite"`、`artifactRoot: "_speclite-output"`、`manifestPath: "_speclite/_config/manifest.yaml"`。
+  - [x] 若需要暴露 target directory state 的新 machine-readable field，先停止并更新 owning SPEC；不得只在 schema module 或 fixture snapshot 中发明字段。
+  - [x] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；如果加入 `target-directory-resolution` 或 `directory-state-check`，同步测试其排序，不依赖 execution timing。
 
-- [ ] Task 7: 编写 focused tests 与 fixture assertions（AC: 1-6）
-  - [ ] Unit tests 覆盖默认 cwd、显式相对路径、显式绝对路径、Windows-style input normalization、project-relative POSIX output 和 path escape guard。
-  - [ ] Unit tests 覆盖 missing / empty / non-empty / existing-install / malformed-manifest directory states。
-  - [ ] Integration tests 覆盖 `speclite install` 默认 target no-write 行为：命令完成目标解析后不创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
-  - [ ] Integration tests 覆盖 explicit `[target-directory]` no-write 行为和 deterministic output。
-  - [ ] Integration tests 覆盖 existing install detection：可读 manifest 输出 runtime、manifest version、IDE targets 和 next actions；malformed manifest 复用 `manifest-schema` issue。
-  - [ ] `install --json` tests 解析 JSON 语义，不做 raw text snapshot；断言无 absolute path、home directory、OS-specific separator、timestamp、stack trace 或 random id。
-  - [ ] 不把 `existing-install-update` release gate 宣称为完成；本 Story 只覆盖 target directory resolution 与 existing install detection 的 Story-scoped sub-cases。
+- [x] Task 7: 编写 focused tests 与 fixture assertions（AC: 1-6）
+  - [x] Unit tests 覆盖默认 cwd、显式相对路径、显式绝对路径、Windows-style input normalization、project-relative POSIX output 和 path escape guard。
+  - [x] Unit tests 覆盖 missing / empty / non-empty / existing-install / malformed-manifest directory states。
+  - [x] Integration tests 覆盖 `speclite install` 默认 target no-write 行为：命令完成目标解析后不创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
+  - [x] Integration tests 覆盖 explicit `[target-directory]` no-write 行为和 deterministic output。
+  - [x] Integration tests 覆盖 existing install detection：可读 manifest 输出 runtime、manifest version、IDE targets 和 next actions；malformed manifest 复用 `manifest-schema` issue。
+  - [x] `install --json` tests 解析 JSON 语义，不做 raw text snapshot；断言无 absolute path、home directory、OS-specific separator、timestamp、stack trace 或 random id。
+  - [x] 不把 `existing-install-update` release gate 宣称为完成；本 Story 只覆盖 target directory resolution 与 existing install detection 的 Story-scoped sub-cases。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-6）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 1.2 touched modules 的 focused Vitest tests。
-  - [ ] 检查 diff，确保未修改 `_bmad-output/planning-artifacts/`、未实现 Story 1.3+ module selection / config initialization / IDE mirror creation / ready summary、未添加 Post-MVP commands。
-  - [ ] 确认 no-write tests 在 failure、pending confirmation 和 existing-install 分支均断言目标项目未发生 mutation。
+- [x] Task 8: 本地验证与范围控制（AC: 1-6）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 1.2 touched modules 的 focused Vitest tests。
+  - [x] 检查 diff，确保未修改 `_bmad-output/planning-artifacts/`、未实现 Story 1.3+ module selection / config initialization / IDE mirror creation / ready summary、未添加 Post-MVP commands。
+  - [x] 确认 no-write tests 在 failure、pending confirmation 和 existing-install 分支均断言目标项目未发生 mutation。
 
 ## Dev Notes（开发备注）
 
@@ -305,12 +305,45 @@ type TargetDirectoryState =
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
+
+- `python3 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` 失败：默认 `python3` 缺少 `tomllib`。
+- `python3.12 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` 成功解析 workflow。
+- `npx vitest run test/target-directory.test.ts` 初次红灯：本地尚未安装 `node_modules`，无法解析 `vitest/config`。
+- `npm install` 成功安装现有锁文件依赖；未新增依赖。
+- `npx vitest run test/target-directory.test.ts` 通过：10 tests passed。
+- `npm test` 通过：5 files passed, 18 tests passed。
+- `npm run build` 通过：tsup ESM 和 DTS build success。
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 验证 Story 1.1 scaffold 与 diagnostics/runtime guard/schema anchors 存在并被复用。
+- 为 `speclite install` 添加 commander optional argument `[target-directory]` 和 `--yes` command-level authorization option；未添加 `--project-root`。
+- 新增 `src/fs/path-normalizer.ts`，集中生成 target root normalization、display-safe path 和 public `data.paths` projection。
+- 新增 `src/installer/target-directory.ts`，实现 `missing`、`empty`、`non-empty`、`existing-install` directory state inspection，且在 confirmation 前不创建 target/runtime/artifact/IDE 目录。
+- Existing install detection 复用 manifest schema anchor，按 `claude`、`agents` canonical order 投影 IDE target visibility，并对 malformed/unreadable manifest 使用 `manifest-schema.*` issues。
+- Install orchestration 在 runtime/platform guard 后进入 `target-directory-resolution` 和 `directory-state-check`，随后停在 `target-confirmation`；未实现 Story 1.3+ 的 source/module/config/IDE mirror/ready summary。
+- 新增 Story 1.2 focused tests 并同步 lifecycle fixture assertions；全量 build/test 已通过。
 
 ### File List（文件列表）
+
+- `src/bin/speclite.ts`
+- `src/commands/install.ts`
+- `src/diagnostics/command-result.ts`
+- `src/fs/path-normalizer.ts`
+- `src/installer/install-context.ts`
+- `src/installer/runtime-guard.ts`
+- `src/installer/target-directory.ts`
+- `test/cli-smoke.test.ts`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-node.json`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-platform.json`
+- `test/target-directory.test.ts`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/1-2-project-target-directory-resolution-and-existing-install-detection.md`
+
+### Change Log（变更日志）
+
+- 2026-05-26: Implemented Story 1.2 target directory resolution, existing install detection, confirmation gate, focused tests, fixture updates, and moved story to review.

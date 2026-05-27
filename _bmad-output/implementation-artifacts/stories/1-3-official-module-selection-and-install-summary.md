@@ -1,6 +1,6 @@
 # Story 1.3: Official Module Selection And Install Summary（官方模块选择与安装摘要）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -85,68 +85,68 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证 Story 1.1 / Story 1.2 前置实现与范围边界（AC: 1, 9）
-  - [ ] 确认 Story 1.1 已经提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`SourceDescriptor` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
-  - [ ] 确认 Story 1.2 已经提供 target directory resolution、directory state inspection、existing-install detection 和 target confirmation gate。
-  - [ ] 如果 `package.json`、`src/`、`test/` 或 Story 1.1/1.2 预期实现文件仍不存在，停止 Story 1.3 实现并先完成前序 Story；不得在本 Story 中重建前序 scaffold 或绕过 target confirmation gate。
-  - [ ] 保留 Story 1.1/1.2 的 no-write guarantees：runtime/platform failure、target confirmation pending、missing target、existing install 或 malformed manifest branch 不得产生 project writes。
+- [x] Task 1: 验证 Story 1.1 / Story 1.2 前置实现与范围边界（AC: 1, 9）
+  - [x] 确认 Story 1.1 已经提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`SourceDescriptor` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
+  - [x] 确认 Story 1.2 已经提供 target directory resolution、directory state inspection、existing-install detection 和 target confirmation gate。
+  - [x] 如果 `package.json`、`src/`、`test/` 或 Story 1.1/1.2 预期实现文件仍不存在，停止 Story 1.3 实现并先完成前序 Story；不得在本 Story 中重建前序 scaffold 或绕过 target confirmation gate。
+  - [x] 保留 Story 1.1/1.2 的 no-write guarantees：runtime/platform failure、target confirmation pending、missing target、existing install 或 malformed manifest branch 不得产生 project writes。
 
-- [ ] Task 2: 实现 bundled official source descriptor 读取与 evidence gate（AC: 2, 3）
-  - [ ] 在 `src/source/` 中扩展或新增 bundled source discovery helper；优先复用现有 `source-descriptor-schema.ts`。
-  - [ ] 将默认官方来源解析为 `SourceDescriptor`，`sourceType: "bundled"`，`resolvedRoot: "assets/source/speclite"` 或等价 display-safe label。
-  - [ ] 从 packaging manifest、package file inventory hash、package hash 或 package lock/hash 中读取 bundled source integrity evidence；如果这些 anchor 尚未由前序 Story 建立，先实现最小可测试 anchor，或用 blocking `source-integrity.missing-evidence` 明确停止。
-  - [ ] `trustStatus: "trusted"` 只能来自 verified evidence；evidence 存在但未命中 trust anchor 时只能是 `unverified`；hash mismatch、missing evidence 或 failed verification 必须是 `blocked` 并阻断写入规划。
-  - [ ] Source staging/cache/temp paths 是 private implementation state，不能进入 public JSON、manifest/index、fixture snapshot 或 issue details。
+- [x] Task 2: 实现 bundled official source descriptor 读取与 evidence gate（AC: 2, 3）
+  - [x] 在 `src/source/` 中扩展或新增 bundled source discovery helper；优先复用现有 `source-descriptor-schema.ts`。
+  - [x] 将默认官方来源解析为 `SourceDescriptor`，`sourceType: "bundled"`，`resolvedRoot: "assets/source/speclite"` 或等价 display-safe label。
+  - [x] 从 packaging manifest、package file inventory hash、package hash 或 package lock/hash 中读取 bundled source integrity evidence；如果这些 anchor 尚未由前序 Story 建立，先实现最小可测试 anchor，或用 blocking `source-integrity.missing-evidence` 明确停止。
+  - [x] `trustStatus: "trusted"` 只能来自 verified evidence；evidence 存在但未命中 trust anchor 时只能是 `unverified`；hash mismatch、missing evidence 或 failed verification 必须是 `blocked` 并阻断写入规划。
+  - [x] Source staging/cache/temp paths 是 private implementation state，不能进入 public JSON、manifest/index、fixture snapshot 或 issue details。
 
-- [ ] Task 3: 实现 official module metadata parser（AC: 4, 5）
-  - [ ] 在 `src/modules/module-metadata.ts` 或等价 module 中读取 `assets/source/speclite/*/module.yaml`，并用 existing YAML parser dependency 解析。
-  - [ ] 当前 source tree 中至少应发现 `core` 与 `sdlc` 两个 official module；不要把 helper scripts、custom examples、support-only tooling、fixtures、archives 或 installed-state directories 当作 modules。
-  - [ ] 明确 module metadata schema 的必填字段：`code`、`name`、`description` 和 version source；如需要新增 `version` 字段，必须同步 source metadata fixture 和 parser tests。
-  - [ ] 读取 `module-help.csv` 时只用于 capability/help/menu summary；不得从 menu code 或 display label 反推 module id。
-  - [ ] 验证 default installable / mirrorable module 的 canonical package availability；package root discovery 必须递归识别 module directory 下的 nested `SKILL.md` package roots，不得只检查 top-level；缺少 package 的 module 不得作为默认 installed module 进入后续 IDE mirror 或 ReadyCheck。
-  - [ ] Parser 对 malformed YAML/CSV、missing required field、duplicate module code、duplicate skill id、unsupported directory shape 输出 deterministic diagnostic；不要抛 raw parser error 作为用户主输出。
+- [x] Task 3: 实现 official module metadata parser（AC: 4, 5）
+  - [x] 在 `src/modules/module-metadata.ts` 或等价 module 中读取 `assets/source/speclite/*/module.yaml`，并用 existing YAML parser dependency 解析。
+  - [x] 当前 source tree 中至少应发现 `core` 与 `sdlc` 两个 official module；不要把 helper scripts、custom examples、support-only tooling、fixtures、archives 或 installed-state directories 当作 modules。
+  - [x] 明确 module metadata schema 的必填字段：`code`、`name`、`description` 和 version source；如需要新增 `version` 字段，必须同步 source metadata fixture 和 parser tests。
+  - [x] 读取 `module-help.csv` 时只用于 capability/help/menu summary；不得从 menu code 或 display label 反推 module id。
+  - [x] 验证 default installable / mirrorable module 的 canonical package availability；package root discovery 必须递归识别 module directory 下的 nested `SKILL.md` package roots，不得只检查 top-level；缺少 package 的 module 不得作为默认 installed module 进入后续 IDE mirror 或 ReadyCheck。
+  - [x] Parser 对 malformed YAML/CSV、missing required field、duplicate module code、duplicate skill id、unsupported directory shape 输出 deterministic diagnostic；不要抛 raw parser error 作为用户主输出。
 
-- [ ] Task 4: 处理 module version 与 dependency semantics（AC: 5, 6）
-  - [ ] 解决 live metadata 缺少 module `version` 的实现缺口：推荐在 module metadata schema 中新增明确 `version`，并更新 bundled `module.yaml`；若采用 source/package version fallback，必须把 fallback 写入 schema/tests，而不是 renderer 私有逻辑。
-  - [ ] 如果 `core` 是 `sdlc` 或其他 module 的 required dependency，使用 metadata field 或 module selection rule 显式表达；不得让用户取消后才在后续写入阶段失败。
-  - [ ] `default_selected: true` 只作为 default selection source；required module、default module 与 user-selected module 必须在 internal state 中可区分。
-  - [ ] Module ordering 使用 source manifest/module order；没有 source order 时才使用 normalized module id lexicographic order。
+- [x] Task 4: 处理 module version 与 dependency semantics（AC: 5, 6）
+  - [x] 解决 live metadata 缺少 module `version` 的实现缺口：推荐在 module metadata schema 中新增明确 `version`，并更新 bundled `module.yaml`；若采用 source/package version fallback，必须把 fallback 写入 schema/tests，而不是 renderer 私有逻辑。
+  - [x] 如果 `core` 是 `sdlc` 或其他 module 的 required dependency，使用 metadata field 或 module selection rule 显式表达；不得让用户取消后才在后续写入阶段失败。
+  - [x] `default_selected: true` 只作为 default selection source；required module、default module 与 user-selected module 必须在 internal state 中可区分。
+  - [x] Module ordering 使用 source manifest/module order；没有 source order 时才使用 normalized module id lexicographic order。
 
-- [ ] Task 5: 实现 module selection model 和 prompt/headless boundary（AC: 6, 7）
-  - [ ] 在 `src/modules/module-selection.ts` 或等价 module 中实现 deterministic selection state，至少包含 available modules、default selected modules、required modules、user selected modules 和 rejected/invalid selections。
-  - [ ] 交互 prompt 必须展示 module id、name、version 和简短 scope，不依赖颜色或符号才能理解。
-  - [ ] MVP `speclite install` 当前 public flag matrix 只有 `--json`、`--yes`；如果要新增 module selection flag，必须先更新 owning SPEC 和 parser/schema/tests。
-  - [ ] Headless/automation mode 若无法获得明确 module selection，应保留 no-write pending state 或使用已契约化 defaults；不得在无确认情况下写入项目文件。
-  - [ ] Invalid module id 必须返回 stable diagnostic；不要把 free-form prompt text 作为唯一错误表达。
+- [x] Task 5: 实现 module selection model 和 prompt/headless boundary（AC: 6, 7）
+  - [x] 在 `src/modules/module-selection.ts` 或等价 module 中实现 deterministic selection state，至少包含 available modules、default selected modules、required modules、user selected modules 和 rejected/invalid selections。
+  - [x] 交互 prompt 必须展示 module id、name、version 和简短 scope，不依赖颜色或符号才能理解。
+  - [x] MVP `speclite install` 当前 public flag matrix 只有 `--json`、`--yes`；如果要新增 module selection flag，必须先更新 owning SPEC 和 parser/schema/tests。
+  - [x] Headless/automation mode 若无法获得明确 module selection，应保留 no-write pending state 或使用已契约化 defaults；不得在无确认情况下写入项目文件。
+  - [x] Invalid module id 必须返回 stable diagnostic；不要把 free-form prompt text 作为唯一错误表达。
 
-- [ ] Task 6: 生成 pre-write install scope summary（AC: 7, 9）
-  - [ ] 在 `src/installer/` 中把 selected modules 写入 internal `InstallPlan.selectedModules`，但不要执行 project writes。
-  - [ ] Summary 必须展示 selected module ids、module names、versions、source descriptor summary、capability scope 和 next action。
-  - [ ] Summary 必须明确哪些动作尚未发生：config initialization、runtime structure creation、IDE mirror creation、manifest/index generation、ReadyCheck 和 ready summary。
-  - [ ] Human-readable output 使用 Evidence profile 的克制结构，支持 `NO_COLOR`、non-TTY 和 CI 文本等价。
-  - [ ] JSON output 使用契约化 `CommandResult` fields；pre-write fresh install 的 `installedModules` 保持为空，不要新增未契约化 `installSummary`、`readySummary`、`selectedModules` 或 `pendingModuleSelection` blob。
+- [x] Task 6: 生成 pre-write install scope summary（AC: 7, 9）
+  - [x] 在 `src/installer/` 中把 selected modules 写入 internal `InstallPlan.selectedModules`，但不要执行 project writes。
+  - [x] Summary 必须展示 selected module ids、module names、versions、source descriptor summary、capability scope 和 next action。
+  - [x] Summary 必须明确哪些动作尚未发生：config initialization、runtime structure creation、IDE mirror creation、manifest/index generation、ReadyCheck 和 ready summary。
+  - [x] Human-readable output 使用 Evidence profile 的克制结构，支持 `NO_COLOR`、non-TTY 和 CI 文本等价。
+  - [x] JSON output 使用契约化 `CommandResult` fields；pre-write fresh install 的 `installedModules` 保持为空，不要新增未契约化 `installSummary`、`readySummary`、`selectedModules` 或 `pendingModuleSelection` blob。
 
-- [ ] Task 7: 处理 no-module、invalid-source 和 evidence-missing 分支（AC: 3, 8, 9）
-  - [ ] no official module 时，命令停止并输出 failure；`completedSteps` 与 `pendingSteps` 保持 command-defined stable lifecycle order。
-  - [ ] bundled source 缺少 evidence 时输出 `source-integrity.missing-evidence`，category 为 `source-integrity`，severity 为 `error`，并停止后续安装阶段。
-  - [ ] malformed module metadata 不得被忽略为“没有模块”；应输出明确 diagnostic，区分 no module 与 invalid module source。
-  - [ ] 失败分支均断言未创建 `_speclite`、`_speclite-output`、`.claude/skills`、`.agents/skills`、manifest/index、config TOML 或 operation lock。
+- [x] Task 7: 处理 no-module、invalid-source 和 evidence-missing 分支（AC: 3, 8, 9）
+  - [x] no official module 时，命令停止并输出 failure；`completedSteps` 与 `pendingSteps` 保持 command-defined stable lifecycle order。
+  - [x] bundled source 缺少 evidence 时输出 `source-integrity.missing-evidence`，category 为 `source-integrity`，severity 为 `error`，并停止后续安装阶段。
+  - [x] malformed module metadata 不得被忽略为“没有模块”；应输出明确 diagnostic，区分 no module 与 invalid module source。
+  - [x] 失败分支均断言未创建 `_speclite`、`_speclite-output`、`.claude/skills`、`.agents/skills`、manifest/index、config TOML 或 operation lock。
 
-- [ ] Task 8: 编写 focused tests 与 fixture assertions（AC: 1-9）
-  - [ ] Unit tests 覆盖 bundled `SourceDescriptor` projection、evidence ordering、trustStatus derivation 和 missing evidence failure。
-  - [ ] Unit tests 覆盖 module metadata parser：`core`、`sdlc`、missing version、duplicate code、malformed YAML/CSV、non-distributable directory filtering。
-  - [ ] Unit tests 覆盖 module selection：default selected、required dependency、multi-select、invalid id、stable ordering。
-  - [ ] Integration tests 覆盖 `speclite install` 在 target confirmation 后进入 module selection，但仍不写入项目文件。
-  - [ ] Integration tests 覆盖 `speclite install --json` module selection success/pending/failure 的 semantic JSON parse；不得 raw byte 比较当前时间、absolute path 或 terminal formatting。
-  - [ ] Regression tests 覆盖 Story 1.1/1.2 failure/pending branches，确保 Story 1.3 没有提前读取 source 或写文件。
-  - [ ] Tests 不访问 npm registry、private registry、Git remote、offline bundle origin 或外部网络。
+- [x] Task 8: 编写 focused tests 与 fixture assertions（AC: 1-9）
+  - [x] Unit tests 覆盖 bundled `SourceDescriptor` projection、evidence ordering、trustStatus derivation 和 missing evidence failure。
+  - [x] Unit tests 覆盖 module metadata parser：`core`、`sdlc`、missing version、duplicate code、malformed YAML/CSV、non-distributable directory filtering。
+  - [x] Unit tests 覆盖 module selection：default selected、required dependency、multi-select、invalid id、stable ordering。
+  - [x] Integration tests 覆盖 `speclite install` 在 target confirmation 后进入 module selection，但仍不写入项目文件。
+  - [x] Integration tests 覆盖 `speclite install --json` module selection success/pending/failure 的 semantic JSON parse；不得 raw byte 比较当前时间、absolute path 或 terminal formatting。
+  - [x] Regression tests 覆盖 Story 1.1/1.2 failure/pending branches，确保 Story 1.3 没有提前读取 source 或写文件。
+  - [x] Tests 不访问 npm registry、private registry、Git remote、offline bundle origin 或外部网络。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-9）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 1.3 touched modules 的 focused Vitest tests。
-  - [ ] 如果 Story 1.3 新增或改变 public JSON field、module metadata schema 或 source descriptor producer behavior，确认同一变更中更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
-  - [ ] 检查 diff，确认没有实现 Story 1.4 config initialization、Story 1.5 runtime/IDE mirror writes、Story 1.6 ready summary 或 Post-MVP `list` / `doctor` / `sync` / `uninstall`。
-  - [ ] 检查 no-write tests 覆盖 module discovery failure、module selection pending、missing evidence 和 no official module 分支。
+- [x] Task 9: 本地验证与范围控制（AC: 1-9）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 1.3 touched modules 的 focused Vitest tests。
+  - [x] 如果 Story 1.3 新增或改变 public JSON field、module metadata schema 或 source descriptor producer behavior，确认同一变更中更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+  - [x] 检查 diff，确认没有实现 Story 1.4 config initialization、Story 1.5 runtime/IDE mirror writes、Story 1.6 ready summary 或 Post-MVP `list` / `doctor` / `sync` / `uninstall`。
+  - [x] 检查 no-write tests 覆盖 module discovery failure、module selection pending、missing evidence 和 no official module 分支。
 
 ## Dev Notes（开发备注）
 
@@ -314,12 +314,41 @@ Do not change source asset metadata casually. If module `version` is added, add 
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
+
+- `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` 失败：默认 `python3` 缺 `tomllib`。
+- `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` 成功。
+- `npm test -- --run test/source-and-modules.test.ts test/install-module-selection.test.ts` 初次失败：`vitest: command not found`；执行 `npm ci` 安装既有依赖后继续。
+- `npm run build` 通过。
+- `npm test -- --run test/source-and-modules.test.ts test/install-module-selection.test.ts` 通过：2 files, 10 tests。
+- `npm test` 通过：7 files, 33 tests。
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已确认 Story 1.1/1.2 scaffold、runtime guard、target directory resolution、existing install detection 与 no-write gate 存在并保留。
+- 新增 bundled source discovery，复用 `SourceDescriptor` schema，以 `package-lock.json` 作为可复现 `version-lock` evidence；缺失 evidence 时输出 `source-integrity.missing-evidence` 并停止后续阶段。
+- 新增 official module metadata parser，读取 bundled `module.yaml`、`module-help.csv` 与 nested `SKILL.md` package roots，覆盖 duplicate/malformed/missing required field diagnostics。
+- 为 `core` / `sdlc` module metadata 增加显式 `version`，并用 `required` / `required_dependencies` 表达 core 与 sdlc dependency semantics。
+- 新增 deterministic module selection model，并将 `install --yes` 接入 pre-write install scope summary；JSON 仍复用既有 `CommandResult<InstallCommandData>` 字段，未新增 public automation fields。
+- 已验证 pre-write fresh install 的 `installedModules` 保持为空，target confirmation pending、existing install、missing evidence 与 module selection summary 分支均不创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
 
 ### File List（文件列表）
+
+- `_bmad-output/implementation-artifacts/stories/1-3-official-module-selection-and-install-summary.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `assets/source/speclite/core-skills/module.yaml`
+- `assets/source/speclite/sdlc-skills/module.yaml`
+- `src/commands/install.ts`
+- `src/diagnostics/command-result.ts`
+- `src/source/source-discovery.ts`
+- `src/modules/module-metadata.ts`
+- `src/modules/module-selection.ts`
+- `test/source-and-modules.test.ts`
+- `test/install-module-selection.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-26: 实现 Story 1.3 official bundled source discovery、module metadata parsing、module selection、pre-write install scope summary 和 focused regression tests；Story 状态推进至 review。

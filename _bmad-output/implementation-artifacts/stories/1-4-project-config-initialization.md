@@ -1,6 +1,6 @@
 # Story 1.4: Project Config Initialization（项目配置初始化）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -81,56 +81,56 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证 Story 1.1-1.3 前置实现与 no-write 边界（AC: 1, 4, 7）
-  - [ ] 确认 Story 1.1 已提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
-  - [ ] 确认 Story 1.2 已提供 target directory resolution、existing-install detection、path normalization 和 target confirmation gate。
-  - [ ] 确认 Story 1.3 已提供 bundled source discovery、module metadata parser、module selection model 和 pre-write install scope summary。
-  - [ ] 如果 `package.json`、`src/`、`test/` 或前序 Story 预期实现文件仍不存在，停止 Story 1.4 实现并先完成前序 Story；不得在本 Story 中重建前序 scaffold 或绕过前序 confirmation gates。
-  - [ ] 保留 Story 1.1-1.3 的 no-write guarantees：guard failure、target confirmation pending、existing-install blocker、source-integrity blocker、module selection pending 或 no-module failure 均不得产生 config writes。
+- [x] Task 1: 验证 Story 1.1-1.3 前置实现与 no-write 边界（AC: 1, 4, 7）
+  - [x] 确认 Story 1.1 已提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
+  - [x] 确认 Story 1.2 已提供 target directory resolution、existing-install detection、path normalization 和 target confirmation gate。
+  - [x] 确认 Story 1.3 已提供 bundled source discovery、module metadata parser、module selection model 和 pre-write install scope summary。
+  - [x] 如果 `package.json`、`src/`、`test/` 或前序 Story 预期实现文件仍不存在，停止 Story 1.4 实现并先完成前序 Story；不得在本 Story 中重建前序 scaffold 或绕过前序 confirmation gates。
+  - [x] 保留 Story 1.1-1.3 的 no-write guarantees：guard failure、target confirmation pending、existing-install blocker、source-integrity blocker、module selection pending 或 no-module failure 均不得产生 config writes。
 
-- [ ] Task 2: 建立 project config schema 与 config initialization model（AC: 3, 4, 5, 9）
-  - [ ] 在 `src/config/` 中新增或扩展 `config-schema.ts`、`config-writer.ts`、`config-reader.ts` 和 shared validation helpers；复用 Story 1.1 的 `src/config/resolve-output-schema.ts`。
-  - [ ] 定义 config model 的 canonical field names：`project_name`、`user_name`、`communication_language`、`document_output_language`、`output_folder`，以及 source module metadata 需要的 `user_skill_level`、`planning_artifacts`、`implementation_artifacts`、`project_knowledge`。
-  - [ ] 从 `assets/source/speclite/core-skills/module.yaml` 和 `assets/source/speclite/sdlc-skills/module.yaml` 读取 prompt defaults / config tables；不得把 `config.toml.example` 当作 runtime fallback source。
-  - [ ] 明确 installer-owned config split：project/module defaults 写入 `_speclite/config.toml`，install-time user-scoped values 写入 `_speclite/config.user.toml`；如实现选择不同 split，必须在 `src/config/config-schema.ts` 和 tests 中显式表达，不得隐式散落在 renderer 中。
-  - [ ] 对 string values 执行 trim；空字符串或纯空白回退到 deterministic defaults，不得写入空白覆盖值。
+- [x] Task 2: 建立 project config schema 与 config initialization model（AC: 3, 4, 5, 9）
+  - [x] 在 `src/config/` 中新增或扩展 `config-schema.ts`、`config-writer.ts`、`config-reader.ts` 和 shared validation helpers；复用 Story 1.1 的 `src/config/resolve-output-schema.ts`。
+  - [x] 定义 config model 的 canonical field names：`project_name`、`user_name`、`communication_language`、`document_output_language`、`output_folder`，以及 source module metadata 需要的 `user_skill_level`、`planning_artifacts`、`implementation_artifacts`、`project_knowledge`。
+  - [x] 从 `assets/source/speclite/core-skills/module.yaml` 和 `assets/source/speclite/sdlc-skills/module.yaml` 读取 prompt defaults / config tables；不得把 `config.toml.example` 当作 runtime fallback source。
+  - [x] 明确 installer-owned config split：project/module defaults 写入 `_speclite/config.toml`，install-time user-scoped values 写入 `_speclite/config.user.toml`；如实现选择不同 split，必须在 `src/config/config-schema.ts` 和 tests 中显式表达，不得隐式散落在 renderer 中。
+  - [x] 对 string values 执行 trim；空字符串或纯空白回退到 deterministic defaults，不得写入空白覆盖值。
 
-- [ ] Task 3: 实现 quick / detailed config collection（AC: 2, 3, 4, 7）
-  - [ ] 在 `src/installer/` 中新增或扩展 config initialization step，例如 `src/installer/config-initialization.ts`；`src/commands/install.ts` 只负责 orchestration。
-  - [ ] Quick config 使用最小 prompt set：`user_name`、`project_name`、`communication_language`、`document_output_language`、`output_folder`。
-  - [ ] Detailed config 在 quick config 基础上允许确认或调整 `user_skill_level`、module artifact paths、selected modules 和 IDE targets；模块与 target 数据必须来自前序 install planning state。
-  - [ ] 交互 prompt 必须展示 default、resolved project-relative path、是否影响 installer-owned config 或 human-owned stub；不得依赖颜色或符号才能理解。
-  - [ ] Non-interactive / headless mode 若缺少必要输入且不能安全使用 deterministic defaults，必须返回 pending/no-write state；不得用隐式 prompt fallback 写入配置。
+- [x] Task 3: 实现 quick / detailed config collection（AC: 2, 3, 4, 7）
+  - [x] 在 `src/installer/` 中新增或扩展 config initialization step，例如 `src/installer/config-initialization.ts`；`src/commands/install.ts` 只负责 orchestration。
+  - [x] Quick config 使用最小 prompt set：`user_name`、`project_name`、`communication_language`、`document_output_language`、`output_folder`。
+  - [x] Detailed config 在 quick config 基础上允许确认或调整 `user_skill_level`、module artifact paths、selected modules 和 IDE targets；模块与 target 数据必须来自前序 install planning state。
+  - [x] 交互 prompt 必须展示 default、resolved project-relative path、是否影响 installer-owned config 或 human-owned stub；不得依赖颜色或符号才能理解。
+  - [x] Non-interactive / headless mode 若缺少必要输入且不能安全使用 deterministic defaults，必须返回 pending/no-write state；不得用隐式 prompt fallback 写入配置。
 
-- [ ] Task 4: 构造 config planned writes 与 human-owned stub plan（AC: 5, 6, 7）
-  - [ ] 将 `_speclite/config.toml` 和 `_speclite/config.user.toml` 作为 installer-owned planned writes 加入 internal `InstallPlan.plannedWrites`。
-  - [ ] 将 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` 作为 human-owned create-if-absent planned writes；路径存在时 action 必须是 protected skip，不读取、重排或格式化内容。
-  - [ ] 不为每个 installed skill 生成 `_speclite/custom/{skill}.toml` 或 `_speclite/custom/{skill}.user.toml`。
-  - [ ] Planned write path 必须是 project-relative POSIX path；internal absolute path 只能存在于 private state。
-  - [ ] 如果 output/artifact root path 解析到 target project 外、symlink escape 或 path escape，返回 `artifact-path.escapes-project` 或 `artifact-path.symlink-escape` 类 issue，不进入写入阶段。
+- [x] Task 4: 构造 config planned writes 与 human-owned stub plan（AC: 5, 6, 7）
+  - [x] 将 `_speclite/config.toml` 和 `_speclite/config.user.toml` 作为 installer-owned planned writes 加入 internal `InstallPlan.plannedWrites`。
+  - [x] 将 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` 作为 human-owned create-if-absent planned writes；路径存在时 action 必须是 protected skip，不读取、重排或格式化内容。
+  - [x] 不为每个 installed skill 生成 `_speclite/custom/{skill}.toml` 或 `_speclite/custom/{skill}.user.toml`。
+  - [x] Planned write path 必须是 project-relative POSIX path；internal absolute path 只能存在于 private state。
+  - [x] 如果 output/artifact root path 解析到 target project 外、symlink escape 或 path escape，返回 `artifact-path.escapes-project` 或 `artifact-path.symlink-escape` 类 issue，不进入写入阶段。
 
-- [ ] Task 5: 生成 final configuration summary 与 no-write confirmation gate（AC: 1, 7, 8, 9）
-  - [ ] Human-readable summary 使用 Evidence profile：Summary、Config、Paths、Protected stubs、Pending steps、Next actions。
-  - [ ] Summary 必须明确哪些动作尚未发生：runtime structure creation、artifact directory creation、IDE mirror creation、manifest/index generation、ReadyCheck 和 ready summary。
-  - [ ] 在 final configuration summary confirmed 之前，`writeAuthorized` 必须为 false，且不得创建 operation lock、safe-write temp file、`_speclite` directory、`_speclite-output` directory 或 IDE target directory。
-  - [ ] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；如果加入 `config-initialization` step，必须同步 tests 和 fixture expected outputs。
-  - [ ] JSON output 只使用当前 `CommandResult<InstallCommandData>` 字段；pre-write config state 通过 `completedSteps`、`pendingSteps`、`issues`、`nextActions` 和 human-readable final configuration summary 表达，`installedModules` 不得承载 selected/config state；新增 public JSON 字段必须先更新 owning SPEC。
+- [x] Task 5: 生成 final configuration summary 与 no-write confirmation gate（AC: 1, 7, 8, 9）
+  - [x] Human-readable summary 使用 Evidence profile：Summary、Config、Paths、Protected stubs、Pending steps、Next actions。
+  - [x] Summary 必须明确哪些动作尚未发生：runtime structure creation、artifact directory creation、IDE mirror creation、manifest/index generation、ReadyCheck 和 ready summary。
+  - [x] 在 final configuration summary confirmed 之前，`writeAuthorized` 必须为 false，且不得创建 operation lock、safe-write temp file、`_speclite` directory、`_speclite-output` directory 或 IDE target directory。
+  - [x] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；如果加入 `config-initialization` step，必须同步 tests 和 fixture expected outputs。
+  - [x] JSON output 只使用当前 `CommandResult<InstallCommandData>` 字段；pre-write config state 通过 `completedSteps`、`pendingSteps`、`issues`、`nextActions` 和 human-readable final configuration summary 表达，`installedModules` 不得承载 selected/config state；新增 public JSON 字段必须先更新 owning SPEC。
 
-- [ ] Task 6: 编写 focused tests 与 fixture assertions（AC: 1-9）
-  - [ ] Unit tests 覆盖 quick config defaults、detailed config collection、string trim、empty value fallback、language field preservation 和 artifact path normalization。
-  - [ ] Unit tests 覆盖 config TOML model/writer/parser round trip；不得把 example files 当 runtime fallback。
-  - [ ] Unit tests 覆盖 human-owned stubs create-if-absent：missing -> planned create，existing -> protected skip，existing content/order/comment untouched。
-  - [ ] Integration tests 覆盖 `speclite install` 在 module selection 后进入 config initialization，但在 final config confirmation 前不写入任何 project file。
-  - [ ] Integration tests 覆盖 `install --json` config initialization success/pending/failure 的 semantic JSON parse；不得 raw byte 比较当前时间、absolute path 或 terminal formatting。
-  - [ ] Regression tests 覆盖 Story 1.1-1.3 failure/pending branches，确保 Story 1.4 不提前执行 config prompts 或 planned writes。
-  - [ ] Fixture assertions 更新 `fresh-install-empty-project` 的 config step expected command JSON / file tree only after owning SPEC 与 executable schema 支持对应 fields；不得先更新 snapshots 再反推契约行为。
+- [x] Task 6: 编写 focused tests 与 fixture assertions（AC: 1-9）
+  - [x] Unit tests 覆盖 quick config defaults、detailed config collection、string trim、empty value fallback、language field preservation 和 artifact path normalization。
+  - [x] Unit tests 覆盖 config TOML model/writer/parser round trip；不得把 example files 当 runtime fallback。
+  - [x] Unit tests 覆盖 human-owned stubs create-if-absent：missing -> planned create，existing -> protected skip，existing content/order/comment untouched。
+  - [x] Integration tests 覆盖 `speclite install` 在 module selection 后进入 config initialization，但在 final config confirmation 前不写入任何 project file。
+  - [x] Integration tests 覆盖 `install --json` config initialization success/pending/failure 的 semantic JSON parse；不得 raw byte 比较当前时间、absolute path 或 terminal formatting。
+  - [x] Regression tests 覆盖 Story 1.1-1.3 failure/pending branches，确保 Story 1.4 不提前执行 config prompts 或 planned writes。
+  - [x] Fixture assertions 更新 `fresh-install-empty-project` 的 config step expected command JSON / file tree only after owning SPEC 与 executable schema 支持对应 fields；不得先更新 snapshots 再反推契约行为。
 
-- [ ] Task 7: 本地验证与范围控制（AC: 1-9）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 1.4 touched modules 的 focused Vitest tests。
-  - [ ] 如新增或改变 public JSON field、config TOML schema、step id 或 fixture comparison behavior，确认同一变更中更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
-  - [ ] 检查 diff，确认没有实现 Story 1.5 runtime writes / IDE mirror creation / manifest generation，也没有实现 Story 1.6 progress full sequence、ReadyCheck 或 ready summary。
-  - [ ] 检查 diff，确认没有新增 Post-MVP `init` / `list` / `doctor` / `sync` / `uninstall` 命令，也没有格式化、重写或同步 planning artifacts。
+- [x] Task 7: 本地验证与范围控制（AC: 1-9）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 1.4 touched modules 的 focused Vitest tests。
+  - [x] 如新增或改变 public JSON field、config TOML schema、step id 或 fixture comparison behavior，确认同一变更中更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+  - [x] 检查 diff，确认没有实现 Story 1.5 runtime writes / IDE mirror creation / manifest generation，也没有实现 Story 1.6 progress full sequence、ReadyCheck 或 ready summary。
+  - [x] 检查 diff，确认没有新增 Post-MVP `init` / `list` / `doctor` / `sync` / `uninstall` 命令，也没有格式化、重写或同步 planning artifacts。
 
 ## Dev Notes（开发备注）
 
@@ -329,12 +329,42 @@ project_knowledge = "docs"
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
+
+- `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` failed because default `python3` lacks `tomllib`; reran successfully with `python3.12`.
+- `npx vitest run test/config-initialization.test.ts` first failed because Story 1.4 config modules did not exist, then passed after implementation.
+- `npm test` passed: 8 test files, 44 tests.
+- `npm run build` passed: tsup ESM and DTS build succeeded.
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Verified Story 1.1-1.3 anchors in live source before implementing Story 1.4.
+- Added shared project config schema, TOML reader/writer, module metadata config prompt extraction, and config initialization planning.
+- Integrated config initialization after module selection while keeping `writeAuthorized: false` before final config summary confirmation.
+- Added installer-owned planned writes for `_speclite/config.toml` and `_speclite/config.user.toml`.
+- Added human-owned project-level stub planning for `_speclite/custom/config.toml` and `_speclite/custom/config.user.toml`, with existing stubs protected by skip actions without content rewrites.
+- Preserved current `CommandResult<InstallCommandData>` shape: config state is expressed via lifecycle steps, summary, issues, next actions, and internal `InstallPlan`.
+- Confirmed no Story 1.5 runtime directory writes, IDE mirror creation, manifest/index generation, ReadyCheck, ready summary, or Post-MVP commands were implemented.
 
 ### File List（文件列表）
+
+- `src/bin/speclite.ts`
+- `src/commands/install.ts`
+- `src/config/config-reader.ts`
+- `src/config/config-schema.ts`
+- `src/config/config-writer.ts`
+- `src/installer/config-initialization.ts`
+- `src/installer/install-plan-schema.ts`
+- `src/modules/module-metadata.ts`
+- `test/cli-smoke.test.ts`
+- `test/config-initialization.test.ts`
+- `test/install-module-selection.test.ts`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/1-4-project-config-initialization.md`
+
+### Change Log（变更日志）
+
+- 2026-05-26: Implemented Story 1.4 project config initialization and moved story to review.

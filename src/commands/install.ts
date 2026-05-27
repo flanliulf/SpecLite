@@ -1,0 +1,663 @@
+import process from "node:process";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  createInstallFailureResult,
+  createInstallSuccessResult,
+  DEFAULT_INSTALL_MANIFEST_VERSION,
+} from "../diagnostics/command-result.js";
+import type {
+  CommandPathSummary,
+  IdeTargetStatus,
+  InstallCommandResult,
+  ValidationIssue,
+} from "../diagnostics/command-result-schema.js";
+import { normalizeTargetDirectory } from "../fs/path-normalizer.js";
+import { getIdeAdapterRegistry } from "../ide/adapter-registry.js";
+import {
+  createConfigInitializationPlan,
+  createConfigInitializationPromptInput,
+  type ConfigInitializationPromptInput,
+  type ConfigInitializationSelection,
+} from "../installer/config-initialization.js";
+import { createInstallCommandContext } from "../installer/install-context.js";
+import {
+  InstallPlanSchema,
+  type InstallPlan,
+  type InstallPlanTargetAdapter,
+} from "../installer/install-plan-schema.js";
+import { INSTALL_LIFECYCLE_STEP_IDS } from "../installer/progress-events.js";
+import { runReadyCheck } from "../installer/ready-check.js";
+import { applyInstallPlan } from "../installer/runtime-structure.js";
+import { evaluateRuntimeGuard, type RuntimeFacts } from "../installer/runtime-guard.js";
+import { inspectTargetDirectory, type TargetDirectoryState } from "../installer/target-directory.js";
+import {
+  discoverOfficialModules,
+  ModuleMetadataError,
+  type OfficialModule,
+} from "../modules/module-metadata.js";
+import { createModuleSelection } from "../modules/module-selection.js";
+import {
+  createMissingBundledSourceEvidenceIssue,
+  discoverBundledSourceDescriptor,
+} from "../source/source-discovery.js";
+import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
+
+export type { ConfigInitializationPromptInput, ConfigInitializationSelection };
+
+const UNAVAILABLE_INSTALL_MANIFEST_VERSION = "unavailable" as const;
+const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+export type InstallCommandOptions = {
+  json?: boolean;
+  yes?: boolean;
+};
+
+export type InstallCommandRuntime = Partial<RuntimeFacts> & {
+  cwd?: string;
+  targetProject?: string;
+};
+
+export type ModuleSelectionPromptInput = {
+  modules: OfficialModule[];
+  defaultSelectedModuleIds: string[];
+  requiredModuleIds: string[];
+};
+
+export type InstallCommandOutcome = {
+  result: InstallCommandResult;
+  exitCode: number;
+  installPlan?: InstallPlan;
+};
+
+export function getCurrentRuntimeFacts(runtime: InstallCommandRuntime = {}): RuntimeFacts {
+  return {
+    nodeVersion: runtime.nodeVersion ?? process.version,
+    platform: runtime.platform ?? process.platform,
+    platformRelease: runtime.platformRelease ?? os.release(),
+  };
+}
+
+export async function runInstallCommand(input: {
+  options?: InstallCommandOptions;
+  runtime?: InstallCommandRuntime;
+  projectRoot?: string;
+  selectModuleIds?: (input: ModuleSelectionPromptInput) => Promise<string[]>;
+  configureProject?: (
+    input: ConfigInitializationPromptInput,
+  ) => Promise<ConfigInitializationSelection>;
+  targetDirectory?: string;
+} = {}): Promise<InstallCommandOutcome> {
+  const projectRoot = input.projectRoot ?? PACKAGE_ROOT;
+  const runtimeFacts = getCurrentRuntimeFacts(input.runtime);
+  const targetProject =
+    input.runtime?.targetProject ?? (path.basename(input.runtime?.cwd ?? process.cwd()) || "project");
+  const guardResult = evaluateRuntimeGuard(runtimeFacts);
+
+  if (!guardResult.ok) {
+    const result = createInstallFailureResult({
+      targetProject,
+      issues: [guardResult.issue],
+      completedSteps: [],
+      pendingSteps: [...INSTALL_LIFECYCLE_STEP_IDS],
+      nextActions: guardResult.nextActions,
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const cwd = input.runtime?.cwd ?? process.cwd();
+  const normalizedTarget = normalizeTargetDirectory({
+    cwd,
+    ...(input.targetDirectory === undefined ? {} : { targetDirectory: input.targetDirectory }),
+  });
+  const targetDirectoryState = await inspectTargetDirectory({
+    targetRoot: normalizedTarget.targetRoot,
+  });
+  const completedSteps: string[] = [];
+  const pendingSteps = [...INSTALL_LIFECYCLE_STEP_IDS];
+  const context = createInstallCommandContext({
+    cwd,
+    targetProject: input.runtime?.targetProject ?? normalizedTarget.targetProject,
+    projectRootDisplay: normalizedTarget.displayPath,
+    paths: normalizedTarget.paths,
+    runtime: runtimeFacts,
+    completedSteps: guardResult.completedSteps,
+    requiresConfirmation: true,
+    writeAuthorized: input.options?.yes ?? false,
+  });
+
+  if (targetDirectoryState.issues.length > 0) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: targetDirectoryState.issues,
+      completedSteps,
+      pendingSteps,
+      nextActions: [
+        "Run speclite validate or inspect the existing manifest before continuing.",
+        "Do not run fresh install until existing installed state is understood.",
+      ],
+      summary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+      data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  if (shouldStopBeforeSourceSelection(targetDirectoryState, context.writeAuthorized)) {
+    const result = createInstallSuccessResult({
+      targetProject: context.targetProject,
+      completedSteps,
+      pendingSteps,
+      summary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+      nextActions: createTargetNextActions(targetDirectoryState, context.writeAuthorized),
+      data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+    });
+
+    return { result, exitCode: 0 };
+  }
+
+  const sourceDescriptor = await discoverBundledSourceDescriptor({ projectRoot });
+  if (sourceDescriptor.trustStatus === "blocked") {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createMissingBundledSourceEvidenceIssue()],
+      completedSteps,
+      pendingSteps: [...INSTALL_LIFECYCLE_STEP_IDS],
+      nextActions: [
+        "Restore bundled source packaging evidence before continuing.",
+        "Rerun speclite install --yes after the package evidence anchor is available.",
+      ],
+      summary:
+        "SpecLite install stopped before module selection because bundled source integrity evidence is missing. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const modulesResult = await discoverModulesForInstall(projectRoot);
+  if (!modulesResult.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [modulesResult.issue],
+      completedSteps,
+      pendingSteps: [...INSTALL_LIFECYCLE_STEP_IDS],
+      nextActions: ["Fix bundled official module metadata before continuing install."],
+      summary:
+        "SpecLite install stopped before module selection because official modules could not be discovered. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const defaultModuleSelection = createModuleSelection({ modules: modulesResult.modules });
+  const userSelectedModuleIds =
+    input.options?.json === true || input.selectModuleIds === undefined
+      ? undefined
+      : await input.selectModuleIds({
+          modules: modulesResult.modules,
+          defaultSelectedModuleIds: defaultModuleSelection.defaultSelectedModuleIds,
+          requiredModuleIds: defaultModuleSelection.requiredModuleIds,
+        });
+  const moduleSelection = createModuleSelection({
+    modules: modulesResult.modules,
+    ...(userSelectedModuleIds === undefined ? {} : { userSelectedModuleIds }),
+  });
+  const moduleSelectionCompletedSteps = ["source-discovery", "module-selection"];
+  const moduleSelectionPendingSteps = [
+    "config-initialization",
+    "runtime-structure",
+    "ide-mirror-creation",
+    "manifest-generation",
+    "ready-check",
+    "ready-summary",
+  ];
+  const selectedModules = modulesResult.modules.filter((module) =>
+    moduleSelection.selectedModuleIds.includes(module.code),
+  );
+  const defaultTargetAdapters = createDefaultTargetAdapters();
+
+  if (moduleSelection.invalidModuleIds.length > 0) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createInvalidModuleSelectionIssue(moduleSelection.invalidModuleIds)],
+      completedSteps: moduleSelectionCompletedSteps,
+      pendingSteps: moduleSelectionPendingSteps,
+      nextActions: [
+        "Choose one or more module ids from the displayed official module list.",
+        "Rerun speclite install after correcting the module selection.",
+      ],
+      summary:
+        "SpecLite install stopped before write planning because the module selection contains unknown module ids. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const configSelection =
+    input.options?.json === true || input.configureProject === undefined
+      ? undefined
+      : await input.configureProject(
+          createConfigInitializationPromptInput({
+            selectedModules,
+            targetAdapters: defaultTargetAdapters,
+          }),
+        );
+  const finalSelectedModuleIds = selectKnownIds({
+    requestedIds: configSelection?.selectedModuleIds,
+    defaultIds: moduleSelection.selectedModuleIds,
+    allowedIds: moduleSelection.selectedModuleIds,
+  });
+  const finalSelectedModules = modulesResult.modules.filter((module) =>
+    finalSelectedModuleIds.includes(module.code),
+  );
+  const finalTargetAdapters = selectTargetAdapters(
+    defaultTargetAdapters,
+    configSelection?.ideTargetIds,
+  );
+  const configPlan = await createConfigInitializationPlan({
+    targetRoot: normalizedTarget.targetRoot,
+    targetProject: context.targetProject,
+    selectedModules: finalSelectedModules,
+    mode: configSelection?.mode ?? "quick",
+    ...(configSelection?.values === undefined ? {} : { values: configSelection.values }),
+    selectedModuleIds: finalSelectedModuleIds,
+    ideTargetIds: finalTargetAdapters.map((adapter) => adapter.targetId),
+    targetAdapters: finalTargetAdapters,
+  });
+
+  if (!configPlan.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: configPlan.issues,
+      completedSteps: moduleSelectionCompletedSteps,
+      pendingSteps: moduleSelectionPendingSteps,
+      nextActions: configPlan.nextActions,
+      summary: configPlan.summary,
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const configInitializationCompletedSteps = [...moduleSelectionCompletedSteps, "config-initialization"];
+  const installPlan = InstallPlanSchema.parse({
+    sourceDescriptor,
+    selectedModules: finalSelectedModuleIds,
+    targetAdapters: finalTargetAdapters,
+    externalAccesses: [],
+    plannedWrites: configPlan.plannedWrites,
+    requiresConfirmation: context.requiresConfirmation,
+    writeAuthorized: context.writeAuthorized,
+  });
+
+  const applyResult = await applyInstallPlan({
+    targetRoot: normalizedTarget.targetRoot,
+    packageRoot: projectRoot,
+    sourceDescriptor,
+    installPlan,
+    selectedModules: finalSelectedModules,
+    configPlan,
+  });
+
+  if (!applyResult.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [applyResult.issue],
+      completedSteps: [...configInitializationCompletedSteps, ...applyResult.completedSteps],
+      pendingSteps: applyResult.pendingSteps,
+      nextActions: [
+        "Resolve the reported write-phase blocker and rerun speclite install --yes.",
+        "Do not treat the install as ready until Story 1.6 ReadyCheck runs successfully.",
+      ],
+      summary:
+        "SpecLite install stopped during runtime structure, artifact directory, IDE mirror or manifest/index creation. ReadyCheck and ready summary remain pending.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1, installPlan };
+  }
+
+  const readyCheck = await runReadyCheck({
+    projectRoot: normalizedTarget.targetRoot,
+    sourceDescriptor,
+    installedModules: applyResult.installedModules,
+    ideTargets: applyResult.ideTargets,
+    paths: applyResult.paths,
+  });
+
+  if (!readyCheck.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [readyCheck.issue],
+      completedSteps: [
+        ...configInitializationCompletedSteps,
+        "runtime-structure",
+        "ide-mirror-creation",
+        "manifest-generation",
+      ],
+      pendingSteps: readyCheck.pendingSteps,
+      nextActions: [
+        "Resolve the reported local readiness blocker and rerun speclite install --yes.",
+        "Do not treat the install as ready until ReadyCheck runs successfully.",
+      ],
+      summary:
+        "SpecLite install completed write phases, but ReadyCheck failed. Ready summary remains pending.",
+      data: {
+        manifestVersion: DEFAULT_INSTALL_MANIFEST_VERSION,
+        installedModules: applyResult.installedModules,
+        ideTargets: applyResult.ideTargets,
+        paths: applyResult.paths,
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1, installPlan };
+  }
+
+  const result = createInstallSuccessResult({
+    targetProject: context.targetProject,
+    completedSteps: [
+      ...configInitializationCompletedSteps,
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary",
+    ],
+    pendingSteps: [],
+    summary: createInstalledReadySummary({
+      selectedModules: finalSelectedModules,
+      sourceDescriptor,
+      paths: readyCheck.paths,
+      configPlan,
+      ideTargets: readyCheck.ideTargets,
+    }),
+    nextActions: [
+      "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
+      "Run speclite status to inspect the installed-state summary.",
+      "Run speclite validate for deeper local validation when needed.",
+    ],
+    data: {
+      manifestVersion: readyCheck.manifestVersion,
+      installedModules: readyCheck.installedModules,
+      ideTargets: readyCheck.ideTargets,
+      paths: readyCheck.paths,
+      sourceDescriptor,
+    },
+  });
+
+  return { result, exitCode: 0, installPlan };
+}
+
+function createInstalledReadySummary(input: {
+  selectedModules: OfficialModule[];
+  sourceDescriptor: SourceDescriptor;
+  paths: CommandPathSummary;
+  configPlan: Extract<Awaited<ReturnType<typeof createConfigInitializationPlan>>, { ok: true }>;
+  ideTargets: IdeTargetStatus[];
+}): string {
+  const selectedModuleDetails = input.selectedModules
+    .map((module) => `${module.code} (${module.name} ${module.version})`)
+    .join(", ");
+  const selectedModuleIds = input.selectedModules.map((module) => module.code).join(", ");
+
+  return [
+    `Source: ${input.sourceDescriptor.sourceType} ${input.sourceDescriptor.resolvedRoot ?? "unknown"}.`,
+    "Final configuration summary confirmed.",
+    `Config mode: ${input.configPlan.mode}.`,
+    `Project name: ${input.configPlan.model.core.project_name}.`,
+    `User display name: ${input.configPlan.model.core.user_name}.`,
+    `Languages: communication=${input.configPlan.model.core.communication_language}, document=${input.configPlan.model.core.document_output_language}.`,
+    `Selected modules: ${selectedModuleIds}.`,
+    `Installed modules: ${selectedModuleDetails}.`,
+    `IDE targets: ${input.ideTargets.map((target) => `${target.id} (${target.skillCount ?? 0} skills at ${target.targetPath ?? "not-configured"})`).join(", ")}.`,
+    `Runtime path: ${input.paths.specliteRoot ?? "_speclite"}.`,
+    `Artifact root: ${input.paths.artifactRoot ?? "_speclite-output"}.`,
+    `Manifest path: ${input.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}.`,
+    "Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
+  ].join(" ");
+}
+
+function shouldStopBeforeSourceSelection(
+  state: TargetDirectoryState,
+  writeAuthorized: boolean,
+): boolean {
+  return (
+    !writeAuthorized ||
+    state.kind === "regular-file" ||
+    state.kind === "unsafe-symlink" ||
+    state.kind === "existing-install"
+  );
+}
+
+function createTargetSummary(state: TargetDirectoryState, displayPath: string): string {
+  switch (state.kind) {
+    case "missing":
+      return `Target: ${displayPath}. Directory state: missing. After confirmation, the target directory can be created by a later install stage; no project files were changed.`;
+    case "empty":
+      return `Target: ${displayPath}. Directory state: empty. After confirmation, later install stages may create SpecLite runtime files; no project files were changed.`;
+    case "non-empty":
+      return `Target: ${displayPath}. Directory state: non-empty. After confirmation, later install stages may continue against this project root; no project files were changed.`;
+    case "regular-file":
+      return `Target: ${displayPath}. Directory state: regular-file. Choose a directory target before install continues; no project files were changed.`;
+    case "unsafe-symlink":
+      return `Target: ${displayPath}. Directory state: unsafe-symlink. Symlink targets are not inspected as project roots because they can escape the project boundary; no project files were changed.`;
+    case "existing-install":
+      return [
+        `Target: ${displayPath}.`,
+        "Directory state: existing-install.",
+        `Detected runtime: ${state.detectedRuntime ? "present" : "not-present"}.`,
+        `Manifest version: ${state.manifestVersion ?? UNAVAILABLE_INSTALL_MANIFEST_VERSION}.`,
+        `IDE targets: ${formatIdeTargets(state.ideTargets)}.`,
+        "Next action: review the existing SpecLite install before continuing.",
+        "No project files were changed.",
+      ].join(" ");
+  }
+}
+
+function createTargetNextActions(
+  state: TargetDirectoryState,
+  writeAuthorized: boolean,
+): string[] {
+  if (state.kind === "existing-install") {
+    return [
+      "Review the existing SpecLite install before continuing.",
+      "Run speclite status or speclite validate for installed-state details.",
+    ];
+  }
+
+  if (state.kind === "regular-file") {
+    return ["Choose a directory target before continuing with install."];
+  }
+
+  if (state.kind === "unsafe-symlink") {
+    return ["Choose a real project directory before continuing with install."];
+  }
+
+  if (!writeAuthorized) {
+    return ["Confirm the target directory before continuing with later install stages."];
+  }
+
+  return ["Target directory is confirmed; continue with source selection in the next install stage."];
+}
+
+function createTargetStateData(
+  state: TargetDirectoryState,
+  paths: ReturnType<typeof normalizeTargetDirectory>["paths"],
+): {
+  manifestVersion: string;
+  installedModules: string[];
+  ideTargets: IdeTargetStatus[];
+  paths: CommandPathSummary;
+} {
+  return {
+    manifestVersion:
+      state.kind === "existing-install"
+        ? (state.manifestVersion ?? UNAVAILABLE_INSTALL_MANIFEST_VERSION)
+        : DEFAULT_INSTALL_MANIFEST_VERSION,
+    installedModules: state.kind === "existing-install" ? state.installedModules : [],
+    ideTargets: state.kind === "existing-install" ? state.ideTargets : [],
+    paths,
+  };
+}
+
+async function discoverModulesForInstall(projectRoot: string): Promise<
+  | {
+      ok: true;
+      modules: OfficialModule[];
+    }
+  | {
+      ok: false;
+      issue: ValidationIssue;
+    }
+> {
+  try {
+    const modules = await discoverOfficialModules({ projectRoot });
+    if (modules.length === 0) {
+      return {
+        ok: false,
+        issue: createUnsupportedSourceIssue({
+          reason: "no-official-modules",
+          impact: "No valid installable official modules were found in bundled source metadata.",
+          suggestedNextStep: "Restore bundled module.yaml and SKILL.md package roots.",
+        }),
+      };
+    }
+
+    return { ok: true, modules };
+  } catch (error) {
+    return {
+      ok: false,
+      issue: createUnsupportedSourceIssue({
+        reason: error instanceof ModuleMetadataError ? error.code : "module-metadata-unreadable",
+        impact: "Bundled official module metadata is invalid or unreadable.",
+        suggestedNextStep: "Fix bundled module.yaml, module-help.csv and SKILL.md package roots.",
+      }),
+    };
+  }
+}
+
+function createUnsupportedSourceIssue(input: {
+  reason: string;
+  impact: string;
+  suggestedNextStep: string;
+}): ValidationIssue {
+  return {
+    issueId: "source-integrity.unsupported-source",
+    category: "source-integrity",
+    severity: "error",
+    component: "official-module-discovery",
+    details: {
+      reason: input.reason,
+    },
+    impact: input.impact,
+    suggestedNextStep: input.suggestedNextStep,
+  };
+}
+
+function createInvalidModuleSelectionIssue(invalidModuleIds: string[]): ValidationIssue {
+  return {
+    issueId: "module-selection.invalid-module-id",
+    category: "source-integrity",
+    severity: "error",
+    component: "official-module-selection",
+    details: {
+      invalidModuleIds,
+    },
+    impact: "The requested official module selection contains unknown module ids.",
+    suggestedNextStep: "Select only module ids from the displayed official module list.",
+  };
+}
+
+function createDefaultTargetAdapters(): InstallPlanTargetAdapter[] {
+  return getIdeAdapterRegistry().map((adapter) => ({
+    targetId: adapter.id,
+    targetDirectory: adapter.targetDirectory,
+    status: "planned",
+  }));
+}
+
+function selectKnownIds(input: {
+  requestedIds: string[] | undefined;
+  defaultIds: string[];
+  allowedIds: string[];
+}): string[] {
+  if (input.requestedIds === undefined) {
+    return input.defaultIds;
+  }
+
+  const requested = new Set(input.requestedIds);
+  const selectedIds = input.allowedIds.filter((id) => requested.has(id));
+  return selectedIds.length === 0 ? input.defaultIds : selectedIds;
+}
+
+function selectTargetAdapters(
+  targetAdapters: InstallPlanTargetAdapter[],
+  requestedTargetIds: string[] | undefined,
+): InstallPlanTargetAdapter[] {
+  if (requestedTargetIds === undefined) {
+    return targetAdapters;
+  }
+
+  const requested = new Set(requestedTargetIds);
+  const selectedAdapters = targetAdapters.filter((adapter) => requested.has(adapter.targetId));
+  return selectedAdapters.length === 0 ? targetAdapters : selectedAdapters;
+}
+
+function createPrewriteModuleSummary(input: {
+  selectedModules: OfficialModule[];
+  sourceDescriptor: SourceDescriptor;
+  targetSummary: string;
+  configSummary: string;
+}): string {
+  const selectedModules = input.selectedModules
+    .map((module) => `${module.code} (${module.name} ${module.version})`)
+    .join(", ");
+  const capabilityScope = input.selectedModules
+    .map((module) => `${module.code}: ${module.capabilitySummary.join(", ") || module.description}`)
+    .join("; ");
+
+  return [
+    input.targetSummary,
+    `Source: ${input.sourceDescriptor.sourceType} ${input.sourceDescriptor.resolvedRoot ?? "unknown"}.`,
+    `Selected modules: ${selectedModules}.`,
+    `Capability scope: ${capabilityScope}.`,
+    input.configSummary,
+    "Pending: runtime structure creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary have not happened.",
+    "No project files were changed.",
+  ].join(" ");
+}
+
+function formatIdeTargets(ideTargets: IdeTargetStatus[]): string {
+  if (ideTargets.length === 0) {
+    return "none";
+  }
+
+  return ideTargets
+    .map((target) =>
+      target.targetPath === undefined
+        ? `${target.id}=${target.status}`
+        : `${target.id}=${target.status} (${target.targetPath})`,
+    )
+    .join(", ");
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "install",
+  "targetProject": "fresh-install-empty-project",
+  "summary": "SpecLite install preflight failed before any project files were changed.",
+  "issues": [
+    {
+      "issueId": "environment.unsupported-node",
+      "category": "environment",
+      "severity": "error",
+      "component": "runtime-guard",
+      "details": {
+        "detectedVersion": "v20.11.1",
+        "requiredRange": ">=22"
+      },
+      "impact": "SpecLite cannot start the install flow on this Node.js runtime.",
+      "suggestedNextStep": "Switch to Node.js 22 or newer and rerun the command."
+    }
+  ],
+  "nextActions": [
+    "Install and run SpecLite with Node.js 22 or newer.",
+    "After switching Node.js versions, rerun speclite install."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [],
+      "trustStatus": "blocked"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [],
+    "pendingSteps": [
+      "source-discovery",
+      "module-selection",
+      "config-initialization",
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary"
+    ]
+  }
+}

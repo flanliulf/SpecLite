@@ -1,6 +1,8 @@
 code: core
 name: "SpecLite Core Module"
+version: "0.0.0"
 description: "Core configuration schema and shared runtime resources for SpecLite installations"
+required: true
 
 header: "SpecLite Core Configuration"
 subheader: "Configure the shared settings used across installed SpecLite skills, workflows, and agents. These values are written to {project-root}/_speclite/config.toml under [core]."

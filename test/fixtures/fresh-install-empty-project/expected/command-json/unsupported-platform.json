@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "install",
+  "targetProject": "fresh-install-empty-project",
+  "summary": "SpecLite install preflight failed before any project files were changed.",
+  "issues": [
+    {
+      "issueId": "environment.unsupported-platform",
+      "category": "environment",
+      "severity": "error",
+      "component": "runtime-guard",
+      "details": {
+        "detectedPlatform": "linux",
+        "supportedPlatforms": ["macos-13-or-newer", "windows-11"]
+      },
+      "impact": "SpecLite cannot use the MVP install path on this platform.",
+      "suggestedNextStep": "Run the install on macOS 13 or newer, or on Windows 11."
+    }
+  ],
+  "nextActions": [
+    "Use macOS 13 or newer, or Windows 11, for the MVP install path.",
+    "If this platform should be supported, track it as a future platform policy change."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [],
+      "trustStatus": "blocked"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [],
+    "pendingSteps": [
+      "source-discovery",
+      "module-selection",
+      "config-initialization",
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary"
+    ]
+  }
+}

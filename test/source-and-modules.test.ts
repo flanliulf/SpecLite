@@ -1,0 +1,268 @@
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import {
+  discoverBundledSourceDescriptor,
+  createMissingBundledSourceEvidenceIssue,
+} from "../src/source/source-discovery.js";
+import {
+  discoverOfficialModules,
+  ModuleMetadataError,
+} from "../src/modules/module-metadata.js";
+import { createModuleSelection } from "../src/modules/module-selection.js";
+
+describe("bundled source descriptor discovery", () => {
+  it("projects bundled official source through a display-safe SourceDescriptor", async () => {
+    const descriptor = await discoverBundledSourceDescriptor({
+      projectRoot: process.cwd(),
+    });
+
+    expect(descriptor).toMatchObject({
+      sourceType: "bundled",
+      resolvedRoot: "assets/source/speclite",
+      trustStatus: "unverified",
+    });
+    expect(descriptor.integrityEvidence).toEqual([
+      expect.objectContaining({
+        kind: "version-lock",
+        packageName: "speclite",
+        version: "0.0.0",
+        lockPath: "package-lock.json",
+        verified: false,
+      }),
+    ]);
+    expect(JSON.stringify(descriptor)).not.toContain(os.homedir());
+    expect(JSON.stringify(descriptor)).not.toContain(process.cwd());
+  });
+
+  it("returns source-integrity.missing-evidence when package evidence is unavailable", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-missing-evidence-"));
+
+    try {
+      const descriptor = await discoverBundledSourceDescriptor({ projectRoot: tempRoot });
+      const issue = createMissingBundledSourceEvidenceIssue();
+
+      expect(descriptor).toMatchObject({
+        sourceType: "bundled",
+        resolvedRoot: "assets/source/speclite",
+        trustStatus: "blocked",
+        integrityEvidence: [],
+      });
+      expect(issue).toMatchObject({
+        issueId: "source-integrity.missing-evidence",
+        category: "source-integrity",
+        severity: "error",
+        component: "bundled-source",
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("official module metadata parser", () => {
+  it("discovers core and sdlc modules with stable ids, versions and package roots", async () => {
+    const modules = await discoverOfficialModules({
+      projectRoot: process.cwd(),
+    });
+
+    expect(modules.map((module) => module.code)).toEqual(["core", "sdlc"]);
+    expect(modules).toEqual([
+      expect.objectContaining({
+        code: "core",
+        name: "SpecLite Core Module",
+        version: "0.0.0",
+        required: true,
+        defaultSelected: false,
+      }),
+      expect.objectContaining({
+        code: "sdlc",
+        name: "SpecLite SDLC",
+        version: "0.0.0",
+        defaultSelected: true,
+        requiredDependencies: ["core"],
+      }),
+    ]);
+    expect(modules.find((module) => module.code === "core")?.packageRoots.length).toBeGreaterThan(
+      0,
+    );
+    expect(modules.find((module) => module.code === "sdlc")?.packageRoots).toContain(
+      "4-implementation/speclite-dev-story",
+    );
+  });
+
+  it("rejects metadata missing an explicit module version", async () => {
+    const sourceRoot = await createModuleFixture({
+      "sample/module.yaml": [
+        "code: sample",
+        'name: "Sample Module"',
+        'description: "Missing version fixture"',
+        "",
+      ].join("\n"),
+      "sample/module-help.csv": "module,skill,display-name\nSample,_meta,\n",
+      "sample/sample-skill/SKILL.md": "# Sample\n",
+    });
+
+    try {
+      await expect(discoverOfficialModules({ sourceRoot })).rejects.toMatchObject({
+        code: "module-metadata.missing-required-field",
+      });
+    } finally {
+      await rm(path.dirname(sourceRoot), { recursive: true, force: true });
+    }
+  });
+
+  it("rejects duplicate module codes and duplicate skill ids deterministically", async () => {
+    const duplicateModuleRoot = await createModuleFixture({
+      "a/module.yaml": [
+        "code: dup",
+        'name: "A"',
+        "version: 1.0.0",
+        'description: "A"',
+        "",
+      ].join("\n"),
+      "a/module-help.csv": "module,skill,display-name\nA,_meta,\n",
+      "a/a-skill/SKILL.md": "# A\n",
+      "b/module.yaml": [
+        "code: dup",
+        'name: "B"',
+        "version: 1.0.0",
+        'description: "B"',
+        "",
+      ].join("\n"),
+      "b/module-help.csv": "module,skill,display-name\nB,_meta,\n",
+      "b/b-skill/SKILL.md": "# B\n",
+    });
+    const duplicateSkillRoot = await createModuleFixture({
+      "a/module.yaml": [
+        "code: a",
+        'name: "A"',
+        "version: 1.0.0",
+        'description: "A"',
+        "",
+      ].join("\n"),
+      "a/module-help.csv": "module,skill,display-name\nA,_meta,\n",
+      "a/shared/SKILL.md": "# A\n",
+      "b/module.yaml": [
+        "code: b",
+        'name: "B"',
+        "version: 1.0.0",
+        'description: "B"',
+        "",
+      ].join("\n"),
+      "b/module-help.csv": "module,skill,display-name\nB,_meta,\n",
+      "b/shared/SKILL.md": "# B\n",
+    });
+
+    try {
+      await expect(discoverOfficialModules({ sourceRoot: duplicateModuleRoot })).rejects.toEqual(
+        new ModuleMetadataError("module-metadata.duplicate-code", "Duplicate module code: dup"),
+      );
+      await expect(discoverOfficialModules({ sourceRoot: duplicateSkillRoot })).rejects.toEqual(
+        new ModuleMetadataError("module-metadata.duplicate-skill-id", "Duplicate skill id: shared"),
+      );
+    } finally {
+      await rm(path.dirname(duplicateModuleRoot), { recursive: true, force: true });
+      await rm(path.dirname(duplicateSkillRoot), { recursive: true, force: true });
+    }
+  });
+
+  it("rejects required dependencies that do not point to discovered module ids", async () => {
+    const sourceRoot = await createModuleFixture({
+      "sdlc/module.yaml": [
+        "code: sdlc",
+        'name: "SDLC"',
+        "version: 1.0.0",
+        'description: "SDLC"',
+        "required_dependencies:",
+        "  - missing-core",
+        "",
+      ].join("\n"),
+      "sdlc/module-help.csv": "module,skill,display-name\nSDLC,_meta,\n",
+      "sdlc/sdlc-skill/SKILL.md": "# SDLC\n",
+    });
+
+    try {
+      await expect(discoverOfficialModules({ sourceRoot })).rejects.toEqual(
+        new ModuleMetadataError(
+          "module-metadata.unknown-required-dependency",
+          "Module sdlc requires unknown module: missing-core",
+        ),
+      );
+    } finally {
+      await rm(path.dirname(sourceRoot), { recursive: true, force: true });
+    }
+  });
+
+  it("rejects module-help.csv entries that do not point to canonical package roots", async () => {
+    const sourceRoot = await createModuleFixture({
+      "sdlc/module.yaml": [
+        "code: sdlc",
+        'name: "SDLC"',
+        "version: 1.0.0",
+        'description: "SDLC"',
+        "",
+      ].join("\n"),
+      "sdlc/module-help.csv": [
+        "module,skill,display-name,phase",
+        "SDLC,_meta,,",
+        "SDLC,missing-skill,Missing Skill,4-implementation",
+        "SDLC,sdlc-skill,SDLC Skill,4-implementation",
+        "",
+      ].join("\n"),
+      "sdlc/sdlc-skill/SKILL.md": "# SDLC\n",
+    });
+
+    try {
+      await expect(discoverOfficialModules({ sourceRoot })).rejects.toEqual(
+        new ModuleMetadataError(
+          "module-metadata.unknown-help-skill",
+          "Module sdlc has module-help.csv entries for missing canonical skill package roots: missing-skill",
+        ),
+      );
+    } finally {
+      await rm(path.dirname(sourceRoot), { recursive: true, force: true });
+    }
+  });
+});
+
+describe("official module selection", () => {
+  it("keeps required, default and user-selected modules distinguishable and ordered", async () => {
+    const modules = await discoverOfficialModules({ projectRoot: process.cwd() });
+    const selection = createModuleSelection({
+      modules,
+      userSelectedModuleIds: ["sdlc"],
+    });
+
+    expect(selection.selectedModuleIds).toEqual(["core", "sdlc"]);
+    expect(selection.requiredModuleIds).toEqual(["core"]);
+    expect(selection.defaultSelectedModuleIds).toEqual(["sdlc"]);
+    expect(selection.userSelectedModuleIds).toEqual(["sdlc"]);
+    expect(selection.invalidModuleIds).toEqual([]);
+  });
+
+  it("reports invalid module ids without changing the deterministic selected set", async () => {
+    const modules = await discoverOfficialModules({ projectRoot: process.cwd() });
+    const selection = createModuleSelection({
+      modules,
+      userSelectedModuleIds: ["missing", "sdlc"],
+    });
+
+    expect(selection.selectedModuleIds).toEqual(["core", "sdlc"]);
+    expect(selection.invalidModuleIds).toEqual(["missing"]);
+  });
+});
+
+async function createModuleFixture(files: Record<string, string>): Promise<string> {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-module-fixture-"));
+  const sourceRoot = path.join(tempRoot, "assets/source/speclite");
+
+  for (const [relativePath, contents] of Object.entries(files)) {
+    const filePath = path.join(sourceRoot, relativePath);
+    await mkdir(path.dirname(filePath), { recursive: true });
+    await writeFile(filePath, contents, "utf8");
+  }
+
+  return sourceRoot;
+}

@@ -1,6 +1,6 @@
 # Story 1.6: Install Progress And Ready Summary（安装进度与就绪摘要）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -85,67 +85,67 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证 Story 1.1-1.5 前置实现与当前仓库状态（AC: 1, 2, 5）
-  - [ ] 确认 Story 1.1 已真实提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`SourceDescriptor` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
-  - [ ] 确认 Story 1.2 已真实提供 target directory resolution、existing-install detection、path normalization 和 confirmation-before-write gate。
-  - [ ] 确认 Story 1.3 已真实提供 bundled source discovery、module metadata parser、source descriptor evidence gate、module selection model 和 pre-write install scope summary。
-  - [ ] 确认 Story 1.4 已真实提供 quick/detailed config collection、config schema/model、TOML planned writes、human-owned stub plan 和 final configuration summary gate。
-  - [ ] 确认 Story 1.5 已真实提供 `_speclite` runtime writes、artifact repository creation、IDE mirror creation、manifest/index generation、files index ownership/hash projection 和 no-ready-summary failure gate。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/installer/progress-events.ts`、`src/installer/ready-summary.ts`、`src/diagnostics/output.ts` 或前序 Story 预期实现文件仍不存在，停止 Story 1.6 实现并先完成前序 Story；不得在 Story 1.6 中重建前序 scaffold 或伪造 ready evidence。
+- [x] Task 1: 验证 Story 1.1-1.5 前置实现与当前仓库状态（AC: 1, 2, 5）
+  - [x] 确认 Story 1.1 已真实提供 TypeScript/commander scaffold、runtime/platform guard、`CommandResult` anchor、`SourceDescriptor` anchor、`InstallPlan` anchor、manifest anchor、adapter registry anchor 和 fixture contract anchor。
+  - [x] 确认 Story 1.2 已真实提供 target directory resolution、existing-install detection、path normalization 和 confirmation-before-write gate。
+  - [x] 确认 Story 1.3 已真实提供 bundled source discovery、module metadata parser、source descriptor evidence gate、module selection model 和 pre-write install scope summary。
+  - [x] 确认 Story 1.4 已真实提供 quick/detailed config collection、config schema/model、TOML planned writes、human-owned stub plan 和 final configuration summary gate。
+  - [x] 确认 Story 1.5 已真实提供 `_speclite` runtime writes、artifact repository creation、IDE mirror creation、manifest/index generation、files index ownership/hash projection 和 no-ready-summary failure gate。
+  - [x] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/installer/progress-events.ts`、`src/installer/ready-summary.ts`、`src/diagnostics/output.ts` 或前序 Story 预期实现文件仍不存在，停止 Story 1.6 实现并先完成前序 Story；不得在 Story 1.6 中重建前序 scaffold 或伪造 ready evidence。
 
-- [ ] Task 2: 定义并接入 install lifecycle progress steps（AC: 1, 7, 9）
-  - [ ] 在 `src/installer/progress-events.ts` 或等价模块中定义 command-defined stable lifecycle order：`source-discovery`、`module-selection`、`config-initialization`、`runtime-structure`、`ide-mirror-creation`、`manifest-generation`、`ready-check`、`ready-summary`。
-  - [ ] 确保 `completedSteps` 和 `pendingSteps` 按该 lifecycle order 输出，不按 execution timing、filesystem traversal、object insertion 或 async completion order 排序。
-  - [ ] Human-readable progress 使用 stable step text；不得把 spinner、颜色或动态覆盖行作为唯一状态表达。
-  - [ ] `stepId` 使用 stable lower-kebab；internal guard / type 名称使用 `ReadyCheck`，不要命名为 `readySummaryCheck`、`validateReady` 或自由文本 label。
+- [x] Task 2: 定义并接入 install lifecycle progress steps（AC: 1, 7, 9）
+  - [x] 在 `src/installer/progress-events.ts` 或等价模块中定义 command-defined stable lifecycle order：`source-discovery`、`module-selection`、`config-initialization`、`runtime-structure`、`ide-mirror-creation`、`manifest-generation`、`ready-check`、`ready-summary`。
+  - [x] 确保 `completedSteps` 和 `pendingSteps` 按该 lifecycle order 输出，不按 execution timing、filesystem traversal、object insertion 或 async completion order 排序。
+  - [x] Human-readable progress 使用 stable step text；不得把 spinner、颜色或动态覆盖行作为唯一状态表达。
+  - [x] `stepId` 使用 stable lower-kebab；internal guard / type 名称使用 `ReadyCheck`，不要命名为 `readySummaryCheck`、`validateReady` 或自由文本 label。
 
-- [ ] Task 3: 实现 ReadyCheck 最小本地检查（AC: 2, 3, 5）
-  - [ ] 在 `src/installer/ready-summary.ts`、`src/installer/ready-check.ts` 或等价模块中实现 `ReadyCheck`，由 install orchestration 在 Story 1.5 write phase 成功后调用。
-  - [ ] 读取 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`，只验证可读性、schema version 支持和 required projection shape。
-  - [ ] 验证 `sourceDescriptor` projection 存在且 shape valid；不得重新访问 npm registry、Git remote、offline bundle origin、private registry endpoint 或 package-manager cache。
-  - [ ] 按 selected targets 验证 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/` 中 required installed skill entries 可见；target order 复用 `CANONICAL_TARGET_ORDER`。
-  - [ ] 验证 installed modules 均具备 canonical package evidence；`sdlc` 只有在其 40 个 nested `SKILL.md` canonical package entries 已被 discovery、manifest/index 和 selected IDE mirrors 正确识别时，才能作为 default selected module 计入 ready result；如果任一 selected/default module 缺少 required canonical package evidence，不得合成 ready evidence。
-  - [ ] 验证 `_speclite` metadata/control hub、configured artifact root 和 required runtime paths 存在；不要计算完整 file hash baseline。
-  - [ ] 如果当前 install state 已有 blocking issue、failed required step、missing required projection 或 unreadable required runtime path，ReadyCheck 返回 failure 并保持 `ready-summary` pending。
+- [x] Task 3: 实现 ReadyCheck 最小本地检查（AC: 2, 3, 5）
+  - [x] 在 `src/installer/ready-summary.ts`、`src/installer/ready-check.ts` 或等价模块中实现 `ReadyCheck`，由 install orchestration 在 Story 1.5 write phase 成功后调用。
+  - [x] 读取 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`，只验证可读性、schema version 支持和 required projection shape。
+  - [x] 验证 `sourceDescriptor` projection 存在且 shape valid；不得重新访问 npm registry、Git remote、offline bundle origin、private registry endpoint 或 package-manager cache。
+  - [x] 按 selected targets 验证 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/` 中 required installed skill entries 可见；target order 复用 `CANONICAL_TARGET_ORDER`。
+  - [x] 验证 installed modules 均具备 canonical package evidence；`sdlc` 只有在其 40 个 nested `SKILL.md` canonical package entries 已被 discovery、manifest/index 和 selected IDE mirrors 正确识别时，才能作为 default selected module 计入 ready result；如果任一 selected/default module 缺少 required canonical package evidence，不得合成 ready evidence。
+  - [x] 验证 `_speclite` metadata/control hub、configured artifact root 和 required runtime paths 存在；不要计算完整 file hash baseline。
+  - [x] 如果当前 install state 已有 blocking issue、failed required step、missing required projection 或 unreadable required runtime path，ReadyCheck 返回 failure 并保持 `ready-summary` pending。
 
-- [ ] Task 4: 生成 human-readable ready summary（AC: 4, 7, 8, 9）
-  - [ ] 在 diagnostics/output renderer 中新增或扩展 Evidence profile 的 install ready summary renderer；semantic data 与 presentation 分离。
-  - [ ] 输出稳定顺序：Summary、completed steps、installed modules、IDE targets、key paths、Next actions。
-  - [ ] Summary 包含 target project display、manifest version、source descriptor summary、installed module ids/names、IDE target skill counts、key paths 和 next commands。
-  - [ ] Key paths 至少包含 `projectRoot: "."`、`specliteRoot: "_speclite"`、`artifactRoot` 和 `manifestPath: "_speclite/_config/manifest.yaml"`，并用文本说明所属空间或角色。
-  - [ ] Next actions 使用 command-specific priority order，优先推荐如何在 IDE 中找到 installed skill、运行 `speclite status` 或运行 `speclite validate`。
-  - [ ] 不要在 Story 1.6 中新增 Post-MVP `doctor`、`sync`、`uninstall`、top-level `repair`、Copilot/Cursor branded target readiness 或 command pointer artifact。
+- [x] Task 4: 生成 human-readable ready summary（AC: 4, 7, 8, 9）
+  - [x] 在 diagnostics/output renderer 中新增或扩展 Evidence profile 的 install ready summary renderer；semantic data 与 presentation 分离。
+  - [x] 输出稳定顺序：Summary、completed steps、installed modules、IDE targets、key paths、Next actions。
+  - [x] Summary 包含 target project display、manifest version、source descriptor summary、installed module ids/names、IDE target skill counts、key paths 和 next commands。
+  - [x] Key paths 至少包含 `projectRoot: "."`、`specliteRoot: "_speclite"`、`artifactRoot` 和 `manifestPath: "_speclite/_config/manifest.yaml"`，并用文本说明所属空间或角色。
+  - [x] Next actions 使用 command-specific priority order，优先推荐如何在 IDE 中找到 installed skill、运行 `speclite status` 或运行 `speclite validate`。
+  - [x] 不要在 Story 1.6 中新增 Post-MVP `doctor`、`sync`、`uninstall`、top-level `repair`、Copilot/Cursor branded target readiness 或 command pointer artifact。
 
-- [ ] Task 5: 投影 `install --json` 且禁止未契约化字段（AC: 5, 6, 7, 8）
-  - [ ] `install --json` 继续通过 `src/diagnostics/command-result-schema.ts` 输出 `CommandResult<InstallCommandData>`。
-  - [ ] 成功时将 lifecycle state 投影到 `data.completedSteps` / `data.pendingSteps`；`ready-check` 完成后才允许 `ready-summary` 完成。
-  - [ ] 失败时 `ready-summary` 必须保持 pending 或不存在于 completed set；不得输出 human-readable ready block。
-  - [ ] `data.ideTargets` 按 `claude`、`agents` canonical order 输出，每项可包含 `id`、`status`、`targetPath`、`skillCount`。
-  - [ ] 不新增 `readySummary`、`failedStep`、`progressEvents`、`stepTiming`、`duration`、`createdFiles`、`changedPaths`、`skippedPaths` 或 `installSummary` public JSON field；如果产品确实需要新增字段，先停止并更新 owning SPEC、schema anchor 和 fixtures。
+- [x] Task 5: 投影 `install --json` 且禁止未契约化字段（AC: 5, 6, 7, 8）
+  - [x] `install --json` 继续通过 `src/diagnostics/command-result-schema.ts` 输出 `CommandResult<InstallCommandData>`。
+  - [x] 成功时将 lifecycle state 投影到 `data.completedSteps` / `data.pendingSteps`；`ready-check` 完成后才允许 `ready-summary` 完成。
+  - [x] 失败时 `ready-summary` 必须保持 pending 或不存在于 completed set；不得输出 human-readable ready block。
+  - [x] `data.ideTargets` 按 `claude`、`agents` canonical order 输出，每项可包含 `id`、`status`、`targetPath`、`skillCount`。
+  - [x] 不新增 `readySummary`、`failedStep`、`progressEvents`、`stepTiming`、`duration`、`createdFiles`、`changedPaths`、`skippedPaths` 或 `installSummary` public JSON field；如果产品确实需要新增字段，先停止并更新 owning SPEC、schema anchor 和 fixtures。
 
-- [ ] Task 6: 保持 failure diagnostics 与 no-ready-summary gate（AC: 3, 5, 7, 9）
-  - [ ] 对 manifest/index unreadable、schema version unsupported、source descriptor invalid、missing IDE entry、missing runtime path 或 pre-existing blocking issue，复用 taxonomy 中的 reserved issue category/id。
-  - [ ] 不发明 `ready-check.*` issue category；使用 `manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`artifact-path`、`operation-lock` 或现有 category。
-  - [ ] Failure human-readable output 使用 issue list + pending steps + manual action；不要渲染 ready summary heading 或 "ready" 状态。
-  - [ ] Partial write failure 后不得声称 rollback；继续依赖 Story 1.5 的 partial failure semantics、`changedPaths` 边界和显式后续 `validate` / `update` / `update --repair`。
+- [x] Task 6: 保持 failure diagnostics 与 no-ready-summary gate（AC: 3, 5, 7, 9）
+  - [x] 对 manifest/index unreadable、schema version unsupported、source descriptor invalid、missing IDE entry、missing runtime path 或 pre-existing blocking issue，复用 taxonomy 中的 reserved issue category/id。
+  - [x] 不发明 `ready-check.*` issue category；使用 `manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`artifact-path`、`operation-lock` 或现有 category。
+  - [x] Failure human-readable output 使用 issue list + pending steps + manual action；不要渲染 ready summary heading 或 "ready" 状态。
+  - [x] Partial write failure 后不得声称 rollback；继续依赖 Story 1.5 的 partial failure semantics、`changedPaths` 边界和显式后续 `validate` / `update` / `update --repair`。
 
-- [ ] Task 7: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-10）
-  - [ ] Unit tests 覆盖 lifecycle order、stable lower-kebab step ids、`completedSteps` / `pendingSteps` 排序和 no timing fields。
-  - [ ] Unit tests 覆盖 `ReadyCheck` minimal scope：manifest/index readable、schema supported、source descriptor projection valid、selected IDE mirror entries visible、runtime/artifact paths present、blocking issue guard。
-  - [ ] Regression tests 确认 `ReadyCheck` 不调用 full validate、hash scan、remote source access、implicit update check 或 repair planning；可通过 dependency injection / spy 断言对应模块未被调用。
-  - [ ] Integration tests 覆盖 successful fresh install 后出现 ready summary，且 summary 含 Summary、completed steps、installed modules、IDE targets、key paths 和 Next actions。
-  - [ ] Integration tests 覆盖每个 required step failure 时不展示 ready summary，并断言 `completedSteps` / `pendingSteps` 语义正确。
-  - [ ] JSON contract tests 解析 `install --json`，断言 required fields 存在、无 `readySummary` blob、无 ANSI、无 absolute path、无 timestamp、target order 稳定。
-  - [ ] Fixture `fresh-install-empty-project` 更新 expected command JSON、human-readable example 或 normalized snapshot，覆盖 ready summary gate。
-  - [ ] NO_COLOR/non-TTY/CI tests 覆盖无颜色、无 spinner-only progress、文本等价表达和 terminal width fallback。
+- [x] Task 7: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-10）
+  - [x] Unit tests 覆盖 lifecycle order、stable lower-kebab step ids、`completedSteps` / `pendingSteps` 排序和 no timing fields。
+  - [x] Unit tests 覆盖 `ReadyCheck` minimal scope：manifest/index readable、schema supported、source descriptor projection valid、selected IDE mirror entries visible、runtime/artifact paths present、blocking issue guard。
+  - [x] Regression tests 确认 `ReadyCheck` 不调用 full validate、hash scan、remote source access、implicit update check 或 repair planning；可通过 dependency injection / spy 断言对应模块未被调用。
+  - [x] Integration tests 覆盖 successful fresh install 后出现 ready summary，且 summary 含 Summary、completed steps、installed modules、IDE targets、key paths 和 Next actions。
+  - [x] Integration tests 覆盖每个 required step failure 时不展示 ready summary，并断言 `completedSteps` / `pendingSteps` 语义正确。
+  - [x] JSON contract tests 解析 `install --json`，断言 required fields 存在、无 `readySummary` blob、无 ANSI、无 absolute path、无 timestamp、target order 稳定。
+  - [x] Fixture `fresh-install-empty-project` 更新 expected command JSON、human-readable example 或 normalized snapshot，覆盖 ready summary gate。
+  - [x] NO_COLOR/non-TTY/CI tests 覆盖无颜色、无 spinner-only progress、文本等价表达和 terminal width fallback。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-10）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 1.6 touched modules 的 focused Vitest tests。
-  - [ ] 运行相关 fixture test，至少覆盖 `fresh-install-empty-project` ready summary gating。
-  - [ ] 如新增或改变 public JSON field、step id、issue id、target status、fixture comparison behavior 或 manifest/index projection，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 full `validate`、remote source freshness/provenance revalidation、implicit update check、repair planning、Post-MVP commands 或 branded Copilot/Cursor targets。
+- [x] Task 8: 本地验证与范围控制（AC: 1-10）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 1.6 touched modules 的 focused Vitest tests。
+  - [x] 运行相关 fixture test，至少覆盖 `fresh-install-empty-project` ready summary gating。
+  - [x] 如新增或改变 public JSON field、step id、issue id、target status、fixture comparison behavior 或 manifest/index projection，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 full `validate`、remote source freshness/provenance revalidation、implicit update check、repair planning、Post-MVP commands 或 branded Copilot/Cursor targets。
 
 ## Dev Notes（开发备注）
 
@@ -389,12 +389,49 @@ Do not use generic "done" as the only success signal. Ready must be supported by
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+Codex GPT-5
 
 ### Debug Log References（调试日志引用）
+
+- `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` failed because system `python3` lacks `tomllib`; reran successfully with `python3.12`.
+- `npx vitest run test/install-progress-ready-summary.test.ts` first failed on missing Story 1.6 modules, then passed after implementation.
+- `npm test` passed: 10 test files, 63 tests.
+- `npm run build` passed with tsup ESM and DTS output.
+- `git diff --check` passed.
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Verified Story 1.1-1.5 implementation anchors existed before implementing Story 1.6; did not rebuild prior story flows or synthesize ready evidence.
+- Added command-defined install lifecycle projection for `source-discovery`, `module-selection`, `config-initialization`, `runtime-structure`, `ide-mirror-creation`, `manifest-generation`, `ready-check` and `ready-summary`.
+- Implemented `ReadyCheck` as a local-only gate over manifest/index readability, schema support, source descriptor shape, IDE mirror visibility, installed module package evidence and required runtime paths.
+- Added ready summary rendering from the same `CommandResult<InstallCommandData>` semantic model, with no `readySummary` JSON blob and no ANSI/spinner-only output dependency.
+- Updated focused unit/integration/fixture assertions for ready summary gating, failure no-ready-summary behavior, canonical target order and JSON contract absence checks.
+- Cleaned generated validation outputs `node_modules/` and `dist/` after running tests/build.
 
 ### File List（文件列表）
+
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/1-6-install-progress-and-ready-summary.md`
+- `src/commands/install.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/installer/install-context.ts`
+- `src/installer/progress-events.ts`
+- `src/installer/ready-check.ts`
+- `src/installer/runtime-guard.ts`
+- `src/installer/runtime-structure.ts`
+- `test/cli-smoke.test.ts`
+- `test/config-initialization.test.ts`
+- `test/contract-anchors.test.ts`
+- `test/install-module-selection.test.ts`
+- `test/install-progress-ready-summary.test.ts`
+- `test/runtime-structure.test.ts`
+- `test/target-directory.test.ts`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-node.json`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-platform.json`
+
+### Change Log（变更日志）
+
+- 2026-05-27: Implemented Story 1.6 install lifecycle progress, ReadyCheck, ready summary, JSON projection and focused tests; moved status to review.

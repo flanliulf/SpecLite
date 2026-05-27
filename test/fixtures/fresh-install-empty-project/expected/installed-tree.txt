@@ -1,0 +1,15 @@
+_speclite/config.toml
+_speclite/config.user.toml
+_speclite/custom/config.toml
+_speclite/custom/config.user.toml
+_speclite/_config/manifest.yaml
+_speclite/_config/skill-index.json
+_speclite/_config/help-index.json
+_speclite/_config/files-index.json
+_speclite/_config/phase-coverage.json
+_speclite-output/planning-artifacts
+_speclite-output/implementation-artifacts/stories
+_speclite-output/implementation-artifacts/code-reviews
+docs/brownfield/evidence
+.claude/skills/speclite-dev-story/SKILL.md
+.agents/skills/speclite-dev-story/SKILL.md

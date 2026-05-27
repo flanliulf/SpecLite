@@ -1,6 +1,6 @@
 # Story 1.1: CLI Install Entry And Runtime Guard（CLI 安装入口与运行时守卫）
 
-Status: ready-for-dev
+Status: Done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -71,62 +71,62 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 建立 root Node/TypeScript CLI scaffold（AC: 1, 3）
-  - [ ] 新增 `package.json`，设置 `"type": "module"`、`bin.speclite: "./dist/bin/speclite.js"` 和 `engines.node: ">=22"`。
-  - [ ] 新增 `package-lock.json`，锁定 Story 1.1 选择的依赖版本，避免后续 dev/test 环境漂移。
-  - [ ] 新增 `tsconfig.json`、`tsup.config.ts`、`vitest.config.ts`。
-  - [ ] 新增 npm scripts：`build`、`test`、`dev` 或等价 tsx 本地执行入口，以及 `release:packaging-check` stub。
-  - [ ] 确保 `release:packaging-check` 当前只作为 Epic 6 packaging acceptance placeholder，不假装已经执行 package file inventory assertions。
+- [x] Task 1: 建立 root Node/TypeScript CLI scaffold（AC: 1, 3）
+  - [x] 新增 `package.json`，设置 `"type": "module"`、`bin.speclite: "./dist/bin/speclite.js"` 和 `engines.node: ">=22"`。
+  - [x] 新增 `package-lock.json`，锁定 Story 1.1 选择的依赖版本，避免后续 dev/test 环境漂移。
+  - [x] 新增 `tsconfig.json`、`tsup.config.ts`、`vitest.config.ts`。
+  - [x] 新增 npm scripts：`build`、`test`、`dev` 或等价 tsx 本地执行入口，以及 `release:packaging-check` stub。
+  - [x] 确保 `release:packaging-check` 当前只作为 Epic 6 packaging acceptance placeholder，不假装已经执行 package file inventory assertions。
 
-- [ ] Task 2: 建立 CLI entrypoint 与 install command skeleton（AC: 1, 3, 7）
-  - [ ] 新增 `src/bin/speclite.ts`，负责创建 commander program、注册 `install` command、处理 exit code。
-  - [ ] 新增 `src/commands/install.ts`，只做 install command orchestration skeleton、runtime/platform guard 调用和 command context 创建。
-  - [ ] 不得在 Story 1.1 中写入 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
-  - [ ] 不得提前实现 Story 1.2+ 的 target directory resolution、module selection、config initialization、IDE mirror creation 或 ready summary。
+- [x] Task 2: 建立 CLI entrypoint 与 install command skeleton（AC: 1, 3, 7）
+  - [x] 新增 `src/bin/speclite.ts`，负责创建 commander program、注册 `install` command、处理 exit code。
+  - [x] 新增 `src/commands/install.ts`，只做 install command orchestration skeleton、runtime/platform guard 调用和 command context 创建。
+  - [x] 不得在 Story 1.1 中写入 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
+  - [x] 不得提前实现 Story 1.2+ 的 target directory resolution、module selection、config initialization、IDE mirror creation 或 ready summary。
 
-- [ ] Task 3: 建立 owning SPEC executable anchors（AC: 1, 2, 4）
-  - [ ] 新增 `src/diagnostics/command-result-schema.ts`，作为 `CommandResult` 与 `ValidationIssue` public JSON executable schema anchor。
-  - [ ] 新增 `src/source/source-descriptor-schema.ts`，作为 `SourceDescriptor` 与 `SourceIntegrityEvidence` anchor，当前可提供最小 stub 供 `InstallCommandData` schema 引用。
-  - [ ] 新增 `src/installer/install-plan-schema.ts`，作为 `SourceResolutionPlan`、`InstallPlan`、planned writes、confirmation state 和 write authorization anchor。
-  - [ ] 新增 `src/manifest/manifest-schema.ts`，作为 manifest、skill/help/files index 和 phase coverage projection anchor。
-  - [ ] 新增 `src/ide/adapter-registry.ts`，作为 `claude`、`agents` adapter ids、target ids、canonical target order 和 status mapping anchor。
-  - [ ] 新增 `src/config/resolve-output-schema.ts`，作为 `speclite resolve` stdout JSON、stderr JSON Lines diagnostics 和 merge-result parser anchor。
-  - [ ] 新增 `src/fixtures/fixture-contract.ts`，作为 fixture manifest parsing、expected-output comparison 和 release gate classification anchor。
+- [x] Task 3: 建立 owning SPEC executable anchors（AC: 1, 2, 4）
+  - [x] 新增 `src/diagnostics/command-result-schema.ts`，作为 `CommandResult` 与 `ValidationIssue` public JSON executable schema anchor。
+  - [x] 新增 `src/source/source-descriptor-schema.ts`，作为 `SourceDescriptor` 与 `SourceIntegrityEvidence` anchor，当前可提供最小 stub 供 `InstallCommandData` schema 引用。
+  - [x] 新增 `src/installer/install-plan-schema.ts`，作为 `SourceResolutionPlan`、`InstallPlan`、planned writes、confirmation state 和 write authorization anchor。
+  - [x] 新增 `src/manifest/manifest-schema.ts`，作为 manifest、skill/help/files index 和 phase coverage projection anchor。
+  - [x] 新增 `src/ide/adapter-registry.ts`，作为 `claude`、`agents` adapter ids、target ids、canonical target order 和 status mapping anchor。
+  - [x] 新增 `src/config/resolve-output-schema.ts`，作为 `speclite resolve` stdout JSON、stderr JSON Lines diagnostics 和 merge-result parser anchor。
+  - [x] 新增 `src/fixtures/fixture-contract.ts`，作为 fixture manifest parsing、expected-output comparison 和 release gate classification anchor。
 
-- [ ] Task 4: 实现共享 diagnostics projection，禁止第二套 JSON shape（AC: 3, 4, 5, 6, 9）
-  - [ ] 新增 `src/diagnostics/command-result.ts` 或等价 module，用于由领域结果构造 `CommandResult<InstallCommandData>`。
-  - [ ] 新增 `src/validation/issue-model.ts` 或等价 module，用于导出 stable issue category / severity ordering，或直接从 `command-result-schema.ts` 复用。
-  - [ ] 实现 `install` command failure projection：`schemaVersion: "speclite.command-result.v1"`、`command: "install"`、`status: "failure"`、`issues`、`nextActions`、`data`。
-  - [ ] JSON path fields 使用 project-relative POSIX path；guard failure 不应产生 project write path。
-  - [ ] `summary` 与 `nextActions` 保持 stable、无 timestamp、无 absolute path、无环境特定措辞。
+- [x] Task 4: 实现共享 diagnostics projection，禁止第二套 JSON shape（AC: 3, 4, 5, 6, 9）
+  - [x] 新增 `src/diagnostics/command-result.ts` 或等价 module，用于由领域结果构造 `CommandResult<InstallCommandData>`。
+  - [x] 新增 `src/validation/issue-model.ts` 或等价 module，用于导出 stable issue category / severity ordering，或直接从 `command-result-schema.ts` 复用。
+  - [x] 实现 `install` command failure projection：`schemaVersion: "speclite.command-result.v1"`、`command: "install"`、`status: "failure"`、`issues`、`nextActions`、`data`。
+  - [x] JSON path fields 使用 project-relative POSIX path；guard failure 不应产生 project write path。
+  - [x] `summary` 与 `nextActions` 保持 stable、无 timestamp、无 absolute path、无环境特定措辞。
 
-- [ ] Task 5: 实现 runtime/platform guard（AC: 4, 5, 6, 8, 9）
-  - [ ] 新增 `src/installer/runtime-guard.ts` 或更合适的 Story-scoped guard module。
-  - [ ] Node version guard 在读取或写入目标项目文件前执行；最低支持范围与 `package.json engines.node` 保持一致：`>=22`。
-  - [ ] 不满足 Node range 时输出 `environment.unsupported-node`，severity 为 `error`，details 至少包含 `detectedVersion` 与 `requiredRange`。
-  - [ ] Platform guard 支持 MVP 平台策略：macOS 13+ 与 Windows 11 核心安装路径；不支持时输出 `environment.unsupported-platform`，details 至少包含 `detectedPlatform` 与 `supportedPlatforms`。
-  - [ ] Details 不得包含 absolute paths、home directory、environment variable values、timestamps、stack traces 或 raw process dumps。
-  - [ ] 失败时不得创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
+- [x] Task 5: 实现 runtime/platform guard（AC: 4, 5, 6, 8, 9）
+  - [x] 新增 `src/installer/runtime-guard.ts` 或更合适的 Story-scoped guard module。
+  - [x] Node version guard 在读取或写入目标项目文件前执行；最低支持范围与 `package.json engines.node` 保持一致：`>=22`。
+  - [x] 不满足 Node range 时输出 `environment.unsupported-node`，severity 为 `error`，details 至少包含 `detectedVersion` 与 `requiredRange`。
+  - [x] Platform guard 支持 MVP 平台策略：macOS 13+ 与 Windows 11 核心安装路径；不支持时输出 `environment.unsupported-platform`，details 至少包含 `detectedPlatform` 与 `supportedPlatforms`。
+  - [x] Details 不得包含 absolute paths、home directory、environment variable values、timestamps、stack traces 或 raw process dumps。
+  - [x] 失败时不得创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
 
-- [ ] Task 6: 建立最小 fixture expected output skeleton（AC: 1, 3, 8, 9）
-  - [ ] 新增 `test/fixtures/fresh-install-empty-project/` 的最小 `input/`、`expected/command-json/` 和 `README.md` skeleton，或采用 fixture contract 推荐的等价 layout。
-  - [ ] 为 unsupported Node / unsupported platform guard failure 保留 expected command JSON skeleton，字段来自 `CommandResult` contract。
-  - [ ] expected output 不得包含 absolute paths、home directories、timestamps、环境变量或本机 checkout-specific text。
-  - [ ] 若添加 stderr JSON Lines fixture，必须逐行 parse 为 `ValidationIssue` shape。
+- [x] Task 6: 建立最小 fixture expected output skeleton（AC: 1, 3, 8, 9）
+  - [x] 新增 `test/fixtures/fresh-install-empty-project/` 的最小 `input/`、`expected/command-json/` 和 `README.md` skeleton，或采用 fixture contract 推荐的等价 layout。
+  - [x] 为 unsupported Node / unsupported platform guard failure 保留 expected command JSON skeleton，字段来自 `CommandResult` contract。
+  - [x] expected output 不得包含 absolute paths、home directories、timestamps、环境变量或本机 checkout-specific text。
+  - [x] 若添加 stderr JSON Lines fixture，必须逐行 parse 为 `ValidationIssue` shape。
 
-- [ ] Task 7: 编写 Story 1.1 最小测试（AC: 1, 2, 3, 4, 5, 6, 8, 9）
-  - [ ] `package.json` test：验证 `bin.speclite`、`engines.node`、required scripts 存在。
-  - [ ] CLI smoke test：验证 `speclite install` command skeleton 可加载，不要求执行后续 install stages。
-  - [ ] Contract producer/consumer tests：验证 guard failure 通过 `command-result-schema.ts` parse/validate。
-  - [ ] Runtime guard tests：模拟 unsupported Node 与 unsupported platform，断言 issue id、category、severity、details、exit code、`CommandResult.status`。
-  - [ ] No-write tests：guard failure 后断言不会创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
+- [x] Task 7: 编写 Story 1.1 最小测试（AC: 1, 2, 3, 4, 5, 6, 8, 9）
+  - [x] `package.json` test：验证 `bin.speclite`、`engines.node`、required scripts 存在。
+  - [x] CLI smoke test：验证 `speclite install` command skeleton 可加载，不要求执行后续 install stages。
+  - [x] Contract producer/consumer tests：验证 guard failure 通过 `command-result-schema.ts` parse/validate。
+  - [x] Runtime guard tests：模拟 unsupported Node 与 unsupported platform，断言 issue id、category、severity、details、exit code、`CommandResult.status`。
+  - [x] No-write tests：guard failure 后断言不会创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-9）
-  - [ ] 运行 `npm install` 或等价 dependency install，确认 lockfile 可复现。
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`。
-  - [ ] 运行 `npm run release:packaging-check`，当前应通过 stub 并清楚表明完整 packaging assertions deferred to Epic 6。
-  - [ ] 检查 diff，确保本 Story 未修改 planning artifacts，未实现 Post-MVP commands，未写入目标项目 runtime directories。
+- [x] Task 8: 本地验证与范围控制（AC: 1-9）
+  - [x] 运行 `npm install` 或等价 dependency install，确认 lockfile 可复现。
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`。
+  - [x] 运行 `npm run release:packaging-check`，当前应通过 stub 并清楚表明完整 packaging assertions deferred to Epic 6。
+  - [x] 检查 diff，确保本 Story 未修改 planning artifacts，未实现 Post-MVP commands，未写入目标项目 runtime directories。
 
 ## Dev Notes（开发备注）
 
@@ -310,12 +310,67 @@ This list is intentionally Story-scoped. If implementation needs tiny helper fil
 
 ### Agent Model Used（使用模型）
 
-_To be filled by the dev-story agent._
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
+
+- `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow`：失败，默认 Python 3.9.6 缺 `tomllib`。
+- `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow`：通过，workflow 无 prepend/append，persistent facts 为 `project-context.md`。
+- `npm install`：通过，生成 `package-lock.json`。
+- `npm run build`：首轮发现双 shebang 与 TypeScript optional-property 问题；修复后通过，产物路径为 `dist/bin/speclite.js`。
+- `npm test`：通过，4 个 test files、7 个 tests。
+- `node dist/bin/speclite.js install --json`：通过，built CLI 可执行并返回 success preflight `CommandResult`。
+- `npm run release:packaging-check`：通过，明确输出 packaging file inventory assertions deferred to Epic 6。
+- `git diff --check`：通过。
+
+### Implementation Plan（实现计划）
+
+- 先建立 Node/TypeScript ESM package scaffold 与 commander CLI entry，保证 `bin.speclite` 构建到 `dist/bin/speclite.js`。
+- 以 `src/diagnostics/command-result-schema.ts` 为唯一 `CommandResult` / `ValidationIssue` executable contract anchor，fixture consumer 与 producer 测试复用同一 schema。
+- 将 runtime/platform guard 放在 install command orchestration 的最前面，guard failure 只创建 deterministic failure envelope，不读取或写入目标项目 runtime directories。
+- 只创建 Story 1.1 所需 schema/registry anchors 和 install command context skeleton，不实现 target directory resolution、source selection、config initialization、IDE mirror creation 或 ready summary。
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 建立 root ESM package scaffold、`commander` CLI、`tsup` build、`tsx` dev entry、Vitest 测试骨架与 `release:packaging-check` Epic 6 placeholder。
+- 新增 `CommandResult`、`ValidationIssue`、source descriptor、install plan、manifest/index、IDE adapter registry、resolve output 与 fixture contract executable anchors。
+- 实现 install runtime/platform guard：Node `<22` 输出 `environment.unsupported-node`，unsupported platform 输出 `environment.unsupported-platform`，二者均复用 diagnostics contract 并返回 deterministic install failure envelope。
+- 建立 `fresh-install-empty-project` fixture skeleton 与 unsupported Node / unsupported platform expected command JSON。
+- 验证 guard failure 不创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`，且 passing guard 只创建 command context、不写入项目文件。
 
 ### File List（文件列表）
+
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/1-1-cli-install-entry-and-runtime-guard.md`
+- `package.json`
+- `package-lock.json`
+- `tsconfig.json`
+- `tsup.config.ts`
+- `vitest.config.ts`
+- `src/bin/speclite.ts`
+- `src/commands/install.ts`
+- `src/config/resolve-output-schema.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/fixtures/fixture-contract.ts`
+- `src/ide/adapter-registry.ts`
+- `src/installer/install-context.ts`
+- `src/installer/install-plan-schema.ts`
+- `src/installer/runtime-guard.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/source/source-descriptor-schema.ts`
+- `src/validation/issue-model.ts`
+- `test/cli-smoke.test.ts`
+- `test/contract-anchors.test.ts`
+- `test/fixtures/fresh-install-empty-project/README.md`
+- `test/fixtures/fresh-install-empty-project/input/.gitkeep`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-node.json`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-platform.json`
+- `test/package-scaffold.test.ts`
+- `test/runtime-guard.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-26：完成 Story 1.1 CLI scaffold、contract anchors、runtime/platform guard、fixture skeleton、最小测试与本地验证；Story 状态更新为 `review`。
