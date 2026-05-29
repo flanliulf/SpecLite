@@ -1,6 +1,6 @@
 # Story 3.5: CommandResult And ValidationIssue JSON Contract（CommandResult 与 ValidationIssue JSON 契约）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -80,73 +80,73 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-9）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 的实际代码已经建立 TypeScript CLI scaffold、core command orchestration、manifest/index parser、IDE adapter registry、validation aggregation、path normalization、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/commands/status.ts`、`src/commands/validate.ts`、`src/commands/update.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.5 中创建孤立的 diagnostics-only scaffold。
-  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/validation/issue-model.ts` 或等价 issue model、`src/validation/validate-project.ts`、`src/commands/*.ts`、`src/manifest/manifest-schema.ts`、`src/source/source-descriptor-schema.ts`、`src/installer/install-plan-schema.ts`、`src/ide/adapter-registry.ts` 和 `src/fs/path-normalizer.ts`。
-  - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-9）
+  - [x] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 的实际代码已经建立 TypeScript CLI scaffold、core command orchestration、manifest/index parser、IDE adapter registry、validation aggregation、path normalization、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [x] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/commands/status.ts`、`src/commands/validate.ts`、`src/commands/update.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.5 中创建孤立的 diagnostics-only scaffold。
+  - [x] 修改前完整读取所有 UPDATE files，尤其是 `src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/validation/issue-model.ts` 或等价 issue model、`src/validation/validate-project.ts`、`src/commands/*.ts`、`src/manifest/manifest-schema.ts`、`src/source/source-descriptor-schema.ts`、`src/installer/install-plan-schema.ts`、`src/ide/adapter-registry.ts` 和 `src/fs/path-normalizer.ts`。
+  - [x] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 建立或收口 `CommandResult` executable schema anchor（AC: 1, 6, 8, 9）
-  - [ ] 在 `src/diagnostics/command-result-schema.ts` 或既有 diagnostics schema anchor 中集中定义 `CommandResult`、`ValidationIssue`、command id enum、status enum、command-specific `data` payload 和 public projection types。
-  - [ ] 固定 schema version `speclite.command-result.v1`，并在 producer mode 禁止输出 owning SPEC 未声明的 top-level public fields。
-  - [ ] Command-specific data 必须覆盖 `InstallCommandData`、`StatusCommandData`、`ValidateCommandData`、`UpdateCommandData` 和 `RepairCommandData`；不要把 per-command private domain fields 泄露到 public JSON。
-  - [ ] `speclite resolve` 不使用 `CommandResult`，但其 stderr diagnostics 必须复用 `ValidationIssue` shape；不要把 resolve stdout 改成 envelope。
-  - [ ] Schema module 只能是 executable anchor，不是第二份 contract source；若 implementation 需要改变 public JSON behavior，必须先更新 owning SPEC，再同步 schema、reporter 和 fixtures。
+- [x] Task 2: 建立或收口 `CommandResult` executable schema anchor（AC: 1, 6, 8, 9）
+  - [x] 在 `src/diagnostics/command-result-schema.ts` 或既有 diagnostics schema anchor 中集中定义 `CommandResult`、`ValidationIssue`、command id enum、status enum、command-specific `data` payload 和 public projection types。
+  - [x] 固定 schema version `speclite.command-result.v1`，并在 producer mode 禁止输出 owning SPEC 未声明的 top-level public fields。
+  - [x] Command-specific data 必须覆盖 `InstallCommandData`、`StatusCommandData`、`ValidateCommandData`、`UpdateCommandData` 和 `RepairCommandData`；不要把 per-command private domain fields 泄露到 public JSON。
+  - [x] `speclite resolve` 不使用 `CommandResult`，但其 stderr diagnostics 必须复用 `ValidationIssue` shape；不要把 resolve stdout 改成 envelope。
+  - [x] Schema module 只能是 executable anchor，不是第二份 contract source；若 implementation 需要改变 public JSON behavior，必须先更新 owning SPEC，再同步 schema、reporter 和 fixtures。
 
-- [ ] Task 3: 实现统一 `ValidationIssue` model 与 taxonomy guardrails（AC: 1, 5, 7, 9）
-  - [ ] 将 `ValidationIssue` shape 统一为 `issueId`、`category`、`severity`、optional `affectedPath`、optional `component`、optional `details`、`impact`、`suggestedNextStep`。
-  - [ ] Producer 必须使用 taxonomy 中的 category 与 reserved issue id；不得在 rule 内拼接自由文本 issue id，也不得把 path、target id、source name、hash、count 或 timestamp 拼进 issue id。
-  - [ ] Validation rule 可以新增 existing category 下的 issue id，但必须在同一变更中更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 和 fixtures；若本 Story 没有授权修改 SPEC，则不得新增。
-  - [ ] 建立 redaction-safe issue details helper 或 validation guard，拒绝 absolute path、home directory、credential-bearing URL、environment variable value、stack trace、raw exception、timestamp、random id、temporary/cache path 和 hash value 进入 `details`。
-  - [ ] `impact` 和 `suggestedNextStep` 必须使用 stable short templates；human-readable renderer 可以在 JSON contract 外补充解释，但不得改变 automation fields。
+- [x] Task 3: 实现统一 `ValidationIssue` model 与 taxonomy guardrails（AC: 1, 5, 7, 9）
+  - [x] 将 `ValidationIssue` shape 统一为 `issueId`、`category`、`severity`、optional `affectedPath`、optional `component`、optional `details`、`impact`、`suggestedNextStep`。
+  - [x] Producer 必须使用 taxonomy 中的 category 与 reserved issue id；不得在 rule 内拼接自由文本 issue id，也不得把 path、target id、source name、hash、count 或 timestamp 拼进 issue id。
+  - [x] Validation rule 可以新增 existing category 下的 issue id，但必须在同一变更中更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 和 fixtures；若本 Story 没有授权修改 SPEC，则不得新增。
+  - [x] 建立 redaction-safe issue details helper 或 validation guard，拒绝 absolute path、home directory、credential-bearing URL、environment variable value、stack trace、raw exception、timestamp、random id、temporary/cache path 和 hash value 进入 `details`。
+  - [x] `impact` 和 `suggestedNextStep` 必须使用 stable short templates；human-readable renderer 可以在 JSON contract 外补充解释，但不得改变 automation fields。
 
-- [ ] Task 4: 实现 command status、exit code 和 special blockers projection（AC: 2, 3, 4）
-  - [ ] 在 `src/diagnostics/command-result.ts` 或等价 module 中实现单一 status derivation function：command incomplete 或任一 error/critical issue => `failure`；仅 warning issue => `warning`；无 warning/error/critical issue => `success`。
-  - [ ] 将 exit code projection 与 `CommandResult.status` 绑定：`failure` => non-zero，`success` / `warning` => 0；禁止 command handler 单独重写 exit code。
-  - [ ] 对 `update` / `update.repair` 实现 conflict blocker rule：`data.conflicts.length > 0` 必须产生 `failure`，并只投影一个 `update.conflicts` command-level issue。
-  - [ ] 对 write-capable commands 的 `operation-lock.project-locked` 保持 command-level blocker；在获取 lock 前失败时不得输出看似完整的 update/repair plan payload。
-  - [ ] 保持 Story 3.1 的 status health 分工：`highLevelHealth` 不影响 `CommandResult.status`，`status` 的 partial/failed health 不自动生成 warning issue。
+- [x] Task 4: 实现 command status、exit code 和 special blockers projection（AC: 2, 3, 4）
+  - [x] 在 `src/diagnostics/command-result.ts` 或等价 module 中实现单一 status derivation function：command incomplete 或任一 error/critical issue => `failure`；仅 warning issue => `warning`；无 warning/error/critical issue => `success`。
+  - [x] 将 exit code projection 与 `CommandResult.status` 绑定：`failure` => non-zero，`success` / `warning` => 0；禁止 command handler 单独重写 exit code。
+  - [x] 对 `update` / `update.repair` 实现 conflict blocker rule：`data.conflicts.length > 0` 必须产生 `failure`，并只投影一个 `update.conflicts` command-level issue。
+  - [x] 对 write-capable commands 的 `operation-lock.project-locked` 保持 command-level blocker；在获取 lock 前失败时不得输出看似完整的 update/repair plan payload。
+  - [x] 保持 Story 3.1 的 status health 分工：`highLevelHealth` 不影响 `CommandResult.status`，`status` 的 partial/failed health 不自动生成 warning issue。
 
-- [ ] Task 5: 统一 command id、target project、path 与 ordering helpers（AC: 6, 8, 9）
-  - [ ] 建立 command id normalization helper，输出仅限 `install`、`status`、`validate`、`update`、`update.repair`；不得从 raw argv、alias、flag order 或 shell string 生成 public command id。
-  - [ ] 建立 `targetProject` display identifier helper：优先使用 trim 后非空 project config name；否则使用 target project directory basename；不得 slugify、truncate、转义为 path 或按 checkout root 改写。
-  - [ ] 所有 public path fields 必须通过 `src/fs/path-normalizer.ts` 或等价 shared helper 生成 project-relative POSIX path；`data.paths.projectRoot` 固定为 `"."`。
-  - [ ] 实现 shared sorting helpers：severity order、canonical issue category order、adapter target order、normalized path lexicographic order、command-specific next action priority order 和 plan action ordering。
-  - [ ] Tests 必须断言 arrays 不依赖 object key insertion、filesystem traversal、glob order、rule registration order 或 async completion order。
+- [x] Task 5: 统一 command id、target project、path 与 ordering helpers（AC: 6, 8, 9）
+  - [x] 建立 command id normalization helper，输出仅限 `install`、`status`、`validate`、`update`、`update.repair`；不得从 raw argv、alias、flag order 或 shell string 生成 public command id。
+  - [x] 建立 `targetProject` display identifier helper：优先使用 trim 后非空 project config name；否则使用 target project directory basename；不得 slugify、truncate、转义为 path 或按 checkout root 改写。
+  - [x] 所有 public path fields 必须通过 `src/fs/path-normalizer.ts` 或等价 shared helper 生成 project-relative POSIX path；`data.paths.projectRoot` 固定为 `"."`。
+  - [x] 实现 shared sorting helpers：severity order、canonical issue category order、adapter target order、normalized path lexicographic order、command-specific next action priority order 和 plan action ordering。
+  - [x] Tests 必须断言 arrays 不依赖 object key insertion、filesystem traversal、glob order、rule registration order 或 async completion order。
 
-- [ ] Task 6: 接入 covered command reporters and presentation profiles（AC: 1, 5, 8）
-  - [ ] `src/commands/install.ts`、`src/commands/status.ts`、`src/commands/validate.ts` 和 `src/commands/update.ts` 只做 orchestration，并返回 domain result 或 `CommandResult` input；不要在 command modules 内直接拼接 JSON。
-  - [ ] `src/diagnostics/output.ts` 拥有 Compact、Evidence 和 Structured profile；default human-readable output 与 `--json` 必须共享同一 semantic model。
-  - [ ] `status` default human-readable 使用 Compact profile；`install`、`validate`、`update` default human-readable 使用 Evidence profile；`--json` 始终使用 Structured profile。
-  - [ ] Structured renderer 输出 raw JSON object / string，不得包含 ANSI escape、颜色、图标、table layout、terminal width formatting 或 human-only decoration fields。
-  - [ ] Human-readable output 必须保留 severity、category、issue id、affected path 或 component、impact、suggested next step、next actions 和 required path/target evidence；颜色和符号只能作为可选增强。
+- [x] Task 6: 接入 covered command reporters and presentation profiles（AC: 1, 5, 8）
+  - [x] `src/commands/install.ts`、`src/commands/status.ts`、`src/commands/validate.ts` 和 `src/commands/update.ts` 只做 orchestration，并返回 domain result 或 `CommandResult` input；不要在 command modules 内直接拼接 JSON。
+  - [x] `src/diagnostics/output.ts` 拥有 Compact、Evidence 和 Structured profile；default human-readable output 与 `--json` 必须共享同一 semantic model。
+  - [x] `status` default human-readable 使用 Compact profile；`install`、`validate`、`update` default human-readable 使用 Evidence profile；`--json` 始终使用 Structured profile。
+  - [x] Structured renderer 输出 raw JSON object / string，不得包含 ANSI escape、颜色、图标、table layout、terminal width formatting 或 human-only decoration fields。
+  - [x] Human-readable output 必须保留 severity、category、issue id、affected path 或 component、impact、suggested next step、next actions 和 required path/target evidence；颜色和符号只能作为可选增强。
 
-- [ ] Task 7: 收口 command-specific data payload contracts（AC: 1, 4, 8, 9）
-  - [ ] `InstallCommandData` 必须只输出 owning SPEC 声明的 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps`、`pendingSteps` 等字段；不得新增未契约化 `readySummary` blob 或 timing fields。
-  - [ ] `StatusCommandData` 必须包含 `manifestPresent`、`installedModules`、`ideTargets`、`highLevelHealth`、`paths`，可选 `sourceDescriptor`、`manifestVersion`；不得包含 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths` 或 hash scan data。
-  - [ ] `ValidateCommandData` 必须包含 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`；`issueCounts` 固定包含 `info`、`warning`、`error`、`critical` 四个 key。
-  - [ ] `UpdateCommandData` 必须区分 `updatePlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`；`changedPaths` / `skippedPaths` 只表示 actual apply result，`writeAuthorized === false` 时必须为空。
-  - [ ] `RepairCommandData` 必须区分 `repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`；repair actions 只能面向 installer-owned paths。
-  - [ ] Producer mode 只能输出 owning SPEC reason code registry 中的 reason codes；consumer/parser mode 必须容忍 unknown future reason codes，并保留其 stable display string。
+- [x] Task 7: 收口 command-specific data payload contracts（AC: 1, 4, 8, 9）
+  - [x] `InstallCommandData` 必须只输出 owning SPEC 声明的 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps`、`pendingSteps` 等字段；不得新增未契约化 `readySummary` blob 或 timing fields。
+  - [x] `StatusCommandData` 必须包含 `manifestPresent`、`installedModules`、`ideTargets`、`highLevelHealth`、`paths`，可选 `sourceDescriptor`、`manifestVersion`；不得包含 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths` 或 hash scan data。
+  - [x] `ValidateCommandData` 必须包含 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`；`issueCounts` 固定包含 `info`、`warning`、`error`、`critical` 四个 key。
+  - [x] `UpdateCommandData` 必须区分 `updatePlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`；`changedPaths` / `skippedPaths` 只表示 actual apply result，`writeAuthorized === false` 时必须为空。
+  - [x] `RepairCommandData` 必须区分 `repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`；repair actions 只能面向 installer-owned paths。
+  - [x] Producer mode 只能输出 owning SPEC reason code registry 中的 reason codes；consumer/parser mode 必须容忍 unknown future reason codes，并保留其 stable display string。
 
-- [ ] Task 8: 编写 contract tests、focused unit tests 和 fixture assertions（AC: 1-9）
-  - [ ] Schema tests 覆盖 valid / invalid `CommandResult` envelope、top-level field allowlist、schemaVersion、command id enum、status enum、command-specific data payload required fields 和 producer-only unknown field rejection。
-  - [ ] Status derivation tests 覆盖 success、warning、failure、error/critical issue、command incomplete、warning exit 0、failure non-zero、`status.data.highLevelHealth` 与 command status 独立。
-  - [ ] Update conflict tests 覆盖 `data.conflicts.length > 0` 产生 single `update.conflicts` issue、non-zero exit code、per-path conflict details 不复制到 `issues[]`、dry-run 或 `writeAuthorized === false` 仍暴露 conflicts。
-  - [ ] Command id tests 覆盖 alias、flag order、`--json`、`--yes`、`--project-root` 不影响 command id；`update --repair` 输出 `update.repair`。
-  - [ ] Target project tests 覆盖 project config name、空白 config name fallback、checkout root 改变、非 ASCII 项目名和不 slugify。
-  - [ ] ValidationIssue redaction tests 覆盖 details / impact / suggestedNextStep 不含 absolute path、home directory、Windows drive letter、environment variable value、credential、stack trace、timestamp、hash、temporary/cache path 或 random id。
-  - [ ] Ordering tests 覆盖 issues severity/category/path/id order、nextActions priority order、checkedCategories canonical order、checkedTargets adapter order、validatedPaths lexicographic order、plan/conflict/changed/skipped paths stable order。
-  - [ ] Renderer tests 覆盖 Compact / Evidence / Structured profile 共享同一 semantic model，`--json` 无 ANSI / icon / terminal width formatting，human-readable 不是 automation-only carrier。
-  - [ ] Resolve exception tests 覆盖 `speclite resolve` stdout 不包裹 `CommandResult`，stderr JSON Lines diagnostics 使用 `ValidationIssue` shape，warning diagnostics 不导致 resolve failure。
-  - [ ] Fixture tests 覆盖至少 install/status/validate/update/update.repair 的 representative success、warning 和 failure JSON snapshots，并用 parsed semantic comparison 而不是 raw text comparison。
+- [x] Task 8: 编写 contract tests、focused unit tests 和 fixture assertions（AC: 1-9）
+  - [x] Schema tests 覆盖 valid / invalid `CommandResult` envelope、top-level field allowlist、schemaVersion、command id enum、status enum、command-specific data payload required fields 和 producer-only unknown field rejection。
+  - [x] Status derivation tests 覆盖 success、warning、failure、error/critical issue、command incomplete、warning exit 0、failure non-zero、`status.data.highLevelHealth` 与 command status 独立。
+  - [x] Update conflict tests 覆盖 `data.conflicts.length > 0` 产生 single `update.conflicts` issue、non-zero exit code、per-path conflict details 不复制到 `issues[]`、dry-run 或 `writeAuthorized === false` 仍暴露 conflicts。
+  - [x] Command id tests 覆盖 alias、flag order、`--json`、`--yes`、`--project-root` 不影响 command id；`update --repair` 输出 `update.repair`。
+  - [x] Target project tests 覆盖 project config name、空白 config name fallback、checkout root 改变、非 ASCII 项目名和不 slugify。
+  - [x] ValidationIssue redaction tests 覆盖 details / impact / suggestedNextStep 不含 absolute path、home directory、Windows drive letter、environment variable value、credential、stack trace、timestamp、hash、temporary/cache path 或 random id。
+  - [x] Ordering tests 覆盖 issues severity/category/path/id order、nextActions priority order、checkedCategories canonical order、checkedTargets adapter order、validatedPaths lexicographic order、plan/conflict/changed/skipped paths stable order。
+  - [x] Renderer tests 覆盖 Compact / Evidence / Structured profile 共享同一 semantic model，`--json` 无 ANSI / icon / terminal width formatting，human-readable 不是 automation-only carrier。
+  - [x] Resolve exception tests 覆盖 `speclite resolve` stdout 不包裹 `CommandResult`，stderr JSON Lines diagnostics 使用 `ValidationIssue` shape，warning diagnostics 不导致 resolve failure。
+  - [x] Fixture tests 覆盖至少 install/status/validate/update/update.repair 的 representative success、warning 和 failure JSON snapshots，并用 parsed semantic comparison 而不是 raw text comparison。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-9）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 diagnostics schema、CommandResult projection、renderer、status/validate/update command projection、path normalization 和 fixture comparison focused tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 diagnostics-only fallback implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 3.6 的完整 validate progress/category coverage UX、Epic 4 update/repair apply behavior、Epic 5 source integrity expansion、Epic 6 release fixture matrix、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair`、command pointer artifacts 或 dedicated Copilot/Cursor target ids。
+- [x] Task 9: 本地验证与范围控制（AC: 1-9）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 diagnostics schema、CommandResult projection、renderer、status/validate/update command projection、path normalization 和 fixture comparison focused tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 diagnostics-only fallback implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Story 3.6 的完整 validate progress/category coverage UX、Epic 4 update/repair apply behavior、Epic 5 source integrity expansion、Epic 6 release fixture matrix、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair`、command pointer artifacts 或 dedicated Copilot/Cursor target ids。
 
 ## Dev Notes（开发备注）
 
@@ -442,17 +442,53 @@ Path policy：
 
 ### Agent Model Used（使用的代理模型）
 
-由 dev agent 填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-由 dev agent 填写。
+- 2026-05-28 22:30 CST: 按 `bmad-dev-story` 激活 workflow；`python3` resolver 因本机 Python 3.9 缺少 `tomllib` 失败，已用 `python3.12` 成功解析 workflow。无 prepend/append，persistent fact 为 `_bmad-output/project-context.md`。
+- 2026-05-28 22:30 CST: 已读取 Story、`_bmad-output/project-context.md`、`_bmad-output/implementation-artifacts/sprint-status.yaml` 和 worktree dirty 状态；将 sprint status 中本 Story 从 `ready-for-dev` 推进到 `in-progress`。
+- 2026-05-28 22:31 CST: Task 1 前置核对发现 `src/commands/update.ts` 不存在；`src/commands/` 仅包含 `install.ts`、`resolve.ts`、`status.ts`、`validate.ts`。`src/bin/speclite.ts` 当前未注册 `update` / `update --repair`。
+- 2026-05-28 22:31 CST: 依据 Task 1 明确规则触发 HALT：缺少 `src/commands/update.ts` 时应先完成前置 stories，不得在 Story 3.5 中创建孤立 diagnostics-only scaffold。
+- 2026-05-29 16:27 CST: Fresh sub-agent 按 `bmad-dev-story` 恢复 Story 3.5；`python3` resolver 仍因 Xcode Python 3.9 缺 `tomllib` 失败，已用 `python3.12` 成功解析 workflow。复核 Story、sprint status、dirty worktree 和 UPDATE files 后确认前置 `src/commands/update.ts` scaffold 已存在。
+- 2026-05-29 16:29 CST: 先补红灯测试覆盖 update/repair data payload allowlist、producer unknown field rejection、redaction unsafe issue rejection、targetProject config name、update conflict single blocker 和 stable issue prose。
+- 2026-05-29 16:33 CST: 收口 `CommandResult` executable schema，增加 `RepairCommandData`、`UpdatePlan`、`RepairPlan`、`UpdateConflict`、reason code producer guard、covered command fixture schema union、shared status/exit/command id/targetProject/update conflict projection helper。
+- 2026-05-29 16:34 CST: 保持 `update` / `update.repair` 为 non-write placeholder：输出契约化 empty plan，`writeAuthorized: false`，不实现 safe write、operation lock、真实 conflict detector 或 repair apply。
+- 2026-05-29 16:35 CST: 验证通过：Story 3.5 focused tests、相关 CLI/diagnostics tests、全量 `npm test`、`npm run build`。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context 由 `bmad-create-story` workflow 创建。
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- HALT: Story 3.5 未完成实现、测试或 DoD。阻塞原因是 covered command 前置实现不完整，尤其缺少 `src/commands/update.ts` 与 CLI `update` / `update --repair` 注册；直接在 Story 3.5 中创建孤立 update scaffold 会违反 Task 1 范围约束。
+- 已完成 `CommandResult` / `ValidationIssue` JSON contract 收敛：covered command schemas、top-level allowlist、status/exit projection、targetProject display id、update conflict blocker、path/array sorting、redaction guard 和 renderer shared semantic model 均有定向测试覆盖。
+- `speclite update` / `speclite update --repair` 保持 Epic 4 前的 non-write placeholder，只暴露契约化 public payload 与稳定 command id；未实现真实 update plan、conflict detector、repair apply 或 operation lock。
+- Story 3.5 定向验证、相关 CLI/diagnostics tests、全量测试和 build 均通过，Story 状态已推进到 `review`。
 
 ### File List（文件列表）
 
-由 dev agent 填写。
+- `_bmad-output/implementation-artifacts/code-reviews/3-5-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-5-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-5-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/3-5-commandresult-and-validationissue-json-contract.md`
+- `src/commands/install.ts`
+- `src/commands/status.ts`
+- `src/commands/update.ts`
+- `src/commands/validate.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/fixtures/fixture-contract.ts`
+- `src/validation/issue-model.ts`
+- `src/validation/rules/file-integrity.ts`
+- `src/validation/rules/ide-mirror.ts`
+- `test/contract-anchors.test.ts`
+- `test/install-module-selection.test.ts`
+- `test/update-command.test.ts`
+- `test/validate-command.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-28: 启动 Story 3.5 dev-story，记录前置实现 blocker，并将 Story 保持为 `in-progress`；未进行产品代码实现。
+- 2026-05-29: 完成 Story 3.5 `CommandResult` / `ValidationIssue` JSON contract、schema、projection、renderer 和 focused tests，Story 状态推进到 `review`。

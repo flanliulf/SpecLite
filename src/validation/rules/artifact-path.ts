@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { access, lstat } from "node:fs/promises";
+import { access, lstat, realpath } from "node:fs/promises";
 import path from "node:path";
 import type { ValidationIssue } from "../../diagnostics/command-result-schema.js";
 import {
@@ -19,7 +19,7 @@ export type ArtifactPathIssueId =
   | "artifact-path.invalid-required-metadata";
 
 type ArtifactPathRole = "configuredRoot" | "defaultOutputPath" | "actualArtifactPath";
-type MetadataLocation = "frontmatter" | "sidecar";
+type MetadataLocation = "frontmatter" | "sidecar" | "directory";
 
 export async function validateArtifactPathContract(input: {
   projectRoot: string;
@@ -78,7 +78,9 @@ export async function validateArtifactPathContract(input: {
     }
   }
 
-  issues.push(...validateRequiredMetadata(input));
+  if (input.metadata !== undefined) {
+    issues.push(...validateRequiredMetadata(input));
+  }
 
   return dedupeIssues(issues);
 }
@@ -278,6 +280,7 @@ async function findSymlinkSegment(input: {
   relativePath: string;
   pathRole: ArtifactPathRole;
 }): Promise<ValidationIssue | undefined> {
+  const realProjectRoot = await realpath(input.projectRoot);
   const segments = input.relativePath.split("/");
   let current = input.projectRoot;
 
@@ -286,12 +289,15 @@ async function findSymlinkSegment(input: {
     try {
       const stat = await lstat(current);
       if (stat.isSymbolicLink()) {
+        const realSegment = await realpath(current);
+        if (isSameOrDescendantNativePath(realSegment, realProjectRoot)) continue;
+
         return createArtifactPathIssue({
           issueId: "artifact-path.symlink-escape",
           affectedPath: `artifact:${input.pathRole}`,
           details: {
             pathRole: input.pathRole,
-            reason: "existing-path-segment-is-symlink",
+            reason: "symlink-escape",
           },
           impact: "A workflow artifact path crosses a symlink and cannot be proven to stay inside the target project.",
           suggestedNextStep: "Replace the symlinked path segment with a real project directory before continuing.",
@@ -304,6 +310,11 @@ async function findSymlinkSegment(input: {
   }
 
   return undefined;
+}
+
+function isSameOrDescendantNativePath(candidatePath: string, containerPath: string): boolean {
+  const relative = path.relative(containerPath, candidatePath);
+  return relative.length === 0 || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
 function createArtifactPathIssue(input: {

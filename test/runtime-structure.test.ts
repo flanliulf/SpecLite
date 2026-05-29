@@ -13,6 +13,17 @@ const fixtureExpectedRoot = path.join(
   process.cwd(),
   "test/fixtures/fresh-install-empty-project/expected",
 );
+const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 53;
+const REQUIRED_METHOD_LOOP_SKILL_IDS = [
+  "speclite-advanced-elicitation",
+  "speclite-review-acceptance-auditor",
+  "speclite-agent-analyst",
+  "speclite-agent-pm",
+  "speclite-agent-ux-designer",
+  "speclite-agent-architect",
+  "speclite-agent-dev",
+  "speclite-dev-story",
+];
 
 describe("runtime structure and IDE mirror creation", () => {
   it("writes the confirmed fresh install shape and completes ReadyCheck", async () => {
@@ -34,8 +45,18 @@ describe("runtime structure and IDE mirror creation", () => {
       expect(outcome.result.status).toBe("success");
       expect(outcome.result.data.installedModules).toEqual(["core", "sdlc"]);
       expect(outcome.result.data.ideTargets).toEqual([
-        { id: "claude", status: "configured", targetPath: ".claude/skills", skillCount: expect.any(Number) },
-        { id: "agents", status: "configured", targetPath: ".agents/skills", skillCount: expect.any(Number) },
+        {
+          id: "claude",
+          status: "configured",
+          targetPath: ".claude/skills",
+          skillCount: EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT,
+        },
+        {
+          id: "agents",
+          status: "configured",
+          targetPath: ".agents/skills",
+          skillCount: EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT,
+        },
       ]);
       expect(outcome.result.data.completedSteps).toContain("ide-mirror-creation");
       expect(outcome.result.data.completedSteps).toContain("manifest-generation");
@@ -117,8 +138,21 @@ describe("runtime structure and IDE mirror creation", () => {
       const storyReviewPhaseRow = phaseCoverage.rows.find(
         (row: { canonicalSkillId: string }) => row.canonicalSkillId === "speclite-story-review-01-reviewer",
       );
+      const canonicalSkillIds = skillIndex.entries.map(
+        (entry: { canonicalSkillId: string }) => entry.canonicalSkillId,
+      );
+      const claudeSkillFileIds = mirrorSkillFileIds(filesIndex, ".claude/skills");
+      const agentsSkillFileIds = mirrorSkillFileIds(filesIndex, ".agents/skills");
 
       expect(manifest).toMatchObject(expectedManifest);
+      expect(canonicalSkillIds).toHaveLength(EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT);
+      expect(new Set(canonicalSkillIds).size).toBe(EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT);
+      expect(canonicalSkillIds).toEqual([...canonicalSkillIds].sort());
+      expect(canonicalSkillIds).toEqual(expect.arrayContaining(REQUIRED_METHOD_LOOP_SKILL_IDS));
+      expect(claudeSkillFileIds).toHaveLength(EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT);
+      expect(agentsSkillFileIds).toHaveLength(EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT);
+      expect(claudeSkillFileIds).toEqual(canonicalSkillIds);
+      expect(agentsSkillFileIds).toEqual(canonicalSkillIds);
       expect(devStoryEntries).toHaveLength(1);
       expect(devStoryEntry).toEqual(expectedDevStorySkillIndex);
       expect(devStoryFileEntry).toEqual(expectedDevStoryFileIndex);
@@ -282,7 +316,12 @@ describe("runtime structure and IDE mirror creation", () => {
 
       expect(outcome.exitCode).toBe(0);
       expect(outcome.result.data.ideTargets).toEqual([
-        { id: "agents", status: "configured", targetPath: ".agents/skills", skillCount: expect.any(Number) },
+        {
+          id: "agents",
+          status: "configured",
+          targetPath: ".agents/skills",
+          skillCount: EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT,
+        },
       ]);
       await expect(
         readFile(path.join(tempRoot, ".agents/skills/speclite-help/SKILL.md"), "utf8"),
@@ -534,4 +573,14 @@ describe("runtime structure and IDE mirror creation", () => {
 
 async function readJson(filePath: string): Promise<any> {
   return JSON.parse(await readFile(filePath, "utf8"));
+}
+
+function mirrorSkillFileIds(
+  filesIndex: { entries: Array<{ path: string }> },
+  mirrorRoot: ".claude/skills" | ".agents/skills",
+): string[] {
+  return filesIndex.entries
+    .filter((entry) => entry.path.startsWith(`${mirrorRoot}/`) && entry.path.endsWith("/SKILL.md"))
+    .map((entry) => entry.path.slice(`${mirrorRoot}/`.length).split("/")[0]!)
+    .sort();
 }

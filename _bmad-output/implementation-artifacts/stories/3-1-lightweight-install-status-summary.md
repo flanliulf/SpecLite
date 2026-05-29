@@ -1,6 +1,6 @@
 # Story 3.1: Lightweight Install Status Summary（轻量安装状态摘要）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -65,70 +65,70 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
-  - [ ] 确认 Epic 1 / Epic 2 的实际代码已建立 TypeScript CLI scaffold、`speclite install`、manifest/index generation、source descriptor projection、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`src/bin/speclite.ts`、`src/commands/status.ts`、`src/diagnostics/command-result-schema.ts`、`src/manifest/manifest-schema.ts`、`src/source/source-descriptor-schema.ts` 或 `src/ide/adapter-registry.ts` 仍不存在，先完成前置 stories；不得在 Story 3.1 中一次性重建全部安装器或 IDE mirror pipeline。
-  - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
+  - [x] 确认 Epic 1 / Epic 2 的实际代码已建立 TypeScript CLI scaffold、`speclite install`、manifest/index generation、source descriptor projection、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [x] 如果 `package.json`、`src/`、`test/`、`src/bin/speclite.ts`、`src/commands/status.ts`、`src/diagnostics/command-result-schema.ts`、`src/manifest/manifest-schema.ts`、`src/source/source-descriptor-schema.ts` 或 `src/ide/adapter-registry.ts` 仍不存在，先完成前置 stories；不得在 Story 3.1 中一次性重建全部安装器或 IDE mirror pipeline。
+  - [x] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 接入 `speclite status` 命令编排（AC: 1, 2, 4, 5）
-  - [ ] 在 `src/commands/status.ts` 或既有 status command module 中实现 command orchestration；`src/commands/` 只做参数解析、调用领域读取函数和返回 `CommandResult<StatusCommandData>`。
-  - [ ] 支持默认 human-readable 输出与 `--json` 输出，command id 必须稳定为 `status`，不得使用 raw argv、alias 或带 flags 的字符串。
-  - [ ] 默认 project root resolution 必须复用 Story 1.2 / `src/fs/path-normalizer.ts` 或既有 project-root helper；public path fields 使用 project-relative POSIX path。
-  - [ ] `status` 默认不得检查 project operation lock；lock checks 保留给 write-capable commands 和显式 `speclite validate`。
+- [x] Task 2: 接入 `speclite status` 命令编排（AC: 1, 2, 4, 5）
+  - [x] 在 `src/commands/status.ts` 或既有 status command module 中实现 command orchestration；`src/commands/` 只做参数解析、调用领域读取函数和返回 `CommandResult<StatusCommandData>`。
+  - [x] 支持默认 human-readable 输出与 `--json` 输出，command id 必须稳定为 `status`，不得使用 raw argv、alias 或带 flags 的字符串。
+  - [x] 默认 project root resolution 必须复用 Story 1.2 / `src/fs/path-normalizer.ts` 或既有 project-root helper；public path fields 使用 project-relative POSIX path。
+  - [x] `status` 默认不得检查 project operation lock；lock checks 保留给 write-capable commands 和显式 `speclite validate`。
 
-- [ ] Task 3: 实现 lightweight installed-state reader（AC: 1, 2, 4, 6）
-  - [ ] 新增或复用 `src/status/installed-state.ts`、`src/manifest/manifest-reader.ts` 或等价模块，读取 `_speclite/_config/manifest.yaml` 和必要 indexes 的最小 shape。
-  - [ ] 读取 `SourceDescriptor` projection 时必须复用 `src/source/source-descriptor-schema.ts`；不要手写第二套 source descriptor parser。
-  - [ ] 读取 manifest/index 时必须复用 `src/manifest/manifest-schema.ts` 或同一 schema/parser anchor；不要在 status command 内复制 manifest field contract。
-  - [ ] 未安装时返回 `manifestPresent: false`、`installedModules: []`、`ideTargets` 的空或 not-configured 摘要、`highLevelHealth: "not-configured"` 和推荐安装的 next action。
-  - [ ] Manifest/index/source descriptor 损坏或不可读时，status 可以输出 `highLevelHealth: "failed"`；只有 lightweight read 本身无法生成稳定 command result 时，才通过 command-level issue 改变 `CommandResult.status`。
+- [x] Task 3: 实现 lightweight installed-state reader（AC: 1, 2, 4, 6）
+  - [x] 新增或复用 `src/status/installed-state.ts`、`src/manifest/manifest-reader.ts` 或等价模块，读取 `_speclite/_config/manifest.yaml` 和必要 indexes 的最小 shape。
+  - [x] 读取 `SourceDescriptor` projection 时必须复用 `src/source/source-descriptor-schema.ts`；不要手写第二套 source descriptor parser。
+  - [x] 读取 manifest/index 时必须复用 `src/manifest/manifest-schema.ts` 或同一 schema/parser anchor；不要在 status command 内复制 manifest field contract。
+  - [x] 未安装时返回 `manifestPresent: false`、`installedModules: []`、`ideTargets` 的空或 not-configured 摘要、`highLevelHealth: "not-configured"` 和推荐安装的 next action。
+  - [x] Manifest/index/source descriptor 损坏或不可读时，status 可以输出 `highLevelHealth: "failed"`；只有 lightweight read 本身无法生成稳定 command result 时，才通过 command-level issue 改变 `CommandResult.status`。
 
-- [ ] Task 4: 实现 `highLevelHealth` deterministic aggregation（AC: 1, 2, 4, 5, 6）
-  - [ ] 按 owning SPEC 的 first-match order 计算：`not-configured` -> `failed` -> `partial` -> `configured`。
-  - [ ] `not-configured` 条件：`manifestPresent === false`，且本次 lightweight status 没有发现可读 installed-state manifest。
-  - [ ] `failed` 条件：manifest/index/source descriptor shape 损坏或不可读，导致无法产生稳定 installed summary；或任何已安装/显式选择的 IDE target summary 为 `failed`。
-  - [ ] `partial` 条件：manifest 可读但 installed summary 不完整，例如 `installedModules` 为空、任一已安装/显式选择的 IDE target 为 `not-configured` 或 `partial`，或 required runtime path summary 缺失。
-  - [ ] `configured` 条件：manifest、source descriptor、installed modules、required runtime paths 和所有已安装/显式选择的 IDE target summary 都可读且为 configured。
-  - [ ] 不得从 `CommandResult.status` 反推 `highLevelHealth`，也不得从 `highLevelHealth` 自动生成 warning issue 或 non-zero exit code。
+- [x] Task 4: 实现 `highLevelHealth` deterministic aggregation（AC: 1, 2, 4, 5, 6）
+  - [x] 按 owning SPEC 的 first-match order 计算：`not-configured` -> `failed` -> `partial` -> `configured`。
+  - [x] `not-configured` 条件：`manifestPresent === false`，且本次 lightweight status 没有发现可读 installed-state manifest。
+  - [x] `failed` 条件：manifest/index/source descriptor shape 损坏或不可读，导致无法产生稳定 installed summary；或任何已安装/显式选择的 IDE target summary 为 `failed`。
+  - [x] `partial` 条件：manifest 可读但 installed summary 不完整，例如 `installedModules` 为空、任一已安装/显式选择的 IDE target 为 `not-configured` 或 `partial`，或 required runtime path summary 缺失。
+  - [x] `configured` 条件：manifest、source descriptor、installed modules、required runtime paths 和所有已安装/显式选择的 IDE target summary 都可读且为 configured。
+  - [x] 不得从 `CommandResult.status` 反推 `highLevelHealth`，也不得从 `highLevelHealth` 自动生成 warning issue 或 non-zero exit code。
 
-- [ ] Task 5: 实现 IDE target status summary（AC: 2, 3, 7）
-  - [ ] 在 `src/ide/adapter-registry.ts` 中复用 canonical target order：`claude`，然后 `agents`。
-  - [ ] Status summary layer 使用 `StatusSummaryTargetHealth = "not-configured" | "configured" | "partial" | "failed"` 或等价类型；不要复用 installed phase coverage 的 `mapped`。
-  - [ ] 每个 `IdeTargetStatus` 至少包含 `id` 和 `status`；可按 contract 输出 `targetPath`、`skillCount` 或原因摘要，但 path 必须是 project-relative POSIX path。
-  - [ ] 对 target directory 缺失、expected entry 缺失、manifest/index 与 target projection 不完整等轻量可读问题，输出 `partial` 或 `failed` 摘要并给出原因；不要执行 package hash comparison 或 full file integrity scan。
-  - [ ] 不新增 `copilot`、`cursor` 或 branded target id；`.agents/skills` 一律显示为 `agents` / `.agents/skills` target。
+- [x] Task 5: 实现 IDE target status summary（AC: 2, 3, 7）
+  - [x] 在 `src/ide/adapter-registry.ts` 中复用 canonical target order：`claude`，然后 `agents`。
+  - [x] Status summary layer 使用 `StatusSummaryTargetHealth = "not-configured" | "configured" | "partial" | "failed"` 或等价类型；不要复用 installed phase coverage 的 `mapped`。
+  - [x] 每个 `IdeTargetStatus` 至少包含 `id` 和 `status`；可按 contract 输出 `targetPath`、`skillCount` 或原因摘要，但 path 必须是 project-relative POSIX path。
+  - [x] 对 target directory 缺失、expected entry 缺失、manifest/index 与 target projection 不完整等轻量可读问题，输出 `partial` 或 `failed` 摘要并给出原因；不要执行 package hash comparison 或 full file integrity scan。
+  - [x] 不新增 `copilot`、`cursor` 或 branded target id；`.agents/skills` 一律显示为 `agents` / `.agents/skills` target。
 
-- [ ] Task 6: 投影 `StatusCommandData` 与 JSON renderer（AC: 1, 2, 4, 5, 6）
-  - [ ] `speclite status --json` 必须输出 `CommandResult<StatusCommandData>`，并通过 `src/diagnostics/command-result-schema.ts` 或同一 executable contract anchor 校验。
-  - [ ] Required `data` fields：`manifestPresent`、`installedModules`、`ideTargets`、`highLevelHealth`、`paths`。
-  - [ ] Optional `data` fields：`sourceDescriptor`、`manifestVersion`；只在可读且通过 schema shape 时输出。
-  - [ ] `data.paths.projectRoot` 必须是 `"."`；其他 path fields 必须 project-relative POSIX。
-  - [ ] `issues` 允许为空数组；不要因为 `highLevelHealth` 为 `partial` 或 `failed` 自动填充 warning issue。
-  - [ ] 不得输出 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`、`readySummary`、`validationSummary`、`hashScanResult`、timestamp 或未契约化字段。
+- [x] Task 6: 投影 `StatusCommandData` 与 JSON renderer（AC: 1, 2, 4, 5, 6）
+  - [x] `speclite status --json` 必须输出 `CommandResult<StatusCommandData>`，并通过 `src/diagnostics/command-result-schema.ts` 或同一 executable contract anchor 校验。
+  - [x] Required `data` fields：`manifestPresent`、`installedModules`、`ideTargets`、`highLevelHealth`、`paths`。
+  - [x] Optional `data` fields：`sourceDescriptor`、`manifestVersion`；只在可读且通过 schema shape 时输出。
+  - [x] `data.paths.projectRoot` 必须是 `"."`；其他 path fields 必须 project-relative POSIX。
+  - [x] `issues` 允许为空数组；不要因为 `highLevelHealth` 为 `partial` 或 `failed` 自动填充 warning issue。
+  - [x] 不得输出 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`、`readySummary`、`validationSummary`、`hashScanResult`、timestamp 或未契约化字段。
 
-- [ ] Task 7: 实现 compact human-readable output（AC: 2, 3, 7）
-  - [ ] 在 `src/diagnostics/output.ts` 或既有 renderer 层扩展 Compact profile，用于默认 `speclite status`。
-  - [ ] 输出顺序建议为：command title、high-level health、source/version、manifest summary、installed modules、IDE targets、key paths、Next actions。
-  - [ ] `not-configured` empty state 必须显式呈现，不以空白表示；Next actions 推荐 `speclite install`。
-  - [ ] `partial` / `failed` 摘要应引导用户运行 `speclite validate` 获取完整 issue list；不要把 full validation details 塞入 status。
-  - [ ] 输出必须支持 `NO_COLOR`、non-TTY、CI 和窄终端；颜色、符号或布局变化不得丢失 health、target id、path 或 next action。
+- [x] Task 7: 实现 compact human-readable output（AC: 2, 3, 7）
+  - [x] 在 `src/diagnostics/output.ts` 或既有 renderer 层扩展 Compact profile，用于默认 `speclite status`。
+  - [x] 输出顺序建议为：command title、high-level health、source/version、manifest summary、installed modules、IDE targets、key paths、Next actions。
+  - [x] `not-configured` empty state 必须显式呈现，不以空白表示；Next actions 推荐 `speclite install`。
+  - [x] `partial` / `failed` 摘要应引导用户运行 `speclite validate` 获取完整 issue list；不要把 full validation details 塞入 status。
+  - [x] 输出必须支持 `NO_COLOR`、non-TTY、CI 和窄终端；颜色、符号或布局变化不得丢失 health、target id、path 或 next action。
 
-- [ ] Task 8: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-7）
-  - [ ] 单元测试覆盖 `highLevelHealth` 聚合：not-configured、failed、partial、configured、manifest unreadable、source descriptor invalid、target partial/failed。
-  - [ ] 单元测试覆盖 `StatusCommandData` schema：required fields、optional fields、`issues: []`、无 `issueCounts`、无 full validation fields、`data.paths.projectRoot === "."`。
-  - [ ] 单元测试覆盖 target ordering 与 target semantics：`claude` before `agents`，不输出 branded Copilot/Cursor target，不混用 `mapped`/`unsupported`。
-  - [ ] Regression tests 通过 dependency injection / spies 断言 status 不调用 full validate、file hash scan、remote source resolver、implicit update check、repair planner 或 operation lock checker。
-  - [ ] 集成测试覆盖未安装 fixture：exit code 0、`CommandResult.status: "success"`、`highLevelHealth: "not-configured"`、next action 包含 `speclite install`。
-  - [ ] 集成测试覆盖已安装 fixture：manifest present、source/channel/version、manifest version、installed modules、IDE target summary、key paths、compact human-readable output。
-  - [ ] Fixture snapshots 对 `speclite status --json` 做 deterministic comparison；不得包含 absolute local path、home directory、timestamp、terminal width formatting、ANSI escape、hash-scan-only data 或 platform-specific separators。
+- [x] Task 8: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-7）
+  - [x] 单元测试覆盖 `highLevelHealth` 聚合：not-configured、failed、partial、configured、manifest unreadable、source descriptor invalid、target partial/failed。
+  - [x] 单元测试覆盖 `StatusCommandData` schema：required fields、optional fields、`issues: []`、无 `issueCounts`、无 full validation fields、`data.paths.projectRoot === "."`。
+  - [x] 单元测试覆盖 target ordering 与 target semantics：`claude` before `agents`，不输出 branded Copilot/Cursor target，不混用 `mapped`/`unsupported`。
+  - [x] Regression tests 通过 dependency injection / spies 断言 status 不调用 full validate、file hash scan、remote source resolver、implicit update check、repair planner 或 operation lock checker。
+  - [x] 集成测试覆盖未安装 fixture：exit code 0、`CommandResult.status: "success"`、`highLevelHealth: "not-configured"`、next action 包含 `speclite install`。
+  - [x] 集成测试覆盖已安装 fixture：manifest present、source/channel/version、manifest version、installed modules、IDE target summary、key paths、compact human-readable output。
+  - [x] Fixture snapshots 对 `speclite status --json` 做 deterministic comparison；不得包含 absolute local path、home directory、timestamp、terminal width formatting、ANSI escape、hash-scan-only data 或 platform-specific separators。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Story 3.1 touched modules 的 focused Vitest tests 与 status integration tests。
-  - [ ] 重复运行相同 status fixtures 至少 3 次，确认 JSON semantic output 除明确允许字段外保持稳定。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 status fixture pass。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 full `speclite validate` category coverage、Epic 4 update/repair behavior、Epic 5 remote freshness/provenance checks、Epic 6 full fixture matrix、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair`、command pointer artifacts 或 branded Copilot/Cursor target。
+- [x] Task 9: 本地验证与范围控制（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Story 3.1 touched modules 的 focused Vitest tests 与 status integration tests。
+  - [x] 重复运行相同 status fixtures 至少 3 次，确认 JSON semantic output 除明确允许字段外保持稳定。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 status fixture pass。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 full `speclite validate` category coverage、Epic 4 update/repair behavior、Epic 5 remote freshness/provenance checks、Epic 6 full fixture matrix、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair`、command pointer artifacts 或 branded Copilot/Cursor target。
 
 ## Dev Notes（开发备注）
 
@@ -322,17 +322,41 @@ Story 3.1 是受契约约束的本地摘要能力，不应在本实现中追逐�
 
 ### Agent Model Used（使用的代理模型）
 
-由 dev agent 填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-由 dev agent 填写。
+- 2026-05-28: 激活 `bmad-dev-story`；`python3` resolver 因 Python 3.9 缺少 `tomllib` 失败，按 fallback 读取 customize，确认无 team/user override。
+- 2026-05-28: 读取 Story 3.1、`sprint-status.yaml`、`_bmad-output/project-context.md` 和当前 worktree 状态；Story 3.1 从 `ready-for-dev` 推进到 `in-progress`。
+- 2026-05-28: Red phase 新增 `test/status-command.test.ts`，确认 `src/commands/status.ts` 缺失导致 focused test 失败。
+- 2026-05-28: Green/refactor phase 新增 status command、installed-state reader、StatusCommandData schema、compact renderer 和 CLI 注册；focused tests、build、full test suite 均通过。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context 由 `bmad-create-story` workflow 创建。
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已实现 `speclite status` 默认 human-readable 与 `--json` 输出，command id 固定为 `status`，并复用既有 project root resolution。
+- 已新增 lightweight installed-state reader，读取 manifest、source descriptor projection、skill-index 和 IDE target shallow summary；未安装项目返回 success + `highLevelHealth: "not-configured"` + install next action。
+- 已实现 `highLevelHealth` first-match aggregation，并保持其与 `CommandResult.status`、`issues: []` 独立。
+- 已实现 status-layer IDE target summary，按 `claude` -> `agents` 规范顺序输出，使用 `not-configured/configured/partial/failed` 词汇；partial target 提供 `reason` 与 project-relative `affectedPath`。
+- 已扩展 `StatusCommandData` / `StatusCommandResult` executable schema，JSON 输出不包含 validate-only fields、timestamp、ANSI、absolute paths 或 hash-scan-only data。
+- 已新增 focused Vitest coverage：未安装 fixture、已安装 fixture、partial target、invalid manifest/source descriptor、compact human output、CLI `status --json` 三次确定性输出、health aggregation、reader contract。
+
+### Change Log（变更日志）
+
+- 2026-05-28: 实现 Story 3.1 lightweight install status summary，并将 Story 状态推进到 `review`。
 
 ### File List（文件列表）
 
-由 dev agent 填写。
+- `_bmad-output/implementation-artifacts/code-reviews/3-1-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-1-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-1-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/3-1-lightweight-install-status-summary.md`
+- `src/bin/speclite.ts`
+- `src/commands/status.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/output.ts`
+- `src/status/installed-state.ts`
+- `test/status-command.test.ts`
+- `dist/`（`npm run build` 生成/刷新；本轮不提交）

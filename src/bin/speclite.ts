@@ -2,15 +2,25 @@
 import { Command } from "commander";
 import { createInterface } from "node:readline/promises";
 import type { ConfigInputValues, ProjectConfigField } from "../config/config-schema.js";
-import { renderCommandResultJson, renderInstallHumanOutput } from "../diagnostics/output.js";
+import {
+  renderCommandResultJson,
+  renderInstallHumanOutput,
+  renderStatusHumanOutput,
+  renderUpdateHumanOutput,
+  renderValidateHumanOutput,
+} from "../diagnostics/output.js";
 import {
   runInstallCommand,
   type ConfigInitializationPromptInput,
   type ConfigInitializationSelection,
   type InstallCommandRuntime,
   type ModuleSelectionPromptInput,
+  type PrewriteInstallScopeConfirmationInput,
 } from "../commands/install.js";
 import { registerResolveCommand } from "../commands/resolve.js";
+import { runStatusCommand, type StatusCommandRuntime } from "../commands/status.js";
+import { runUpdateCommand, type UpdateCommandRuntime } from "../commands/update.js";
+import { runValidateCommand, type ValidateCommandRuntime } from "../commands/validate.js";
 
 export type CliIo = {
   stdout: (text: string) => void;
@@ -21,7 +31,7 @@ export type CliIo = {
 
 export type CreateCliOptions = {
   io?: Partial<CliIo>;
-  runtime?: InstallCommandRuntime;
+  runtime?: InstallCommandRuntime & StatusCommandRuntime & ValidateCommandRuntime & UpdateCommandRuntime;
 };
 
 export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
@@ -32,6 +42,78 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
   program.exitOverride();
 
   registerResolveCommand(program, io);
+
+  program
+    .command("update")
+    .description("Expose the SpecLite update command surface before Epic 4 implementation.")
+    .argument("[target-directory]", "Project directory to update.")
+    .option("--repair", "Use the explicit repair command id and repair placeholder.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .action(
+      async (
+        targetDirectory: string | undefined,
+        commandOptions: { repair?: boolean; json?: boolean },
+      ) => {
+        const outcome = await runUpdateCommand({
+          options: {
+            json: commandOptions.json ?? false,
+            repair: commandOptions.repair ?? false,
+          },
+          ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+          ...(targetDirectory === undefined ? {} : { targetDirectory }),
+        });
+
+        if (commandOptions.json) {
+          io.stdout(renderCommandResultJson(outcome.result));
+        } else {
+          io.stdout(renderUpdateHumanOutput(outcome.result));
+        }
+
+        io.setExitCode(outcome.exitCode);
+      },
+    );
+
+  program
+    .command("status")
+    .description("Inspect the local SpecLite installed-state summary.")
+    .argument("[target-directory]", "Project directory to inspect.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean }) => {
+      const outcome = await runStatusCommand({
+        options: { json: commandOptions.json ?? false },
+        ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+        ...(targetDirectory === undefined ? {} : { targetDirectory }),
+      });
+
+      if (commandOptions.json) {
+        io.stdout(renderCommandResultJson(outcome.result));
+      } else {
+        io.stdout(renderStatusHumanOutput(outcome.result));
+      }
+
+      io.setExitCode(outcome.exitCode);
+    });
+
+  program
+    .command("validate")
+    .description("Validate the local SpecLite installed-state schema projection.")
+    .argument("[target-directory]", "Project directory to validate.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean }) => {
+      const outcome = await runValidateCommand({
+        options: { json: commandOptions.json ?? false },
+        ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+        ...(targetDirectory === undefined ? {} : { targetDirectory }),
+      });
+
+      if (commandOptions.json) {
+        io.stdout(renderCommandResultJson(outcome.result));
+      } else {
+        io.stdout(renderValidateHumanOutput(outcome.result));
+      }
+
+      io.setExitCode(outcome.exitCode);
+    });
 
   program
     .command("install")
@@ -52,6 +134,8 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
                 ),
               configureProject: async (configInput: ConfigInitializationPromptInput) =>
                 collectConfigInitializationSelection(io, configInput),
+              confirmPrewriteInstallScope: async (confirmationInput: PrewriteInstallScopeConfirmationInput) =>
+                confirmPrewriteInstallScope(io, confirmationInput),
             }),
         ...(targetDirectory === undefined ? {} : { targetDirectory }),
       };
@@ -190,6 +274,13 @@ async function collectConfigInitializationSelection(
     selectedModuleIds,
     ideTargetIds,
   };
+}
+
+async function confirmPrewriteInstallScope(
+  io: CliIo,
+  input: PrewriteInstallScopeConfirmationInput,
+): Promise<void> {
+  await io.prompt(`${input.prompt}\nReview final install scope before files are written. Press Enter to confirm and continue: `);
 }
 
 async function collectConfigValue(

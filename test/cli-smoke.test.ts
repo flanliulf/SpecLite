@@ -109,13 +109,16 @@ describe("CLI smoke", () => {
       await program.parseAsync(["node", "speclite", "install", "--yes"], { from: "node" });
 
       expect(exitCodes).toEqual([0]);
-      expect(prompts).toHaveLength(2);
+      expect(prompts).toHaveLength(3);
       expect(prompts[0]).toContain("core: SpecLite Core Module 0.0.0; scope:");
       expect(prompts[0]).toContain("sdlc: SpecLite SDLC 0.0.0; scope:");
       expect(prompts[0]).toContain("Enter one or more module ids");
       expect(prompts[1]).toContain("Choose project configuration mode");
       expect(prompts[1]).toContain("quick or detailed");
       expect(prompts[1]).toContain("does not write _speclite");
+      expect(prompts[2]).toContain("Final pre-write install scope summary");
+      expect(prompts[2]).toContain("Canonical package roots: core=13, total=13.");
+      expect(prompts[2]).toContain("No project files were changed.");
       expect(stdout.join("")).toContain("Selected modules: core");
       expect(stdout.join("")).not.toContain("sdlc (");
     } finally {
@@ -168,6 +171,8 @@ describe("CLI smoke", () => {
       expect(prompts.some((prompt) => prompt.includes("Detailed config planning_artifacts"))).toBe(true);
       expect(prompts.some((prompt) => prompt.includes("Selected modules"))).toBe(true);
       expect(prompts.some((prompt) => prompt.includes("IDE targets"))).toBe(true);
+      expect(prompts.some((prompt) => prompt.includes("Final pre-write install scope summary"))).toBe(true);
+      expect(prompts.some((prompt) => prompt.includes("Review final install scope before files are written"))).toBe(true);
       expect(output).toContain("Config mode: detailed");
       expect(output).toContain("Project name: CLI Demo");
       expect(output).toContain("User display name: Ada");

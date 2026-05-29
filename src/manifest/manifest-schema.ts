@@ -49,6 +49,25 @@ export function isInstalledSkillActivationTarget(value: string): boolean {
   );
 }
 
+export function isStableSourceRef(value: string): boolean {
+  const trimmed = value.trim();
+  if (
+    trimmed.length === 0 ||
+    trimmed.includes("\\") ||
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("~") ||
+    /^[A-Za-z]:(?:\/|\\|$)/.test(trimmed)
+  ) {
+    return false;
+  }
+
+  if (trimmed.includes(":")) {
+    return /^[a-z][a-z0-9-]*:[a-z0-9._/-]+$/.test(trimmed);
+  }
+
+  return isProjectRelativePosixPath(trimmed);
+}
+
 export const IdeTargetIdSchema = z.enum(["claude", "agents"]);
 export const InstalledPhaseCoverageStatusSchema = z.enum(["mapped", "unsupported", "failed"]);
 export const InstalledSkillEntryPathSchema = z
@@ -101,9 +120,18 @@ export const ManifestSchema = z
     paths: z
       .object({
         projectRoot: z.literal("."),
-        specliteRoot: z.string().min(1),
-        artifactRoot: z.string().min(1),
-        manifestPath: z.string().min(1),
+        specliteRoot: z
+          .string()
+          .min(1)
+          .refine(isProjectRelativePosixPath, "specliteRoot must be project-relative POSIX"),
+        artifactRoot: z
+          .string()
+          .min(1)
+          .refine(isProjectRelativePosixPath, "artifactRoot must be project-relative POSIX"),
+        manifestPath: z
+          .string()
+          .min(1)
+          .refine(isProjectRelativePosixPath, "manifestPath must be project-relative POSIX"),
       })
       .strict(),
   })
@@ -114,7 +142,10 @@ export const SkillIndexEntrySchema = z
     schemaVersion: z.literal(SKILL_INDEX_SCHEMA_VERSION),
     canonicalSkillId: z.string().min(1),
     moduleId: z.string().min(1),
-    sourcePackagePath: z.string().min(1),
+    sourcePackagePath: z
+      .string()
+      .min(1)
+      .refine(isProjectRelativePosixPath, "sourcePackagePath must be project-relative POSIX"),
     canonicalPackageHash: z.string().min(1),
     installedTargets: z.array(IdeTargetIdSchema),
     phaseIds: z.array(z.string().min(1)),
@@ -135,13 +166,19 @@ export const HelpIndexEntrySchema = z
 export const FilesIndexEntrySchema = z
   .object({
     schemaVersion: z.literal(FILES_INDEX_SCHEMA_VERSION),
-    path: z.string().min(1),
+    path: z
+      .string()
+      .min(1)
+      .refine(isProjectRelativePosixPath, "path must be project-relative POSIX"),
     ownership: z.enum(["installer-owned", "human-owned", "workflow-owned"]),
-    hash: z.string().min(1).optional(),
-    hashAlgorithm: z.literal("sha256").optional(),
+    hash: z.string().min(1),
+    hashAlgorithm: z.literal("sha256"),
     executable: z.boolean(),
     artifactKind: z.string().min(1),
-    sourceRef: z.string().min(1).optional(),
+    sourceRef: z
+      .string()
+      .min(1)
+      .refine(isStableSourceRef, "sourceRef must be a stable project-relative path or local reference token"),
   })
   .strict();
 

@@ -10,6 +10,7 @@ import {
   projectInstallLifecycleState,
 } from "../src/installer/progress-events.js";
 import { runReadyCheck } from "../src/installer/ready-check.js";
+import type { OfficialModule } from "../src/modules/module-metadata.js";
 
 const supportedRuntime = {
   nodeVersion: "v22.12.0",
@@ -266,6 +267,130 @@ describe("ReadyCheck minimal local gate", () => {
     }
   });
 
+  it("fails when skill-index omits a selected module package root", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-missing-package-root-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      await mkdir(path.join(tempRoot, "_speclite-output"), { recursive: true });
+      await mkdir(path.join(tempRoot, ".claude/skills/speclite-dev-story"), { recursive: true });
+      await writeFile(path.join(tempRoot, ".claude/skills/speclite-dev-story/SKILL.md"), "# Dev\n", "utf8");
+      await writeFile(
+        path.join(tempRoot, "_speclite/_config/manifest.yaml"),
+        [
+          'schemaVersion: "speclite.manifest.v1"',
+          "sourceDescriptor:",
+          '  sourceType: "bundled"',
+          '  resolvedRoot: "assets/source/speclite"',
+          "  integrityEvidence: []",
+          '  trustStatus: "trusted"',
+          "installedModules:",
+          '  - "sdlc"',
+          "targetIds:",
+          '  - "claude"',
+          "paths:",
+          '  projectRoot: "."',
+          '  specliteRoot: "_speclite"',
+          '  artifactRoot: "_speclite-output"',
+          '  manifestPath: "_speclite/_config/manifest.yaml"',
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      await writeReadyCheckIndex(tempRoot, "skill-index.json", {
+        schemaVersion: "speclite.skill-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: "speclite-dev-story",
+            moduleId: "sdlc",
+            sourcePackagePath: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
+            canonicalPackageHash: "sha256:dev",
+            installedTargets: ["claude"],
+            phaseIds: ["4-implementation"],
+          },
+        ],
+      });
+      await writeReadyCheckIndex(tempRoot, "help-index.json", {
+        schemaVersion: "speclite.help-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.help-index.v1",
+            phaseId: "4-implementation",
+            entryLabel: "Dev Story",
+            canonicalSkillId: "speclite-dev-story",
+            activationTarget: ".claude/skills/speclite-dev-story/SKILL.md",
+            targetIds: ["claude"],
+          },
+        ],
+      });
+      await writeReadyCheckIndex(tempRoot, "files-index.json", {
+        schemaVersion: "speclite.files-index.v1",
+        entries: [],
+      });
+      await writeReadyCheckIndex(tempRoot, "phase-coverage.json", {
+        schemaVersion: "speclite.phase-coverage.v1",
+        rows: [
+          {
+            schemaVersion: "speclite.phase-coverage.v1",
+            phaseId: "4-implementation",
+            phaseLabel: "Implementation",
+            moduleId: "sdlc",
+            canonicalSkillId: "speclite-dev-story",
+            ideTargets: [
+              {
+                targetId: "claude",
+                entryPath: ".claude/skills/speclite-dev-story",
+                activationTarget: ".claude/skills/speclite-dev-story/SKILL.md",
+                status: "mapped",
+              },
+            ],
+          },
+        ],
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: {
+          sourceType: "bundled",
+          resolvedRoot: "assets/source/speclite",
+          integrityEvidence: [],
+          trustStatus: "trusted",
+        },
+        installedModules: ["sdlc"],
+        selectedModules: [
+          createReadyCheckModule({
+            code: "sdlc",
+            packageRoots: [
+              "4-implementation/speclite-dev-story",
+              "4-implementation/speclite-quick-dev",
+            ],
+          }),
+        ],
+        ideTargets: [{ id: "claude", status: "configured", targetPath: ".claude/skills", skillCount: 1 }],
+        paths: {
+          projectRoot: ".",
+          specliteRoot: "_speclite",
+          artifactRoot: "_speclite-output",
+          manifestPath: "_speclite/_config/manifest.yaml",
+        },
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "ide-mirror.missing-entry",
+        category: "ide-mirror",
+        details: {
+          missingModuleId: "sdlc",
+          missingCanonicalSkillId: "speclite-quick-dev",
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("fails when help and phase targets point at another canonical skill directory", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-cross-skill-target-"));
 
@@ -402,6 +527,27 @@ async function writeReadyCheckIndex(tempRoot: string, fileName: string, data: un
     `${JSON.stringify(data, null, 2)}\n`,
     "utf8",
   );
+}
+
+function createReadyCheckModule(input: {
+  code: string;
+  packageRoots: string[];
+}): OfficialModule {
+  return {
+    code: input.code,
+    name: input.code,
+    description: input.code,
+    version: "0.0.0",
+    sourceDirectory: `${input.code}-skills`,
+    defaultSelected: true,
+    required: input.code === "core",
+    requiredDependencies: [],
+    packageRoots: input.packageRoots,
+    capabilitySummary: [],
+    helpEntries: [],
+    directories: [],
+    configPrompts: [],
+  };
 }
 
 describe("install ready summary rendering", () => {

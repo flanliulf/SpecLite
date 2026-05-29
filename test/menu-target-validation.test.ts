@@ -204,6 +204,44 @@ describe("menu target validation", () => {
       ]),
     );
   });
+
+  it("does not require every installed skill to have help or phase coverage rows", () => {
+    const issues = validateMenuTargets({
+      skillIndex: {
+        ...skillIndex,
+        entries: [
+          ...skillIndex.entries,
+          {
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: "speclite-no-help",
+            moduleId: "core",
+            sourcePackagePath: "assets/source/speclite/core-skills/speclite-no-help",
+            canonicalPackageHash: "sha256:no-help",
+            installedTargets: ["claude", "agents"],
+            phaseIds: ["anytime"],
+          },
+        ],
+      },
+      helpIndex: createHelpIndex({
+        canonicalSkillId: "speclite-dev-story",
+        activationTarget: ".claude/skills/speclite-dev-story/SKILL.md",
+      }),
+      phaseCoverage: createPhaseCoverage([
+        {
+          targetId: "claude",
+          activationTarget: ".claude/skills/speclite-dev-story/SKILL.md",
+          status: "mapped",
+        },
+        {
+          targetId: "agents",
+          activationTarget: ".agents/skills/speclite-dev-story/SKILL.md",
+          status: "mapped",
+        },
+      ]),
+    });
+
+    expect(issues).toEqual([]);
+  });
 });
 
 function createHelpIndex(input: {

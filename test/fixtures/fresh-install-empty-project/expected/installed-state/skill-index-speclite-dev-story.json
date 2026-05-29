@@ -3,7 +3,7 @@
   "canonicalSkillId": "speclite-dev-story",
   "moduleId": "sdlc",
   "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
-  "canonicalPackageHash": "sha256:2bdddc57a601832dc1411b130ef477a4215cb78f711bf3981aa8ff9cc606f4a5",
+  "canonicalPackageHash": "sha256:477272e7e59081658a709f0764e9ece76f8fad4d82d6d91b6739810bd8fee9ff",
   "installedTargets": [
     "claude",
     "agents"

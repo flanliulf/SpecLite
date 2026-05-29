@@ -13,6 +13,10 @@ import {
 import { createModuleSelection } from "../src/modules/module-selection.js";
 import { runInstallCommand } from "../src/commands/install.js";
 
+const EXPECTED_CORE_PACKAGE_ROOT_COUNT = 13;
+const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 40;
+const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 53;
+
 describe("bundled source descriptor discovery", () => {
   it("projects bundled official source through a display-safe SourceDescriptor", async () => {
     const descriptor = await discoverBundledSourceDescriptor({
@@ -67,6 +71,8 @@ describe("official module metadata parser", () => {
     const modules = await discoverOfficialModules({
       projectRoot: process.cwd(),
     });
+    const coreModule = modules.find((module) => module.code === "core")!;
+    const sdlcModule = modules.find((module) => module.code === "sdlc")!;
 
     expect(modules.map((module) => module.code)).toEqual(["core", "sdlc"]);
     expect(modules).toEqual([
@@ -85,16 +91,31 @@ describe("official module metadata parser", () => {
         requiredDependencies: ["core"],
       }),
     ]);
-    expect(modules.find((module) => module.code === "core")?.packageRoots.length).toBeGreaterThan(
-      0,
+    expect(coreModule.packageRoots).toHaveLength(EXPECTED_CORE_PACKAGE_ROOT_COUNT);
+    expect(sdlcModule.packageRoots).toHaveLength(EXPECTED_SDLC_PACKAGE_ROOT_COUNT);
+    expect(coreModule.packageRoots.length + sdlcModule.packageRoots.length).toBe(
+      EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT,
     );
-    expect(modules.find((module) => module.code === "sdlc")?.packageRoots).toContain(
-      "4-implementation/speclite-dev-story",
+    expect(sortedPackageSkillIds(coreModule)).toEqual(uniqueSortedHelpSkillIds(coreModule));
+    expect(sortedPackageSkillIds(sdlcModule)).toEqual(uniqueSortedHelpSkillIds(sdlcModule));
+    expect(coreModule.packageRoots).toEqual(
+      expect.arrayContaining([
+        "speclite-advanced-elicitation",
+        "speclite-review-acceptance-auditor",
+      ]),
+    );
+    expect(sdlcModule.packageRoots).toEqual(
+      expect.arrayContaining([
+        "1-analysis/speclite-agent-analyst",
+        "2-plan-workflows/speclite-agent-pm",
+        "2-plan-workflows/speclite-agent-ux-designer",
+        "3-solutioning/speclite-agent-architect",
+        "4-implementation/speclite-agent-dev",
+        "4-implementation/speclite-dev-story",
+      ]),
     );
     expect(
-      modules
-        .find((module) => module.code === "sdlc")
-        ?.helpEntries.find((entry) => entry.canonicalSkillId === "speclite-create-prd"),
+      sdlcModule.helpEntries.find((entry) => entry.canonicalSkillId === "speclite-create-prd"),
     ).toMatchObject({
       canonicalSkillId: "speclite-create-prd",
       displayName: "Create PRD",
@@ -330,4 +351,14 @@ async function createModuleFixture(files: Record<string, string>): Promise<strin
   }
 
   return sourceRoot;
+}
+
+function sortedPackageSkillIds(input: { packageRoots: string[] }): string[] {
+  return input.packageRoots.map((packageRoot) => path.posix.basename(packageRoot)).sort();
+}
+
+function uniqueSortedHelpSkillIds(input: {
+  helpEntries: Array<{ canonicalSkillId: string }>;
+}): string[] {
+  return [...new Set(input.helpEntries.map((entry) => entry.canonicalSkillId))].sort();
 }

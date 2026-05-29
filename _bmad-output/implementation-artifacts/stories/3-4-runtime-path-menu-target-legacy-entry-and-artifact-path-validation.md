@@ -1,6 +1,6 @@
 # Story 3.4: Runtime Path, Menu Target, Legacy Entry And Artifact Path Validation（运行时路径、菜单目标、遗留入口与产物路径验证）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -29,6 +29,7 @@ Status: ready-for-dev
    **并且** 同一 menu target 解析到多个 installed entries 时必须报告 `menu-target.ambiguous-target`；  
    **并且** help entry 引用未知 `canonicalSkillId` 时必须报告 `menu-target.unknown-skill`；  
    **并且** phase coverage row 没有可映射 target 时必须报告 `menu-target.no-mapped-target`；  
+   **并且** menu-target validation 必须以 `skill-index.json` 作为 installed skill inventory；help index 或 phase coverage 引用不存在于 skill index 的 `canonicalSkillId` 时必须报告 `menu-target.unknown-skill`，但 installed skill 没有 help/phase row 不得被误报为 unknown；
    **并且** MVP 只能使用 adapter registry target ids `claude` 和 `agents`，不得输出 branded `copilot`、`cursor` 或自由文本 target id。
 
 3. **Legacy namespace residue is reported without deleting user files（遗留命名空间残留只报告不删除）**  
@@ -70,78 +71,80 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-6）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、files index/hash helpers、diagnostics/output、path normalization、validation aggregation、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/output.ts`、`src/validation/validate-project.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.4 中创建孤立的 runtime/menu/artifact validator。
-  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/runtime-path.ts`、`src/validation/rules/menu-target.ts`、`src/validation/rules/legacy-namespace.ts`、`src/validation/rules/artifact-path.ts`、`src/validation/validate-project.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 和 `src/fs/safe-write.ts`。
-  - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-6）
+  - [x] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、files index/hash helpers、diagnostics/output、path normalization、validation aggregation、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [x] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/output.ts`、`src/validation/validate-project.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.4 中创建孤立的 runtime/menu/artifact validator。
+  - [x] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/runtime-path.ts`、`src/validation/rules/menu-target.ts`、`src/validation/rules/legacy-namespace.ts`、`src/validation/rules/artifact-path.ts`、`src/validation/validate-project.ts`、`src/manifest/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 和 `src/fs/safe-write.ts`。
+  - [x] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 实现 runtime-path validation rule（AC: 1, 6）
-  - [ ] 在 `src/validation/rules/runtime-path.ts` 或既有 validation rule anchor 中实现 runtime path validation；不要在 `src/commands/validate.ts` 中直接遍历路径或拼接 issue。
-  - [ ] 从 manifest / skill index / installed entry metadata 读取 runtime path references，并复用 `src/fs/path-normalizer.ts` 进行 project-relative POSIX normalization、project boundary check 和 symlink resolution。
-  - [ ] 只接受当前 `_speclite` runtime namespace、installer-owned runtime scripts 和已契约化 runtime support command path；不得接受 `_bmad`、legacy resolver script、source checkout script 或 target project 外 path 作为 installed runtime dependency。
-  - [ ] 缺失 required runtime entry 输出 `runtime-path.missing-entry`；invalid script path 输出 `runtime-path.invalid-script-path`；legacy resolver/runtime reference 输出 `runtime-path.legacy-resolver-path`；symlink escape 输出 `runtime-path.symlink-escape`。
-  - [ ] `details` 使用稳定机器上下文，例如 `runtimeRefKind`、`reason`、`namespaceKind`、`expectedNamespace: "_speclite"`；不得包含 raw absolute path、home directory、stack trace、hash 或 timestamp。
-  - [ ] Runtime path validation 可以读取 installed state files，但不得调用 `speclite resolve`、status command、update planner 或 repair planner。
+- [x] Task 2: 实现 runtime-path validation rule（AC: 1, 6）
+  - [x] 在 `src/validation/rules/runtime-path.ts` 或既有 validation rule anchor 中实现 runtime path validation；不要在 `src/commands/validate.ts` 中直接遍历路径或拼接 issue。
+  - [x] 从 manifest / skill index / installed entry metadata 读取 runtime path references，并复用 `src/fs/path-normalizer.ts` 进行 project-relative POSIX normalization、project boundary check 和 symlink resolution。
+  - [x] 只接受当前 `_speclite` runtime namespace、installer-owned runtime scripts 和已契约化 runtime support command path；不得接受 `_bmad`、legacy resolver script、source checkout script 或 target project 外 path 作为 installed runtime dependency。
+  - [x] 缺失 required runtime entry 输出 `runtime-path.missing-entry`；invalid script path 输出 `runtime-path.invalid-script-path`；legacy resolver/runtime reference 输出 `runtime-path.legacy-resolver-path`；symlink escape 输出 `runtime-path.symlink-escape`。
+  - [x] `details` 使用稳定机器上下文，例如 `runtimeRefKind`、`reason`、`namespaceKind`、`expectedNamespace: "_speclite"`；不得包含 raw absolute path、home directory、stack trace、hash 或 timestamp。
+  - [x] Runtime path validation 可以读取 installed state files，但不得调用 `speclite resolve`、status command、update planner 或 repair planner。
 
-- [ ] Task 3: 实现 menu-target uniqueness validation（AC: 2, 6）
-  - [ ] 在 `src/validation/rules/menu-target.ts` 或既有 rule module 中读取 help index、phase coverage、module help catalog projection 和 installed target mapping；schema/shape 错误继续由 Story 3.2 的 `manifest-schema` rule 负责。
-  - [ ] 使用 `canonicalSkillId` 作为唯一 skill identity，使用 adapter registry target ids 和 canonical order：`claude`，然后 `agents`；不得从 `entryLabel`、menu code、IDE-specific basename 或 alias 重新推导 skill identity。
-  - [ ] 对每个 help/menu target 验证它能解析到一个且只有一个 self-contained skill entry：`.claude/skills/<canonicalSkillId>/` 或 `.agents/skills/<canonicalSkillId>/`。
-  - [ ] Missing target 输出 `menu-target.missing-target`；ambiguous target 输出 `menu-target.ambiguous-target`；unknown skill 输出 `menu-target.unknown-skill`；no mapped target 输出 `menu-target.no-mapped-target`。
-  - [ ] Optional unsupported target 可以按 taxonomy 降级为 `warning`；用户显式选择或 required target 无法表示时必须为 `error`。
-  - [ ] Tests 必须覆盖 duplicate menu code、duplicate canonical skill id projection、help index target id 与 adapter registry 不一致、phase coverage no mapped target，以及 `agents` 不被渲染为 Copilot/Cursor readiness。
+- [x] Task 3: 实现 menu-target uniqueness validation（AC: 2, 6）
+  - [x] 在 `src/validation/rules/menu-target.ts` 或既有 rule module 中读取 help index、phase coverage、module help catalog projection 和 installed target mapping；schema/shape 错误继续由 Story 3.2 的 `manifest-schema` rule 负责。
+  - [x] 使用 `canonicalSkillId` 作为唯一 skill identity，使用 adapter registry target ids 和 canonical order：`claude`，然后 `agents`；不得从 `entryLabel`、menu code、IDE-specific basename 或 alias 重新推导 skill identity。
+  - [x] 先从 `skill-index.json` 建立 installed skill inventory；help index / phase coverage 的所有 `canonicalSkillId` 引用必须存在于该 inventory。
+  - [x] 对每个 help/menu target 验证它能解析到一个且只有一个 self-contained skill entry：`.claude/skills/<canonicalSkillId>/` 或 `.agents/skills/<canonicalSkillId>/`。
+  - [x] Missing target 输出 `menu-target.missing-target`；ambiguous target 输出 `menu-target.ambiguous-target`；unknown skill 输出 `menu-target.unknown-skill`；no mapped target 输出 `menu-target.no-mapped-target`。
+  - [x] Optional unsupported target 可以按 taxonomy 降级为 `warning`；用户显式选择或 required target 无法表示时必须为 `error`。
+  - [x] Tests 必须覆盖 duplicate menu code、duplicate canonical skill id projection、help index target id 与 adapter registry 不一致、phase coverage no mapped target，以及 `agents` 不被渲染为 Copilot/Cursor readiness。
 
-- [ ] Task 4: 实现 legacy-namespace residue validation（AC: 3, 4, 6）
-  - [ ] 在 `src/validation/rules/legacy-namespace.ts` 或既有 legacy validation anchor 中检查 known legacy runtime namespaces、legacy config references 和 stale IDE skill entries；不要全项目任意扫描并把无关历史目录当作错误。
-  - [ ] 只在 legacy residue 与当前 installed canonical skill id、runtime/config lookup path、IDE target directory 或 activation/menu entry 重叠时报告 issue。
-  - [ ] Old runtime namespace residue 输出 `legacy-namespace.runtime-residue`；stale skill entry overlap 输出 `legacy-namespace.stale-skill-entry`；legacy config reference 输出 `legacy-namespace.legacy-config-reference`。
-  - [ ] `details` 使用稳定枚举，例如 `legacyKind`、`riskKind`、`overlapKind`、`manualActionRequired: true` 和 `verificationCommand: "speclite validate"`；不得把 dynamic path、target id、long prose 或 local absolute path 拼进 `suggestedNextStep`。
-  - [ ] `validate` 必须只读：不得删除 legacy directory、不得重写 installed entry、不得迁移 config、不得调用 update/repair 写入路径。
-  - [ ] Human-readable output 可以提示用户手动检查 affected path，但 structured `suggestedNextStep` 必须保持 stable template。
+- [x] Task 4: 实现 legacy-namespace residue validation（AC: 3, 4, 6）
+  - [x] 在 `src/validation/rules/legacy-namespace.ts` 或既有 legacy validation anchor 中检查 known legacy runtime namespaces、legacy config references 和 stale IDE skill entries；不要全项目任意扫描并把无关历史目录当作错误。
+  - [x] 只在 legacy residue 与当前 installed canonical skill id、runtime/config lookup path、IDE target directory 或 activation/menu entry 重叠时报告 issue。
+  - [x] Old runtime namespace residue 输出 `legacy-namespace.runtime-residue`；stale skill entry overlap 输出 `legacy-namespace.stale-skill-entry`；legacy config reference 输出 `legacy-namespace.legacy-config-reference`。
+  - [x] `details` 使用稳定枚举，例如 `legacyKind`、`riskKind`、`overlapKind`、`manualActionRequired: true` 和 `verificationCommand: "speclite validate"`；不得把 dynamic path、target id、long prose 或 local absolute path 拼进 `suggestedNextStep`。
+  - [x] `validate` 必须只读：不得删除 legacy directory、不得重写 installed entry、不得迁移 config、不得调用 update/repair 写入路径。
+  - [x] Human-readable output 可以提示用户手动检查 affected path，但 structured `suggestedNextStep` 必须保持 stable template。
 
-- [ ] Task 5: 实现 artifact-path validation（AC: 5, 6）
-  - [ ] 在 `src/validation/rules/artifact-path.ts` 或既有 artifact validation anchor 中读取 manifest / module metadata / artifact contract / artifact metadata location；不要把 artifact content quality、叙事完整度或人工评审结论纳入 MVP validation。
-  - [ ] 验证 configured artifact root 和 `artifactContract.defaultOutputPath` 是 project-relative POSIX path，并且解析后位于 target project boundary 内。
-  - [ ] 验证 default output path 落在 `_speclite-output/` 或 configured workflow artifact root 下；不得接受 absolute path、home directory、drive letter、`..` escape、OS-specific separator 或 source/package-manager/cache/temp path。
-  - [ ] Path escape 输出 `artifact-path.escapes-project`；symlink escape 输出 `artifact-path.symlink-escape`；required directory missing 输出 `artifact-path.missing-required-directory`；unwritable directory 输出 `artifact-path.unwritable-directory`；production validate 不得通过实际写探测触发这些 findings。
-  - [ ] `artifact-path.fixture-write-failed` 只能由 fixture harness / test-only path 产生：fixture harness 可以在受控临时 fixture project 中尝试写入 expected artifact 来验证 workflow artifact loop；production `speclite validate` 不得写入 probe file、chmod、touch、copy 或 cleanup target project。
-  - [ ] 验证 artifact metadata：Markdown frontmatter、sidecar JSON 或 directory `metadata.json` 必须包含 `workflowType`、`sourceSkill`、`generatedAt`；缺失输出 `artifact-path.missing-required-metadata`，值域非法输出 `artifact-path.invalid-required-metadata`。
-  - [ ] `generatedAt` 可以被解析，但 stable fixture snapshot 必须 normalize 或 exclude 具体时间值；不要把 timestamp 写入 `ValidationIssue.details`。
-  - [ ] Workflow-owned artifacts 不得被 update/repair 当作 installer-owned changed paths；artifact validation failure 不得触发 overwrite。
+- [x] Task 5: 实现 artifact-path validation（AC: 5, 6）
+  - [x] 在 `src/validation/rules/artifact-path.ts` 或既有 artifact validation anchor 中读取 manifest / module metadata / artifact contract / artifact metadata location；不要把 artifact content quality、叙事完整度或人工评审结论纳入 MVP validation。
+  - [x] 验证 configured artifact root 和 `artifactContract.defaultOutputPath` 是 project-relative POSIX path，并且解析后位于 target project boundary 内。
+  - [x] 验证 default output path 落在 `_speclite-output/` 或 configured workflow artifact root 下；不得接受 absolute path、home directory、drive letter、`..` escape、OS-specific separator 或 source/package-manager/cache/temp path。
+  - [x] Path escape 输出 `artifact-path.escapes-project`；symlink escape 输出 `artifact-path.symlink-escape`；required directory missing 输出 `artifact-path.missing-required-directory`；unwritable directory 输出 `artifact-path.unwritable-directory`；production validate 不得通过实际写探测触发这些 findings。
+  - [x] `artifact-path.fixture-write-failed` 只能由 fixture harness / test-only path 产生：fixture harness 可以在受控临时 fixture project 中尝试写入 expected artifact 来验证 workflow artifact loop；production `speclite validate` 不得写入 probe file、chmod、touch、copy 或 cleanup target project。
+  - [x] 验证 artifact metadata：Markdown frontmatter、sidecar JSON 或 directory `metadata.json` 必须包含 `workflowType`、`sourceSkill`、`generatedAt`；缺失输出 `artifact-path.missing-required-metadata`，值域非法输出 `artifact-path.invalid-required-metadata`。
+  - [x] `generatedAt` 可以被解析，但 stable fixture snapshot 必须 normalize 或 exclude 具体时间值；不要把 timestamp 写入 `ValidationIssue.details`。
+  - [x] Workflow-owned artifacts 不得被 update/repair 当作 installer-owned changed paths；artifact validation failure 不得触发 overwrite。
 
-- [ ] Task 6: 接入 validate orchestration and deterministic projection（接入 Validate 编排与确定性投影）（AC: 1-6）
-  - [ ] `src/commands/validate.ts` 继续只负责参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
-  - [ ] `src/validation/validate-project.ts` 或 equivalent aggregator 必须在 `manifest-schema` schema validation 之后执行 runtime/menu/legacy/artifact rules；如果 manifest/index 无法读取，后续 rules 不得伪造 installed state findings。
-  - [ ] `checkedCategories` 只列出实际执行的 categories，并遵守 canonical issue category order：`environment`、`manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`menu-target`、`legacy-namespace`、`artifact-path`、`file-integrity`、`operation-lock`、`update`。
-  - [ ] `checkedTargets` 只列出实际检查的 targets，并遵守 adapter registry order：`claude`，然后 `agents`。
-  - [ ] `validatedPaths` 必须包含实际检查过的 runtime files、help/phase coverage paths、target entry paths、legacy residue paths 或 artifact paths，全部规范化为 project-relative POSIX path 后按字典序输出。
-  - [ ] `CommandResult.issues` 必须按 severity order、canonical issue category order、normalized affected path、issue id 排序；不得按发现顺序、rule execution order、filesystem traversal order 或 async completion order 输出。
-  - [ ] Human-readable validate output 使用 shared diagnostics/output layer；不得在 validation rule 内自行拼接 issue layout、path display、summary 或 next action ordering。
+- [x] Task 6: 接入 validate orchestration and deterministic projection（接入 Validate 编排与确定性投影）（AC: 1-6）
+  - [x] `src/commands/validate.ts` 继续只负责参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
+  - [x] `src/validation/validate-project.ts` 或 equivalent aggregator 必须在 `manifest-schema` schema validation 之后执行 runtime/menu/legacy/artifact rules；如果 manifest/index 无法读取，后续 rules 不得伪造 installed state findings。
+  - [x] `checkedCategories` 只列出实际执行的 categories，并遵守 canonical issue category order：`environment`、`manifest-schema`、`source-integrity`、`ide-mirror`、`runtime-path`、`menu-target`、`legacy-namespace`、`artifact-path`、`file-integrity`、`operation-lock`、`update`。
+  - [x] `checkedTargets` 只列出实际检查的 targets，并遵守 adapter registry order：`claude`，然后 `agents`。
+  - [x] `validatedPaths` 必须包含实际检查过的 runtime files、help/phase coverage paths、target entry paths、legacy residue paths 或 artifact paths，全部规范化为 project-relative POSIX path 后按字典序输出。
+  - [x] `CommandResult.issues` 必须按 severity order、canonical issue category order、normalized affected path、issue id 排序；不得按发现顺序、rule execution order、filesystem traversal order 或 async completion order 输出。
+  - [x] Human-readable validate output 使用 shared diagnostics/output layer；不得在 validation rule 内自行拼接 issue layout、path display、summary 或 next action ordering。
 
-- [ ] Task 7: 保持 local-only read-only validation boundary（保持本地只读验证边界）（AC: 1-6）
-  - [ ] `speclite validate` 不得调用 remote source resolver、registry client、Git remote、offline bundle resolver、package-manager cache、temporary extraction root 或 source checkout freshness check。
-  - [ ] `speclite validate` 不得调用 install/update planner、repair planner、safe write、target writer、manifest generator、artifact writer、chmod、copy-tree 或 cleanup mutation。
-  - [ ] Validate 可以报告 stale lock warning，但不得删除 `_speclite/.lock` 或 stale temp files；write-capable command 的 operation lock 行为不属于本 Story。
-  - [ ] 普通 `speclite update` 的确认或 `--yes` 不得修复 legacy/runtime/menu/artifact drift；可安全修复只属于后续 Epic 4 的 `update --repair` 明确授权路径。
-  - [ ] 不得把同一个物理问题同时报告为多个 category；优先使用最具体 category，例如 menu resolution 用 `menu-target`，runtime reference 用 `runtime-path`，artifact root escape 用 `artifact-path`。
+- [x] Task 7: 保持 local-only read-only validation boundary（保持本地只读验证边界）（AC: 1-6）
+  - [x] `speclite validate` 不得调用 remote source resolver、registry client、Git remote、offline bundle resolver、package-manager cache、temporary extraction root 或 source checkout freshness check。
+  - [x] `speclite validate` 不得调用 install/update planner、repair planner、safe write、target writer、manifest generator、artifact writer、chmod、copy-tree 或 cleanup mutation。
+  - [x] Validate 可以报告 stale lock warning，但不得删除 `_speclite/.lock` 或 stale temp files；write-capable command 的 operation lock 行为不属于本 Story。
+  - [x] 普通 `speclite update` 的确认或 `--yes` 不得修复 legacy/runtime/menu/artifact drift；可安全修复只属于后续 Epic 4 的 `update --repair` 明确授权路径。
+  - [x] 不得把同一个物理问题同时报告为多个 category；优先使用最具体 category，例如 menu resolution 用 `menu-target`，runtime reference 用 `runtime-path`，artifact root escape 用 `artifact-path`。
 
-- [ ] Task 8: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-6）
-  - [ ] Runtime path tests 覆盖 missing `_speclite` runtime entry、invalid script path、legacy resolver path、symlink escape、valid current `_speclite` runtime path。
-  - [ ] Menu target tests 覆盖 missing target、ambiguous target、unknown canonical skill、no mapped target、valid target 解析到 `.claude/skills/<canonicalSkillId>/` 和 `.agents/skills/<canonicalSkillId>/`。
-  - [ ] Legacy namespace tests 覆盖 `_bmad`/旧 runtime residue、stale overlapping skill entry、legacy config reference、inert unrelated directory 不被误报、diagnostics 不删除 legacy files。
-  - [ ] Artifact path tests 覆盖 valid `_speclite-output` root、configured artifact root、default output path、path escape、symlink escape、missing required directory、unwritable directory、fixture-harness write failure、metadata missing / invalid。
-  - [ ] Redaction tests 覆盖 `ValidationIssue.details`、`impact`、`suggestedNextStep` 不包含 absolute path、home directory、Windows drive letter、environment variable value、hash、timestamp、temporary/cache path、stack trace 或 raw exception。
-  - [ ] Determinism tests 重复运行相同 validate fixture 至少 3 次，确认 issue arrays、issueCounts、checkedCategories、checkedTargets、validatedPaths、nextActions 和 `--json` semantic output 稳定。
-  - [ ] Boundary tests 断言 validate 不访问 remote source、不执行 update/repair/write/chmod、不扫描 package-manager cache 或 temporary extraction root、不写入 artifact metadata。
-  - [ ] Integration / fixture tests 至少覆盖 `ide-drift`、`path-portability` 和最小 `skill-artifact-loop` 中的 runtime/menu/artifact path validation evidence。
+- [x] Task 8: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-6）
+  - [x] Runtime path tests 覆盖 missing `_speclite` runtime entry、invalid script path、legacy resolver path、symlink escape、valid current `_speclite` runtime path。
+  - [x] Menu target tests 覆盖 missing target、ambiguous target、unknown canonical skill、no mapped target、valid target 解析到 `.claude/skills/<canonicalSkillId>/` 和 `.agents/skills/<canonicalSkillId>/`。
+  - [x] Menu target tests 覆盖 installed skill 没有 help/phase row 时不报 `menu-target.unknown-skill`，以及 help/phase row 引用 skill index 不存在 id 时报告 `menu-target.unknown-skill`。
+  - [x] Legacy namespace tests 覆盖 `_bmad`/旧 runtime residue、stale overlapping skill entry、legacy config reference、inert unrelated directory 不被误报、diagnostics 不删除 legacy files。
+  - [x] Artifact path tests 覆盖 valid `_speclite-output` root、configured artifact root、default output path、path escape、symlink escape、missing required directory、unwritable directory、fixture-harness write failure、metadata missing / invalid。
+  - [x] Redaction tests 覆盖 `ValidationIssue.details`、`impact`、`suggestedNextStep` 不包含 absolute path、home directory、Windows drive letter、environment variable value、hash、timestamp、temporary/cache path、stack trace 或 raw exception。
+  - [x] Determinism tests 重复运行相同 validate fixture 至少 3 次，确认 issue arrays、issueCounts、checkedCategories、checkedTargets、validatedPaths、nextActions 和 `--json` semantic output 稳定。
+  - [x] Boundary tests 断言 validate 不访问 remote source、不执行 update/repair/write/chmod、不扫描 package-manager cache 或 temporary extraction root、不写入 artifact metadata。
+  - [x] Integration / fixture tests 至少覆盖 `ide-drift`、`path-portability` 和最小 `skill-artifact-loop` 中的 runtime/menu/artifact path validation evidence。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-6）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 runtime-path、menu-target、legacy-namespace、artifact-path、CommandResult projection、path normalization 和 validate integration focused tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 validate-only fallback implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 3.5 的全量 CommandResult 迁移、Story 3.6 的完整 progress/category coverage、Epic 4 update/repair apply behavior、Epic 5 remote freshness/provenance checks、Epic 6 release fixture matrix 或 Post-MVP command pointer / doctor / sync / uninstall 能力。
+- [x] Task 9: 本地验证与范围控制（AC: 1-6）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 runtime-path、menu-target、legacy-namespace、artifact-path、CommandResult projection、path normalization 和 validate integration focused tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 validate-only fallback implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Story 3.5 的全量 CommandResult 迁移、Story 3.6 的完整 progress/category coverage、Epic 4 update/repair apply behavior、Epic 5 remote freshness/provenance checks、Epic 6 release fixture matrix 或 Post-MVP command pointer / doctor / sync / uninstall 能力。
 
 ## Dev Notes（开发备注）
 
@@ -484,17 +487,59 @@ Story 3.4 是受契约约束的本地 deterministic validation 能力，不应�
 
 ### Agent Model Used（使用的代理模型）
 
-由 dev agent 填写。
+GPT-5 Codex（fresh sub-agent）
 
 ### Debug Log References（调试日志引用）
 
-由 dev agent 填写。
+- `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow`：成功解析 workflow；`python3` 因本机 Xcode Python 3.9 缺少 `tomllib` 失败，已按 skill fallback 处理。
+- `npm run build`：通过。
+- `npm test -- --run test/runtime-path-validation.test.ts test/legacy-namespace-validation.test.ts test/menu-target-validation.test.ts test/artifact-path-validation.test.ts test/validate-command.test.ts`：通过，5 个文件 25 个测试全部通过。
+- `npm test`：失败，2 个既有 hash fixture 断言失败：`test/ide-target-writer.test.ts` 的 canonical package hash 期望值不匹配，`test/runtime-structure.test.ts` 的 `skill-index-speclite-dev-story` hash 期望值不匹配。失败关联当前工作区既有 asset / fixture drift，不属于 Story 3.4 新增 runtime/menu/legacy/artifact validation；按范围约束未修改无关 hash fixture。
+- `git diff --check`：通过。
+- `npm test -- --run test/ide-target-writer.test.ts test/runtime-structure.test.ts`：fresh sub-agent 复现失败 2 项。`runtime-structure` 仍为 `skill-index-speclite-dev-story` canonical hash expected `sha256:477272...` / actual `sha256:cabe9...`；`ide-target-writer` 为测试内现算 `installedSurfaceHash` expected `sha256:a73efc...` / installed directory actual `sha256:6c6cc...`，不是静态 fixture baseline 单点漂移。
+- `npx tsx --eval ...` hash 复核：同一 sample source 中 `hashPackageDirectory(sourceRoot, { include: isInstallableCanonicalPackageFile })` 得到 `sha256:a73efc...`，安装目录包含 `SKILL.md` 与 `references/details.md` 后得到 `sha256:6c6cc...`。证据指向 `src/manifest/hash.ts` 的 include 目录遍历语义与 `src/fs/copy-tree.ts` 实际复制面不一致，修复会超出“仅更新两个 fixture/期望文件”的范围。
+- `npm test -- --run test/runtime-path-validation.test.ts test/legacy-namespace-validation.test.ts test/menu-target-validation.test.ts test/artifact-path-validation.test.ts test/validate-command.test.ts`：通过，5 个文件 25 个测试全部通过。
+- `npm run build`：通过。
+- `npm test`：失败仍为同 2 项 hash 断言；其余 22 个测试文件 139 项通过。
+- `git diff --check`：通过。
+- `npm test -- --run test/ide-target-writer.test.ts test/runtime-structure.test.ts`：通过，2 个文件 12 个测试全部通过；`src/manifest/hash.ts` 目录遍历语义修复后 canonical hash 覆盖面与实际 installable package surface 一致。
+- `npm test -- --run test/runtime-path-validation.test.ts test/legacy-namespace-validation.test.ts test/menu-target-validation.test.ts test/artifact-path-validation.test.ts test/validate-command.test.ts`：通过，5 个文件 25 个测试全部通过。
+- `npm run build`：通过。
+- `npm test`：通过，24 个文件 141 个测试全部通过。
+- `git diff --check`：通过。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context 由 `bmad-create-story` workflow 创建。
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已实现 Story 3.4 的 runtime path validation、legacy namespace validation、phase coverage manifest-schema 读取、menu target aggregation 接入、artifact path aggregation 接入，以及 focused tests。
+- HALT: 完整 `npm test` 仍有 2 个非 Story 3.4 hash fixture 失败；因用户要求不得修改无关文件，Story 未推进到 `review`，保持 `in-progress`。
+- HALT 复核: 两个失败不能都归类为 deterministic fixture baseline drift。`runtime-structure` hash 是 baseline drift 候选，但 `ide-target-writer` 失败暴露 hash/include 语义与安装目录复制内容不一致；最小安全处理不再是只更新两个 fixture/期望文件。按用户约束继续 HALT，Story 和 sprint status 保持 `in-progress`。
+- HALT 已解除：根因确认为 shared hash helper include traversal bug，不是单纯 fixture drift。`listFiles()` 不再用 file-level include predicate 剪掉目录递归，canonical package hash 已覆盖 `references/`、`assets/`、`scripts/` 下的 installable files。
+- Story 3.4 focused tests、targeted hash regression、完整 build、完整 test 和 `git diff --check` 均通过；Story 与 sprint status 已推进到 `review`。
 
 ### File List（文件列表）
 
-由 dev agent 填写。
+- `_bmad-output/implementation-artifacts/code-reviews/3-4-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-4-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-4-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/3-4-runtime-path-menu-target-legacy-entry-and-artifact-path-validation.md`
+- `src/commands/validate.ts`
+- `src/manifest/hash.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/validation/rules/menu-target.ts`
+- `src/validation/rules/runtime-path.ts`
+- `src/validation/rules/legacy-namespace.ts`
+- `src/validation/rules/artifact-path.ts`
+- `src/validation/validate-project.ts`
+- `test/runtime-path-validation.test.ts`
+- `test/legacy-namespace-validation.test.ts`
+- `test/menu-target-validation.test.ts`
+- `test/artifact-path-validation.test.ts`
+- `test/validate-command.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-28: 新增 runtime-path 与 legacy-namespace validation rule，接入 phase coverage、menu-target、artifact-path 与 validate deterministic projection；新增 focused validation tests。因完整回归存在非本 Story hash fixture blocker，状态保持 `in-progress`。
+- 2026-05-28: 修复 shared hash helper 的 include traversal bug，使 canonical hash included file set 与实际 installable package surface 一致；targeted hash regression、Story 3.4 focused tests、完整 build、完整回归和 diff check 全部通过，状态推进到 `review`。

@@ -78,10 +78,53 @@ describe("artifact path validation", () => {
         metadataLocation: "frontmatter",
       });
       expect(symlinkIssue.map((issue) => issue.issueId)).toContain("artifact-path.symlink-escape");
+      expect(symlinkIssue).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            issueId: "artifact-path.symlink-escape",
+            affectedPath: "artifact:actualArtifactPath",
+            details: {
+              pathRole: "actualArtifactPath",
+              reason: "symlink-escape",
+            },
+          }),
+        ]),
+      );
       expect(JSON.stringify(symlinkIssue)).not.toContain(outsideRoot);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
       await rm(outsideRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts project-internal artifact symlinks inside the project boundary", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-path-internal-link-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite-output/real"), { recursive: true });
+      await writeFile(path.join(tempRoot, "_speclite-output/real/report.md"), "# Report\n", "utf8");
+      await symlink(
+        path.join(tempRoot, "_speclite-output/real"),
+        path.join(tempRoot, "_speclite-output/link"),
+      );
+
+      await expect(
+        validateArtifactPathContract({
+          projectRoot: tempRoot,
+          configuredRoot: "_speclite-output",
+          defaultOutputPath: "_speclite-output",
+          actualArtifactPath: "_speclite-output/link/report.md",
+          artifactType: "report",
+          metadata: {
+            workflowType: "dev-story",
+            sourceSkill: "speclite-dev-story",
+            generatedAt: "2026-05-27T06:00:00.000Z",
+          },
+          metadataLocation: "frontmatter",
+        }),
+      ).resolves.toEqual([]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
     }
   });
 

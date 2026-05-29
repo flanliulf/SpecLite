@@ -1,6 +1,6 @@
 # Story 3.3: IDE Mirror And File Integrity Validation（IDE 镜像与文件完整性验证）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -45,6 +45,7 @@ Status: ready-for-dev
    **前提** manifest / skill index 声明某 canonical skill 应映射到某个 IDE target；
    **当** `validate` 检查 target mirror；
    **则** expected skill entry 缺失必须报告 `ide-mirror.missing-entry`；
+   **并且** 对 selected modules 下每个 canonical package root，若 `skill-index.json` 已声明其安装到某 selected target，则该 target mirror 必须存在对应 `.claude/skills/<canonicalSkillId>/` 或 `.agents/skills/<canonicalSkillId>/` entry；默认 `core` + `sdlc` install 下每个 selected target 应覆盖 `53` 个 canonical skill entries；
    **并且** 同一 target 中存在多个 entry 声称或投影到同一 `canonicalSkillId` 时，必须报告 `ide-mirror.duplicate-entry`；
    **并且** 额外 entry 与已安装 canonical skill id 重叠时，必须报告 missing、mismatched 或 duplicate 中最具体的 stable issue；
    **并且** 不得生成未在 taxonomy 中保留的自由文本 issue id。
@@ -59,59 +60,61 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-6）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、files index generation、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/validation/rules/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.3 中创建孤立的 mirror/hash validation scaffold。
-  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/ide-mirror.ts`、`src/validation/rules/file-integrity.ts`、`src/ide/mirror-validator.ts`、`src/manifest/manifest-generator.ts` 或等价 files-index helper、`src/manifest/manifest-schema.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 和 `src/fs/path-normalizer.ts`。
-  - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-6）
+  - [x] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、files index generation、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [x] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/validation/rules/manifest-schema.ts`、`src/ide/adapter-registry.ts`、`src/diagnostics/command-result-schema.ts` 或 `src/fs/path-normalizer.ts` 尚不存在，先完成前置 stories；不得在 Story 3.3 中创建孤立的 mirror/hash validation scaffold。
+  - [x] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/rules/ide-mirror.ts`、`src/validation/rules/file-integrity.ts`、`src/ide/mirror-validator.ts`、`src/manifest/manifest-generator.ts` 或等价 files-index helper、`src/manifest/manifest-schema.ts`、`src/manifest/hash.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts` 和 `src/fs/path-normalizer.ts`。
+  - [x] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 建立 canonical package hash comparison（AC: 1, 2, 5, 6）
-  - [ ] 在 `src/ide/mirror-validator.ts`、`src/validation/rules/ide-mirror.ts` 或既有 mirror validation anchor 中实现 package-level mirror comparison；不要在 `src/commands/validate.ts` 中直接遍历和拼接 issue。
-  - [ ] 从 manifest / skill index 读取 `canonicalSkillId`、`canonicalPackageHash` 和 `installedTargets[]`，并仅使用 `src/ide/adapter-registry.ts` 声明的 MVP target ids：`claude`、`agents`。
-  - [ ] 按 Canonical Package Hash Algorithm Contract 计算 canonical package content：`SKILL.md`、`CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example`、`customize.toml` 等 source package paths 如存在则参与 hash。
-  - [ ] 明确排除 adapter-specific discovery metadata、wrapper files、capability catalog、command pointer placeholder 或 target-local generated files；这些文件若由 installer 管理，只能通过 files index 的 file-level hash 校验。
-  - [ ] 对 missing expected entry 输出 `ide-mirror.missing-entry`；对 content mismatch 输出 `ide-mirror.hash-mismatch`；对同 target duplicate canonical skill entry 输出 `ide-mirror.duplicate-entry`。
-  - [ ] `details` 使用稳定机器上下文，例如 `targetId`、`canonicalSkillId`、`reason`、`expectedHashAlgorithm` 和 `baselineKind`；不得包含 actual hash、expected hash、absolute path、home directory、timestamp、stack trace 或 raw filesystem error。
+- [x] Task 2: 建立 canonical package hash comparison（AC: 1, 2, 5, 6）
+  - [x] 在 `src/ide/mirror-validator.ts`、`src/validation/rules/ide-mirror.ts` 或既有 mirror validation anchor 中实现 package-level mirror comparison；不要在 `src/commands/validate.ts` 中直接遍历和拼接 issue。
+  - [x] 从 manifest / skill index 读取 `canonicalSkillId`、`canonicalPackageHash` 和 `installedTargets[]`，并仅使用 `src/ide/adapter-registry.ts` 声明的 MVP target ids：`claude`、`agents`。
+  - [x] 对每个 skill-index entry 的每个 installed target 验证 mirror entry 存在；默认 `core` + `sdlc` install 下，每个 selected target 的 expected entry count 为 `53`。
+  - [x] 按 Canonical Package Hash Algorithm Contract 计算 canonical package content：`SKILL.md`、`CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example`、`customize.toml` 等 source package paths 如存在则参与 hash。
+  - [x] 明确排除 adapter-specific discovery metadata、wrapper files、capability catalog、command pointer placeholder 或 target-local generated files；这些文件若由 installer 管理，只能通过 files index 的 file-level hash 校验。
+  - [x] 对 missing expected entry 输出 `ide-mirror.missing-entry`；对 content mismatch 输出 `ide-mirror.hash-mismatch`；对同 target duplicate canonical skill entry 输出 `ide-mirror.duplicate-entry`。
+  - [x] `details` 使用稳定机器上下文，例如 `targetId`、`canonicalSkillId`、`reason`、`expectedHashAlgorithm` 和 `baselineKind`；不得包含 actual hash、expected hash、absolute path、home directory、timestamp、stack trace 或 raw filesystem error。
 
-- [ ] Task 3: 实现 files index raw-byte integrity checks（AC: 3, 4, 6）
-  - [ ] 在 `src/validation/rules/file-integrity.ts` 或既有 validation rule module 中读取 `_speclite/_config/files-index.json` 的已解析结果；schema/shape 错误继续由 Story 3.2 的 `manifest-schema` rule 负责。
-  - [ ] 只对 `ownership: "installer-owned"` 且属于 installed runtime/control hub、IDE execution plane 或 installer-generated artifact 的 entries 执行 current raw-byte hash comparison。
-  - [ ] 使用 shared hash helper（例如 `src/manifest/hash.ts`）计算 `sha256`；不要新增第三方 hash dependency，不要把 text normalization、line ending normalization 或 JSON pretty-print 作为 hash 输入替代。
-  - [ ] 文件缺失时输出 `file-integrity.missing-installer-owned-file`；raw-byte hash mismatch 时输出 `file-integrity.hash-mismatch`；无法可靠建立 ownership 时输出 `file-integrity.unknown-ownership`。
-  - [ ] executable intent mismatch、case conflict、stale safe-write temp file 等维度如果已能由本 Story 检查，则使用 taxonomy 已保留的 `file-integrity.executable-bit-mismatch`、`file-integrity.case-conflict`、`file-integrity.stale-temp-file`；否则保留为明确后续 validation dimension，不得把它们吞进 hash mismatch。
-  - [ ] Human-owned 和 workflow-owned files 不得被 Story 3.3 的 drift check 当作可自动修复对象；如需要报告，只能报告 ownership/risk，不得要求 validate 修改它们。
+- [x] Task 3: 实现 files index raw-byte integrity checks（AC: 3, 4, 6）
+  - [x] 在 `src/validation/rules/file-integrity.ts` 或既有 validation rule module 中读取 `_speclite/_config/files-index.json` 的已解析结果；schema/shape 错误继续由 Story 3.2 的 `manifest-schema` rule 负责。
+  - [x] 只对 `ownership: "installer-owned"` 且属于 installed runtime/control hub、IDE execution plane 或 installer-generated artifact 的 entries 执行 current raw-byte hash comparison。
+  - [x] 使用 shared hash helper（例如 `src/manifest/hash.ts`）计算 `sha256`；不要新增第三方 hash dependency，不要把 text normalization、line ending normalization 或 JSON pretty-print 作为 hash 输入替代。
+  - [x] 文件缺失时输出 `file-integrity.missing-installer-owned-file`；raw-byte hash mismatch 时输出 `file-integrity.hash-mismatch`；无法可靠建立 ownership 时输出 `file-integrity.unknown-ownership`。
+  - [x] executable intent mismatch、case conflict、stale safe-write temp file 等维度如果已能由本 Story 检查，则使用 taxonomy 已保留的 `file-integrity.executable-bit-mismatch`、`file-integrity.case-conflict`、`file-integrity.stale-temp-file`；否则保留为明确后续 validation dimension，不得把它们吞进 hash mismatch。
+  - [x] Human-owned 和 workflow-owned files 不得被 Story 3.3 的 drift check 当作可自动修复对象；如需要报告，只能报告 ownership/risk，不得要求 validate 修改它们。
 
-- [ ] Task 4: 接入 validate orchestration and deterministic data projection（接入 Validate 编排与确定性数据投影）（AC: 4, 6）
-  - [ ] `src/commands/validate.ts` 继续只负责参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
-  - [ ] `src/validation/validate-project.ts` 或 equivalent aggregator 必须在 `manifest-schema` schema validation 之后执行 `ide-mirror` 和 `file-integrity` rules；如果 manifest/index 无法读取，后续 rules 不得伪造 mirror 或 file integrity 结果。
-  - [ ] `checkedCategories` 只列出实际执行的 categories，并遵守 canonical issue category order；执行本 Story checks 时必须包含 `ide-mirror` 和/或 `file-integrity`。
-  - [ ] `checkedTargets` 只列出实际检查的 targets，并遵守 adapter registry order：`claude`，然后 `agents`。
-  - [ ] `validatedPaths` 必须包含实际检查过的 target directories、manifest/index paths 或 files-index paths，全部规范化为 project-relative POSIX path 后按字典序输出。
-  - [ ] `CommandResult.issues` 必须按 severity order、canonical issue category order、normalized affected path、issue id 排序；不得按发现顺序、rule execution order 或 async completion order 输出。
-  - [ ] Human-readable validate output 使用 shared diagnostics/output layer；不得在 validation rule 内自行拼接 issue layout、path display、summary 或 next action ordering。
+- [x] Task 4: 接入 validate orchestration and deterministic data projection（接入 Validate 编排与确定性数据投影）（AC: 4, 6）
+  - [x] `src/commands/validate.ts` 继续只负责参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
+  - [x] `src/validation/validate-project.ts` 或 equivalent aggregator 必须在 `manifest-schema` schema validation 之后执行 `ide-mirror` 和 `file-integrity` rules；如果 manifest/index 无法读取，后续 rules 不得伪造 mirror 或 file integrity 结果。
+  - [x] `checkedCategories` 只列出实际执行的 categories，并遵守 canonical issue category order；执行本 Story checks 时必须包含 `ide-mirror` 和/或 `file-integrity`。
+  - [x] `checkedTargets` 只列出实际检查的 targets，并遵守 adapter registry order：`claude`，然后 `agents`。
+  - [x] `validatedPaths` 必须包含实际检查过的 target directories、manifest/index paths 或 files-index paths，全部规范化为 project-relative POSIX path 后按字典序输出。
+  - [x] `CommandResult.issues` 必须按 severity order、canonical issue category order、normalized affected path、issue id 排序；不得按发现顺序、rule execution order 或 async completion order 输出。
+  - [x] Human-readable validate output 使用 shared diagnostics/output layer；不得在 validation rule 内自行拼接 issue layout、path display、summary 或 next action ordering。
 
-- [ ] Task 5: 保持 read-only validation and repair boundary（保持只读验证与 Repair 边界）（AC: 4, 5）
-  - [ ] `speclite validate` 不得调用 update planner、repair planner、safe write、chmod、copy-tree、target writer、manifest generator 或 IDE mirror writer。
-  - [ ] 对 IDE mirror drift 或 installer-owned file drift，human-readable output 和 JSON `suggestedNextStep` 必须指向明确后续路径，例如运行 `speclite update --repair` 或人工检查 affected path；不得暗示 validate 已修复。
-  - [ ] 普通 `speclite update` 的确认或 `--yes` 不得修复 drift；drift repair 只属于后续 Epic 4 的 `update --repair` 明确授权路径。
-  - [ ] Validate 可以报告 stale lock warning，但不得删除 lock 或 stale temp files；write-capable command 的 operation lock 行为不属于本 Story。
+- [x] Task 5: 保持 read-only validation and repair boundary（保持只读验证与 Repair 边界）（AC: 4, 5）
+  - [x] `speclite validate` 不得调用 update planner、repair planner、safe write、chmod、copy-tree、target writer、manifest generator 或 IDE mirror writer。
+  - [x] 对 IDE mirror drift 或 installer-owned file drift，human-readable output 和 JSON `suggestedNextStep` 必须指向明确后续路径，例如运行 `speclite update --repair` 或人工检查 affected path；不得暗示 validate 已修复。
+  - [x] 普通 `speclite update` 的确认或 `--yes` 不得修复 drift；drift repair 只属于后续 Epic 4 的 `update --repair` 明确授权路径。
+  - [x] Validate 可以报告 stale lock warning，但不得删除 lock 或 stale temp files；write-capable command 的 operation lock 行为不属于本 Story。
 
-- [ ] Task 6: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-6）
-  - [ ] Unit tests 覆盖 `.claude/skills/<canonicalSkillId>/` missing entry、package hash mismatch、valid package hash、duplicate canonical skill entry。
-  - [ ] Unit tests 覆盖 `.agents/skills/<canonicalSkillId>/` missing entry、package hash mismatch、valid package hash、duplicate canonical skill entry。
-  - [ ] Unit tests 覆盖同一 canonical skill 在 `claude` 与 `agents` targets 中 canonical package hash 一致，且 adapter artifacts 不参与 canonical package hash。
-  - [ ] Unit tests 覆盖 files index installer-owned raw-byte hash mismatch、missing installer-owned file、unknown ownership、project-relative POSIX path normalization。
-  - [ ] Unit tests 覆盖 details redaction：不得出现 actual/expected hash values、absolute path、home directory、temporary/cache path、timestamp、stack trace 或 raw exception object。
-  - [ ] Integration / fixture tests 覆盖 valid installed mirrors、`ide-drift` fixture、files index mismatch fixture、missing target entry fixture 和 duplicate entry fixture。
-  - [ ] 重复运行相同 validate fixture 至少 3 次，确认 issue arrays、issueCounts、checkedCategories、checkedTargets、validatedPaths、nextActions 和 `--json` semantic output 稳定。
-  - [ ] Negative tests 断言 validate 不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、temporary extraction root 或 source checkout，也不执行 update/repair/write/chmod。
+- [x] Task 6: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-6）
+  - [x] Unit tests 覆盖 `.claude/skills/<canonicalSkillId>/` missing entry、package hash mismatch、valid package hash、duplicate canonical skill entry。
+  - [x] Unit tests 覆盖 `.agents/skills/<canonicalSkillId>/` missing entry、package hash mismatch、valid package hash、duplicate canonical skill entry。
+  - [x] Unit tests 覆盖 full selected target mirror completeness：skill index 有 `53` 个 entries 时，mirror 缺少任一 entry 会报告 `ide-mirror.missing-entry`。
+  - [x] Unit tests 覆盖同一 canonical skill 在 `claude` 与 `agents` targets 中 canonical package hash 一致，且 adapter artifacts 不参与 canonical package hash。
+  - [x] Unit tests 覆盖 files index installer-owned raw-byte hash mismatch、missing installer-owned file、unknown ownership、project-relative POSIX path normalization。
+  - [x] Unit tests 覆盖 details redaction：不得出现 actual/expected hash values、absolute path、home directory、temporary/cache path、timestamp、stack trace 或 raw exception object。
+  - [x] Integration / fixture tests 覆盖 valid installed mirrors、`ide-drift` fixture、files index mismatch fixture、missing target entry fixture 和 duplicate entry fixture。
+  - [x] 重复运行相同 validate fixture 至少 3 次，确认 issue arrays、issueCounts、checkedCategories、checkedTargets、validatedPaths、nextActions 和 `--json` semantic output 稳定。
+  - [x] Negative tests 断言 validate 不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、temporary extraction root 或 source checkout，也不执行 update/repair/write/chmod。
 
-- [ ] Task 7: 本地验证与范围控制（AC: 1-6）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 IDE mirror validation、file integrity validation、CommandResult projection、path normalization 和 validate integration focused tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 validate-only fallback implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 3.4 的 runtime/menu/legacy/artifact validation、Story 3.5 的全量 CommandResult 迁移、Story 3.6 的 progress/category coverage、Epic 4 update/repair apply behavior、Epic 5 remote freshness/provenance checks 或 Epic 6 release fixture matrix。
+- [x] Task 7: 本地验证与范围控制（AC: 1-6）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 IDE mirror validation、file integrity validation、CommandResult projection、path normalization 和 validate integration focused tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 validate-only fallback implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Story 3.4 的 runtime/menu/legacy/artifact validation、Story 3.5 的全量 CommandResult 迁移、Story 3.6 的 progress/category coverage、Epic 4 update/repair apply behavior、Epic 5 remote freshness/provenance checks 或 Epic 6 release fixture matrix。
 
 ## Dev Notes（开发备注）
 
@@ -421,17 +424,43 @@ Story 3.3 是受契约约束的本地 deterministic validation 能力，不应�
 
 ### Agent Model Used（使用的代理模型）
 
-由 dev agent 填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-由 dev agent 填写。
+- `npm test -- test/validate-command.test.ts`：先红灯确认缺少 `ide-mirror` / `file-integrity` validation，完成实现后 10/10 通过。
+- `npm run build`：通过，tsup ESM 与 DTS build 均成功。
+- `npm test`：通过，22 个 test files、138 个 tests 全部通过。
+- `_bmad-output/implementation-artifacts/code-reviews/3-3-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-3-code-review/EXPERIMENT_NOTES.md`
 
 ### Completion Notes List（完成备注列表）
 
 - Story context 由 `bmad-create-story` workflow 创建。
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 的实际 TypeScript CLI、validate command、manifest schema、hash helper、adapter registry、diagnostics/output 和 tests 文件存在；未创建孤立 scaffold。
+- `speclite validate` 现在在 manifest-schema validation 成功后执行 `ide-mirror` 与 `file-integrity` rules；schema/shape 错误仍停留在 Story 3.2 的 `manifest-schema` 边界。
+- 实现 canonical package hash contract：使用 path/byte length framing 与 raw bytes，排除 adapter artifacts，symlink under canonical package candidate 产生 redaction-safe `ide-mirror.hash-mismatch`。
+- 实现 IDE mirror drift diagnostics：missing entry、package hash mismatch、duplicate projected entry，details 不泄露 actual/expected hash、绝对路径、home directory、timestamp 或 stack trace。
+- 实现 files index installer-owned raw-byte integrity diagnostics：hash mismatch、missing installer-owned file、installer-controlled path 的 unknown ownership；validate 只报告，不写入、不修复、不 chmod。
+- Validate data projection 现在包含实际执行的 `checkedCategories`、adapter order 的 `checkedTargets`、project-relative POSIX 且字典序的 `validatedPaths`，issues 也按 severity/category/path/issue id 稳定排序。
 
 ### File List（文件列表）
 
-由 dev agent 填写。
+- `_bmad-output/implementation-artifacts/code-reviews/3-3-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-3-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-3-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/3-3-ide-mirror-and-file-integrity-validation.md`
+- `src/diagnostics/command-result.ts`
+- `src/manifest/hash.ts`
+- `src/validation/rules/ide-mirror.ts`
+- `src/validation/rules/file-integrity.ts`
+- `src/validation/rules/manifest-schema.ts`
+- `src/validation/validate-project.ts`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-speclite-dev-story.json`
+- `test/validate-command.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-28: 实现 Story 3.3 的 IDE mirror canonical package hash validation、files index raw-byte integrity validation、deterministic validate projection 和 focused regression tests；Story 状态推进到 `review`。

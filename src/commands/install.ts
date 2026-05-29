@@ -6,6 +6,7 @@ import {
   createInstallFailureResult,
   createInstallSuccessResult,
   DEFAULT_INSTALL_MANIFEST_VERSION,
+  resolveTargetProjectDisplayName,
 } from "../diagnostics/command-result.js";
 import type {
   CommandPathSummary,
@@ -71,6 +72,10 @@ export type InstallCommandOutcome = {
   installPlan?: InstallPlan;
 };
 
+export type PrewriteInstallScopeConfirmationInput = {
+  prompt: string;
+};
+
 export function getCurrentRuntimeFacts(runtime: InstallCommandRuntime = {}): RuntimeFacts {
   return {
     nodeVersion: runtime.nodeVersion ?? process.version,
@@ -87,12 +92,22 @@ export async function runInstallCommand(input: {
   configureProject?: (
     input: ConfigInitializationPromptInput,
   ) => Promise<ConfigInitializationSelection>;
+  confirmPrewriteInstallScope?: (
+    input: PrewriteInstallScopeConfirmationInput,
+  ) => Promise<void>;
   targetDirectory?: string;
 } = {}): Promise<InstallCommandOutcome> {
   const projectRoot = input.projectRoot ?? PACKAGE_ROOT;
   const runtimeFacts = getCurrentRuntimeFacts(input.runtime);
-  const targetProject =
-    input.runtime?.targetProject ?? (path.basename(input.runtime?.cwd ?? process.cwd()) || "project");
+  const cwd = input.runtime?.cwd ?? process.cwd();
+  const normalizedTarget = normalizeTargetDirectory({
+    cwd,
+    ...(input.targetDirectory === undefined ? {} : { targetDirectory: input.targetDirectory }),
+  });
+  const targetProject = await resolveTargetProjectDisplayName({
+    targetRoot: normalizedTarget.targetRoot,
+    ...(input.runtime?.targetProject === undefined ? {} : { explicitName: input.runtime.targetProject }),
+  });
   const guardResult = evaluateRuntimeGuard(runtimeFacts);
 
   if (!guardResult.ok) {
@@ -107,11 +122,6 @@ export async function runInstallCommand(input: {
     return { result, exitCode: 1 };
   }
 
-  const cwd = input.runtime?.cwd ?? process.cwd();
-  const normalizedTarget = normalizeTargetDirectory({
-    cwd,
-    ...(input.targetDirectory === undefined ? {} : { targetDirectory: input.targetDirectory }),
-  });
   const targetDirectoryState = await inspectTargetDirectory({
     targetRoot: normalizedTarget.targetRoot,
   });
@@ -119,7 +129,7 @@ export async function runInstallCommand(input: {
   const pendingSteps = [...INSTALL_LIFECYCLE_STEP_IDS];
   const context = createInstallCommandContext({
     cwd,
-    targetProject: input.runtime?.targetProject ?? normalizedTarget.targetProject,
+    targetProject,
     projectRootDisplay: normalizedTarget.displayPath,
     paths: normalizedTarget.paths,
     runtime: runtimeFacts,
@@ -247,15 +257,22 @@ export async function runInstallCommand(input: {
     return { result, exitCode: 1 };
   }
 
+  const configPromptInput = createConfigInitializationPromptInput({
+    selectedModules,
+    targetAdapters: defaultTargetAdapters,
+  });
   const configSelection =
     input.options?.json === true || input.configureProject === undefined
       ? undefined
-      : await input.configureProject(
-          createConfigInitializationPromptInput({
+      : await input.configureProject({
+          ...configPromptInput,
+          prompt: createPrewriteModuleSummary({
             selectedModules,
-            targetAdapters: defaultTargetAdapters,
+            sourceDescriptor,
+            targetSummary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+            configPrompt: configPromptInput.prompt,
           }),
-        );
+        });
   const unsupportedTargetIds = findUnsupportedTargetIds(
     configSelection?.ideTargetIds,
     defaultTargetAdapters,
@@ -321,6 +338,16 @@ export async function runInstallCommand(input: {
   }
 
   const configInitializationCompletedSteps = [...moduleSelectionCompletedSteps, "config-initialization"];
+  const finalPrewriteSummary = createFinalPrewriteInstallScopeSummary({
+    selectedModules: finalSelectedModules,
+    sourceDescriptor,
+    targetSummary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+    configPlan,
+    targetAdapters: finalTargetAdapters,
+  });
+  if (input.options?.json !== true && input.confirmPrewriteInstallScope !== undefined) {
+    await input.confirmPrewriteInstallScope({ prompt: finalPrewriteSummary });
+  }
   const installPlan = InstallPlanSchema.parse({
     sourceDescriptor,
     selectedModules: finalSelectedModuleIds,
@@ -365,6 +392,7 @@ export async function runInstallCommand(input: {
     projectRoot: normalizedTarget.targetRoot,
     sourceDescriptor,
     installedModules: applyResult.installedModules,
+    selectedModules: finalSelectedModules,
     ideTargets: applyResult.ideTargets,
     paths: applyResult.paths,
   });
@@ -453,6 +481,7 @@ function createInstalledReadySummary(input: {
     `User display name: ${input.configPlan.model.core.user_name}.`,
     `Languages: communication=${input.configPlan.model.core.communication_language}, document=${input.configPlan.model.core.document_output_language}.`,
     `Selected modules: ${selectedModuleIds}.`,
+    `Canonical package roots: ${formatModulePackageRootCounts(input.selectedModules)}.`,
     `Installed modules: ${selectedModuleDetails}.`,
     `IDE targets: ${input.ideTargets.map((target) => `${target.id} (${target.skillCount ?? 0} skills at ${target.targetPath ?? "not-configured"})`).join(", ")}.`,
     `Runtime path: ${input.paths.specliteRoot ?? "_speclite"}.`,
@@ -460,6 +489,49 @@ function createInstalledReadySummary(input: {
     `Manifest path: ${input.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}.`,
     "Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
   ].join(" ");
+}
+
+function createFinalPrewriteInstallScopeSummary(input: {
+  selectedModules: OfficialModule[];
+  sourceDescriptor: SourceDescriptor;
+  targetSummary: string;
+  configPlan: Extract<Awaited<ReturnType<typeof createConfigInitializationPlan>>, { ok: true }>;
+  targetAdapters: InstallPlanTargetAdapter[];
+}): string {
+  const selectedModuleDetails = input.selectedModules
+    .map((module) => `${module.code} (${module.name} ${module.version})`)
+    .join(", ");
+  const capabilityScope = input.selectedModules
+    .map((module) => `${module.code}: ${module.capabilitySummary.join(", ") || module.description}`)
+    .join("; ");
+  const plannedConfigWrites = input.configPlan.plannedWrites
+    .map((write) => `${write.path}=${write.action}`)
+    .join(", ");
+  const targetIds = input.targetAdapters.map((adapter) => adapter.targetId).join(", ");
+
+  return [
+    "Final pre-write install scope summary.",
+    input.targetSummary,
+    `Source descriptor: ${input.sourceDescriptor.sourceType} ${input.sourceDescriptor.resolvedRoot ?? "unknown"}; trust=${input.sourceDescriptor.trustStatus}.`,
+    `Config mode: ${input.configPlan.mode}.`,
+    `Selected modules: ${selectedModuleDetails}.`,
+    `Canonical package roots: ${formatModulePackageRootCounts(input.selectedModules)}.`,
+    `Capability scope: ${capabilityScope}.`,
+    `IDE targets: ${targetIds}.`,
+    `Planned config writes: ${plannedConfigWrites}.`,
+    "Planned write phases: config initialization, runtime structure creation, artifact directory creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary.",
+    "Pending: no runtime structure, artifact directories, IDE mirrors, manifest/index files, ReadyCheck or ready summary have been written yet.",
+    "No project files were changed.",
+  ].join(" ");
+}
+
+function formatModulePackageRootCounts(modules: OfficialModule[]): string {
+  const total = modules.reduce((sum, module) => sum + module.packageRoots.length, 0);
+  const perModule = modules
+    .map((module) => `${module.code}=${module.packageRoots.length}`)
+    .join(", ");
+
+  return `${perModule}, total=${total}`;
 }
 
 function shouldStopBeforeSourceSelection(
@@ -618,7 +690,7 @@ function createUnsupportedSourceIssue(input: {
 
 function createInvalidModuleSelectionIssue(invalidModuleIds: string[]): ValidationIssue {
   return {
-    issueId: "module-selection.invalid-module-id",
+    issueId: "source-integrity.unsupported-source",
     category: "source-integrity",
     severity: "error",
     component: "official-module-selection",
@@ -701,7 +773,7 @@ function createPrewriteModuleSummary(input: {
   selectedModules: OfficialModule[];
   sourceDescriptor: SourceDescriptor;
   targetSummary: string;
-  configSummary: string;
+  configPrompt: string;
 }): string {
   const selectedModules = input.selectedModules
     .map((module) => `${module.code} (${module.name} ${module.version})`)
@@ -714,8 +786,9 @@ function createPrewriteModuleSummary(input: {
     input.targetSummary,
     `Source: ${input.sourceDescriptor.sourceType} ${input.sourceDescriptor.resolvedRoot ?? "unknown"}.`,
     `Selected modules: ${selectedModules}.`,
+    `Canonical package roots: ${formatModulePackageRootCounts(input.selectedModules)}.`,
     `Capability scope: ${capabilityScope}.`,
-    input.configSummary,
+    input.configPrompt,
     "Pending: runtime structure creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary have not happened.",
     "No project files were changed.",
   ].join(" ");

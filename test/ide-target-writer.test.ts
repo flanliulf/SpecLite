@@ -140,6 +140,56 @@ describe("self-contained IDE skill entry writer", () => {
     }
   });
 
+  it("mirrors and indexes package roots that have no help or phase row", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-target-writer-no-help-"));
+    const sourceRoot = path.join(tempRoot, "assets/source/speclite/core-skills");
+    const projectRoot = path.join(tempRoot, "project");
+
+    try {
+      await mkdir(path.join(sourceRoot, "speclite-sample"), { recursive: true });
+      await mkdir(path.join(sourceRoot, "speclite-no-help"), { recursive: true });
+      await mkdir(projectRoot, { recursive: true });
+      await writeFile(path.join(sourceRoot, "speclite-sample/SKILL.md"), "# Skill\n", "utf8");
+      await writeFile(path.join(sourceRoot, "speclite-no-help/SKILL.md"), "# No Help\n", "utf8");
+
+      const result = await writeIdeMirrors({
+        projectRoot,
+        packageRoot: tempRoot,
+        selectedModules: [createSampleModule({
+          packageRoots: ["speclite-sample", "speclite-no-help"],
+        })],
+        targetAdapters: [
+          { targetId: "claude", targetDirectory: ".claude/skills", status: "planned" },
+          { targetId: "agents", targetDirectory: ".agents/skills", status: "planned" },
+        ],
+        artifactRoots,
+      });
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.skillIndexEntries.map((entry) => entry.canonicalSkillId)).toEqual([
+        "speclite-no-help",
+        "speclite-sample",
+      ]);
+      expect(result.skillIndexEntries.find((entry) => entry.canonicalSkillId === "speclite-no-help")).toMatchObject({
+        phaseIds: ["anytime"],
+        installedTargets: ["claude", "agents"],
+      });
+      expect(result.helpIndexEntries.map((entry) => entry.canonicalSkillId)).toEqual(["speclite-sample"]);
+      expect(result.phaseCoverageRows.map((row) => row.canonicalSkillId)).toEqual(["speclite-sample"]);
+      expect(result.targetSkillCounts.get("claude")).toBe(2);
+      expect(result.targetSkillCounts.get("agents")).toBe(2);
+      await expect(
+        stat(path.join(projectRoot, ".claude/skills/speclite-no-help/SKILL.md")),
+      ).resolves.toBeDefined();
+      await expect(
+        stat(path.join(projectRoot, ".agents/skills/speclite-no-help/SKILL.md")),
+      ).resolves.toBeDefined();
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("does not create an empty entry when canonical SKILL.md is missing", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-target-writer-missing-"));
     const sourceRoot = path.join(tempRoot, "source/speclite-missing");
@@ -177,7 +227,9 @@ describe("self-contained IDE skill entry writer", () => {
   });
 });
 
-function createSampleModule(): OfficialModule {
+function createSampleModule(input: {
+  packageRoots?: string[];
+} = {}): OfficialModule {
   return {
     code: "core",
     name: "Core",
@@ -187,7 +239,7 @@ function createSampleModule(): OfficialModule {
     defaultSelected: true,
     required: true,
     requiredDependencies: [],
-    packageRoots: ["speclite-sample"],
+    packageRoots: input.packageRoots ?? ["speclite-sample"],
     capabilitySummary: [],
     helpEntries: [
       {

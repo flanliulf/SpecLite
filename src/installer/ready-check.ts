@@ -18,6 +18,7 @@ import {
   type PhaseCoverage,
   type SkillIndex,
 } from "../manifest/manifest-schema.js";
+import type { OfficialModule } from "../modules/module-metadata.js";
 import { SourceDescriptorSchema, type SourceDescriptor } from "../source/source-descriptor-schema.js";
 import { validateMenuTargets } from "../validation/rules/menu-target.js";
 import type { InstallLifecycleStepId } from "./progress-events.js";
@@ -43,6 +44,7 @@ export async function runReadyCheck(input: {
   projectRoot: string;
   sourceDescriptor: SourceDescriptor;
   installedModules: string[];
+  selectedModules?: OfficialModule[];
   ideTargets: IdeTargetStatus[];
   paths: CommandPathSummary;
   blockingIssues?: ValidationIssue[];
@@ -101,6 +103,18 @@ export async function runReadyCheck(input: {
     return createReadyCheckFailure(blockingMenuTargetIssue);
   }
 
+  const expectedSkillEntries = createExpectedSkillEntries({
+    installedModules: input.installedModules,
+    selectedModules: input.selectedModules ?? [],
+  });
+  const expectedSkillIssue = validateExpectedSkillEntries({
+    expectedSkillEntries,
+    skillIndex: indexesResult.skillIndex,
+  });
+  if (expectedSkillIssue !== undefined) {
+    return createReadyCheckFailure(expectedSkillIssue);
+  }
+
   const runtimePaths = [
     paths.specliteRoot,
     "_speclite/_config",
@@ -151,12 +165,42 @@ export async function runReadyCheck(input: {
       return createReadyCheckFailure(createMissingIdeMirrorIssue(targetId, target?.targetPath));
     }
 
+    const indexedTargetSkillCount = indexesResult.skillIndex.entries.filter((skill) =>
+      skill.installedTargets.includes(targetId),
+    ).length;
+    if (target.skillCount !== undefined && target.skillCount !== indexedTargetSkillCount) {
+      return createReadyCheckFailure(createTargetSkillCountIssue({
+        targetId,
+        targetPath: target.targetPath,
+        reportedSkillCount: target.skillCount,
+        indexedSkillCount: indexedTargetSkillCount,
+      }));
+    }
+
     for (const entry of indexesResult.skillIndex.entries.filter((skill) =>
       skill.installedTargets.includes(targetId),
     )) {
       const skillEntryPath = `${target.targetPath}/${entry.canonicalSkillId}/SKILL.md`;
       if (!(await pathExists(projectRootPath(input.projectRoot, skillEntryPath)))) {
         return createReadyCheckFailure(createMissingIdeMirrorIssue(targetId, skillEntryPath));
+      }
+    }
+
+    for (const expectedEntry of expectedSkillEntries) {
+      const indexedEntry = indexesResult.skillIndex.entries.find((entry) =>
+        entry.moduleId === expectedEntry.moduleId &&
+        entry.canonicalSkillId === expectedEntry.canonicalSkillId
+      );
+      if (indexedEntry !== undefined && !indexedEntry.installedTargets.includes(targetId)) {
+        return createReadyCheckFailure(createMissingIdeMirrorIssue(
+          targetId,
+          `${target.targetPath}/${expectedEntry.canonicalSkillId}/SKILL.md`,
+          {
+            missingModuleId: expectedEntry.moduleId,
+            missingCanonicalSkillId: expectedEntry.canonicalSkillId,
+            reason: "selected-package-root-not-installed-for-target",
+          },
+        ));
       }
     }
   }
@@ -170,6 +214,48 @@ export async function runReadyCheck(input: {
     completedSteps: ["ready-check"],
     pendingSteps: ["ready-summary"],
   };
+}
+
+type ExpectedSkillEntry = {
+  moduleId: string;
+  canonicalSkillId: string;
+};
+
+function createExpectedSkillEntries(input: {
+  installedModules: string[];
+  selectedModules: OfficialModule[];
+}): ExpectedSkillEntry[] {
+  const installedModuleIds = new Set(input.installedModules);
+  return input.selectedModules
+    .filter((module) => installedModuleIds.has(module.code))
+    .flatMap((module) =>
+      module.packageRoots.map((packageRoot) => ({
+        moduleId: module.code,
+        canonicalSkillId: path.posix.basename(packageRoot),
+      })),
+    )
+    .sort((left, right) =>
+      `${left.moduleId}:${left.canonicalSkillId}`.localeCompare(
+        `${right.moduleId}:${right.canonicalSkillId}`,
+      ),
+    );
+}
+
+function validateExpectedSkillEntries(input: {
+  expectedSkillEntries: ExpectedSkillEntry[];
+  skillIndex: SkillIndex;
+}): ValidationIssue | undefined {
+  if (input.expectedSkillEntries.length === 0) return undefined;
+
+  const installedKeys = new Set(
+    input.skillIndex.entries.map((entry) => `${entry.moduleId}:${entry.canonicalSkillId}`),
+  );
+  const missing = input.expectedSkillEntries.find((entry) =>
+    !installedKeys.has(`${entry.moduleId}:${entry.canonicalSkillId}`),
+  );
+  if (missing === undefined) return undefined;
+
+  return createMissingSkillIndexEntryIssue(missing);
 }
 
 function normalizeReadyPaths(paths: CommandPathSummary): Required<CommandPathSummary> | undefined {
@@ -356,15 +442,59 @@ function createMissingRuntimePathIssue(affectedPath: string): ValidationIssue {
   };
 }
 
-function createMissingIdeMirrorIssue(targetId: IdeTargetId, affectedPath: string | undefined): ValidationIssue {
+function createMissingIdeMirrorIssue(
+  targetId: IdeTargetId,
+  affectedPath: string | undefined,
+  details?: Record<string, unknown>,
+): ValidationIssue {
   return {
     issueId: "ide-mirror.missing-entry",
     category: "ide-mirror",
     severity: "error",
     ...(affectedPath === undefined ? {} : { affectedPath }),
     component: `ReadyCheck:${targetId}`,
+    ...(details === undefined ? {} : { details }),
     impact: "A selected IDE mirror target is missing a required installed skill entry.",
     suggestedNextStep: "Rerun speclite install --yes to restore selected IDE mirror entries.",
+  };
+}
+
+function createMissingSkillIndexEntryIssue(missing: ExpectedSkillEntry): ValidationIssue {
+  return {
+    issueId: "ide-mirror.missing-entry",
+    category: "ide-mirror",
+    severity: "error",
+    affectedPath: "_speclite/_config/skill-index.json",
+    component: "ReadyCheck:skill-index",
+    details: {
+      missingModuleId: missing.moduleId,
+      missingCanonicalSkillId: missing.canonicalSkillId,
+      reason: "selected-package-root-missing-from-skill-index",
+    },
+    impact: "A selected module package root is missing from the installed skill index.",
+    suggestedNextStep: "Regenerate skill-index.json from the selected module package roots.",
+  };
+}
+
+function createTargetSkillCountIssue(input: {
+  targetId: IdeTargetId;
+  targetPath: string;
+  reportedSkillCount: number;
+  indexedSkillCount: number;
+}): ValidationIssue {
+  return {
+    issueId: "ide-mirror.missing-entry",
+    category: "ide-mirror",
+    severity: "error",
+    affectedPath: input.targetPath,
+    component: `ReadyCheck:${input.targetId}`,
+    details: {
+      reportedSkillCount: input.reportedSkillCount,
+      indexedSkillCount: input.indexedSkillCount,
+      reason: "target-skill-count-mismatch",
+    },
+    impact: "The IDE target summary does not match the installed skill index.",
+    suggestedNextStep: "Regenerate IDE mirrors and installed-state indexes from the same selected module set.",
   };
 }
 

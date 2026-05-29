@@ -1,6 +1,6 @@
 # Story 3.6: Validation Progress, Category Coverage And Local Determinism（验证进度、类别覆盖与本地确定性）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -78,71 +78,71 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-9）
-  - [ ] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 / Story 3.5 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、validation rules、CommandResult schema/projection、diagnostics output、path normalization、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 或 `src/ide/adapter-registry.ts` 尚不存在，先完成前置 stories；不得在 Story 3.6 中创建孤立的 validation-order-only scaffold。
-  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/validate-project.ts`、所有已存在的 `src/validation/rules/*.ts`、`src/validation/issue-model.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts`、`src/ide/adapter-registry.ts` 和 fixture comparison helpers。
-  - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-9）
+  - [x] 确认 Epic 1 / Epic 2 / Story 3.1 / Story 3.2 / Story 3.3 / Story 3.4 / Story 3.5 的实际代码已经建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index executable schemas、IDE adapter registry、validation rules、CommandResult schema/projection、diagnostics output、path normalization、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [x] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 或 `src/ide/adapter-registry.ts` 尚不存在，先完成前置 stories；不得在 Story 3.6 中创建孤立的 validation-order-only scaffold。
+  - [x] 修改前完整读取所有 UPDATE files，尤其是 `src/validation/validate-project.ts`、所有已存在的 `src/validation/rules/*.ts`、`src/validation/issue-model.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts`、`src/ide/adapter-registry.ts` 和 fixture comparison helpers。
+  - [x] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 建立 validation ordering primitives（建立验证排序原语）（AC: 1, 2, 4, 5, 6）
-  - [ ] 在 `src/validation/validate-project.ts`、`src/validation/validation-order.ts` 或既有 shared module 中定义 single canonical issue category order，并复用 taxonomy / CommandResult contract 中的 11 个 categories；该 order 包含 `source-integrity` reserved position，但不表示 Story 3.6 拥有该 category 的 domain validation rule。
-  - [ ] 复用或扩展 Story 3.5 的 shared sorting helpers：severity order、canonical category order、adapter target order、normalized path lexicographic order 和 issue id tie-breaker。
-  - [ ] `checkedCategories` 只能由实际执行的 validation rules / category groups 产生，不能通过扫描 available rules、所有 known categories 或 reserved category order 伪造；未执行的 `source-integrity` 必须在 human-readable progress 中显示 skipped / not checked，而不是进入 `checkedCategories`。
-  - [ ] `checkedTargets` 必须由 manifest/index / adapter registry / actual target checks 产生，并通过 `src/ide/adapter-registry.ts` 的 canonical target order 排序。
-  - [ ] `validatedPaths` 必须在进入 `CommandResult` 前完成 project-relative POSIX normalization 和 lexicographic sort；不要让 reporter 再做语义补救。
+- [x] Task 2: 建立 validation ordering primitives（建立验证排序原语）（AC: 1, 2, 4, 5, 6）
+  - [x] 在 `src/validation/validate-project.ts`、`src/validation/validation-order.ts` 或既有 shared module 中定义 single canonical issue category order，并复用 taxonomy / CommandResult contract 中的 11 个 categories；该 order 包含 `source-integrity` reserved position，但不表示 Story 3.6 拥有该 category 的 domain validation rule。
+  - [x] 复用或扩展 Story 3.5 的 shared sorting helpers：severity order、canonical category order、adapter target order、normalized path lexicographic order 和 issue id tie-breaker。
+  - [x] `checkedCategories` 只能由实际执行的 validation rules / category groups 产生，不能通过扫描 available rules、所有 known categories 或 reserved category order 伪造；未执行的 `source-integrity` 必须在 human-readable progress 中显示 skipped / not checked，而不是进入 `checkedCategories`。
+  - [x] `checkedTargets` 必须由 manifest/index / adapter registry / actual target checks 产生，并通过 `src/ide/adapter-registry.ts` 的 canonical target order 排序。
+  - [x] `validatedPaths` 必须在进入 `CommandResult` 前完成 project-relative POSIX normalization 和 lexicographic sort；不要让 reporter 再做语义补救。
 
-- [ ] Task 3: 收口 validate orchestration and progress model（收口 Validate 编排与进度模型）（AC: 1, 2, 7, 8, 9）
-  - [ ] `src/commands/validate.ts` 继续只负责参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
-  - [ ] `src/validation/validate-project.ts` 必须按 canonical category order 编排 rules，并显式记录每个实际执行 category 的 start / complete / skipped state。
-  - [ ] Human-readable progress 可以显示 category label、status 和 short reason；machine-readable `ValidateCommandData` 仍只输出 owning SPEC 声明的 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`，不得新增未契约化 progress payload。
-  - [ ] 如果某个 category 因前置 schema corruption、unsupported target 或 missing installed state 被跳过，human-readable output 必须说明 skipped / not checked，不得用 `No issues found` 暗示已检查通过。
-  - [ ] Progress status 不得包含 wall-clock duration、elapsed time、timestamp、random id 或 profiling samples；performance evidence 属于 Epic 6 / release evidence，不进入 stable command JSON。
+- [x] Task 3: 收口 validate orchestration and progress model（收口 Validate 编排与进度模型）（AC: 1, 2, 7, 8, 9）
+  - [x] `src/commands/validate.ts` 继续只负责参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
+  - [x] `src/validation/validate-project.ts` 必须按 canonical category order 编排 rules，并显式记录每个实际执行 category 的 start / complete / skipped state。
+  - [x] Human-readable progress 可以显示 category label、status 和 short reason；machine-readable `ValidateCommandData` 仍只输出 owning SPEC 声明的 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`，不得新增未契约化 progress payload。
+  - [x] 如果某个 category 因前置 schema corruption、unsupported target 或 missing installed state 被跳过，human-readable output 必须说明 skipped / not checked，不得用 `No issues found` 暗示已检查通过。
+  - [x] Progress status 不得包含 wall-clock duration、elapsed time、timestamp、random id 或 profiling samples；performance evidence 属于 Epic 6 / release evidence，不进入 stable command JSON。
 
-- [ ] Task 4: 固化 `ValidateCommandData` projection（固化 ValidateCommandData 投影）（AC: 2, 3, 4, 5）
-  - [ ] `issueCounts` 必须由最终 sorted issues 派生，并固定包含 `info`、`warning`、`error`、`critical` 四个 key，包括 0 值。
-  - [ ] `checkedCategories` 必须仅包含实际执行类别，并使用 canonical relative order；部分执行不能重新编号或按执行完成顺序输出。
-  - [ ] `checkedTargets` 必须仅包含实际检查 targets，并使用 `claude`、`agents` canonical order；读取失败时不要伪造 target coverage。
-  - [ ] `validatedPaths` 必须包含实际读过或验证过的 relevant paths，例如 manifest/index paths、IDE target paths、runtime/menu/artifact paths、files-index paths 和 operation-lock path；每一项都必须 project-relative POSIX 并按字典序输出。
-  - [ ] `status.data` 仍不得包含 `issueCounts`、`checkedCategories`、`checkedTargets` 或 `validatedPaths`；这些字段只属于 `validate.data`。
+- [x] Task 4: 固化 `ValidateCommandData` projection（固化 ValidateCommandData 投影）（AC: 2, 3, 4, 5）
+  - [x] `issueCounts` 必须由最终 sorted issues 派生，并固定包含 `info`、`warning`、`error`、`critical` 四个 key，包括 0 值。
+  - [x] `checkedCategories` 必须仅包含实际执行类别，并使用 canonical relative order；部分执行不能重新编号或按执行完成顺序输出。
+  - [x] `checkedTargets` 必须仅包含实际检查 targets，并使用 `claude`、`agents` canonical order；读取失败时不要伪造 target coverage。
+  - [x] `validatedPaths` 必须包含实际读过或验证过的 relevant paths，例如 manifest/index paths、IDE target paths、runtime/menu/artifact paths、files-index paths 和 operation-lock path；每一项都必须 project-relative POSIX 并按字典序输出。
+  - [x] `status.data` 仍不得包含 `issueCounts`、`checkedCategories`、`checkedTargets` 或 `validatedPaths`；这些字段只属于 `validate.data`。
 
-- [ ] Task 5: 实现 global issue sorting and redaction-safe determinism（实现全局 Issue 排序与脱敏确定性）（AC: 5, 6, 7）
-  - [ ] 所有 validation rules 只能产出 domain findings / `ValidationIssue` inputs；最终 global sort 在 shared diagnostics / validation aggregation layer 完成。
-  - [ ] Sorting key 必须是 severity rank -> category rank -> normalized affected path -> issue id -> stable component key；不得使用 array insertion order 或 object key order 做 tie-breaker。
-  - [ ] `affectedPath`、`component`、`details`、`impact`、`suggestedNextStep` 必须保持 stable and redaction-safe；不得包含 absolute path、home directory、drive letter、environment variable value、credential、token、stack trace、raw exception、timestamp、hash、random id、temporary path、cache path 或 source staging path。
-  - [ ] 如果 rule 需要比较 hash，hash value 不得进入 `ValidationIssue.details` 或 public stable output；可通过 stable `baselineKind`、`hashAlgorithm`、`reason` 等字段表达机器上下文。
-  - [ ] Tests 必须覆盖输入 issues 打乱顺序、rules 异步完成顺序变化、paths 未排序、targets 未排序时，最终 JSON 仍稳定。
+- [x] Task 5: 实现 global issue sorting and redaction-safe determinism（实现全局 Issue 排序与脱敏确定性）（AC: 5, 6, 7）
+  - [x] 所有 validation rules 只能产出 domain findings / `ValidationIssue` inputs；最终 global sort 在 shared diagnostics / validation aggregation layer 完成。
+  - [x] Sorting key 必须是 severity rank -> category rank -> normalized affected path -> issue id -> stable component key；不得使用 array insertion order 或 object key order 做 tie-breaker。
+  - [x] `affectedPath`、`component`、`details`、`impact`、`suggestedNextStep` 必须保持 stable and redaction-safe；不得包含 absolute path、home directory、drive letter、environment variable value、credential、token、stack trace、raw exception、timestamp、hash、random id、temporary path、cache path 或 source staging path。
+  - [x] 如果 rule 需要比较 hash，hash value 不得进入 `ValidationIssue.details` 或 public stable output；可通过 stable `baselineKind`、`hashAlgorithm`、`reason` 等字段表达机器上下文。
+  - [x] Tests 必须覆盖输入 issues 打乱顺序、rules 异步完成顺序变化、paths 未排序、targets 未排序时，最终 JSON 仍稳定。
 
-- [ ] Task 6: 强化 local-only read-only validation boundary（强化本地只读验证边界）（AC: 7）
-  - [ ] `speclite validate` 不得调用 remote source resolver、registry client、Git remote、offline bundle origin、package-manager cache、temporary extraction root、source checkout freshness check 或 provenance revalidation。
-  - [ ] `speclite validate` 不得调用 install/update planner、repair planner、safe write mutation、target writer、manifest generator、artifact writer、chmod、copy-tree、cleanup mutation 或 config writer。
-  - [ ] Validate 可以报告 `operation-lock.stale-lock` warning，但不得删除 lock 或 stale temp files；write-capable command 的 lock acquisition / repair behavior 仍属于 Epic 4。
-  - [ ] Story 3.6 不新增 `source-integrity` domain validation rule。若前置 implementation 已存在本地只读 `source-integrity` category group，本 Story 只负责按 canonical order 编排、记录 checked/skipped state 和稳定输出；若不存在，则 human-readable output 必须显示 skipped / not checked，`checkedCategories` 不得包含 `source-integrity`。
-  - [ ] `source-integrity` 的 source descriptor / integrity evidence shape、source lockfile lifecycle、remote freshness 和 provenance revalidation 归属 Epic 5；Story 3.6 只保留 no-network / no-provenance boundary，避免在 Epic 3 中实现半套来源完整性规则。
+- [x] Task 6: 强化 local-only read-only validation boundary（强化本地只读验证边界）（AC: 7）
+  - [x] `speclite validate` 不得调用 remote source resolver、registry client、Git remote、offline bundle origin、package-manager cache、temporary extraction root、source checkout freshness check 或 provenance revalidation。
+  - [x] `speclite validate` 不得调用 install/update planner、repair planner、safe write mutation、target writer、manifest generator、artifact writer、chmod、copy-tree、cleanup mutation 或 config writer。
+  - [x] Validate 可以报告 `operation-lock.stale-lock` warning，但不得删除 lock 或 stale temp files；write-capable command 的 lock acquisition / repair behavior 仍属于 Epic 4。
+  - [x] Story 3.6 不新增 `source-integrity` domain validation rule。若前置 implementation 已存在本地只读 `source-integrity` category group，本 Story 只负责按 canonical order 编排、记录 checked/skipped state 和稳定输出；若不存在，则 human-readable output 必须显示 skipped / not checked，`checkedCategories` 不得包含 `source-integrity`。
+  - [x] `source-integrity` 的 source descriptor / integrity evidence shape、source lockfile lifecycle、remote freshness 和 provenance revalidation 归属 Epic 5；Story 3.6 只保留 no-network / no-provenance boundary，避免在 Epic 3 中实现半套来源完整性规则。
 
-- [ ] Task 7: 实现 validate Evidence profile terminal fallback（实现 Validate Evidence Profile 终端降级）（AC: 8, 9）
-  - [ ] `src/diagnostics/output.ts` 的 validate default human-readable output 使用 Evidence profile，展示 command title、summary、issueCounts、checkedCategories、checkedTargets、validatedPaths 摘要、issues、nextActions 和 explicit empty states。
-  - [ ] 小于 80 columns 时，宽表格必须降级为 key-value blocks；80-119 columns 可使用紧凑表格或 grouped list；大于等于 120 columns 可以使用更完整表格，但字段集合不能变化。
-  - [ ] `NO_COLOR`、non-TTY、CI 和 screen reader 场景下，颜色、图标或符号只能作为增强；severity、category、issueId、affectedPath、impact、suggestedNextStep 和 nextActions 必须以文本呈现。
-  - [ ] `--json` Structured profile 必须输出 raw JSON object / string，不包含 ANSI escape、颜色、图标、spinner text、table drawing、terminal width formatting、locale-dependent layout 或 human-only decoration fields。
-  - [ ] Empty states 必须明确：无 issue 显示 `No issues found`，无 conflict 显示 `No conflicts detected`，没有类别被执行时显示 `No categories checked` 或更具体 blocker wording。
+- [x] Task 7: 实现 validate Evidence profile terminal fallback（实现 Validate Evidence Profile 终端降级）（AC: 8, 9）
+  - [x] `src/diagnostics/output.ts` 的 validate default human-readable output 使用 Evidence profile，展示 command title、summary、issueCounts、checkedCategories、checkedTargets、validatedPaths 摘要、issues、nextActions 和 explicit empty states。
+  - [x] 小于 80 columns 时，宽表格必须降级为 key-value blocks；80-119 columns 可使用紧凑表格或 grouped list；大于等于 120 columns 可以使用更完整表格，但字段集合不能变化。
+  - [x] `NO_COLOR`、non-TTY、CI 和 screen reader 场景下，颜色、图标或符号只能作为增强；severity、category、issueId、affectedPath、impact、suggestedNextStep 和 nextActions 必须以文本呈现。
+  - [x] `--json` Structured profile 必须输出 raw JSON object / string，不包含 ANSI escape、颜色、图标、spinner text、table drawing、terminal width formatting、locale-dependent layout 或 human-only decoration fields。
+  - [x] Empty states 必须明确：无 issue 显示 `No issues found`，无 conflict 显示 `No conflicts detected`，没有类别被执行时显示 `No categories checked` 或更具体 blocker wording。
 
-- [ ] Task 8: 编写 contract tests、focused tests 和 fixture assertions（AC: 1-9）
-  - [ ] Unit tests 覆盖 canonical category order、partial category subset order、unknown category rejection / guarded handling，以及 `checkedCategories` 不受 rule registration order 影响。
-  - [ ] Unit tests 覆盖 `issueCounts` 固定四 key，包括全 0、仅 warning、error + critical 混合、unknown severity producer rejection。
-  - [ ] Unit tests 覆盖 `checkedTargets` 使用 `claude` -> `agents`，且不受 glob、filesystem、user selection 或 async completion order 影响。
-  - [ ] Unit tests 覆盖 `validatedPaths` normalization：POSIX separator、relative path、lexicographic sort、absolute path / drive letter / home path rejection 或 redaction policy。
-  - [ ] Unit tests 覆盖 issues global sorting：severity -> category -> affectedPath -> issueId；输入 issue arrays 打乱多次后输出稳定。
-  - [ ] Repeated-run determinism tests 在同一 fixture 上连续运行 `speclite validate` 至少 3 次，比较 parsed semantic JSON；除 owning SPEC 允许 normalize / exclude 的 timestamp 字段外必须一致。
-  - [ ] Boundary tests 使用 spies / dependency injection 断言 validate 不访问 remote source、不调用 update/repair/write/chmod、不读取 package-manager cache 或 temporary extraction root。
-  - [ ] Renderer tests 覆盖 `<80`、`80-119`、`>=120` columns、`NO_COLOR`、non-TTY、CI、screen-reader/plain-text copy；关键字段不得丢失。
-  - [ ] Fixture tests 覆盖至少 `fresh-install-empty-project`、`ide-drift`、`path-portability` 和最小 `skill-artifact-loop` 的 validate output ordering、empty state、checked categories / targets / paths 和 JSON stability。
+- [x] Task 8: 编写 contract tests、focused tests 和 fixture assertions（AC: 1-9）
+  - [x] Unit tests 覆盖 canonical category order、partial category subset order、unknown category rejection / guarded handling，以及 `checkedCategories` 不受 rule registration order 影响。
+  - [x] Unit tests 覆盖 `issueCounts` 固定四 key，包括全 0、仅 warning、error + critical 混合、unknown severity producer rejection。
+  - [x] Unit tests 覆盖 `checkedTargets` 使用 `claude` -> `agents`，且不受 glob、filesystem、user selection 或 async completion order 影响。
+  - [x] Unit tests 覆盖 `validatedPaths` normalization：POSIX separator、relative path、lexicographic sort、absolute path / drive letter / home path rejection 或 redaction policy。
+  - [x] Unit tests 覆盖 issues global sorting：severity -> category -> affectedPath -> issueId；输入 issue arrays 打乱多次后输出稳定。
+  - [x] Repeated-run determinism tests 在同一 fixture 上连续运行 `speclite validate` 至少 3 次，比较 parsed semantic JSON；除 owning SPEC 允许 normalize / exclude 的 timestamp 字段外必须一致。
+  - [x] Boundary tests 使用 spies / dependency injection 断言 validate 不访问 remote source、不调用 update/repair/write/chmod、不读取 package-manager cache 或 temporary extraction root。
+  - [x] Renderer tests 覆盖 `<80`、`80-119`、`>=120` columns、`NO_COLOR`、non-TTY、CI、screen-reader/plain-text copy；关键字段不得丢失。
+  - [x] Fixture tests 覆盖至少 `fresh-install-empty-project`、`ide-drift`、`path-portability` 和最小 `skill-artifact-loop` 的 validate output ordering、empty state、checked categories / targets / paths 和 JSON stability。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-9）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 validation aggregation、CommandResult projection、diagnostics output、path normalization、adapter registry 和 validate integration focused tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 isolated validation ordering implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Epic 4 update/repair apply behavior、Epic 5 remote freshness/provenance expansion、Epic 6 full release matrix beyond focused validate fixtures、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair`、command pointer artifacts、coverage dashboard、trend report 或 dedicated Copilot/Cursor target ids。
+- [x] Task 9: 本地验证与范围控制（AC: 1-9）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 validation aggregation、CommandResult projection、diagnostics output、path normalization、adapter registry 和 validate integration focused tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建 isolated validation ordering implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Epic 4 update/repair apply behavior、Epic 5 remote freshness/provenance expansion、Epic 6 full release matrix beyond focused validate fixtures、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair`、command pointer artifacts、coverage dashboard、trend report 或 dedicated Copilot/Cursor target ids。
 
 ## Dev Notes（开发备注）
 
@@ -365,14 +365,37 @@ GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-- N/A for story creation.
+- 2026-05-29: `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` failed because local `python3` lacks Python 3.11 `tomllib`; followed skill fallback and manually merged default workflow config.
+- 2026-05-29: Ran focused validation/diagnostics tests: `npm test -- test/validate-command.test.ts`.
+- 2026-05-29: Ran related validation contract tests: `npm test -- test/validate-command.test.ts test/contract-anchors.test.ts test/runtime-path-validation.test.ts test/menu-target-validation.test.ts test/artifact-path-validation.test.ts test/legacy-namespace-validation.test.ts test/status-command.test.ts`.
+- 2026-05-29: Ran build verification: `npm run build`.
+- 2026-05-29: Ran full regression verification: `npm test`.
 
 ### Completion Notes List（完成备注）
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 - Story created from live Epic 3 shard, PRD, Architecture, UX, owning SPECs and previous Story 3.5 context.
 - No code implementation was performed.
+- Confirmed prerequisite TypeScript CLI scaffold, validate command, validation aggregator, diagnostics, path normalizer, adapter registry, fixture contract, and `test/` suite exist in the current workspace.
+- Added shared validation ordering primitives for canonical category order, target order, normalized validated path sorting, zero issue counts, and global issue sorting with command-level path and component tie-breakers.
+- Updated validate aggregation to execute implemented category groups in canonical relative order, keep `source-integrity` as a reserved/not checked category, derive data from actual checks only, normalize/sort validated paths before projection, and sort issues before status/count projection.
+- Updated validate Evidence human output to show checked categories, not checked categories, checked targets, validated paths, issue counts, explicit empty states, issue field text equivalents, and terminal-width fallback labels without changing `--json`.
+- Added focused tests for partial category blockers, skipped/not checked categories, global deterministic issue sorting, repeated validate stability, renderer fallback widths, and structured JSON presentation isolation.
+- Verified `npm run build` and full `npm test` pass.
 
 ### File List（文件列表）
 
-- `_bmad-output/implementation-artifacts/3-6-validation-progress-category-coverage-and-local-determinism.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-6-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-6-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-6-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/3-6-validation-progress-category-coverage-and-local-determinism.md`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/validation/validate-project.ts`
+- `src/validation/validation-order.ts`
+- `test/validate-command.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-29: Implemented Story 3.6 validate ordering, deterministic projection, Evidence human output fallback, focused tests, and moved story to review.

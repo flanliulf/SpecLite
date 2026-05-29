@@ -165,6 +165,7 @@ export async function createConfigInitializationPlan(input: {
       mode,
       model,
       plannedWrites,
+      selectedModules: input.selectedModules,
       selectedModuleIds:
         input.selectedModuleIds ?? input.selectedModules.map((module) => module.code).sort(),
       ideTargetIds:
@@ -332,6 +333,7 @@ function createFinalConfigSummary(input: {
   mode: ConfigCollectionMode;
   model: ProjectConfigModel;
   plannedWrites: PlannedWrite[];
+  selectedModules: OfficialModule[];
   selectedModuleIds: string[];
   ideTargetIds: string[];
 }): string {
@@ -348,6 +350,7 @@ function createFinalConfigSummary(input: {
     `Languages: communication=${input.model.core.communication_language}, document=${input.model.core.document_output_language}.`,
     `Artifact root: ${input.model.core.output_folder}.`,
     `Selected modules: ${formatList(input.selectedModuleIds)}.`,
+    `Canonical package roots: ${formatModulePackageRootCounts(input.selectedModules)}.`,
     `IDE targets: ${formatList(input.ideTargetIds)}.`,
     `Planned config paths: ${INSTALLER_CONFIG_PATH}, ${INSTALLER_USER_CONFIG_PATH}.`,
     `Protected stubs: ${protectedStubs}.`,
@@ -355,6 +358,15 @@ function createFinalConfigSummary(input: {
     "Next actions: confirm this final configuration summary before any project file is written.",
     "No project files were changed.",
   ].join(" ");
+}
+
+function formatModulePackageRootCounts(modules: OfficialModule[]): string {
+  const total = modules.reduce((sum, module) => sum + module.packageRoots.length, 0);
+  const perModule = modules
+    .map((module) => `${module.code}=${module.packageRoots.length}`)
+    .join(", ");
+
+  return `${perModule}, total=${total}`;
 }
 
 function createConfigInitializationFailure(issues: ValidationIssue[]): ConfigInitializationResult {

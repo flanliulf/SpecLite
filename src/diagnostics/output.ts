@@ -1,5 +1,21 @@
-import type { InstallCommandResult, ValidationIssue } from "./command-result-schema.js";
+import type {
+  InstallCommandResult,
+  RepairCommandResult,
+  StatusCommandResult,
+  UpdateCommandResult,
+  ValidateCommandResult,
+  ValidationIssue,
+} from "./command-result-schema.js";
 import type { PhaseCoverage } from "../manifest/manifest-schema.js";
+import { CANONICAL_ISSUE_CATEGORY_ORDER } from "../validation/validation-order.js";
+
+export type HumanOutputOptions = {
+  columns?: number;
+  noColor?: boolean;
+  isTty?: boolean;
+  ci?: boolean;
+  screenReader?: boolean;
+};
 
 export type ArtifactEvidence = {
   artifactPath: string;
@@ -9,10 +25,17 @@ export type ArtifactEvidence = {
   generatedAt: string;
   configuredRoot: string;
   defaultOutputPath: string;
-  metadataLocation: "frontmatter" | "sidecar";
+  metadataLocation: "frontmatter" | "sidecar" | "directory";
 };
 
-export function renderCommandResultJson(result: InstallCommandResult): string {
+export function renderCommandResultJson(
+  result:
+    | InstallCommandResult
+    | StatusCommandResult
+    | ValidateCommandResult
+    | UpdateCommandResult
+    | RepairCommandResult,
+): string {
   return `${JSON.stringify(result, null, 2)}\n`;
 }
 
@@ -42,6 +65,125 @@ export function renderInstallHumanOutput(result: InstallCommandResult): string {
 
   if (result.nextActions.length > 0) {
     lines.push("Next actions:");
+    for (const action of result.nextActions) {
+      lines.push(`- ${action}`);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderStatusHumanOutput(result: StatusCommandResult): string {
+  const lines = [
+    "SpecLite status",
+    `High-level health: ${result.data.highLevelHealth}`,
+    `Source: ${formatOptionalSourceDescriptor(result.data.sourceDescriptor)}`,
+    `Manifest: ${result.data.manifestPresent ? "present" : "missing"}${result.data.manifestVersion === undefined ? "" : `, version=${result.data.manifestVersion}`}`,
+    `Installed modules: ${formatList(result.data.installedModules)}`,
+    "IDE targets:",
+  ];
+
+  if (result.data.ideTargets.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const target of result.data.ideTargets) {
+      const skillCount = target.skillCount ?? 0;
+      const targetPath = target.targetPath ?? "not-configured";
+      const reason = target.reason === undefined ? "" : `, reason=${target.reason}`;
+      lines.push(`- ${target.id}: ${target.status}, skills=${skillCount}, path=${targetPath}${reason}`);
+    }
+  }
+
+  lines.push(
+    "Key paths",
+    `- projectRoot: ${result.data.paths.projectRoot}`,
+    `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"}`,
+    `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"}`,
+    `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
+  );
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) {
+      lines.push(`- ${action}`);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderValidateHumanOutput(
+  result: ValidateCommandResult,
+  options: HumanOutputOptions = {},
+): string {
+  const columns = options.columns ?? 100;
+  const checkedCategorySet = new Set(result.data.checkedCategories);
+  const notCheckedCategories = CANONICAL_ISSUE_CATEGORY_ORDER.filter(
+    (category) => !checkedCategorySet.has(category),
+  );
+  const presentation =
+    columns < 80
+      ? "key-value"
+      : columns < 120
+        ? "compact-table"
+        : "full-table";
+  const lines = [
+    "SpecLite validate",
+    `Status: ${result.status}`,
+    `Output profile: Evidence (${presentation})`,
+    `Checked categories: ${formatList(result.data.checkedCategories)}`,
+    `Not checked categories: ${formatList(notCheckedCategories)}`,
+    `Checked targets: ${formatList(result.data.checkedTargets)}`,
+    `Validated paths: ${formatList(result.data.validatedPaths)}`,
+    `Issue counts: critical=${result.data.issueCounts.critical}, error=${result.data.issueCounts.error}, warning=${result.data.issueCounts.warning}, info=${result.data.issueCounts.info}`,
+  ];
+
+  if (result.issues.length === 0) {
+    lines.push("No issues found for checked categories.");
+    lines.push("No conflicts detected.");
+    if (result.data.checkedCategories.length === 0) {
+      lines.push("No categories checked.");
+    }
+    if (notCheckedCategories.length > 0) {
+      lines.push("Skipped / not checked categories are listed above and must not be interpreted as healthy.");
+    }
+  } else {
+    lines.push("Issues:");
+    lines.push("Issue fields: severity, category, issueId, affectedPath, impact, suggestedNextStep");
+    for (const issue of result.issues) {
+      lines.push(formatIssue(issue));
+    }
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) {
+      lines.push(`- ${action}`);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderUpdateHumanOutput(result: UpdateCommandResult | RepairCommandResult): string {
+  const lines = [
+    "SpecLite update",
+    `Status: ${result.status}`,
+    `Mode: ${result.command === "update.repair" ? "repair" : "update"}`,
+    result.summary,
+    `Changed paths: ${formatList(result.data.changedPaths)}`,
+    `Skipped paths: ${formatList(result.data.skippedPaths)}`,
+  ];
+
+  if (result.issues.length > 0) {
+    lines.push("Issues:");
+    for (const issue of result.issues) {
+      lines.push(formatIssue(issue));
+    }
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
     for (const action of result.nextActions) {
       lines.push(`- ${action}`);
     }
@@ -158,7 +300,8 @@ function isReadySummaryResult(result: InstallCommandResult): boolean {
 }
 
 function formatIssue(issue: ValidationIssue): string {
-  return `[${issue.severity}] ${issue.issueId}: ${issue.impact} Suggested next step: ${issue.suggestedNextStep}`;
+  const location = issue.affectedPath ?? issue.component ?? "unknown";
+  return `[${issue.severity}] category=${issue.category} issueId=${issue.issueId} location=${location} impact=${issue.impact} suggestedNextStep=${issue.suggestedNextStep}`;
 }
 
 function formatList(values: string[]): string {
@@ -169,4 +312,14 @@ function formatSourceDescriptor(sourceDescriptor: InstallCommandResult["data"]["
   const sourceLabel =
     sourceDescriptor.version ?? sourceDescriptor.resolvedRoot ?? sourceDescriptor.requestedVersion ?? "unknown";
   return `${sourceDescriptor.sourceType} ${sourceLabel} (${sourceDescriptor.trustStatus})`;
+}
+
+function formatOptionalSourceDescriptor(sourceDescriptor: StatusCommandResult["data"]["sourceDescriptor"]): string {
+  if (sourceDescriptor === undefined) return "not-available";
+  const details = [
+    sourceDescriptor.sourceType,
+    sourceDescriptor.channel,
+    sourceDescriptor.version ?? sourceDescriptor.resolvedRoot ?? sourceDescriptor.requestedVersion,
+  ].filter((value): value is string => value !== undefined);
+  return details.join(" ");
 }

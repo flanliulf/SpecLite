@@ -287,6 +287,87 @@ describe("project config initialization", () => {
 	    }
 	  });
 
+  it("uses trimmed project config name as install targetProject display name", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-config-name-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite"), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, "_speclite/config.toml"),
+        '[core]\nproject_name = " 项目 Install "\n',
+        "utf8",
+      );
+
+      const outcome = await runInstallCommand({
+        options: { json: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.result.targetProject).toBe("项目 Install");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("falls back to target directory basename when install project config name is unavailable", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-config-fallback-"));
+
+    try {
+      const cases = [
+        {
+          name: "missing-config",
+          setup: async (targetRoot: string) => {
+            await mkdir(targetRoot, { recursive: true });
+          },
+        },
+        {
+          name: "empty-config-name",
+          setup: async (targetRoot: string) => {
+            await mkdir(path.join(targetRoot, "_speclite"), { recursive: true });
+            await writeFile(
+              path.join(targetRoot, "_speclite/config.toml"),
+              '[core]\nproject_name = ""\n',
+              "utf8",
+            );
+          },
+        },
+        {
+          name: "blank-config-name",
+          setup: async (targetRoot: string) => {
+            await mkdir(path.join(targetRoot, "_speclite"), { recursive: true });
+            await writeFile(
+              path.join(targetRoot, "_speclite/config.toml"),
+              '[core]\nproject_name = "   "\n',
+              "utf8",
+            );
+          },
+        },
+      ];
+
+      for (const testCase of cases) {
+        const targetRoot = path.join(tempRoot, testCase.name);
+        await testCase.setup(targetRoot);
+
+        const outcome = await runInstallCommand({
+          options: { json: true },
+          runtime: {
+            ...supportedRuntime,
+            cwd: targetRoot,
+          },
+        });
+
+        expect(outcome.exitCode).toBe(0);
+        expect(outcome.result.targetProject).toBe(testCase.name);
+      }
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("enters runtime write phase after confirmed config initialization while preserving CommandResult shape", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-config-"));
 

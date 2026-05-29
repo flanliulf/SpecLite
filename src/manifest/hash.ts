@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 export type FileHash = `sha256:${string}`;
@@ -19,23 +19,23 @@ export async function hashPackageDirectory(
   options: { include?: (relativeFile: string) => boolean } = {},
 ): Promise<FileHash> {
   const hash = createHash("sha256");
-  const files = (await listFiles(packageRoot)).filter((file) => options.include?.(file) ?? true);
+  const files = await listFiles(packageRoot, options);
 
   for (const file of files) {
     const absolutePath = path.join(packageRoot, file);
-    const fileStat = await stat(absolutePath);
-    hash.update(file);
-    hash.update("\0");
-    hash.update(isExecutableMode(fileStat.mode) ? "executable" : "regular");
-    hash.update("\0");
-    hash.update(await readFile(absolutePath));
-    hash.update("\0");
+    const bytes = await readFile(absolutePath);
+    hash.update(`${Buffer.byteLength(file, "utf8")}\n${file}\n${bytes.byteLength}\n`, "utf8");
+    hash.update(bytes);
+    hash.update("\n", "utf8");
   }
 
   return `sha256:${hash.digest("hex")}`;
 }
 
-export async function listFiles(root: string): Promise<string[]> {
+export async function listFiles(
+  root: string,
+  options: { include?: (relativeFile: string) => boolean } = {},
+): Promise<string[]> {
   const files: string[] = [];
 
   async function visit(directory: string): Promise<void> {
@@ -44,6 +44,7 @@ export async function listFiles(root: string): Promise<string[]> {
     for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
       const absolutePath = path.join(directory, entry.name);
       const relativePath = path.relative(root, absolutePath).split(path.sep).join("/");
+      const included = options.include?.(relativePath) ?? true;
 
       if (entry.isDirectory()) {
         await visit(absolutePath);
@@ -51,7 +52,12 @@ export async function listFiles(root: string): Promise<string[]> {
       }
 
       if (entry.isFile()) {
-        files.push(relativePath);
+        if (included) files.push(relativePath);
+        continue;
+      }
+
+      if (entry.isSymbolicLink() && included) {
+        throw new Error(`Canonical package hash cannot include symlink: ${relativePath}`);
       }
     }
   }

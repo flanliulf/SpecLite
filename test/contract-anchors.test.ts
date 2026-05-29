@@ -2,7 +2,17 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { InstallCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
+import {
+  InstallCommandResultSchema,
+  RepairCommandResultSchema,
+  UpdateCommandResultSchema,
+  ValidationIssueSchema,
+} from "../src/diagnostics/command-result-schema.js";
+import {
+  deriveCommandStatus,
+  getExitCodeForStatus,
+  normalizeCommandId,
+} from "../src/diagnostics/command-result.js";
 import { SourceDescriptorSchema } from "../src/source/source-descriptor-schema.js";
 import { SourceResolutionPlanSchema, InstallPlanSchema } from "../src/installer/install-plan-schema.js";
 import { ManifestSchema, MANIFEST_SCHEMA_VERSION } from "../src/manifest/manifest-schema.js";
@@ -41,6 +51,165 @@ describe("owning SPEC executable anchors", () => {
 
     expect(InstallCommandResultSchema.parse(result)).toEqual(result);
     expect(parseExpectedCommandJson(result)).toEqual(result);
+  });
+
+  it("accepts update and repair command payloads without legacy placeholder fields", () => {
+    const updateResult = {
+      schemaVersion: "speclite.command-result.v1",
+      status: "success",
+      command: "update",
+      targetProject: "fixture",
+      summary: "Update planning completed.",
+      issues: [],
+      nextActions: [],
+      data: {
+        updatePlan: {
+          actions: [],
+        },
+        changedPaths: [],
+        skippedPaths: [],
+        conflicts: [],
+        requiresConfirmation: true,
+        writeAuthorized: false,
+      },
+    };
+    const repairResult = {
+      ...updateResult,
+      command: "update.repair",
+      data: {
+        repairPlan: {
+          actions: [],
+        },
+        changedPaths: [],
+        skippedPaths: [],
+        conflicts: [],
+        requiresConfirmation: true,
+        writeAuthorized: false,
+      },
+    };
+
+    expect(UpdateCommandResultSchema.parse(updateResult)).toEqual(updateResult);
+    expect(RepairCommandResultSchema.parse(repairResult)).toEqual(repairResult);
+    expect(parseExpectedCommandJson(updateResult)).toEqual(updateResult);
+    expect(parseExpectedCommandJson(repairResult)).toEqual(repairResult);
+    expect(
+      UpdateCommandResultSchema.safeParse({
+        ...updateResult,
+        data: {
+          ...updateResult.data,
+          implementationAvailable: false,
+        },
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects non-contract top-level fields and redaction-unsafe issue prose", () => {
+    const result = {
+      schemaVersion: "speclite.command-result.v1",
+      status: "failure",
+      command: "install",
+      targetProject: "fixture",
+      summary: "SpecLite install failed.",
+      issues: [],
+      nextActions: [],
+      data: {
+        sourceDescriptor: {
+          sourceType: "bundled",
+          resolvedRoot: "assets/source/speclite",
+          integrityEvidence: [],
+          trustStatus: "blocked",
+        },
+        manifestVersion: MANIFEST_SCHEMA_VERSION,
+        installedModules: [],
+        ideTargets: [],
+        paths: {
+          projectRoot: ".",
+        },
+        completedSteps: [],
+        pendingSteps: [],
+      },
+      elapsedMs: 12,
+    };
+
+    expect(InstallCommandResultSchema.safeParse(result).success).toBe(false);
+    expect(
+      ValidationIssueSchema.safeParse({
+        issueId: "manifest-schema.missing-version",
+        category: "manifest-schema",
+        severity: "error",
+        affectedPath: "_speclite/_config/manifest.yaml",
+        impact: "Manifest version is missing.",
+        suggestedNextStep: "Rerun install.",
+      }).success,
+    ).toBe(true);
+    expect(
+      ValidationIssueSchema.safeParse({
+        issueId: "file-integrity.hash-mismatch",
+        category: "file-integrity",
+        severity: "error",
+        affectedPath: ".claude/skills/speclite-help/SKILL.md",
+        details: {
+          leakedPath: "/tmp/speclite-cache/file.txt",
+        },
+        impact: "An installed file no longer matches the files index boundary.",
+        suggestedNextStep: "Rerun install after removing local cache details.",
+      }).success,
+    ).toBe(false);
+    expect(
+      ValidationIssueSchema.safeParse({
+        issueId: "manifest-schema.invalid-details",
+        category: "manifest-schema",
+        severity: "error",
+        details: {
+          reason: undefined,
+        },
+        impact: "Manifest details must remain JSON-serializable.",
+        suggestedNextStep: "Emit a stable details reason before rendering command JSON.",
+      }).success,
+    ).toBe(false);
+    expect(
+      ValidationIssueSchema.safeParse({
+        issueId: "manifest-schema.invalid-details-list",
+        category: "manifest-schema",
+        severity: "error",
+        details: {
+          reasons: ["schema-version", undefined],
+        },
+        impact: "Manifest details arrays must remain JSON-serializable.",
+        suggestedNextStep: "Emit only stable details values before rendering command JSON.",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("derives command status, exit code and normalized command ids from shared helpers", () => {
+    const warningIssue = {
+      issueId: "operation-lock.stale-lock",
+      category: "operation-lock",
+      severity: "warning",
+      component: "validate-command",
+      details: {
+        reason: "stale-lock",
+      },
+      impact: "A stale operation lock may require manual inspection.",
+      suggestedNextStep: "Inspect the operation lock before running write-capable commands.",
+    } as const;
+    const errorIssue = {
+      ...warningIssue,
+      issueId: "operation-lock.project-locked",
+      severity: "error",
+      impact: "A write-capable operation cannot continue while the project is locked.",
+    } as const;
+
+    expect(deriveCommandStatus({ issues: [] })).toBe("success");
+    expect(deriveCommandStatus({ issues: [warningIssue] })).toBe("warning");
+    expect(deriveCommandStatus({ issues: [errorIssue] })).toBe("failure");
+    expect(deriveCommandStatus({ issues: [], commandCompleted: false })).toBe("failure");
+    expect(deriveCommandStatus({ issues: [], hasBlockingConflicts: true })).toBe("failure");
+    expect(getExitCodeForStatus("success")).toBe(0);
+    expect(getExitCodeForStatus("warning")).toBe(0);
+    expect(getExitCodeForStatus("failure")).toBe(1);
+    expect(normalizeCommandId({ command: "update" })).toBe("update");
+    expect(normalizeCommandId({ command: "update", repair: true })).toBe("update.repair");
   });
 
   it("provides Story 1.1 schema and registry anchors without orchestration shortcuts", () => {

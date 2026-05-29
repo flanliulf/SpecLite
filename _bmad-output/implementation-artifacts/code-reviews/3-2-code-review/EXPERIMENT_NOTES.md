@@ -1,0 +1,43 @@
+# EXPERIMENT_NOTES
+
+## 实时笔记
+
+- 2026-05-28: 前置核对显示 Epic 3 的 `3-2-manifest-and-index-schema-validation` 当前为 `ready-for-dev`。工作区中该 Story 文件已有既有未提交改动，执行时必须保留并在其基础上继续。
+- 2026-05-28 19:50: `python3` resolver 因本机 Python 3.9 缺少 `tomllib` 失败；按 workflow fallback 使用 `python3.12` 成功解析 workflow。该情况不阻塞实现。
+- 2026-05-28 19:50: 本轮范围已按用户最新指令收窄为 dev-story；原进度文件中的 CR 串行闭环计划不再适用于本轮。
+- 2026-05-28 19:50: Story 3.2 前置实现核对通过，核心缺口是 validate command、manifest-schema rule、validate aggregation 和相关 tests。
+- 2026-05-28 19:55: 保守决策：Story 3.2 的 selected module completeness 先按默认 `core` + `sdlc` baseline `53` entries 验证，不在本 Story 引入远程 source inventory 或 update/repair 行为。
+- 2026-05-28 19:56: 保守决策：`sourceRef` 允许 project-relative path 或稳定 local reference token（如 `install-plan:*`、`installed-state:*`），但拒绝 absolute/home/Windows/backslash 形态，避免破坏既有 installer projection。
+- 2026-05-28 19:56: 无 HALT。所有 Story 3.2 focused tests、build、完整测试与 diff check 已通过。
+- 2026-05-28 CR Round 1: 进入只读代码审查；允许写入本 CR 目录产物。工作区存在大量无关改动，审查不覆盖 Story 3.1/3.3/3.4/6.x 或 planning artifacts。
+- 2026-05-28 CR Round 1: Story `File List` 是主范围；另将 `git diff` 中与 Story 3.2 schema shape 直接相关的 installer/fixture 投影文件作为辅助证据，不扩展到 status command 或其他 Story 新文件。
+- 2026-05-28 CR Round 1: 未运行 `npm test` / `npm run build`，因为本轮用户约束只读源码和 Story 文档，且 build 可能写入 `dist/`；仅运行限定路径的 `git diff --check`。
+- 2026-05-28 CR Round 1: 审查结论为不直接通过，建议进入 evaluator；blocking/decision_needed=0，patch=1，defer=0。
+- 2026-05-28 CR Evaluation Round 1: 最新审查文件为 `3-2-code-review-summary-20260528-round-1.md`；此前没有评估文件，因此本次评估为 Round 1。
+- 2026-05-28 CR Evaluation Round 1: 保守决策为确认 reviewer finding 有效并升级为 P1 阻塞修复项；不降级 TODO、不视为误报。依据是 `validateSelectedModuleCompleteness` 只检查 53 个 entries 数量，Story AC 3 还要求缺少任一 selected canonical package root 都必须报告 stable `manifest-schema` issue。
+- 2026-05-28 CR Evaluation Round 1: 本轮不运行测试、不修复源码、不修改 Story、不提交；仅写入评估文件和本目录进度记录。
+- 2026-05-28 CR Fix Round 1: 最新评估文件为 `3-2-code-review-evaluation-20260528-round-1.md`，待修复项只有 1 个；本轮不修改 Story 文档、不处理其他 CR 目录或既有未提交改动。
+- 2026-05-28 CR Fix Round 1: 保守决策为在当前 `core+sdlc` baseline 内检查 `moduleId:sourcePackagePath` 唯一覆盖与模块 root 数量，不引入远程 source inventory 或修复/更新行为。
+- 2026-05-28 CR Fix Round 1: focused regression 构造 53 个 entries，用重复的 `core:assets/source/speclite/core-skills/core-skill-2` 替代缺失 root，断言 stable `manifest-schema.malformed-field`。
+- 2026-05-28 CR Round 2: 本轮为复审，已有 1 个历史 CR summary 和 1 个 evaluation；最新修复记录显示只改 `src/validation/rules/manifest-schema.ts` 与 `test/validate-command.test.ts`。
+- 2026-05-28 CR Round 2: 重点复核 selected root 覆盖校验，不扩大到 Story 3.3/3.4 或其他 Epic 变更；普通 `git diff` 不显示未跟踪修复文件，需直接读取文件内容和必要的 `--no-index` 差异。
+- 2026-05-28 CR Round 2: `npx vitest run test/validate-command.test.ts` 通过 6/6；但当前修复只检查 duplicate root 与 core/sdlc 数量，不校验 expected canonical package root set，仍可被唯一错误 root 替换场景绕过。
+- 2026-05-28 CR Round 2: 结论为不通过；blocking=1，patch=1，defer=0，可进入 evaluator。
+- 2026-05-28 CR Evaluation Round 2: 最新审查文件为 `3-2-code-review-summary-20260528-round-2.md`；已有 1 个评估文件，因此本次评估为 Round 2。
+- 2026-05-28 CR Evaluation Round 2: 保守决策为确认 reviewer finding 有效并评为 P1 阻塞修复项；不降级 TODO、不视为误报。依据是当前 `validateSelectedModuleRootCoverage` 只检查 duplicate root 与 `core`/`sdlc` unique count，没有把 actual roots 与 selected canonical package root expected set 做 equality。
+- 2026-05-28 CR Evaluation Round 2: 本轮不运行测试、不修复源码、不修改 Story、不提交；仅写入评估文件和本目录进度记录。
+- 2026-05-28 CR Fix Round 2: 最新评估文件为 `3-2-code-review-evaluation-20260528-round-2.md`，待修复项只有 1 个；本轮不修改 Story 文档、不处理非评估确认事项。
+- 2026-05-28 CR Fix Round 2: 保守决策为使用当前 `core+sdlc` selected baseline 的 canonical package root inventory 做 compiled local equality，不引入 remote source、registry、cache 或 update/repair pipeline。
+- 2026-05-28 CR Fix Round 2: focused regression 构造 53 个 entries，保持无 duplicate、`core=13`、`sdlc=40`，但用唯一 unexpected core root 替换 `speclite-advanced-elicitation`，断言 stable `manifest-schema.malformed-field` 及 `missingRoot`/`unexpectedRoot` details。
+- 2026-05-28 CR Fix Round 2: `npm test -- test/validate-command.test.ts` 已通过 7/7；`npm run build` 已通过；`git diff --check` 无输出；本轮触及 untracked 文件的 `git diff --check --no-index /dev/null <file>` 均无输出。
+- 2026-05-28 CR Round 3: 最新评估文件为 `3-2-code-review-evaluation-20260528-round-2.md`，其中修复执行记录显示本轮待复审修复只涉及 `src/validation/rules/manifest-schema.ts` 和 `test/validate-command.test.ts`。
+- 2026-05-28 CR Round 3: `validateSelectedModuleRootCoverage` 已在 duplicate/root count 后补 expected roots 与 actual roots 的 missing/unexpected set equality；focused regression 覆盖唯一 unexpected root 替换 expected root 的同 count 场景。
+- 2026-05-28 CR Round 3: 复核当前 source-side canonical package roots：core 13 个、sdlc 40 个，与 expected inventory 一致；`npm test -- test/validate-command.test.ts` 通过 7/7。
+- 2026-05-28 CR Round 3: 结论为通过；blocking=0，patch=0，defer=0，可进入 evaluator。
+- 2026-05-28 CR Evaluation Round 3: 最新审查文件为 `3-2-code-review-summary-20260528-round-3.md`；已有 2 个评估文件，因此本次评估为 Round 3。
+- 2026-05-28 CR Evaluation Round 3: 独立复核确认 `src/validation/rules/manifest-schema.ts` 已对 expected canonical package root set 与 actual root set 做 missing/unexpected equality；`test/validate-command.test.ts` 已覆盖同 count、无 duplicate、module count 正确但 root 被替换的 regression。
+- 2026-05-28 CR Evaluation Round 3: `npm test -- test/validate-command.test.ts` 通过 7/7，限定路径 `git diff --check` 通过；评估结论 Approved / 通过，需修复项 0，CR TODO 0。
+- 2026-05-28 CR Rules Extraction 04: 采用用户授权默认推荐决策，对 selected canonical package root set equality 经验执行 record-only；新增 `CR-API-16`，不修改全局文档。
+- 2026-05-28 CR TODO Tracker 05: 只检查 non-blocking 项；Round 1/2 findings 均为 P1 阻塞并已修复，Round 3 evaluator 明确 CR TODO 0，因此不新增 backlog。
+- 2026-05-28 CR Finalizer 06: finalizer 前置条件为最新 Round 3 evaluation Approved；`bmm-workflow-status.yaml` 当前不存在，按 skill 容错跳过。Epic 3 仍有 3-3 到 3-6 未 done，不主动修改 Epic 主状态。
+- 2026-05-28 CR Finalizer 06: 已完成状态同步；Story 3.2 文件为 `Status: done`，`sprint-status.yaml` 对应条目为 `done`，Epic 3 保持 `in-progress`。

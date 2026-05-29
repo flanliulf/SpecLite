@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { InstallCommandResultSchema, ValidationIssueSchema } from "../diagnostics/command-result-schema.js";
+import {
+  CoveredCommandResultSchema,
+  ValidationIssueSchema,
+} from "../diagnostics/command-result-schema.js";
 
 export const RELEASE_GATE_FIXTURE_CASES = [
   "fresh-install-empty-project",
@@ -19,7 +22,7 @@ export const FixtureCaseManifestSchema = z
   })
   .strict();
 
-export const ExpectedCommandJsonSchema = InstallCommandResultSchema;
+export const ExpectedCommandJsonSchema = CoveredCommandResultSchema;
 
 export const ExpectedStderrJsonLineSchema = ValidationIssueSchema;
 

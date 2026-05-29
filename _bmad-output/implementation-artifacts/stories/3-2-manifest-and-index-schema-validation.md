@@ -1,6 +1,6 @@
 # Story 3.2: Manifest And Index Schema Validation（Manifest 与索引 Schema 验证）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -32,6 +32,7 @@ Status: ready-for-dev
    **当** `validate` 检查 skill index；  
    **则** 系统必须验证 `schemaVersion`、`canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash`、`installedTargets[]` 和 `phaseIds[]` 的 shape；  
    **并且** `canonicalSkillId` 必须来自 source-side canonical skill package，不得由 skill index 定义第二套 skill identity、alias-only identity 或 IDE-specific skill id；  
+   **并且** 对 selected modules，`skill-index.json` 必须覆盖该模块下全部 canonical package roots；默认 `core` + `sdlc` baseline 必须有 `53` 个 entries，缺少任一 selected package root 都必须报告 stable `manifest-schema` issue；
    **并且** `installedTargets[]` 必须只使用 adapter registry 声明的 MVP target ids 和 project-relative POSIX paths；  
    **并且** package-level hash 只能表示 canonical package equality，不得替代 files index 的 file-level hashes。
 
@@ -70,61 +71,63 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
-  - [ ] 确认 Epic 1 / Epic 2 的实际代码已建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index generation、source descriptor projection、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
-  - [ ] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/validate-project.ts` 或 `src/ide/adapter-registry.ts` 尚不存在，先完成前置 stories；不得在 Story 3.2 中一次性重建全部 installer、status、IDE mirror 或 update pipeline。
-  - [ ] 修改前完整读取所有 UPDATE files，尤其是 `src/manifest/manifest-schema.ts`、`src/validation/rules/manifest-schema.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 和 `src/ide/adapter-registry.ts`。
-  - [ ] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
+  - [x] 确认 Epic 1 / Epic 2 的实际代码已建立 TypeScript CLI scaffold、`speclite validate` command hook、manifest/index generation、source descriptor projection、IDE adapter registry、diagnostics/output、`src/fixtures/fixture-contract.ts` 和 fixture assets/tests；不能只依据 story context 的 `ready-for-dev` 状态判断完成。
+  - [x] 如果 `package.json`、`src/`、`test/`、`tests/`、`src/bin/speclite.ts`、`src/commands/validate.ts`、`src/manifest/manifest-schema.ts`、`src/diagnostics/command-result-schema.ts`、`src/validation/validate-project.ts` 或 `src/ide/adapter-registry.ts` 尚不存在，先完成前置 stories；不得在 Story 3.2 中一次性重建全部 installer、status、IDE mirror 或 update pipeline。
+  - [x] 修改前完整读取所有 UPDATE files，尤其是 `src/manifest/manifest-schema.ts`、`src/validation/rules/manifest-schema.ts`、`src/validation/validate-project.ts`、`src/diagnostics/command-result-schema.ts`、`src/diagnostics/command-result.ts`、`src/diagnostics/output.ts`、`src/fs/path-normalizer.ts` 和 `src/ide/adapter-registry.ts`。
+  - [x] 检查 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、story 文件、sprint status 或用户改动；不得格式化、重写、同步或回滚无关文件。
 
-- [ ] Task 2: 建立 manifest/index executable schemas（AC: 1-5）
-  - [ ] 在 `src/manifest/manifest-schema.ts` 或既有 manifest schema anchor 中集中定义 manifest、skill index、help index、files index 和必要 phase coverage projection 的 runtime schemas；不要在 command 或 validation rule 中 hand-roll 第二套字段检查。
-  - [ ] 固定 MVP schema version constants：`speclite.manifest.v1`、`speclite.skill-index.v1`、`speclite.help-index.v1`、`speclite.files-index.v1`，以及同一 parser anchor 已覆盖时的 `speclite.phase-coverage.v1`。
-  - [ ] schema parser 必须区分 consumer tolerance 与 producer output：consumer 可以容忍未来 optional fields；producer 不得输出 owning SPEC 未声明的 public fields。
-  - [ ] YAML/JSON parsing 必须复用前置 stories 已选 parser 与 error wrapping pattern；不要为了 Story 3.2 引入新 parser dependency。
-  - [ ] 所有 path fields 在 schema normalization 后必须使用 project-relative POSIX path；不得允许 absolute path、home directory、drive letter、OS-specific separator 或 checkout-root-dependent path 进入 public JSON / fixture snapshots。
+- [x] Task 2: 建立 manifest/index executable schemas（AC: 1-5）
+  - [x] 在 `src/manifest/manifest-schema.ts` 或既有 manifest schema anchor 中集中定义 manifest、skill index、help index、files index 和必要 phase coverage projection 的 runtime schemas；不要在 command 或 validation rule 中 hand-roll 第二套字段检查。
+  - [x] 固定 MVP schema version constants：`speclite.manifest.v1`、`speclite.skill-index.v1`、`speclite.help-index.v1`、`speclite.files-index.v1`，以及同一 parser anchor 已覆盖时的 `speclite.phase-coverage.v1`。
+  - [x] schema parser 必须区分 consumer tolerance 与 producer output：consumer 可以容忍未来 optional fields；producer 不得输出 owning SPEC 未声明的 public fields。
+  - [x] YAML/JSON parsing 必须复用前置 stories 已选 parser 与 error wrapping pattern；不要为了 Story 3.2 引入新 parser dependency。
+  - [x] 所有 path fields 在 schema normalization 后必须使用 project-relative POSIX path；不得允许 absolute path、home directory、drive letter、OS-specific separator 或 checkout-root-dependent path 进入 public JSON / fixture snapshots。
 
-- [ ] Task 3: 实现 manifest-schema validation rule（AC: 1, 2, 6, 7）
-  - [ ] 在 `src/validation/rules/manifest-schema.ts` 或既有 rule module 中实现 local-only schema validation，读取 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json` 和 `files-index.json`。
-  - [ ] Rule 只产出 `ValidationIssue[]` 和 deterministic checked path evidence；不直接渲染 human-readable 文案、不决定 exit code、不执行 repair、不写文件。
-  - [ ] 对 missing required artifact、parse failure 或阻塞 installed-state read 的 corruption，使用 taxonomy 已保留的 `manifest-schema.schema-corruption`，并通过 `details.artifactKind` / `details.reason` 表达稳定机器上下文。
-  - [ ] 对缺少 schema version 的 artifact 使用 `manifest-schema.missing-version`；对不支持版本使用 `manifest-schema.unsupported-version`；对需要迁移的旧版本使用 `manifest-schema.migration-needed`；对 required field shape 错误使用 `manifest-schema.malformed-field`。
-  - [ ] 不新增 `manifest-schema.missing-file` 等未在 taxonomy 中保留的 producer issue id。若实现确实需要新的 issue id，停止并先请求更新 owning SPEC / taxonomy / fixtures。
-  - [ ] `manifest-schema.migration-needed.details` 必须至少包含 `currentSchemaVersion`、`supportedSchemaVersion`、`migrationKind`、`manualActionRequired`；MVP producer 只能输出 `manual` 或 `unsupported`。
+- [x] Task 3: 实现 manifest-schema validation rule（AC: 1, 2, 6, 7）
+  - [x] 在 `src/validation/rules/manifest-schema.ts` 或既有 rule module 中实现 local-only schema validation，读取 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json` 和 `files-index.json`。
+  - [x] Rule 只产出 `ValidationIssue[]` 和 deterministic checked path evidence；不直接渲染 human-readable 文案、不决定 exit code、不执行 repair、不写文件。
+  - [x] 对 missing required artifact、parse failure 或阻塞 installed-state read 的 corruption，使用 taxonomy 已保留的 `manifest-schema.schema-corruption`，并通过 `details.artifactKind` / `details.reason` 表达稳定机器上下文。
+  - [x] 对缺少 schema version 的 artifact 使用 `manifest-schema.missing-version`；对不支持版本使用 `manifest-schema.unsupported-version`；对需要迁移的旧版本使用 `manifest-schema.migration-needed`；对 required field shape 错误使用 `manifest-schema.malformed-field`。
+  - [x] 不新增 `manifest-schema.missing-file` 等未在 taxonomy 中保留的 producer issue id。若实现确实需要新的 issue id，停止并先请求更新 owning SPEC / taxonomy / fixtures。
+  - [x] `manifest-schema.migration-needed.details` 必须至少包含 `currentSchemaVersion`、`supportedSchemaVersion`、`migrationKind`、`manualActionRequired`；MVP producer 只能输出 `manual` 或 `unsupported`。
 
-- [ ] Task 4: 验证 skill/help/files index 的领域约束（AC: 3-5）
-  - [ ] Skill index 必须验证 `canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash`、`installedTargets[]`、`phaseIds[]`，并确认不定义第二套 skill identity。
-  - [ ] Skill index 的 `installedTargets[]` 必须只引用 adapter registry 中的 `claude` / `agents` target id；不得输出 branded `copilot`、`cursor` 或未知 target id。
-  - [ ] Help index 必须验证 help entries 只引用 canonical skill id、phase、entry label、activation target 和 target ids；不得把 menu label 当成 skill identity。
-  - [ ] Files index 必须验证 ownership、file-level hash field、`hashAlgorithm: "sha256"`、`executable` intent、`artifactKind`、`sourceRef` 和 path policy。
-  - [ ] Files index validation 只检查 recorded field shape 和 policy；full current file hash comparison、IDE mirror drift 和 missing installed files 属于 Story 3.3，不在 Story 3.2 中提前实现。
-  - [ ] Source references 只检查 recorded source/package reference shape；不得访问 remote source、npm registry、Git remote、offline bundle origin 或 project-external staging/cache path。
+- [x] Task 4: 验证 skill/help/files index 的领域约束（AC: 3-5）
+  - [x] Skill index 必须验证 `canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash`、`installedTargets[]`、`phaseIds[]`，并确认不定义第二套 skill identity。
+  - [x] Skill index 必须与 selected modules 的 canonical package root inventory 对齐；默认 `core` + `sdlc` baseline 为 `53` 个 entries，少任一 selected root 都不得通过 schema/domain validation。
+  - [x] Skill index 的 `installedTargets[]` 必须只引用 adapter registry 中的 `claude` / `agents` target id；不得输出 branded `copilot`、`cursor` 或未知 target id。
+  - [x] Help index 必须验证 help entries 只引用 canonical skill id、phase、entry label、activation target 和 target ids；不得把 menu label 当成 skill identity。
+  - [x] Files index 必须验证 ownership、file-level hash field、`hashAlgorithm: "sha256"`、`executable` intent、`artifactKind`、`sourceRef` 和 path policy。
+  - [x] Files index validation 只检查 recorded field shape 和 policy；full current file hash comparison、IDE mirror drift 和 missing installed files 属于 Story 3.3，不在 Story 3.2 中提前实现。
+  - [x] Source references 只检查 recorded source/package reference shape；不得访问 remote source、npm registry、Git remote、offline bundle origin 或 project-external staging/cache path。
 
-- [ ] Task 5: 接入 validate orchestration 和 CommandResult projection（AC: 6, 7）
-  - [ ] `src/commands/validate.ts` 只做参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
-  - [ ] `src/validation/validate-project.ts` 或 equivalent aggregator 必须把 manifest-schema rule 纳入 canonical issue category order；部分执行时仍保留相对顺序。
-  - [ ] `ValidateCommandData.issueCounts` 必须固定包含 `info`、`warning`、`error`、`critical` 四个 key，包括 0 值。
-  - [ ] `checkedCategories` 仅列出实际执行的 categories；执行本 Story rule 时必须包含 `manifest-schema`，且不得由 object key order、rule registration order 或 async completion order 决定排序。
-  - [ ] `checkedTargets` 如可从 manifest/index 读取，必须按 adapter registry order 输出；读取失败时不要伪造 targets。
-  - [ ] `validatedPaths` 必须包含实际检查过的 manifest/index path，按 normalized project-relative POSIX path 字典序输出。
-  - [ ] Human-readable validate output 使用 shared diagnostics/output layer；不得在 command 或 rule 内自行拼接 issue layout、path display、summary 或 next action ordering。
+- [x] Task 5: 接入 validate orchestration 和 CommandResult projection（AC: 6, 7）
+  - [x] `src/commands/validate.ts` 只做参数解析、project root resolution、调用 `validateProject` / equivalent domain service，并返回 `CommandResult<ValidateCommandData>`。
+  - [x] `src/validation/validate-project.ts` 或 equivalent aggregator 必须把 manifest-schema rule 纳入 canonical issue category order；部分执行时仍保留相对顺序。
+  - [x] `ValidateCommandData.issueCounts` 必须固定包含 `info`、`warning`、`error`、`critical` 四个 key，包括 0 值。
+  - [x] `checkedCategories` 仅列出实际执行的 categories；执行本 Story rule 时必须包含 `manifest-schema`，且不得由 object key order、rule registration order 或 async completion order 决定排序。
+  - [x] `checkedTargets` 如可从 manifest/index 中读取，必须按 adapter registry order 输出；读取失败时不要伪造 targets。
+  - [x] `validatedPaths` 必须包含实际检查过的 manifest/index path，按 normalized project-relative POSIX path 字典序输出。
+  - [x] Human-readable validate output 使用 shared diagnostics/output layer；不得在 command 或 rule 内自行拼接 issue layout、path display、summary 或 next action ordering。
 
-- [ ] Task 6: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-7）
-  - [ ] Unit tests 覆盖 manifest/index schema version：valid v1、missing version、unsupported version、migration-needed old version、malformed required field、parse failure。
-  - [ ] Unit tests 覆盖 `manifest-schema.migration-needed.details` 的 required keys、MVP `migrationKind` producer restriction 和 redaction-safe details。
-  - [ ] Unit tests 覆盖 skill index canonical identity：不允许 alternate skill id、alias-only identity、IDE-specific identity、未知 target id 或 branded `copilot` / `cursor` target id。
-  - [ ] Unit tests 覆盖 help index shape：`canonicalSkillId`、phase、entry label、activation target、target ids，以及不把 `entryLabel` 当成 identity。
-  - [ ] Unit tests 覆盖 files index shape：project-relative POSIX `path`、`ownership` enum、`hashAlgorithm: "sha256"`、`executable` boolean、`artifactKind`、`sourceRef`。
-  - [ ] Unit tests 覆盖 `ValidateCommandData.issueCounts` 四 key 固定输出、`checkedCategories` canonical order、`checkedTargets` adapter order、`validatedPaths` lexicographic order。
-  - [ ] Negative tests 断言 validate 不访问 remote source、不执行 full hash scan、不写入/repair、不触发 update planner、不读取 package-manager cache 或 temporary extraction root。
-  - [ ] Integration / fixture tests 覆盖 valid installed config、missing manifest、missing skill/help/files index、unsupported schema version、migration-needed schema、malformed JSON/YAML 和 malformed required fields。
-  - [ ] 重复运行相同 validate fixture 至少 3 次，确认 issue id、category、severity、affected path、details、issueCounts、checkedCategories、checkedTargets 和 validatedPaths 的语义内容稳定。
+- [x] Task 6: 编写 focused tests、integration tests 和 fixture assertions（AC: 1-7）
+  - [x] Unit tests 覆盖 manifest/index schema version：valid v1、missing version、unsupported version、migration-needed old version、malformed required field、parse failure。
+  - [x] Unit tests 覆盖 `manifest-schema.migration-needed.details` 的 required keys、MVP `migrationKind` producer restriction 和 redaction-safe details。
+  - [x] Unit tests 覆盖 skill index canonical identity：不允许 alternate skill id、alias-only identity、IDE-specific identity、未知 target id 或 branded `copilot` / `cursor` target id。
+  - [x] Unit tests 覆盖 selected module package root completeness：默认 `core` + `sdlc` 期望 `53` 个 skill index entries，缺失任一 package root 会产生 stable validation issue。
+  - [x] Unit tests 覆盖 help index shape：`canonicalSkillId`、phase、entry label、activation target、target ids，以及不把 `entryLabel` 当成 identity。
+  - [x] Unit tests 覆盖 files index shape：project-relative POSIX `path`、`ownership` enum、`hashAlgorithm: "sha256"`、`executable` boolean、`artifactKind`、`sourceRef`。
+  - [x] Unit tests 覆盖 `ValidateCommandData.issueCounts` 四 key 固定输出、`checkedCategories` canonical order、`checkedTargets` adapter order、`validatedPaths` lexicographic order。
+  - [x] Negative tests 断言 validate 不访问 remote source、不执行 full hash scan、不写入/repair、不触发 update planner、不读取 package-manager cache 或 temporary extraction root。
+  - [x] Integration / fixture tests 覆盖 valid installed config、missing manifest、missing skill/help/files index、unsupported schema version、migration-needed schema、malformed JSON/YAML 和 malformed required fields。
+  - [x] 重复运行相同 validate fixture 至少 3 次，确认 issue id、category、severity、affected path、details、issueCounts、checkedCategories、checkedTargets 和 validatedPaths 的语义内容稳定。
 
-- [ ] Task 7: 本地验证与范围控制（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 manifest schema parser、validation rule、CommandResult projection 和 validate integration focused tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建孤立 validate-only scaffold。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 3.3 的 full file hash comparison / IDE mirror drift、Story 3.4 的 runtime/menu/legacy/artifact validation、Story 3.5 的全量 CommandResult 迁移、Story 3.6 的完整 progress/category coverage、Epic 4 update/repair write behavior、Epic 5 remote freshness/provenance checks 或 Epic 6 release fixture matrix。
+- [x] Task 7: 本地验证与范围控制（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 manifest schema parser、validation rule、CommandResult projection 和 validate integration focused tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass 或创建孤立 validate-only scaffold。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+  - [x] 检查 diff，确认没有实现 Story 3.3 的 full file hash comparison / IDE mirror drift、Story 3.4 的 runtime/menu/legacy/artifact validation、Story 3.5 的全量 CommandResult 迁移、Story 3.6 的完整 progress/category coverage、Epic 4 update/repair write behavior、Epic 5 remote freshness/provenance checks 或 Epic 6 release fixture matrix。
 
 ## Dev Notes（开发备注）
 
@@ -379,17 +382,42 @@ Story 3.2 是受契约约束的本地 schema validation 能力，不应在本实
 
 ### Agent Model Used（使用的代理模型）
 
-由 dev agent 填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-由 dev agent 填写。
+- 2026-05-28 19:50 CST: 使用 `python3.12 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` 完成 workflow 解析；裸 `python3` 因 Python 3.9 缺少 `tomllib` 失败，按 skill fallback 继续。
+- 2026-05-28 19:50 CST: 读取完整 Story、`sprint-status.yaml`、`_bmad-output/project-context.md` 和 Story 指定 implementation anchors；确认前置 TypeScript CLI/manifest/diagnostics/adapter scaffold 已存在，`validate` 相关 anchors 由本 Story 创建。
+- 2026-05-28 19:50 CST: 工作区存在大量既有未提交改动；本轮只处理 Story 3.2 范围，不回滚、不格式化无关文件。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context 由 `bmad-create-story` workflow 创建。
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已实现 `speclite validate` command hook，返回 `CommandResult<ValidateCommandData>`，包含固定四级 `issueCounts`、canonical `checkedCategories`、adapter registry order 的 `checkedTargets` 和 lexicographic `validatedPaths`。
+- 已新增 `manifest-schema` validation rule，local-only 读取 manifest、skill index、help index、files index，稳定输出 taxonomy 允许的 `manifest-schema.*` issue id。
+- 已在 shared manifest schema anchor 中收紧 manifest/index/files shape，保留 sourceRef 稳定本地引用 token 兼容性，并补齐 installer 生成端 existing human-owned files-index required fields。
+- 已添加 focused validate command tests，覆盖 valid/missing/parse/missing-version/unsupported/migration/malformed/domain/determinism/CLI human+JSON 场景。
+- 验证通过：`npx vitest run test/validate-command.test.ts`、`npx vitest run test/runtime-structure.test.ts -t "preserves existing human-owned stubs"`、`npm run build`、`npm test`、`git diff --check`。
 
 ### File List（文件列表）
 
-由 dev agent 填写。
+- `_bmad-output/implementation-artifacts/code-reviews/3-2-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-2-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/code-reviews/3-2-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/3-2-manifest-and-index-schema-validation.md`
+- `src/bin/speclite.ts`
+- `src/commands/validate.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/installer/runtime-structure.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/validation/rules/manifest-schema.ts`
+- `src/validation/validate-project.ts`
+- `test/validate-command.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-05-28: 完成 Story 3.2 manifest/index schema validation dev-story，实现 validate command、manifest-schema rule、ValidateCommandData projection、focused tests，并将状态推进到 review。

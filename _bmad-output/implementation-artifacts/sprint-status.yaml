@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-05-28 18:40 CST
+# last_updated: 2026-05-29 18:11 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-05-28 18:40 CST
+last_updated: 2026-05-29 18:11 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -60,13 +60,13 @@ development_status:
   2-5-workflow-artifact-output-and-metadata-validation: done
   epic-2-retrospective: done
 
-  epic-3: in-progress
-  3-1-lightweight-install-status-summary: ready-for-dev
-  3-2-manifest-and-index-schema-validation: ready-for-dev
-  3-3-ide-mirror-and-file-integrity-validation: ready-for-dev
-  3-4-runtime-path-menu-target-legacy-entry-and-artifact-path-validation: ready-for-dev
-  3-5-commandresult-and-validationissue-json-contract: ready-for-dev
-  3-6-validation-progress-category-coverage-and-local-determinism: ready-for-dev
+  epic-3: done
+  3-1-lightweight-install-status-summary: done
+  3-2-manifest-and-index-schema-validation: done
+  3-3-ide-mirror-and-file-integrity-validation: done
+  3-4-runtime-path-menu-target-legacy-entry-and-artifact-path-validation: done
+  3-5-commandresult-and-validationissue-json-contract: done
+  3-6-validation-progress-category-coverage-and-local-determinism: done
   epic-3-retrospective: optional
 
   epic-4: in-progress
