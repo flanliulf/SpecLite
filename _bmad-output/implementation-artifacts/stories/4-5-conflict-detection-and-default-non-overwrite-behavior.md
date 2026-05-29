@@ -57,8 +57,8 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否已经由前序 stories 创建。创建本 Story 时这些 TypeScript CLI implementation scaffold 仍不存在，不能把 ready-for-dev story context 当作源码已完成证据。
-  - [ ] 确认 Story 4.1 ownership/files index anchors、Story 4.2 shared resolver anchors、Story 4.3 update plan/authorization anchors、Story 4.4 operation lock/safe write anchors 和 Story 3.5 `CommandResult` / `ValidationIssue` anchors 是否真实存在；若不存在，按前序 story implementation 顺序补齐，不得在本 Story 中绕过契约创建私有 conflict model。
+  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当作 Epic 4 源码已完成证据。
+  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership/files index anchors、Story 4.2 shared resolver anchors、Story 4.3 update plan/authorization anchors、Story 4.4 operation lock/safe write anchors 是否真实存在；若不存在，按前序 story implementation 顺序补齐，不得在本 Story 中绕过契约创建私有 conflict model。
   - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
 
@@ -129,8 +129,8 @@ Status: ready-for-dev
 
 ### Current Repository State（当前仓库状态）
 
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` implementation scaffold。`assets/source/speclite/` 下存在 source skill assets、module metadata、custom examples 和 legacy Python resolver scripts，但它们不是 MVP TypeScript CLI implementation。
-- `_bmad-output/implementation-artifacts/1-1` 到 `1-6`、`2-1` 到 `2-5`、`3-1` 到 `3-6`、`4-1`、`4-2`、`4-3`、`4-4` 当前是 ready-for-dev story context，不是完成后的源码证据。实现 Story 4.5 前必须重新确认前置 stories 是否已经由其他 agent 添加 actual implementation。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，仓库根目录已有 root `package.json`、`src/`、`test/` 以及 status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation issue/order anchors。root `fixtures/`、Story 4.1/4.2/4.3/4.4 update anchors 仍需按当前源码逐项确认。
+- Epic 3 / Story 3.5 已完成：`src/commands/update.ts` 是 non-write placeholder 与 public contract seam。Story 4.1 到 4.4 的 actual implementation 仍需按 sprint 状态和源码重新确认；本 Story 4.5 的 ready-for-dev context 不是其自身实现完成证据。
 - 当前 worktree 已有与本 Story 创建无关的 dirty planning artifacts、`sprint-status.yaml` 改动和未跟踪 Epic 1-4 story 文件。实现 Story 4.5 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是初始化占位内容；实际 implementation guardrails 以 live PRD、Architecture、UX、ADR 和 owning SPEC artifacts 为准。
 - 本 create-story run 复现了 skill activation runtime 行为：裸 `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-create-story --key workflow` 因 stdlib `tomllib` 缺失失败；`python3.12` 成功解析 workflow。

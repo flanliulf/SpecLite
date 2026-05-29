@@ -34,6 +34,7 @@ Status: ready-for-dev
    **前提** fixture validate artifact loop；  
    **当** 检查生成 artifact；  
    **则** 只校验 artifact type、默认输出路径、metadata location 和 metadata 值域；  
+   **并且** `skill-artifact-loop` 只证明一个最小 installed activation / artifact loop，不得替代 `fresh-install-empty-project` 对 full canonical skill set 的安装、索引和 IDE mirror coverage 证明；
    **并且** `generatedAt` 必须存在且可 parse 为 ISO 8601 string，并在 stable snapshot 中 normalize、omit 或标记为 non-stable；  
    **并且** 不把叙事质量、人工评审结论、业务正确性、内容完整度或多 skill workflow 成功率作为 MVP validation。
 
@@ -57,7 +58,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: Preflight and implementation reality check（AC: 1-7）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/`、`test/fixtures/` 和 `dist/` 是否已由前序 stories 实际实现。创建本 Story 时这些 implementation scaffold 在仓库根目录未发现；不得把 ready-for-dev story context 当作源码完成证据。
+  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/`、`test/fixtures/` 和 `dist/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture/artifact gates 仍必须按当前源码验证，不得把 ready-for-dev story context 当作源码完成证据。
   - [ ] 重新读取 `_bmad-output/planning-artifacts/specs/README.md`，再按 owning SPEC reading order 读取与本 Story 相关的 `01-command-result-json-contract.md`、`04-manifest-index-contract.md`、`05-ide-adapter-registry-contract.md`、`06-resolve-command-contract.md`、`07-validation-issue-taxonomy.md` 和 `08-fixture-contract.md`。
   - [ ] 重新读取 Story 6.1、6.2、6.3、6.4、2.3、2.4 和 2.5，确认 fixture contract、installed activation、resolver runtime support、artifact metadata、path portability、documentation example packaging boundary 是否真实落地。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得伪造 fixture pass。
@@ -67,6 +68,7 @@ Status: ready-for-dev
   - [ ] 在 `test/fixtures/skill-artifact-loop/` 或现有等价 fixture root 下使用 stable lower-kebab layout：`input/`、`expected/`、`README.md`。
   - [ ] Fixture input 必须包含 installed state：manifest/index、skill index、help index、phase coverage、files index、selected IDE target entry、installed self-contained skill package、project config/customization layers 和 configured artifact root。
   - [ ] Fixture registry 将 `skill-artifact-loop` 标记为 fixture project release gate。不要把 documentation examples、packaging acceptance 或 richer multi-skill regression assets 合并进这个最小 gate。
+  - [ ] Fixture README / registry 必须明确：本 gate 是最小 activation/artifact loop evidence，不是 full canonical installed set coverage；full `core` + `sdlc` 53 skill baseline 由 `fresh-install-empty-project` gate 证明。
   - [ ] 创建 `skill-artifact-loop` gate 后，必须补充 6.4 runtime matrix inclusion：复用 6.4 已建立的 runner wiring、Node `[22, 24]` policy、release evidence metadata 和 typed gate slot，将 6.4 的 pending/skip slot 转为实际 gate run evidence。
   - [ ] Fixture README 明确 release gate scope：installed IDE entry discovery、activation protocol、resolver access、artifact write 和 metadata value-domain validation。
 
@@ -126,7 +128,7 @@ Status: ready-for-dev
 
 - 创建本 Story 时，`sprint-status.yaml` 中 `epic-6` 为 `in-progress`，`6.1`、`6.2`、`6.3`、`6.4` 为 `ready-for-dev`，`6.5` 为 `backlog`。本 Story 创建后只应将 `6.5` 改为 `ready-for-dev`，保持 `epic-6` 为 `in-progress`，并保持 6.1-6.4 状态不变。
 - 创建本 Story 前，目标 story file `_bmad-output/implementation-artifacts/6-5-skill-artifact-loop-and-documentation-examples.md` 不存在。
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 或 `dist/` implementation scaffold。仅发现 `assets/`、`docs/`、`_bmad/`、`_bmad-output/` 与 IDE/agent metadata directories。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，root TypeScript CLI scaffold、status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation ordering anchors 已存在。root `fixtures/`、`dist/`、Epic 4 update/repair behavior、Epic 5 source-integrity behavior、Story 6.1-6.4 fixture/runtime gates 和本 Story skill artifact loop 仍需按当前源码逐项确认。
 - `assets/source/speclite/` 已存在，并包含 bundled source assets、module metadata、custom stubs、legacy Python resolver scripts 和 canonical skill packages。这些 source assets 不是 installed target state，也不是 Node/TypeScript MVP CLI implementation。
 - 当前 worktree 已有用户或其它流程产生的 dirty planning artifacts、`sprint-status.yaml` 改动和大量未跟踪 implementation story files。实现本 Story 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是 initialized placeholder，没有补充新的 implementation guardrails。实际 implementation guardrails 以 live PRD、Architecture、UX、readiness report、owning SPEC artifacts、previous story contexts 和本 Story 为准。
@@ -135,7 +137,7 @@ Status: ready-for-dev
 
 ### Scope Boundary（范围边界）
 
-- 本 Story 负责：最小 `skill-artifact-loop` release gate fixture、installed IDE entry discovery、installed `SKILL.md` activation protocol、`speclite resolve` runtime support access、最小 planning/review artifact write、artifact metadata value-domain validation、`generatedAt` parse and snapshot normalization、fixture-derived documentation examples、packaged documentation example classification 和 affected focused tests。
+- 本 Story 负责：最小 `skill-artifact-loop` release gate fixture、installed IDE entry discovery、installed `SKILL.md` activation protocol、`speclite resolve` runtime support access、最小 planning/review artifact write、artifact metadata value-domain validation、`generatedAt` parse and snapshot normalization、fixture-derived documentation examples、packaged documentation example classification 和 affected focused tests；它不证明 full canonical installed set coverage，后者由 Story 6.2 的 `fresh-install-empty-project` gate 负责。
 - 本 Story 消费：Story 2.3 的 installed activation target boundary、Story 2.4 的 Node/TypeScript resolver runtime support、Story 2.5 的 artifact metadata/frontmatter/sidecar contract、Story 6.1 的 fixture layout/comparator/gate classification、Story 6.2 的 fresh install/update expected output foundation、Story 6.3 的 resolve parity/source redaction discipline、Story 6.4 的 Node/path/packaging boundary。
 - 本 Story 不负责：重新定义 artifact contract、完整实现 source-integrity matrix、完整 path-portability OS matrix、performance dashboard、多 skill complex workflow、manual review quality scoring、complete docs rewrite、Post-MVP `doctor` / `sync` / `uninstall`、top-level `repair`、coverage trend report、enterprise dashboard、full source lockfile lifecycle、signatures、provenance policy、dedicated Copilot/Cursor adapter 或 command pointer artifact。
 - 本 Story 不修改 owning SPEC。若 implementation 发现 public JSON、manifest/index、artifact contract、resolve behavior、fixture layout、taxonomy、packaging acceptance 或 documentation example classification 需要变更，必须先提出并更新 owning SPEC / Architecture，再更新 executable schema/parser/comparator，最后更新 fixture expected outputs。

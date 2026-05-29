@@ -65,7 +65,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 实现前置核对与范围边界（AC: 1-8）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否已由 Epic 1-5 实际实现。创建本 Story 时这些实现骨架在当前仓库根目录尚不存在；不得把本 story context 当作源码完成证据。
+  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture contract 仍必须按当前源码验证，不得把本 story context 当作源码完成证据。
   - [ ] 重新读取 `_bmad-output/planning-artifacts/specs/README.md`，再按 owning SPEC 顺序读取 `01`、`04`、`05`、`06`、`07`、`08` 中与 fixture/output 相关的 sections；不要从 PRD、Architecture 或旧 story 复制 field-level truth。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得在本 Story 内伪造通过状态。
   - [ ] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、其它 Epic 6 story、源码或 status 文件。
@@ -132,8 +132,8 @@ Status: ready-for-dev
 
 ### Current Repository State（当前仓库状态）
 
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/` 或 root `fixtures/` implementation scaffold。后续 dev agent 必须重新确认当前实现状态；如果前序 stories 尚未落地，不得把本 Story 作为源码已完成证据。
-- `_bmad-output/implementation-artifacts/1-1` 到 `5-5` 当前存在 ready-for-dev story context，但这不等同于 actual implementation。实现 Story 6.1 前必须验证 Epic 1-5 的 actual source anchors、tests 和 fixture assets 是否已经真实创建。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，root TypeScript CLI scaffold、status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation ordering anchors 已存在。root `fixtures/`、Epic 4 update/repair behavior、Epic 5 source-integrity behavior 和 Epic 6 fixture runner/release gate behavior 仍需按当前源码逐项确认。
+- Story 3.5 command JSON contract 已存在，是 fixture comparison 的基础输入之一；但 Epic 3 没有实现 Epic 4/5/6 的 downstream behavior。实现 Story 6.1 前必须验证 Epic 1-5 的 actual source anchors、tests 和 fixture assets 是否已经真实创建。
 - 当前 worktree 已有用户或其它流程产生的 dirty planning artifacts、`sprint-status.yaml` 改动和未跟踪 Story 1-5 files。实现本 Story 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是 initialized placeholder，没有补充新的 implementation guardrails。实际 implementation guardrails 以 live PRD、Architecture、UX、owning SPEC 和本 Story 为准。
 - 本 create-story run 使用 `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-create-story --key workflow` 成功解析 workflow；裸 `python3` 在本机可能指向不含 `tomllib` 的旧 runtime。

@@ -16,6 +16,7 @@ Status: ready-for-dev
    **前提** `fresh-install-empty-project` release gate fixture；  
    **当** fixture 执行 fresh install；  
    **则** expected outputs 必须验证生成的 project tree 至少包含 `_speclite/`、`_speclite-output/`、`_speclite/_config/manifest.yaml`、manifest/index snapshots、`.claude/skills/` 和 `.agents/skills/`；  
+   **并且** 默认 selected official modules `core` + `sdlc` 下全部 canonical package roots 必须进入 `skill-index.json`、`files-index.json` 和每个 selected IDE mirror；当前 baseline 必须断言 `53` 个 canonical package roots，而不是只断言代表性 workflow skill；
    **并且** generated tree、files index、skill/help/phase coverage indexes 与 IDE mirror entries 使用 project-relative POSIX-style paths。
 
 2. **Ready summary is gated by ReadyCheck（Ready Summary 由 ReadyCheck 门禁）**  
@@ -69,7 +70,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 实现前置核对与契约阅读（AC: 1-9）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否已由 Epic 1-6 前序 stories 实际实现。创建本 Story 时这些 implementation scaffold 在当前仓库根目录尚不存在；不得把本 ready-for-dev story 当作源码完成证据。
+  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture gates 仍必须按当前源码验证，不得把本 ready-for-dev story 当作源码完成证据。
   - [ ] 按 `_bmad-output/planning-artifacts/specs/README.md` 的 implementation reading order 读取 owning SPEC。至少读取 `01-command-result-json-contract.md`、`03-install-plan-contract.md`、`04-manifest-index-contract.md`、`05-ide-adapter-registry-contract.md`、`07-validation-issue-taxonomy.md` 和 `08-fixture-contract.md`。
   - [ ] 重新读取 Story 6.1 的 fixture contract foundation 和 Story 5.5 的 source descriptor / redaction closure，确认 comparator、fixture classification、redaction 和 no-network assumptions 是否已真实落地。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得伪造 fixture pass。
@@ -79,12 +80,14 @@ Status: ready-for-dev
   - [ ] 在 `test/fixtures/fresh-install-empty-project/` 或等价 fixture root 下创建 stable lower-kebab fixture layout：`input/`、`expected/`、`README.md`。
   - [ ] Input state 必须表示 empty target project，不得依赖当前 repo `_bmad`、`_bmad-output`、home directory、checkout root、cache、temporary path 或 network state。
   - [ ] Expected installed tree 必须覆盖 `_speclite/` metadata/control hub、`_speclite-output/` artifact repository、`.claude/skills/` 和 `.agents/skills/` execution plane。
+  - [ ] Expected installed tree 必须列出默认 `core` + `sdlc` 的全部 canonical skill mirror entries：`.claude/skills/*/SKILL.md` 为 `53` 个，`.agents/skills/*/SKILL.md` 为 `53` 个。
   - [ ] Expected manifest/index snapshots 必须覆盖 manifest、skill index、help index、files index 和 phase coverage index 的 required schema versions、canonical target order 和 project-relative POSIX paths。
+  - [ ] Expected manifest/index snapshots 必须断言 `skill-index.json` 有 `53` 个 canonical package root entries，`files-index.json` 覆盖每个 selected mirror 中对应 package files。
   - [ ] Expected command JSON 必须使用 `CommandResult<InstallCommandData>`，包含 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps` 和 `pendingSteps`；不得新增未契约化 `readySummary` JSON blob。
 
 - [ ] Task 3: 实现 ReadyCheck 与 ready summary fixture assertions（AC: 2, 8）
   - [ ] 使用 stable progress `stepId` 断言 lifecycle order，至少覆盖 `source-discovery`、`manifest-generation`、`ide-mirror-creation`、`config-initialization`、`ready-check` 和 ready summary gate。
-  - [ ] `ReadyCheck` 必须至少确认 manifest/index 可读且 schema version supported、source descriptor projection valid、selected IDE mirrors 存在、required installed skill entries 可见、`_speclite` / artifact root / runtime paths 存在，且本次 install 没有 blocking issue 或 failed required step。
+  - [ ] `ReadyCheck` 必须至少确认 manifest/index 可读且 schema version supported、source descriptor projection valid、selected IDE mirrors 存在、selected modules 下全部 canonical package roots 对应 installed skill entries 可见、`_speclite` / artifact root / runtime paths 存在，且本次 install 没有 blocking issue 或 failed required step。
   - [ ] `ReadyCheck` 不得执行 full hash scan、remote source access、remote freshness/provenance revalidation、implicit update check 或 repair planning。
   - [ ] 失败路径 expected output 必须断言 completed steps、failed step、pending steps、blocking issue 和 suggested manual action；不得展示 ready summary 或 release-ready summary。
   - [ ] Human-readable Evidence profile 必须展示 Summary、Steps、Paths、Targets、Issues 和 Next actions；Structured profile 必须由 parsed JSON semantic comparison 覆盖。
@@ -136,8 +139,8 @@ Status: ready-for-dev
 
 ### Current Repository State（当前仓库状态）
 
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/` 或 root `fixtures/` implementation scaffold。后续 dev agent 必须重新确认当前实现状态；如果前序 stories 尚未落地，不得把本 Story 当作源码已完成证据。
-- `_bmad-output/implementation-artifacts/1-1` 到 `6-1` 当前是 ready-for-dev story context 或未跟踪 story files；这不等同于 actual implementation。实现 Story 6.2 前必须验证 Epic 1-5 与 Story 6.1 的 actual source anchors、tests 和 fixture assets 是否已经真实创建。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，root TypeScript CLI scaffold、status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation ordering anchors 已存在。root `fixtures/`、Epic 4 update/repair behavior、Epic 5 source-integrity behavior、Story 6.1 fixture contract 和本 Story release gates 仍需按当前源码逐项确认。
+- Story 3.5 command JSON contract 已存在，是 `fresh-install-empty-project` / `existing-install-update` expected outputs 的基础输入之一；但 Epic 3 没有证明 full canonical install/update fixture coverage。实现 Story 6.2 前必须验证 Epic 1-5 与 Story 6.1 的 actual source anchors、tests 和 fixture assets 是否已经真实创建。
 - 当前 worktree 已有用户或其它流程产生的 dirty planning artifacts、`sprint-status.yaml` 改动和未跟踪 Story 1-5 / 6.1 files。实现本 Story 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是 initialized placeholder，没有补充新的 implementation guardrails。实际 implementation guardrails 以 live PRD、Architecture、UX、owning SPEC、readiness report 和本 Story 为准。
 - 最近 5 个 commit 均为 docs/context/source/glossary/specs 方向，没有可复用的 TypeScript implementation commit pattern。Dev agent 必须读取实际源码与 tests，不得从 docs commits 推断实现已经存在。

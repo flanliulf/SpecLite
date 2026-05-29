@@ -57,7 +57,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现、工作树与只读边界（AC: 1-6）
-  - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否已由前序 stories 创建。创建本 Story 时这些 TypeScript CLI 实现目录尚不存在，不能把 ready-for-dev story context 当成源码已完成证据。
+  - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Story 4.1 anchors 与本 Story 所需 resolver integration 仍必须按当前源码验证。
   - [ ] 确认 Story 2.4 的 resolver implementation anchors 已真实存在：`src/commands/resolve.ts`、`src/config/resolve-output-schema.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/config-schema.ts`、`src/config/customization-schema.ts`。
   - [ ] 确认 Story 4.1 的 ownership model / protected boundary anchors 已真实存在或已在当前 implementation sequence 中计划完成：`src/update/ownership-model.ts`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts`。
   - [ ] 如果前置 implementation anchors 尚不存在，先完成前置 stories 或在本 Story 的范围内只补 resolver consumption 所需最小 integration；不得创建孤立的 update-only resolver copy。
@@ -135,8 +135,8 @@ Status: ready-for-dev
 
 ### Current Repository State（当前仓库状态）
 
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` implementation scaffold。`assets/source/speclite/` 下存在 source skill assets、module metadata、custom examples 和 legacy Python resolver scripts，但它们不是 MVP TypeScript CLI implementation。
-- `_bmad-output/implementation-artifacts/1-1` 到 `1-6`、`2-1` 到 `2-5`、`3-1` 到 `3-6`、`4-1` 当前是 ready-for-dev story context，不是完成后的源码证据。实现 Story 4.2 前必须重新确认前置 stories 是否已经由其他 agent 添加 actual implementation。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，仓库根目录已有 root `package.json`、`src/`、`test/` 以及 status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation issue/order anchors。root `fixtures/`、Epic 4 ownership/files-index anchors 和本 Story 的 update resolver integration 仍需按当前源码逐项确认。
+- Epic 3 / Story 3.5 已完成：`src/commands/update.ts` 是 non-write placeholder 与 public contract seam。Story 4.1 的 actual implementation 仍需按 sprint 状态和源码重新确认；本 Story 4.2 的 ready-for-dev context 不是其自身实现完成证据。
 - 当前 worktree 已有与本 Story 创建无关的 dirty planning artifacts、`sprint-status.yaml` 改动和未跟踪 Epic 1-4 story 文件。实现 Story 4.2 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是初始化占位内容；实际 implementation guardrails 以 live PRD、Architecture、UX、ADR 和 owning SPEC artifacts 为准。
 - 本 create-story run 复现了 skill activation runtime 行为：裸 `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-create-story --key workflow` 因 stdlib `tomllib` 缺失失败；`python3.12` 成功解析 workflow。这支持 ADR 0002 的短期 fallback 与长期 Node parity 方向。

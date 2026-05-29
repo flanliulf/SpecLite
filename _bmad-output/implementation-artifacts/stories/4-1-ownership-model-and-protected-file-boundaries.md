@@ -64,9 +64,9 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
-  - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`fixtures/` 是否已由前序 Stories 创建。当前创建 Story 时这些 TypeScript CLI 实现目录尚不存在，不能把 ready-for-dev story context 当成已完成源码证据。
+  - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；本 Story 仍不得把 ready-for-dev story context 当成 Epic 4 源码已完成证据。
   - [ ] 确认 Epic 1 / Story 1.4 已经或将要只负责 fresh-install create-if-absent project-level custom TOML stubs；Story 4.1 不得反向要求 Story 1.4 依赖完整 update/repair 模型。
-  - [ ] 如果 `src/commands/update.ts`、`src/update/`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 或等价前置 anchors 不存在，先完成前置 stories 或在本 Story 的既定范围内创建对应 Epic 4 所需 anchors；不得创建孤立的 update-only scaffold 并绕过 CommandResult、manifest 和 fixture contracts。
+  - [ ] 确认 `src/commands/update.ts` 仍按 Story 3.5 作为 non-write placeholder / public contract seam 存在，并重新检查 `src/update/`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 或等价前置 anchors；缺失的 Epic 4 anchors 只能在本 Story 范围内创建，不得创建孤立的 update-only scaffold 并绕过 CommandResult、manifest 和 fixture contracts。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录当前 behavior、数据 shape、public output 和测试覆盖；不得格式化、重写、同步或回滚与 Story 4.1 无关的文件。
 
 - [ ] Task 2: 建立 ownership model 与 path classifier（AC: 1-6）
@@ -124,8 +124,8 @@ Status: ready-for-dev
 
 ### Current Repository State（当前仓库状态）
 
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`src/`、`test/`、`tests/` 或 root `fixtures/` implementation scaffold。`assets/source/speclite/` 下存在 source skill assets、module metadata、custom examples 和 legacy Python resolver scripts，但它们不是 installed target project 的 MVP TypeScript CLI implementation。
-- `_bmad-output/implementation-artifacts/1-1` 到 `1-6`、`2-1` 到 `2-5`、`3-1` 到 `3-6` 当前是 ready-for-dev story context，不是已完成源码证据。实现 Story 4.1 前必须重新确认前序 stories 是否已经由其他 agent 添加 actual implementation。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，仓库根目录已有 root `package.json`、`src/`、`test/` 以及 status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation issue/order anchors。root `fixtures/` 或后续 Epic 4/5/6 专用实现仍需按当前源码逐项确认；不要沿用本 Story 创建时的旧仓库状态。
+- Epic 3 / Story 3.5 已完成：`src/commands/update.ts` 是 non-write placeholder 与 public contract seam。真实 update plan、ownership/files-index、operation lock、safe write、conflict detector 和 repair apply 仍由 Epic 4 stories 实现；本 Story 4.1 的 ready-for-dev context 不是其自身实现完成证据。
 - 当前 worktree 已有与本 Story 创建无关的 dirty planning artifacts、`sprint-status.yaml` 改动和未跟踪 Epic 1-3 story 文件。实现 Story 4.1 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是初始化占位内容；实际 implementation guardrails 以 live PRD、Architecture、UX、ADR、glossary 和 owning SPEC artifacts 为准。
 

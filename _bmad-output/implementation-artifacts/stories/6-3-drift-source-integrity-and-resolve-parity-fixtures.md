@@ -88,7 +88,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 执行前置核对与契约阅读（AC: 1-12）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否已由前序 stories 实际实现。创建本 Story 时这些 implementation scaffold 在当前仓库根目录未发现；不得把 ready-for-dev story context 当作源码完成证据。
+  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture gates 仍必须按当前源码验证，不得把 ready-for-dev story context 当作源码完成证据。
   - [ ] 按 `_bmad-output/planning-artifacts/specs/README.md` reading order 读取 owning SPEC：`01-command-result-json-contract.md`、`02-source-descriptor-contract.md`、`03-install-plan-contract.md`、`04-manifest-index-contract.md`、`06-resolve-command-contract.md`、`07-validation-issue-taxonomy.md` 和 `08-fixture-contract.md`。
   - [ ] 重新读取 Story 6.1、6.2、5.5、4.6 和 2.4，确认 fixture contract、normal update vs repair boundary、source trust/redaction 和 resolver parity 是否已真实落地。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得伪造 fixture pass。
@@ -170,7 +170,7 @@ Status: ready-for-dev
 
 - 创建本 Story 时，`sprint-status.yaml` 中 `epic-6` 为 `in-progress`，`6.1` 与 `6.2` 为 `ready-for-dev`，`6.3` 为 `backlog`。本 Story 创建后只应将 `6.3` 改为 `ready-for-dev`。
 - 创建本 Story 前，目标 story file `_bmad-output/implementation-artifacts/6-3-drift-source-integrity-and-resolve-parity-fixtures.md` 不存在。
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/` 或 root `fixtures/` implementation scaffold。后续 dev agent 必须重新确认当前实现状态；如果前序 stories 尚未落地，不得把本 Story 当作源码已完成证据。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，root TypeScript CLI scaffold、status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation ordering anchors 已存在。root `fixtures/`、Epic 4 update/repair behavior、Epic 5 source-integrity behavior、Story 6.1/6.2 fixture gates 和本 Story drift/source/resolve fixtures 仍需按当前源码逐项确认；不要沿用本 Story 创建时的旧仓库状态。
 - 当前 worktree 已有用户或其它流程产生的 dirty planning artifacts、`sprint-status.yaml` 改动和大量未跟踪 implementation story files。实现本 Story 时不得格式化、重写、同步或回滚这些无关改动。
 - `_bmad-output/project-context.md` 当前仍是 initialized placeholder，没有补充新的 implementation guardrails。实际 implementation guardrails 以 live PRD、Architecture、UX、owning SPEC、readiness report 和本 Story 为准。
 - 最近 5 个 commit 均为 docs/context/source/glossary/specs 方向，没有可复用的 TypeScript implementation commit pattern。Dev agent 必须读取实际源码与 tests，不得从 docs commits 推断实现已经存在。

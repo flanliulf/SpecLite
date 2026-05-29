@@ -83,7 +83,7 @@ Status: ready-for-dev
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: 验证前置实现、工作树和 story context 边界（AC: 1-11）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/`、`test/fixtures/` 和 `dist/` 是否已经由前序 stories 实际实现。创建本 Story 时这些 implementation scaffold 在仓库根目录未发现；不得把 ready-for-dev story context 当作源码完成证据。
+  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/`、`test/fixtures/` 和 `dist/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture/runtime gates 仍必须按当前源码验证，不得把 ready-for-dev story context 当作源码完成证据。
   - [ ] 重新读取 Story 6.1、6.2、6.3、5.5、4.6 和 2.4，确认 fixture contract、normal update vs repair boundary、source trust/redaction、explicit repair、resolver parity 和 Node 22/24 policy 是否真实落地。
   - [ ] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、Story 6.1/6.2/6.3、Story 6.5、源码或 status 文件。
   - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前置 story 顺序补齐或记录 blocker，不得伪造 release evidence。
@@ -154,7 +154,7 @@ Status: ready-for-dev
 
 - 创建本 Story 时，`sprint-status.yaml` 中 `epic-6` 为 `in-progress`，`6.1`、`6.2`、`6.3` 为 `ready-for-dev`，`6.4` 为 `backlog`，`6.5` 为 `backlog`。本 Story 创建后只应将 `6.4` 改为 `ready-for-dev`，保持 `epic-6` 为 `in-progress`，并保持 6.1/6.2/6.3 状态不变。
 - 创建本 Story 前，目标 story file `_bmad-output/implementation-artifacts/6-4-path-portability-and-runtime-matrix-evidence.md` 不存在。
-- 创建本 Story 时，仓库根目录未发现 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 或 `dist/` implementation scaffold。`assets/source/speclite/` 下存在 source skill assets / module metadata / legacy resolver scripts 的可能性不等同于 MVP TypeScript CLI implementation。
+- 截至 2026-05-29 的 Epic 3 提交 `395b017`，root TypeScript CLI scaffold、status/validate/update command anchors、`CommandResult` / `ValidationIssue` schema、diagnostics/output 和 validation ordering anchors 已存在。root `fixtures/`、`dist/`、Epic 4 update/repair behavior、Epic 5 source-integrity behavior、Story 6.1-6.3 fixture gates 和本 Story runtime/path/packaging evidence 仍需按当前源码逐项确认。
 - 当前 worktree 已有用户或其它流程产生的 dirty planning artifacts、`sprint-status.yaml` 改动和大量未跟踪 implementation story files。实现本 Story 时不得格式化、重写、同步或回滚无关改动。
 - `_bmad-output/project-context.md` 当前仍是 initialized placeholder，没有补充新的 implementation guardrails。实际 implementation guardrails 以 live PRD、Architecture、UX、readiness report、owning SPEC artifacts、previous story contexts 和本 Story 为准。
 - 本 create-story run 使用 `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-create-story --key workflow` 成功解析 workflow；裸 `python3` 在本机可能指向不含 `tomllib` 的旧 runtime。
