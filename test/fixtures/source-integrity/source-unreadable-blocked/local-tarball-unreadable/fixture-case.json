@@ -1,0 +1,6 @@
+{
+  "caseId": "source-integrity/source-unreadable-blocked/local-tarball-unreadable",
+  "sourceType": "local-tarball",
+  "expectedGate": "mvp-release",
+  "description": "Unreadable local tarball returns a stable redacted source-integrity issue."
+}

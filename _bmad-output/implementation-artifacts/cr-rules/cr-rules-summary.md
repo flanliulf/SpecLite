@@ -45,6 +45,15 @@
 | CR-SEC-11 | Safe-write stale temp 诊断必须覆盖同目录受控 roots | 4-4 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-12 | Safe-write cleanup failure 必须返回稳定 issue 而不是 raw error | 4-4 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-13 | Existing overwrite 必须执行 apply-time ownership/hash baseline preflight | 4-4 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-14 | Source label sanitizer 必须覆盖 token、query 和 fragment 后再进入 public projection | 5-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-15 | Private registry metadata client 调用必须先通过显式 runtime config 绑定 | 5-2 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-API-21 | Registry package identity 只能投影到 integrity evidence | 5-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-22 | Validate 必须本地校验 trustStatus 与 evidence verified 一致性 | 5-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-23 | Source evidence 必须驱动实际 install input，否则写入前阻塞 | 5-3 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-API-24 | Git source descriptor validate 必须拒绝非 full commit SHA evidence | 5-4 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-25 | Git commit evidence 必须经过 commit-ish verification 后才能写入 | 5-4 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-26 | Blocked SourceDescriptor 必须在 schema 与 runtime 写入边界双层 fail closed | 5-5 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-PROCESS-01 | 全仓 typecheck 既有债务必须用 Story touched surface 过滤裁决 | 5-5 | 7/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -1969,6 +1978,439 @@
 
 - **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
 
+### Story 5-5 / 2026-06-01
+
+- **Story**: 5-5
+- **分析来源**:
+  - `5-5-code-review-summary-20260601-round-1.md`
+  - `5-5-code-review-evaluation-20260601-round-1.md`
+  - `5-5-code-review-summary-20260601-round-2.md`
+  - `5-5-code-review-evaluation-20260601-round-2.md`
+  - `5-5-code-review-summary-20260601-round-3.md`
+  - `5-5-code-review-evaluation-20260601-round-3.md`
+  - `5-5-code-review-summary-20260601-round-4.md`
+  - `5-5-code-review-evaluation-20260601-round-4.md`
+  - `5-5-code-review-summary-20260601-round-5.md`
+  - `5-5-code-review-evaluation-20260601-round-5.md`
+  - `5-5-code-review-summary-20260601-round-6.md`
+  - `5-5-code-review-evaluation-20260601-round-6.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：blocked source 的 no-write gate 只依赖上游 command/resolver 分支，`InstallPlanSchema` 与 `applyInstallPlan` 写入边界本身没有 fail closed。
+  - Round 2-5 reviewer/evaluator 连续确认并修复 write boundary failure shape、runtime/test touched-file type diagnostics、optional callback 传参和 validation/test touched-surface type diagnostics；这些细项分别被最小修复关闭，不转 CR TODO。
+  - Round 6 reviewer/evaluator 均通过；四桶为 `decision_needed=0`、`patch=0`、`defer=0`、`dismiss=0`，需修复项 0，CR TODO 0。全仓 `tsc` 仍因既有类型债务失败，但 Story 5.5 touched surface 过滤无输出。
+  - Story 5.5 已修复 Story 5.4 遗留 `TODO-004` 范围：resolved Git install human output 的 `confirmationState` 基于 resolved evidence/version/contentHash 显示 `confirmed`，未确认 Git access gate 仍保持 `pending` 且不调用 Git client。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。用户已授权默认推荐决策；本次执行 record-only，仅写入本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Blocked SourceDescriptor 必须在 schema 与 runtime 写入边界双层 fail closed | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| 全仓 typecheck 既有债务必须用 Story touched surface 过滤裁决 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-26：Blocked SourceDescriptor 必须在 schema 与 runtime 写入边界双层 fail closed
+
+- **来源问题**: Story 5.5 Round 1 中，blocked source 的写入阻断主要依赖 `runInstallCommand` 上游分支；`InstallPlanSchema` 仍可接受 `writeAuthorized=true` 且 `sourceDescriptor.trustStatus === "blocked"` 的 plan，`applyInstallPlan` 也可能在获取 operation lock 后继续写入。
+- **CR 证据**:
+  - `5-5-code-review-summary-20260601-round-1.md`: Finding #1 指出 blocked source 的写入阻断没有落在 install plan / apply 写入边界本身。
+  - `5-5-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题为 P1，要求 schema 层拒绝已授权 blocked plan，并在 runtime apply 获取 lock 前 fail closed。
+  - `5-5-code-review-evaluation-20260601-round-6.md`: evaluator 确认 `InstallPlanSchema.superRefine` 与 `applyInstallPlan` 的 blocked descriptor gate 未回退，runtime 返回 `changedPaths: []` 且 details 不泄露 raw source/path。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 确认，并由后续多轮复审验证未回退。 |
+  | 影响范围 | 2 | 影响 source trust、install plan schema、runtime apply、operation lock、write authorization 和 public diagnostics。 |
+  | 风险等级 | 2 | blocked source 若越过写入边界，可能导致不可信来源写入、operation lock 误获取或 public diagnostics 泄露来源细节。 |
+  | 根因稳定性 | 1 | 属于把 no-write invariant 放在 command 上游而非 shared write boundary 的实现习惯，后续 update/repair/apply 复用时容易复现。 |
+  | 可执行性 | 2 | 可用 schema regression、direct `applyInstallPlan` no-lock/no-write regression 和 redaction negative assertion 检查。 |
+  | 文档缺口 | 0 | SourceDescriptor、InstallPlan 与 write eligibility SPEC 已覆盖总原则，本条作为 CR 实现检查点沉淀。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: install/update/repair 等消费 `SourceDescriptor`、`InstallPlanSchema` 和 runtime apply/write boundary 的流程。
+- **规避指南**:
+  - 不得只在 command orchestration 上游阻断 `trustStatus=blocked`；已授权 plan schema 与 runtime apply boundary 都必须 fail closed。
+  - runtime apply 的 blocked gate 必须发生在获取 operation lock 或执行任何 filesystem write 之前。
+- **最佳实践**:
+  - schema 层拒绝 `writeAuthorized=true` + blocked descriptor；runtime 层返回稳定 `source-integrity.blocked-source` failure、`changedPaths: []` 和 no-lock/no-write 结果。
+  - failure details 只保留稳定 reason/source type，不输出 `resolvedRoot`、raw URL、本机 absolute path、cache/temp/staging path、raw stderr 或 stack trace。
+- **全局文档建议**:
+  - 不建议本次升格；全局 source descriptor / install plan contract 已覆盖 trust/write eligibility 总原则，且用户本次限定 04 为 record-only，不修改全局文档。
+- **本次落地**:
+  - Round 1 fixer 已修复；Round 6 reviewer/evaluator 确认未回退。
+- **同步状态**: 已写入规则总结
+
+#### CR-PROCESS-01：全仓 typecheck 既有债务必须用 Story touched surface 过滤裁决
+
+- **来源问题**: Story 5.5 Round 3-5 中，`npx tsc --noEmit` 持续因全仓既有类型债务失败；reviewer/evaluator 需要区分本 Story touched surface 的新增诊断与历史债务，避免把全仓债务误判为当前 Story blocker，也避免遗漏本 Story touched-file 诊断。
+- **CR 证据**:
+  - `5-5-code-review-summary-20260601-round-3.md`: reviewer 指出全仓 `tsc` 失败中仍包含 Story touched files 的相关诊断，要求 evaluator 裁决并最小清理。
+  - `5-5-code-review-summary-20260601-round-4.md`: reviewer 在全仓失败背景下过滤出 `src/ide/target-writer.ts` 的 Story touched-surface 诊断。
+  - `5-5-code-review-summary-20260601-round-5.md`: reviewer 扩大到 Story 5.5 validation/test touched surface 后过滤出剩余相关诊断。
+  - `5-5-code-review-evaluation-20260601-round-6.md`: evaluator 复核 Story 5.5 touched surface 过滤无输出，并明确全仓 `tsc` 退出码 2 属于既有类型债务，不阻塞本 Story。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 多轮复现，Round 3-5 均需要用 touched-surface 过滤裁决。 |
+  | 影响范围 | 1 | 影响 CR reviewer/evaluator/fixer 对 typecheck 失败的归因、修复边界和通过判断。 |
+  | 风险等级 | 1 | 误归因会扩大修复范围或遗漏当前 Story 新增类型诊断，但通常不直接造成运行时缺陷。 |
+  | 根因稳定性 | 1 | 在存在全仓既有 typecheck 债务的仓库中，Story 局部修复容易反复遇到该判断问题。 |
+  | 可执行性 | 2 | 可要求先跑全仓命令记录退出码，再用明确 touched-file/touched-surface `rg` 过滤并把结果写入 CR 记录。 |
+  | 文档缺口 | 1 | 现有 CR 记录体现了该做法，但尚未在规则总结中沉淀为 reviewer/evaluator/fixer 的复用判断规则。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: 存在全仓既有 typecheck/lint/test 债务时的 Story CR reviewer、evaluator 和 fixer 收口流程。
+- **规避指南**:
+  - 不得只因全仓 `tsc` 退出码非 0 就扩大当前 Story 修复范围；也不得只因“全仓已有债务”忽略 touched surface 中的新诊断。
+- **最佳实践**:
+  - 先记录全仓命令退出码和历史债务判断，再用 Story touched files / touched surface 的稳定路径过滤输出。
+  - 若过滤结果非空，只修当前 Story touched surface；若过滤结果为空，可把全仓失败记录为既有债务并允许 Story 继续收尾。
+- **全局文档建议**:
+  - 不建议本次升格；该规则属于 CR 流程操作检查点，本次按用户授权仅 record-only。
+- **本次落地**:
+  - Round 3-5 fixer 已逐项清理 Story 5.5 touched-surface 诊断；Round 6 evaluator 确认过滤无输出。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 6 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不新增 TODO。
+- **需由 05 处理的既有 TODO**: `TODO-004` 已在 Story 5.5 范围内修复，并由 Round 6 reviewer/evaluator 确认未回退；交由 05 按 backlog 格式标记为 resolved。
+
+### Story 5-4 / 2026-06-01
+
+- **Story**: 5-4
+- **分析来源**:
+  - `5-4-code-review-summary-20260601-round-1.md`
+  - `5-4-code-review-evaluation-20260601-round-1.md`
+  - `5-4-code-review-fixer-summary-20260601-round-1.md`
+  - `5-4-code-review-summary-20260601-round-2.md`
+  - `5-4-code-review-evaluation-20260601-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 P1 `patch` finding：installed Git descriptor 可用非 SHA selector 伪装 `git-commit` evidence 并通过 validate；explicit commit SHA 未证明为 commit-ish 即可写入 `git-commit` evidence。
+  - Round 1 fixer 已修复 2 个 P1，并通过 `npm test -- test/git-source-resolution.test.ts`、affected focused tests、`npm test`、`npm run build` 和 scoped `git diff --check`。
+  - Round 2 reviewer/evaluator 均确认通过；需修复 0，可忽略 0，CR TODO 1。
+  - 本次 04 使用模型：GPT-5 Codex (codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - 未解决的 P2：confirmed Git install human output 仍显示 `confirmationState=pending`，交给 05 TODO Tracker，不在本文件重复作为已沉淀规则管理。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Git source descriptor validate 必须拒绝非 full commit SHA evidence | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Git commit evidence 必须经过 commit-ish verification 后才能写入 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| confirmed Git install human output 仍显示 `confirmationState=pending` | 未通过：状态未解决 | - | todo-tracker | 交给 05 TODO Tracker |
+
+### 提炼规则
+
+#### CR-API-24：Git source descriptor validate 必须拒绝非 full commit SHA evidence
+
+- **来源问题**: Story 5.4 Round 1 暴露 installed Git descriptor 中 `version: "main"` 与 `git-commit.commitSha: "main"` 可通过 local validate，导致 branch/tag/raw selector 能伪装成 concrete commit evidence。
+- **CR 证据**:
+  - `5-4-code-review-summary-20260601-round-1.md`: Finding #1 指出 `SourceIntegrityEvidenceSchema` 与 Git validate 分支只检查非空字符串和 equality，未检查 full 40-hex SHA。
+  - `5-4-code-review-evaluation-20260601-round-1.md`: evaluator 独立复现 `version=main` / `commitSha=main` 返回 `issues: []`，确认该问题为 P1。
+  - `5-4-code-review-fixer-summary-20260601-round-1.md`: fixer 已收紧 schema/validate full SHA shape，并补充 malformed installed descriptor negative tests。
+  - `5-4-code-review-evaluation-20260601-round-2.md`: evaluator 确认 Git descriptor full SHA schema / validate gate 已修复。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 Git `SourceDescriptor` schema、local validate、manifest installed-state health 和 source-integrity diagnostics。 |
+  | 风险等级 | 2 | malformed installed Git evidence 被 validate 放过会削弱 floating source 后置门禁和自动化健康判断。 |
+  | 根因稳定性 | 1 | 把 evidence presence/equality 当作语义有效性，是 source descriptor validation 中容易复现的实现习惯。 |
+  | 可执行性 | 2 | 可通过 shared full SHA schema、local-only validate guard 和 focused malformed descriptor tests 检查。 |
+  | 文档缺口 | 0 | source descriptor contract 已覆盖 Git commit evidence 与 validate no-network 总原则，本条作为 CR 实现检查点沉淀。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: Git source descriptor、`git-commit` integrity evidence、manifest installed projection、`speclite validate` local source-integrity rule。
+- **规避指南**:
+  - 不得只因 Git descriptor `version` 与 `git-commit.commitSha` 相等就视为有效 evidence；两者都必须是 full concrete commit SHA。
+- **最佳实践**:
+  - 在 schema 和 validate 两层复用 full commit SHA guard；validate 保持 local-only，只检查 descriptor/evidence shape，不访问 Git remote、freshness 或 provenance。
+- **全局文档建议**:
+  - 不建议本次升格；全局 source descriptor / validation contract 已覆盖 Git commit evidence 与 local-only validate 边界，本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-25：Git commit evidence 必须经过 commit-ish verification 后才能写入
+
+- **来源问题**: Story 5.4 Round 1 暴露 explicit 40-hex selector 只要出现在 `ls-remote` 输出的任意 advertised oid 中，即可被写入 `version` 与 `git-commit.commitSha`，没有证明该对象是 commit-ish。
+- **CR 证据**:
+  - `5-4-code-review-summary-20260601-round-1.md`: Finding #2 指出 resolver 只解析 `<oid>\t<ref>`，没有执行 `git rev-parse --verify --end-of-options <rev>^{commit}` 或等价 commit-ish verification。
+  - `5-4-code-review-evaluation-20260601-round-1.md`: evaluator 独立复现 arbitrary advertised tag oid 可生成 `git-commit` evidence，确认该问题为 P1。
+  - `5-4-code-review-fixer-summary-20260601-round-1.md`: fixer 已新增 `GitClient.verifyCommit`，并要求 branch/tag/full-ref/explicit SHA 候选 oid 经验证后才写入 descriptor。
+  - `5-4-code-review-evaluation-20260601-round-2.md`: evaluator 确认 explicit SHA 要求 verified SHA 与 requested SHA 一致，verification failure / exception 均 blocked。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 Git resolver、install planning eligibility、source descriptor evidence 和 focused fixture contract。 |
+  | 风险等级 | 2 | 未证明 commit-ish 的 object 进入 `git-commit` evidence 会污染 install planning 和 installed state。 |
+  | 根因稳定性 | 1 | source resolver 容易把 string shape 或 advertised oid 当作 proof，后续 source-specific evidence 扩展也可能复现。 |
+  | 可执行性 | 2 | 可要求 resolver 调用 injected commit verification，并用 annotated tag object、non-commit oid、verification failure/exception tests 覆盖。 |
+  | 文档缺口 | 0 | Story/SPEC 已明确 commit-ish proof 要求，本条作为 CR 实现检查点沉淀。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: Git source resolver、Git client abstraction、source resolution plan confirmed path、Git evidence 写入前门禁。
+- **规避指南**:
+  - 不得把 full 40-hex 字符串或 `ls-remote` advertised oid 当作 commit proof；写入 `git-commit` evidence 前必须证明最终对象可解引用为 commit。
+- **最佳实践**:
+  - 通过 injected `verifyCommit` 或等价 Git-safe path 解析 commit-ish；explicit SHA 必须验证结果与 requested SHA 完全一致，branch/tag/full-ref 必须写入 dereferenced commit SHA。
+- **全局文档建议**:
+  - 不建议本次升格；该规则细化 Git source resolver implementation checkpoint，且 owning Story/SPEC 已覆盖 commit-ish proof 总原则。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **新增 TODO 候选**: confirmed Git install human output 仍显示 `confirmationState=pending`。
+- **建议优先级**: P2。
+- **建议类别**: other。
+- **交接理由**: Round 2 evaluator 确认该问题真实存在且影响 external access confirmation 的 human audit 展示，但 runtime confirmation gate 与 Git evidence 写入门禁已生效，不阻塞 Story 5.4 finalizer。
+
+### Story 5-3 / 2026-06-01
+
+- **Story**: 5-3
+- **分析来源**:
+  - `5-3-code-review-summary-20260601-round-1.md`
+  - `5-3-code-review-evaluation-20260601-round-1.md`
+  - `5-3-code-review-fixer-summary-20260601-round-1.md`
+  - `5-3-code-review-summary-20260601-round-2.md`
+  - `5-3-code-review-evaluation-20260601-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：confirmed local source 已记录 local `SourceDescriptor` / evidence，但 module discovery、IDE mirror copy、files index 与 skill index 仍读取 bundled source，导致 source evidence 与 actual installed content 不一致。
+  - Fixer 已按保守边界修复：`local` source 通过 private non-enumerable `installSourceRoot` 贯穿 module discovery 与 write phase；public descriptor、manifest、human output、files index 和 skill index 只使用 display-safe `local-source/...` ref；`local-tarball` / `offline-bundle` 在无 extractor/canonical tree handle 时写入前稳定阻塞，artifact `contentHash` 保持 raw bytes hash。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，可忽略 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - Source descriptor、install plan 与 manifest/index owning SPEC 已覆盖 canonical source、write eligibility、redaction 和 source evidence 总原则；本条作为 CR 实现检查点沉淀，不重复修改全局文档。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Source evidence 必须驱动实际 install input，否则写入前阻塞 | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-23：Source evidence 必须驱动实际 install input，否则写入前阻塞
+
+- **来源问题**: Story 5.3 首轮实现中，confirmed local source 会生成 local `SourceDescriptor`、`contentHash` 和 integrity evidence，但后续 install planning、module discovery、IDE mirror copy、files index 与 skill index 仍使用 bundled source tree，造成 manifest/sourceDescriptor 记录 local evidence，而 actual installed content 来自 bundled source。
+- **CR 证据**:
+  - `5-3-code-review-summary-20260601-round-1.md`: Finding #1 指出 local resolution 成功后安装阶段仍固定读取 bundled source，导致 source evidence 与 installed state 不一致。
+  - `5-3-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题为 P1，要求 local canonical source root 贯穿 install；tarball/offline bundle 若没有 canonical tree handle 必须写入前阻塞。
+  - `5-3-code-review-fixer-summary-20260601-round-1.md`: fixer 记录 `local` source private install source handle、local copy/hash/index 链路，以及 artifact source 无 canonical tree handle 时阻塞写入。
+  - `5-3-code-review-evaluation-20260601-round-2.md`: evaluator 确认 Round 1 P1 已修复，local canonical root 已贯穿 install，private root 未泄露，tarball/offline stable blocked，CR TODO 0。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 2 | 影响 source resolver、install orchestration、module discovery、IDE mirror copy、manifest/index、files index 与 skill index。 |
+  | 风险等级 | 2 | 会让 public source evidence 指向 local source，而实际安装内容来自 bundled source，破坏来源完整性和后续验证可信度。 |
+  | 根因稳定性 | 2 | 属于 source descriptor public projection 与 private install source handle 脱节的架构链路缺口，后续 source 类型扩展容易复现。 |
+  | 可执行性 | 2 | 可要求 install source handle 贯穿 discovery/copy/hash/index，并用 marker source、no private path leakage、artifact-source blocked regression 检查。 |
+  | 文档缺口 | 1 | owning SPEC 已覆盖 source descriptor/write eligibility 总原则，但未沉淀“source evidence 必须驱动 actual install input”的 CR 实现检查点。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: `src/source/` source resolver、install orchestration、module discovery、IDE mirror writer、manifest/files/skill index 生成，以及任何会把 `SourceDescriptor` evidence 与 actual installed content 关联的流程。
+- **规避指南**:
+  - 不得在记录 non-bundled source evidence 后继续从 bundled source tree 执行 discovery、copy、hash 或 index generation。
+  - 不得因为 artifact source 已有 raw bytes `contentHash` 就允许写入 bundled content；缺少 installable canonical tree handle 时必须在写入前 fail closed。
+- **最佳实践**:
+  - public `SourceDescriptor` 与 private install source handle 分层：public projection 只保留 display-safe label，private handle 只在 install 链路内部传递。
+  - focused tests 应构造带唯一 marker 的 local canonical source tree，断言 installed files、files index hash/sourceRef、skill index `sourcePackagePath` / `canonicalPackageHash` 均来自该 source；同时断言 private root 不出现在 public JSON、human output、manifest或 indexes。
+  - 对 tarball/offline bundle，如果当前实现没有 extractor/source payload staging/canonical tree handle，应断言 confirmed source 在 module planning/write phase 前 blocked，且 artifact `contentHash` 仍保持 raw bytes hash。
+- **全局文档建议**:
+  - 不建议本次升格；`02-source-descriptor-contract.md`、`03-install-plan-contract.md` 与 `04-manifest-index-contract.md` 已覆盖 source descriptor、write eligibility、canonical source 和 installed projection 的总体原则。本条属于 Story 5.3 暴露出的 implementation checkpoint，本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 5-2 / 2026-06-01
+
+- **Story**: 5-2
+- **分析来源**:
+  - `5-2-code-review-summary-20260601-round-1.md`
+  - `5-2-code-review-evaluation-20260601-round-1.md`
+  - `5-2-code-review-summary-20260601-round-2.md`
+  - `5-2-code-review-evaluation-20260601-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 3 个 P1：private registry 成功路径缺少显式 runtime config、registry package identity 被投影到顶层 `resolvedRoot`、`validateSourceIntegrity` 未校验 `trustStatus` 与 evidence `verified` 的本地一致性。
+  - Fixer 已按 evaluator 边界修复 3 项：只定义最小 private runtime/API config，不新增 CLI flag、持久配置、token scope 或 `.npmrc` lifecycle；registry success descriptor 移除顶层 `resolvedRoot` package identity；validate 增加 local-only consistency checks。
+  - Round 2 reviewer/evaluator 均确认通过；新增 blocker 0，需修复 0，CR TODO 0；`install.ts` 重复 orchestration 维持 dismiss，不列 TODO。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - 全局 source descriptor contract / architecture 已覆盖 registry redaction、trust status、validate no-network 等总原则；本次 3 条作为 CR 实现检查点沉淀，不重复修改全局文档。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Private registry metadata client 调用必须先通过显式 runtime config 绑定 | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Registry package identity 只能投影到 integrity evidence | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Validate 必须本地校验 trustStatus 与 evidence verified 一致性 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-SEC-15：Private registry metadata client 调用必须先通过显式 runtime config 绑定
+
+- **来源问题**: Story 5.2 首轮实现中，private registry 成功路径只存在于 injected `registryClient` test，真实 runtime 没有显式 private registry endpoint/config 入口；默认 client 对 `private-registry` 直接返回 authentication-required，无法证明 AC2 的用户显式配置语义。
+- **CR 证据**:
+  - `5-2-code-review-summary-20260601-round-1.md`: Finding #1 指出 private registry 缺少真实显式 endpoint/config lifecycle，成功路径只存在于 injected test client。
+  - `5-2-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题为 P1，要求本 Story 仅定义最小 private in-memory/runtime config contract，不猜测 CLI flag、持久配置或 token lifecycle。
+  - `5-2-code-review-evaluation-20260601-round-2.md`: evaluator 确认 `RegistryRuntimeConfig` 已表达 `registryKind`、display-safe label、package/channel 绑定；缺 config 或绑定不匹配时在调用 metadata client 前返回 `source-integrity.authentication-required`。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 private registry resolver、install runtime/API 输入、diagnostics 与 metadata client 调用边界。 |
+  | 风险等级 | 2 | 未经显式配置就尝试 private registry 或隐式回退 public registry，可能破坏访问意图、认证边界和 redaction safety。 |
+  | 根因稳定性 | 1 | source resolver 扩展时容易把 test injection 当作 runtime contract，后续 source 类型也可能复现。 |
+  | 可执行性 | 2 | 可检查为 metadata client 调用前必须校验 source type、kind、package、channel 和 display-safe label，并配套 no-client-call regression。 |
+  | 文档缺口 | 1 | 全局文档已有 registry redaction 与 source access 总原则，但没有沉淀 private registry runtime config 绑定这个实现检查点。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: private registry resolver、install runtime/API layer、metadata client injection、registry diagnostics 和 source access confirmation flow。
+- **规避指南**:
+  - 不得用测试注入的 metadata client 替代真实 runtime contract；private registry 在缺少显式 runtime config 或 package/channel/kind 绑定不匹配时，必须在访问 metadata client 前 fail closed。
+- **最佳实践**:
+  - private registry runtime config 仅暴露 display-safe label 与必要绑定字段；focused tests 同时覆盖缺 config 不调用 client、提供 explicit config 成功解析、public output 不泄露 secret。
+- **全局文档建议**:
+  - 不建议本次升格；该规则偏 Story 5.2 private registry resolver 实现检查点，且全局 source descriptor / architecture 已覆盖 registry redaction 和 explicit source access 总原则。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-21：Registry package identity 只能投影到 integrity evidence
+
+- **来源问题**: Story 5.2 首轮实现中，registry success descriptor 把 package name 写入顶层 `resolvedRoot`，与 Story AC3 要求 package identity 只能通过 `integrityEvidence[].packageName` 表示的 automation contract 不一致。
+- **CR 证据**:
+  - `5-2-code-review-summary-20260601-round-1.md`: Finding #2 指出 `resolvedRoot: packageName` 形成第二处 registry package identity。
+  - `5-2-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题为 P1，要求移除 registry success descriptor 顶层 package identity 并同步 tests/fixtures/output。
+  - `5-2-code-review-evaluation-20260601-round-2.md`: evaluator 确认 success descriptor 不再写入 `resolvedRoot`，package identity 仅保留在 `integrityEvidence[].packageName`。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 registry `SourceDescriptor`、fixtures、status/install/validate 的 automation contract 消费。 |
+  | 风险等级 | 1 | 第二处 package identity 会增加后续 public contract 兼容成本，并可能误导消费方依赖错误字段。 |
+  | 根因稳定性 | 1 | optional display/source fields 容易被复用为 identity 字段，是 descriptor 扩展中的稳定实现风险。 |
+  | 可执行性 | 2 | 可通过 schema/fixture/assertion 检查 registry success descriptor 不含顶层 `resolvedRoot` package identity。 |
+  | 文档缺口 | 1 | 全局文档允许 `resolvedRoot` 作为 display-safe source label，但未沉淀 registry identity 只能来自 evidence 的实现检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: registry source descriptor、source-integrity fixtures、install/status/validate public JSON projection 和 automation consumers。
+- **规避指南**:
+  - 不得把 registry package name、scope/package selector 或 private package identity 复制到顶层 `resolvedRoot`、`packageName` 或其他第二身份字段。
+- **最佳实践**:
+  - registry source 的 package identity 只放在 `registry-integrity` / `version-lock` evidence 的 `packageName`；若 human output 需要显示 label，只使用 contract 允许的 redacted/display-safe metadata，不新增 automation identity。
+- **全局文档建议**:
+  - 不建议本次升格；该规则细化 Story 5.2 AC3 与 existing source descriptor contract 的 registry 实现检查点。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-22：Validate 必须本地校验 trustStatus 与 evidence verified 一致性
+
+- **来源问题**: Story 5.2 首轮实现中，`validateSourceIntegrity` 对 registry descriptor 只检查是否存在 registry/lock evidence，无法发现 `trustStatus: "trusted"` 但没有 `verified: true` evidence、已安装 descriptor 仍为 `blocked`，或 `unverified` 携带 failed verification 语义。
+- **CR 证据**:
+  - `5-2-code-review-summary-20260601-round-1.md`: Finding #3 指出 validate 只检查 evidence 是否存在，未校验 trusted/blocked 与 evidence verification 的本地一致性。
+  - `5-2-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题为 P1，要求补 local-only consistency rules 和 focused tests，不访问 registry、不做 freshness/latest check。
+  - `5-2-code-review-evaluation-20260601-round-2.md`: evaluator 确认 validate 已覆盖 missing evidence、installed blocked descriptor、trusted-without-verified-evidence、unverified failed lock evidence，并保持 local-only。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 validate command、source-integrity issue、installed manifest descriptor 和 registry evidence contract。 |
+  | 风险等级 | 2 | 错误 trusted 或 blocked installed state 被 validate 放过，会削弱本地健康检查和写入前 evidence gate。 |
+  | 根因稳定性 | 1 | 只校验 shape/presence 而不校验语义一致性，是 validation rule 中常见且可复现的缺口。 |
+  | 可执行性 | 2 | 可写成 focused tests：trusted 必须有 verified evidence、blocked installed descriptor 必报 issue、failed verification 不得以 unverified 通过。 |
+  | 文档缺口 | 0 | source descriptor contract 与 architecture 已覆盖 trust/evidence 语义和 validate no-network 边界，本条作为 CR 实现检查点沉淀。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: `speclite validate`、`src/validation/rules/source-integrity.ts`、本地 manifest/source descriptor/evidence shape 与 consistency validation。
+- **规避指南**:
+  - 不得把 evidence presence 当作 validate 通过条件；`trustStatus` 与 evidence `verified` 语义必须本地一致，且 failed verification 必须变成 stable `source-integrity` issue。
+- **最佳实践**:
+  - validate 保持 local-only：只读 manifest/source descriptor/evidence，不访问 registry 或 remote provenance；用 focused tests 覆盖 trusted-without-verified-evidence、blocked installed descriptor 和 failed evidence cases。
+- **全局文档建议**:
+  - 不建议本次升格；全局文档已有 trust/evidence 与 validate no-network 总原则，本条只记录 Story 5.2 暴露出的 implementation checkpoint。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
 ### Story 4-5 / 2026-06-01
 
 - **Story**: 4-5
@@ -1997,6 +2439,70 @@
 - **处理结果**: 不新建重复规则；已将 Story 4-5 作为第二个来源 Story 写入 `CR-SEC-09`，并将该规则总分从 7/12 更新为 8/12。
 - **更新依据**: Story 4-5 Round 1 Finding #1 与 Story 4-1 的 protected classifier 优先级问题同源，均要求 classifier 的 `human-owned` / `workflow-owned` / `unknown` protected 结论不得被 files-index ownership 或 public action projection 覆盖。
 - **同步状态**: 已写入规则总结。
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 5-1 / 2026-06-01
+
+- **Story**: 5-1
+- **分析来源**:
+  - `5-1-code-review-summary-20260601-round-1.md`
+  - `5-1-code-review-evaluation-20260601-round-1.md`
+  - `5-1-code-review-summary-20260601-round-2.md`
+  - `5-1-code-review-evaluation-20260601-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：`npm` source value 中的 `?token=secret` 可进入 public JSON `data.sourceDescriptor.resolvedRoot` 与 human-readable `Source` / `External Access` 输出，违反 Story 5.1 redaction/display-safe 要求。
+  - Fixer 已在 `sanitizePackageLabel()` 中增加 secret-like key、query string、fragment 与 strict npm package-name allowlist 检查，不满足 display-safe 条件时统一投影为 `redacted-npm-package`，并补充 focused regression。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - 全局 architecture / source descriptor contract 已覆盖 credentials、tokens、private query string 不得进入 public JSON / fixture snapshot 的总体原则；本条作为 CR 实现检查点沉淀，不重复修改全局文档。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Source label sanitizer 必须覆盖 token、query 和 fragment 后再进入 public projection | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-SEC-14：Source label sanitizer 必须覆盖 token、query 和 fragment 后再进入 public projection
+
+- **来源问题**: Story 5.1 首轮实现中，`npm` source value 只按 unsafe display value 做粗略检查，未检查 secret-like token、query string 或 fragment，导致 `@scope/pkg?token=secret` 可作为 display-safe label 进入 blocked `SourceDescriptor.resolvedRoot`、`SourceResolutionPlan.externalAccesses[]` 和 human-readable output。
+- **CR 证据**:
+  - `5-1-code-review-summary-20260601-round-1.md`: Finding #1 指出 `sanitizePackageLabel()` 未检查 `containsSecretLikeToken()` 或 query string，定向命令确认 JSON 与 human output 泄露 raw token/query。
+  - `5-1-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题违反 Story 5.1 AC4/AC6，属于 P1，需要修复 npm source display-safe redaction 与 focused regression。
+  - `5-1-code-review-evaluation-20260601-round-2.md`: evaluator 确认 `sanitizePackageLabel()` 已对 secret-like token、query/fragment delimiter 和 strict npm package-name allowlist 做检查，selection、external access、install JSON 与 human output 均不泄露 raw query/token。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 source selection、blocked source descriptor、external access intent、install JSON 与 human-readable output。 |
+  | 风险等级 | 2 | raw token/private query 进入 public output 会造成 secret 泄露和 fixture/public contract 破坏。 |
+  | 根因稳定性 | 1 | source-specific label sanitizer 容易只校验 URL/path 而漏掉 package selector 内嵌 query/token，是后续 source 类型扩展中可复现的实现习惯风险。 |
+  | 可执行性 | 2 | 可要求 source label sanitizer 覆盖 secret-like keys、query、fragment、absolute/local path 与 strict label allowlist，并配套 JSON/human negative assertions。 |
+  | 文档缺口 | 0 | 全局 source descriptor / architecture 已覆盖 public redaction 总原则，本条作为 CR 实现检查点沉淀。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: `src/source/` source selection、source resolver、blocked `SourceDescriptor`、external access intent、install/update/status/validate 等会将 source label 投影到 public JSON 或 human output 的流程。
+- **规避指南**:
+  - 不得只检查 URL、absolute path 或 credential URL 形态后就把 source value 当作 display-safe；package selector、version/channel selector 或其他 source-specific label 中的 token、query 和 fragment 也必须 redacted。
+- **最佳实践**:
+  - public source label 进入 `CommandResult`、fixture snapshot、human-readable output 或 `ValidationIssue.details` 前，应先通过集中 sanitizer，校验 secret-like keys、query/fragment delimiter、local path 和 strict source-specific allowlist；focused tests 同时断言 JSON 与 human output 不包含 raw token/query。
+- **全局文档建议**:
+  - 不建议本次升格；全局文档已覆盖 credentials/tokens/private query string 不得进入 public output 的原则，且修改全局文档超出本次 04/05/06 收尾授权。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
 
 #### 05 TODO Tracker 交接
 

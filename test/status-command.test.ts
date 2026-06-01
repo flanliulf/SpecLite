@@ -16,7 +16,15 @@ const sourceDescriptor = {
   channel: "stable",
   version: "0.0.0",
   resolvedRoot: "assets/source/speclite",
-  integrityEvidence: [],
+  integrityEvidence: [
+    {
+      kind: "version-lock",
+      packageName: "speclite",
+      version: "0.0.0",
+      lockPath: "package-lock.json",
+      verified: true,
+    },
+  ],
   trustStatus: "trusted",
 } as const;
 
@@ -266,7 +274,9 @@ describe("status command lightweight installed-state summary", () => {
 
       expect(output).toContain("SpecLite status");
       expect(output).toContain("High-level health: configured");
-      expect(output).toContain("Source: bundled stable 0.0.0");
+      expect(output).toContain("Source: sourceType=bundled; channel=stable; version=0.0.0");
+      expect(output).toContain("trustStatus=trusted");
+      expect(output).toContain("evidence=version-lock:verified");
       expect(output).toContain("Manifest: present, version=speclite.manifest.v1");
       expect(output).toContain("- claude: configured, skills=1, path=.claude/skills");
       expect(output).toContain("Key paths");
@@ -459,7 +469,12 @@ function createInstalledManifest(input: {
     '  channel: "stable"',
     '  version: "0.0.0"',
     '  resolvedRoot: "assets/source/speclite"',
-    "  integrityEvidence: []",
+    "  integrityEvidence:",
+    '    - kind: "version-lock"',
+    '      packageName: "speclite"',
+    '      version: "0.0.0"',
+    '      lockPath: "package-lock.json"',
+    "      verified: true",
     '  trustStatus: "trusted"',
     "installedModules:",
     '  - "core"',

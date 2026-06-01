@@ -1,6 +1,6 @@
 # Story 5.2: Registry Source Resolution And Diagnostics（Registry 来源解析与诊断）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -56,61 +56,61 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
-  - [ ] 确认 Story 5.1 的 source selection、channel/requestedVersion capture、`SourceResolutionPlan.externalAccesses[]`、未确认前 no access/no write、redaction 和 unsupported custom source boundary 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得在本 Story 中绕过 5.1 边界直接访问 registry。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 1.1 CLI/runtime guard、Story 4.3 plan-before-write、Story 4.4 operation lock/safe write 和 Story 5.1 source descriptor projection anchors 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
+- [x] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
+  - [x] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
+  - [x] 确认 Story 5.1 的 source selection、channel/requestedVersion capture、`SourceResolutionPlan.externalAccesses[]`、未确认前 no access/no write、redaction 和 unsupported custom source boundary 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得在本 Story 中绕过 5.1 边界直接访问 registry。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 1.1 CLI/runtime guard、Story 4.3 plan-before-write、Story 4.4 operation lock/safe write 和 Story 5.1 source descriptor projection anchors 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
 
-- [ ] Task 2: 接入 registry source resolution entrypoints（AC: 1-2, 6）
-  - [ ] 在 `src/source/` 的既有 source resolver dispatch 中为 `npm` 与 `private-registry` 接入 registry-specific resolver；不要在 `src/commands/install.ts`、reporter、fixture helper 或 validation rule 中复制 registry resolution logic。
-  - [ ] 复用 Story 5.1 的 source selection model：`sourceType` 只能是 `npm` 或 `private-registry`，用户输入的 range、dist-tag、tag 或 channel 进入 `requestedVersion` 或 `channel`，resolved package version 只能进入 `version`。
-  - [ ] Public npm registry source 使用 npm 默认 registry 语义；private registry source 必须来自用户显式配置的 registry/channel 信息。不得把未配置 private registry 的情况降级为 public registry，也不得隐式猜测企业 registry host。
-  - [ ] Registry access 必须发生在 `SourceResolutionPlan` 已声明 external access intent 且用户确认之后；未确认时只展示 package/channel/registry label intent，不访问 registry、不下载 tarball、不获取 operation lock、不写入项目文件。
-  - [ ] Registry resolver 只解析 source metadata、resolved version 和 evidence；不得执行 package install、修改 `node_modules`、写 package-lock、运行 lifecycle scripts 或把 npm cache 当成 public artifact。
+- [x] Task 2: 接入 registry source resolution entrypoints（AC: 1-2, 6）
+  - [x] 在 `src/source/` 的既有 source resolver dispatch 中为 `npm` 与 `private-registry` 接入 registry-specific resolver；不要在 `src/commands/install.ts`、reporter、fixture helper 或 validation rule 中复制 registry resolution logic。
+  - [x] 复用 Story 5.1 的 source selection model：`sourceType` 只能是 `npm` 或 `private-registry`，用户输入的 range、dist-tag、tag 或 channel 进入 `requestedVersion` 或 `channel`，resolved package version 只能进入 `version`。
+  - [x] Public npm registry source 使用 npm 默认 registry 语义；private registry source 必须来自用户显式配置的 registry/channel 信息。不得把未配置 private registry 的情况降级为 public registry，也不得隐式猜测企业 registry host。
+  - [x] Registry access 必须发生在 `SourceResolutionPlan` 已声明 external access intent 且用户确认之后；未确认时只展示 package/channel/registry label intent，不访问 registry、不下载 tarball、不获取 operation lock、不写入项目文件。
+  - [x] Registry resolver 只解析 source metadata、resolved version 和 evidence；不得执行 package install、修改 `node_modules`、写 package-lock、运行 lifecycle scripts 或把 npm cache 当成 public artifact。
 
-- [ ] Task 3: 生成 registry SourceDescriptor 与 integrity evidence（AC: 1, 3-5）
-  - [ ] `SourceDescriptor.sourceType` 使用 `npm` 或 `private-registry`；`version` 必须是 resolved installed source version；`requestedVersion`/`channel` 保留用户请求的 selector；不要让 requested selector 覆盖 resolved version。
-  - [ ] Registry source 成功解析后，`integrityEvidence` 至少包含一个 `registry-integrity` 或 `version-lock` entry。缺少任何可复现 evidence 时，source 必须变成 `blocked` 并产生 `source-integrity.missing-evidence`。
-  - [ ] `registry-integrity` evidence 必须包含 `packageName`、resolved `version`、SRI `integrity` 和 `verified`。当 registry metadata 缺失或 shape 不符合 executable schema/parser 时，不得猜测字段；输出稳定 `source-integrity` failure。
-  - [ ] `version-lock` evidence 必须只来自明确的 lock/expected source input，`lockPath` 使用 project-relative POSIX path，不得输出 absolute path、home directory、private registry URL 或 npm cache path。
-  - [ ] `trustStatus: "trusted"` 只能由 expected hash 或 lock match 成功产生；registry source 不能因为来自 npm public registry、企业 private registry、scope registry 或 auth registry 就自动 trusted。
-  - [ ] 可解析且有可复现 evidence、但没有 expected hash 或 lock match 的 registry source 使用 `trustStatus: "unverified"`，并且只能在用户显式选择并确认该 source 后进入 install planning。
-  - [ ] Hash mismatch、lock mismatch、evidence verification failure 或 source policy rejection 必须输出 `source-integrity.hash-mismatch`、`source-integrity.lock-mismatch`、`source-integrity.policy-rejected` 或 owning SPEC 中更具体的 issue，并阻止写入。
+- [x] Task 3: 生成 registry SourceDescriptor 与 integrity evidence（AC: 1, 3-5）
+  - [x] `SourceDescriptor.sourceType` 使用 `npm` 或 `private-registry`；`version` 必须是 resolved installed source version；`requestedVersion`/`channel` 保留用户请求的 selector；不要让 requested selector 覆盖 resolved version。
+  - [x] Registry source 成功解析后，`integrityEvidence` 至少包含一个 `registry-integrity` 或 `version-lock` entry。缺少任何可复现 evidence 时，source 必须变成 `blocked` 并产生 `source-integrity.missing-evidence`。
+  - [x] `registry-integrity` evidence 必须包含 `packageName`、resolved `version`、SRI `integrity` 和 `verified`。当 registry metadata 缺失或 shape 不符合 executable schema/parser 时，不得猜测字段；输出稳定 `source-integrity` failure。
+  - [x] `version-lock` evidence 必须只来自明确的 lock/expected source input，`lockPath` 使用 project-relative POSIX path，不得输出 absolute path、home directory、private registry URL 或 npm cache path。
+  - [x] `trustStatus: "trusted"` 只能由 expected hash 或 lock match 成功产生；registry source 不能因为来自 npm public registry、企业 private registry、scope registry 或 auth registry 就自动 trusted。
+  - [x] 可解析且有可复现 evidence、但没有 expected hash 或 lock match 的 registry source 使用 `trustStatus: "unverified"`，并且只能在用户显式选择并确认该 source 后进入 install planning。
+  - [x] Hash mismatch、lock mismatch、evidence verification failure 或 source policy rejection 必须输出 `source-integrity.hash-mismatch`、`source-integrity.lock-mismatch`、`source-integrity.policy-rejected` 或 owning SPEC 中更具体的 issue，并阻止写入。
 
-- [ ] Task 4: 维护 registry diagnostics、redaction 和 public output（AC: 2, 6）
-  - [ ] Registry unreachable、proxy/network failure 或 registry metadata 无法读取时使用 `source-integrity.registry-unreachable`；认证失败、缺少 token、权限不足或 auth challenge 使用 `source-integrity.authentication-required`。
-  - [ ] Package/version 不存在、unsupported selector 或 npm-compatible registry shape 不满足 MVP resolver 要求时，优先使用 taxonomy 中已有 reserved issue id；没有更具体 id 时使用 `source-integrity.unsupported-source`，不得发明 dynamic issue id。
-  - [ ] `ValidationIssue.details` 只保留 deterministic、redaction-safe、fixture-stable fields，例如 `sourceType`、display-safe `packageName`、`requestedVersion`、`channel`、`registryKind` 或 stable failure kind；不得包含 token、credential-bearing URL、private query string、proxy secret、stack trace、timestamp 或 raw exception。
-  - [ ] Human-readable output 与 `install --json` 使用同一 redaction policy。Private registry host、registry endpoint、proxy、auth header、token、query string 和 cache/temp path 不得进入 public JSON、manifest/index、fixture snapshot、impact 或 suggested next step。
-  - [ ] `impact` 和 `suggestedNextStep` 使用 stable short sentence templates，动态上下文放入 redacted-safe `details`、`component` 或 display-safe source label。
-  - [ ] Registry failure 在 operation lock 或 install write planning 前发生时，不得输出假装 planning 完成的 planned writes、changed paths、skipped paths 或 conflicts。
+- [x] Task 4: 维护 registry diagnostics、redaction 和 public output（AC: 2, 6）
+  - [x] Registry unreachable、proxy/network failure 或 registry metadata 无法读取时使用 `source-integrity.registry-unreachable`；认证失败、缺少 token、权限不足或 auth challenge 使用 `source-integrity.authentication-required`。
+  - [x] Package/version 不存在、unsupported selector 或 npm-compatible registry shape 不满足 MVP resolver 要求时，优先使用 taxonomy 中已有 reserved issue id；没有更具体 id 时使用 `source-integrity.unsupported-source`，不得发明 dynamic issue id。
+  - [x] `ValidationIssue.details` 只保留 deterministic、redaction-safe、fixture-stable fields，例如 `sourceType`、display-safe `packageName`、`requestedVersion`、`channel`、`registryKind` 或 stable failure kind；不得包含 token、credential-bearing URL、private query string、proxy secret、stack trace、timestamp 或 raw exception。
+  - [x] Human-readable output 与 `install --json` 使用同一 redaction policy。Private registry host、registry endpoint、proxy、auth header、token、query string 和 cache/temp path 不得进入 public JSON、manifest/index、fixture snapshot、impact 或 suggested next step。
+  - [x] `impact` 和 `suggestedNextStep` 使用 stable short sentence templates，动态上下文放入 redacted-safe `details`、`component` 或 display-safe source label。
+  - [x] Registry failure 在 operation lock 或 install write planning 前发生时，不得输出假装 planning 完成的 planned writes、changed paths、skipped paths 或 conflicts。
 
-- [ ] Task 5: 保持 install planning、manifest/index 和 validate 边界（AC: 3, 5, 7）
-  - [ ] 严格保持 `SourceResolutionPlan -> registry source resolution -> SourceDescriptor -> InstallPlan -> operation lock -> safe write -> CommandResult projection` 顺序。
-  - [ ] `--yes` 或 command-level write confirmation 不得自动接受缺少 evidence、mismatched evidence、unsupported selector、private registry auth failure 或 source policy rejection。
-  - [ ] Manifest/index 只投影 owning SPEC 允许的 source descriptor fields；不得新增 registry URL、auth status、token scope、raw metadata、npm cache path 或 package manager implementation fields。
-  - [ ] `speclite status` 只读取本地 manifest/source descriptor summary；不得执行 registry freshness check、latest version check、provenance revalidation 或 implicit update check。
-  - [ ] `speclite validate` 只检查本地 recorded source descriptor、integrity evidence shape、manifest/index、files index、IDE mirrors 和 local hash baseline；不得访问 npm public registry、private registry、proxy 或 remote provenance service。
-  - [ ] Registry source descriptor 若已写入 installed state，后续 validate 对 shape mismatch、missing evidence 或 blocked trust state 使用本地 `source-integrity` diagnostics，不通过网络重新判断可达性或最新版本。
+- [x] Task 5: 保持 install planning、manifest/index 和 validate 边界（AC: 3, 5, 7）
+  - [x] 严格保持 `SourceResolutionPlan -> registry source resolution -> SourceDescriptor -> InstallPlan -> operation lock -> safe write -> CommandResult projection` 顺序。
+  - [x] `--yes` 或 command-level write confirmation 不得自动接受缺少 evidence、mismatched evidence、unsupported selector、private registry auth failure 或 source policy rejection。
+  - [x] Manifest/index 只投影 owning SPEC 允许的 source descriptor fields；不得新增 registry URL、auth status、token scope、raw metadata、npm cache path 或 package manager implementation fields。
+  - [x] `speclite status` 只读取本地 manifest/source descriptor summary；不得执行 registry freshness check、latest version check、provenance revalidation 或 implicit update check。
+  - [x] `speclite validate` 只检查本地 recorded source descriptor、integrity evidence shape、manifest/index、files index、IDE mirrors 和 local hash baseline；不得访问 npm public registry、private registry、proxy 或 remote provenance service。
+  - [x] Registry source descriptor 若已写入 installed state，后续 validate 对 shape mismatch、missing evidence 或 blocked trust state 使用本地 `source-integrity` diagnostics，不通过网络重新判断可达性或最新版本。
 
-- [ ] Task 6: 编写 focused tests 与 registry fixture assertions（AC: 1-7）
-  - [ ] Unit tests 覆盖 public registry source：package name + requested version/range/dist-tag/channel 解析、resolved version 写入 `version`、selector 保留在 `requestedVersion`/`channel`、`registry-integrity` evidence 排序和 `trustStatus` 推导。
-  - [ ] Unit tests 覆盖 private registry source：显式 registry/channel 配置、auth scoped-to-registry input、display-safe registry label、credential-bearing URL/token/private query redaction。
-  - [ ] Unit tests 覆盖 trust matrix：expected hash/lock match -> `trusted`；可复现 evidence 无 trust anchor -> `unverified`；missing evidence、hash mismatch、lock mismatch、unsupported selector -> `blocked`。
-  - [ ] Diagnostics tests 覆盖 `source-integrity.registry-unreachable`、`source-integrity.authentication-required`、package/version not found fallback、redaction-safe `details`、stable `impact` 和 `suggestedNextStep`。
-  - [ ] JSON contract tests 覆盖 `install --json` 的 `CommandResult<InstallCommandData>`、`data.sourceDescriptor.integrityEvidence`、`issues` 排序、`nextActions` 排序、path policy 和 no private registry leakage。
-  - [ ] Validate/status tests 使用已安装 local descriptor fixture，断言不调用 registry client、不访问 network、不做 latest/freshness check。
-  - [ ] Fixture assertions 仅覆盖 Story 5.2 registry 范围：`source-integrity/registry-lock-trusted`、`source-integrity/registry-unverified` 以及 `source-integrity/source-unreadable-blocked` 中的 registry unreachable/auth required sub-cases；不要提前实现 Story 5.3 tarball/offline/local path、Story 5.4 Git pinning、Story 5.5 full trust reporting 或 Epic 6 full fixture matrix。
-  - [ ] 所有 tests 必须 deterministic、local-only。Registry responses 使用 mocks、local fixture metadata 或 injected client；不得访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
+- [x] Task 6: 编写 focused tests 与 registry fixture assertions（AC: 1-7）
+  - [x] Unit tests 覆盖 public registry source：package name + requested version/range/dist-tag/channel 解析、resolved version 写入 `version`、selector 保留在 `requestedVersion`/`channel`、`registry-integrity` evidence 排序和 `trustStatus` 推导。
+  - [x] Unit tests 覆盖 private registry source：显式 registry/channel 配置、auth scoped-to-registry input、display-safe registry label、credential-bearing URL/token/private query redaction。
+  - [x] Unit tests 覆盖 trust matrix：expected hash/lock match -> `trusted`；可复现 evidence 无 trust anchor -> `unverified`；missing evidence、hash mismatch、lock mismatch、unsupported selector -> `blocked`。
+  - [x] Diagnostics tests 覆盖 `source-integrity.registry-unreachable`、`source-integrity.authentication-required`、package/version not found fallback、redaction-safe `details`、stable `impact` 和 `suggestedNextStep`。
+  - [x] JSON contract tests 覆盖 `install --json` 的 `CommandResult<InstallCommandData>`、`data.sourceDescriptor.integrityEvidence`、`issues` 排序、`nextActions` 排序、path policy 和 no private registry leakage。
+  - [x] Validate/status tests 使用已安装 local descriptor fixture，断言不调用 registry client、不访问 network、不做 latest/freshness check。
+  - [x] Fixture assertions 仅覆盖 Story 5.2 registry 范围：`source-integrity/registry-lock-trusted`、`source-integrity/registry-unverified` 以及 `source-integrity/source-unreadable-blocked` 中的 registry unreachable/auth required sub-cases；不要提前实现 Story 5.3 tarball/offline/local path、Story 5.4 Git pinning、Story 5.5 full trust reporting 或 Epic 6 full fixture matrix。
+  - [x] 所有 tests 必须 deterministic、local-only。Registry responses 使用 mocks、local fixture metadata 或 injected client；不得访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
 
-- [ ] Task 7: 本地验证与范围控制（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 registry source resolver、source descriptor schema、install plan, diagnostics output, redaction, validate no-network 和 affected registry fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 registry/redaction/no-network tests、不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1、已有 Story 1-4 文件、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 5.3 tarball/offline/local path、Story 5.4 Git source pinning、Story 5.5 source descriptor full trust reporting、Epic 6 fixture matrix、Post-MVP `doctor` / `sync` / `uninstall` 或完整 source lockfile lifecycle。
+- [x] Task 7: 本地验证与范围控制（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 registry source resolver、source descriptor schema、install plan, diagnostics output, redaction, validate no-network 和 affected registry fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 registry/redaction/no-network tests、不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1、已有 Story 1-4 文件、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 5.3 tarball/offline/local path、Story 5.4 Git source pinning、Story 5.5 source descriptor full trust reporting、Epic 6 fixture matrix、Post-MVP `doctor` / `sync` / `uninstall` 或完整 source lockfile lifecycle。
 
 ## Dev Notes（开发备注）
 
@@ -270,17 +270,57 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- 2026-06-01 15:29 CST：`python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow` 失败，原因是裸 `python3` 缺 `tomllib`；随后使用 `python3.12` 成功解析 workflow。
+- 2026-06-01 15:35 CST：`npm test -- test/registry-source-resolution.test.ts` RED，缺少 `src/source/registry-source-resolver.ts`。
+- 2026-06-01 15:39 CST：`npm test -- test/registry-source-resolution.test.ts` GREEN，registry focused tests 通过。
+- 2026-06-01 15:41 CST：`npm run build` 通过。
+- 2026-06-01 15:41 CST：`npm test -- test/source-selection.test.ts test/registry-source-resolution.test.ts test/contract-anchors.test.ts test/status-command.test.ts test/validate-command.test.ts` 通过，5 files / 50 tests。
+- 2026-06-01 15:41 CST：`git diff --check` 通过。
+- 2026-06-01 15:41 CST：`npm test` 通过，31 files / 216 tests。
+- 2026-06-01 15:43 CST：`npm test -- test/registry-source-resolution.test.ts` 通过，fixture assertions 补充后 8 tests。
+- 2026-06-01 15:47 CST：`npm run build`、`npm test`、`git diff --check` 复跑通过，其中全量测试为 31 files / 217 tests。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context created by bmad-create-story sub-agent for Story 5.2 only.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已实现 `npm` / `private-registry` registry metadata resolver abstraction，支持 exact version、dist-tag/channel、简单 caret range 到 resolved `version`，并生成 `registry-integrity` / `version-lock` evidence。
+- 已保持 Story 5.1 no access/no write before confirmation：未确认 registry source 时不调用 registry client、不获取 operation lock、不写入项目文件；`--yes` 不自动确认 source access。
+- 已实现 registry trust 推导：expected lock / expected integrity match 才能产生 `trusted`；只有 registry SRI 且无 trust anchor 时保持 `unverified`；missing evidence、hash mismatch、lock mismatch、auth/unreachable/unsupported selector 均阻断。
+- 已实现 registry diagnostics 与 redaction-safe `ValidationIssue.details`，并复用 public JSON / human output 的 display-safe source labels；token、query、fragment、credential-bearing URL 和 private host 不进入 public projection。
+- 已新增 validate 本地 `source-integrity` 规则，只读取 installed manifest/source descriptor shape，不调用 registry client、不做 latest/freshness check。
+- 已补 Story 5.2 focused fixtures：`registry-lock-trusted`、`registry-unverified`、`source-unreadable-blocked/registry-auth-required`。
+- 范围审计未发现 Story 5.3 tarball/offline/local path、Story 5.4 Git pinning、Story 5.5 full trust reporting、Epic 6 fixture matrix 或 Post-MVP commands 的提前实现。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `_bmad-output/implementation-artifacts/code-reviews/5-2-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-2-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-2-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/5-2-registry-source-resolution-and-diagnostics.md`
+- `src/bin/speclite.ts`
+- `src/commands/install.ts`
+- `src/source/registry-source-resolver.ts`
+- `src/source/source-integrity.ts`
+- `src/source/source-selection.ts`
+- `src/validation/rules/source-integrity.ts`
+- `src/validation/validate-project.ts`
+- `test/fixtures/source-integrity/fixture-case.json`
+- `test/fixtures/source-integrity/registry-lock-trusted/expected/source-descriptor.json`
+- `test/fixtures/source-integrity/registry-lock-trusted/fixture-case.json`
+- `test/fixtures/source-integrity/registry-unverified/expected/source-descriptor.json`
+- `test/fixtures/source-integrity/registry-unverified/fixture-case.json`
+- `test/fixtures/source-integrity/source-unreadable-blocked/registry-auth-required/expected/issue.json`
+- `test/fixtures/source-integrity/source-unreadable-blocked/registry-auth-required/fixture-case.json`
+- `test/fixtures/source-integrity/unsupported-private-registry/expected/command-json.json`
+- `test/registry-source-resolution.test.ts`
+- `test/source-selection.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-06-01：实现 Story 5.2 registry source resolution、registry evidence/trust derivation、diagnostics/redaction、validate local-only rule 和 focused registry fixtures；Story 状态切换为 `review`。

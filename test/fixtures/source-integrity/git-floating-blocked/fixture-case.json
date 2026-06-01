@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "speclite.fixture-case.v1",
+  "story": "5.4",
+  "name": "git-floating-blocked",
+  "description": "Confirmed Git source without a requested ref is blocked before install planning and never calls the Git client.",
+  "expectedOutputClass": "source-integrity",
+  "releaseGate": "focused"
+}

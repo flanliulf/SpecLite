@@ -20,10 +20,10 @@
           "packageName": "speclite",
           "version": "0.0.0",
           "lockPath": "package-lock.json",
-          "verified": false
+          "verified": true
         }
       ],
-      "trustStatus": "unverified"
+      "trustStatus": "trusted"
     },
     "manifestVersion": "speclite.manifest.v1",
     "installedModules": [

@@ -2,6 +2,7 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import type { SourceDescriptor, SourceIntegrityEvidence } from "./source-descriptor-schema.js";
+import { deriveSourceTrustStatus } from "./source-trust.js";
 
 export const BUNDLED_SOURCE_DISPLAY_ROOT = "assets/source/speclite" as const;
 
@@ -14,7 +15,11 @@ export async function discoverBundledSourceDescriptor(input: {
     sourceType: "bundled",
     resolvedRoot: BUNDLED_SOURCE_DISPLAY_ROOT,
     integrityEvidence: evidence === undefined ? [] : [evidence],
-    trustStatus: evidence === undefined ? "blocked" : evidence.verified ? "trusted" : "unverified",
+    trustStatus: deriveSourceTrustStatus({
+      integrityEvidence: evidence === undefined ? [] : [evidence],
+      explicitlyConfirmed: true,
+      hasBlockingIssue: evidence === undefined,
+    }),
   };
 }
 
@@ -56,7 +61,7 @@ async function readPackageLockEvidence(
     packageName,
     version,
     lockPath: "package-lock.json",
-    verified: false,
+    verified: true,
   };
 }
 

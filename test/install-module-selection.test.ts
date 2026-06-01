@@ -62,7 +62,7 @@ describe("install official module selection orchestration", () => {
       expect(outcome.result.data.sourceDescriptor).toMatchObject({
         sourceType: "bundled",
         resolvedRoot: "assets/source/speclite",
-        trustStatus: "unverified",
+        trustStatus: "trusted",
       });
       expect(outcome.result.data.installedModules).toEqual(["core", "sdlc"]);
       expect(outcome.result.data.completedSteps).toEqual([
@@ -159,7 +159,7 @@ describe("install official module selection orchestration", () => {
         confirmPrewriteInstallScope: async (input) => {
           finalPrewritePrompt = input.prompt;
           expect(input.prompt).toContain("Final pre-write install scope summary.");
-          expect(input.prompt).toContain("Source descriptor: bundled assets/source/speclite; trust=unverified.");
+          expect(input.prompt).toContain("Source descriptor: bundled assets/source/speclite; trust=trusted.");
           expect(input.prompt).toContain("Config mode: detailed.");
           expect(input.prompt).toContain("Selected modules: core (SpecLite Core Module 0.0.0).");
           expect(input.prompt).not.toContain("Selected modules: core (SpecLite Core Module 0.0.0), sdlc");

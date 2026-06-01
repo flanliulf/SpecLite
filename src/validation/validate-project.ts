@@ -23,6 +23,7 @@ import { validateMenuTargets } from "./rules/menu-target.js";
 import { validateLegacyNamespace } from "./rules/legacy-namespace.js";
 import { validateArtifactPathContract } from "./rules/artifact-path.js";
 import { validateOperationLock } from "./rules/operation-lock.js";
+import { validateSourceIntegrity } from "./rules/source-integrity.js";
 
 export type ValidateProjectResult = {
   issues: ValidationIssue[];
@@ -35,9 +36,11 @@ export async function validateProject(input: { projectRoot: string }): Promise<V
   const checkedCategories = new Set<IssueCategory>(["manifest-schema"]);
   const checkedTargets = new Set<IdeTargetId>(manifestSchemaResult.checkedTargets);
   const validatedPaths = new Set(manifestSchemaResult.validatedPaths);
+  const manifest = manifestSchemaResult.manifest;
 
   if (
     manifestSchemaResult.issues.length === 0 &&
+    manifest !== undefined &&
     manifestSchemaResult.skillIndex !== undefined &&
     manifestSchemaResult.helpIndex !== undefined &&
     manifestSchemaResult.filesIndex !== undefined &&
@@ -54,7 +57,7 @@ export async function validateProject(input: { projectRoot: string }): Promise<V
 
     const runtimePathResult = await validateRuntimePaths({
       projectRoot: input.projectRoot,
-      manifest: manifestSchemaResult.manifest,
+      manifest,
       filesIndex: manifestSchemaResult.filesIndex,
     });
     issues.push(...runtimePathResult.issues);
@@ -83,7 +86,7 @@ export async function validateProject(input: { projectRoot: string }): Promise<V
 
     const artifactPathResult = await validateArtifactPaths({
       projectRoot: input.projectRoot,
-      configuredRoot: manifestSchemaResult.manifest.paths.artifactRoot,
+      configuredRoot: manifest.paths.artifactRoot,
       defaultOutputPaths: manifestSchemaResult.phaseCoverage.rows
         .map((row) => row.artifactContract)
         .filter((contract): contract is NonNullable<typeof contract> => contract !== undefined),
@@ -95,11 +98,20 @@ export async function validateProject(input: { projectRoot: string }): Promise<V
     const fileIntegrityResult = await validateFileIntegrity({
       projectRoot: input.projectRoot,
       filesIndex: manifestSchemaResult.filesIndex,
-      artifactRoot: manifestSchemaResult.manifest.paths.artifactRoot,
+      artifactRoot: manifest.paths.artifactRoot,
     });
     issues.push(...fileIntegrityResult.issues);
     checkedCategories.add("file-integrity");
     for (const validatedPath of fileIntegrityResult.validatedPaths) validatedPaths.add(validatedPath);
+
+    const sourceIntegrityResult = validateSourceIntegrity({
+      manifest,
+    });
+    if (sourceIntegrityResult.issues.length > 0 || sourceIntegrityResult.validatedPaths.length > 0) {
+      issues.push(...sourceIntegrityResult.issues);
+      checkedCategories.add("source-integrity");
+      for (const validatedPath of sourceIntegrityResult.validatedPaths) validatedPaths.add(validatedPath);
+    }
   }
 
   const operationLockResult = await validateOperationLock({ projectRoot: input.projectRoot });

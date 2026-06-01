@@ -1,0 +1,15 @@
+{
+  "issueId": "source-integrity.floating-git-source",
+  "category": "source-integrity",
+  "severity": "error",
+  "component": "git-source-resolution",
+  "details": {
+    "reason": "floating-git-source",
+    "sourceType": "git",
+    "requestedRefKind": "missing",
+    "remoteKind": "redacted-git-remote",
+    "hasResolvedCommit": false
+  },
+  "impact": "Git source resolution did not produce a concrete commit SHA before install planning.",
+  "suggestedNextStep": "Provide a Git ref that resolves to a concrete commit SHA before authorizing install writes."
+}

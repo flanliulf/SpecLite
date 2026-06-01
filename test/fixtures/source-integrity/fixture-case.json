@@ -1,0 +1,5 @@
+{
+  "caseId": "source-integrity",
+  "releaseGate": true,
+  "purpose": "Focused source-integrity fixture group for Story 5.1 source selection and Story 5.2 registry resolution, evidence, diagnostics and redaction assertions."
+}

@@ -49,7 +49,16 @@ export const InstallPlanSchema = z
     requiresConfirmation: z.boolean(),
     writeAuthorized: z.boolean(),
   })
-  .strict();
+  .strict()
+  .superRefine((plan, context) => {
+    if (plan.writeAuthorized && plan.sourceDescriptor.trustStatus === "blocked") {
+      context.addIssue({
+        code: "custom",
+        message: "Blocked source descriptors cannot authorize install writes.",
+        path: ["sourceDescriptor", "trustStatus"],
+      });
+    }
+  });
 
 export type ExternalAccess = z.infer<typeof ExternalAccessSchema>;
 export type PlannedWrite = z.infer<typeof PlannedWriteSchema>;

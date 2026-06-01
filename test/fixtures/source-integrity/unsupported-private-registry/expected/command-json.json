@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "install",
+  "targetProject": "source-integrity",
+  "summary": "SpecLite install recorded source selection and external access intent, then stopped before registry source access. No project files were changed.",
+  "issues": [
+    {
+      "issueId": "source-integrity.unsupported-source",
+      "category": "source-integrity",
+      "severity": "error",
+      "component": "source-resolution",
+      "details": {
+        "reason": "source-access-not-confirmed",
+        "requestedSourceType": "private-registry"
+      },
+      "impact": "SpecLite recorded the external access intent, but source access was not explicitly confirmed.",
+      "suggestedNextStep": "Confirm the selected source before registry resolution, operation lock acquisition or project writes."
+    }
+  ],
+  "nextActions": [
+    "Confirm external access intent before enabling private-registry source resolution.",
+    "No registry metadata, operation lock or project write was started."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "private-registry",
+      "channel": "beta",
+      "requestedVersion": "latest",
+      "resolvedRoot": "redacted-private-registry",
+      "integrityEvidence": [],
+      "trustStatus": "blocked"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": ".",
+      "specliteRoot": "_speclite",
+      "artifactRoot": "_speclite-output",
+      "manifestPath": "_speclite/_config/manifest.yaml"
+    },
+    "completedSteps": [
+      "source-discovery"
+    ],
+    "pendingSteps": [
+      "module-selection",
+      "config-initialization",
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary"
+    ]
+  }
+}

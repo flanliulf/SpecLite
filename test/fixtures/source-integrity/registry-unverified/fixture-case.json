@@ -1,0 +1,5 @@
+{
+  "caseId": "source-integrity/registry-unverified",
+  "releaseGate": true,
+  "purpose": "Confirmed registry source with reproducible registry-integrity evidence but no trust anchor stays unverified."
+}

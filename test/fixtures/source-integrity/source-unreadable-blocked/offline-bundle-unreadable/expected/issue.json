@@ -1,0 +1,12 @@
+{
+  "issueId": "source-integrity.offline-bundle-unreadable",
+  "category": "source-integrity",
+  "severity": "error",
+  "component": "local-source-resolution",
+  "details": {
+    "reason": "offline-bundle-unreadable",
+    "sourceType": "offline-bundle"
+  },
+  "impact": "Offline bundle source resolution could not read the selected bundle artifact.",
+  "suggestedNextStep": "Check the offline bundle artifact outside public output and rerun source resolution."
+}

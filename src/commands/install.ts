@@ -44,6 +44,27 @@ import {
   discoverBundledSourceDescriptor,
 } from "../source/source-discovery.js";
 import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
+import {
+  createBlockedSourceDescriptor,
+  createSourceResolutionPlan,
+  createUnconfirmedSourceAccessIssue,
+  createUnsupportedSourceResolutionIssue,
+  normalizeSourceSelection,
+  type SourceSelectionInput,
+} from "../source/source-selection.js";
+import {
+  createDefaultRegistryMetadataClient,
+  resolveRegistrySource,
+  type RegistryMetadataClient,
+  type RegistryRuntimeConfig,
+} from "../source/registry-source-resolver.js";
+import {
+  createDefaultGitClient,
+  resolveGitSource,
+  type GitClient,
+} from "../source/git-source-resolver.js";
+import { resolveLocalSource } from "../source/local-source-resolver.js";
+import { createLocalSourceIntegrityIssue } from "../source/source-integrity.js";
 
 export type { ConfigInitializationPromptInput, ConfigInitializationSelection };
 
@@ -53,6 +74,10 @@ const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 export type InstallCommandOptions = {
   json?: boolean;
   yes?: boolean;
+  sourceType?: string;
+  sourceValue?: string;
+  requestedVersion?: string;
+  channel?: string;
 };
 
 export type InstallCommandRuntime = Partial<RuntimeFacts> & {
@@ -76,6 +101,10 @@ export type PrewriteInstallScopeConfirmationInput = {
   prompt: string;
 };
 
+export type SourceAccessConfirmationInput = {
+  prompt: string;
+};
+
 export function getCurrentRuntimeFacts(runtime: InstallCommandRuntime = {}): RuntimeFacts {
   return {
     nodeVersion: runtime.nodeVersion ?? process.version,
@@ -92,9 +121,13 @@ export async function runInstallCommand(input: {
   configureProject?: (
     input: ConfigInitializationPromptInput,
   ) => Promise<ConfigInitializationSelection>;
+  confirmSourceAccess?: (input: SourceAccessConfirmationInput) => Promise<void>;
   confirmPrewriteInstallScope?: (
     input: PrewriteInstallScopeConfirmationInput,
   ) => Promise<void>;
+  registryClient?: RegistryMetadataClient;
+  gitClient?: GitClient;
+  privateRegistryRuntimeConfig?: RegistryRuntimeConfig;
   targetDirectory?: string;
 } = {}): Promise<InstallCommandOutcome> {
   const projectRoot = input.projectRoot ?? PACKAGE_ROOT;
@@ -168,6 +201,294 @@ export async function runInstallCommand(input: {
     return { result, exitCode: 0 };
   }
 
+  const sourceSelection = normalizeSourceSelection(createSourceSelectionInput(input.options));
+  if (!sourceSelection.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [sourceSelection.issue],
+      completedSteps,
+      pendingSteps: [...INSTALL_LIFECYCLE_STEP_IDS],
+      nextActions: [
+        "Choose one of the supported source types before continuing install.",
+        "No source resolver, operation lock or project write was started.",
+      ],
+      summary:
+        "SpecLite install stopped during source selection because the requested source input is invalid. No project files were changed.",
+      data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  let sourceResolutionPlan = createSourceResolutionPlan({
+    selection: sourceSelection.selection,
+    confirmed: sourceSelection.selection.sourceType === "bundled",
+  });
+  if (sourceSelection.selection.sourceType !== "bundled") {
+    if (input.confirmSourceAccess !== undefined) {
+      await input.confirmSourceAccess({
+        prompt: createSourceAccessConfirmationPrompt(sourceResolutionPlan),
+      });
+      sourceResolutionPlan = createSourceResolutionPlan({
+        selection: sourceSelection.selection,
+        confirmed: true,
+      });
+    }
+  }
+
+  if (sourceSelection.selection.sourceType !== "bundled" && !sourceResolutionPlan.confirmed) {
+    const sourceDescriptor = createBlockedSourceDescriptor(sourceSelection.selection);
+    const unconfirmedAccessKind = isRegistrySource(sourceSelection.selection.sourceType)
+      ? "registry"
+      : "source";
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createUnconfirmedSourceAccessIssue(sourceSelection.selection)],
+      completedSteps: ["source-discovery"],
+      pendingSteps: [
+        "module-selection",
+        "config-initialization",
+        "runtime-structure",
+        "ide-mirror-creation",
+        "manifest-generation",
+        "ready-check",
+        "ready-summary",
+      ],
+      nextActions: [
+        `Confirm external access intent before enabling ${sourceSelection.selection.sourceType} source resolution.`,
+        unconfirmedAccessKind === "registry"
+          ? "No registry metadata, operation lock or project write was started."
+          : "No source artifact, operation lock or project write was started.",
+      ],
+      summary:
+        unconfirmedAccessKind === "registry"
+          ? "SpecLite install recorded source selection and external access intent, then stopped before registry source access. No project files were changed."
+          : "SpecLite install recorded source selection and external access intent, then stopped before source access. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  if (isRegistrySource(sourceSelection.selection.sourceType)) {
+    const registryResolution = await resolveRegistrySource({
+      selection: sourceSelection.selection,
+      registryClient: input.registryClient ?? createDefaultRegistryMetadataClient(),
+      ...(sourceSelection.selection.sourceType === "private-registry" &&
+      input.privateRegistryRuntimeConfig !== undefined
+        ? { runtimeConfig: input.privateRegistryRuntimeConfig }
+        : {}),
+    });
+    if (!registryResolution.ok) {
+      const result = createInstallFailureResult({
+        targetProject: context.targetProject,
+        issues: registryResolution.issues,
+        completedSteps: ["source-discovery"],
+        pendingSteps: [
+          "module-selection",
+          "config-initialization",
+          "runtime-structure",
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ],
+        nextActions: [
+          "Resolve the source-integrity issue before enabling install planning.",
+          "No operation lock or project write was started.",
+        ],
+        summary:
+          "SpecLite install stopped during registry source resolution. No project files were changed.",
+        data: {
+          ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+          sourceDescriptor: registryResolution.descriptor,
+        },
+      });
+
+      return { result, exitCode: 1 };
+    }
+
+    const registryInstallOutcome = await continueInstallWithSourceDescriptor({
+      input,
+      projectRoot,
+      targetDirectoryState,
+      normalizedTarget,
+      context,
+      completedSteps,
+      sourceResolutionPlan,
+      sourceDescriptor: registryResolution.descriptor,
+    });
+    return registryInstallOutcome;
+  }
+
+  if (isLocalArtifactOrPathSource(sourceSelection.selection.sourceType)) {
+    const localResolution = await resolveLocalSource({
+      selection: sourceSelection.selection,
+      sourceValue: input.options?.sourceValue ?? "",
+      targetProjectRoot: normalizedTarget.targetRoot,
+      sourceBaseRoot: cwd,
+    });
+    if (!localResolution.ok) {
+      const result = createInstallFailureResult({
+        targetProject: context.targetProject,
+        issues: localResolution.issues,
+        completedSteps: ["source-discovery"],
+        pendingSteps: [
+          "module-selection",
+          "config-initialization",
+          "runtime-structure",
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ],
+        nextActions: [
+          "Resolve the source-integrity issue before enabling install planning.",
+          "No operation lock or project write was started.",
+        ],
+        summary:
+          "SpecLite install stopped during local source resolution. No project files were changed.",
+        data: {
+          ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+          sourceDescriptor: localResolution.descriptor,
+        },
+      });
+
+      return { result, exitCode: 1 };
+    }
+
+    if (localResolution.installSourceRoot === undefined) {
+      const result = createInstallFailureResult({
+        targetProject: context.targetProject,
+        issues: [
+          createLocalSourceIntegrityIssue({
+            issueId: "source-integrity.unsupported-source",
+            reason: "local-artifact-install-source-unavailable",
+            sourceType: sourceSelection.selection.sourceType,
+          }),
+        ],
+        completedSteps: ["source-discovery"],
+        pendingSteps: [
+          "module-selection",
+          "config-initialization",
+          "runtime-structure",
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ],
+        nextActions: [
+          "Use a local canonical source tree or add extractor staging before enabling install planning.",
+          "No operation lock or project write was started.",
+        ],
+        summary:
+          "SpecLite install stopped after local source resolution because this local artifact does not provide a canonical source tree for install planning. No project files were changed.",
+        data: {
+          ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+          sourceDescriptor: localResolution.descriptor,
+        },
+      });
+
+      return { result, exitCode: 1 };
+    }
+
+    const localInstallOutcome = await continueInstallWithSourceDescriptor({
+      input,
+      projectRoot,
+      targetDirectoryState,
+      normalizedTarget,
+      context,
+      completedSteps,
+      sourceResolutionPlan,
+      sourceDescriptor: localResolution.descriptor,
+      installSourceRoot: localResolution.installSourceRoot,
+      ...(localResolution.descriptor.resolvedRoot === undefined
+        ? {}
+        : { installSourceRefRoot: localResolution.descriptor.resolvedRoot }),
+    });
+    return localInstallOutcome;
+  }
+
+  if (sourceSelection.selection.sourceType === "git") {
+    const gitResolution = await resolveGitSource({
+      selection: sourceSelection.selection,
+      gitClient: input.gitClient ?? createDefaultGitClient(),
+    });
+    if (!gitResolution.ok) {
+      const result = createInstallFailureResult({
+        targetProject: context.targetProject,
+        issues: gitResolution.issues,
+        completedSteps: ["source-discovery"],
+        pendingSteps: [
+          "module-selection",
+          "config-initialization",
+          "runtime-structure",
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ],
+        nextActions: [
+          "Resolve the source-integrity issue before enabling install planning.",
+          "No operation lock or project write was started.",
+        ],
+        summary:
+          "SpecLite install stopped during Git source resolution. No project files were changed.",
+        data: {
+          ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+          sourceDescriptor: gitResolution.descriptor,
+        },
+      });
+
+      return { result, exitCode: 1 };
+    }
+
+    const gitInstallOutcome = await continueInstallWithSourceDescriptor({
+      input,
+      projectRoot,
+      targetDirectoryState,
+      normalizedTarget,
+      context,
+      completedSteps,
+      sourceResolutionPlan,
+      sourceDescriptor: gitResolution.descriptor,
+    });
+    return gitInstallOutcome;
+  }
+
+  if (sourceSelection.selection.sourceType !== "bundled") {
+    const sourceDescriptor = createBlockedSourceDescriptor(sourceSelection.selection);
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createUnsupportedSourceResolutionIssue(sourceSelection.selection)],
+      completedSteps: ["source-discovery"],
+      pendingSteps: [
+        "module-selection",
+        "config-initialization",
+        "runtime-structure",
+        "ide-mirror-creation",
+        "manifest-generation",
+        "ready-check",
+        "ready-summary",
+      ],
+      nextActions: [
+        `Review external access intent before enabling ${sourceSelection.selection.sourceType} source resolution.`,
+        "Use bundled source or a supported Story 5.3 local source type.",
+      ],
+      summary:
+        "SpecLite install recorded source selection and external access intent, then stopped before source-specific resolution. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
   const sourceDescriptor = await discoverBundledSourceDescriptor({ projectRoot });
   if (sourceDescriptor.trustStatus === "blocked") {
     const result = createInstallFailureResult({
@@ -190,7 +511,7 @@ export async function runInstallCommand(input: {
     return { result, exitCode: 1 };
   }
 
-  const modulesResult = await discoverModulesForInstall(projectRoot);
+  const modulesResult = await discoverModulesForInstall({ projectRoot });
   if (!modulesResult.ok) {
     const result = createInstallFailureResult({
       targetProject: context.targetProject,
@@ -352,7 +673,7 @@ export async function runInstallCommand(input: {
     sourceDescriptor,
     selectedModules: finalSelectedModuleIds,
     targetAdapters: finalTargetAdapters,
-    externalAccesses: [],
+    externalAccesses: sourceResolutionPlan.externalAccesses,
     plannedWrites: configPlan.plannedWrites,
     requiresConfirmation: context.requiresConfirmation,
     writeAuthorized: context.writeAuthorized,
@@ -375,6 +696,9 @@ export async function runInstallCommand(input: {
       pendingSteps: applyResult.pendingSteps,
       nextActions: [
         "Resolve the reported write-phase blocker and rerun speclite install --yes.",
+        ...(applyResult.changedPaths.length === 0
+          ? []
+          : [`Review completed changed paths before rerun: ${applyResult.changedPaths.join(", ")}`]),
         "Do not treat the install as ready until Story 1.6 ReadyCheck runs successfully.",
       ],
       summary:
@@ -459,6 +783,359 @@ export async function runInstallCommand(input: {
   });
 
   return { result, exitCode: 0, installPlan };
+}
+
+async function continueInstallWithSourceDescriptor(input: {
+  input: {
+    options?: InstallCommandOptions;
+    selectModuleIds?: (input: ModuleSelectionPromptInput) => Promise<string[]>;
+    configureProject?: (
+      input: ConfigInitializationPromptInput,
+    ) => Promise<ConfigInitializationSelection>;
+    confirmPrewriteInstallScope?: (
+      input: PrewriteInstallScopeConfirmationInput,
+    ) => Promise<void>;
+  };
+  projectRoot: string;
+  targetDirectoryState: TargetDirectoryState;
+  normalizedTarget: ReturnType<typeof normalizeTargetDirectory>;
+  context: ReturnType<typeof createInstallCommandContext>;
+  completedSteps: string[];
+  sourceResolutionPlan: ReturnType<typeof createSourceResolutionPlan>;
+  sourceDescriptor: SourceDescriptor;
+  installSourceRoot?: string;
+  installSourceRefRoot?: string;
+}): Promise<InstallCommandOutcome> {
+  const {
+    input: commandInput,
+    projectRoot,
+    targetDirectoryState,
+    normalizedTarget,
+    context,
+    completedSteps,
+    sourceResolutionPlan,
+    sourceDescriptor,
+    installSourceRoot,
+    installSourceRefRoot,
+  } = input;
+
+  const modulesResult = await discoverModulesForInstall({
+    projectRoot,
+    ...(installSourceRoot === undefined ? {} : { sourceRoot: installSourceRoot }),
+  });
+  if (!modulesResult.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [modulesResult.issue],
+      completedSteps,
+      pendingSteps: [...INSTALL_LIFECYCLE_STEP_IDS],
+      nextActions: ["Fix bundled official module metadata before continuing install."],
+      summary:
+        "SpecLite install stopped before module selection because official modules could not be discovered. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const defaultModuleSelection = createModuleSelection({ modules: modulesResult.modules });
+  const userSelectedModuleIds =
+    commandInput.options?.json === true || commandInput.selectModuleIds === undefined
+      ? undefined
+      : await commandInput.selectModuleIds({
+          modules: modulesResult.modules,
+          defaultSelectedModuleIds: defaultModuleSelection.defaultSelectedModuleIds,
+          requiredModuleIds: defaultModuleSelection.requiredModuleIds,
+        });
+  const moduleSelection = createModuleSelection({
+    modules: modulesResult.modules,
+    ...(userSelectedModuleIds === undefined ? {} : { userSelectedModuleIds }),
+  });
+  const moduleSelectionCompletedSteps = ["source-discovery", "module-selection"];
+  const moduleSelectionPendingSteps = [
+    "config-initialization",
+    "runtime-structure",
+    "ide-mirror-creation",
+    "manifest-generation",
+    "ready-check",
+    "ready-summary",
+  ];
+  const selectedModules = modulesResult.modules.filter((module) =>
+    moduleSelection.selectedModuleIds.includes(module.code),
+  );
+  const defaultTargetAdapters = createDefaultTargetAdapters();
+
+  if (moduleSelection.invalidModuleIds.length > 0) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createInvalidModuleSelectionIssue(moduleSelection.invalidModuleIds)],
+      completedSteps: moduleSelectionCompletedSteps,
+      pendingSteps: moduleSelectionPendingSteps,
+      nextActions: [
+        "Choose one or more module ids from the displayed official module list.",
+        "Rerun speclite install after correcting the module selection.",
+      ],
+      summary:
+        "SpecLite install stopped before write planning because the module selection contains unknown module ids. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const configPromptInput = createConfigInitializationPromptInput({
+    selectedModules,
+    targetAdapters: defaultTargetAdapters,
+  });
+  const configSelection =
+    commandInput.options?.json === true || commandInput.configureProject === undefined
+      ? undefined
+      : await commandInput.configureProject({
+          ...configPromptInput,
+          prompt: createPrewriteModuleSummary({
+            selectedModules,
+            sourceDescriptor,
+            targetSummary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+            configPrompt: configPromptInput.prompt,
+          }),
+        });
+  const unsupportedTargetIds = findUnsupportedTargetIds(
+    configSelection?.ideTargetIds,
+    defaultTargetAdapters,
+  );
+  if (unsupportedTargetIds.length > 0) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [createUnsupportedTargetSelectionIssue(unsupportedTargetIds, defaultTargetAdapters)],
+      completedSteps: moduleSelectionCompletedSteps,
+      pendingSteps: moduleSelectionPendingSteps,
+      nextActions: [
+        "Select IDE targets from the supported adapter registry: claude or agents.",
+        "Dedicated Copilot, Cursor or other branded IDE targets are outside the MVP adapter registry.",
+      ],
+      summary:
+        "SpecLite install stopped before write planning because the selected IDE target is unsupported. No project files were changed.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+  const finalSelectedModuleIds = selectKnownIds({
+    requestedIds: configSelection?.selectedModuleIds,
+    defaultIds: moduleSelection.selectedModuleIds,
+    allowedIds: moduleSelection.selectedModuleIds,
+  });
+  const finalSelectedModules = modulesResult.modules.filter((module) =>
+    finalSelectedModuleIds.includes(module.code),
+  );
+  const finalTargetAdapters = selectTargetAdapters(
+    defaultTargetAdapters,
+    configSelection?.ideTargetIds,
+  );
+  const configPlan = await createConfigInitializationPlan({
+    targetRoot: normalizedTarget.targetRoot,
+    targetProject: context.targetProject,
+    selectedModules: finalSelectedModules,
+    mode: configSelection?.mode ?? "quick",
+    ...(configSelection?.values === undefined ? {} : { values: configSelection.values }),
+    selectedModuleIds: finalSelectedModuleIds,
+    ideTargetIds: finalTargetAdapters.map((adapter) => adapter.targetId),
+    targetAdapters: finalTargetAdapters,
+  });
+
+  if (!configPlan.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: configPlan.issues,
+      completedSteps: moduleSelectionCompletedSteps,
+      pendingSteps: moduleSelectionPendingSteps,
+      nextActions: configPlan.nextActions,
+      summary: configPlan.summary,
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1 };
+  }
+
+  const configInitializationCompletedSteps = [...moduleSelectionCompletedSteps, "config-initialization"];
+  const finalPrewriteSummary = createFinalPrewriteInstallScopeSummary({
+    selectedModules: finalSelectedModules,
+    sourceDescriptor,
+    targetSummary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+    configPlan,
+    targetAdapters: finalTargetAdapters,
+  });
+  if (commandInput.options?.json !== true && commandInput.confirmPrewriteInstallScope !== undefined) {
+    await commandInput.confirmPrewriteInstallScope({ prompt: finalPrewriteSummary });
+  }
+  const installPlan = InstallPlanSchema.parse({
+    sourceDescriptor,
+    selectedModules: finalSelectedModuleIds,
+    targetAdapters: finalTargetAdapters,
+    externalAccesses: sourceResolutionPlan.externalAccesses,
+    plannedWrites: configPlan.plannedWrites,
+    requiresConfirmation: context.requiresConfirmation,
+    writeAuthorized: context.writeAuthorized,
+  });
+
+  const applyResult = await applyInstallPlan({
+    targetRoot: normalizedTarget.targetRoot,
+    packageRoot: projectRoot,
+    ...(installSourceRoot === undefined ? {} : { sourceRoot: installSourceRoot }),
+    ...(installSourceRefRoot === undefined ? {} : { sourceRefRoot: installSourceRefRoot }),
+    sourceDescriptor,
+    installPlan,
+    selectedModules: finalSelectedModules,
+    configPlan,
+  });
+
+  if (!applyResult.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [applyResult.issue],
+      completedSteps: [...configInitializationCompletedSteps, ...applyResult.completedSteps],
+      pendingSteps: applyResult.pendingSteps,
+      nextActions: [
+        "Resolve the reported write-phase blocker and rerun speclite install --yes.",
+        ...(applyResult.changedPaths.length === 0
+          ? []
+          : [`Review completed changed paths before rerun: ${applyResult.changedPaths.join(", ")}`]),
+        "Do not treat the install as ready until Story 1.6 ReadyCheck runs successfully.",
+      ],
+      summary:
+        "SpecLite install stopped during runtime structure, artifact directory, IDE mirror or manifest/index creation. ReadyCheck and ready summary remain pending.",
+      data: {
+        ...createTargetStateData(targetDirectoryState, normalizedTarget.paths),
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1, installPlan };
+  }
+
+  const readyCheck = await runReadyCheck({
+    projectRoot: normalizedTarget.targetRoot,
+    sourceDescriptor,
+    installedModules: applyResult.installedModules,
+    selectedModules: finalSelectedModules,
+    ideTargets: applyResult.ideTargets,
+    paths: applyResult.paths,
+  });
+
+  if (!readyCheck.ok) {
+    const result = createInstallFailureResult({
+      targetProject: context.targetProject,
+      issues: [readyCheck.issue],
+      completedSteps: [
+        ...configInitializationCompletedSteps,
+        "runtime-structure",
+        "ide-mirror-creation",
+        "manifest-generation",
+      ],
+      pendingSteps: readyCheck.pendingSteps,
+      nextActions: [
+        "Resolve the reported local readiness blocker and rerun speclite install --yes.",
+        "Do not treat the install as ready until ReadyCheck runs successfully.",
+      ],
+      summary:
+        "SpecLite install completed write phases, but ReadyCheck failed. Ready summary remains pending.",
+      data: {
+        manifestVersion: DEFAULT_INSTALL_MANIFEST_VERSION,
+        installedModules: applyResult.installedModules,
+        ideTargets: applyResult.ideTargets,
+        paths: applyResult.paths,
+        sourceDescriptor,
+      },
+    });
+
+    return { result, exitCode: 1, installPlan };
+  }
+
+  const result = createInstallSuccessResult({
+    targetProject: context.targetProject,
+    completedSteps: [
+      ...configInitializationCompletedSteps,
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary",
+    ],
+    pendingSteps: [],
+    summary: createInstalledReadySummary({
+      selectedModules: finalSelectedModules,
+      sourceDescriptor,
+      paths: readyCheck.paths,
+      configPlan,
+      ideTargets: readyCheck.ideTargets,
+    }),
+    nextActions: [
+      "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
+      "Run speclite status to inspect the installed-state summary.",
+      "Run speclite validate for deeper local validation when needed.",
+    ],
+    data: {
+      manifestVersion: readyCheck.manifestVersion,
+      installedModules: readyCheck.installedModules,
+      ideTargets: readyCheck.ideTargets,
+      paths: readyCheck.paths,
+      sourceDescriptor,
+    },
+  });
+
+  return { result, exitCode: 0, installPlan };
+}
+
+function createSourceSelectionInput(
+  options: InstallCommandOptions | undefined,
+): SourceSelectionInput {
+  return {
+    ...(options?.sourceType === undefined ? {} : { sourceType: options.sourceType }),
+    ...(options?.sourceValue === undefined ? {} : { sourceValue: options.sourceValue }),
+    ...(options?.requestedVersion === undefined
+      ? {}
+      : { requestedVersion: options.requestedVersion }),
+    ...(options?.channel === undefined ? {} : { channel: options.channel }),
+  };
+}
+
+function isRegistrySource(sourceType: string): sourceType is "npm" | "private-registry" {
+  return sourceType === "npm" || sourceType === "private-registry";
+}
+
+function isLocalArtifactOrPathSource(
+  sourceType: string,
+): sourceType is "local-tarball" | "offline-bundle" | "local" {
+  return sourceType === "local-tarball" || sourceType === "offline-bundle" || sourceType === "local";
+}
+
+function createSourceAccessConfirmationPrompt(sourceResolutionPlan: ReturnType<typeof createSourceResolutionPlan>): string {
+  const externalAccessLines = sourceResolutionPlan.externalAccesses.map((access) =>
+    [
+      `sourceType=${access.sourceType}`,
+      `sourceValue=${access.sourceValue}`,
+      `reason=${access.reason}`,
+      `confirmationState=${access.confirmationState}`,
+    ].join("; "),
+  );
+
+  return [
+    "Confirm source access before SpecLite reads external metadata or local artifacts.",
+    ...externalAccessLines,
+    "No operation lock or project write has started.",
+  ].join("\n");
 }
 
 function createInstalledReadySummary(input: {
@@ -617,7 +1294,7 @@ function createTargetStateData(
   };
 }
 
-async function discoverModulesForInstall(projectRoot: string): Promise<
+async function discoverModulesForInstall(input: { projectRoot: string; sourceRoot?: string }): Promise<
   | {
       ok: true;
       modules: OfficialModule[];
@@ -628,7 +1305,7 @@ async function discoverModulesForInstall(projectRoot: string): Promise<
     }
 > {
   try {
-    const modules = await discoverOfficialModules({ projectRoot });
+    const modules = await discoverOfficialModules(input);
     if (modules.length === 0) {
       return {
         ok: false,

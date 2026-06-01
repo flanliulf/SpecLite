@@ -138,6 +138,9 @@ function hasHashValueShape(value: string): boolean {
 }
 
 function hasTemporaryOrCachePathShape(value: string): boolean {
+  if (["cache", "temporary", "dependency", "build-output"].includes(value)) {
+    return false;
+  }
   return /(^|[\\/])(?:tmp|temp|cache|\.cache|node_modules|\.npm)([\\/]|$)/i.test(value);
 }
 

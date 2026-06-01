@@ -13,6 +13,7 @@ export async function copyCanonicalPackage(input: {
   sourcePackageRoot: string;
   sourceRefRoot: string;
   targetEntryRoot: string;
+  onChangedPath?: (relativePath: string) => void;
 }): Promise<
   | {
       ok: true;
@@ -66,6 +67,7 @@ export async function copyCanonicalPackage(input: {
     });
 
     if (!write.ok) return write;
+    input.onChangedPath?.(write.path);
 
     copiedFiles.push({
       schemaVersion: "speclite.files-index.v1",

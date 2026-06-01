@@ -1,0 +1,5 @@
+{
+  "caseId": "source-integrity/source-unreadable-blocked/registry-auth-required",
+  "releaseGate": true,
+  "purpose": "Private registry authentication failure maps to a stable redaction-safe source-integrity issue."
+}

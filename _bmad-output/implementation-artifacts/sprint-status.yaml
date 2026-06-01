@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-06-01 14:20 CST
+# last_updated: 2026-06-01 23:25 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-06-01 14:20 CST
+last_updated: 2026-06-01 23:25 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -78,12 +78,12 @@ development_status:
   4-6-explicit-repair-for-recoverable-installer-owned-drift: done
   epic-4-retrospective: optional
 
-  epic-5: in-progress
-  5-1-source-selection-and-channel-summary: ready-for-dev
-  5-2-registry-source-resolution-and-diagnostics: ready-for-dev
-  5-3-local-tarball-offline-bundle-and-local-path-integrity: ready-for-dev
-  5-4-git-source-pinning-and-floating-source-rejection: ready-for-dev
-  5-5-sourcedescriptor-trust-status-and-redacted-reporting: ready-for-dev
+  epic-5: done
+  5-1-source-selection-and-channel-summary: done
+  5-2-registry-source-resolution-and-diagnostics: done
+  5-3-local-tarball-offline-bundle-and-local-path-integrity: done
+  5-4-git-source-pinning-and-floating-source-rejection: done
+  5-5-sourcedescriptor-trust-status-and-redacted-reporting: done
   epic-5-retrospective: optional
 
   epic-6: in-progress

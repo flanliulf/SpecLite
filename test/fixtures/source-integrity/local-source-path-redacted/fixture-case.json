@@ -1,0 +1,6 @@
+{
+  "caseId": "source-integrity/local-source-path-redacted",
+  "sourceType": "local",
+  "expectedGate": "mvp-release",
+  "description": "Local source descriptor uses display-safe source label and does not expose an absolute local path."
+}

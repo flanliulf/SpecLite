@@ -33,14 +33,20 @@ export type IdeMirrorWriteResult =
 export async function writeIdeMirrors(input: {
   projectRoot: string;
   packageRoot: string;
+  sourceRoot?: string;
+  sourceRefRoot?: string;
   selectedModules: OfficialModule[];
   targetAdapters: InstallPlanTargetAdapter[];
   artifactRoots: ArtifactRootContext;
+  onChangedPath?: (relativePath: string) => void;
 }): Promise<IdeMirrorWriteResult> {
   const selectedTargetIds = new Set(input.targetAdapters.map((adapter) => adapter.targetId));
   const orderedTargetIds = CANONICAL_TARGET_ORDER.filter((targetId) => selectedTargetIds.has(targetId));
   const adaptersById = new Map(getIdeAdapterRegistry().map((adapter) => [adapter.id, adapter]));
   const packageEntries = createPackageEntries(input.selectedModules);
+  const canonicalSourceRoot =
+    input.sourceRoot ?? path.join(input.packageRoot, BUNDLED_SOURCE_DISPLAY_ROOT);
+  const canonicalSourceRefRoot = input.sourceRefRoot ?? BUNDLED_SOURCE_DISPLAY_ROOT;
   const skillIndexEntries: SkillIndexEntry[] = [];
   const helpIndexEntries: HelpIndexEntry[] = [];
   const phaseCoverageRows: PhaseCoverageRow[] = [];
@@ -53,12 +59,11 @@ export async function writeIdeMirrors(input: {
 
   for (const entry of packageEntries) {
     const sourcePackageRoot = path.join(
-      input.packageRoot,
-      BUNDLED_SOURCE_DISPLAY_ROOT,
+      canonicalSourceRoot,
       entry.module.sourceDirectory,
       entry.packageRoot,
     );
-    const sourceRefRoot = `${BUNDLED_SOURCE_DISPLAY_ROOT}/${entry.module.sourceDirectory}/${entry.packageRoot}`;
+    const sourceRefRoot = `${canonicalSourceRefRoot}/${entry.module.sourceDirectory}/${entry.packageRoot}`;
     const canonicalPackageHash = await hashPackageDirectory(sourcePackageRoot, {
       include: isInstallableCanonicalPackageFile,
     });
@@ -89,6 +94,7 @@ export async function writeIdeMirrors(input: {
         sourcePackageRoot,
         sourceRefRoot,
         targetEntryRoot,
+        ...(input.onChangedPath !== undefined ? { onChangedPath: input.onChangedPath } : {}),
       });
 
       if (!copy.ok) {

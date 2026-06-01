@@ -1,6 +1,6 @@
 # Story 5.1: Source Selection And Channel Summary（来源选择与 Channel 摘要）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -50,60 +50,60 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-6）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与本 Story source descriptor anchors 仍必须按当前源码验证。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 1.1 CLI/diagnostics scaffold、Story 1.3 bundled source module selection、Story 1.6 install progress/ready summary、Story 4.3 plan-before-write 和 Story 4.4 operation lock/safe write anchors 是否真实存在；若不存在，停止并按前置 story 顺序补齐或记录 blocker，不得在本 Story 中创建私有 JSON shape 或私有 source model。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
+- [x] Task 1: 验证前置实现、工作树和只读边界（AC: 1-6）
+  - [x] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与本 Story source descriptor anchors 仍必须按当前源码验证。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 1.1 CLI/diagnostics scaffold、Story 1.3 bundled source module selection、Story 1.6 install progress/ready summary、Story 4.3 plan-before-write 和 Story 4.4 operation lock/safe write anchors 是否真实存在；若不存在，停止并按前置 story 顺序补齐或记录 blocker，不得在本 Story 中创建私有 JSON shape 或私有 source model。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
 
-- [ ] Task 2: 建立 install source selection model（AC: 1, 3, 6）
-  - [ ] 在 `src/source/` 的既有 source descriptor / resolver anchor 中集中定义 source selection 输入模型；不得在 prompt、command parser、JSON reporter 或 fixture helper 中复制 source type 枚举。
-  - [ ] 支持 MVP source types：`bundled`、`npm`、`private-registry`、`local-tarball`、`offline-bundle`、`git`、`local`，并把 UI 文案或 CLI 输入归一到这些 stable source type values。
-  - [ ] 记录 `requestedSourceValue`、`requestedVersion` 或 `channel` 时只保存在 private planning state 或 display-safe projection 中；raw credential-bearing URL、token、本机 absolute path、cache path、temporary extraction path 不得进入 public JSON、manifest/index、fixture snapshot 或 `ValidationIssue.details`。
-  - [ ] Channel/version 输入必须区分 `requestedVersion` 和 resolved `version`；range、dist-tag、tag、branch 或用户输入 selector 不得覆盖 resolved installed version。
-  - [ ] 对非法 source type、非法 selector、空必填输入或当前阶段尚未实现的 source-specific resolver，输出稳定 `source-integrity` issue，优先使用 taxonomy 中已有 issue id；不得以 free-form issue id 或 raw parser error 结束。
+- [x] Task 2: 建立 install source selection model（AC: 1, 3, 6）
+  - [x] 在 `src/source/` 的既有 source descriptor / resolver anchor 中集中定义 source selection 输入模型；不得在 prompt、command parser、JSON reporter 或 fixture helper 中复制 source type 枚举。
+  - [x] 支持 MVP source types：`bundled`、`npm`、`private-registry`、`local-tarball`、`offline-bundle`、`git`、`local`，并把 UI 文案或 CLI 输入归一到这些 stable source type values。
+  - [x] 记录 `requestedSourceValue`、`requestedVersion` 或 `channel` 时只保存在 private planning state 或 display-safe projection 中；raw credential-bearing URL、token、本机 absolute path、cache path、temporary extraction path 不得进入 public JSON、manifest/index、fixture snapshot 或 `ValidationIssue.details`。
+  - [x] Channel/version 输入必须区分 `requestedVersion` 和 resolved `version`；range、dist-tag、tag、branch 或用户输入 selector 不得覆盖 resolved installed version。
+  - [x] 对非法 source type、非法 selector、空必填输入或当前阶段尚未实现的 source-specific resolver，输出稳定 `source-integrity` issue，优先使用 taxonomy 中已有 issue id；不得以 free-form issue id 或 raw parser error 结束。
 
-- [ ] Task 3: 生成 SourceResolutionPlan 与 external access intent（AC: 3, 5）
-  - [ ] 在 source resolution 前生成 internal `SourceResolutionPlan`，包含 `requestedSourceType`、display-safe `requestedSourceValue`、`externalAccesses[]`、`requiresConfirmation` 和 `confirmed`。
-  - [ ] `bundled` source 不声明 network/registry/remote Git external access；canonical tree label 固定为 display-safe `assets/source/speclite`。
-  - [ ] npm public/private registry source 在真正访问 registry 前必须声明 registry/package/version 或 channel intent，并说明访问原因；private registry 的 host/registry label 必须 redacted，不显示 token、credential-bearing URL 或 private query string。
-  - [ ] local tarball、offline bundle、Git source 和 local path 在进入 source-specific resolution 前必须展示访问/读取 intent；本 Story 只建立 selection + intent + summary 边界，不实现 Story 5.2-5.4 的深度 resolution/trust rules。
-  - [ ] 未确认来源摘要时不得访问 registry、Git remote、tarball/offline bundle origin 或读取/解包 project-external source；也不得获取 operation lock 或写入项目文件。
+- [x] Task 3: 生成 SourceResolutionPlan 与 external access intent（AC: 3, 5）
+  - [x] 在 source resolution 前生成 internal `SourceResolutionPlan`，包含 `requestedSourceType`、display-safe `requestedSourceValue`、`externalAccesses[]`、`requiresConfirmation` 和 `confirmed`。
+  - [x] `bundled` source 不声明 network/registry/remote Git external access；canonical tree label 固定为 display-safe `assets/source/speclite`。
+  - [x] npm public/private registry source 在真正访问 registry 前必须声明 registry/package/version 或 channel intent，并说明访问原因；private registry 的 host/registry label 必须 redacted，不显示 token、credential-bearing URL 或 private query string。
+  - [x] local tarball、offline bundle、Git source 和 local path 在进入 source-specific resolution 前必须展示访问/读取 intent；本 Story 只建立 selection + intent + summary 边界，不实现 Story 5.2-5.4 的深度 resolution/trust rules。
+  - [x] 未确认来源摘要时不得访问 registry、Git remote、tarball/offline bundle origin 或读取/解包 project-external source；也不得获取 operation lock 或写入项目文件。
 
-- [ ] Task 4: 输出 bundled source summary 与 install summary projection（AC: 2, 4）
-  - [ ] `bundled` source 作为默认选项时，install summary human-readable output 必须展示 source type、display-safe resolved root、selected channel/version（如存在）和 no external access。
-  - [ ] `install --json` 必须使用 `CommandResult<InstallCommandData>`，并通过 `data.sourceDescriptor` 投影 resolved source；不得新增未契约化 `readySummary` blob、`sourceSummary` blob 或 automation-only 字段。
-  - [ ] `data.sourceDescriptor.sourceType`、`channel`、`requestedVersion`、`version`、`resolvedRoot`、`contentHash`、`integrityEvidence` 和 `trustStatus` 的字段语义必须遵守 source descriptor SPEC；本 Story 不得定义第二套 trust/evidence 规则。
-  - [ ] 当 custom source 被选择但 source-specific resolver 尚未由 Story 5.2-5.5 实现时，命令必须在写入前失败并给出 `source-integrity.unsupported-source` 或更具体 reserved issue；不得伪造 `SourceDescriptor` 成功或写入 half-installed state。
-  - [ ] Human-readable output 使用 Evidence profile：Summary、Source、External Access、Authorization、Issues、Next Actions；automation 依赖必须仍在 `CommandResult.data`、`issues` 或 `nextActions` 中。
+- [x] Task 4: 输出 bundled source summary 与 install summary projection（AC: 2, 4）
+  - [x] `bundled` source 作为默认选项时，install summary human-readable output 必须展示 source type、display-safe resolved root、selected channel/version（如存在）和 no external access。
+  - [x] `install --json` 必须使用 `CommandResult<InstallCommandData>`，并通过 `data.sourceDescriptor` 投影 resolved source；不得新增未契约化 `readySummary` blob、`sourceSummary` blob 或 automation-only 字段。
+  - [x] `data.sourceDescriptor.sourceType`、`channel`、`requestedVersion`、`version`、`resolvedRoot`、`contentHash`、`integrityEvidence` 和 `trustStatus` 的字段语义必须遵守 source descriptor SPEC；本 Story 不得定义第二套 trust/evidence 规则。
+  - [x] 当 custom source 被选择但 source-specific resolver 尚未由 Story 5.2-5.5 实现时，命令必须在写入前失败并给出 `source-integrity.unsupported-source` 或更具体 reserved issue；不得伪造 `SourceDescriptor` 成功或写入 half-installed state。
+  - [x] Human-readable output 使用 Evidence profile：Summary、Source、External Access、Authorization、Issues、Next Actions；automation 依赖必须仍在 `CommandResult.data`、`issues` 或 `nextActions` 中。
 
-- [ ] Task 5: 保持 install planning、write authorization 和 operation lock 边界（AC: 5）
-  - [ ] 严格保持 `SourceResolutionPlan -> InstallPlan -> operation lock -> safe write -> CommandResult projection` 顺序。
-  - [ ] `--yes` 或 interactive confirmation 只能授权 command-level writes；不得自动接受 unverified source、floating Git source、unsupported source、failed evidence verification 或 source policy rejection。
-  - [ ] `--dry-run`、pending confirmation 和 script mode without `--yes` 必须保留真实 plan、`writeAuthorized: false`、`changedPaths: []`、`skippedPaths: []`；不得把 planned actions 改写为 `skip:not-authorized`。
-  - [ ] 在 source selection / source summary 阶段不得修改 `_speclite/`、IDE mirrors、manifest/index、`_speclite-output/` 或 human-owned TOML。
-  - [ ] 如果 command 在 operation lock 前因 source selection/source integrity 失败，public JSON 不得输出假装 planning 完成的 planned writes、changed paths、skipped paths 或 conflicts。
+- [x] Task 5: 保持 install planning、write authorization 和 operation lock 边界（AC: 5）
+  - [x] 严格保持 `SourceResolutionPlan -> InstallPlan -> operation lock -> safe write -> CommandResult projection` 顺序。
+  - [x] `--yes` 或 interactive confirmation 只能授权 command-level writes；不得自动接受 unverified source、floating Git source、unsupported source、failed evidence verification 或 source policy rejection。
+  - [x] `--dry-run`、pending confirmation 和 script mode without `--yes` 必须保留真实 plan、`writeAuthorized: false`、`changedPaths: []`、`skippedPaths: []`；不得把 planned actions 改写为 `skip:not-authorized`。
+  - [x] 在 source selection / source summary 阶段不得修改 `_speclite/`、IDE mirrors、manifest/index、`_speclite-output/` 或 human-owned TOML。
+  - [x] 如果 command 在 operation lock 前因 source selection/source integrity 失败，public JSON 不得输出假装 planning 完成的 planned writes、changed paths、skipped paths 或 conflicts。
 
-- [ ] Task 6: 实现 redaction 与 path policy（AC: 3-4, 6）
-  - [ ] 所有 public path fields 使用 project-relative POSIX path；project-external source 使用 display-safe label 或 redacted diagnostic object，不输出 absolute path、home directory、drive letter 或 OS-specific separator。
-  - [ ] Registry endpoint、proxy、private registry host、Git remote、tarball/offline bundle/local path display 必须 redacted；credentials、tokens、private query strings 和 cache/temp paths 不得进入 JSON、manifest/index、fixture snapshot、impact 或 suggestedNextStep。
-  - [ ] `ValidationIssue.details` 只保留 deterministic、redaction-safe、fixture-stable fields；动态原始输入放在 private state 或 redacted display label。
-  - [ ] Human-readable output 遵守同一 redaction/display-safe policy，不能因为不是 JSON 就显示 raw URL 或本机路径。
+- [x] Task 6: 实现 redaction 与 path policy（AC: 3-4, 6）
+  - [x] 所有 public path fields 使用 project-relative POSIX path；project-external source 使用 display-safe label 或 redacted diagnostic object，不输出 absolute path、home directory、drive letter 或 OS-specific separator。
+  - [x] Registry endpoint、proxy、private registry host、Git remote、tarball/offline bundle/local path display 必须 redacted；credentials、tokens、private query strings 和 cache/temp paths 不得进入 JSON、manifest/index、fixture snapshot、impact 或 suggestedNextStep。
+  - [x] `ValidationIssue.details` 只保留 deterministic、redaction-safe、fixture-stable fields；动态原始输入放在 private state 或 redacted display label。
+  - [x] Human-readable output 遵守同一 redaction/display-safe policy，不能因为不是 JSON 就显示 raw URL 或本机路径。
 
-- [ ] Task 7: 编写 focused tests 与 fixture assertions（AC: 1-6）
-  - [ ] Unit tests 覆盖 source type normalization、default `bundled` selection、custom source input capture、channel/requestedVersion separation 和 invalid input diagnostics。
-  - [ ] Unit tests 覆盖 `SourceResolutionPlan.externalAccesses[]`：bundled 无 external access；registry/Git/tarball/offline/local source 在未确认前只输出 intent，不访问外部来源。
-  - [ ] JSON contract tests 覆盖 `install --json` 的 `CommandResult<InstallCommandData>`、`data.sourceDescriptor`、stable `command: "install"`、`data.paths.projectRoot: "."`、issue sorting 和 nextActions ordering。
-  - [ ] Redaction tests 覆盖 credential-bearing URL、private registry token、home directory、local absolute path、npm cache path、temporary extraction path 和 Git credential URL 不进入 public JSON、human-readable output 或 fixture snapshots。
-  - [ ] Fixture tests 覆盖 `fresh-install-empty-project` 的 bundled source summary、ready summary gate，以及 `source-integrity` group 中与 selection/summary 直接相关的 redaction/unsupported-source cases；Story 5.2-5.5 再补 registry/tarball/Git/local path 深度 trust/evidence sub-cases。
-  - [ ] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络；source-specific resolution 用 mocks 或 local fixture input。
+- [x] Task 7: 编写 focused tests 与 fixture assertions（AC: 1-6）
+  - [x] Unit tests 覆盖 source type normalization、default `bundled` selection、custom source input capture、channel/requestedVersion separation 和 invalid input diagnostics。
+  - [x] Unit tests 覆盖 `SourceResolutionPlan.externalAccesses[]`：bundled 无 external access；registry/Git/tarball/offline/local source 在未确认前只输出 intent，不访问外部来源。
+  - [x] JSON contract tests 覆盖 `install --json` 的 `CommandResult<InstallCommandData>`、`data.sourceDescriptor`、stable `command: "install"`、`data.paths.projectRoot: "."`、issue sorting 和 nextActions ordering。
+  - [x] Redaction tests 覆盖 credential-bearing URL、private registry token、home directory、local absolute path、npm cache path、temporary extraction path 和 Git credential URL 不进入 public JSON、human-readable output 或 fixture snapshots。
+  - [x] Fixture tests 覆盖 `fresh-install-empty-project` 的 bundled source summary、ready summary gate，以及 `source-integrity` group 中与 selection/summary 直接相关的 redaction/unsupported-source cases；Story 5.2-5.5 再补 registry/tarball/Git/local path 深度 trust/evidence sub-cases。
+  - [x] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络；source-specific resolution 用 mocks 或 local fixture input。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-6）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 source selection、source descriptor schema、install plan、diagnostics output、redaction、path policy 和 affected fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 source selection/redaction tests、不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、无关 Story 文件、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 5.2 registry resolution、Story 5.3 tarball/offline/local integrity、Story 5.4 Git pinning、Story 5.5 trust status full reporting、Epic 6 fixture matrix全量范围或 Post-MVP `doctor` / `sync` / `uninstall`。
+- [x] Task 8: 本地验证与范围控制（AC: 1-6）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 source selection、source descriptor schema、install plan、diagnostics output、redaction、path policy 和 affected fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 source selection/redaction tests、不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、无关 Story 文件、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 5.2 registry resolution、Story 5.3 tarball/offline/local integrity、Story 5.4 Git pinning、Story 5.5 trust status full reporting、Epic 6 fixture matrix全量范围或 Post-MVP `doctor` / `sync` / `uninstall`。
 
 ## Dev Notes（开发备注）
 
@@ -250,17 +250,39 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- 2026-06-01 14:36 CST：`python3` resolver 因缺 `tomllib` 失败，改用 `python3.12` 成功解析 `bmad-dev-story` workflow。
+- 2026-06-01 14:39 CST：`npx vitest run test/source-selection.test.ts` 先因缺少 `src/source/source-selection.ts` 失败，作为 RED 阶段证据。
+- 2026-06-01 14:44 CST：`npm run build` 通过；`npm test` 通过，30 个 test files / 207 个 tests。
+- 2026-06-01 14:44 CST：`git diff --check` 通过。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context created by bmad-create-story workflow.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 完成 `src/source/source-selection.ts`，集中定义 Story 5.1 source selection vocabulary、display-safe source label、requestedVersion/channel redaction、`SourceResolutionPlan` 和 unsupported custom source diagnostic。
+- `speclite install` 新增 `--source`、`--source-value`、`--channel`、`--version` 输入映射；bundled source 保持现有 install path，custom source 在 source-specific resolver 前用 `source-integrity.unsupported-source` 失败，且不获取 operation lock、不写 `_speclite`。
+- install human output 增加 Evidence profile 中的 Source、External Access、Authorization 段；`install --json` 仍只使用契约化 `CommandResult<InstallCommandData>` 和 `data.sourceDescriptor`。
+- 新增 focused source-selection / redaction / fixture tests，覆盖 bundled summary、custom private registry unsupported、credential URL、home directory/local absolute path 和 Git credential URL 不进入 public JSON/human output/fixture snapshot。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `src/source/source-selection.ts`
+- `src/commands/install.ts`
+- `src/bin/speclite.ts`
+- `src/diagnostics/output.ts`
+- `test/source-selection.test.ts`
+- `test/fixtures/source-integrity/fixture-case.json`
+- `test/fixtures/source-integrity/unsupported-private-registry/expected/command-json.json`
+- `_bmad-output/implementation-artifacts/stories/5-1-source-selection-and-channel-summary.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/code-reviews/5-1-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-1-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-1-code-review/EXPERIMENT_NOTES.md`
+
+### Change Log（变更日志）
+
+- 2026-06-01：实现 Story 5.1 source selection / source summary / external access intent / redaction / unsupported custom source diagnostic；状态更新为 `review`。

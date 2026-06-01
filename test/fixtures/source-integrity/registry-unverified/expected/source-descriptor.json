@@ -1,0 +1,15 @@
+{
+  "sourceType": "private-registry",
+  "channel": "internal",
+  "version": "2.0.0",
+  "integrityEvidence": [
+    {
+      "kind": "registry-integrity",
+      "packageName": "@acme/private-source",
+      "version": "2.0.0",
+      "integrity": "sha512-private",
+      "verified": false
+    }
+  ],
+  "trustStatus": "unverified"
+}

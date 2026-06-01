@@ -1,0 +1,12 @@
+{
+  "issueId": "source-integrity.hash-mismatch",
+  "category": "source-integrity",
+  "severity": "error",
+  "component": "local-source-resolution",
+  "details": {
+    "reason": "local-artifact-hash-mismatch",
+    "sourceType": "local-tarball"
+  },
+  "impact": "Local source integrity evidence does not match the expected hash trust anchor.",
+  "suggestedNextStep": "Check the expected local source hash before authorizing install writes."
+}

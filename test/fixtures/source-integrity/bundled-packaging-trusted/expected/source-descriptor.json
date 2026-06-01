@@ -1,0 +1,14 @@
+{
+  "sourceType": "bundled",
+  "resolvedRoot": "assets/source/speclite",
+  "integrityEvidence": [
+    {
+      "kind": "version-lock",
+      "packageName": "speclite",
+      "version": "0.0.0",
+      "lockPath": "package-lock.json",
+      "verified": true
+    }
+  ],
+  "trustStatus": "trusted"
+}

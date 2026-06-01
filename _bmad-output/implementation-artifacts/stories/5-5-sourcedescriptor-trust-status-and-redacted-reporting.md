@@ -1,6 +1,6 @@
 # Story 5.5: SourceDescriptor Trust Status And Redacted Reporting（SourceDescriptor 信任状态与脱敏报告）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -57,65 +57,65 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
-  - [ ] 确认 Story 5.1 的 source selection / external access intent / redaction boundary、Story 5.2 的 registry evidence / trust helper、Story 5.3 的 local artifact/path evidence、Story 5.4 的 Git commit evidence / floating source rejection 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得在本 Story 中伪造成功状态。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 3.2 manifest/index schema、Story 4.3 plan-before-write、Story 4.4 operation lock/safe write 和 Story 4.6 repair source policy anchors 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其它 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
+- [x] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
+  - [x] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
+  - [x] 确认 Story 5.1 的 source selection / external access intent / redaction boundary、Story 5.2 的 registry evidence / trust helper、Story 5.3 的 local artifact/path evidence、Story 5.4 的 Git commit evidence / floating source rejection 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得在本 Story 中伪造成功状态。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 3.2 manifest/index schema、Story 4.3 plan-before-write、Story 4.4 operation lock/safe write 和 Story 4.6 repair source policy anchors 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其它 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
 
-- [ ] Task 2: 统一 `SourceDescriptor` executable schema/parser（AC: 1, 7）
-  - [ ] 在 `src/source/source-descriptor-schema.ts` 中集中定义并导出 `SourceDescriptor` 与 `SourceIntegrityEvidence` executable schema/parser；该 module 是 SPEC implementation anchor，不是第二份契约真源。
-  - [ ] 只允许 SPEC 中声明的 `sourceType`：`bundled`、`npm`、`private-registry`、`local-tarball`、`offline-bundle`、`git`、`local`；不得新增 `registry`、`npm-public`、`enterprise-registry`、`path`、`archive` 等未契约化别名。
-  - [ ] 字段语义必须遵守 source descriptor SPEC：`version` 是 resolved installed source version；用户输入的 range、dist-tag、tag、branch 或 selector 使用 `requestedVersion` 或 internal planning state，不得覆盖 resolved `version`。
-  - [ ] `resolvedRoot` 出现在 public output 时只能是 project-relative POSIX path 或 display-safe source label；不得包含 npm cache、temporary extraction、local absolute path、home directory、drive letter 或 OS-specific separator。
-  - [ ] `contentHash` 只对 local tarball、offline bundle 和 local source snapshot 等 content-addressable source artifacts required；registry 和 Git source 不得伪造 `contentHash`。
-  - [ ] `integrityEvidence` 进入写入步骤前至少包含一项可复现 evidence；排序遵守 CommandResult SPEC：registry integrity / version lock -> content hash -> git commit，同 kind 按 normalized stable key 排序。
+- [x] Task 2: 统一 `SourceDescriptor` executable schema/parser（AC: 1, 7）
+  - [x] 在 `src/source/source-descriptor-schema.ts` 中集中定义并导出 `SourceDescriptor` 与 `SourceIntegrityEvidence` executable schema/parser；该 module 是 SPEC implementation anchor，不是第二份契约真源。
+  - [x] 只允许 SPEC 中声明的 `sourceType`：`bundled`、`npm`、`private-registry`、`local-tarball`、`offline-bundle`、`git`、`local`；不得新增 `registry`、`npm-public`、`enterprise-registry`、`path`、`archive` 等未契约化别名。
+  - [x] 字段语义必须遵守 source descriptor SPEC：`version` 是 resolved installed source version；用户输入的 range、dist-tag、tag、branch 或 selector 使用 `requestedVersion` 或 internal planning state，不得覆盖 resolved `version`。
+  - [x] `resolvedRoot` 出现在 public output 时只能是 project-relative POSIX path 或 display-safe source label；不得包含 npm cache、temporary extraction、local absolute path、home directory、drive letter 或 OS-specific separator。
+  - [x] `contentHash` 只对 local tarball、offline bundle 和 local source snapshot 等 content-addressable source artifacts required；registry 和 Git source 不得伪造 `contentHash`。
+  - [x] `integrityEvidence` 进入写入步骤前至少包含一项可复现 evidence；排序遵守 CommandResult SPEC：registry integrity / version lock -> content hash -> git commit，同 kind 按 normalized stable key 排序。
 
-- [ ] Task 3: 集中实现 `trustStatus` 推导（AC: 2-4）
-  - [ ] 在 `src/source/` 中建立单一 trust evaluator（例如 `source-trust.ts` 或并入既有 `source-integrity.ts`）；所有 resolver 只能调用该入口，不得在 registry、local、Git、manifest、status 或 validate 中复制 trust matrix。
-  - [ ] `trusted` 只能由 expected hash、lock match，或 bundled source 的 packaging manifest / package hash / package lock match 产生；不得仅因 source type、public npm、private registry、Git、tarball、offline bundle、本机文件存在或用户确认而 trusted。
-  - [ ] `unverified` 必须同时满足：用户显式选择并确认该 source、至少存在一个 reproducible `integrityEvidence`、没有 blocking source-integrity issue。`verified: false` 只能表达“证据可复现但无信任锚”，不能表达 verification failure。
-  - [ ] `blocked` 必须覆盖 missing evidence、hash mismatch、lock mismatch、unsupported source、local source self-reference、floating Git source、bundled packaging evidence 缺失、failed evidence verification 和 source policy rejection；blocked source 不得进入 install/update planned writes。
-  - [ ] `--yes` 或 command-level write confirmation 不得自动接受 `unverified` source、floating Git source、unsupported source、failed evidence verification 或 source policy rejection。
+- [x] Task 3: 集中实现 `trustStatus` 推导（AC: 2-4）
+  - [x] 在 `src/source/` 中建立单一 trust evaluator（例如 `source-trust.ts` 或并入既有 `source-integrity.ts`）；所有 resolver 只能调用该入口，不得在 registry、local、Git、manifest、status 或 validate 中复制 trust matrix。
+  - [x] `trusted` 只能由 expected hash、lock match，或 bundled source 的 packaging manifest / package hash / package lock match 产生；不得仅因 source type、public npm、private registry、Git、tarball、offline bundle、本机文件存在或用户确认而 trusted。
+  - [x] `unverified` 必须同时满足：用户显式选择并确认该 source、至少存在一个 reproducible `integrityEvidence`、没有 blocking source-integrity issue。`verified: false` 只能表达“证据可复现但无信任锚”，不能表达 verification failure。
+  - [x] `blocked` 必须覆盖 missing evidence、hash mismatch、lock mismatch、unsupported source、local source self-reference、floating Git source、bundled packaging evidence 缺失、failed evidence verification 和 source policy rejection；blocked source 不得进入 install/update planned writes。
+  - [x] `--yes` 或 command-level write confirmation 不得自动接受 `unverified` source、floating Git source、unsupported source、failed evidence verification 或 source policy rejection。
 
-- [ ] Task 4: 统一 redacted public projection（AC: 1, 5, 7）
-  - [ ] 建立或复用 `src/fs/path-normalizer.ts` / redaction helpers，集中生成 project-relative POSIX path、display-safe source label 和 `RedactedExternalPathDiagnostic`。
-  - [ ] Public JSON、manifest/index、`ValidationIssue.details`、human-readable output、fixture snapshots 和 ready/status/validate summaries 使用同一 redaction policy。
-  - [ ] 不得在 public contract 中输出 credential、token、auth header、credential-bearing URL、private query string、private registry endpoint、proxy secret、home directory、本机 absolute path、drive letter、OS-specific separator、npm cache path、temporary extraction path、source staging directory、temporary Git checkout path、temporary object database 或 raw stack trace。
-  - [ ] Registry source display 使用 package name、resolved version、registry kind 或 redacted registry label；Git source display 使用 redacted remote label + resolved commit SHA；local/tarball/offline source display 使用 display-safe label 或 redacted diagnostic object。
-  - [ ] `impact`、`suggestedNextStep`、`summary` 和 `nextActions` 使用 stable short templates，不拼入 source name、hash、raw path、timestamp、stack trace 或环境相关文本。
+- [x] Task 4: 统一 redacted public projection（AC: 1, 5, 7）
+  - [x] 建立或复用 `src/fs/path-normalizer.ts` / redaction helpers，集中生成 project-relative POSIX path、display-safe source label 和 `RedactedExternalPathDiagnostic`。
+  - [x] Public JSON、manifest/index、`ValidationIssue.details`、human-readable output、fixture snapshots 和 ready/status/validate summaries 使用同一 redaction policy。
+  - [x] 不得在 public contract 中输出 credential、token、auth header、credential-bearing URL、private query string、private registry endpoint、proxy secret、home directory、本机 absolute path、drive letter、OS-specific separator、npm cache path、temporary extraction path、source staging directory、temporary Git checkout path、temporary object database 或 raw stack trace。
+  - [x] Registry source display 使用 package name、resolved version、registry kind 或 redacted registry label；Git source display 使用 redacted remote label + resolved commit SHA；local/tarball/offline source display 使用 display-safe label 或 redacted diagnostic object。
+  - [x] `impact`、`suggestedNextStep`、`summary` 和 `nextActions` 使用 stable short templates，不拼入 source name、hash、raw path、timestamp、stack trace 或环境相关文本。
 
-- [ ] Task 5: 投影到 install summary、`status`、`validate` 和 manifest/index（AC: 1, 5-7）
-  - [ ] `install --json` 继续输出 `CommandResult<InstallCommandData>`，`data.sourceDescriptor` 使用 owning SPEC 字段；不得新增未契约化 `sourceSummary`、`trustReport`、`readySummary` blob 或 automation-only field。
-  - [ ] Human-readable install summary / ready summary 使用 Evidence profile，在 Source block 中展示 source type、channel/requestedVersion/version、display-safe source label、`trustStatus`、evidence summary 和 next action；automation 依赖必须仍在 structured fields。
-  - [ ] `speclite status` 只读取本地 manifest/source descriptor projection、manifest version、installed modules、IDE target summary、required paths 和 high-level health；不得访问 npm registry、private registry、Git remote、offline bundle origin、本地 source origin 或 package-manager cache。
-  - [ ] `speclite validate` 只检查本地 recorded descriptor shape、evidence shape、manifest/index projection、files index、IDE mirrors 和 local hash baseline；不得执行 remote freshness check、Git branch/tag freshness、registry latest check、provenance revalidation 或 source lockfile refresh。
-  - [ ] Manifest/index 只投影 source descriptor SPEC 允许的 fields；不得加入 registry URL、auth status、token scope、raw metadata、tarball path、bundle path、local path、remote URL、checkout path、staging/cache/temp path 或 implementation-only fields。
-  - [ ] `source-integrity` 与 `file-integrity` category 必须保持分离：source resolver/install planning 阶段的问题用 `source-integrity`；已安装文件、files index 或 IDE mirror drift 用 `file-integrity` 或 `ide-mirror`。
+- [x] Task 5: 投影到 install summary、`status`、`validate` 和 manifest/index（AC: 1, 5-7）
+  - [x] `install --json` 继续输出 `CommandResult<InstallCommandData>`，`data.sourceDescriptor` 使用 owning SPEC 字段；不得新增未契约化 `sourceSummary`、`trustReport`、`readySummary` blob 或 automation-only field。
+  - [x] Human-readable install summary / ready summary 使用 Evidence profile，在 Source block 中展示 source type、channel/requestedVersion/version、display-safe source label、`trustStatus`、evidence summary 和 next action；automation 依赖必须仍在 structured fields。
+  - [x] `speclite status` 只读取本地 manifest/source descriptor projection、manifest version、installed modules、IDE target summary、required paths 和 high-level health；不得访问 npm registry、private registry、Git remote、offline bundle origin、本地 source origin 或 package-manager cache。
+  - [x] `speclite validate` 只检查本地 recorded descriptor shape、evidence shape、manifest/index projection、files index、IDE mirrors 和 local hash baseline；不得执行 remote freshness check、Git branch/tag freshness、registry latest check、provenance revalidation 或 source lockfile refresh。
+  - [x] Manifest/index 只投影 source descriptor SPEC 允许的 fields；不得加入 registry URL、auth status、token scope、raw metadata、tarball path、bundle path、local path、remote URL、checkout path、staging/cache/temp path 或 implementation-only fields。
+  - [x] `source-integrity` 与 `file-integrity` category 必须保持分离：source resolver/install planning 阶段的问题用 `source-integrity`；已安装文件、files index 或 IDE mirror drift 用 `file-integrity` 或 `ide-mirror`。
 
-- [ ] Task 6: 实现 cross-source reporting matrix（AC: 1-6）
-  - [ ] Bundled source：记录 packaging manifest / package hash / package lock match evidence；evidence 可验证时 `trusted`，缺失 evidence 时 `source-integrity.missing-evidence` + `blocked`，`resolvedRoot` 只能是 `assets/source/speclite` 等 package-internal display-safe label。
-  - [ ] Registry source：复用 Story 5.2 `registry-integrity` / `version-lock` evidence；lock/hash match -> `trusted`，registry evidence without trust anchor -> `unverified`，missing/mismatch/auth/unreachable -> `blocked` 或 stable `source-integrity` issue；不得因为 npm public/private registry 类型 trusted。
-  - [ ] Tarball/offline/local source：复用 Story 5.3 `content-hash` evidence、snapshot allowlist 和 self-reference guard；artifact/snapshot hash without trust anchor -> `unverified`，missing/mismatch/unreadable/self-reference -> `blocked`。
-  - [ ] Git source：复用 Story 5.4 `git-commit` evidence；resolved commit without trust anchor -> `unverified`，floating remote/branch/tag/unresolved ref/auth failure -> `blocked`；不得把 branch/tag/requested ref 当 resolved evidence。
-  - [ ] 所有 source type 的 trust/evidence display 必须在 `NO_COLOR`、non-TTY、CI、Windows path portability 和窄终端下保留文本等价说明；不得只靠颜色或图标表达 `trusted`、`unverified`、`blocked`。
+- [x] Task 6: 实现 cross-source reporting matrix（AC: 1-6）
+  - [x] Bundled source：记录 packaging manifest / package hash / package lock match evidence；evidence 可验证时 `trusted`，缺失 evidence 时 `source-integrity.missing-evidence` + `blocked`，`resolvedRoot` 只能是 `assets/source/speclite` 等 package-internal display-safe label。
+  - [x] Registry source：复用 Story 5.2 `registry-integrity` / `version-lock` evidence；lock/hash match -> `trusted`，registry evidence without trust anchor -> `unverified`，missing/mismatch/auth/unreachable -> `blocked` 或 stable `source-integrity` issue；不得因为 npm public/private registry 类型 trusted。
+  - [x] Tarball/offline/local source：复用 Story 5.3 `content-hash` evidence、snapshot allowlist 和 self-reference guard；artifact/snapshot hash without trust anchor -> `unverified`，missing/mismatch/unreadable/self-reference -> `blocked`。
+  - [x] Git source：复用 Story 5.4 `git-commit` evidence；resolved commit without trust anchor -> `unverified`，floating remote/branch/tag/unresolved ref/auth failure -> `blocked`；不得把 branch/tag/requested ref 当 resolved evidence。
+  - [x] 所有 source type 的 trust/evidence display 必须在 `NO_COLOR`、non-TTY、CI、Windows path portability 和窄终端下保留文本等价说明；不得只靠颜色或图标表达 `trusted`、`unverified`、`blocked`。
 
-- [ ] Task 7: 编写 focused tests 与 source-integrity fixture assertions（AC: 1-7）
-  - [ ] Unit tests 覆盖 `SourceDescriptor` parser：allowed source types、field optionality、`version`/`requestedVersion` separation、`contentHash` source-type requirements、evidence kind schemas 和 evidence ordering。
-  - [ ] Trust matrix tests 覆盖 bundled、registry、tarball/offline bundle、local path 和 Git source：expected hash/lock/packaging match -> `trusted`；reproducible evidence without trust anchor -> `unverified`；missing evidence、hash mismatch、lock mismatch、unsupported source、floating Git、local self-reference 和 policy rejection -> `blocked`。
-  - [ ] Redaction tests 覆盖 credential-bearing URL、registry token、proxy secret、private query string、home directory、absolute local source path、drive letter、OS-specific separator、npm cache path、temporary extraction path、staging directory、temporary Git checkout/object DB、raw Git stderr、raw fs error 和 stack trace 不进入 public JSON、manifest/index、human-readable output 或 fixture snapshots。
-  - [ ] JSON contract tests 覆盖 `install --json`、`status --json` 和 `validate --json` 中 `sourceDescriptor` projection、issue sorting、nextActions sorting、`data.paths.projectRoot: "."`、absence of timestamps 和 no private path leakage。
-  - [ ] Validate/status no-network tests 使用已安装 descriptor fixtures，断言不会调用 registry client、Git client、tarball reader、offline bundle extractor、local source scanner、package-manager cache reader 或 provenance service。
-  - [ ] Fixture assertions 覆盖 Story 5.5 收口范围：`source-integrity/bundled-packaging-trusted`、`source-integrity/bundled-packaging-missing-evidence-blocked`，并复核 5.2-5.4 已引入的 required source-integrity sub-cases在 trustStatus、evidence ordering 和 redaction policy 上一致；不要扩大到 Epic 6 full fixture matrix。
-  - [ ] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、remote provenance service 或外部网络；source-specific inputs 使用 mocks、temporary files、local fixture metadata 或 injected clients。
+- [x] Task 7: 编写 focused tests 与 source-integrity fixture assertions（AC: 1-7）
+  - [x] Unit tests 覆盖 `SourceDescriptor` parser：allowed source types、field optionality、`version`/`requestedVersion` separation、`contentHash` source-type requirements、evidence kind schemas 和 evidence ordering。
+  - [x] Trust matrix tests 覆盖 bundled、registry、tarball/offline bundle、local path 和 Git source：expected hash/lock/packaging match -> `trusted`；reproducible evidence without trust anchor -> `unverified`；missing evidence、hash mismatch、lock mismatch、unsupported source、floating Git、local self-reference 和 policy rejection -> `blocked`。
+  - [x] Redaction tests 覆盖 credential-bearing URL、registry token、proxy secret、private query string、home directory、absolute local source path、drive letter、OS-specific separator、npm cache path、temporary extraction path、staging directory、temporary Git checkout/object DB、raw Git stderr、raw fs error 和 stack trace 不进入 public JSON、manifest/index、human-readable output 或 fixture snapshots。
+  - [x] JSON contract tests 覆盖 `install --json`、`status --json` 和 `validate --json` 中 `sourceDescriptor` projection、issue sorting、nextActions sorting、`data.paths.projectRoot: "."`、absence of timestamps 和 no private path leakage。
+  - [x] Validate/status no-network tests 使用已安装 descriptor fixtures，断言不会调用 registry client、Git client、tarball reader、offline bundle extractor、local source scanner、package-manager cache reader 或 provenance service。
+  - [x] Fixture assertions 覆盖 Story 5.5 收口范围：`source-integrity/bundled-packaging-trusted`、`source-integrity/bundled-packaging-missing-evidence-blocked`，并复核 5.2-5.4 已引入的 required source-integrity sub-cases在 trustStatus、evidence ordering 和 redaction policy 上一致；不要扩大到 Epic 6 full fixture matrix。
+  - [x] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、remote provenance service 或外部网络；source-specific inputs 使用 mocks、temporary files、local fixture metadata 或 injected clients。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 source descriptor schema、trust evaluator、redaction helpers、install/status/validate projection、source-integrity validation rule 和 affected source-integrity fixture tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 trust/redaction/no-network tests、不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1/5.2/5.3/5.4、已有 Story 1-4 文件、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Epic 6 full fixture matrix、complete source lockfile lifecycle、enterprise allowlist/signatures/provenance、Post-MVP `doctor` / `sync` / `uninstall`、top-level `repair`、backup/restore 或 standalone report artifact。
+- [x] Task 8: 本地验证与范围控制（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 source descriptor schema、trust evaluator、redaction helpers、install/status/validate projection、source-integrity validation rule 和 affected source-integrity fixture tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 trust/redaction/no-network tests、不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1/5.2/5.3/5.4、已有 Story 1-4 文件、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Epic 6 full fixture matrix、complete source lockfile lifecycle、enterprise allowlist/signatures/provenance、Post-MVP `doctor` / `sync` / `uninstall`、top-level `repair`、backup/restore 或 standalone report artifact。
 
 ## Dev Notes（开发备注）
 
@@ -287,17 +287,55 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5 Codex fresh dev-story sub agent.
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- `_bmad-output/implementation-artifacts/code-reviews/5-5-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-5-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-5-code-review/EXPERIMENT_NOTES.md`
 
 ### Completion Notes List（完成备注列表）
 
 - Story context created by bmad-create-story sub-agent for Story 5.5 only.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 已完成 preflight：读取 Story 5.5、`sprint-status.yaml`、`_bmad-output/project-context.md`、owning SPEC、root `package.json`、`src/` 与 `test/` anchors；裸 `python3` resolver 缺 `tomllib`，已使用 `python3.12` fallback。
+- 已在 `src/source/source-descriptor-schema.ts` 收紧 executable parser：non-blocked descriptor 必须有 evidence、`trusted` 必须有 verified trust anchor、content-addressable source 需要 `contentHash`、registry/Git 不得伪造 `contentHash`、`resolvedRoot` 必须 public-safe，且 evidence 使用 canonical ordering。
+- 已新增 `src/source/source-trust.ts` 单一 trust evaluator，并让 bundled、registry、local 和 Git resolver 使用该入口推导 `trusted` / `unverified` / `blocked`。
+- 已把 bundled package-lock evidence 视为 verified packaging trust anchor；缺少 bundled evidence 仍 blocked，并通过 focused fixture `bundled-packaging-missing-evidence-blocked` 表达。
+- 已扩展 install / ready / status human output Source block，展示 source type、channel/requestedVersion/version/resolvedRoot、`trustStatus` 和 evidence summary；resolved Git install 的 human output 现在显示 `confirmationState=confirmed`，因此 Story 5.4 遗留 `TODO-004` 已在本 Story reporting 范围内修复。
+- 已扩展 validate 本地 source-integrity rule，覆盖 bundled installed descriptor evidence shape；validate/status 仍只读取本地 manifest/index/installed state，不访问 registry、Git remote、tarball/offline origin、cache 或 provenance service。
+- 范围审计：未修改 `_bmad-output/planning-artifacts/`，未修改 Story 5.1/5.2/5.3/5.4，未实现 Epic 6 full fixture matrix、source lockfile lifecycle、enterprise allowlist/signatures/provenance、Post-MVP commands、top-level repair、backup/restore 或 standalone report artifact。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `src/source/source-descriptor-schema.ts`
+- `src/source/source-trust.ts`
+- `src/source/source-discovery.ts`
+- `src/source/registry-source-resolver.ts`
+- `src/source/local-source-resolver.ts`
+- `src/source/git-source-resolver.ts`
+- `src/diagnostics/output.ts`
+- `src/validation/rules/source-integrity.ts`
+- `test/source-descriptor-trust-reporting.test.ts`
+- `test/source-and-modules.test.ts`
+- `test/registry-source-resolution.test.ts`
+- `test/status-command.test.ts`
+- `test/validate-command.test.ts`
+- `test/install-module-selection.test.ts`
+- `test/install-progress-ready-summary.test.ts`
+- `test/fixtures/source-integrity/bundled-packaging-trusted/fixture-case.json`
+- `test/fixtures/source-integrity/bundled-packaging-trusted/expected/source-descriptor.json`
+- `test/fixtures/source-integrity/bundled-packaging-missing-evidence-blocked/fixture-case.json`
+- `test/fixtures/source-integrity/bundled-packaging-missing-evidence-blocked/expected/source-descriptor.json`
+- `test/fixtures/source-integrity/bundled-packaging-missing-evidence-blocked/expected/issue.json`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
+- `_bmad-output/implementation-artifacts/code-reviews/5-5-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-5-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-5-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/5-5-sourcedescriptor-trust-status-and-redacted-reporting.md`
+
+### Change Log（变更日志）
+
+- 2026-06-01：完成 Story 5.5 SourceDescriptor trustStatus 与 redacted reporting 收口；状态推进到 review。

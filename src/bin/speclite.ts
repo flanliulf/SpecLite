@@ -15,6 +15,7 @@ import {
   type ConfigInitializationSelection,
   type InstallCommandRuntime,
   type ModuleSelectionPromptInput,
+  type SourceAccessConfirmationInput,
   type PrewriteInstallScopeConfirmationInput,
 } from "../commands/install.js";
 import { registerResolveCommand } from "../commands/resolve.js";
@@ -125,9 +126,27 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .argument("[target-directory]", "Project directory to inspect before installing SpecLite.")
     .option("--json", "Emit machine-readable CommandResult JSON.")
     .option("--yes", "Authorize command-level writes after preflight gates pass.")
-    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean; yes?: boolean }) => {
+    .option("--source <type>", "Select source type: bundled, npm, private-registry, local-tarball, offline-bundle, git or local.")
+    .option("--source-value <value>", "Provide the source value for custom source types.")
+    .option("--channel <channel>", "Record the requested source channel before resolution.")
+    .option("--version <version>", "Record the requested source version, tag, range or ref before resolution.")
+    .action(async (targetDirectory: string | undefined, commandOptions: {
+      json?: boolean;
+      yes?: boolean;
+      source?: string;
+      sourceValue?: string;
+      channel?: string;
+      version?: string;
+    }) => {
       const installInput = {
-        options: { json: commandOptions.json ?? false, yes: commandOptions.yes ?? false },
+        options: {
+          json: commandOptions.json ?? false,
+          yes: commandOptions.yes ?? false,
+          ...(commandOptions.source === undefined ? {} : { sourceType: commandOptions.source }),
+          ...(commandOptions.sourceValue === undefined ? {} : { sourceValue: commandOptions.sourceValue }),
+          ...(commandOptions.channel === undefined ? {} : { channel: commandOptions.channel }),
+          ...(commandOptions.version === undefined ? {} : { requestedVersion: commandOptions.version }),
+        },
         ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
         ...(commandOptions.json === true
           ? {}
@@ -138,6 +157,8 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
                 ),
               configureProject: async (configInput: ConfigInitializationPromptInput) =>
                 collectConfigInitializationSelection(io, configInput),
+              confirmSourceAccess: async (confirmationInput: SourceAccessConfirmationInput) =>
+                confirmSourceAccess(io, confirmationInput),
               confirmPrewriteInstallScope: async (confirmationInput: PrewriteInstallScopeConfirmationInput) =>
                 confirmPrewriteInstallScope(io, confirmationInput),
             }),
@@ -285,6 +306,13 @@ async function confirmPrewriteInstallScope(
   input: PrewriteInstallScopeConfirmationInput,
 ): Promise<void> {
   await io.prompt(`${input.prompt}\nReview final install scope before files are written. Press Enter to confirm and continue: `);
+}
+
+async function confirmSourceAccess(
+  io: CliIo,
+  input: SourceAccessConfirmationInput,
+): Promise<void> {
+  await io.prompt(`${input.prompt}\nPress Enter to confirm this source access intent and continue: `);
 }
 
 async function collectConfigValue(

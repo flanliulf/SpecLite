@@ -1,0 +1,6 @@
+{
+  "caseId": "source-integrity/source-unreadable-blocked/offline-bundle-unreadable",
+  "sourceType": "offline-bundle",
+  "expectedGate": "mvp-release",
+  "description": "Unreadable offline bundle returns a stable redacted source-integrity issue."
+}

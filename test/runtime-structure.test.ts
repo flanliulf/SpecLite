@@ -3,6 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { runInstallCommand } from "../src/commands/install.js";
+import { applyInstallPlan } from "../src/installer/runtime-structure.js";
+import type { SourceDescriptor } from "../src/source/source-descriptor-schema.js";
 
 const supportedRuntime = {
   nodeVersion: "v22.12.0",
@@ -421,6 +423,173 @@ describe("runtime structure and IDE mirror creation", () => {
     }
   });
 
+  it("rejects unauthorized direct apply without acquiring a lock or writing files", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-unauthorized-"));
+    const sourceDescriptor: SourceDescriptor = {
+      sourceType: "bundled",
+      resolvedRoot: "assets/source/speclite",
+      integrityEvidence: [],
+      trustStatus: "unverified",
+    };
+
+    try {
+      const result = await applyInstallPlan({
+        targetRoot: tempRoot,
+        packageRoot: process.cwd(),
+        sourceDescriptor,
+        installPlan: {
+          sourceDescriptor,
+          selectedModules: [],
+          targetAdapters: [],
+          externalAccesses: [],
+          plannedWrites: [],
+          requiresConfirmation: true,
+          writeAuthorized: false,
+        },
+        selectedModules: [],
+        configPlan: {
+          ok: true,
+          mode: "quick",
+          model: {
+            core: {
+              project_name: "unauthorized-apply",
+              user_name: "SpecLite",
+              communication_language: "Chinese",
+              document_output_language: "Chinese",
+              output_folder: "_speclite-output",
+            },
+            modules: {},
+          },
+          configToml: {
+            core: {
+              project_name: "unauthorized-apply",
+              document_output_language: "Chinese",
+              output_folder: "_speclite-output",
+            },
+          },
+          configUserToml: {
+            core: {
+              user_name: "SpecLite",
+              communication_language: "Chinese",
+            },
+          },
+          plannedWrites: [],
+          summary: "Fixture config plan.",
+          nextActions: [],
+        },
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        issue: expect.objectContaining({
+          issueId: "operation-lock.project-locked",
+          category: "operation-lock",
+          severity: "error",
+          details: {
+            reason: "write-not-authorized",
+          },
+        }),
+        completedSteps: [],
+        pendingSteps: [
+          "runtime-structure",
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ],
+        changedPaths: [],
+      });
+      await assertNoRuntimeApplyWrites(tempRoot);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a write-authorized blocked source descriptor before lock acquisition or writes", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-blocked-source-"));
+    const blockedSourceDescriptor: SourceDescriptor = {
+      sourceType: "bundled",
+      resolvedRoot: "assets/source/speclite",
+      integrityEvidence: [],
+      trustStatus: "blocked",
+    };
+
+    try {
+      const result = await applyInstallPlan({
+        targetRoot: tempRoot,
+        packageRoot: process.cwd(),
+        sourceDescriptor: blockedSourceDescriptor,
+        installPlan: {
+          sourceDescriptor: blockedSourceDescriptor,
+          selectedModules: [],
+          targetAdapters: [],
+          externalAccesses: [],
+          plannedWrites: [],
+          requiresConfirmation: false,
+          writeAuthorized: true,
+        },
+        selectedModules: [],
+        configPlan: {
+          ok: true,
+          mode: "quick",
+          model: {
+            core: {
+              project_name: "blocked-source",
+              user_name: "SpecLite",
+              communication_language: "Chinese",
+              document_output_language: "Chinese",
+              output_folder: "_speclite-output",
+            },
+            modules: {},
+          },
+          configToml: {
+            core: {
+              project_name: "blocked-source",
+              document_output_language: "Chinese",
+              output_folder: "_speclite-output",
+            },
+          },
+          configUserToml: {
+            core: {
+              user_name: "SpecLite",
+              communication_language: "Chinese",
+            },
+          },
+          plannedWrites: [],
+          summary: "Fixture config plan.",
+          nextActions: [],
+        },
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        issue: expect.objectContaining({
+          issueId: "source-integrity.blocked-source",
+          category: "source-integrity",
+          severity: "error",
+          details: {
+            reason: "blocked-source",
+            sourceType: "bundled",
+          },
+        }),
+        completedSteps: [],
+        pendingSteps: [
+          "runtime-structure",
+          "ide-mirror-creation",
+          "manifest-generation",
+          "ready-check",
+          "ready-summary",
+        ],
+        changedPaths: [],
+      });
+      await assertNoRuntimeApplyWrites(tempRoot);
+      expect(JSON.stringify(result)).not.toContain(tempRoot);
+      expect(JSON.stringify(result)).not.toContain(process.cwd());
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("preserves existing human-owned stubs and workflow-owned artifacts", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-preserve-"));
     const humanStub = "# hand edited\n[core]\nproject_name = \"keep\"\n";
@@ -535,11 +704,22 @@ describe("runtime structure and IDE mirror creation", () => {
             category: "ide-mirror",
             severity: "error",
             affectedPath: expect.stringMatching(`^\\${mirrorRoot}/skills/`),
-            details: {
+            details: expect.objectContaining({
               reason: "existing-path-segment-is-symlink",
-            },
+              changedPaths: expect.arrayContaining([
+                "_speclite/config.toml",
+                "_speclite/config.user.toml",
+              ]),
+              manualAction: expect.stringContaining("Review the listed changedPaths"),
+            }),
           }),
         ]);
+        expect(outcome.result.nextActions).toEqual(
+          expect.arrayContaining([
+            expect.stringContaining("Review completed changed paths before rerun:"),
+          ]),
+        );
+        expect(outcome.result.nextActions.join("\n")).toContain("_speclite/config.toml");
         expect(outcome.result.data.completedSteps).toEqual([
           "source-discovery",
           "module-selection",
@@ -561,7 +741,6 @@ describe("runtime structure and IDE mirror creation", () => {
         });
         const serializedResult = JSON.stringify(outcome.result);
         expect(serializedResult).not.toContain("failedStep");
-        expect(serializedResult).not.toContain("changedPaths");
         expect(serializedResult).not.toContain("readySummary");
       } finally {
         await rm(tempRoot, { recursive: true, force: true });
@@ -583,4 +762,20 @@ function mirrorSkillFileIds(
     .filter((entry) => entry.path.startsWith(`${mirrorRoot}/`) && entry.path.endsWith("/SKILL.md"))
     .map((entry) => entry.path.slice(`${mirrorRoot}/`.length).split("/")[0]!)
     .sort();
+}
+
+async function assertNoRuntimeApplyWrites(projectRoot: string): Promise<void> {
+  for (const forbiddenPath of [
+    "_speclite",
+    "_speclite/.lock",
+    "_speclite/_config/manifest.yaml",
+    "_speclite/_config/files-index.json",
+    "_speclite/config.toml",
+    "_speclite/config.user.toml",
+    "_speclite-output",
+  ]) {
+    await expect(lstat(path.join(projectRoot, forbiddenPath))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+  }
 }

@@ -18,7 +18,15 @@ const sourceDescriptor = {
   channel: "stable",
   version: "0.0.0",
   resolvedRoot: "assets/source/speclite",
-  integrityEvidence: [],
+  integrityEvidence: [
+    {
+      kind: "version-lock",
+      packageName: "speclite",
+      version: "0.0.0",
+      lockPath: "package-lock.json",
+      verified: true,
+    },
+  ],
   trustStatus: "trusted",
 } as const;
 
@@ -49,6 +57,7 @@ describe("validate command manifest/index schema validation", () => {
           issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
           checkedCategories: [
             "manifest-schema",
+            "source-integrity",
             "ide-mirror",
             "runtime-path",
             "menu-target",
@@ -73,7 +82,7 @@ describe("validate command manifest/index schema validation", () => {
         },
       });
 
-      const json = renderCommandResultJson(outputs[0]);
+      const json = renderCommandResultJson(outputs[0]!);
       expect(json).not.toContain(tempRoot);
       expect(json).not.toMatch(/\u001b\[[0-9;]*m/);
       expect(json).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
@@ -610,9 +619,9 @@ describe("validate command manifest/index schema validation", () => {
       expect(human).toContain("SpecLite validate");
       expect(human).toContain("Output profile: Evidence");
       expect(human).toContain(
-        "Checked categories: manifest-schema, ide-mirror, runtime-path, menu-target, legacy-namespace, artifact-path, file-integrity",
+        "Checked categories: manifest-schema, source-integrity, ide-mirror, runtime-path, menu-target, legacy-namespace, artifact-path, file-integrity",
       );
-      expect(human).toContain("Not checked categories: environment, source-integrity, operation-lock, update");
+      expect(human).toContain("Not checked categories: environment, operation-lock, update");
       expect(human).toContain("No issues found for checked categories.");
       expect(human).toContain("No conflicts detected.");
       expect(human).not.toMatch(/\u001b\[[0-9;]*m/);
@@ -820,6 +829,7 @@ describe("validate command manifest/index schema validation", () => {
       expect(parsed.status).toBe("failure");
       expect(parsed.data.checkedCategories).toEqual([
         "manifest-schema",
+        "source-integrity",
         "ide-mirror",
         "runtime-path",
         "menu-target",
@@ -1104,7 +1114,12 @@ async function writeInstalledProjection(projectRoot: string): Promise<void> {
       '  channel: "stable"',
       '  version: "0.0.0"',
       '  resolvedRoot: "assets/source/speclite"',
-      "  integrityEvidence: []",
+      "  integrityEvidence:",
+      '    - kind: "version-lock"',
+      '      packageName: "speclite"',
+      '      version: "0.0.0"',
+      '      lockPath: "package-lock.json"',
+      "      verified: true",
       '  trustStatus: "trusted"',
       "installedModules:",
       '  - "core"',

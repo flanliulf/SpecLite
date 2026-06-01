@@ -131,8 +131,8 @@ describe("ReadyCheck minimal local gate", () => {
         sourceDescriptor: {
           sourceType: "bundled",
           resolvedRoot: "assets/source/speclite",
-          integrityEvidence: [],
-          trustStatus: "unverified",
+          integrityEvidence: [bundledPackageLockEvidence()],
+          trustStatus: "trusted",
         },
         installedModules: ["core"],
         ideTargets: [{ id: "claude", status: "configured", targetPath: ".claude/skills", skillCount: 1 }],
@@ -170,7 +170,7 @@ describe("ReadyCheck minimal local gate", () => {
           "sourceDescriptor:",
           '  sourceType: "bundled"',
           '  resolvedRoot: "assets/source/speclite"',
-          "  integrityEvidence: []",
+          ...bundledPackageLockEvidenceYaml(),
           '  trustStatus: "trusted"',
           "installedModules:",
           '  - "sdlc"',
@@ -242,7 +242,7 @@ describe("ReadyCheck minimal local gate", () => {
         sourceDescriptor: {
           sourceType: "bundled",
           resolvedRoot: "assets/source/speclite",
-          integrityEvidence: [],
+          integrityEvidence: [bundledPackageLockEvidence()],
           trustStatus: "trusted",
         },
         installedModules: ["sdlc"],
@@ -282,7 +282,7 @@ describe("ReadyCheck minimal local gate", () => {
           "sourceDescriptor:",
           '  sourceType: "bundled"',
           '  resolvedRoot: "assets/source/speclite"',
-          "  integrityEvidence: []",
+          ...bundledPackageLockEvidenceYaml(),
           '  trustStatus: "trusted"',
           "installedModules:",
           '  - "sdlc"',
@@ -354,7 +354,7 @@ describe("ReadyCheck minimal local gate", () => {
         sourceDescriptor: {
           sourceType: "bundled",
           resolvedRoot: "assets/source/speclite",
-          integrityEvidence: [],
+          integrityEvidence: [bundledPackageLockEvidence()],
           trustStatus: "trusted",
         },
         installedModules: ["sdlc"],
@@ -408,7 +408,7 @@ describe("ReadyCheck minimal local gate", () => {
           "sourceDescriptor:",
           '  sourceType: "bundled"',
           '  resolvedRoot: "assets/source/speclite"',
-          "  integrityEvidence: []",
+          ...bundledPackageLockEvidenceYaml(),
           '  trustStatus: "trusted"',
           "installedModules:",
           '  - "sdlc"',
@@ -480,7 +480,7 @@ describe("ReadyCheck minimal local gate", () => {
         sourceDescriptor: {
           sourceType: "bundled",
           resolvedRoot: "assets/source/speclite",
-          integrityEvidence: [],
+          integrityEvidence: [bundledPackageLockEvidence()],
           trustStatus: "trusted",
         },
         installedModules: ["sdlc"],
@@ -527,6 +527,27 @@ async function writeReadyCheckIndex(tempRoot: string, fileName: string, data: un
     `${JSON.stringify(data, null, 2)}\n`,
     "utf8",
   );
+}
+
+function bundledPackageLockEvidence() {
+  return {
+    kind: "version-lock",
+    packageName: "speclite",
+    version: "0.0.0",
+    lockPath: "package-lock.json",
+    verified: true,
+  } as const;
+}
+
+function bundledPackageLockEvidenceYaml(): string[] {
+  return [
+    "  integrityEvidence:",
+    '    - kind: "version-lock"',
+    '      packageName: "speclite"',
+    '      version: "0.0.0"',
+    '      lockPath: "package-lock.json"',
+    "      verified: true",
+  ];
 }
 
 function createReadyCheckModule(input: {

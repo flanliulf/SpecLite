@@ -26,7 +26,7 @@ describe("bundled source descriptor discovery", () => {
     expect(descriptor).toMatchObject({
       sourceType: "bundled",
       resolvedRoot: "assets/source/speclite",
-      trustStatus: "unverified",
+      trustStatus: "trusted",
     });
     expect(descriptor.integrityEvidence).toEqual([
       expect.objectContaining({
@@ -34,7 +34,7 @@ describe("bundled source descriptor discovery", () => {
         packageName: "speclite",
         version: "0.0.0",
         lockPath: "package-lock.json",
-        verified: false,
+        verified: true,
       }),
     ]);
     expect(JSON.stringify(descriptor)).not.toContain(os.homedir());

@@ -243,6 +243,29 @@ describe("owning SPEC executable anchors", () => {
       writeAuthorized: false,
     })).toMatchObject({ writeAuthorized: false });
 
+    const blockedWritePlan = InstallPlanSchema.safeParse({
+      sourceDescriptor: {
+        sourceType: "bundled",
+        resolvedRoot: "assets/source/speclite",
+        integrityEvidence: [],
+        trustStatus: "blocked",
+      },
+      selectedModules: [],
+      targetAdapters: [],
+      externalAccesses: [],
+      plannedWrites: [],
+      requiresConfirmation: false,
+      writeAuthorized: true,
+    });
+    expect(blockedWritePlan.success).toBe(false);
+    if (!blockedWritePlan.success) {
+      expect(blockedWritePlan.error.issues).toEqual([
+        expect.objectContaining({
+          path: ["sourceDescriptor", "trustStatus"],
+        }),
+      ]);
+    }
+
     expect(ManifestSchema.parse({
       schemaVersion: MANIFEST_SCHEMA_VERSION,
       sourceDescriptor: {

@@ -46,6 +46,16 @@ export function renderInstallHumanOutput(result: InstallCommandResult): string {
 
   const lines = [result.summary];
 
+  lines.push(
+    "Source",
+    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+    "External Access",
+    ...formatInstallExternalAccess(result.data.sourceDescriptor),
+    "Authorization",
+    result.data.sourceDescriptor.trustStatus === "blocked"
+      ? "Source is blocked before write planning."
+      : "Command-level write authorization is separate from source selection.",
+  );
   lines.push(`Manifest version: ${result.data.manifestVersion}`);
   lines.push(`Completed steps: ${formatList(result.data.completedSteps)}`);
   lines.push(`Pending steps: ${formatList(result.data.pendingSteps)}`);
@@ -341,7 +351,12 @@ function renderInstallReadySummary(result: InstallCommandResult): string {
     `Target project: ${result.targetProject}`,
     `Install location: ${result.data.paths.projectRoot}`,
     `Manifest version: ${result.data.manifestVersion}`,
-    `Source descriptor: ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+    "Source",
+    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+    "External Access",
+    ...formatInstallExternalAccess(result.data.sourceDescriptor),
+    "Authorization",
+    "Command-level writes were authorized only after source and install scope confirmation.",
     result.summary,
     "",
     "Completed steps",
@@ -465,17 +480,69 @@ function formatList(values: string[]): string {
 }
 
 function formatSourceDescriptor(sourceDescriptor: InstallCommandResult["data"]["sourceDescriptor"]): string {
-  const sourceLabel =
-    sourceDescriptor.version ?? sourceDescriptor.resolvedRoot ?? sourceDescriptor.requestedVersion ?? "unknown";
-  return `${sourceDescriptor.sourceType} ${sourceLabel} (${sourceDescriptor.trustStatus})`;
+  const fields = [
+    `sourceType=${sourceDescriptor.sourceType}`,
+    sourceDescriptor.channel === undefined ? undefined : `channel=${sourceDescriptor.channel}`,
+    sourceDescriptor.requestedVersion === undefined
+      ? undefined
+      : `requestedVersion=${sourceDescriptor.requestedVersion}`,
+    sourceDescriptor.version === undefined ? undefined : `version=${sourceDescriptor.version}`,
+    sourceDescriptor.resolvedRoot === undefined
+      ? undefined
+      : `resolvedRoot=${sourceDescriptor.resolvedRoot}`,
+    `trustStatus=${sourceDescriptor.trustStatus}`,
+    `evidence=${formatEvidenceSummary(sourceDescriptor.integrityEvidence)}`,
+  ].filter((value): value is string => value !== undefined);
+  return fields.join("; ");
+}
+
+function formatInstallExternalAccess(
+  sourceDescriptor: InstallCommandResult["data"]["sourceDescriptor"],
+): string[] {
+  if (sourceDescriptor.sourceType === "bundled") {
+    return ["No external source access requested."];
+  }
+
+  const sourceValue =
+    sourceDescriptor.resolvedRoot ?? sourceDescriptor.version ?? sourceDescriptor.requestedVersion ?? "redacted-source";
+  const confirmationState =
+    sourceDescriptor.integrityEvidence.length > 0 ||
+    sourceDescriptor.version !== undefined ||
+    sourceDescriptor.contentHash !== undefined
+      ? "confirmed"
+      : "pending";
+  return [
+    [
+      `- sourceType=${sourceDescriptor.sourceType}`,
+      `sourceValue=${sourceValue}`,
+      `reason=${getInstallExternalAccessReason(sourceDescriptor.sourceType)}`,
+      `confirmationState=${confirmationState}`,
+    ].join("; "),
+  ];
+}
+
+function getInstallExternalAccessReason(sourceType: string): string {
+  if (sourceType === "npm") return "Resolve npm package metadata before selecting an installable SpecLite source.";
+  if (sourceType === "private-registry") {
+    return "Resolve private registry package metadata before selecting an installable SpecLite source.";
+  }
+  if (sourceType === "local-tarball") return "Read local tarball metadata before selecting an installable SpecLite source.";
+  if (sourceType === "offline-bundle") return "Read offline bundle metadata before selecting an installable SpecLite source.";
+  if (sourceType === "git") return "Resolve Git source metadata before selecting an installable SpecLite source.";
+  if (sourceType === "local") return "Read local source metadata before selecting an installable SpecLite source.";
+  return "Review source access intent before enabling source resolution.";
 }
 
 function formatOptionalSourceDescriptor(sourceDescriptor: StatusCommandResult["data"]["sourceDescriptor"]): string {
   if (sourceDescriptor === undefined) return "not-available";
-  const details = [
-    sourceDescriptor.sourceType,
-    sourceDescriptor.channel,
-    sourceDescriptor.version ?? sourceDescriptor.resolvedRoot ?? sourceDescriptor.requestedVersion,
-  ].filter((value): value is string => value !== undefined);
-  return details.join(" ");
+  return formatSourceDescriptor(sourceDescriptor);
+}
+
+function formatEvidenceSummary(
+  evidence: InstallCommandResult["data"]["sourceDescriptor"]["integrityEvidence"],
+): string {
+  if (evidence.length === 0) return "none";
+  return evidence
+    .map((entry) => `${entry.kind}:${entry.verified ? "verified" : "unverified"}`)
+    .join(",");
 }

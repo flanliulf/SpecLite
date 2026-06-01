@@ -1,0 +1,13 @@
+{
+  "issueId": "source-integrity.local-source-self-reference",
+  "category": "source-integrity",
+  "severity": "error",
+  "component": "local-source-resolution",
+  "details": {
+    "reason": "local-source-self-reference",
+    "sourceType": "local",
+    "blockedRootKind": "installed-state"
+  },
+  "impact": "The selected local source points at installed state, workflow output, dependency, cache, temporary or build output.",
+  "suggestedNextStep": "Choose a canonical source tree outside installed state, workflow output, dependency, cache, temporary or build output."
+}

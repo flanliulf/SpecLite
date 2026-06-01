@@ -9,7 +9,7 @@
 |------|------|
 | 🔴 open | 3 |
 | 🟡 in-progress | 0 |
-| ✅ resolved | 0 |
+| ✅ resolved | 1 |
 
 ---
 
@@ -53,6 +53,17 @@
 ---
 
 <!-- 已解决事项归档于此，保留用于回顾 -->
+
+### TODO-004: confirmed Git install human output confirmation state 对齐
+
+- **来源**: 5-4 CR round 1-2 (2026-06-01 ~ 2026-06-01)
+- **优先级**: P2
+- **类别**: other
+- **描述**: `src/diagnostics/output.ts:498-514` 的 install external access human output 仍从 `sourceDescriptor` 反推展示并硬编码 `confirmationState=pending`；confirmed Git install 成功解析后，human audit 仍显示 pending。`src/commands/install.ts:223-274` 与 `src/commands/install.ts:415-459` 的 runtime confirmation gate 已保证未确认路径不访问 Git client、confirmed 后才进入 Git resolver，因此该问题不影响 remote access gate 或 Git evidence 写入门禁，但会误导 external access confirmation 的人工审计展示。后续修复应把 `SourceResolutionPlan.externalAccesses` 或等价 display-safe confirmation state 投影到 install result 可渲染数据，并补充 confirmed success / unconfirmed stop human output regression。
+- **涉及文件**: `src/diagnostics/output.ts`, `src/diagnostics/command-result-schema.ts`, `src/commands/install.ts`, `test/git-source-resolution.test.ts`
+- **建议时机**: Story 5.5 source descriptor trust status / redacted reporting 收口时，或下次触及 install human output / external access confirmation 投影时处理；先确认 public result data shape，再同步 JSON schema、human renderer 和 regression tests。
+- **状态**: resolved
+- **解决记录**: Story 5.5 已修复；resolved Git install human output 的 `confirmationState` 基于 resolved evidence/version/contentHash 显示 `confirmed`，未确认 Git access gate 仍保持 `pending`。Story 5.5 CR round 6 reviewer/evaluator 已 approved/pass；本地尚未提交 commit。
 
 ---
 

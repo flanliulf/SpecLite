@@ -1,6 +1,6 @@
 # Story 5.3: Local Tarball, Offline Bundle And Local Path Integrity（本地包、离线包与本地路径完整性）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -62,73 +62,73 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-8）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
-  - [ ] 确认 Story 5.1 的 source selection、external access intent、source summary confirmation、redaction policy 和 unsupported custom source boundary 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得绕过 5.1 直接读取 project-external local sources。
-  - [ ] 确认 Story 5.2 的 registry-specific implementation 不被本 Story 回归；本 Story 只能解除 `local-tarball`、`offline-bundle` 和 `local` 这三个 source type 的 unsupported boundary。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.3 plan-before-write、Story 4.4 operation lock/safe write、Story 5.1 source descriptor projection 和 Story 5.2 trust/evidence helpers 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
+- [x] Task 1: 验证前置实现、工作树和只读边界（AC: 1-8）
+  - [x] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
+  - [x] 确认 Story 5.1 的 source selection、external access intent、source summary confirmation、redaction policy 和 unsupported custom source boundary 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得绕过 5.1 直接读取 project-external local sources。
+  - [x] 确认 Story 5.2 的 registry-specific implementation 不被本 Story 回归；本 Story 只能解除 `local-tarball`、`offline-bundle` 和 `local` 这三个 source type 的 unsupported boundary。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.3 plan-before-write、Story 4.4 operation lock/safe write、Story 5.1 source descriptor projection 和 Story 5.2 trust/evidence helpers 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
 
-- [ ] Task 2: 接入 local tarball artifact resolver（AC: 1, 5-8）
-  - [ ] 在 `src/source/` 的既有 source resolver dispatch 中为 `local-tarball` 接入 tarball-specific resolver；不要在 `src/commands/install.ts`、reporter、fixture helper 或 validation rule 中复制 tarball resolution logic。
-  - [ ] 复用 Story 5.1 的 `SourceResolutionPlan.externalAccesses[]`：读取 tarball 前必须已有 display-safe source label、reason 和 confirmation state；未确认时不读取 tarball、不解包、不获取 operation lock、不写项目文件。
-  - [ ] 验证 tarball 路径指向可读取文件；不可读取、权限不足、不是 regular file 或 parser/extractor 不支持时输出 `source-integrity.tarball-unreadable` 或 owning SPEC 中更具体的 reserved issue，不得输出 raw filesystem error。
-  - [ ] 对 tarball 文件本身按 raw bytes 计算 `sha256` artifact hash，并写入 `SourceDescriptor.contentHash` 和 `integrityEvidence[]` 中的 `content-hash` evidence；不要用解包后目录 hash、npm cache hash、mtime 或平台 metadata 替代 artifact hash。
-  - [ ] 如果 expected hash 或 lock match 成功，`trustStatus` 可以是 `trusted`；如果只有可复现 artifact hash 且用户显式选择并确认，`trustStatus` 可以是 `unverified`；missing evidence、hash mismatch 或 unsupported tarball shape 必须为 `blocked`。
-  - [ ] Public output、manifest/index、fixture snapshot 和 `ValidationIssue.details` 只能展示 display-safe tarball label 或 redacted diagnostic object；不得包含 absolute path、home directory、drive letter、OS-specific separator、cache path 或 temporary extraction path。
+- [x] Task 2: 接入 local tarball artifact resolver（AC: 1, 5-8）
+  - [x] 在 `src/source/` 的既有 source resolver dispatch 中为 `local-tarball` 接入 tarball-specific resolver；不要在 `src/commands/install.ts`、reporter、fixture helper 或 validation rule 中复制 tarball resolution logic。
+  - [x] 复用 Story 5.1 的 `SourceResolutionPlan.externalAccesses[]`：读取 tarball 前必须已有 display-safe source label、reason 和 confirmation state；未确认时不读取 tarball、不解包、不获取 operation lock、不写项目文件。
+  - [x] 验证 tarball 路径指向可读取文件；不可读取、权限不足、不是 regular file 或 parser/extractor 不支持时输出 `source-integrity.tarball-unreadable` 或 owning SPEC 中更具体的 reserved issue，不得输出 raw filesystem error。
+  - [x] 对 tarball 文件本身按 raw bytes 计算 `sha256` artifact hash，并写入 `SourceDescriptor.contentHash` 和 `integrityEvidence[]` 中的 `content-hash` evidence；不要用解包后目录 hash、npm cache hash、mtime 或平台 metadata 替代 artifact hash。
+  - [x] 如果 expected hash 或 lock match 成功，`trustStatus` 可以是 `trusted`；如果只有可复现 artifact hash 且用户显式选择并确认，`trustStatus` 可以是 `unverified`；missing evidence、hash mismatch 或 unsupported tarball shape 必须为 `blocked`。
+  - [x] Public output、manifest/index、fixture snapshot 和 `ValidationIssue.details` 只能展示 display-safe tarball label 或 redacted diagnostic object；不得包含 absolute path、home directory、drive letter、OS-specific separator、cache path 或 temporary extraction path。
 
-- [ ] Task 3: 接入 offline bundle resolver 与 staging redaction（AC: 2, 5-8）
-  - [ ] 在 `src/source/` 中接入 `offline-bundle` resolver，保持与 tarball resolver 相同的 pre-confirmation no-read/no-extract/no-write 顺序。
-  - [ ] 验证 offline bundle 可读取，并对 bundle artifact raw bytes 计算 `sha256` hash；`SourceDescriptor.contentHash` 对 bundle artifact required。
-  - [ ] 如果 bundle 需要 staging/extraction，staging root、temporary extraction path、package-manager cache path 和 cleanup nonce 都是 private implementation state；不得进入 `CommandResult`、manifest/index、files index、fixture snapshot、impact、suggestedNextStep 或 `ValidationIssue.details`。
-  - [ ] Controlled success 和 controlled failure 应 best-effort cleanup staging/extraction directories；cleanup failure 只有影响 target project safety、write eligibility 或 redaction safety 时才产生 public issue，且必须 redacted。
-  - [ ] Offline bundle 不可读、格式不支持、缺少 source payload 或 extraction failure 使用稳定 `source-integrity.offline-bundle-unreadable` 或 owning SPEC 中更具体的 reserved issue；不得把 stack trace、temp path 或 absolute bundle path 写入 public output。
-  - [ ] 解包后的 canonical source tree hash 只能作为 optional expected installed-state input；不得覆盖 artifact `contentHash`，不得把 raw extraction directory hash 当作 source evidence。
+- [x] Task 3: 接入 offline bundle resolver 与 staging redaction（AC: 2, 5-8）
+  - [x] 在 `src/source/` 中接入 `offline-bundle` resolver，保持与 tarball resolver 相同的 pre-confirmation no-read/no-extract/no-write 顺序。
+  - [x] 验证 offline bundle 可读取，并对 bundle artifact raw bytes 计算 `sha256` hash；`SourceDescriptor.contentHash` 对 bundle artifact required。
+  - [x] 如果 bundle 需要 staging/extraction，staging root、temporary extraction path、package-manager cache path 和 cleanup nonce 都是 private implementation state；不得进入 `CommandResult`、manifest/index、files index、fixture snapshot、impact、suggestedNextStep 或 `ValidationIssue.details`。
+  - [x] Controlled success 和 controlled failure 应 best-effort cleanup staging/extraction directories；cleanup failure 只有影响 target project safety、write eligibility 或 redaction safety 时才产生 public issue，且必须 redacted。
+  - [x] Offline bundle 不可读、格式不支持、缺少 source payload 或 extraction failure 使用稳定 `source-integrity.offline-bundle-unreadable` 或 owning SPEC 中更具体的 reserved issue；不得把 stack trace、temp path 或 absolute bundle path 写入 public output。
+  - [x] 解包后的 canonical source tree hash 只能作为 optional expected installed-state input；不得覆盖 artifact `contentHash`，不得把 raw extraction directory hash 当作 source evidence。
 
-- [ ] Task 4: 实现 local path snapshot allowlist 与 self-reference guard（AC: 3-4, 6-8）
-  - [ ] 在 `src/source/` 中集中实现 local path resolver / snapshot hasher；不得在 installer runner、manifest generator、validation rule 或 fixture helper 中复制 allowlist/hash 规则。
-  - [ ] Local path source 进入 snapshot 前必须运行 self-reference guard，并基于 normalized project root、resolved source root 和 blocked root kinds 判断是否指向 target project installed state、IDE execution plane、workflow output、dependency、cache、temporary 或 build output。
-  - [ ] 至少阻断 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary 和 build output；命中时输出 `source-integrity.local-source-self-reference`，`details.reason` 固定为 `local-source-self-reference`，`details.blockedRootKind` 使用稳定枚举值，不包含 raw path。
-  - [ ] Snapshot hash scope 只能覆盖 canonical source tree allowlist。Allowlist 应来自 source discovery / module metadata / canonical source package boundaries；如果实际 source layout 尚未由前序实现固化，先读取 `assets/source/speclite/` 和前置 source discovery anchors，不得对整个 repository 做递归 hash。
-  - [ ] Snapshot hash 必须排除 `.git`、temporary files、`node_modules`、fixture output、本地 cache directories、build output、editor/OS metadata、safe-write temp files、operation lock 和所有 project-external staging roots。
-  - [ ] Local source snapshot hash 使用 deterministic traversal：project-relative POSIX path normalization、stable lexicographic ordering、raw file bytes、fixed inclusion/exclusion policy；不得依赖 filesystem traversal order、mtime、ctime、inode、owner、platform separator 或 async completion order。
-  - [ ] Local absolute source path 不得进入 stable public JSON、manifest/index、fixture snapshot 或 human-readable output；对 project-external local source 只能展示 display-safe label 或 `RedactedExternalPathDiagnostic` shape。
+- [x] Task 4: 实现 local path snapshot allowlist 与 self-reference guard（AC: 3-4, 6-8）
+  - [x] 在 `src/source/` 中集中实现 local path resolver / snapshot hasher；不得在 installer runner、manifest generator、validation rule 或 fixture helper 中复制 allowlist/hash 规则。
+  - [x] Local path source 进入 snapshot 前必须运行 self-reference guard，并基于 normalized project root、resolved source root 和 blocked root kinds 判断是否指向 target project installed state、IDE execution plane、workflow output、dependency、cache、temporary 或 build output。
+  - [x] 至少阻断 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary 和 build output；命中时输出 `source-integrity.local-source-self-reference`，`details.reason` 固定为 `local-source-self-reference`，`details.blockedRootKind` 使用稳定枚举值，不包含 raw path。
+  - [x] Snapshot hash scope 只能覆盖 canonical source tree allowlist。Allowlist 应来自 source discovery / module metadata / canonical source package boundaries；如果实际 source layout 尚未由前序实现固化，先读取 `assets/source/speclite/` 和前置 source discovery anchors，不得对整个 repository 做递归 hash。
+  - [x] Snapshot hash 必须排除 `.git`、temporary files、`node_modules`、fixture output、本地 cache directories、build output、editor/OS metadata、safe-write temp files、operation lock 和所有 project-external staging roots。
+  - [x] Local source snapshot hash 使用 deterministic traversal：project-relative POSIX path normalization、stable lexicographic ordering、raw file bytes、fixed inclusion/exclusion policy；不得依赖 filesystem traversal order、mtime、ctime、inode、owner、platform separator 或 async completion order。
+  - [x] Local absolute source path 不得进入 stable public JSON、manifest/index、fixture snapshot 或 human-readable output；对 project-external local source 只能展示 display-safe label 或 `RedactedExternalPathDiagnostic` shape。
 
-- [ ] Task 5: 推导 local source trustStatus 与 write eligibility（AC: 5-7）
-  - [ ] `trusted` 只能由 expected hash、lock match 或 owning SPEC 明确允许的等价 trust anchor 产生；local tarball、offline bundle 或 local path source 不得因为 source type、本机文件存在、用户选择、企业内网来源或离线来源而自动 trusted。
-  - [ ] 有 artifact hash / snapshot hash 等可复现 evidence、没有 expected hash 或 lock match、且没有 blocking issue 时，source 使用 `trustStatus: "unverified"`；只有用户显式选择并确认该 source 后才能进入 install planning。
-  - [ ] Missing evidence、hash mismatch、lock mismatch、self-reference、unsupported source shape、source policy rejection、unreadable artifact 或 failed evidence verification 必须产生 `source-integrity` error，`trustStatus: "blocked"`，并阻止 InstallPlan planned writes。
-  - [ ] `integrityEvidence[].verified === false` 只能表示 evidence 可复现但没有 trust anchor 背书；不得用于表示 verification failure。Verification failure 必须变成 blocked issue。
-  - [ ] `SourceDescriptor.integrityEvidence` 排序遵守 CommandResult SPEC：registry integrity / version lock -> content hash -> git commit；本 Story 产生的 `content-hash` entries 同 kind 多条按 normalized stable key 排序。
-  - [ ] `--yes` 或 command-level write confirmation 不得自动接受 missing evidence、hash mismatch、self-reference、unsupported source、unreadable artifact 或 source policy rejection。
+- [x] Task 5: 推导 local source trustStatus 与 write eligibility（AC: 5-7）
+  - [x] `trusted` 只能由 expected hash、lock match 或 owning SPEC 明确允许的等价 trust anchor 产生；local tarball、offline bundle 或 local path source 不得因为 source type、本机文件存在、用户选择、企业内网来源或离线来源而自动 trusted。
+  - [x] 有 artifact hash / snapshot hash 等可复现 evidence、没有 expected hash 或 lock match、且没有 blocking issue 时，source 使用 `trustStatus: "unverified"`；只有用户显式选择并确认该 source 后才能进入 install planning。
+  - [x] Missing evidence、hash mismatch、lock mismatch、self-reference、unsupported source shape、source policy rejection、unreadable artifact 或 failed evidence verification 必须产生 `source-integrity` error，`trustStatus: "blocked"`，并阻止 InstallPlan planned writes。
+  - [x] `integrityEvidence[].verified === false` 只能表示 evidence 可复现但没有 trust anchor 背书；不得用于表示 verification failure。Verification failure 必须变成 blocked issue。
+  - [x] `SourceDescriptor.integrityEvidence` 排序遵守 CommandResult SPEC：registry integrity / version lock -> content hash -> git commit；本 Story 产生的 `content-hash` entries 同 kind 多条按 normalized stable key 排序。
+  - [x] `--yes` 或 command-level write confirmation 不得自动接受 missing evidence、hash mismatch、self-reference、unsupported source、unreadable artifact 或 source policy rejection。
 
-- [ ] Task 6: 维护 CommandResult、manifest/index、status 和 validate 边界（AC: 1-8）
-  - [ ] `install --json` 继续输出 `CommandResult<InstallCommandData>`，`command: "install"`，`data.paths.projectRoot: "."`；不得新增未契约化 `sourceSummary`、`localSourceReport`、`stagingPath` 或 automation-only blob。
-  - [ ] Manifest/index 只投影 source descriptor owning SPEC 允许的 fields；不得加入 raw tarball path、offline bundle path、local path、extraction root、cache path、artifact file name、host-specific temporary metadata 或 parser implementation fields。
-  - [ ] `speclite status` 只读取本地 manifest/source descriptor summary；不得重新读取 tarball、重新解包 offline bundle、重新扫描 project-external local path、访问 package-manager cache 或执行 implicit update/source freshness check。
-  - [ ] `speclite validate` 只检查本地 recorded source descriptor、integrity evidence shape、manifest/index、files index、IDE mirrors 和 local installed-state hash baseline；不得访问 npm registry、private registry、Git remote、offline bundle origin、tarball origin、project-external local source 或 temporary extraction roots。
-  - [ ] Source resolver / install planning 阶段的本地来源问题使用 `source-integrity`；已安装文件、files index 或 IDE mirror drift 使用 `file-integrity` 或 `ide-mirror`，不得混用 category。
-  - [ ] Human-readable output 使用 Evidence profile：Summary、Source、External Access、Authorization、Issues、Next Actions；`trusted`、`unverified`、`blocked` 必须有文本等价解释，不依赖颜色或图标。
-  - [ ] `NO_COLOR`、non-TTY、CI、Windows path portability 和窄终端下，source type、display-safe label、content hash summary、trustStatus、issueId 和 next action 仍必须纯文本可读。
+- [x] Task 6: 维护 CommandResult、manifest/index、status 和 validate 边界（AC: 1-8）
+  - [x] `install --json` 继续输出 `CommandResult<InstallCommandData>`，`command: "install"`，`data.paths.projectRoot: "."`；不得新增未契约化 `sourceSummary`、`localSourceReport`、`stagingPath` 或 automation-only blob。
+  - [x] Manifest/index 只投影 source descriptor owning SPEC 允许的 fields；不得加入 raw tarball path、offline bundle path、local path、extraction root、cache path、artifact file name、host-specific temporary metadata 或 parser implementation fields。
+  - [x] `speclite status` 只读取本地 manifest/source descriptor summary；不得重新读取 tarball、重新解包 offline bundle、重新扫描 project-external local path、访问 package-manager cache 或执行 implicit update/source freshness check。
+  - [x] `speclite validate` 只检查本地 recorded source descriptor、integrity evidence shape、manifest/index、files index、IDE mirrors 和 local installed-state hash baseline；不得访问 npm registry、private registry、Git remote、offline bundle origin、tarball origin、project-external local source 或 temporary extraction roots。
+  - [x] Source resolver / install planning 阶段的本地来源问题使用 `source-integrity`；已安装文件、files index 或 IDE mirror drift 使用 `file-integrity` 或 `ide-mirror`，不得混用 category。
+  - [x] Human-readable output 使用 Evidence profile：Summary、Source、External Access、Authorization、Issues、Next Actions；`trusted`、`unverified`、`blocked` 必须有文本等价解释，不依赖颜色或图标。
+  - [x] `NO_COLOR`、non-TTY、CI、Windows path portability 和窄终端下，source type、display-safe label、content hash summary、trustStatus、issueId 和 next action 仍必须纯文本可读。
 
-- [ ] Task 7: 编写 focused tests 与 source-integrity fixture assertions（AC: 1-8）
-  - [ ] Unit tests 覆盖 local tarball：readable artifact hash、`contentHash` required、`content-hash` evidence、expected hash match -> `trusted`、no trust anchor -> `unverified`、hash mismatch/missing evidence/unreadable -> `blocked`。
-  - [ ] Unit tests 覆盖 offline bundle：artifact hash、private extraction root、cleanup best-effort redaction、optional canonical tree hash 与 artifact `contentHash` 分离、unreadable/extraction failure diagnostics。
-  - [ ] Unit tests 覆盖 local path snapshot：allowlist inclusion、required exclusions、stable traversal ordering、raw-byte hash、path separator normalization、mtime/platform metadata ignored。
-  - [ ] Unit tests 覆盖 self-reference guard：`_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary、build output 各自产生 stable `blockedRootKind`。
-  - [ ] Diagnostics/redaction tests 覆盖 absolute path、home directory、drive letter、OS-specific separator、cache path、temporary extraction path、safe-write temp path、stack trace、raw fs error 和 credentials 不进入 public JSON、human-readable output 或 fixture snapshots。
-  - [ ] JSON contract tests 覆盖 `CommandResult<InstallCommandData>`、`data.sourceDescriptor.contentHash`、`integrityEvidence` 排序、`issues` 排序、`nextActions` 排序、path policy 和 no staging/cache leakage。
-  - [ ] Validate/status no-access tests 使用已安装 local descriptor fixture，断言不会重新读取 project-external source artifact、offline bundle origin、temporary extraction root、package-manager cache 或 local source root。
-  - [ ] Fixture assertions 仅覆盖 Story 5.3 范围：`source-integrity/local-source-snapshot-unverified`、`source-integrity/local-source-path-redacted`、`source-integrity/local-source-installed-state-blocked`、`source-integrity/artifact-hash-mismatch-blocked`、`source-integrity/source-unreadable-blocked` 中的 tarball/offline unreadable sub-cases；不要提前实现 Story 5.4 Git pinning、Story 5.5 full reporting 或 Epic 6 full fixture matrix。
-  - [ ] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络；local artifacts 使用 temporary test files、fixture source packages 或 injected filesystem/extractor。
+- [x] Task 7: 编写 focused tests 与 source-integrity fixture assertions（AC: 1-8）
+  - [x] Unit tests 覆盖 local tarball：readable artifact hash、`contentHash` required、`content-hash` evidence、expected hash match -> `trusted`、no trust anchor -> `unverified`、hash mismatch/missing evidence/unreadable -> `blocked`。
+  - [x] Unit tests 覆盖 offline bundle：artifact hash、private extraction root、cleanup best-effort redaction、optional canonical tree hash 与 artifact `contentHash` 分离、unreadable/extraction failure diagnostics。
+  - [x] Unit tests 覆盖 local path snapshot：allowlist inclusion、required exclusions、stable traversal ordering、raw-byte hash、path separator normalization、mtime/platform metadata ignored。
+  - [x] Unit tests 覆盖 self-reference guard：`_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary、build output 各自产生 stable `blockedRootKind`。
+  - [x] Diagnostics/redaction tests 覆盖 absolute path、home directory、drive letter、OS-specific separator、cache path、temporary extraction path、safe-write temp path、stack trace、raw fs error 和 credentials 不进入 public JSON、human-readable output 或 fixture snapshots。
+  - [x] JSON contract tests 覆盖 `CommandResult<InstallCommandData>`、`data.sourceDescriptor.contentHash`、`integrityEvidence` 排序、`issues` 排序、`nextActions` 排序、path policy 和 no staging/cache leakage。
+  - [x] Validate/status no-access tests 使用已安装 local descriptor fixture，断言不会重新读取 project-external source artifact、offline bundle origin、temporary extraction root、package-manager cache 或 local source root。
+  - [x] Fixture assertions 仅覆盖 Story 5.3 范围：`source-integrity/local-source-snapshot-unverified`、`source-integrity/local-source-path-redacted`、`source-integrity/local-source-installed-state-blocked`、`source-integrity/artifact-hash-mismatch-blocked`、`source-integrity/source-unreadable-blocked` 中的 tarball/offline unreadable sub-cases；不要提前实现 Story 5.4 Git pinning、Story 5.5 full reporting 或 Epic 6 full fixture matrix。
+  - [x] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络；local artifacts 使用 temporary test files、fixture source packages 或 injected filesystem/extractor。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-8）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 local source resolver、tarball/offline bundle resolver、source descriptor schema、install plan、diagnostics output、redaction、validate no-access 和 affected source-integrity fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 local source/redaction/no-access tests、不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1、Story 5.2、已有 Story 1-4 文件、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 5.4 Git source pinning、Story 5.5 source descriptor full trust reporting、Epic 6 fixture matrix、Post-MVP `doctor` / `sync` / `uninstall`、enterprise allowlist、signatures、provenance verification 或完整 source lockfile lifecycle。
+- [x] Task 8: 本地验证与范围控制（AC: 1-8）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 local source resolver、tarball/offline bundle resolver、source descriptor schema、install plan、diagnostics output、redaction、validate no-access 和 affected source-integrity fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 local source/redaction/no-access tests、不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1、Story 5.2、已有 Story 1-4 文件、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 5.4 Git source pinning、Story 5.5 source descriptor full trust reporting、Epic 6 fixture matrix、Post-MVP `doctor` / `sync` / `uninstall`、enterprise allowlist、signatures、provenance verification 或完整 source lockfile lifecycle。
 
 ## Dev Notes（开发备注）
 
@@ -293,17 +293,61 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- 2026-06-01 16:25 CST：`python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` 因缺 `tomllib` 失败；按 Story fallback 使用 `python3.12` 成功解析 workflow。
+- 2026-06-01 16:25 CST：已将 `sprint-status.yaml` 中 Story 5.3 从 `ready-for-dev` 标记为 `in-progress`。
+- 2026-06-01 16:27 CST：完成 Task 1 preflight；确认 `package.json` / `package-lock.json` / `src/` / `test/` 当前可读，`tests/` 与 root `fixtures/` 当前不存在，实际 fixture 位于 `test/fixtures/`。
+- 2026-06-01 16:30 CST：新增 `test/local-source-integrity.test.ts` RED tests，初始失败于缺少 `src/source/local-source-resolver.ts`。
+- 2026-06-01 16:33 CST：实现 local tarball/offline/local path resolver、source-integrity local issue helpers 和 install confirmation dispatch；`npx vitest run test/local-source-integrity.test.ts` 通过。
+- 2026-06-01 16:35 CST：补充 validate/status no-access 与 installed descriptor shape tests；focused `source-selection` / `registry-source-resolution` / `status` / `validate` / `local-source-integrity` tests 通过。
+- 2026-06-01 16:37 CST：补充 Story 5.3 source-integrity fixture assertions；`npm test` 通过，32 files / 234 tests。
+- 2026-06-01 16:40 CST：补齐 `source-integrity/local-source-path-redacted` fixture assertion 后重新运行 `npx vitest run test/local-source-integrity.test.ts`、`npm test`、`npm run build`，全部通过；Story 5.3 状态置为 `review`。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context created by bmad-create-story sub-agent for Story 5.3 only.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Task 1 preflight 完成：Story 5.1 source selection/no access-no write/redaction anchors 和 Story 5.2 registry trust/evidence/validate local-only anchors 已在当前源码中确认；Story 5.3 local tarball/offline/local path resolver 尚未实现，后续只解除这三个 source type 的 unsupported boundary。
+- 当前 worktree 已确认有大量非本 Story dirty/untracked 文件；本轮仅修改 Story 5.3、`sprint-status.yaml`、5.3 进度文件以及后续 Story 5.3 直接相关源码/测试。
+- 实现 local tarball/offline bundle artifact raw-byte `sha256` content hash，写入 `SourceDescriptor.contentHash` 与 `content-hash` evidence；expected hash mismatch 产生 blocked `source-integrity.hash-mismatch`。
+- 实现 local path snapshot allowlist hasher：deterministic POSIX relative traversal、raw bytes、stable ordering，并排除 `.git`、`node_modules`、fixture/workflow output、cache/temp/build/editor metadata。
+- 实现 local source self-reference guard：阻断 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary、build output，并输出 redaction-safe `blockedRootKind`。
+- Install dispatch 现在对 `local-tarball`、`offline-bundle`、`local` 继承 Story 5.1 confirmation boundary：未确认时不读取 source、不获取 operation lock、不写项目文件；确认后进入 local resolver。
+- `speclite status` 仍只读 installed manifest summary；`speclite validate` 对 local source 只检查 recorded descriptor/content-hash evidence shape，不重新读取 tarball、offline bundle 或 local source origin。
+- Tests 覆盖 local resolver trust/evidence matrix、redaction、self-reference、install no-access、confirmed install/status/validate no-access、fixture expected issues/source descriptor，以及 Story 5.2 registry regression。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `_bmad-output/implementation-artifacts/code-reviews/5-3-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-3-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-3-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/5-3-local-tarball-offline-bundle-and-local-path-integrity.md`
+- `src/commands/install.ts`
+- `src/source/local-source-resolver.ts`
+- `src/source/source-integrity.ts`
+- `src/validation/issue-model.ts`
+- `src/validation/rules/source-integrity.ts`
+- `test/local-source-integrity.test.ts`
+- `test/fixtures/source-integrity/artifact-hash-mismatch-blocked/expected/issue.json`
+- `test/fixtures/source-integrity/artifact-hash-mismatch-blocked/fixture-case.json`
+- `test/fixtures/source-integrity/local-source-installed-state-blocked/expected/issue.json`
+- `test/fixtures/source-integrity/local-source-installed-state-blocked/fixture-case.json`
+- `test/fixtures/source-integrity/local-source-path-redacted/expected/source-descriptor.json`
+- `test/fixtures/source-integrity/local-source-path-redacted/fixture-case.json`
+- `test/fixtures/source-integrity/local-source-snapshot-unverified/expected/source-descriptor.json`
+- `test/fixtures/source-integrity/local-source-snapshot-unverified/fixture-case.json`
+- `test/fixtures/source-integrity/local-source-snapshot-unverified/input/source/core-skills/module-help.csv`
+- `test/fixtures/source-integrity/local-source-snapshot-unverified/input/source/core-skills/module.yaml`
+- `test/fixtures/source-integrity/local-source-snapshot-unverified/input/source/core-skills/speclite-dev-story/SKILL.md`
+- `test/fixtures/source-integrity/source-unreadable-blocked/local-tarball-unreadable/expected/issue.json`
+- `test/fixtures/source-integrity/source-unreadable-blocked/local-tarball-unreadable/fixture-case.json`
+- `test/fixtures/source-integrity/source-unreadable-blocked/offline-bundle-unreadable/expected/issue.json`
+- `test/fixtures/source-integrity/source-unreadable-blocked/offline-bundle-unreadable/fixture-case.json`
+
+### Change Log（变更日志）
+
+- 2026-06-01：实现 Story 5.3 local tarball/offline bundle/local path source integrity、redaction、validate/status no-access focused coverage，并将 Story 置为 review。

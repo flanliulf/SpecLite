@@ -1,0 +1,16 @@
+{
+  "issueId": "source-integrity.authentication-required",
+  "category": "source-integrity",
+  "severity": "error",
+  "component": "registry-source-resolution",
+  "details": {
+    "reason": "authentication-required",
+    "sourceType": "private-registry",
+    "packageName": "@acme/private-source",
+    "requestedVersion": "redacted-selector",
+    "channel": "redacted-channel",
+    "registryKind": "private"
+  },
+  "impact": "Registry source resolution cannot continue without valid access to the selected registry.",
+  "suggestedNextStep": "Confirm registry credentials outside public output and rerun source resolution."
+}

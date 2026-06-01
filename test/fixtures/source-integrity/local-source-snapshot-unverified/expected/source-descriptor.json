@@ -1,0 +1,14 @@
+{
+  "sourceType": "local",
+  "resolvedRoot": "local-source",
+  "contentHash": "sha256:eed68b22d645b06faea12781c7e77c14f6bde4b31e5b311d6b33c65af9e419fa",
+  "integrityEvidence": [
+    {
+      "kind": "content-hash",
+      "algorithm": "sha256",
+      "value": "sha256:eed68b22d645b06faea12781c7e77c14f6bde4b31e5b311d6b33c65af9e419fa",
+      "verified": false
+    }
+  ],
+  "trustStatus": "unverified"
+}

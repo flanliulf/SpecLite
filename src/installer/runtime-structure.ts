@@ -29,11 +29,14 @@ export type ApplyInstallPlanResult =
       issue: ValidationIssue;
       completedSteps: string[];
       pendingSteps: string[];
+      changedPaths: string[];
     };
 
 export async function applyInstallPlan(input: {
   targetRoot: string;
   packageRoot: string;
+  sourceRoot?: string;
+  sourceRefRoot?: string;
   sourceDescriptor: SourceDescriptor;
   installPlan: InstallPlan;
   selectedModules: OfficialModule[];
@@ -55,6 +58,23 @@ export async function applyInstallPlan(input: {
       },
       completedSteps: [],
       pendingSteps: createApplyPendingSteps([]),
+      changedPaths: [],
+    };
+  }
+
+  const blockedSourceDescriptor =
+    input.installPlan.sourceDescriptor.trustStatus === "blocked"
+      ? input.installPlan.sourceDescriptor
+      : input.sourceDescriptor.trustStatus === "blocked"
+        ? input.sourceDescriptor
+        : undefined;
+  if (blockedSourceDescriptor !== undefined) {
+    return {
+      ok: false,
+      issue: createBlockedSourceIssue(blockedSourceDescriptor),
+      completedSteps: [],
+      pendingSteps: createApplyPendingSteps([]),
+      changedPaths: [],
     };
   }
 
@@ -62,10 +82,11 @@ export async function applyInstallPlan(input: {
     projectRoot: input.targetRoot,
     operation: "install",
   });
-  if (!lock.ok) return createApplyFailure(lock.issue, []);
+  if (!lock.ok) return createApplyFailure(lock.issue, [], []);
 
   const fileEntries: FilesIndexEntry[] = [];
   const completedSteps: string[] = [];
+  const changedPaths: string[] = [];
   const selectedTargetIds = CANONICAL_TARGET_ORDER.filter((targetId) =>
     input.installPlan.targetAdapters.some((adapter) => adapter.targetId === targetId),
   );
@@ -87,7 +108,7 @@ export async function applyInstallPlan(input: {
         projectRoot: input.targetRoot,
         relativePath: directory,
       });
-      if (!created.ok) return createApplyFailure(created.issue, completedSteps);
+      if (!created.ok) return createApplyFailure(created.issue, completedSteps, changedPaths);
     }
     completedSteps.push("runtime-structure");
 
@@ -113,7 +134,8 @@ export async function applyInstallPlan(input: {
         contents: write.contents,
         component: "runtime-structure-writer",
       });
-      if (!result.ok) return createApplyFailure(result.issue, completedSteps);
+      if (!result.ok) return createApplyFailure(result.issue, completedSteps, changedPaths);
+      changedPaths.push(result.path);
       fileEntries.push({
         schemaVersion: "speclite.files-index.v1",
         path: result.path,
@@ -136,7 +158,8 @@ export async function applyInstallPlan(input: {
           contents: createHumanStubContents(plannedWrite.path),
           component: "human-owned-stub-writer",
         });
-        if (!result.ok) return createApplyFailure(result.issue, completedSteps);
+        if (!result.ok) return createApplyFailure(result.issue, completedSteps, changedPaths);
+        changedPaths.push(result.path);
         fileEntries.push({
           schemaVersion: "speclite.files-index.v1",
           path: result.path,
@@ -165,11 +188,16 @@ export async function applyInstallPlan(input: {
     const mirror = await writeIdeMirrors({
       projectRoot: input.targetRoot,
       packageRoot: input.packageRoot,
+      ...(input.sourceRoot === undefined ? {} : { sourceRoot: input.sourceRoot }),
+      ...(input.sourceRefRoot === undefined ? {} : { sourceRefRoot: input.sourceRefRoot }),
       selectedModules: input.selectedModules,
       targetAdapters: input.installPlan.targetAdapters,
       artifactRoots,
+      onChangedPath: (relativePath) => {
+        changedPaths.push(relativePath);
+      },
     });
-    if (!mirror.ok) return createApplyFailure(mirror.issue, completedSteps);
+    if (!mirror.ok) return createApplyFailure(mirror.issue, completedSteps, changedPaths);
 
     fileEntries.push(...mirror.files);
     completedSteps.push("ide-mirror-creation");
@@ -218,7 +246,8 @@ export async function applyInstallPlan(input: {
         contents: `${index.contents}\n`,
         component: "manifest-generator",
       });
-      if (!result.ok) return createApplyFailure(result.issue, completedSteps);
+      if (!result.ok) return createApplyFailure(result.issue, completedSteps, changedPaths);
+      changedPaths.push(result.path);
       fileEntries.push({
         schemaVersion: "speclite.files-index.v1",
         path: result.path,
@@ -238,7 +267,8 @@ export async function applyInstallPlan(input: {
       contents: `${JSON.stringify(filesIndex, null, 2)}\n`,
       component: "manifest-generator",
     });
-    if (!filesIndexWrite.ok) return createApplyFailure(filesIndexWrite.issue, completedSteps);
+    if (!filesIndexWrite.ok) return createApplyFailure(filesIndexWrite.issue, completedSteps, changedPaths);
+    changedPaths.push(filesIndexWrite.path);
     completedSteps.push("manifest-generation");
 
     return {
@@ -258,12 +288,49 @@ export async function applyInstallPlan(input: {
 function createApplyFailure(
   issue: ValidationIssue,
   completedSteps: string[],
+  changedPaths: string[],
 ): Extract<ApplyInstallPlanResult, { ok: false }> {
+  const stableChangedPaths = [...new Set(changedPaths)].sort();
   return {
     ok: false,
-    issue,
+    issue: addPartialFailureChangedPaths(issue, stableChangedPaths),
     completedSteps: [...completedSteps],
     pendingSteps: createApplyPendingSteps(completedSteps),
+    changedPaths: stableChangedPaths,
+  };
+}
+
+function addPartialFailureChangedPaths(issue: ValidationIssue, changedPaths: string[]): ValidationIssue {
+  if (changedPaths.length === 0) return issue;
+
+  const manualAction =
+    "Review the listed changedPaths before rerunning the command; only completed safe-write rename paths are included.";
+  const details = issue.details ?? {};
+  return {
+    ...issue,
+    details: {
+      ...details,
+      changedPaths,
+      manualAction:
+        typeof details.manualAction === "string"
+          ? `${details.manualAction} ${manualAction}`
+          : manualAction,
+    },
+  };
+}
+
+function createBlockedSourceIssue(sourceDescriptor: SourceDescriptor): ValidationIssue {
+  return {
+    issueId: "source-integrity.blocked-source",
+    category: "source-integrity",
+    severity: "error",
+    component: "install-plan-apply",
+    details: {
+      reason: "blocked-source",
+      sourceType: sourceDescriptor.sourceType,
+    },
+    impact: "Blocked source descriptors cannot enter the install write phase.",
+    suggestedNextStep: "Resolve the source-integrity issue before enabling install writes.",
   };
 }
 

@@ -1,0 +1,8 @@
+{
+  "issueId": "source-integrity.missing-evidence",
+  "category": "source-integrity",
+  "severity": "error",
+  "component": "bundled-source",
+  "impact": "Bundled official source cannot be used without reproducible packaging evidence.",
+  "suggestedNextStep": "Restore package-lock.json or add a packaging evidence anchor before continuing install."
+}

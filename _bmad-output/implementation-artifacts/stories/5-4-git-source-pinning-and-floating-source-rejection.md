@@ -1,6 +1,6 @@
 # Story 5.4: Git Source Pinning And Floating Source Rejection（Git 来源固定与浮动来源拒绝）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -56,72 +56,72 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
-  - [ ] 确认 Story 5.1 的 source selection、Git source external access intent、source summary confirmation、redaction policy 和 unsupported custom source boundary 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得绕过 5.1 直接访问 Git remote。
-  - [ ] 确认 Story 5.2 的 registry resolver 与 Story 5.3 的 local artifact/path resolver 不被本 Story 回归；本 Story 只能解除 `git` source type 的 unsupported boundary。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.3 plan-before-write、Story 4.4 operation lock/safe write、Story 5.1 source descriptor projection、Story 5.2/5.3 trust/evidence helper patterns 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
+- [x] Task 1: 验证前置实现、工作树和只读边界（AC: 1-7）
+  - [x] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4 update/repair write anchors 与 Epic 5 source anchors 仍必须按当前源码验证。
+  - [x] 确认 Story 5.1 的 source selection、Git source external access intent、source summary confirmation、redaction policy 和 unsupported custom source boundary 是否真实实现；若不存在，先按前序 story 顺序补齐或记录 blocker，不得绕过 5.1 直接访问 Git remote。
+  - [x] 确认 Story 5.2 的 registry resolver 与 Story 5.3 的 local artifact/path resolver 不被本 Story 回归；本 Story 只能解除 `git` source type 的 unsupported boundary。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.3 plan-before-write、Story 4.4 operation lock/safe write、Story 5.1 source descriptor projection、Story 5.2/5.3 trust/evidence helper patterns 是否真实存在；若不存在，不得创建私有 JSON shape、私有 trust model 或隐藏写入流程。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为。
 
-- [ ] Task 2: 接入 Git source resolution entrypoint（AC: 1, 4-5）
-  - [ ] 在 `src/source/` 的既有 source resolver dispatch 中为 `git` 接入 Git-specific resolver；不要在 `src/commands/install.ts`、reporter、fixture helper 或 validation rule 中复制 Git resolution logic。
-  - [ ] 复用 Story 5.1 的 source selection model：`sourceType` 只能是 `git`，用户输入的 branch、tag、ref、URL selector 或 raw ref 进入 `requestedVersion`、internal `requestedRef` 或 display-safe planning state，resolved commit SHA 才能进入 `git-commit` evidence。
-  - [ ] Git remote access 必须发生在 `SourceResolutionPlan` 已声明 external access intent 且用户确认之后；未确认时只展示 redacted remote label、requested ref、访问原因和 confirmation state，不访问 remote、不 fetch、不 clone、不获取 operation lock、不写入项目文件。
-  - [ ] Git resolver 只负责解析 remote/ref 到 commit evidence 和 source descriptor；不得执行 package install、修改 `node_modules`、写 package-lock、运行 Git hooks、执行 remote-provided scripts 或把 temporary Git checkout 当成 public artifact。
-  - [ ] 如果实现选择调用 Git CLI，必须通过 wrapper 隔离 stdout/stderr、exit status、timeout 和 redaction；不得让 raw Git error、credential-bearing remote 或 private query string 直接进入 `ValidationIssue.details`、human output 或 fixture snapshots。
+- [x] Task 2: 接入 Git source resolution entrypoint（AC: 1, 4-5）
+  - [x] 在 `src/source/` 的既有 source resolver dispatch 中为 `git` 接入 Git-specific resolver；不要在 `src/commands/install.ts`、reporter、fixture helper 或 validation rule 中复制 Git resolution logic。
+  - [x] 复用 Story 5.1 的 source selection model：`sourceType` 只能是 `git`，用户输入的 branch、tag、ref、URL selector 或 raw ref 进入 `requestedVersion`、internal `requestedRef` 或 display-safe planning state，resolved commit SHA 才能进入 `git-commit` evidence。
+  - [x] Git remote access 必须发生在 `SourceResolutionPlan` 已声明 external access intent 且用户确认之后；未确认时只展示 redacted remote label、requested ref、访问原因和 confirmation state，不访问 remote、不 fetch、不 clone、不获取 operation lock、不写入项目文件。
+  - [x] Git resolver 只负责解析 remote/ref 到 commit evidence 和 source descriptor；不得执行 package install、修改 `node_modules`、写 package-lock、运行 Git hooks、执行 remote-provided scripts 或把 temporary Git checkout 当成 public artifact。
+  - [x] 如果实现选择调用 Git CLI，必须通过 wrapper 隔离 stdout/stderr、exit status、timeout 和 redaction；不得让 raw Git error、credential-bearing remote 或 private query string 直接进入 `ValidationIssue.details`、human output 或 fixture snapshots。
 
-- [ ] Task 3: 解析 remote/ref 并证明 concrete commit SHA（AC: 1-3）
-  - [ ] Git source resolution 必须产出 concrete commit SHA；仅检测字符串像 SHA、仅保存 remote URL、仅保存 branch/tag/ref name，均不能作为可写入 evidence。
-  - [ ] 对 branch/tag 输入，可以先把原始 selector 保存在 `requestedVersion` 或 internal planning state；只有当 resolver 明确解析出 commit SHA 后，source 才可继续。
-  - [ ] 对 remote URL only、branch-only、tag-only、symbolic ref only 或任何解析后仍没有 concrete commit SHA 的输入，生成 `trustStatus: "blocked"` 和 `source-integrity.floating-git-source`，并阻止进入 `InstallPlan`。
-  - [ ] 如果 remote 可达但 requested ref 不存在或无法解析到 commit-ish，使用稳定 `source-integrity` issue。当前 taxonomy 没有 Git-specific unreachable/ref-not-found id 时，优先使用 `source-integrity.unsupported-source` 并在 redaction-safe `details.reason` 中使用稳定 reason，例如 `git-ref-unresolved`。
-  - [ ] 如果认证缺失、凭据无效或权限不足，使用 `source-integrity.authentication-required`；不得输出 token、username/password、credential-bearing URL、private query string 或 auth header。
-  - [ ] 如果使用 `git ls-remote`，它只能在确认后的 external access 阶段执行；解析输出时只接受 `<oid> TAB <ref>` 形式的 deterministic data，不得解析 human stderr 作为契约字段。
-  - [ ] 如果需要在 temporary object database 中验证 commit-ish，使用 `git rev-parse --verify --end-of-options <rev>^{commit}` 或等价 Git-safe path；该检查只能针对已经由显式 Git resolution 获取的对象，不能把本机当前 repo 的 object database 当作 remote source 证明。
+- [x] Task 3: 解析 remote/ref 并证明 concrete commit SHA（AC: 1-3）
+  - [x] Git source resolution 必须产出 concrete commit SHA；仅检测字符串像 SHA、仅保存 remote URL、仅保存 branch/tag/ref name，均不能作为可写入 evidence。
+  - [x] 对 branch/tag 输入，可以先把原始 selector 保存在 `requestedVersion` 或 internal planning state；只有当 resolver 明确解析出 commit SHA 后，source 才可继续。
+  - [x] 对 remote URL only、branch-only、tag-only、symbolic ref only 或任何解析后仍没有 concrete commit SHA 的输入，生成 `trustStatus: "blocked"` 和 `source-integrity.floating-git-source`，并阻止进入 `InstallPlan`。
+  - [x] 如果 remote 可达但 requested ref 不存在或无法解析到 commit-ish，使用稳定 `source-integrity` issue。当前 taxonomy 没有 Git-specific unreachable/ref-not-found id 时，优先使用 `source-integrity.unsupported-source` 并在 redaction-safe `details.reason` 中使用稳定 reason，例如 `git-ref-unresolved`。
+  - [x] 如果认证缺失、凭据无效或权限不足，使用 `source-integrity.authentication-required`；不得输出 token、username/password、credential-bearing URL、private query string 或 auth header。
+  - [x] 如果使用 `git ls-remote`，它只能在确认后的 external access 阶段执行；解析输出时只接受 `<oid> TAB <ref>` 形式的 deterministic data，不得解析 human stderr 作为契约字段。
+  - [x] 如果需要在 temporary object database 中验证 commit-ish，使用 `git rev-parse --verify --end-of-options <rev>^{commit}` 或等价 Git-safe path；该检查只能针对已经由显式 Git resolution 获取的对象，不能把本机当前 repo 的 object database 当作 remote source 证明。
 
-- [ ] Task 4: 生成 Git SourceDescriptor 与 git-commit evidence（AC: 3, 7）
-  - [ ] `SourceDescriptor.sourceType` 必须是 `git`；`integrityEvidence` 至少包含 `{ kind: "git-commit", commitSha, verified }`。
-  - [ ] `commitSha` 必须是 resolved concrete commit SHA；不得存 branch、tag、short ref、symbolic ref、remote URL 或 display label。
-  - [ ] Git source 不需要伪造 `contentHash`。`contentHash` 只对 local tarball、offline bundle 和 local source snapshot 等 content-addressable artifacts required。
-  - [ ] `version` 如需用于 display-safe resolved version，必须与 resolved commit SHA 语义一致；用户输入的 branch/tag/ref/range 只能保存在 `requestedVersion` 或 internal requested ref 字段，不得覆盖 commit evidence。
-  - [ ] `trustStatus: "trusted"` 只能由 expected hash、lock match 或 owning SPEC 明确允许的 trust anchor 产生；Git source 不得因为来自 Git、来自企业 remote、解析到 commit SHA 或用户确认而自动 trusted。
-  - [ ] Git source 成功解析到 commit SHA、存在 reproducible `git-commit` evidence、没有 mismatch/policy failure 且用户显式选择确认时，可以是 `trustStatus: "unverified"` 并进入 install planning。
-  - [ ] `integrityEvidence[].verified === false` 只能表示 commit evidence 可复现但没有 expected hash 或 lock match 背书；不得用于表示 ref 解析失败、remote 不可达、认证失败或 hash/lock mismatch。
+- [x] Task 4: 生成 Git SourceDescriptor 与 git-commit evidence（AC: 3, 7）
+  - [x] `SourceDescriptor.sourceType` 必须是 `git`；`integrityEvidence` 至少包含 `{ kind: "git-commit", commitSha, verified }`。
+  - [x] `commitSha` 必须是 resolved concrete commit SHA；不得存 branch、tag、short ref、symbolic ref、remote URL 或 display label。
+  - [x] Git source 不需要伪造 `contentHash`。`contentHash` 只对 local tarball、offline bundle 和 local source snapshot 等 content-addressable artifacts required。
+  - [x] `version` 如需用于 display-safe resolved version，必须与 resolved commit SHA 语义一致；用户输入的 branch/tag/ref/range 只能保存在 `requestedVersion` 或 internal requested ref 字段，不得覆盖 commit evidence。
+  - [x] `trustStatus: "trusted"` 只能由 expected hash、lock match 或 owning SPEC 明确允许的 trust anchor 产生；Git source 不得因为来自 Git、来自企业 remote、解析到 commit SHA 或用户确认而自动 trusted。
+  - [x] Git source 成功解析到 commit SHA、存在 reproducible `git-commit` evidence、没有 mismatch/policy failure 且用户显式选择确认时，可以是 `trustStatus: "unverified"` 并进入 install planning。
+  - [x] `integrityEvidence[].verified === false` 只能表示 commit evidence 可复现但没有 expected hash 或 lock match 背书；不得用于表示 ref 解析失败、remote 不可达、认证失败或 hash/lock mismatch。
 
-- [ ] Task 5: 维护 Git diagnostics、redaction 和 public output（AC: 4-5）
-  - [ ] Public JSON、manifest/index、fixture snapshot 和 human output 只能展示 redacted/display-safe Git remote label 和 resolved commit SHA；不得展示 credential-bearing remote URL、token、username/password、private query string、temporary checkout path、local Git object path 或 raw Git stderr。
-  - [ ] `SourceResolutionPlan.requestedSourceValue` 与 `ExternalAccess.sourceValue` 必须是 display-safe value；raw remote URL 只能存在于 private in-memory planning state。
-  - [ ] `ValidationIssue.details` 只保留 deterministic、redaction-safe、fixture-stable fields，例如 `sourceType: "git"`、`reason`、`requestedRefKind`、`remoteKind` 或 `hasResolvedCommit: false`；不得包含 hash mismatch raw values、remote URL、credentials、stack trace、timestamp 或 random id。
-  - [ ] `impact` 和 `suggestedNextStep` 使用 stable short sentence templates，动态上下文放入 redacted-safe `details`、`component` 或 display-safe source label。
-  - [ ] Git resolution failure 在 operation lock 或 install write planning 前发生时，不得输出假装 planning 完成的 planned writes、changed paths、skipped paths 或 conflicts。
-  - [ ] Human-readable output 与 `install --json` 使用同一 redaction policy；不能因为是 human output 就显示 raw remote。
+- [x] Task 5: 维护 Git diagnostics、redaction 和 public output（AC: 4-5）
+  - [x] Public JSON、manifest/index、fixture snapshot 和 human output 只能展示 redacted/display-safe Git remote label 和 resolved commit SHA；不得展示 credential-bearing remote URL、token、username/password、private query string、temporary checkout path、local Git object path 或 raw Git stderr。
+  - [x] `SourceResolutionPlan.requestedSourceValue` 与 `ExternalAccess.sourceValue` 必须是 display-safe value；raw remote URL 只能存在于 private in-memory planning state。
+  - [x] `ValidationIssue.details` 只保留 deterministic、redaction-safe、fixture-stable fields，例如 `sourceType: "git"`、`reason`、`requestedRefKind`、`remoteKind` 或 `hasResolvedCommit: false`；不得包含 hash mismatch raw values、remote URL、credentials、stack trace、timestamp 或 random id。
+  - [x] `impact` 和 `suggestedNextStep` 使用 stable short sentence templates，动态上下文放入 redacted-safe `details`、`component` 或 display-safe source label。
+  - [x] Git resolution failure 在 operation lock 或 install write planning 前发生时，不得输出假装 planning 完成的 planned writes、changed paths、skipped paths 或 conflicts。
+  - [x] Human-readable output 与 `install --json` 使用同一 redaction policy；不能因为是 human output 就显示 raw remote。
 
-- [ ] Task 6: 保持 install planning、manifest/index、status 和 validate 边界（AC: 1-2, 6-7）
-  - [ ] 严格保持 `SourceResolutionPlan -> Git source resolution -> SourceDescriptor -> InstallPlan -> operation lock -> safe write -> CommandResult projection` 顺序。
-  - [ ] `--yes` 或 command-level write confirmation 不得自动接受 floating Git source、missing commit evidence、authentication failure、unresolved ref、unsupported Git transport、failed evidence verification 或 source policy rejection。
-  - [ ] Manifest/index 只投影 source descriptor owning SPEC 允许的 fields；不得新增 `remoteUrl`、`branch`、`tag`、`authStatus`、`checkoutPath`、`gitConfig`、`fetchDepth`、`temporaryObjectDb` 或 implementation-only fields。
-  - [ ] `speclite status` 只读取本地 manifest/source descriptor summary；不得执行 Git remote freshness check、latest tag check、branch head check、provenance revalidation 或 implicit update check。
-  - [ ] `speclite validate` 只检查本地 recorded source descriptor、`git-commit` evidence shape、manifest/index、files index、IDE mirrors 和 local hash baseline；不得访问 Git remote、重新执行 `git ls-remote`、重新 fetch、重新 clone 或验证 branch/tag 是否仍指向同一 SHA。
-  - [ ] Git source descriptor 若已写入 installed state，后续 validate 对 shape mismatch、missing evidence 或 blocked trust state 使用本地 `source-integrity` diagnostics，不通过网络重新判断 remote 可达性、ref freshness 或 provenance。
+- [x] Task 6: 保持 install planning、manifest/index、status 和 validate 边界（AC: 1-2, 6-7）
+  - [x] 严格保持 `SourceResolutionPlan -> Git source resolution -> SourceDescriptor -> InstallPlan -> operation lock -> safe write -> CommandResult projection` 顺序。
+  - [x] `--yes` 或 command-level write confirmation 不得自动接受 floating Git source、missing commit evidence、authentication failure、unresolved ref、unsupported Git transport、failed evidence verification 或 source policy rejection。
+  - [x] Manifest/index 只投影 source descriptor owning SPEC 允许的 fields；不得新增 `remoteUrl`、`branch`、`tag`、`authStatus`、`checkoutPath`、`gitConfig`、`fetchDepth`、`temporaryObjectDb` 或 implementation-only fields。
+  - [x] `speclite status` 只读取本地 manifest/source descriptor summary；不得执行 Git remote freshness check、latest tag check、branch head check、provenance revalidation 或 implicit update check。
+  - [x] `speclite validate` 只检查本地 recorded source descriptor、`git-commit` evidence shape、manifest/index、files index、IDE mirrors 和 local hash baseline；不得访问 Git remote、重新执行 `git ls-remote`、重新 fetch、重新 clone 或验证 branch/tag 是否仍指向同一 SHA。
+  - [x] Git source descriptor 若已写入 installed state，后续 validate 对 shape mismatch、missing evidence 或 blocked trust state 使用本地 `source-integrity` diagnostics，不通过网络重新判断 remote 可达性、ref freshness 或 provenance。
 
-- [ ] Task 7: 编写 focused tests 与 Git source-integrity fixture assertions（AC: 1-7）
-  - [ ] Unit tests 覆盖 Git source request parsing：remote + branch、remote + tag、remote + full ref、remote URL only、explicit commit SHA、unsupported selector 和 requested/ref/resolved commit separation。
-  - [ ] Unit tests 覆盖 `SourceResolutionPlan.externalAccesses[]`：Git source 在未确认前只输出 display-safe intent，不访问 remote、不调用 Git client、不获取 operation lock、不写项目文件。
-  - [ ] Unit tests 覆盖 Git resolver：confirmed branch/tag/ref 解析到 commit SHA 后产生 `git-commit` evidence；remote URL only 或 unresolved selector 产生 `source-integrity.floating-git-source` 或 taxonomy-compliant stable fallback issue。
-  - [ ] Trust matrix tests 覆盖 expected hash/lock match -> `trusted`；resolved commit evidence without trust anchor -> `unverified`；missing commit evidence、floating source、auth required、unsupported transport、policy rejected -> `blocked`。
-  - [ ] Diagnostics/redaction tests 覆盖 credential-bearing HTTPS URL、SSH URL with embedded username、token、private query string、temporary checkout path、raw Git stderr、home directory 和 stack trace 不进入 public JSON、human-readable output、manifest/index 或 fixture snapshots。
-  - [ ] JSON contract tests 覆盖 `install --json` 的 `CommandResult<InstallCommandData>`、`data.sourceDescriptor.integrityEvidence` 中的 `git-commit` ordering、`issues` sorting、`nextActions` ordering、path policy 和 no remote leakage。
-  - [ ] Validate/status no-network tests 使用已安装 Git descriptor fixture，断言不会调用 Git client、不会访问 remote、不会执行 freshness/provenance check。
-  - [ ] Fixture assertions 仅覆盖 Story 5.4 范围：至少包含 `test/fixtures/source-integrity/git-floating-blocked/`，并可增加 Git pinned/unverified focused case 或 contract tests；不要提前实现 Story 5.5 full reporting、Epic 6 full fixture matrix、enterprise allowlist、signature verification 或 provenance verification。
-  - [ ] 所有 tests 必须 deterministic、local-only。Git remote responses 使用 injected Git client、mocked `ls-remote` output 或 local fixture repository；不得访问 public GitHub、private Git server、npm registry、private registry、offline bundle origin、package-manager cache 或外部网络。
+- [x] Task 7: 编写 focused tests 与 Git source-integrity fixture assertions（AC: 1-7）
+  - [x] Unit tests 覆盖 Git source request parsing：remote + branch、remote + tag、remote + full ref、remote URL only、explicit commit SHA、unsupported selector 和 requested/ref/resolved commit separation。
+  - [x] Unit tests 覆盖 `SourceResolutionPlan.externalAccesses[]`：Git source 在未确认前只输出 display-safe intent，不访问 remote、不调用 Git client、不获取 operation lock、不写项目文件。
+  - [x] Unit tests 覆盖 Git resolver：confirmed branch/tag/ref 解析到 commit SHA 后产生 `git-commit` evidence；remote URL only 或 unresolved selector 产生 `source-integrity.floating-git-source` 或 taxonomy-compliant stable fallback issue。
+  - [x] Trust matrix tests 覆盖 expected hash/lock match -> `trusted`；resolved commit evidence without trust anchor -> `unverified`；missing commit evidence、floating source、auth required、unsupported transport、policy rejected -> `blocked`。
+  - [x] Diagnostics/redaction tests 覆盖 credential-bearing HTTPS URL、SSH URL with embedded username、token、private query string、temporary checkout path、raw Git stderr、home directory 和 stack trace 不进入 public JSON、human-readable output、manifest/index 或 fixture snapshots。
+  - [x] JSON contract tests 覆盖 `install --json` 的 `CommandResult<InstallCommandData>`、`data.sourceDescriptor.integrityEvidence` 中的 `git-commit` ordering、`issues` sorting、`nextActions` ordering、path policy 和 no remote leakage。
+  - [x] Validate/status no-network tests 使用已安装 Git descriptor fixture，断言不会调用 Git client、不会访问 remote、不会执行 freshness/provenance check。
+  - [x] Fixture assertions 仅覆盖 Story 5.4 范围：至少包含 `test/fixtures/source-integrity/git-floating-blocked/`，并可增加 Git pinned/unverified focused case 或 contract tests；不要提前实现 Story 5.5 full reporting、Epic 6 full fixture matrix、enterprise allowlist、signature verification 或 provenance verification。
+  - [x] 所有 tests 必须 deterministic、local-only。Git remote responses 使用 injected Git client、mocked `ls-remote` output 或 local fixture repository；不得访问 public GitHub、private Git server、npm registry、private registry、offline bundle origin、package-manager cache 或外部网络。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 Git source resolver、source descriptor schema、install plan、diagnostics output、redaction、validate no-network 和 affected source-integrity fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 Git pinning/redaction/no-network tests、不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1、Story 5.2、Story 5.3、已有 Story 1-4 文件、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 5.5 source descriptor full trust/reporting matrix、Epic 6 fixture matrix、Post-MVP `doctor` / `sync` / `uninstall`、enterprise source policy、allowlists、signatures、provenance verification 或完整 source lockfile lifecycle。
+- [x] Task 8: 本地验证与范围控制（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 Git source resolver、source descriptor schema、install plan、diagnostics output、redaction、validate no-network 和 affected source-integrity fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 Git pinning/redaction/no-network tests、不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、Story 5.1、Story 5.2、Story 5.3、已有 Story 1-4 文件、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 5.5 source descriptor full trust/reporting matrix、Epic 6 fixture matrix、Post-MVP `doctor` / `sync` / `uninstall`、enterprise source policy、allowlists、signatures、provenance verification 或完整 source lockfile lifecycle。
 
 ## Dev Notes（开发备注）
 
@@ -289,17 +289,33 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5.5 dev-story fresh sub-agent（completion-only 收尾）。
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- `_bmad-output/implementation-artifacts/code-reviews/5-4-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-4-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-4-code-review/EXPERIMENT_NOTES.md`
 
 ### Completion Notes List（完成备注列表）
 
 - Story context created by bmad-create-story sub-agent for Story 5.4 only.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Completion-only 收尾于 2026-06-01 18:04 CST 完成：核对 Story 5.4 进度记录、`sprint-status.yaml`、Git source resolver / install orchestration / validate local-only 相关实现和 focused test 覆盖后，将 Story 状态迁移到 `review`。
+- 验证证据沿用父 agent 已取证结果：`npm test -- test/git-source-resolution.test.ts` 通过，1 file / 9 tests passed；`npm test` 通过，33 files / 245 tests passed；`npm run build` 通过。
+- 本次 completion-only 收尾未修改源码、测试、fixture 或规划文档；只更新 Story 5.4 文档、`sprint-status.yaml` 和 5-4 CR 目录三份进度文件。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `src/source/git-source-resolver.ts`
+- `src/commands/install.ts`
+- `src/source/source-integrity.ts`
+- `src/source/source-descriptor-schema.ts`
+- `src/validation/rules/source-integrity.ts`
+- `test/git-source-resolution.test.ts`
+- `test/fixtures/source-integrity/git-floating-blocked/expected/issue.json`
+- `_bmad-output/implementation-artifacts/stories/5-4-git-source-pinning-and-floating-source-rejection.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/code-reviews/5-4-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-4-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/5-4-code-review/EXPERIMENT_NOTES.md`
