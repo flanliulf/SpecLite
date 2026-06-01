@@ -1,6 +1,6 @@
 # Story 4.6: Explicit Repair For Recoverable Installer-Owned Drift（可恢复 Installer-Owned Drift 的显式修复）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -62,79 +62,79 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和只读边界（AC: 1-8）
-  - [ ] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当作 Epic 4 源码已完成证据。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership/files index anchors、Story 4.2 shared resolver anchors、Story 4.3 update plan/write authorization anchors、Story 4.4 operation lock/safe write anchors、Story 4.5 conflict detector anchors 是否真实存在；若不存在，按前序 story implementation 顺序补齐，不得在本 Story 中绕过契约创建私有 repair model。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
+- [x] Task 1: 验证前置实现、工作树和只读边界（AC: 1-8）
+  - [x] 实现前重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当作 Epic 4 源码已完成证据。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership/files index anchors、Story 4.2 shared resolver anchors、Story 4.3 update plan/write authorization anchors、Story 4.4 operation lock/safe write anchors、Story 4.5 conflict detector anchors 是否真实存在；若不存在，按前序 story implementation 顺序补齐，不得在本 Story 中绕过契约创建私有 repair model。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
 
-- [ ] Task 2: 接入 explicit `speclite update --repair` command mode（AC: 1, 5-7）
-  - [ ] 在 `src/commands/update.ts` 或既有 update command anchor 中解析并归一化 `--repair`，使 `speclite update --repair --json` 输出 `command: "update.repair"`，不得输出 raw argv、带 flag 的 command string 或新增顶级 `speclite repair`。
-  - [ ] `update --repair` 必须复用 Story 4.2 shared config/customization resolver；lock 前只允许 command mode normalization 和 read-only preflight，读取 installed state、source descriptor、manifest/index、files index、ownership projection、IDE mirror baseline、operation mode 和 write authorization inputs，但不得构造可写 `RepairPlan` payload 或执行 source/package、manifest/index、mirror、runtime script mutation。
-  - [ ] read-only preflight 完成后，write-capable public command path 必须先获取 Story 4.4 project operation lock；只有 lock 获取成功后，才允许进入 safe repair planning、`RepairPlan.actions[]` construction、unapplied plan rendering / confirmation 和 authorized apply。
-  - [ ] 普通 `speclite update` 继续保持 Story 4.5 conflict/non-overwrite 行为；不得因本 Story 把 ordinary update confirmation 或 `--yes` 转换成 drift repair 授权。
-  - [ ] `--dry-run`、interactive pending confirmation、script mode without `--yes` 都必须保留真实 `repairPlan.actions[]`，设置 `writeAuthorized: false`，且 `changedPaths` / `skippedPaths` 为空；不得把未授权状态改写成 `skip:not-authorized`。
+- [x] Task 2: 接入 explicit `speclite update --repair` command mode（AC: 1, 5-7）
+  - [x] 在 `src/commands/update.ts` 或既有 update command anchor 中解析并归一化 `--repair`，使 `speclite update --repair --json` 输出 `command: "update.repair"`，不得输出 raw argv、带 flag 的 command string 或新增顶级 `speclite repair`。
+  - [x] `update --repair` 必须复用 Story 4.2 shared config/customization resolver；lock 前只允许 command mode normalization 和 read-only preflight，读取 installed state、source descriptor、manifest/index、files index、ownership projection、IDE mirror baseline、operation mode 和 write authorization inputs，但不得构造可写 `RepairPlan` payload 或执行 source/package、manifest/index、mirror、runtime script mutation。
+  - [x] read-only preflight 完成后，write-capable public command path 必须先获取 Story 4.4 project operation lock；只有 lock 获取成功后，才允许进入 safe repair planning、`RepairPlan.actions[]` construction、unapplied plan rendering / confirmation 和 authorized apply。
+  - [x] 普通 `speclite update` 继续保持 Story 4.5 conflict/non-overwrite 行为；不得因本 Story 把 ordinary update confirmation 或 `--yes` 转换成 drift repair 授权。
+  - [x] `--dry-run`、interactive pending confirmation、script mode without `--yes` 都必须保留真实 `repairPlan.actions[]`，设置 `writeAuthorized: false`，且 `changedPaths` / `skippedPaths` 为空；不得把未授权状态改写成 `skip:not-authorized`。
 
-- [ ] Task 3: 实现 repair planner eligibility 与 action semantics（AC: 1-4, 8）
-  - [ ] 在 `src/update/repair-plan.ts` 或既有 update repair anchor 中集中实现 repair planner；不要在 command、renderer、fixture helper 或 validation rule 中复制 repair eligibility 判断。
-  - [ ] Repair planner 只允许 installer-owned drift 成为 `RepairPlan.actions[]`；human-owned、workflow-owned、unknown ownership、missing source evidence、unsupported repair 或 unsafe path 必须保持 excluded / conflict projection，不得进入 executable repair plan。
-  - [ ] `restore-canonical` 只能从 resolved canonical source content 或能够证明 expected content hash 的 installed canonical package baseline 恢复 IDE mirror / canonical skill package content；不得从 stale IDE mirror files 反推 canonical content。
-  - [ ] `regenerate` 只允许用于可由 current source descriptor 和 installer templates 派生的 installer-owned generated metadata/control files，例如 manifest、index、runtime scripts 或 `_speclite` control files。
-  - [ ] 每个 `RepairPlan.actions[]` entry 必须包含 project-relative POSIX `affectedPath`、`ownership: "installer-owned"`、`currentHash`（如存在）、required `expectedHash` 和 action；这包括 `restore-canonical`、`regenerate` 和 installer-owned `skip`。
-  - [ ] Installer-owned `skip` 只允许表达 planned no-op，例如 current hash already matches expected state；它必须携带 `expectedHash` 和 stable reason code，例如 `reason: "unchanged"`，不得用于 human-owned、workflow-owned 或 unknown ownership 的 protected projection。
-  - [ ] `regenerate` 必须先 dry-run candidate content，按 files index raw-byte hash 语义计算 expected hash，再进入 repair plan；没有 expected hash 的 repair action 不可审计、不可 snapshot-stable，必须阻断。
-  - [ ] Missing source evidence、missing canonical baseline 或不足以证明 expected content hash 时，产生 conflict `reason: "missing-source-evidence"`；如果 path/artifact kind 无法派生 safe repair action，使用 `unsupported-repair`。
+- [x] Task 3: 实现 repair planner eligibility 与 action semantics（AC: 1-4, 8）
+  - [x] 在 `src/update/repair-plan.ts` 或既有 update repair anchor 中集中实现 repair planner；不要在 command、renderer、fixture helper 或 validation rule 中复制 repair eligibility 判断。
+  - [x] Repair planner 只允许 installer-owned drift 成为 `RepairPlan.actions[]`；human-owned、workflow-owned、unknown ownership、missing source evidence、unsupported repair 或 unsafe path 必须保持 excluded / conflict projection，不得进入 executable repair plan。
+  - [x] `restore-canonical` 只能从 resolved canonical source content 或能够证明 expected content hash 的 installed canonical package baseline 恢复 IDE mirror / canonical skill package content；不得从 stale IDE mirror files 反推 canonical content。
+  - [x] `regenerate` 只允许用于可由 current source descriptor 和 installer templates 派生的 installer-owned generated metadata/control files，例如 manifest、index、runtime scripts 或 `_speclite` control files。
+  - [x] 每个 `RepairPlan.actions[]` entry 必须包含 project-relative POSIX `affectedPath`、`ownership: "installer-owned"`、`currentHash`（如存在）、required `expectedHash` 和 action；这包括 `restore-canonical`、`regenerate` 和 installer-owned `skip`。
+  - [x] Installer-owned `skip` 只允许表达 planned no-op，例如 current hash already matches expected state；它必须携带 `expectedHash` 和 stable reason code，例如 `reason: "unchanged"`，不得用于 human-owned、workflow-owned 或 unknown ownership 的 protected projection。
+  - [x] `regenerate` 必须先 dry-run candidate content，按 files index raw-byte hash 语义计算 expected hash，再进入 repair plan；没有 expected hash 的 repair action 不可审计、不可 snapshot-stable，必须阻断。
+  - [x] Missing source evidence、missing canonical baseline 或不足以证明 expected content hash 时，产生 conflict `reason: "missing-source-evidence"`；如果 path/artifact kind 无法派生 safe repair action，使用 `unsupported-repair`。
 
-- [ ] Task 4: 维护 conflict、issue、reason code 和 parser 边界（AC: 4, 7-8）
-  - [ ] Repair output 中 `data.conflicts[]` 只表示无法安全 repair 的 path-level blockers，例如 human-owned、workflow-owned、unknown ownership、missing source evidence、unsupported repair 或 unsafe overwrite risk。
-  - [ ] 当 `data.conflicts.length > 0` 时，`CommandResult.status` 必须为 `failure`，exit code 必须 non-zero，即使命令是 dry-run、interactive pending confirmation 或 `writeAuthorized === false`。
-  - [ ] `issues[]` 对 conflict set 必须包含且仅包含一个 command-level blocker：`issueId: "update.conflicts"`、`category: "update"`、`severity: "error"`、无 `affectedPath`、`details.conflictCount` 等于 `data.conflicts.length`。
-  - [ ] 不得把每个 path-level conflict 复制成独立 `issues[]` entry。Per-path details 只放在 `data.conflicts`。
-  - [ ] `operation-lock.project-locked` 仍是 command-level blocker，不属于 `data.conflicts`；lock acquisition 前失败不得输出 `repairPlan`、`changedPaths`、`skippedPaths` 或 `conflicts` 假装 planning 已完成。
-  - [ ] Producer 只能输出 owning SPEC registry 中的 MVP reason codes：`unchanged`、`installer-owned-drift`、`human-owned`、`workflow-owned`、`unknown-ownership`、`missing-source-evidence`、`unsupported-repair`、`not-authorized`。
-  - [ ] `not-authorized` 只能表示 path-level authorization policy 阻止 specific path 进入 executable repair plan；不得表示 dry-run、pending confirmation 或 script mode without `--yes`。
-  - [ ] Consumer/parser 必须保留 unknown future reason codes 为 stable display string，不得仅因 code unknown 而 parsing failed。
+- [x] Task 4: 维护 conflict、issue、reason code 和 parser 边界（AC: 4, 7-8）
+  - [x] Repair output 中 `data.conflicts[]` 只表示无法安全 repair 的 path-level blockers，例如 human-owned、workflow-owned、unknown ownership、missing source evidence、unsupported repair 或 unsafe overwrite risk。
+  - [x] 当 `data.conflicts.length > 0` 时，`CommandResult.status` 必须为 `failure`，exit code 必须 non-zero，即使命令是 dry-run、interactive pending confirmation 或 `writeAuthorized === false`。
+  - [x] `issues[]` 对 conflict set 必须包含且仅包含一个 command-level blocker：`issueId: "update.conflicts"`、`category: "update"`、`severity: "error"`、无 `affectedPath`、`details.conflictCount` 等于 `data.conflicts.length`。
+  - [x] 不得把每个 path-level conflict 复制成独立 `issues[]` entry。Per-path details 只放在 `data.conflicts`。
+  - [x] `operation-lock.project-locked` 仍是 command-level blocker，不属于 `data.conflicts`；lock acquisition 前失败不得输出 `repairPlan`、`changedPaths`、`skippedPaths` 或 `conflicts` 假装 planning 已完成。
+  - [x] Producer 只能输出 owning SPEC registry 中的 MVP reason codes：`unchanged`、`installer-owned-drift`、`human-owned`、`workflow-owned`、`unknown-ownership`、`missing-source-evidence`、`unsupported-repair`、`not-authorized`。
+  - [x] `not-authorized` 只能表示 path-level authorization policy 阻止 specific path 进入 executable repair plan；不得表示 dry-run、pending confirmation 或 script mode without `--yes`。
+  - [x] Consumer/parser 必须保留 unknown future reason codes 为 stable display string，不得仅因 code unknown 而 parsing failed。
 
-- [ ] Task 5: 执行 authorized repair apply，复用 lock/safe-write/partial-failure 语义（AC: 5-7）
-  - [ ] 只有 `writeAuthorized === true` 且没有 blocking conflicts 的 authorized repair actions 才能进入 apply 阶段；未授权 plan、dry-run 或 script mode without `--yes` 不写入任何文件。
-  - [ ] Apply 阶段必须在 Story 4.4 project operation lock 已获取并通过 private lock handle 传递的边界内运行；public `update --repair` command path 不得把 lock acquisition 推迟到 plan rendering / confirmation 之后。
-  - [ ] 对每个 installer-owned repair action 调用 shared safe write primitive；不得在 repair planner、command 或 renderer 中直接写文件。
-  - [ ] `changedPaths` 只记录当前命令实际完成 mutation 的 paths；未尝试、未授权、失败或仍为 planned 的 actions 不得放入 `changedPaths`。
-  - [ ] `skippedPaths` 只记录当前命令实际到达 planned skip outcome 的 paths；未授权状态不得用 `skippedPaths` 表达。
-  - [ ] Partial failure 时输出 completed steps、failed step、pending steps、changed paths 和 manual action；不得声称未完成文件已成功更新，也不得声明事务性 rollback。
-  - [ ] Safe-write temporary files、operation lock volatile fields、absolute temp paths、pid、timestamp、projectRootHash 不得进入 public JSON、manifest/index、files index 或 stable fixture snapshots。
+- [x] Task 5: 执行 authorized repair apply，复用 lock/safe-write/partial-failure 语义（AC: 5-7）
+  - [x] 只有 `writeAuthorized === true` 且没有 blocking conflicts 的 authorized repair actions 才能进入 apply 阶段；未授权 plan、dry-run 或 script mode without `--yes` 不写入任何文件。
+  - [x] Apply 阶段必须在 Story 4.4 project operation lock 已获取并通过 private lock handle 传递的边界内运行；public `update --repair` command path 不得把 lock acquisition 推迟到 plan rendering / confirmation 之后。
+  - [x] 对每个 installer-owned repair action 调用 shared safe write primitive；不得在 repair planner、command 或 renderer 中直接写文件。
+  - [x] `changedPaths` 只记录当前命令实际完成 mutation 的 paths；未尝试、未授权、失败或仍为 planned 的 actions 不得放入 `changedPaths`。
+  - [x] `skippedPaths` 只记录当前命令实际到达 planned skip outcome 的 paths；未授权状态不得用 `skippedPaths` 表达。
+  - [x] Partial failure 时输出 completed steps、failed step、pending steps、changed paths 和 manual action；不得声称未完成文件已成功更新，也不得声明事务性 rollback。
+  - [x] Safe-write temporary files、operation lock volatile fields、absolute temp paths、pid、timestamp、projectRootHash 不得进入 public JSON、manifest/index、files index 或 stable fixture snapshots。
 
-- [ ] Task 6: 实现 RepairCommandData 与 human-readable repair output（AC: 2-8）
-  - [ ] 复用 `src/diagnostics/command-result-schema.ts` 中的 `RepairCommandData`、`RepairPlan`、`UpdateConflict` 和 reason-code producer/consumer guards；不要在 `src/update/`、renderer 或 tests 中定义第二套 public JSON shape。
-  - [ ] `RepairCommandData` 必须包含 `repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`，且不新增未契约化 optional fields；如确需新增字段，必须先更新 owning SPEC、schema/parser 和 fixtures。
-  - [ ] Human-readable Evidence profile 至少展示 Summary、Repair Plan / Planned Effects、Authorization、Conflicts / Remaining Conflicts、Protected Boundaries、Changed Paths、Skipped Paths 和 Next Actions。
-  - [ ] Repair result 必须给出 suggested validation command，优先通过 `nextActions` 指向 `speclite validate` 或 `speclite validate --json`；不要生成 standalone report artifact。
-  - [ ] `NO_COLOR`、non-TTY、CI、Windows path portability 和窄终端下，affected path、ownership、action、reason、issueId、authorization state、next action 和是否需要 `--yes` 仍必须纯文本可读。
-  - [ ] Human-readable output 不得成为 automation 依赖字段的唯一承载位置；CI、fixtures 和 installed skills 必须依赖 `CommandResult.data`、`issues`、`nextActions`、manifest/index 或 fixture expected outputs。
+- [x] Task 6: 实现 RepairCommandData 与 human-readable repair output（AC: 2-8）
+  - [x] 复用 `src/diagnostics/command-result-schema.ts` 中的 `RepairCommandData`、`RepairPlan`、`UpdateConflict` 和 reason-code producer/consumer guards；不要在 `src/update/`、renderer 或 tests 中定义第二套 public JSON shape。
+  - [x] `RepairCommandData` 必须包含 `repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`，且不新增未契约化 optional fields；如确需新增字段，必须先更新 owning SPEC、schema/parser 和 fixtures。
+  - [x] Human-readable Evidence profile 至少展示 Summary、Repair Plan / Planned Effects、Authorization、Conflicts / Remaining Conflicts、Protected Boundaries、Changed Paths、Skipped Paths 和 Next Actions。
+  - [x] Repair result 必须给出 suggested validation command，优先通过 `nextActions` 指向 `speclite validate` 或 `speclite validate --json`；不要生成 standalone report artifact。
+  - [x] `NO_COLOR`、non-TTY、CI、Windows path portability 和窄终端下，affected path、ownership、action、reason、issueId、authorization state、next action 和是否需要 `--yes` 仍必须纯文本可读。
+  - [x] Human-readable output 不得成为 automation 依赖字段的唯一承载位置；CI、fixtures 和 installed skills 必须依赖 `CommandResult.data`、`issues`、`nextActions`、manifest/index 或 fixture expected outputs。
 
-- [ ] Task 7: 保持 deterministic ordering 与 stable fixture behavior（AC: 2-4, 7-8）
-  - [ ] `repairPlan.actions` 排序必须按 normalized affected path -> action -> reason；`conflicts` 排序必须按 normalized affected path -> ownership -> reason。
-  - [ ] `changedPaths` / `skippedPaths` 排序必须按 normalized project-relative POSIX path；`issues` 和 `nextActions` 复用 diagnostics/output 层 canonical ordering。
-  - [ ] IDE target repair planning 必须复用 adapter registry canonical target order，MVP 为 `claude`、`agents`；不得按本机目录顺序、filesystem traversal、object insertion 或 async completion order 排序。
-  - [ ] Hash comparison 和 expectedHash calculation 使用 files index raw-byte hash 语义；line endings、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得被 hash normalization 隐式吸收。
-  - [ ] Fixture snapshots 必须 normalize 或排除 timestamp、duration、operation-lock volatile fields、safe-write temporary paths、projectRootHash、environment-specific paths 和 generated artifact metadata timestamps。
+- [x] Task 7: 保持 deterministic ordering 与 stable fixture behavior（AC: 2-4, 7-8）
+  - [x] `repairPlan.actions` 排序必须按 normalized affected path -> action -> reason；`conflicts` 排序必须按 normalized affected path -> ownership -> reason。
+  - [x] `changedPaths` / `skippedPaths` 排序必须按 normalized project-relative POSIX path；`issues` 和 `nextActions` 复用 diagnostics/output 层 canonical ordering。
+  - [x] IDE target repair planning 必须复用 adapter registry canonical target order，MVP 为 `claude`、`agents`；不得按本机目录顺序、filesystem traversal、object insertion 或 async completion order 排序。
+  - [x] Hash comparison 和 expectedHash calculation 使用 files index raw-byte hash 语义；line endings、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得被 hash normalization 隐式吸收。
+  - [x] Fixture snapshots 必须 normalize 或排除 timestamp、duration、operation-lock volatile fields、safe-write temporary paths、projectRootHash、environment-specific paths 和 generated artifact metadata timestamps。
 
-- [ ] Task 8: 编写 focused tests 与 release-gate fixture assertions（AC: 1-8）
-  - [ ] Unit tests 覆盖 `restore-canonical` eligibility：resolved canonical source 可证明 expected hash、installed canonical package baseline 可证明 expected hash、stale IDE mirror 不可作为 canonical source。
-  - [ ] Unit tests 覆盖 `regenerate` eligibility：manifest/index/runtime script/control file 可以从 current source descriptor + templates dry-run 生成 candidate content，并在进入 plan 前计算 expected hash。
-  - [ ] Unit tests 覆盖 missing source evidence / missing baseline -> conflict `missing-source-evidence`，unsupported artifact kind -> `unsupported-repair`，unknown ownership -> `unknown-ownership`，human-owned -> `human-owned`，workflow-owned -> `workflow-owned`。
-  - [ ] Unit tests 覆盖 authorization semantics：`--dry-run`、interactive pending、script mode without `--yes`、explicit `--yes`，并断言 pending/unapplied repair plan 不写入、不填充 `changedPaths` / `skippedPaths`、不改写为 `skip:not-authorized`。
-  - [ ] Apply tests 覆盖 lock acquisition、safe write same-directory temp + rename、changedPaths after completed mutation、partial failure diagnostics、temporary file exclusion 和 no rollback claim。
-  - [ ] JSON reporter tests 覆盖 `command: "update.repair"`、single `update.conflicts` issue、`details.conflictCount`、`RepairPlan.actions[].expectedHash` required、unknown future reason code consumer tolerance、path policy 和 stable ordering。
-  - [ ] Human-readable renderer tests 覆盖 repair plan block、protected boundaries、remaining conflicts、suggested validation command、NO_COLOR、non-TTY、CI 和 narrow terminal fallback。
-  - [ ] Integration / fixture tests 覆盖 `test/fixtures/existing-install-update/`、`test/fixtures/ide-drift/`、`test/fixtures/path-portability/`、`test/fixtures/fresh-install-empty-project/` 和 source-integrity relevant sub-cases；所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
+- [x] Task 8: 编写 focused tests 与 release-gate fixture assertions（AC: 1-8）
+  - [x] Unit tests 覆盖 `restore-canonical` eligibility：resolved canonical source 可证明 expected hash、installed canonical package baseline 可证明 expected hash、stale IDE mirror 不可作为 canonical source。
+  - [x] Unit tests 覆盖 `regenerate` eligibility：manifest/index/runtime script/control file 可以从 current source descriptor + templates dry-run 生成 candidate content，并在进入 plan 前计算 expected hash。
+  - [x] Unit tests 覆盖 missing source evidence / missing baseline -> conflict `missing-source-evidence`，unsupported artifact kind -> `unsupported-repair`，unknown ownership -> `unknown-ownership`，human-owned -> `human-owned`，workflow-owned -> `workflow-owned`。
+  - [x] Unit tests 覆盖 authorization semantics：`--dry-run`、interactive pending、script mode without `--yes`、explicit `--yes`，并断言 pending/unapplied repair plan 不写入、不填充 `changedPaths` / `skippedPaths`、不改写为 `skip:not-authorized`。
+  - [x] Apply tests 覆盖 lock acquisition、safe write same-directory temp + rename、changedPaths after completed mutation、partial failure diagnostics、temporary file exclusion 和 no rollback claim。
+  - [x] JSON reporter tests 覆盖 `command: "update.repair"`、single `update.conflicts` issue、`details.conflictCount`、`RepairPlan.actions[].expectedHash` required、unknown future reason code consumer tolerance、path policy 和 stable ordering。
+  - [x] Human-readable renderer tests 覆盖 repair plan block、protected boundaries、remaining conflicts、suggested validation command、NO_COLOR、non-TTY、CI 和 narrow terminal fallback。
+  - [x] Integration / fixture tests 覆盖 `test/fixtures/existing-install-update/`、`test/fixtures/ide-drift/`、`test/fixtures/path-portability/`、`test/fixtures/fresh-install-empty-project/` 和 source-integrity relevant sub-cases；所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-8）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 repair planner、repair apply、operation lock、safe write、files index/hash、ownership preservation、IDE mirror repair、CommandResult reporter、Evidence profile renderer、path ordering 和 affected fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 repair/preservation tests、不要创建 update-private JSON shape 或 duplicate repair reason registry。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1/4.2/4.3/4.4/4.5、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有实现 Epic 5 source channel 扩展、Epic 6 release fixture matrix 全量范围、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair` / backup-restore / standalone update report artifact。
+- [x] Task 9: 本地验证与范围控制（AC: 1-8）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 repair planner、repair apply、operation lock、safe write、files index/hash、ownership preservation、IDE mirror repair、CommandResult reporter、Evidence profile renderer、path ordering 和 affected fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 repair/preservation tests、不要创建 update-private JSON shape 或 duplicate repair reason registry。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1/4.2/4.3/4.4/4.5、无关源码或用户改动。
+  - [x] 检查 diff，确认没有实现 Epic 5 source channel 扩展、Epic 6 release fixture matrix 全量范围、Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair` / backup-restore / standalone update report artifact。
 
 ## Dev Notes（开发备注）
 
@@ -301,17 +301,38 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-TBD by dev-story agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev-story agent.
+- 2026-06-01 13:42 CST：解析 `bmad-dev-story` workflow，读取 Story 4.6 与 `sprint-status.yaml`。
+- 2026-06-01 13:46 CST：新增 Story 4.6 focused tests 后运行 `npx vitest run test/update-planning.test.ts test/update-command.test.ts`，预期红灯。
+- 2026-06-01 13:51 CST：实现 repair planner/apply/output 后运行 focused tests、`npm run build`、`npm test` 与 `git diff --check`，全部通过。
+- 详细命令与结果记录见 `_bmad-output/implementation-artifacts/code-reviews/4-6-code-review/EXPERIMENTS.md`。
 
 ### Completion Notes List（完成备注）
 
 - Story context created by bmad-create-story sub-agent #6.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 实现 `speclite update --repair` 的真实 repair planning：installer-owned drift 可从本地 canonical source 或 IDE mirror canonical package source 生成 `restore-canonical` / `regenerate` actions；每个 action 都携带 `expectedHash`。
+- 保留 protected ownership 与 source evidence 边界：human-owned、workflow-owned、unknown ownership、missing source evidence 与 unsupported IDE mirror duplicate repair 均进入 `data.conflicts`，并只通过单个 command-level `update.conflicts` issue 汇总。
+- 实现未授权与授权语义：无 `--yes` / `--dry-run` 输出 unapplied repair plan 且不写入；`--yes` 且无 conflicts 时在 operation lock 内通过 `safeWriteFile` 应用 repair，并只记录实际完成的 `changedPaths` / `skippedPaths`。
+- 更新 human-readable Evidence profile，repair 模式展示 Repair Plan / Planned Effects、Authorization、Remaining Conflicts、Protected Boundaries、Changed Paths、Skipped Paths 和 Next Actions，并通过 `nextActions` 指向 `speclite validate`。
+- 验证通过：focused tests 27 个、全量 `npm test` 198 个 tests、`npm run build`、`git diff --check`。
 
 ### File List（文件列表）
 
-- TBD by dev-story agent.
+- `_bmad-output/implementation-artifacts/code-reviews/4-6-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/4-6-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/4-6-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/4-6-explicit-repair-for-recoverable-installer-owned-drift.md`
+- `src/commands/update.ts`
+- `src/update/update-plan.ts`
+- `src/diagnostics/output.ts`
+- `test/update-command.test.ts`
+- `test/update-planning.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-06-01：完成 Story 4.6 dev step，实现 explicit `update --repair` planning/apply/output 与 focused tests，并将 Story 状态推进到 `review`。

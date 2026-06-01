@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -77,6 +77,102 @@ describe("validate command manifest/index schema validation", () => {
       expect(json).not.toContain(tempRoot);
       expect(json).not.toMatch(/\u001b\[[0-9;]*m/);
       expect(json).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("reports stale operation lock and stale safe-write temp files as conservative read-only warnings", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-validate-stale-lock-temp-"));
+
+    try {
+      await writeInstalledProjection(tempRoot);
+      await writeJson(tempRoot, "_speclite/.lock", {
+        schemaVersion: "speclite.operation-lock.v1",
+        operation: "update",
+        pid: 12345,
+        createdAt: "2000-01-01T00:00:00.000Z",
+        projectRootHash: "sha256:private",
+      });
+      await writeFile(path.join(tempRoot, "_speclite/.speclite-tmp-leftover"), "partial\n", "utf8");
+
+      const outcome = await runValidateCommand({ runtime: { cwd: tempRoot, targetProject: "stale-lock" } });
+      const parsed = ValidateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.status).toBe("warning");
+      expect(parsed.data.checkedCategories).toContain("operation-lock");
+      expect(parsed.data.checkedCategories).toContain("file-integrity");
+      expect(parsed.issues).toEqual([
+        expect.objectContaining({
+          issueId: "file-integrity.stale-temp-file",
+          category: "file-integrity",
+          severity: "warning",
+          affectedPath: "_speclite/.speclite-tmp-leftover",
+          details: expect.objectContaining({
+            reason: "stale-temp-file",
+          }),
+        }),
+        expect.objectContaining({
+          issueId: "operation-lock.stale-lock",
+          category: "operation-lock",
+          severity: "warning",
+          affectedPath: "_speclite/.lock",
+          details: expect.objectContaining({
+            reason: "lock-age-exceeded",
+          }),
+        }),
+      ]);
+      expect(JSON.stringify(parsed)).not.toContain(tempRoot);
+      expect(JSON.stringify(parsed)).not.toContain("12345");
+      expect(JSON.stringify(parsed)).not.toContain("2000-01-01T00:00:00.000Z");
+      await expect(readFile(path.join(tempRoot, "_speclite/.lock"), "utf8")).resolves.toContain(
+        "speclite.operation-lock.v1",
+      );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("recursively reports nested and IDE mirror stale safe-write temp paths", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-validate-nested-temp-"));
+
+    try {
+      await writeInstalledProjection(tempRoot);
+      await writeFile(path.join(tempRoot, "_speclite/_config/.speclite-tmp-nested"), "partial\n", "utf8");
+      await mkdir(path.join(tempRoot, ".claude/skills/speclite-help/.speclite-tmp-blocking"), {
+        recursive: true,
+      });
+
+      const outcome = await runValidateCommand({ runtime: { cwd: tempRoot, targetProject: "nested-temp" } });
+      const parsed = ValidateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(1);
+      expect(parsed.status).toBe("failure");
+      expect(parsed.data.checkedCategories).toContain("file-integrity");
+      expect(parsed.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            issueId: "file-integrity.stale-temp-file",
+            category: "file-integrity",
+            severity: "error",
+            affectedPath: ".claude/skills/speclite-help/.speclite-tmp-blocking",
+            details: expect.objectContaining({
+              reason: "stale-temp-file-blocking",
+            }),
+          }),
+          expect.objectContaining({
+            issueId: "file-integrity.stale-temp-file",
+            category: "file-integrity",
+            severity: "warning",
+            affectedPath: "_speclite/_config/.speclite-tmp-nested",
+            details: expect.objectContaining({
+              reason: "stale-temp-file",
+            }),
+          }),
+        ]),
+      );
+      expect(JSON.stringify(parsed)).not.toContain(tempRoot);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

@@ -1,9 +1,13 @@
 import { constants } from "node:fs";
-import { lstat, mkdir, open, readdir, realpath, rm, rename, writeFile } from "node:fs/promises";
+import { lstat, mkdir, open, readdir, realpath, rm, rename } from "node:fs/promises";
 import path from "node:path";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
-import { createPrivateOperationId, hashBytes } from "../manifest/hash.js";
+import { createPrivateOperationId, hashBytes, hashFile, type FileHash } from "../manifest/hash.js";
+import type { FileOwnership } from "../update/ownership-model.js";
+import { classifyOwnership } from "../update/ownership-model.js";
 import { resolveProjectRelativePath } from "./path-normalizer.js";
+
+export { acquireProjectOperationLock, type OperationLockHandle } from "./operation-lock.js";
 
 export type SafeWriteResult =
   | {
@@ -16,87 +20,6 @@ export type SafeWriteResult =
       ok: false;
       issue: ValidationIssue;
     };
-
-export type OperationLockHandle = {
-  path: "_speclite/.lock";
-  release: () => Promise<void>;
-};
-
-export async function acquireProjectOperationLock(input: {
-  projectRoot: string;
-  operation: "install" | "update" | "update.repair";
-}): Promise<
-  | {
-      ok: true;
-      lock: OperationLockHandle;
-    }
-  | {
-      ok: false;
-      issue: ValidationIssue;
-    }
-> {
-  const lockParent = resolveProjectRelativePath({
-    projectRoot: input.projectRoot,
-    relativePath: "_speclite",
-  });
-  const lockPath = resolveProjectRelativePath({
-    projectRoot: input.projectRoot,
-    relativePath: "_speclite/.lock",
-  });
-
-  await mkdir(lockParent.absolutePath, { recursive: true });
-
-  let handle: Awaited<ReturnType<typeof open>> | undefined;
-  try {
-    handle = await open(lockPath.absolutePath, constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY);
-    await handle.writeFile(
-      JSON.stringify(
-        {
-          schemaVersion: "speclite.operation-lock.v1",
-          operation: input.operation,
-          pid: globalThis.process?.pid,
-          createdAt: new Date().toISOString(),
-          projectRootHash: hashBytes(path.resolve(input.projectRoot)),
-        },
-        null,
-        2,
-      ),
-      "utf8",
-    );
-  } catch (error) {
-    await handle?.close();
-    if (isFileExistsError(error)) {
-      return {
-        ok: false,
-        issue: {
-          issueId: "operation-lock.project-locked",
-          category: "operation-lock",
-          severity: "error",
-          affectedPath: "_speclite/.lock",
-          component: "project-operation-lock",
-          details: {
-            reason: "lock-file-exists",
-          },
-          impact: "Another SpecLite write-capable operation appears to hold the project lock.",
-          suggestedNextStep: "Wait for the active operation to finish, or inspect _speclite/.lock before manual cleanup.",
-        },
-      };
-    }
-    throw error;
-  }
-
-  await handle.close();
-
-  return {
-    ok: true,
-    lock: {
-      path: "_speclite/.lock",
-      release: async () => {
-        await rm(lockPath.absolutePath, { force: true });
-      },
-    },
-  };
-}
 
 export async function ensureSafeDirectory(input: {
   projectRoot: string;
@@ -130,39 +53,70 @@ export async function safeWriteFile(input: {
   contents: Buffer | string;
   executable?: boolean;
   allowExisting?: boolean;
+  expectedExistingFile?: {
+    ownership: FileOwnership;
+    hash: FileHash;
+    artifactRoot?: string;
+  };
   component?: string;
+  operationId?: string;
 }): Promise<SafeWriteResult> {
   const safety = await validateProjectPath({
     projectRoot: input.projectRoot,
     relativePath: input.relativePath,
     component: input.component ?? "safe-write",
     allowExistingFile: input.allowExisting === true,
+    expectedExistingFile: input.expectedExistingFile,
   });
   if (!safety.ok) return safety;
 
   const parent = path.dirname(safety.absolutePath);
   await mkdir(parent, { recursive: true });
 
-  const tempPath = path.join(parent, `.speclite-tmp-${createPrivateOperationId()}`);
+  const operationId = input.operationId ?? createPrivateOperationId();
+  const tempPath = path.join(parent, `.speclite-tmp-${operationId}`);
+  const tempRelativePath = toProjectRelativePosixPath(input.projectRoot, tempPath);
+  let tempHandle: Awaited<ReturnType<typeof open>> | undefined;
   try {
-    await writeFile(tempPath, input.contents, input.executable === true ? { mode: 0o755 } : undefined);
+    tempHandle = await open(
+      tempPath,
+      constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY,
+      input.executable === true ? 0o755 : 0o644,
+    );
+    await tempHandle.writeFile(input.contents);
+    await tempHandle.close();
+    tempHandle = undefined;
     await rename(tempPath, safety.absolutePath);
   } catch (error) {
-    await rm(tempPath, { force: true });
+    await tempHandle?.close();
+    try {
+      await rm(tempPath, { force: true });
+    } catch {
+      return {
+        ok: false,
+        issue: createStaleTempIssue({
+          affectedPath: tempRelativePath,
+          component: input.component ?? "safe-write",
+          reason: "cleanup-failed",
+          failedStep: "cleanup-temp-file",
+          pendingSteps: ["remove-stale-temp-file", "rerun-write"],
+          impact: "SpecLite could not clean up a same-directory safe-write temporary path after a write failure.",
+          suggestedNextStep:
+            "Confirm no SpecLite write operation is active, remove the stale .speclite-tmp path manually, then rerun the command.",
+        }),
+      };
+    }
     return {
       ok: false,
-      issue: {
-        issueId: "file-integrity.stale-temp-file",
-        category: "file-integrity",
-        severity: "error",
+      issue: createStaleTempIssue({
         affectedPath: safety.relativePath,
         component: input.component ?? "safe-write",
-        details: {
-          reason: "safe-write-failed",
-        },
+        reason: "safe-write-failed",
+        failedStep: "temp-write-rename",
+        pendingSteps: ["rename-target"],
         impact: "SpecLite could not complete the same-directory temp-write and rename safely.",
         suggestedNextStep: "Inspect the target path permissions and rerun the command.",
-      },
+      }),
     };
   }
 
@@ -179,6 +133,11 @@ async function validateProjectPath(input: {
   relativePath: string;
   component: string;
   allowExistingFile: boolean;
+  expectedExistingFile?: {
+    ownership: FileOwnership;
+    hash: FileHash;
+    artifactRoot?: string;
+  };
 }): Promise<
   | {
       ok: true;
@@ -221,6 +180,40 @@ async function validateProjectPath(input: {
 
   try {
     const stat = await lstat(resolved.absolutePath);
+    if (stat.isDirectory() && input.allowExistingFile) {
+      return {
+        ok: false,
+        issue: createFileIssue({
+          issueId: "file-integrity.unsafe-overwrite-risk",
+          affectedPath: resolved.relativePath,
+          component: input.component,
+          reason: "target-is-directory",
+          impact: "The planned installer-owned write targets a directory instead of a file.",
+        }),
+      };
+    }
+    if (!stat.isFile() && input.allowExistingFile) {
+      return {
+        ok: false,
+        issue: createFileIssue({
+          issueId: "file-integrity.unsafe-overwrite-risk",
+          affectedPath: resolved.relativePath,
+          component: input.component,
+          reason: "target-is-not-file",
+          impact: "The planned installer-owned write targets a non-file path.",
+        }),
+      };
+    }
+    if (stat.isFile() && input.allowExistingFile) {
+      const baselineIssue = await validateExistingFileBaseline({
+        projectRoot: input.projectRoot,
+        relativePath: resolved.relativePath,
+        absolutePath: resolved.absolutePath,
+        component: input.component,
+        expectedExistingFile: input.expectedExistingFile,
+      });
+      if (baselineIssue !== undefined) return { ok: false, issue: baselineIssue };
+    }
     if (stat.isFile() && !input.allowExistingFile) {
       return {
         ok: false,
@@ -250,6 +243,110 @@ async function validateProjectPath(input: {
   }
 
   return { ok: true, ...resolved };
+}
+
+async function validateExistingFileBaseline(input: {
+  projectRoot: string;
+  relativePath: string;
+  absolutePath: string;
+  component: string;
+  expectedExistingFile?: {
+    ownership: FileOwnership;
+    hash: FileHash;
+    artifactRoot?: string;
+  };
+}): Promise<ValidationIssue | undefined> {
+  if (input.expectedExistingFile === undefined) {
+    return createFileIssue({
+      issueId: "file-integrity.unsafe-overwrite-risk",
+      affectedPath: input.relativePath,
+      component: input.component,
+      reason: "missing-existing-file-baseline",
+      impact: "The planned overwrite lacks an installer-owned ownership and hash baseline.",
+    });
+  }
+
+  if (input.expectedExistingFile.ownership !== "installer-owned") {
+    return createFileIssue({
+      issueId: "file-integrity.unsafe-overwrite-risk",
+      affectedPath: input.relativePath,
+      component: input.component,
+      reason: "protected-ownership",
+      impact: "The planned overwrite targets a file whose baseline ownership is protected.",
+    });
+  }
+
+  const classification = classifyOwnership({
+    relativePath: input.relativePath,
+    artifactRoot: input.expectedExistingFile.artifactRoot,
+  });
+  if (classification.ownership !== "installer-owned") {
+    return createFileIssue({
+      issueId: "file-integrity.unsafe-overwrite-risk",
+      affectedPath: input.relativePath,
+      component: input.component,
+      reason: classification.ownership === "unknown" ? "unknown-ownership" : "protected-ownership",
+      impact: "The planned overwrite targets a path that is not classified as installer-owned.",
+    });
+  }
+
+  const staleTempIssue = await findStaleTempBlocker({
+    projectRoot: input.projectRoot,
+    relativePath: input.relativePath,
+    absolutePath: input.absolutePath,
+    component: input.component,
+  });
+  if (staleTempIssue !== undefined) return staleTempIssue;
+
+  const currentHash = await hashFile(input.absolutePath);
+  if (currentHash !== input.expectedExistingFile.hash) {
+    return createFileIssue({
+      issueId: "file-integrity.unsafe-overwrite-risk",
+      affectedPath: input.relativePath,
+      component: input.component,
+      reason: "baseline-hash-mismatch",
+      impact: "The planned overwrite target changed after planning and no longer matches the expected baseline.",
+    });
+  }
+
+  return undefined;
+}
+
+async function findStaleTempBlocker(input: {
+  projectRoot: string;
+  relativePath: string;
+  absolutePath: string;
+  component: string;
+}): Promise<ValidationIssue | undefined> {
+  const parent = path.dirname(input.absolutePath);
+  let entries: Awaited<ReturnType<typeof readdir>>;
+  try {
+    entries = await readdir(parent, { withFileTypes: true });
+  } catch (error) {
+    if (isMissingPathError(error)) return undefined;
+    throw error;
+  }
+
+  const parentRelative = path.posix.dirname(input.relativePath);
+  const staleTempEntry = entries
+    .filter((entry) => entry.name.startsWith(".speclite-tmp-"))
+    .sort((left, right) => left.name.localeCompare(right.name))[0];
+  if (staleTempEntry === undefined) return undefined;
+
+  const affectedPath =
+    parentRelative === "."
+      ? staleTempEntry.name
+      : `${parentRelative}/${staleTempEntry.name}`;
+  return createStaleTempIssue({
+    affectedPath,
+    component: input.component,
+    reason: "stale-temp-file-blocking",
+    failedStep: "existing-target-preflight",
+    pendingSteps: ["remove-stale-temp-file", "rerun-write"],
+    impact: "A stale safe-write temporary path blocks overwriting the installer-owned target safely.",
+    suggestedNextStep:
+      "Confirm no SpecLite write operation is active, remove the stale .speclite-tmp path manually, then rerun the command.",
+  });
 }
 
 async function findSymlinkSegment(
@@ -339,20 +436,44 @@ function createFileIssue(input: {
   };
 }
 
+function createStaleTempIssue(input: {
+  affectedPath: string;
+  component: string;
+  reason: "safe-write-failed" | "cleanup-failed" | "stale-temp-file-blocking";
+  failedStep: string;
+  pendingSteps: string[];
+  impact: string;
+  suggestedNextStep: string;
+}): ValidationIssue {
+  return {
+    issueId: "file-integrity.stale-temp-file",
+    category: "file-integrity",
+    severity: "error",
+    affectedPath: input.affectedPath,
+    component: input.component,
+    details: {
+      reason: input.reason,
+      completedSteps: [],
+      failedStep: input.failedStep,
+      pendingSteps: input.pendingSteps,
+      changedPaths: [],
+      manualAction:
+        "Confirm no SpecLite write operation is active, remove any stale .speclite-tmp path if present, then rerun the command.",
+    },
+    impact: input.impact,
+    suggestedNextStep: input.suggestedNextStep,
+  };
+}
+
+function toProjectRelativePosixPath(projectRoot: string, absolutePath: string): string {
+  return path.relative(projectRoot, absolutePath).split(path.sep).join("/");
+}
+
 function isMissingPathError(error: unknown): boolean {
   return (
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
     (error as { code?: unknown }).code === "ENOENT"
-  );
-}
-
-function isFileExistsError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code?: unknown }).code === "EEXIST"
   );
 }

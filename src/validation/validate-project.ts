@@ -22,6 +22,7 @@ import { validateRuntimePaths } from "./rules/runtime-path.js";
 import { validateMenuTargets } from "./rules/menu-target.js";
 import { validateLegacyNamespace } from "./rules/legacy-namespace.js";
 import { validateArtifactPathContract } from "./rules/artifact-path.js";
+import { validateOperationLock } from "./rules/operation-lock.js";
 
 export type ValidateProjectResult = {
   issues: ValidationIssue[];
@@ -94,10 +95,18 @@ export async function validateProject(input: { projectRoot: string }): Promise<V
     const fileIntegrityResult = await validateFileIntegrity({
       projectRoot: input.projectRoot,
       filesIndex: manifestSchemaResult.filesIndex,
+      artifactRoot: manifestSchemaResult.manifest.paths.artifactRoot,
     });
     issues.push(...fileIntegrityResult.issues);
     checkedCategories.add("file-integrity");
     for (const validatedPath of fileIntegrityResult.validatedPaths) validatedPaths.add(validatedPath);
+  }
+
+  const operationLockResult = await validateOperationLock({ projectRoot: input.projectRoot });
+  if (operationLockResult.validatedPaths.length > 0 || operationLockResult.issues.length > 0) {
+    issues.push(...operationLockResult.issues);
+    checkedCategories.add("operation-lock");
+    for (const validatedPath of operationLockResult.validatedPaths) validatedPaths.add(validatedPath);
   }
 
   const sortedIssues = sortValidationIssues(issues);

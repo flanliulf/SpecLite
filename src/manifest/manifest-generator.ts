@@ -13,6 +13,11 @@ import type {
   SkillIndex,
   SkillIndexEntry,
 } from "./manifest-schema.js";
+import { hashBytes } from "./hash.js";
+import {
+  isVolatileInstalledStatePath,
+  ownershipForFilesIndexEntry,
+} from "../update/ownership-model.js";
 
 export function createInstalledManifest(input: {
   sourceDescriptor: SourceDescriptor;
@@ -46,7 +51,32 @@ export function createHelpIndex(entries: HelpIndexEntry[]): HelpIndex {
 export function createFilesIndex(entries: FilesIndexEntry[]): FilesIndex {
   return {
     schemaVersion: "speclite.files-index.v1",
-    entries: [...entries].sort((left, right) => left.path.localeCompare(right.path)),
+    entries: [...entries]
+      .filter((entry) => !isVolatileInstalledStatePath(entry.path))
+      .sort((left, right) => left.path.localeCompare(right.path)),
+  };
+}
+
+export function createFilesIndexEntry(input: {
+  path: string;
+  bytes: Buffer | string;
+  executable: boolean;
+  artifactKind: string;
+  sourceRef: string;
+  artifactRoot?: string;
+}): FilesIndexEntry {
+  return {
+    schemaVersion: "speclite.files-index.v1",
+    path: input.path,
+    ownership: ownershipForFilesIndexEntry({
+      path: input.path,
+      ...(input.artifactRoot === undefined ? {} : { artifactRoot: input.artifactRoot }),
+    }),
+    hash: hashBytes(input.bytes),
+    hashAlgorithm: "sha256",
+    executable: input.executable,
+    artifactKind: input.artifactKind,
+    sourceRef: input.sourceRef,
   };
 }
 

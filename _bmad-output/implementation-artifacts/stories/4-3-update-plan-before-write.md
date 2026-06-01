@@ -1,6 +1,6 @@
 # Story 4.3: Update Plan Before Write（写入前更新计划）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -68,79 +68,79 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、当前仓库状态和只读边界（AC: 1-9）
-  - [ ] 实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当成 Epic 4 源码已完成证据。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership model / files index anchors、Story 4.2 shared config/customization resolver anchors 是否真实存在；若不存在，按前序 story 顺序补齐，不得在本 Story 中绕过契约创建私有 update-only 模型。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
+- [x] Task 1: 验证前置实现、当前仓库状态和只读边界（AC: 1-9）
+  - [x] 实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当成 Epic 4 源码已完成证据。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership model / files index anchors、Story 4.2 shared config/customization resolver anchors 是否真实存在；若不存在，按前序 story 顺序补齐，不得在本 Story 中绕过契约创建私有 update-only 模型。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
 
-- [ ] Task 2: 建立 update planning orchestration 顺序（AC: 1, 3-6）
-  - [ ] 在 `src/commands/update.ts` 或既有 update command orchestration 中保持顺序：parse flags -> build command context -> command mode normalization -> read-only preflight（读取 installed state、source descriptor、files index/hash baseline、ownership、resolved config/customization，不构造可写 plan payload）-> acquire project operation lock -> safe update planning / `UpdatePlan` construction -> render unapplied plan or request confirmation -> apply authorized writes through shared safe-write primitives。
-  - [ ] 在 project operation lock 获取成功前，只允许 command mode normalization 和 read-only preflight；不得执行 safe planning、构造可导致写入的 `UpdatePlan` payload、解析为可写 source/package mutation、修改 `_speclite/`、IDE mirrors、`_speclite-output/`、human-owned TOML、manifest/index、files index 或任何 target project file。
-  - [ ] `--dry-run`、interactive confirmation pending、non-TTY/script mode without `--yes` 都必须保留真实 `UpdatePlan.actions[]`，设置 `writeAuthorized: false`，并保持 `changedPaths: []` 与 `skippedPaths: []`。
-  - [ ] `--yes` 只授权无 conflict 的 planned update writes；不得授权 installer-owned drift repair，不得修改 human-owned TOML 或 workflow-owned artifacts，不得绕过 source trust / ownership / hash blockers。
-  - [ ] 如果 write-capable command 在获取 project operation lock 前失败，不得输出 `updatePlan`、`changedPaths`、`skippedPaths` 或 `conflicts` 假装 safe planning 已完成；该 blocker 属于 Story 4.4 的 lock path，但本 Story 的 reporter 必须遵守 `CommandResult` 边界。
+- [x] Task 2: 建立 update planning orchestration 顺序（AC: 1, 3-6）
+  - [x] 在 `src/commands/update.ts` 或既有 update command orchestration 中保持顺序：parse flags -> build command context -> command mode normalization -> read-only preflight（读取 installed state、source descriptor、files index/hash baseline、ownership、resolved config/customization，不构造可写 plan payload）-> acquire project operation lock -> safe update planning / `UpdatePlan` construction -> render unapplied plan or request confirmation -> apply authorized writes through shared safe-write primitives。
+  - [x] 在 project operation lock 获取成功前，只允许 command mode normalization 和 read-only preflight；不得执行 safe planning、构造可导致写入的 `UpdatePlan` payload、解析为可写 source/package mutation、修改 `_speclite/`、IDE mirrors、`_speclite-output/`、human-owned TOML、manifest/index、files index 或任何 target project file。
+  - [x] `--dry-run`、interactive confirmation pending、non-TTY/script mode without `--yes` 都必须保留真实 `UpdatePlan.actions[]`，设置 `writeAuthorized: false`，并保持 `changedPaths: []` 与 `skippedPaths: []`。
+  - [x] `--yes` 只授权无 conflict 的 planned update writes；不得授权 installer-owned drift repair，不得修改 human-owned TOML 或 workflow-owned artifacts，不得绕过 source trust / ownership / hash blockers。
+  - [x] 如果 write-capable command 在获取 project operation lock 前失败，不得输出 `updatePlan`、`changedPaths`、`skippedPaths` 或 `conflicts` 假装 safe planning 已完成；该 blocker 属于 Story 4.4 的 lock path，但本 Story 的 reporter 必须遵守 `CommandResult` 边界。
 
-- [ ] Task 3: 构建 UpdatePlan action model 与 reason code 映射（AC: 2-4, 7）
-  - [ ] 复用 `src/diagnostics/command-result-schema.ts` 中的 `UpdatePlan`、`UpdateConflict` 和 producer guards；不要在 `src/update/` 或 renderer 中定义第二套 public JSON shape。
-  - [ ] 每个 `UpdatePlan.actions[]` entry 必须包含 project-relative POSIX `affectedPath`、`ownership` 和 `action`；对于需要 hash comparison 的 installer-owned path，包含 `currentHash` 与 `expectedHash`。
-  - [ ] `action` 只能使用 `create`、`update`、`skip`、`conflict`；`skip` 必须包含 stable lower-kebab `reason`。
-  - [ ] Normal update 中的 installer-owned drift 必须进入 `conflicts` 或 conflict action，reason 为 `installer-owned-drift`；普通 confirmation 或 `--yes` 不得把它转换成 repair。
-  - [ ] Human-owned 与 workflow-owned paths 不得进入 executable overwrite plan；需要展示时使用 `skip` 或 conflict projection，reason 使用 `human-owned`、`workflow-owned`、`unknown-ownership`、`missing-source-evidence`、`unsupported-repair` 等 owning SPEC registry 允许值。
-  - [ ] Public arrays 按 contract ordering 排序：`updatePlan.actions` 以 normalized affected path -> action -> ownership -> reason 排序，`conflicts` 以 affected path -> ownership -> reason 排序，不能依赖 filesystem traversal order。
+- [x] Task 3: 构建 UpdatePlan action model 与 reason code 映射（AC: 2-4, 7）
+  - [x] 复用 `src/diagnostics/command-result-schema.ts` 中的 `UpdatePlan`、`UpdateConflict` 和 producer guards；不要在 `src/update/` 或 renderer 中定义第二套 public JSON shape。
+  - [x] 每个 `UpdatePlan.actions[]` entry 必须包含 project-relative POSIX `affectedPath`、`ownership` 和 `action`；对于需要 hash comparison 的 installer-owned path，包含 `currentHash` 与 `expectedHash`。
+  - [x] `action` 只能使用 `create`、`update`、`skip`、`conflict`；`skip` 必须包含 stable lower-kebab `reason`。
+  - [x] Normal update 中的 installer-owned drift 必须进入 `conflicts` 或 conflict action，reason 为 `installer-owned-drift`；普通 confirmation 或 `--yes` 不得把它转换成 repair。
+  - [x] Human-owned 与 workflow-owned paths 不得进入 executable overwrite plan；需要展示时使用 `skip` 或 conflict projection，reason 使用 `human-owned`、`workflow-owned`、`unknown-ownership`、`missing-source-evidence`、`unsupported-repair` 等 owning SPEC registry 允许值。
+  - [x] Public arrays 按 contract ordering 排序：`updatePlan.actions` 以 normalized affected path -> action -> ownership -> reason 排序，`conflicts` 以 affected path -> ownership -> reason 排序，不能依赖 filesystem traversal order。
 
-- [ ] Task 4: 接入 source descriptor、files index、ownership 与 resolved config（AC: 1-4）
-  - [ ] Source descriptor 必须来自 `src/source/` 与 `02-source-descriptor-contract.md` 的 trust/evidence model；在 install/update 写入前至少有一项 reproducible integrity evidence。
-  - [ ] `trustStatus: "blocked"`、floating Git source、local source self-reference、missing bundled packaging evidence 或 source policy blocker 必须阻断 write planning，不得用 `writeAuthorized` 表达 source acceptance。
-  - [ ] Files index 必须遵守 `04-manifest-index-contract.md`：file-level hash 使用 raw bytes，fields 包含 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind`、`sourceRef`。
-  - [ ] `_speclite/.lock` 与 `.speclite-tmp-` safe-write temporary files 不得进入 files index，也不得影响 stable files-index hash。
-  - [ ] Ownership truth 来自 Story 4.1 的 ownership model / files index projection；update planner 不得用 hard-coded path list 替代 ownership classifier。
-  - [ ] Resolved config/customization 来自 Story 4.2 的 shared `src/config/` resolver；update planner 不得实现第二套 merge order、array merge 或 layer failure semantics。
-  - [ ] Resolver warning-only diagnostics 允许 conservative planning，但必须进入 shared semantic model；resolver error/critical diagnostics 必须阻断 planning。
+- [x] Task 4: 接入 source descriptor、files index、ownership 与 resolved config（AC: 1-4）
+  - [x] Source descriptor 必须来自 `src/source/` 与 `02-source-descriptor-contract.md` 的 trust/evidence model；在 install/update 写入前至少有一项 reproducible integrity evidence。
+  - [x] `trustStatus: "blocked"`、floating Git source、local source self-reference、missing bundled packaging evidence 或 source policy blocker 必须阻断 write planning，不得用 `writeAuthorized` 表达 source acceptance。
+  - [x] Files index 必须遵守 `04-manifest-index-contract.md`：file-level hash 使用 raw bytes，fields 包含 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind`、`sourceRef`。
+  - [x] `_speclite/.lock` 与 `.speclite-tmp-` safe-write temporary files 不得进入 files index，也不得影响 stable files-index hash。
+  - [x] Ownership truth 来自 Story 4.1 的 ownership model / files index projection；update planner 不得用 hard-coded path list 替代 ownership classifier。
+  - [x] Resolved config/customization 来自 Story 4.2 的 shared `src/config/` resolver；update planner 不得实现第二套 merge order、array merge 或 layer failure semantics。
+  - [x] Resolver warning-only diagnostics 允许 conservative planning，但必须进入 shared semantic model；resolver error/critical diagnostics 必须阻断 planning。
 
-- [ ] Task 5: 实现 `CommandResult<UpdateCommandData>` 投影（AC: 5-7）
-  - [ ] `speclite update --json` 输出 `schemaVersion: "speclite.command-result.v1"`、`command: "update"`、stable `targetProject`、`summary`、`issues`、`nextActions` 和 `data`。
-  - [ ] `data` required fields 为 `updatePlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`；不得添加未契约化字段，除非同一变更先更新 owning SPEC、schema/parser 和 fixtures。
-  - [ ] `UpdatePlan` 描述 planned effects，不是 execution log；`changedPaths` / `skippedPaths` 只描述当前 command 的 actual apply result。
-  - [ ] `writeAuthorized === false` 时，`changedPaths` 与 `skippedPaths` 必须为空，即使 plan 中存在 `update`、`create`、`skip` 或 `conflict` actions。
-  - [ ] `data.conflicts.length > 0` 时，`CommandResult.status` 必须为 `failure`，exit code non-zero，`issues[]` 包含且仅包含一个 command-level `update.conflicts` issue，`details.conflictCount` 等于 path-level conflict 数量。
-  - [ ] 不得把逐路径 conflicts 复制成多个 `issues[]` entries；path-level detail 只放入 `data.conflicts`。
-  - [ ] `summary`、`issues`、`nextActions` 和 path fields 不得包含 timestamp、absolute path、home directory、temporary/cache path、random id 或环境相关文本。
+- [x] Task 5: 实现 `CommandResult<UpdateCommandData>` 投影（AC: 5-7）
+  - [x] `speclite update --json` 输出 `schemaVersion: "speclite.command-result.v1"`、`command: "update"`、stable `targetProject`、`summary`、`issues`、`nextActions` 和 `data`。
+  - [x] `data` required fields 为 `updatePlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized`；不得添加未契约化字段，除非同一变更先更新 owning SPEC、schema/parser 和 fixtures。
+  - [x] `UpdatePlan` 描述 planned effects，不是 execution log；`changedPaths` / `skippedPaths` 只描述当前 command 的 actual apply result。
+  - [x] `writeAuthorized === false` 时，`changedPaths` 与 `skippedPaths` 必须为空，即使 plan 中存在 `update`、`create`、`skip` 或 `conflict` actions。
+  - [x] `data.conflicts.length > 0` 时，`CommandResult.status` 必须为 `failure`，exit code non-zero，`issues[]` 包含且仅包含一个 command-level `update.conflicts` issue，`details.conflictCount` 等于 path-level conflict 数量。
+  - [x] 不得把逐路径 conflicts 复制成多个 `issues[]` entries；path-level detail 只放入 `data.conflicts`。
+  - [x] `summary`、`issues`、`nextActions` 和 path fields 不得包含 timestamp、absolute path、home directory、temporary/cache path、random id 或环境相关文本。
 
-- [ ] Task 6: 实现 human-readable Evidence profile 和 terminal fallback（AC: 5, 8-9）
-  - [ ] 复用 `src/diagnostics/output.ts` 或既有 shared output layer；`src/commands/update.ts` 不得自行拼接 status text、JSON fields、path display、issue layout 或 next action order。
-  - [ ] Evidence profile 至少展示 Summary、Update Plan / Planned Effects、Authorization、Changed Paths、Skipped Paths、Conflicts、Protected Boundaries、Next Actions。
-  - [ ] Authorization 文案必须清楚区分 `requiresConfirmation`、`writeAuthorized`、interactive pending confirmation、script mode without `--yes` 和 explicit `--yes` authorized apply。
-  - [ ] 对 `blocked-by-conflict`、`ready-to-apply`、`no-op`、`applied`、`partial-failure` 等状态，必须有文本状态，不只靠颜色、图标或表格位置。
-  - [ ] Conflict 和 skipped 行必须展示 affected path、ownership、proposed action 或 skipped/conflict reason、suggested next step。
-  - [ ] 窄终端可以把表格降级为 key-value block，但不得丢失 affected path、ownership、proposed action、reason、next action 或是否需要 `--yes`。
-  - [ ] `NO_COLOR`、non-TTY、CI 和 Windows path portability 场景下 human-readable output 仍保持纯文本可读；`--json` 不输出 ANSI、icons 或 human-only decoration fields。
-  - [ ] Human-readable output 不得成为 automation 依赖字段唯一承载位置；CI、fixtures 和 installed skills 需要的 state 必须在 `CommandResult.data`、`issues`、`nextActions` 或 file contract 中表达。
+- [x] Task 6: 实现 human-readable Evidence profile 和 terminal fallback（AC: 5, 8-9）
+  - [x] 复用 `src/diagnostics/output.ts` 或既有 shared output layer；`src/commands/update.ts` 不得自行拼接 status text、JSON fields、path display、issue layout 或 next action order。
+  - [x] Evidence profile 至少展示 Summary、Update Plan / Planned Effects、Authorization、Changed Paths、Skipped Paths、Conflicts、Protected Boundaries、Next Actions。
+  - [x] Authorization 文案必须清楚区分 `requiresConfirmation`、`writeAuthorized`、interactive pending confirmation、script mode without `--yes` 和 explicit `--yes` authorized apply。
+  - [x] 对 `blocked-by-conflict`、`ready-to-apply`、`no-op`、`applied`、`partial-failure` 等状态，必须有文本状态，不只靠颜色、图标或表格位置。
+  - [x] Conflict 和 skipped 行必须展示 affected path、ownership、proposed action 或 skipped/conflict reason、suggested next step。
+  - [x] 窄终端可以把表格降级为 key-value block，但不得丢失 affected path、ownership、proposed action、reason、next action 或是否需要 `--yes`。
+  - [x] `NO_COLOR`、non-TTY、CI 和 Windows path portability 场景下 human-readable output 仍保持纯文本可读；`--json` 不输出 ANSI、icons 或 human-only decoration fields。
+  - [x] Human-readable output 不得成为 automation 依赖字段唯一承载位置；CI、fixtures 和 installed skills 需要的 state 必须在 `CommandResult.data`、`issues`、`nextActions` 或 file contract 中表达。
 
-- [ ] Task 7: 保持 Story 4.3 与 Story 4.4-4.6 的边界（AC: 1-9）
-  - [ ] 本 Story 可以建立 pre-write update plan、authorization state、unapplied plan output、public JSON projection、Evidence profile 和 focused tests。
-  - [ ] 不在本 Story 中完成 project operation lock acquisition、safe write temp-write + rename、partial failure cleanup 或 stale lock cleanup；这些属于 Story 4.4。
-  - [ ] 不在本 Story 中完成 full conflict detector / default non-overwrite matrix；本 Story 只使用已有 ownership/hash blockers 并为 Story 4.5 保留扩展点。
-  - [ ] 不在本 Story 中实现 `update --repair` 的 full repair apply、`restore-canonical`、`regenerate` 或 `RepairPlan` 行为；这些属于 Story 4.6。
-  - [ ] 不新增顶级 `speclite repair`、`speclite sync`、`doctor`、`uninstall`、backup/restore、standalone update report artifact、enterprise dashboard 或 Post-MVP migration commands。
+- [x] Task 7: 保持 Story 4.3 与 Story 4.4-4.6 的边界（AC: 1-9）
+  - [x] 本 Story 可以建立 pre-write update plan、authorization state、unapplied plan output、public JSON projection、Evidence profile 和 focused tests。
+  - [x] 不在本 Story 中完成 project operation lock acquisition、safe write temp-write + rename、partial failure cleanup 或 stale lock cleanup；这些属于 Story 4.4。
+  - [x] 不在本 Story 中完成 full conflict detector / default non-overwrite matrix；本 Story 只使用已有 ownership/hash blockers 并为 Story 4.5 保留扩展点。
+  - [x] 不在本 Story 中实现 `update --repair` 的 full repair apply、`restore-canonical`、`regenerate` 或 `RepairPlan` 行为；这些属于 Story 4.6。
+  - [x] 不新增顶级 `speclite repair`、`speclite sync`、`doctor`、`uninstall`、backup/restore、standalone update report artifact、enterprise dashboard 或 Post-MVP migration commands。
 
-- [ ] Task 8: 编写 focused tests 和 fixture assertions（AC: 1-9）
-  - [ ] Unit tests 覆盖 update planning 输入顺序：installed state、source descriptor、files index、ownership、resolved config/customization 全部在 planning 前读取，并且未授权阶段不写文件。
-  - [ ] Unit tests 覆盖 `UpdatePlan.actions[]`：planned change、unchanged skip、human-owned skip/protection、workflow-owned skip/protection、unknown ownership、missing source evidence、installer-owned drift conflict。
-  - [ ] Unit tests 覆盖 authorization semantics：interactive pending、script mode without `--yes`、`--dry-run`、explicit `--yes`，并断言 pending/unapplied plan 不改写为 `skip:not-authorized`。
-  - [ ] JSON reporter tests 覆盖 `UpdateCommandData` required fields、`writeAuthorized === false` 时 empty `changedPaths` / `skippedPaths`、single `update.conflicts` issue、stable ordering、project-relative POSIX paths 和 no timestamp policy。
-  - [ ] Human-readable renderer tests 覆盖 Evidence profile、NO_COLOR、non-TTY、CI 和窄终端 fallback；断言文本中仍有 severity/issueId/affectedPath/ownership/reason/next action/`--yes` guidance。
-  - [ ] Fixture `test/fixtures/existing-install-update/` 增加 update-plan-before-write case，断言 plan-before-write、unapplied plan、changed/skipped/conflict separation 和 human-owned/workflow-owned preservation。
-  - [ ] Fixture `test/fixtures/ide-drift/` 若前置 drift detector 已存在，断言 normal update 对 IDE mirror drift 只产生 conflict，不执行 repair。
-  - [ ] 所有 JSON assertions parse 后 semantic compare；不得比较 absolute path、home directory、timestamp、random id、stack trace、terminal color 或当前时间。
-  - [ ] Tests 必须 local-only、deterministic，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
+- [x] Task 8: 编写 focused tests 和 fixture assertions（AC: 1-9）
+  - [x] Unit tests 覆盖 update planning 输入顺序：installed state、source descriptor、files index、ownership、resolved config/customization 全部在 planning 前读取，并且未授权阶段不写文件。
+  - [x] Unit tests 覆盖 `UpdatePlan.actions[]`：planned change、unchanged skip、human-owned skip/protection、workflow-owned skip/protection、unknown ownership、missing source evidence、installer-owned drift conflict。
+  - [x] Unit tests 覆盖 authorization semantics：interactive pending、script mode without `--yes`、`--dry-run`、explicit `--yes`，并断言 pending/unapplied plan 不改写为 `skip:not-authorized`。
+  - [x] JSON reporter tests 覆盖 `UpdateCommandData` required fields、`writeAuthorized === false` 时 empty `changedPaths` / `skippedPaths`、single `update.conflicts` issue、stable ordering、project-relative POSIX paths 和 no timestamp policy。
+  - [x] Human-readable renderer tests 覆盖 Evidence profile、NO_COLOR、non-TTY、CI 和窄终端 fallback；断言文本中仍有 severity/issueId/affectedPath/ownership/reason/next action/`--yes` guidance。
+  - [x] Fixture `test/fixtures/existing-install-update/` 增加 update-plan-before-write case，断言 plan-before-write、unapplied plan、changed/skipped/conflict separation 和 human-owned/workflow-owned preservation。
+  - [x] Fixture `test/fixtures/ide-drift/` 若前置 drift detector 已存在，断言 normal update 对 IDE mirror drift 只产生 conflict，不执行 repair。
+  - [x] 所有 JSON assertions parse 后 semantic compare；不得比较 absolute path、home directory、timestamp、random id、stack trace、terminal color 或当前时间。
+  - [x] Tests 必须 local-only、deterministic，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-9）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 update planning、source descriptor gating、files index/hash、ownership protection、resolver consumption、CommandResult reporter、Evidence profile renderer 和 affected fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要绕过 shared resolver、不要创建 update-private JSON 或 merge implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1/4.2、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 4.4 operation lock/safe write、Story 4.5 full conflict detector、Story 4.6 repair apply、Epic 5 source channel 扩展、Epic 6 release fixture matrix 或 Post-MVP governance commands。
+- [x] Task 9: 本地验证与范围控制（AC: 1-9）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 update planning、source descriptor gating、files index/hash、ownership protection、resolver consumption、CommandResult reporter、Evidence profile renderer 和 affected fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要绕过 shared resolver、不要创建 update-private JSON 或 merge implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1/4.2、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 4.4 operation lock/safe write、Story 4.5 full conflict detector、Story 4.6 repair apply、Epic 5 source channel 扩展、Epic 6 release fixture matrix 或 Post-MVP governance commands。
 
 ## Dev Notes（开发备注）
 
@@ -322,17 +322,38 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-TBD by dev-story agent.
+GPT-5.5
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev-story agent.
+- 2026-05-31: 激活 `bmad-dev-story` workflow；裸 `python3` 因缺 `tomllib` 失败，按项目既有运行环境改用 `python3.12` 成功解析 workflow。
+- 2026-05-31: 读取完整 Story 4.3、`sprint-status.yaml`、`_bmad-output/project-context.md`、root `package.json`、`src/`、`test/fixtures/` 和当前 dirty worktree；确认只在 Story 4.3 范围增量修改。
+- 2026-05-31: 确认 `src/update/ownership-model.ts`、`src/update/update-plan.ts`、`src/config/*`、`src/manifest/*`、`src/diagnostics/command-result*.ts` 与 `src/diagnostics/output.ts` 为当前实现锚点。
+- 2026-05-31: RED：`npx vitest run test/update-planning.test.ts test/update-command.test.ts` 先新增失败测试，确认 planned update、`--yes`、blocked source 和 Evidence profile 缺口。
+- 2026-05-31: GREEN/REFACTOR：实现 pre-write update plan source hash comparison、source descriptor gating、authorization state、CLI `--dry-run` / `--yes` 和 Evidence profile renderer；未实现 Story 4.4 的 lock/safe-write apply。
+- 2026-05-31: 验证：`npm run build` 通过；focused update tests 15/15 通过；默认 `npm test` 因两个既有 install/runtime 测试 5s timeout 失败；`npx vitest run --testTimeout=15000` 全量 178/178 通过。
 
 ### Completion Notes List（完成备注）
 
 - Story context created by bmad-create-story sub-agent #3.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 完成 `speclite update` pre-write planning：读取 installed state / files index / ownership / resolver / source descriptor 后生成 `UpdatePlan.actions[]`，installer-owned source 更新保留真实 `update` action，未授权阶段 `changedPaths` / `skippedPaths` 保持为空。
+- 完成 source descriptor 阻断：`trustStatus: "blocked"`、缺少 verified integrity evidence、floating Git source 均在生成可写 plan 前以 `source-integrity.*` command issue 阻断。
+- 完成授权投影：`--dry-run` 与默认 pending/script 模式保留真实 plan 且 `writeAuthorized: false`；`--yes` 只在无 conflict 且存在 planned write 时记录授权状态。本 Story 按边界不执行 Story 4.4 的 actual safe-write apply。
+- 完成 human-readable Evidence profile：输出 Summary、Update Plan / Planned Effects、Authorization、Changed Paths、Skipped Paths、Conflicts、Protected Boundaries、Next Actions，并提供纯文本 reason / next action / `--yes` guidance。
+- 完成 focused tests 与 fixture assertions：覆盖 planned update、unchanged skip、protected ownership/conflicts、missing source evidence、source descriptor blocker、authorization semantics、JSON projection、Evidence profile 与 existing-install-update / ide-drift fixture anchors。
 
 ### File List（文件列表）
 
-- TBD by dev-story agent.
+- src/bin/speclite.ts
+- src/commands/update.ts
+- src/update/update-plan.ts
+- src/diagnostics/output.ts
+- test/update-planning.test.ts
+- test/update-command.test.ts
+- _bmad-output/implementation-artifacts/stories/4-3-update-plan-before-write.md
+- _bmad-output/implementation-artifacts/sprint-status.yaml
+
+### Change Log（变更日志）
+
+- 2026-05-31: 实现 Story 4.3 pre-write update plan、authorization projection、source descriptor gating、Evidence profile renderer 与 focused tests；Story 状态更新为 review。

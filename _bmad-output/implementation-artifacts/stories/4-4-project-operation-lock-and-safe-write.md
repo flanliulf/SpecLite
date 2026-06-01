@@ -1,6 +1,6 @@
 # Story 4.4: Project Operation Lock And Safe Write（项目操作锁与安全写入）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -62,79 +62,78 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、当前仓库状态和只读边界（AC: 1-8）
-  - [ ] 实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当作 Epic 4 源码已完成证据。
-  - [ ] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership/files index anchors、Story 4.2 shared config/customization resolver anchors、Story 4.3 update plan/write authorization anchors 是否真实存在；若不存在，按前序 story implementation 顺序补齐，不得在本 Story 中绕过契约创建私有 lock/write model。
-  - [ ] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
+- [x] Task 1: 验证前置实现、当前仓库状态和只读边界（AC: 1-8）
+  - [x] 实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；不得把 ready-for-dev story context 当作 Epic 4 源码已完成证据。
+  - [x] 确认 Story 3.5 `CommandResult` / `ValidationIssue` anchors 仍可复用，并重新验证 Story 4.1 ownership/files index anchors、Story 4.2 shared config/customization resolver anchors、Story 4.3 update plan/write authorization anchors 是否真实存在；若不存在，按前序 story implementation 顺序补齐，不得在本 Story 中绕过契约创建私有 lock/write model。
+  - [x] 检查当前 worktree dirty 状态，保留用户、父 agent 或其他 sub-agent 的 planning artifacts、story 文件、源码和状态文件改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的行为；不得用本 Story 重构无关模块。
 
-- [ ] Task 2: 实现 project operation lock module 与生命周期（AC: 1-4, 8）
-  - [ ] 在 `src/fs/operation-lock.ts` 或等价 `fs/` anchor 中实现 lock acquisition、release、stale inspection 和 private lock handle 类型；`fs/` 是 lock file I/O 的 owning module。
-  - [ ] Lock path 固定为 target project 内 `_speclite/.lock`，所有 public path display 使用 project-relative POSIX path，内部可以保留 private absolute path 但不得进入 public JSON、manifest/index、files index、fixture snapshot 或 `ValidationIssue.details`。
-  - [ ] Lock file shape 必须为 `schemaVersion: "speclite.operation-lock.v1"`、`operation: "install" | "update" | "update.repair"`、optional `pid`、`createdAt`、`projectRootHash`。
-  - [ ] `createdAt` 仅用于 stale 判断和 private diagnostics，fixture 使用 injected/normalized clock；`pid` 只是 best-effort hint，不得作为唯一 stale criterion；`projectRootHash` 是 normalized project root hint，不是跨 checkout 稳定 public value。
-  - [ ] Controlled success 或 controlled failure 后释放 lock；process crash 可能留下 stale lock，MVP 只通过 validate warning 与 manual cleanup guidance 处理，不自动删除。
-  - [ ] 如果 `_speclite/` 尚未存在但 install 需要创建 lock，先明确 lock parent creation 的 ownership 和 safe creation 顺序；不得把 parent creation 当作绕过 operation lock 的任意写入入口。
+- [x] Task 2: 实现 project operation lock module 与生命周期（AC: 1-4, 8）
+  - [x] 在 `src/fs/operation-lock.ts` 或等价 `fs/` anchor 中实现 lock acquisition、release、stale inspection 和 private lock handle 类型；`fs/` 是 lock file I/O 的 owning module。
+  - [x] Lock path 固定为 target project 内 `_speclite/.lock`，所有 public path display 使用 project-relative POSIX path，内部可以保留 private absolute path 但不得进入 public JSON、manifest/index、files index、fixture snapshot 或 `ValidationIssue.details`。
+  - [x] Lock file shape 必须为 `schemaVersion: "speclite.operation-lock.v1"`、`operation: "install" | "update" | "update.repair"`、optional `pid`、`createdAt`、`projectRootHash`。
+  - [x] `createdAt` 仅用于 stale 判断和 private diagnostics，fixture 使用 injected/normalized clock；`pid` 只是 best-effort hint，不得作为唯一 stale criterion；`projectRootHash` 是 normalized project root hint，不是跨 checkout 稳定 public value。
+  - [x] Controlled success 或 controlled failure 后释放 lock；process crash 可能留下 stale lock，MVP 只通过 validate warning 与 manual cleanup guidance 处理，不自动删除。
+  - [x] 如果 `_speclite/` 尚未存在但 install 需要创建 lock，先明确 lock parent creation 的 ownership 和 safe creation 顺序；不得把 parent creation 当作绕过 operation lock 的任意写入入口。
 
-- [ ] Task 3: 接入 write-capable command orchestration（AC: 1-3, 7-8）
-  - [ ] 在 `src/commands/install.ts`、`src/commands/update.ts` 和 `update --repair` orchestration 中接入 lock acquisition，覆盖 `install`、`update`、`update.repair` 三类 write-capable command。
-  - [ ] `speclite status` 保持 lightweight read-only summary，默认不得检查 project operation lock。
-  - [ ] `speclite validate` 保持 read-only，可以检查 stale lock 并报告 `operation-lock.stale-lock` warning，但不得获取写锁、不得删除 lock file、不得修复 stale temp files。
-  - [ ] Public write-capable command path 必须 non-reentrant：即使同一 process 已持有 lock，再次进入 public command path 也必须走 acquisition 并按 contention 失败处理；内部复用只能通过 private lock handle 传递，不得重新调用 public command path。
-  - [ ] Lock acquisition failure 必须发生在任何 write、safe planning 或 apply side effect 之前；失败时不得写入 installer-owned、human-owned、workflow-owned、manifest/index、files index、IDE mirror、artifact root 或 temp target。
-  - [ ] 如果 command 在 lock acquisition 前失败，不得输出 `updatePlan`、`repairPlan`、`changedPaths`、`skippedPaths` 或 `conflicts` 假装 planning 已安全完成。
+- [x] Task 3: 接入 write-capable command orchestration（AC: 1-3, 7-8）
+  - [x] 在 `src/commands/install.ts`、`src/commands/update.ts` 和 `update --repair` orchestration 中接入 lock acquisition，覆盖 `install`、`update`、`update.repair` 三类 write-capable command。
+  - [x] `speclite status` 保持 lightweight read-only summary，默认不得检查 project operation lock。
+  - [x] `speclite validate` 保持 read-only，可以检查 stale lock 并报告 `operation-lock.stale-lock` warning，但不得获取写锁、不得删除 lock file、不得修复 stale temp files。
+  - [x] Public write-capable command path 必须 non-reentrant：即使同一 process 已持有 lock，再次进入 public command path 也必须走 acquisition 并按 contention 失败处理；内部复用只能通过 private lock handle 传递，不得重新调用 public command path。
+  - [x] Lock acquisition failure 必须发生在任何 write、safe planning 或 apply side effect 之前；失败时不得写入 installer-owned、human-owned、workflow-owned、manifest/index、files index、IDE mirror、artifact root 或 temp target。
+  - [x] 如果 command 在 lock acquisition 前失败，不得输出 `updatePlan`、`repairPlan`、`changedPaths`、`skippedPaths` 或 `conflicts` 假装 planning 已安全完成。
 
-- [ ] Task 4: 实现 safe write primitive（AC: 5-6, 8）
-  - [ ] 在 `src/fs/safe-write.ts` 实现 installer-owned file mutation 的唯一写入 primitive；`src/commands/`、`src/update/`、`src/installer/` 不得各自复制 temp-write/rename logic。
-  - [ ] Safe write 必须将 candidate content 写入 target file 同一目录下的 temporary file，temporary name 包含 `.speclite-tmp-` marker 和 private nonce / operation-local id，然后在支持时 flush，再 rename into place。
-  - [ ] 不得在原位置 truncate 或 partial rewrite target file；不得跨目录 rename；不得把 temporary filename、nonce、pid、timestamp 或 absolute temp path 输出到 public JSON、manifest/index、files index 或 stable fixture snapshot。
-  - [ ] Controlled success 或 controlled failure 应 best-effort 清理 temporary files；cleanup failure 若只留下不阻断后续 safe write 的 stale temp file，validate 可报告 `file-integrity.stale-temp-file` warning；若 stale temp file 阻断 target naming、rename 或 safe mutation，必须报告 error。
-  - [ ] `changedPaths` 只记录当前命令实际完成 rename 的 project-relative POSIX paths；未尝试、未授权或未完成的 planned writes 留在 `InstallPlan.plannedWrites`、`UpdatePlan.actions` 或 `RepairPlan.actions`。
+- [x] Task 4: 实现 safe write primitive（AC: 5-6, 8）
+  - [x] 在 `src/fs/safe-write.ts` 实现 installer-owned file mutation 的唯一写入 primitive；`src/commands/`、`src/update/`、`src/installer/` 不得各自复制 temp-write/rename logic。
+  - [x] Safe write 必须将 candidate content 写入 target file 同一目录下的 temporary file，temporary name 包含 `.speclite-tmp-` marker 和 private nonce / operation-local id，然后在支持时 flush，再 rename into place。
+  - [x] 不得在原位置 truncate 或 partial rewrite target file；不得跨目录 rename；不得把 temporary filename、nonce、pid、timestamp 或 absolute temp path 输出到 public JSON、manifest/index、files index 或 stable fixture snapshot。
+  - [x] Controlled success 或 controlled failure 应 best-effort 清理 temporary files；cleanup failure 若只留下不阻断后续 safe write 的 stale temp file，validate 可报告 `file-integrity.stale-temp-file` warning；若 stale temp file 阻断 target naming、rename 或 safe mutation，必须报告 error。
+  - [x] `changedPaths` 只记录当前命令实际完成 rename 的 project-relative POSIX paths；未尝试、未授权或未完成的 planned writes 留在 `InstallPlan.plannedWrites`、`UpdatePlan.actions` 或 `RepairPlan.actions`。
 
-- [ ] Task 5: 阻断 path escape、symlink escape、case conflict 与 unsafe overwrite（AC: 5-6）
-  - [ ] 复用或补齐 `src/fs/path-normalizer.ts` 的 project-relative POSIX normalization、absolute path rejection、project boundary check、symlink-aware boundary check 和 case conflict helper。
-  - [ ] Safe write 目标路径必须在 target project boundary 内；任何 path escape 或 symlink escape 都必须阻断写入，并按 taxonomy 输出 `artifact-path.*`、`runtime-path.symlink-escape`、`file-integrity.*` 或 owning SPEC 定义的更具体 stable issue。
-  - [ ] 对 case-insensitive conflict，必须在 planning 或 write preflight 中报告 `file-integrity.case-conflict` 或 stable conflict reason；不得依赖 host filesystem 是否实际大小写敏感作为唯一安全判断。
-  - [ ] Unsafe overwrite risk 包括但不限于：目标 ownership 非 installer-owned、ownership unknown、existing human-owned/workflow-owned target、hash baseline 不匹配、目标是 symlink、file/directory type mismatch、create action 目标已存在且不能证明安全、stale temp file 阻断 safe mutation。
-  - [ ] Normal `update` 遇到 installer-owned drift 仍应由 Story 4.5 的 conflict detector 默认标记 conflict；本 Story 只负责 write path 在 apply 前再次阻断 unsafe overwrite，不得把 drift 自动转换成 repair。
+- [x] Task 5: 阻断 path escape、symlink escape、case conflict 与 unsafe overwrite（AC: 5-6）
+  - [x] 复用或补齐 `src/fs/path-normalizer.ts` 的 project-relative POSIX normalization、absolute path rejection、project boundary check、symlink-aware boundary check 和 case conflict helper。
+  - [x] Safe write 目标路径必须在 target project boundary 内；任何 path escape 或 symlink escape 都必须阻断写入，并按 taxonomy 输出 `artifact-path.*`、`runtime-path.symlink-escape`、`file-integrity.*` 或 owning SPEC 定义的更具体 stable issue。
+  - [x] 对 case-insensitive conflict，必须在 planning 或 write preflight 中报告 `file-integrity.case-conflict` 或 stable conflict reason；不得依赖 host filesystem 是否实际大小写敏感作为唯一安全判断。
+  - [x] Unsafe overwrite risk 包括但不限于：目标 ownership 非 installer-owned、ownership unknown、existing human-owned/workflow-owned target、hash baseline 不匹配、目标是 symlink、file/directory type mismatch、create action 目标已存在且不能证明安全、stale temp file 阻断 safe mutation。
+  - [x] Normal `update` 遇到 installer-owned drift 仍应由 Story 4.5 的 conflict detector 默认标记 conflict；本 Story 只负责 write path 在 apply 前再次阻断 unsafe overwrite，不得把 drift 自动转换成 repair。
 
-- [ ] Task 6: 保持 public JSON、issues 和 fixture 稳定（AC: 2, 4, 7-8）
-  - [ ] `operation-lock.project-locked` 是 command-level blocker，category 为 `operation-lock`，severity 为 `error`，必须导致 `CommandResult.status: "failure"` 和 non-zero exit code；不得放入 `data.conflicts`。
-  - [ ] `operation-lock.stale-lock` 只在 validate 等 read-only inspection 中作为 warning；validate 可以返回 `CommandResult.status: "warning"` 和 exit code 0。
-  - [ ] Lock 前失败时 public JSON 不得包含 plan payload、changed/skipped/conflict arrays、temporary paths、lock nonce、raw `pid`、`createdAt`、absolute path 或 checkout-specific `projectRootHash`。
-  - [ ] Partial failure diagnostics 必须包含 completed steps、failed step、pending steps、changed paths 和 manual action。若现有 `UpdateCommandData` / `RepairCommandData` 没有 top-level step fields，不得偷偷新增未契约化 fields；优先使用 stable `issues[].details` / `nextActions` 承载，或先同步更新 owning SPEC、schema/parser 和 fixtures。
-  - [ ] `summary`、`issues[].details`、`impact`、`suggestedNextStep`、`nextActions` 和 path fields 不得包含 timestamp、absolute local path、home directory、temporary/cache path、raw stack trace、random id 或 credential-bearing source locator。
-  - [ ] Fixture snapshots 必须 normalize 或 exclude operation-lock volatile fields、safe-write temporary names、projectRootHash、duration 和 environment-specific paths。
+- [x] Task 6: 保持 public JSON、issues 和 fixture 稳定（AC: 2, 4, 7-8）
+  - [x] `operation-lock.project-locked` 是 command-level blocker，category 为 `operation-lock`，severity 为 `error`，必须导致 `CommandResult.status: "failure"` 和 non-zero exit code；不得放入 `data.conflicts`。
+  - [x] `operation-lock.stale-lock` 只在 validate 等 read-only inspection 中作为 warning；validate 可以返回 `CommandResult.status: "warning"` 和 exit code 0。
+  - [x] Lock 前失败时 public JSON 不得包含 plan payload、changed/skipped/conflict arrays、temporary paths、lock nonce、raw `pid`、`createdAt`、absolute path 或 checkout-specific `projectRootHash`。
+  - [x] Partial failure diagnostics 必须包含 completed steps、failed step、pending steps、changed paths 和 manual action。若现有 `UpdateCommandData` / `RepairCommandData` 没有 top-level step fields，不得偷偷新增未契约化 fields；优先使用 stable `issues[].details` / `nextActions` 承载，或先同步更新 owning SPEC、schema/parser 和 fixtures。
+  - [x] `summary`、`issues[].details`、`impact`、`suggestedNextStep`、`nextActions` 和 path fields 不得包含 timestamp、absolute local path、home directory、temporary/cache path、raw stack trace、random id 或 credential-bearing source locator。
+  - [x] Fixture snapshots 必须 normalize 或 exclude operation-lock volatile fields、safe-write temporary names、projectRootHash、duration 和 environment-specific paths。
 
-- [ ] Task 7: 保持 Story 4.4 与相邻 stories 的边界（AC: 1-8）
-  - [ ] 本 Story 可以实现 operation lock、safe write primitive、unsafe target preflight、partial failure diagnostics 和 focused tests。
-  - [ ] 不在本 Story 中重新定义 Story 4.1 ownership classifier、files index shape、raw-byte hash semantics 或 human/workflow-owned protection。
-  - [ ] 不在本 Story 中重新定义 Story 4.2 config/customization merge order、array merge、layer failure semantics 或 customization lookup key。
-  - [ ] 不在本 Story 中重新定义 Story 4.3 update plan shape、write authorization semantics、Evidence profile 或 planned vs actual result separation；本 Story 只接入 lock/apply 边界。
-  - [ ] 不在本 Story 中完成 Story 4.5 full conflict detector / default non-overwrite matrix。
-  - [ ] 不在本 Story 中完成 Story 4.6 full repair planner/apply、`restore-canonical`、`regenerate`、repair source policy 扩展。
-  - [ ] 不新增顶级 `speclite repair`、`speclite sync`、`doctor`、`uninstall`、backup/restore、transactional rollback、standalone update report artifact、daemon/background service 或 Post-MVP migration commands。
+- [x] Task 7: 保持 Story 4.4 与相邻 stories 的边界（AC: 1-8）
+  - [x] 本 Story 可以实现 operation lock、safe write primitive、unsafe target preflight、partial failure diagnostics 和 focused tests。
+  - [x] 不在本 Story 中重新定义 Story 4.1 ownership classifier、files index shape、raw-byte hash semantics 或 human/workflow-owned protection。
+  - [x] 不在本 Story 中重新定义 Story 4.2 config/customization merge order、array merge、layer failure semantics 或 customization lookup key。
+  - [x] 不在本 Story 中重新定义 Story 4.3 update plan shape、write authorization semantics、Evidence profile 或 planned vs actual result separation；本 Story 只接入 lock/apply 边界。
+  - [x] 不在本 Story 中完成 Story 4.5 full conflict detector / default non-overwrite matrix。
+  - [x] 不在本 Story 中完成 Story 4.6 full repair planner/apply、`restore-canonical`、`regenerate`、repair source policy 扩展。
+  - [x] 不新增顶级 `speclite repair`、`speclite sync`、`doctor`、`uninstall`、backup/restore、transactional rollback、standalone update report artifact、daemon/background service 或 Post-MVP migration commands。
 
-- [ ] Task 8: 编写 focused tests 和 fixture assertions（AC: 1-8）
-  - [ ] Unit tests 覆盖 lock acquisition success、lock contention、controlled release、stale lock inspection、non-reentrant public command path、private lock handle reuse 和 no auto-delete stale lock。
-  - [ ] Unit tests 覆盖 `OperationLockFile` shape、`createdAt` injected clock、`pid` best-effort semantics、`projectRootHash` redaction/normalization 和 files-index exclusion。
-  - [ ] Unit tests 覆盖 safe write success path：temp file same directory、name contains `.speclite-tmp-`、flush/rename path、changedPaths only after completed mutation、temp cleanup best effort。
-  - [ ] Unit tests 覆盖 safe write failure path：write failure before rename、rename failure after temp write、cleanup failure、partial failure diagnostics、manual action guidance 和 no false success。
-  - [ ] Unit tests 覆盖 path blockers：absolute path、`..` path escape、symlink escape、case conflict、unsafe overwrite、file/directory type mismatch、human-owned/workflow-owned target、unknown ownership 和 stale temp file blocking mutation。
-  - [ ] JSON reporter tests 覆盖 `operation-lock.project-locked` command-level issue、no `data.conflicts` duplication、no plan payload before lock, no timestamp/temp/absolute path/lock volatile leakage。
-  - [ ] Validate tests 覆盖 `operation-lock.stale-lock` warning、`file-integrity.stale-temp-file` warning/error split、canonical issue ordering 和 exit code behavior。
-  - [ ] Integration / fixture tests 使用 temporary target project 构造 `install`、`update`、`update --repair` lock contention 与 safe-write apply cases；不要依赖当前 repo 的 `_bmad` 或 `_bmad-output` 作为 installed target state。
-  - [ ] Path-portability fixtures 覆盖 macOS / Windows path separator、case behavior、symlink/path escape 和 project-relative POSIX output。
-  - [ ] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
+- [x] Task 8: 编写 focused tests 和 fixture assertions（AC: 1-8）
+  - [x] Unit tests 覆盖 lock acquisition success、lock contention、controlled release、stale lock inspection、non-reentrant public command path、private lock handle reuse 和 no auto-delete stale lock。
+  - [x] Unit tests 覆盖 `OperationLockFile` shape、`createdAt` injected clock、`pid` best-effort semantics、`projectRootHash` redaction/normalization 和 files-index exclusion。
+  - [x] Unit tests 覆盖 safe write success path：temp file same directory、name contains `.speclite-tmp-`、flush/rename path、changedPaths only after completed mutation、temp cleanup best effort。
+  - [x] Unit tests 覆盖 safe write failure path：write failure before rename、rename failure after temp write、cleanup failure、partial failure diagnostics、manual action guidance 和 no false success。
+  - [x] Unit tests 覆盖 path blockers：absolute path、`..` path escape、symlink escape、case conflict、unsafe overwrite、file/directory type mismatch、human-owned/workflow-owned target、unknown ownership 和 stale temp file blocking mutation。
+  - [x] JSON reporter tests 覆盖 `operation-lock.project-locked` command-level issue、no `data.conflicts` duplication、no plan payload before lock, no timestamp/temp/absolute path/lock volatile leakage。
+  - [x] Validate tests 覆盖 `operation-lock.stale-lock` warning、`file-integrity.stale-temp-file` warning/error split、canonical issue ordering 和 exit code behavior。
+  - [x] Integration / fixture tests 使用 temporary target project 构造 `install`、`update`、`update --repair` lock contention 与 safe-write apply cases；不要依赖当前 repo 的 `_bmad` 或 `_bmad-output` 作为 installed target state。
+  - [x] Path-portability fixtures 覆盖 macOS / Windows path separator、case behavior、symlink/path escape 和 project-relative POSIX output。
+  - [x] 所有 tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
 
-- [ ] Task 9: 本地验证与范围控制（AC: 1-8）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 operation lock、safe write、path normalization、update/apply、installer apply、CommandResult reporter、validate stale lock 和 affected fixtures 的 focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 lock/safe write tests、不要创建 private JSON shape 或 duplicate path safety implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1/4.2/4.3、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 4.5 full conflict detector、Story 4.6 repair apply、Epic 5 source channel 扩展、Epic 6 release fixture matrix 或 Post-MVP governance commands。
+- [x] Task 9: 本地验证与范围控制（AC: 1-8）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 operation lock、safe write、path normalization、update/apply、installer apply、CommandResult reporter、validate stale lock 和 affected fixtures 的 focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 lock/safe write tests、不要创建 private JSON shape 或 duplicate path safety implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1/4.2/4.3、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 4.5 full conflict detector、Story 4.6 repair apply、Epic 5 source channel 扩展、Epic 6 release fixture matrix 或 Post-MVP governance commands。
 
-## Dev Notes（开发备注）
 
 ### Current Repository State（当前仓库状态）
 
@@ -321,17 +320,40 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-TBD by dev-story agent.
+GPT-5.5 (gpt-5.5)
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev-story agent.
+- `_bmad-output/implementation-artifacts/code-reviews/4-4-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/code-reviews/4-4-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/4-4-code-review/EXPERIMENT_NOTES.md`
 
 ### Completion Notes List（完成备注）
 
 - Story context created by bmad-create-story sub-agent #4.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 实现 `src/fs/operation-lock.ts`，提供 project operation lock acquisition、release、stale inspection、private handle 和 stable lock issue projection。
+- 将 `update --yes` 与 `update --repair --yes` 接入 lock-before-planning；lock contention 返回 `operation-lock.project-locked` command-level blocker，且不输出 planned writes/conflicts。
+- 扩展 `safeWriteFile` 为 same-directory `.speclite-tmp-` temp-write、close-before-rename、best-effort cleanup、path/symlink/case/type/overwrite preflight 和 partial failure details。
+- 扩展 validate read-only diagnostics：stale `_speclite/.lock` 报 `operation-lock.stale-lock` warning，不删除 lock；stale `.speclite-tmp-*` 报 `file-integrity.stale-temp-file` warning/error。
+- 补充 focused Vitest coverage，验证 lock lifecycle/non-reentrant update path、safe write success/blockers、validate stale lock/temp warnings、volatile field redaction 和 full regression。
 
 ### File List（文件列表）
 
-- TBD by dev-story agent.
+- `_bmad-output/implementation-artifacts/code-reviews/4-4-code-review/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/code-reviews/4-4-code-review/EXPERIMENT_NOTES.md`
+- `_bmad-output/implementation-artifacts/code-reviews/4-4-code-review/PLAN.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/4-4-project-operation-lock-and-safe-write.md`
+- `src/commands/update.ts`
+- `src/fs/operation-lock.ts`
+- `src/fs/safe-write.ts`
+- `src/validation/rules/file-integrity.ts`
+- `src/validation/rules/operation-lock.ts`
+- `src/validation/validate-project.ts`
+- `test/operation-lock-safe-write.test.ts`
+- `test/validate-command.test.ts`
+
+### Change Log（变更日志）
+
+- 2026-06-01: 完成 Story 4.4 project operation lock、safe write primitive、validate stale diagnostics、focused tests 和 regression 验证；状态推进到 `review`。

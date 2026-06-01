@@ -49,15 +49,19 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .argument("[target-directory]", "Project directory to update.")
     .option("--repair", "Use the explicit repair command id and repair placeholder.")
     .option("--json", "Emit machine-readable CommandResult JSON.")
+    .option("--dry-run", "Generate an unapplied update plan without authorizing writes.")
+    .option("--yes", "Authorize non-conflicting planned update writes.")
     .action(
       async (
         targetDirectory: string | undefined,
-        commandOptions: { repair?: boolean; json?: boolean },
+        commandOptions: { dryRun?: boolean; repair?: boolean; json?: boolean; yes?: boolean },
       ) => {
         const outcome = await runUpdateCommand({
           options: {
+            dryRun: commandOptions.dryRun ?? false,
             json: commandOptions.json ?? false,
             repair: commandOptions.repair ?? false,
+            yes: commandOptions.yes ?? false,
           },
           ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
           ...(targetDirectory === undefined ? {} : { targetDirectory }),

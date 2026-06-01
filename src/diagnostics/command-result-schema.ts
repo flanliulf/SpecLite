@@ -6,7 +6,6 @@ import {
   ISSUE_CATEGORIES,
   ISSUE_SEVERITIES,
   isValidationIssueAffectedPath,
-  UPDATE_REASON_CODES,
 } from "../validation/issue-model.js";
 
 export const COMMAND_RESULT_SCHEMA_VERSION = "speclite.command-result.v1" as const;
@@ -14,7 +13,10 @@ export const COMMAND_RESULT_SCHEMA_VERSION = "speclite.command-result.v1" as con
 export const CommandIdSchema = z.enum(["install", "status", "validate", "update", "update.repair"]);
 const OwnershipSchema = z.enum(["installer-owned", "human-owned", "workflow-owned"]);
 const ConflictOwnershipSchema = z.enum(["installer-owned", "human-owned", "workflow-owned", "unknown"]);
-const UpdateReasonCodeSchema = z.enum(UPDATE_REASON_CODES);
+const UpdateReasonCodeSchema = z
+  .string()
+  .min(1)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "reason code must be stable lower-kebab text");
 
 export const ValidationIssueSchema = z
   .object({

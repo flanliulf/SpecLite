@@ -12,12 +12,13 @@
 | CR-API-02 | Installed-state 检测必须校验触达的 manifest/index 内容与 schema | 1-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-01 | Target 与 installed-state 边界检查必须使用 no-follow 路径判断 | 1-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-01 | 写入确认前的 human output 必须展示可审计 target summary | 1-2 | 6/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-02 | Final pre-write install scope summary 必须绑定最终 selected module set | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-TEST-01 | No-write 回归断言必须覆盖全部禁止写入路径并支持既有路径排除 | 1-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-03 | 用户可见交互能力必须接入 command path 而非停留在 pure model | 1-3, 1-4 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-API-04 | Internal InstallPlan 必须记录 selectedModules 且不得泄露到 public CommandResult | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-05 | Module required_dependencies 必须在 metadata discovery 阶段确定性校验 | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-06 | `module-help.csv` 的 canonicalSkillId 必须引用已发现 package root | 1-5 | 7/12 | rules-summary | 已写入规则总结 |
-| CR-API-07 | 非事务写入失败必须通过已契约字段暴露 partial progress | 1-5 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-07 | 非事务写入失败必须通过已契约字段暴露 partial progress | 1-5, 4-4 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-02 | Installer-owned directory mutation 必须先通过 path-safety guard | 1-5 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-03 | `artifactContract.defaultOutputPath` 必须先 canonicalize 再做 root containment | 2-1 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-08 | `artifactContract` 只允许 stable artifact kind 与 workflow artifact root | 2-1 | 7/12 | rules-summary | 已写入规则总结 |
@@ -29,6 +30,21 @@
 | CR-API-14 | Installed activation 必须通过 `speclite resolve` runtime entry 获取配置与 customization | 2-4 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-04 | Artifact path public contract 必须先严格校验 POSIX-style 再做 filesystem normalization | 2-5 | 6/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-05 | `actualArtifactPath` containment 必须以 configured artifact root 为边界 | 2-5 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-06 | Public status path projection 必须拒绝未校验 installed-state paths | 3-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-15 | Installed-state index 读取必须区分 missing 与 corrupted | 3-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-16 | Skill index completeness 必须比对 selected canonical package root expected set | 3-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-17 | Canonical hash walker 必须在遍历阶段应用 candidate include 边界 | 3-3 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-07 | File integrity symlink 诊断必须先 no-follow 分类再决定 issue 语义 | 3-3 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-18 | Production artifact validation 必须消费 on-disk metadata entity | 3-4 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-API-19 | Config 派生的 public command result 字段必须复用 shared resolver | 4-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-08 | Symlink escape issue 必须基于 realpath boundary 而非 symlink 存在性 | 3-4 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-09 | Protected path classifier 结果必须优先于 files-index ownership | 4-1, 4-5 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-10 | File integrity ownership 检查必须使用 configured artifact root | 4-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-20 | Source trust evidence 缺失或 malformed 时 update planning 必须 fail closed | 4-3 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-02 | Command fixture 必须显式满足被测 gate 之前的前置 evidence | 4-3 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-11 | Safe-write stale temp 诊断必须覆盖同目录受控 roots | 4-4 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-12 | Safe-write cleanup failure 必须返回稳定 issue 而不是 raw error | 4-4 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-13 | Existing overwrite 必须执行 apply-time ownership/hash baseline preflight | 4-4 | 8/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -143,11 +159,19 @@
   - `1-3-code-review-evaluation-20260526-round-1.md`
   - `1-3-code-review-summary-20260526-round-2.md`
   - `1-3-code-review-evaluation-20260526-round-2.md`
+  - `1-3-code-review-summary-20260528-round-3.md`
+  - `1-3-code-review-evaluation-20260528-round-3.md`
+  - `1-3-code-review-summary-20260528-round-4.md`
+  - `1-3-code-review-evaluation-20260528-round-4.md`
+  - `1-3-code-review-summary-20260528-round-5.md`
+  - `1-3-code-review-evaluation-20260528-round-5.md`
 - **结论概览**:
   - Round 1 reviewer/evaluator 确认 3 个 findings，包含 1 个 `decision_needed` 和 2 个 `patch`；evaluator 将 3 项均评估为 P1 阻塞并要求 fixer 修复。
   - Round 1 fixer 已修复 3 项，并记录 `npm test` 通过 7 个 test files / 39 个 tests、`npm run build` 通过；验证后清理 `node_modules/` 和 `dist/`。
   - Round 2 reviewer/evaluator 均通过；3 个 findings 均关闭，新发现 0，需要修复项 0，CR TODO 0。
   - 本次 04 使用模型：GPT-5.5 (gpt-5.5)。本次按用户授权执行 record-only，仅写入本规则总结；全局文档已有相近契约锚点，且全局文档修改会扩大范围，因此不修改全局文档。
+  - 2026-05-28 corrective CR reopen 中，Round 3/4 连续暴露 AC7 pre-write install scope summary 未绑定真实最终 selected module set 的问题；Round 5 reviewer/evaluator 均确认已关闭，findings 0，Fix Items: 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权采用默认推荐决策 record-only，仅追加一条已修复可复用规则；不修改全局文档，不新增 TODO。
 
 #### 升格判定摘要
 
@@ -156,6 +180,7 @@
 | 交互式模块选择必须接入 command path 而非停留在 pure model | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
 | Internal InstallPlan 必须记录 selectedModules 且不得泄露到 public CommandResult | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
 | Module required_dependencies 必须在 metadata discovery 阶段确定性校验 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Final pre-write install scope summary 必须绑定最终 selected module set | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
 
 ### 提炼规则
 
@@ -271,6 +296,45 @@
   - 不建议本次升格；当前仅 Story 1.3 触发一次，且规划文档已有 module metadata 与 diagnostics 边界。后续多 Story 复现时再考虑进入 metadata/parser guideline。
 - **本次落地**:
   - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-DOC-02：Final pre-write install scope summary 必须绑定最终 selected module set
+
+- **来源问题**: Story 1.3 AC7 要求 install scope summary 在任何 project file write 前展示，并包含每个 selected module 的 canonical package root count。Corrective CR Round 3 发现 canonical package root count 只出现在未真正展示的 config summary 或写入后的 ready summary；Round 4 进一步发现 pre-write summary 虽已出现，但在 detailed config 可改变 selected modules 后，summary 仍绑定配置前的临时 module set，可能展示 `core=13, sdlc=40, total=53`，实际只安装 `core`。
+- **CR 证据**:
+  - `1-3-code-review-summary-20260528-round-3.md`: Finding #1 指出 canonical package root count 没有真正出现在成功路径的写入前展示结果中，分类为 `patch`。
+  - `1-3-code-review-evaluation-20260528-round-3.md`: evaluator 确认该 finding 有效，要求在成功路径写入前展示 / 确认 canonical package root count。
+  - `1-3-code-review-summary-20260528-round-4.md`: Finding #1 指出 pre-write package root count summary 可能与最终 selected module set 不一致。
+  - `1-3-code-review-evaluation-20260528-round-4.md`: evaluator 确认 detailed config 可以在 pre-write summary 后改变 selected module set，因此需要在最终 selected module set 和 `configPlan` 确定后、`applyInstallPlan(...)` 前生成最终 summary / confirmation。
+  - `1-3-code-review-evaluation-20260528-round-5.md`: evaluator 确认 Round 4 P1 已关闭，Fix Items: 0。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story corrective CR 中连续 Round 3/4 暴露同类 pre-write summary 绑定错误，并由 Round 5 验证关闭。 |
+  | 影响范围 | 1 | 影响 install command 的 human confirmation、module selection、detailed config 和 write authorization 顺序。 |
+  | 风险等级 | 1 | 用户可能基于错误的 canonical package root count 授权写入，导致确认内容与实际安装范围不一致。 |
+  | 根因稳定性 | 1 | 多阶段交互中先生成 summary、后改变 final selection/config 的实现顺序容易在后续 flow 中复现。 |
+  | 可执行性 | 2 | 可通过 callback 时序断言、no-write assertion 和 selected module count regression test 检查。 |
+  | 文档缺口 | 1 | InstallPlan / CommandResult SPEC 已覆盖 pre-write planning，但未细化 final human summary 必须基于最终 selected module set。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: `speclite install` 及未来所有先收集用户配置、再执行写入的 CLI human flow。
+- **规避指南**:
+  - 不得在用户仍可改变 module/config selection 之前生成最终 pre-write install scope summary，也不得把写入后的 ready summary 当作 AC7 的 pre-write confirmation。
+- **最佳实践**:
+  - 先解析最终 selected module set 和 config plan，再生成 human-visible pre-write summary；summary 必须在 write/apply 前确认，并由 regression test 覆盖 final selected modules、canonical package root count 和 no-write timing。
+- **全局文档建议**:
+  - 不建议本次升格；`_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 已有 pre-write planning/confirmation 真源，本次只作为 Story 1-3 corrective CR 的可复用实践记录。
+- **本次落地**:
+  - Round 4 fixer 已修复，Round 5 reviewer/evaluator 确认关闭。
 - **同步状态**: 已写入规则总结
 
 #### CR-SEC-01：Target 与 installed-state 边界检查必须使用 no-follow 路径判断
@@ -419,10 +483,14 @@
   - `1-5-code-review-evaluation-20260526-round-1.md`
   - `1-5-code-review-summary-20260527-round-2.md`
   - `1-5-code-review-evaluation-20260527-round-2.md`
+  - `1-5-code-review-summary-20260528-round-3.md`
+  - `1-5-code-review-evaluation-20260528-round-3.md`
 - **结论概览**:
   - Round 1 reviewer/evaluator 确认 3 个高严重性 `patch` findings：IDE mirror directory mutation 安全、`module-help.csv` 到 canonical package 的完整性校验、写入中途失败后的 public failure progress 表达；fixer 已修复 3 项，并记录定向测试、`npm test`、`npm run build` 均通过。
   - Round 2 reviewer/evaluator 均通过；3 个 findings 均关闭，新发现 0，需要修复项 0，CR TODO 0。
   - 本次 04 使用模型：GPT-5.5 (gpt-5.5)。本次按用户授权执行默认推荐决策：record-only 写入本规则总结；全局文档已有相近安全、metadata 和 CommandResult 边界约束，且全局文档修改会扩大范围，因此不修改全局文档。
+  - 2026-05-28 corrective CR reopen 中，Round 3 reviewer/evaluator 均通过，findings 0，Fix Items 0，CR TODO 0；Round 1 的 3 个规则来源问题仍保持关闭。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权采用默认推荐决策 record-only，仅补充 round 3 证据与无新增规则结论；不修改全局文档，不新增 TODO。
 
 #### 升格判定摘要
 
@@ -431,6 +499,11 @@
 | Installer-owned directory mutation 必须先通过 path-safety guard | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
 | `module-help.csv` 的 canonicalSkillId 必须引用已发现 package root | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
 | 非事务写入失败必须通过已契约字段暴露 partial progress | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+#### Round 3 补充结论
+
+- **无需新增候选规则**: Round 3 corrective CR reopen 未产生新的 finding；无可进入升格评分的新增候选规则。
+- **本次处理**: 仅补充 round 3 review/evaluation 来源和既有规则仍保持关闭的证据，不新增 `CR-{DOMAIN}-{NN}` 编号。
 
 ### 提炼规则
 
@@ -441,6 +514,7 @@
   - `1-5-code-review-summary-20260526-round-1.md`: Finding #1 指出 `.claude/skills/<canonicalSkillId>` 或 `.agents/skills/<canonicalSkillId>` 的 raw `mkdir` 先于 `safeWriteFile` 安全校验执行。
   - `1-5-code-review-evaluation-20260526-round-1.md`: evaluator 确认该问题违反 AC2 与 AC6/AC7，评估为 P1 阻塞项。
   - `1-5-code-review-evaluation-20260527-round-2.md`: evaluator 确认 `copyCanonicalPackage` 已改为调用 `ensureSafeDirectory`，并有 `.claude` / `.agents` symlink regression tests 断言外部目录未创建。
+  - `1-5-code-review-evaluation-20260528-round-3.md`: evaluator 确认该关闭状态未被 corrective changes 破坏，mirror entry root 仍经过 `copyCanonicalPackage`、`ensureSafeDirectory` 和 `validateProjectPath`。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -468,7 +542,7 @@
 - **全局文档建议**:
   - 不建议本次升格；`_bmad-output/planning-artifacts/architecture/05-project-structure-boundaries项目结构与边界.md` 与 Story AC 已覆盖 path-safety 总原则，本次仅 record-only 沉淀 CR 实践，不扩大到全局文档修改。
 - **本次落地**:
-  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；Round 3 evaluator 确认仍保持关闭。
 - **同步状态**: 已写入规则总结
 
 #### CR-API-06：`module-help.csv` 的 canonicalSkillId 必须引用已发现 package root
@@ -478,6 +552,7 @@
   - `1-5-code-review-summary-20260526-round-1.md`: Finding #2 指出 orphan help row 不会生成 mirror entry、help index 或 phase coverage，也不会产生 blocking diagnostic。
   - `1-5-code-review-evaluation-20260526-round-1.md`: evaluator 确认该问题违反 AC9，要求使用 reserved issue id 或既有契约化 diagnostic。
   - `1-5-code-review-evaluation-20260527-round-2.md`: evaluator 确认 discovery 阶段新增 `module-metadata.unknown-help-skill` 校验，并通过 install diagnostic 映射和双层测试覆盖。
+  - `1-5-code-review-evaluation-20260528-round-3.md`: evaluator 确认缺失 help reference 校验仍保持关闭，同时确认 writer 从 package roots 而非 help rows 生成安装清单。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -505,16 +580,20 @@
 - **全局文档建议**:
   - 不建议本次升格；该规则与 metadata/parser 实践相关，且全局文档修改会扩大范围。本次记录到 CR rules summary，后续多 Story 复现时再考虑统一到 metadata guideline。
 - **本次落地**:
-  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；Round 3 evaluator 确认仍保持关闭。
 - **同步状态**: 已写入规则总结
 
 #### CR-API-07：非事务写入失败必须通过已契约字段暴露 partial progress
 
-- **来源问题**: `applyInstallPlan` 在 runtime/config/artifact writes 已完成后若 IDE mirror 或 manifest/index 写入失败，只返回 issue；`runInstallCommand` 固定使用 config initialization completed steps，隐藏已完成的 write-phase mutations。
+- **来源问题**: `applyInstallPlan` 在 runtime/config/artifact writes 已完成后若 IDE mirror 或 manifest/index 写入失败，只返回 issue；`runInstallCommand` 固定使用 config initialization completed steps，隐藏已完成的 write-phase mutations。Story 4.4 再次暴露同类问题：多个 safe write 已成功后，后续失败路径没有把此前完成的 `changedPaths` 投影到 stable diagnostics。
 - **CR 证据**:
   - `1-5-code-review-summary-20260526-round-1.md`: Finding #3 指出 public failure output 无法表达 runtime/artifact 已完成但后续写入失败的 partial state。
   - `1-5-code-review-evaluation-20260526-round-1.md`: evaluator 确认该问题违反 AC10/Task 7，要求只使用 `completedSteps` / `pendingSteps` 等已契约字段表达。
   - `1-5-code-review-evaluation-20260527-round-2.md`: evaluator 确认失败分支已返回 `completedSteps` / `pendingSteps` partial progress，未新增 `failedStep`、`changedPaths`、`readySummary` 或 ad-hoc blob。
+  - `1-5-code-review-evaluation-20260528-round-3.md`: evaluator 确认 partial progress 与 public output 边界仍保持关闭，failure path 不泄露未契约字段。
+  - `4-4-code-review-summary-20260601-round-1.md`: Finding #1 指出 install apply partial failure 不记录此前已成功 rename 的 project-relative `changedPaths`。
+  - `4-4-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题为 P1，需要在 apply orchestration 层维护 operation-local changed paths。
+  - `4-4-code-review-evaluation-20260601-round-2.md`: evaluator 确认 changed paths 已在失败 issue details 和 install `nextActions` 中稳定投影，问题关闭。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -525,29 +604,30 @@
 
   | 维度 | 分数 | 理由 |
   |------|------|------|
-  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 验证关闭。 |
+  | 复现频次 | 2 | Story 1-5 与 Story 4-4 均出现多阶段非事务写入失败隐藏 partial progress 的问题，并经后续复审关闭。 |
   | 影响范围 | 1 | 影响 install write phase failure output，也适用于 update/repair 等非事务写入流程。 |
   | 风险等级 | 1 | partial mutation 被隐藏会误导人工恢复、validate/repair 入口和自动化诊断。 |
   | 根因稳定性 | 1 | 非事务流程若只返回单一 issue，后续多阶段写入命令容易重复隐藏 progress。 |
   | 可执行性 | 2 | 可通过 stable lifecycle step 列表、failure-path tests 和 public JSON negative assertions 检查。 |
   | 文档缺口 | 1 | CommandResult contract 已有字段，但 CR 规则需要沉淀“不得用固定 pending steps 覆盖 partial mutation”的实现检查点。 |
 
-- **总分**: 7/12
+- **总分**: 8/12
 - **建议去向**: rules-summary
 - **适用范围**: install/update/repair 等本地文件系统非事务写入命令的 failure path。
 - **规避指南**:
   - 不得在多阶段写入失败时固定回退到 pre-write completed steps，也不得声称 rollback 或隐藏已完成 mutation。
 - **最佳实践**:
-  - writer 返回 stable lifecycle `completedSteps` / `pendingSteps` partial progress；command 层只映射到 owning SPEC 已声明字段，并用 negative assertions 防止泄露未契约字段。
+  - writer 返回 stable lifecycle `completedSteps` / `pendingSteps` partial progress；发生 rename 成功后的 mutation 时，operation orchestration 必须只把实际完成的 project-relative paths 追加到 `changedPaths`，command 层只映射到 owning SPEC 已声明字段，并用 negative assertions 防止泄露未契约字段。
 - **全局文档建议**:
   - 不建议本次升格；现有 CommandResult / install lifecycle 文档已有总体字段契约，本次按用户授权只记录到 CR rules summary。
 - **本次落地**:
-  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+  - Story 1-5 Round 1 fixer 已修复，Round 2 evaluator 确认关闭；Round 3 evaluator 确认仍保持关闭。Story 4-4 Round 1 fixer 已修复 changed paths 投影，Round 2 evaluator 确认关闭。
 - **同步状态**: 已写入规则总结
 
 #### 05 TODO Tracker 交接
 
-- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0，本次未识别未解决的非阻塞改进项。
+- **无需新增 TODO backlog**: Round 2 与 Round 3 evaluation 均明确 CR TODO 0，本次未识别未解决的非阻塞改进项。
+- **无需新增规则记录**: Round 3 corrective CR reopen 未产生新的 finding；本次 04 仅补充已关闭证据，不新增 `CR-{DOMAIN}-{NN}` 规则。
 
 ### Story 2-5 / 2026-05-27
 
@@ -770,11 +850,14 @@
   - `2-3-code-review-evaluation-20260527-round-2.md`
   - `2-3-code-review-summary-20260527-round-3.md`
   - `2-3-code-review-evaluation-20260527-round-3.md`
+  - `2-3-code-review-summary-20260528-round-4.md`
+  - `2-3-code-review-evaluation-20260528-round-4.md`
 - **结论概览**:
   - Round 1 reviewer/evaluator 确认 2 个中优先级 `patch` findings，并由 evaluator 升为 P1 阻塞：mapped help/phase target 未反查 `skill-index.installedTargets`，以及 ReadyCheck 将 invalid activation target 过早归类为 `manifest-schema.unreadable`。
   - Round 2 reviewer/evaluator 确认 1 个新的 P1 阻塞：`activationTarget` 可以跨 skill 指向另一个 canonical skill 的 installed `SKILL.md`。
   - Fixer 已修复 3 项，并补充 validator / ReadyCheck regression；Round 3 reviewer/evaluator 均通过，新发现 0，需要修复项 0，CR TODO 0。
-  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only 写入本规则总结；全局 manifest/index、validation taxonomy 和 adapter registry SPEC 已有相近边界原则，因此不修改全局文档。
+  - Round 4 reopened corrective reviewer/evaluator 再次确认历史 3 个 P1 仍关闭；本轮新增 findings 0，Fix Items 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only 补记 round 4 证据；全局 manifest/index、validation taxonomy 和 adapter registry SPEC 已有相近边界原则，因此不修改全局文档。
 
 #### 升格判定摘要
 
@@ -793,6 +876,7 @@
   - `2-3-code-review-summary-20260527-round-1.md`: Finding #1 指出 `skillIndex.installedTargets=["agents"]` 时，help/phase 同时声明 `claude` mapped 仍返回 `[]`。
   - `2-3-code-review-evaluation-20260527-round-1.md`: evaluator 确认该问题违反 AC 2 / AC 4 / AC 8，评估为 P1 阻塞项。
   - `2-3-code-review-evaluation-20260527-round-3.md`: evaluator 确认 `canonicalSkillId -> installedTargets` 映射校验与 regression 覆盖有效。
+  - `2-3-code-review-evaluation-20260528-round-4.md`: reopened corrective evaluator 确认该历史 finding 仍已修复，未重新打开。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -820,7 +904,7 @@
 - **全局文档建议**:
   - 不建议本次升格；`_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 与 `07-validation-issue-taxonomy.md` 已覆盖 skill index、phase coverage 与 menu-target issue 边界，本次只记录 CR 实践。
 - **本次落地**:
-  - Round 1 fixer 已修复，Round 3 evaluator 确认关闭。
+  - Round 1 fixer 已修复，Round 3 evaluator 确认关闭，Round 4 evaluator 再次确认有效。
 - **同步状态**: 已写入规则总结
 
 #### CR-API-11：ReadyCheck 可读 index 的 target 语义错误必须保留 reserved `menu-target.*` 诊断
@@ -830,6 +914,7 @@
   - `2-3-code-review-summary-20260527-round-1.md`: Finding #2 指出 invalid `help-index.activationTarget="DS"` 在 ReadyCheck 中返回 `manifest-schema.unreadable`。
   - `2-3-code-review-evaluation-20260527-round-1.md`: evaluator 确认 target 语义错误应保留 reserved `menu-target.*` 分类，且 malformed JSON / missing file 才保留 `manifest-schema.unreadable`。
   - `2-3-code-review-evaluation-20260527-round-3.md`: evaluator 确认 ReadyCheck 已消费 blocking `menu-target.*` issue，invalid activation target regression 有效。
+  - `2-3-code-review-evaluation-20260528-round-4.md`: reopened corrective evaluator 确认该历史 finding 仍已修复，未重新打开。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -857,7 +942,7 @@
 - **全局文档建议**:
   - 不建议本次升格；`_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 已声明目标 issue id，本次作为 ReadyCheck 实现层经验沉淀。
 - **本次落地**:
-  - Round 1 fixer 已修复，Round 3 evaluator 确认关闭。
+  - Round 1 fixer 已修复，Round 3 evaluator 确认关闭，Round 4 evaluator 再次确认有效。
 - **同步状态**: 已写入规则总结
 
 #### CR-API-12：Installed activation path basename 必须绑定对应 `canonicalSkillId`
@@ -867,6 +952,7 @@
   - `2-3-code-review-summary-20260527-round-2.md`: Finding #1 指出 `canonicalSkillId="speclite-dev-story"` 时可错指 `.claude/skills/other-skill/SKILL.md`，`validateMenuTargets(...)` 返回 `[]`，ReadyCheck 返回 `ok: true`。
   - `2-3-code-review-evaluation-20260527-round-2.md`: evaluator 确认该问题违反 AC 1 / AC 2，评估为 P1 阻塞项。
   - `2-3-code-review-evaluation-20260527-round-3.md`: evaluator 确认 help `activationTarget`、phase mapped `entryPath` 与 `activationTarget` 已解析 target family / basename 并绑定到对应 `canonicalSkillId`。
+  - `2-3-code-review-evaluation-20260528-round-4.md`: reopened corrective evaluator 确认该历史 finding 仍已修复，未重新打开。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -894,12 +980,12 @@
 - **全局文档建议**:
   - 不建议本次升格；`_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 和 Story 2.3 已覆盖 activation target canonical identity 要求，本次作为 CR 实践记录。
 - **本次落地**:
-  - Round 2 fixer 已修复，Round 3 evaluator 确认关闭。
+  - Round 2 fixer 已修复，Round 3 evaluator 确认关闭，Round 4 evaluator 再次确认有效。
 - **同步状态**: 已写入规则总结
 
 #### 05 TODO Tracker 交接
 
-- **无需新增 TODO backlog**: Round 1 / Round 2 / Round 3 evaluation 均明确 CR TODO 0，本次未识别未解决的非阻塞改进项。
+- **无需新增 TODO backlog**: Round 1 / Round 2 / Round 3 / Round 4 evaluation 均明确 CR TODO 0，本次未识别未解决的非阻塞改进项。
 
 ### Story 1-6 / 2026-05-27
 
@@ -1088,3 +1174,830 @@
 #### 05 TODO Tracker 交接
 
 - **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0，本次未识别未解决的非阻塞改进项。
+
+### Story 3-1 / 2026-05-28
+
+- **Story**: 3-1
+- **分析来源**:
+  - `3-1-code-review-summary-20260528-round-1.md`
+  - `3-1-code-review-evaluation-20260528-round-1.md`
+  - `3-1-code-review-summary-20260528-round-2.md`
+  - `3-1-code-review-evaluation-20260528-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个中优先级 `patch` findings，并由 evaluator 升为 P1 阻塞：Status public paths 会透传 manifest 中未校验 path；corrupted `skill-index.json` 被降级为 `partial`。
+  - Fixer 已修复两项：manifest/public command path schema 复用 project-relative POSIX 校验；`skill-index` 读取结果区分 `valid` / `missing` / `invalid`，invalid 进入 failed target 与 failed high-level health。
+  - Round 2 reviewer/evaluator 均通过；新发现 0，需要修复项 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only 写入本规则总结；全局 SPEC 已有 public path 与 health algorithm 契约，本次不修改全局文档。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Public status path projection 必须拒绝未校验 installed-state paths | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Installed-state index 读取必须区分 missing 与 corrupted | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-SEC-06：Public status path projection 必须拒绝未校验 installed-state paths
+
+- **来源问题**: Story 3.1 首轮实现将 `manifest.paths` 直接投影到 `StatusCommandData.paths`，而 manifest path schema 只校验非空字符串。malformed manifest 可把 absolute path、parent traversal 或 backslash path 带入 public status JSON，违反 public path 必须为 project-relative POSIX path 且不得泄露本地绝对路径的契约。
+- **CR 证据**:
+  - `3-1-code-review-summary-20260528-round-1.md`: Finding #1 指出 `src/status/installed-state.ts` 会把 `manifest.paths` 原样写入 status data，定向复现显示 `/tmp/leak` 进入 `data.paths.specliteRoot`。
+  - `3-1-code-review-evaluation-20260528-round-1.md`: evaluator 确认该问题直接违反 Story 3.1 AC 2 / AC 6，评估为 P1，需要修复并补充 malformed path regression。
+  - `3-1-code-review-evaluation-20260528-round-2.md`: evaluator 确认 manifest schema 与 public `CommandPathSummarySchema` 已复用 project-relative POSIX 校验，malformed path 不再投影到 public JSON。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 status command、manifest projection、public CommandResult path schema 和 deterministic fixture output。 |
+  | 风险等级 | 2 | 未校验 path 会泄露 absolute/local path，并使 malformed installed-state 被下游误当成可消费摘要。 |
+  | 根因稳定性 | 1 | manifest/internal installed-state path 与 public projection path 容易混用，后续 status/validate/report projection 仍可能复现。 |
+  | 可执行性 | 2 | 可通过 shared project-relative POSIX schema、negative public JSON assertions 和 malformed path fixtures 检查。 |
+  | 文档缺口 | 0 | Story 3.1 与 owning SPEC 已声明 public path 契约，本规则沉淀 CR 实现检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: status、validate、ready summary、manifest/index projection 等把 installed-state path 暴露到 public `CommandResult` 或 fixture JSON 的流程。
+- **规避指南**:
+  - 不得把 manifest、index 或 installed-state 中的 path 字段原样投影为 public JSON path。
+- **最佳实践**:
+  - 在 schema anchor 或 public projection 边界复用 project-relative POSIX path 校验；校验失败时把 installed-state 视为 corrupted/unreadable，并返回 safe default path 或 stable issue，而不是输出原始 path。
+- **全局文档建议**:
+  - 不建议本次升格；public path contract 已由 Story 3.1 与 owning SPEC 覆盖，本次按用户授权只记录到 CR rules summary。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-15：Installed-state index 读取必须区分 missing 与 corrupted
+
+- **来源问题**: Story 3.1 首轮实现的 `readSkillIndex` 在 JSON parse、schema parse 或文件读取失败时统一返回 `undefined`，导致 missing index 与 corrupted/unreadable index 都被映射为 target `partial`。这弱化了 corrupted installed-state 的 failed health 语义，也让自动化消费者无法区分安装不完整与 state 损坏。
+- **CR 证据**:
+  - `3-1-code-review-summary-20260528-round-1.md`: Finding #2 指出 invalid `skill-index.json` 被归类为 `partial`，而不是 failed installed-state health。
+  - `3-1-code-review-evaluation-20260528-round-1.md`: evaluator 确认该问题违反 Story 3.1 health algorithm，评估为 P1，需要区分 missing 与 invalid/corrupted。
+  - `3-1-code-review-evaluation-20260528-round-2.md`: evaluator 确认 `SkillIndexReadResult` 已拆分为 `missing` / `invalid` / `valid`，invalid JSON 与 schema-invalid skill-index 均进入 failed target 和 failed high-level health。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 status installed-state reader、target health、high-level health aggregation 和后续 validate/update 对 installed summary 的消费。 |
+  | 风险等级 | 2 | corrupted index 被降级为 partial 会掩盖安装状态损坏，误导自动化与人工修复路径。 |
+  | 根因稳定性 | 1 | 读取 helper 用 `undefined` 表示所有失败类型，是状态读取代码中稳定易复现的缺口。 |
+  | 可执行性 | 2 | 可用 discriminated result、invalid JSON/schema-invalid regression 和 health aggregation assertion 检查。 |
+  | 文档缺口 | 0 | Story 3.1 已声明 corrupted manifest/index/source descriptor 应进入 failed health，本规则沉淀实现侧检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: status、validate、ready check、update/repair preflight 中读取 manifest/index/source descriptor 并聚合 installed-state health 的流程。
+- **规避指南**:
+  - 不得用同一个 `undefined`、`null` 或 empty result 同时表示 missing file、JSON parse failure、schema failure 和 unreadable corrupted file。
+- **最佳实践**:
+  - installed-state 读取 helper 应返回 discriminated result；missing 可以按产品语义进入 partial/not-configured，corrupted/unreadable/schema-invalid 应进入 failed 或 stable issue taxonomy，并补充 focused regression。
+- **全局文档建议**:
+  - 不建议本次升格；Story 3.1 health algorithm 已覆盖该语义，本次按用户授权只记录到 CR rules summary。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluator 明确两项均为阻塞修复项，不降级为 TODO；Round 2 reviewer/evaluator 均确认无新增 defer / 非阻塞项，本次不修改 `cr-todo-backlog.md`。
+
+### Story 3-2 / 2026-05-28
+
+- **Story**: 3-2
+- **分析来源**:
+  - `3-2-code-review-summary-20260528-round-1.md`
+  - `3-2-code-review-evaluation-20260528-round-1.md`
+  - `3-2-code-review-summary-20260528-round-2.md`
+  - `3-2-code-review-evaluation-20260528-round-2.md`
+  - `3-2-code-review-summary-20260528-round-3.md`
+  - `3-2-code-review-evaluation-20260528-round-3.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个中优先级 `patch` finding，并由 evaluator 升为 P1 阻塞：`skill-index` completeness 只按 entry 总数判断，无法保证 selected canonical package roots 全部覆盖。
+  - Round 1 fixer 补充 duplicate root 场景后，Round 2 reviewer/evaluator 继续确认该修复仍未按 expected canonical package root inventory 做 set equality，因此仍为 P1 阻塞项。
+  - Round 2 fixer 已改为比对 expected `moduleId:sourcePackagePath` set 与 actual skill-index root set，并补充同 count replacement regression；Round 3 reviewer/evaluator 均确认通过，新增 finding 0、CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权采用默认推荐决策 record-only，仅写入本规则总结；该经验已由 Story AC 与 owning SPEC 局部覆盖，不修改全局文档，不新增 TODO。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Skill index completeness 必须比对 selected canonical package root expected set | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-16：Skill index completeness 必须比对 selected canonical package root expected set
+
+- **来源问题**: Story 3.2 首轮实现只按 `skill-index` entry 总数判断 completeness；第一轮修复又只覆盖 duplicate root 和模块 root 数量，仍可能接受“总数 53、无 duplicate、module count 正确，但 expected root 被唯一 unexpected root 替换”的 installed-state projection。
+- **CR 证据**:
+  - `3-2-code-review-summary-20260528-round-1.md`: Finding #1 指出 `validateSelectedModuleCompleteness` 只检查 entries 数量，不能保证 selected canonical package root 全部覆盖。
+  - `3-2-code-review-evaluation-20260528-round-2.md`: evaluator 确认 duplicate/root count 修复仍不足，必须按 selected canonical package root expected set 与 actual set 做 equality。
+  - `3-2-code-review-evaluation-20260528-round-3.md`: evaluator 确认 expected inventory set equality、missing/unexpected diagnostics 和 focused regression 已闭环，整体结论 Approved / 通过。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 多轮 CR 连续暴露 count-only 与 duplicate/count-only 修复不足的问题，并由 Round 3 验证关闭。 |
+  | 影响范围 | 1 | 影响 validate manifest-schema rule、installed skill index projection、后续 status/update/IDE adapter 对 installed-state 的信任边界。 |
+  | 风险等级 | 2 | 会让数量正确但 canonical root inventory 错误的 installed-state 被接受，削弱 schema validation 与自动化消费判断。 |
+  | 根因稳定性 | 1 | 用 count 或 unique count 替代 expected set equality 是 manifest/index completeness 校验中容易复现的实现习惯。 |
+  | 可执行性 | 2 | 可用 expected set 与 actual set equality、missing/unexpected stable diagnostics 和同 count replacement regression 确定性检查。 |
+  | 文档缺口 | 0 | Story 3.2 AC 与 manifest/index contract 已声明 selected roots coverage，本规则沉淀的是 CR 实现检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: manifest/index validation、installed-state projection validation、ready check 或任何需要证明 selected module canonical package roots 全覆盖的流程。
+- **规避指南**:
+  - 不得用 entry 总数、module 分组数量或 duplicate 检查替代 selected canonical package root expected set equality。
+- **最佳实践**:
+  - 对 selected modules 构造 expected `moduleId:sourcePackagePath` 或等价 stable key set，与 actual skill-index entries 做 set equality；缺失 expected root、出现 unexpected root、重复 root 都应输出 stable issue，并用同 count replacement regression 固化。
+- **全局文档建议**:
+  - 不建议本次升格；Story 3.2 AC 与 manifest/index owning SPEC 已覆盖 selected roots coverage 语义，本次按用户授权只记录到 CR rules summary，不扩大到全局文档修改。
+- **本次落地**:
+  - Round 2 fixer 已修复，Round 3 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1、Round 2 的 findings 均为阻塞修复项，不降级为 TODO；Round 3 reviewer/evaluator 明确新增 finding 0、CR TODO 0，本次不修改 `cr-todo-backlog.md`。
+
+### Story 3-3 / 2026-05-28
+
+- **Story**: 3-3
+- **分析来源**:
+  - `3-3-code-review-summary-20260528-round-1.md`
+  - `3-3-code-review-evaluation-20260528-round-1.md`
+  - `3-3-code-review-summary-20260528-round-2.md`
+  - `3-3-code-review-evaluation-20260528-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 `patch` findings，并由 evaluator 评估为 P1 阻塞：非 canonical adapter artifact symlink 会误触发 `ide-mirror.hash-mismatch`；dangling symlink 会被误报为 missing installer-owned file。
+  - Fixer 已修复两项：canonical package hash walker 在遍历阶段应用 include 过滤；files-index integrity 先用 `lstat()` 区分 missing、symlink 和 unreadable。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需要修复项 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权采用默认推荐决策 record-only，仅写入本规则总结；相关经验已有 Story 3.3 contract 和既有 path/hash 规则覆盖，不修改全局文档，不新增 TODO。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Canonical hash walker 必须在遍历阶段应用 candidate include 边界 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| File integrity symlink 诊断必须先 no-follow 分类再决定 issue 语义 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-17：Canonical hash walker 必须在遍历阶段应用 candidate include 边界
+
+- **来源问题**: Story 3.3 首轮实现让 `hashPackageDirectory()` 先遍历完整 entry root，再应用 canonical include 过滤；因此非 canonical adapter artifact symlink 即使不属于 package hash candidate，也会在过滤前被 `listFiles()` 误判为 canonical package symlink，触发 `ide-mirror.hash-mismatch`。
+- **CR 证据**:
+  - `3-3-code-review-summary-20260528-round-1.md`: Finding #1 指出 `.claude/skills/<id>/adapter-link` 或 `.agents/skills/<id>/wrapper-link` 这类 adapter artifact symlink 会误触发 `shape: "symlink-in-canonical-package"`。
+  - `3-3-code-review-evaluation-20260528-round-1.md`: evaluator 确认该问题违反 adapter artifact exclusion contract，评估为 P1，需要修复。
+  - `3-3-code-review-evaluation-20260528-round-2.md`: evaluator 确认 `hashPackageDirectory()` 已把 include 过滤传入 `listFiles()`，非 canonical symlink 被跳过，canonical candidate symlink 仍被拒绝。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 canonical package hash helper、IDE mirror validation 和 adapter artifact/file-index 分层。 |
+  | 风险等级 | 1 | 会让合法 target-local artifact 触发 validate failure，并给出错误 drift 诊断。 |
+  | 根因稳定性 | 1 | 先遍历后过滤是 hash/include helper 中容易复现的实现习惯。 |
+  | 可执行性 | 2 | 可通过遍历阶段 include predicate、canonical directory root 判定和 adapter symlink regression 确定性检查。 |
+  | 文档缺口 | 1 | 既有规则已有 hash input surface 分层，但未细化“symlink 异常也必须受 include 边界约束”。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: canonical package hash、IDE mirror validation、安装包白名单遍历和任何“候选文件集合 + symlink 拒绝”组合的 helper。
+- **规避指南**:
+  - 不得先遍历完整 entry root 并对所有 symlink 抛错后，再应用 canonical package candidate include 过滤。
+- **最佳实践**:
+  - 在 walker 遍历阶段计算 normalized relative path 是否属于 candidate；只有 included file/directory/symlink 才参与递归、hash record 或 shape mismatch，并用 adapter artifact symlink regression 固化排除边界。
+- **全局文档建议**:
+  - 不建议本次升格；Story 3.3 contract 与既有 `CR-API-09` 已覆盖 canonical hash 输入面分层，本次仅 record-only 记录实现检查点，不扩大到全局文档修改。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-07：File integrity symlink 诊断必须先 no-follow 分类再决定 issue 语义
+
+- **来源问题**: Story 3.3 首轮实现对 files-index entry 先调用会 follow symlink target 的存在性检查；dangling symlink 的 link 本身存在但 target 缺失时，被误报为 `file-integrity.missing-installer-owned-file`，没有进入 symlink handling 分支。
+- **CR 证据**:
+  - `3-3-code-review-summary-20260528-round-1.md`: Finding #2 指出 dangling symlink 被 `access()` 跟随后误报为 missing installer-owned file。
+  - `3-3-code-review-evaluation-20260528-round-1.md`: evaluator 确认该问题违反 symlink handling 独立 validation dimension，评估为 P1，需要修复。
+  - `3-3-code-review-evaluation-20260528-round-2.md`: evaluator 确认当前实现先用 `lstat()`，仅 `ENOENT` 报 missing；symlink 不 follow target，统一报告 `file-integrity.hash-mismatch` 与 `details.shape: "symlink"`。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 files-index raw-byte integrity、validate diagnostics、repair guidance 和 redaction-safe details。 |
+  | 风险等级 | 1 | 会把 shape/symlink 风险误导为缺失文件，影响用户 repair 判断和后续 fixer 验证。 |
+  | 根因稳定性 | 1 | 使用 follow 行为的 `access()` / exists helper 做安全分类，是路径与 symlink 处理中的稳定风险。 |
+  | 可执行性 | 2 | 可要求先 `lstat`/no-follow 分类，再分别处理 ENOENT、symlink、unreadable 和 regular file，并补 dangling/existing symlink regression。 |
+  | 文档缺口 | 1 | 既有 `CR-SEC-01` 覆盖 path boundary no-follow，本规则细化 file-integrity issue 语义与诊断分类。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: file integrity validation、installed-state file ownership checks、read-only drift diagnostics 和需要区分 missing / symlink / unreadable 的 filesystem 检查。
+- **规避指南**:
+  - 不得用会 follow symlink target 的 existence check 决定 installer-owned file 是否缺失。
+- **最佳实践**:
+  - 先使用 no-follow stats 判断路径实体；只有 `ENOENT` 才报告 missing，symlink 必须作为独立 shape/diagnostic 处理，并断言不泄露 readlink target、absolute path 或 hash value。
+- **全局文档建议**:
+  - 不建议本次升格；既有安全规则已覆盖 no-follow 边界，本次仅 record-only 记录 file-integrity 诊断分类检查点。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluator 明确两项均为阻塞修复项，不降级为 TODO；Round 2 reviewer/evaluator 明确新增 finding 0、CR TODO 0，本次不修改 `cr-todo-backlog.md`。
+
+### Story 3-4 / 2026-05-28
+
+- **Story**: 3-4
+- **分析来源**:
+  - `3-4-code-review-summary-20260528-round-1.md`
+  - `3-4-code-review-evaluation-20260528-round-1.md`
+  - `3-4-code-review-summary-20260528-round-2.md`
+  - `3-4-code-review-evaluation-20260528-round-2.md`
+  - `3-4-code-review-summary-20260528-round-3.md`
+  - `3-4-code-review-evaluation-20260528-round-3.md`
+  - `3-4-code-review-summary-20260528-round-4.md`
+  - `3-4-code-review-evaluation-20260528-round-4.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 3 个 `patch` findings，并由 evaluator 评估为 P1 阻塞：production validate 未消费 workflow artifact metadata、installed canonical `SKILL.md` legacy config reference 未接入主流程、runtime symlink escape 未按 realpath boundary 分类。
+  - Round 2 reviewer/evaluator 继续确认 directory artifact `<directory>/metadata.json` 未进入 production artifact validation，作为 Round 1 artifact metadata 修复的未闭环项进入 fixer。
+  - Round 3 reviewer/evaluator 确认 `artifact-path` symlink validation 会把项目内 symlink 误报为 `artifact-path.symlink-escape`，进入 fixer。
+  - Round 4 reviewer/evaluator 均确认通过；新增 finding 0，需要修复项 0，CR TODO 0，最终 evaluator 结论为 Approved / 通过。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权采用默认推荐决策 record-only，仅写入本规则总结；两条经验偏 validate / filesystem 技术域，不修改全局文档，不新增 TODO。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Production artifact validation 必须消费 on-disk metadata entity | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Symlink escape issue 必须基于 realpath boundary 而非 symlink 存在性 | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-18：Production artifact validation 必须消费 on-disk metadata entity
+
+- **来源问题**: Story 3.4 首轮实现只在 rule-level helper 显式传入 metadata 时校验 required artifact metadata，production `speclite validate` 没有读取 actual artifact path 的 on-disk metadata；第一轮修复覆盖 file artifacts 后，Round 2 又暴露 directory artifact `<directory>/metadata.json` 未作为 artifact entity 被发现。
+- **CR 证据**:
+  - `3-4-code-review-summary-20260528-round-1.md`: Finding #1 指出 `validateProject` 调用 `validateArtifactPathContract()` 时未传入 artifact metadata / actual artifact path，production validate 无法触发 metadata missing/invalid issue。
+  - `3-4-code-review-evaluation-20260528-round-2.md`: evaluator 确认 directory artifact metadata 未被 production discovery 读取，`metadata.json` 被跳过导致 AC5 仍漏报。
+  - `3-4-code-review-evaluation-20260528-round-4.md`: evaluator 确认 file artifact 与 directory artifact metadata production validation 均已闭环。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 多轮 CR 连续暴露 file artifact 与 directory artifact metadata 未进入 production validation 的问题。 |
+  | 影响范围 | 1 | 影响 `speclite validate` artifact-path aggregation、workflow artifact metadata contract 和 command-level diagnostics。 |
+  | 风险等级 | 2 | production validate 漏报 required metadata missing/invalid，会让 workflow artifact contract 失效并误导自动化验收。 |
+  | 根因稳定性 | 1 | rule helper 支持但 command aggregation 未消费真实 on-disk entity，是 validation 接入层容易复现的实现缺口。 |
+  | 可执行性 | 2 | 可用 artifact entity discovery、frontmatter/sidecar/directory metadata reader 和 command-level regression 检查。 |
+  | 文档缺口 | 1 | Artifact contract 已声明 metadata 位置，但 CR 暴露了 production aggregation 必须消费 entity 的实现检查点。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: `speclite validate`、workflow artifact validation、artifact metadata discovery 和任何 rule-level contract 需要由 command aggregation 喂入真实 on-disk entity 的流程。
+- **规避指南**:
+  - 不得只在 pure rule helper 测试中显式传入 metadata，就认定 production command path 已覆盖 artifact metadata validation。
+- **最佳实践**:
+  - production validation 应先发现 actual artifact entity，再按 artifact type 读取 Markdown frontmatter、file sidecar JSON 或 directory `metadata.json`，把 `actualArtifactPath`、metadata 与 `metadataLocation` 一并传入 rule 层，并补 command-level missing/invalid regression。
+- **全局文档建议**:
+  - 不建议本次升格；该规则偏 artifact validation 接入实现细节，且 Story 3.4 / owning artifact path contract 已覆盖 metadata 位置。本次按用户授权只记录到 CR rules summary。
+- **本次落地**:
+  - Round 1 与 Round 2 fixer 已修复，Round 4 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-08：Symlink escape issue 必须基于 realpath boundary 而非 symlink 存在性
+
+- **来源问题**: Story 3.4 首轮 runtime-path validation 只要发现 symlink segment 就报告 `runtime-path.symlink-escape`，没有判断 symlink target 是否逃出 project boundary；Round 3 又在 artifact-path validation 中发现同类误报，项目内 artifact symlink 也被报告为 `artifact-path.symlink-escape`。
+- **CR 证据**:
+  - `3-4-code-review-summary-20260528-round-1.md`: Finding #3 指出 runtime path symlink 分类未解析 target，项目内 symlink 可能被误报为 escape。
+  - `3-4-code-review-evaluation-20260528-round-3.md`: evaluator 独立复现 `_speclite-output/link -> _speclite-output/real` 项目内 symlink 被误报为 `artifact-path.symlink-escape`。
+  - `3-4-code-review-evaluation-20260528-round-4.md`: evaluator 确认 runtime-path 与 artifact-path 均已改为 `realpath()` boundary 判断，项目内 symlink 不再误报，project-external symlink escape 仍报告。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | 同一 Story 中 runtime-path 与 artifact-path 两个 validation domains 均出现“symlink 存在即 escape”的同类问题。 |
+  | 影响范围 | 1 | 影响 runtime path、artifact path、validate diagnostics 和合法项目内 symlink layout。 |
+  | 风险等级 | 2 | 会把合法项目内 symlink 误判为 escape，阻断合法安装/产物布局；若反向处理不当也可能漏报真正 project-external escape。 |
+  | 根因稳定性 | 1 | 将 symlink shape 与 boundary escape 混为一谈，是 filesystem validation 中稳定易复现的分类错误。 |
+  | 可执行性 | 2 | 可用 `lstat` 发现 symlink、`realpath` 对 target 与 project root 做 boundary 比较，并用 internal/external symlink paired regression 固化。 |
+  | 文档缺口 | 0 | 既有 Story issue mapping 已定义 symlink escape 语义，本规则沉淀 CR 实现检查点。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: runtime-path、artifact-path、file integrity、IDE mirror 和任何需要把 symlink shape 与 project boundary escape 区分开的 filesystem validation。
+- **规避指南**:
+  - 不得仅因路径 segment 是 symlink 就报告 `*.symlink-escape`；escape issue 必须表示解析后确实越过 project boundary。
+- **最佳实践**:
+  - 先 no-follow 识别 symlink，再对 symlink target 和 project root 执行 `realpath`；项目内 symlink 继续后续校验，项目外 symlink 才报告 escape，并确保 public details 不泄露外部绝对路径。
+- **全局文档建议**:
+  - 不建议本次升格；`CR-SEC-01` / `CR-SEC-07` 已沉淀 no-follow 和 symlink 诊断边界，本条作为 Story 3.4 中 runtime/artifact path 的补充实现规则记录。
+- **本次落地**:
+  - Round 1 与 Round 3 fixer 已修复，Round 4 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1、Round 2、Round 3 的 findings 均为当前 Story 3.4 验收相关阻塞修复项，不降级为 TODO；Round 4 reviewer/evaluator 明确新增 finding 0、CR TODO 0，本次不修改 `cr-todo-backlog.md`。
+
+### Story 4-1 / 2026-05-31
+
+- **Story**: 4-1
+- **分析来源**:
+  - `4-1-code-review-summary-20260531-round-1.md`
+  - `4-1-code-review-evaluation-20260531-round-1.md`
+  - `4-1-code-review-summary-20260531-round-2.md`
+  - `4-1-code-review-evaluation-20260531-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 `patch` findings，并由 evaluator 评估为 P1 阻塞：`update --repair` 未把 protected path classifier 结果作为 files-index 错标时的硬边界；`validate` file-integrity ownership 检查未接收 configured artifact root。
+  - Fixer 已修复两项：update/repair planning 优先使用 classifier 的 `human-owned` / `workflow-owned` / `unknown` protected 结论；file-integrity validation 使用 manifest configured artifact root，并新增对应 focused regressions。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需要修复项 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5.5。本次按用户授权执行默认推荐决策：record-only 写入本规则总结；全局 SPEC/已有 CR 规则已覆盖 artifact root、symlink、path-safety 等相近原则，本次不扩大修改全局文档，不新增 TODO。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Protected path classifier 结果必须优先于 files-index ownership | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| File integrity ownership 检查必须使用 configured artifact root | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-SEC-09：Protected path classifier 结果必须优先于 files-index ownership
+
+- **来源问题**: Story 4.1 首轮实现先对 entry path 调用 `classifyOwnership()`，但当 classifier 返回已知 ownership 时又回退使用 files-index entry 的 `ownership`。因此 `_speclite/custom/config.toml` 或 configured artifact root 下文件即使按路径应为 protected，只要 files-index 错标为 `installer-owned`，`update --repair` 仍会生成 `restore-canonical` action。Story 4.5 再次暴露同类边界：classifier unknown path 在 `data.conflicts[]` 中正确为 `ownership: "unknown"`，但 `updatePlan.actions[]` 又被误投影为 `ownership: "installer-owned"`。
+- **CR 证据**:
+  - `4-1-code-review-summary-20260531-round-1.md`: Finding #1 指出 `_speclite/custom/config.toml` 被 files-index 错标为 `installer-owned` 时，repair plan 生成 `restore-canonical` 且 conflicts 为空。
+  - `4-1-code-review-evaluation-20260531-round-1.md`: evaluator 确认该问题为 P1，要求 classifier 的 `human-owned`、`workflow-owned`、`unknown` 作为 protected 硬边界。
+  - `4-1-code-review-evaluation-20260531-round-2.md`: evaluator 确认 `classifyEntryConflict()` 已优先返回 protected conflict，`planRepair()` 遇到 protected conflict 后不会读取 source evidence 或生成 repair action。
+  - `4-5-code-review-summary-20260601-round-1.md`: Finding #1 指出 classifier unknown path 会在 `updatePlan.actions[]` 中被默认投影为 installer-owned conflict action。
+  - `4-5-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题违反 Story 4.5 unknown ownership protected boundary，要求不扩展 schema 时不得追加误导性 installer-owned action。
+  - `4-5-code-review-evaluation-20260601-round-2.md`: evaluator 确认修复后 unknown path 只保留在 `data.conflicts[]`，不再进入 installer-owned planned action。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Story 4.1 与 Story 4.5 均出现 files-index ownership 或 public action projection 覆盖 classifier protected/unknown 结论的问题，并均由复审验证关闭。 |
+  | 影响范围 | 1 | 影响 update planning、repair planning、files-index ownership 消费和 protected path conflict 生成。 |
+  | 风险等级 | 2 | 错标 files-index 可让 human-owned/workflow-owned 文件进入可执行 repair action，存在覆盖用户配置或工作流产物风险。 |
+  | 根因稳定性 | 1 | 将 mutable index metadata 置于 path classifier 边界之上，是 update/repair 消费 installed-state 时易复现的实现习惯。 |
+  | 可执行性 | 2 | 可要求 classifier protected result 先行短路，并用错标 `_speclite/custom/*.toml` 与 configured artifact root regression 固化。 |
+  | 文档缺口 | 0 | 既有 path-safety、artifact root 和 ownership 边界规则已有相近原则，本条沉淀为 update/repair 具体检查点。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: update/repair planning、files-index ownership 消费、installed-state drift repair 和任何需要同时消费 path classifier 与 persisted ownership metadata 的流程。
+- **规避指南**:
+  - 不得让 files-index entry 的 `installer-owned` 标记或 public action projection 覆盖 path classifier 已判定的 `human-owned`、`workflow-owned` 或 `unknown` protected 结果。
+- **最佳实践**:
+  - 先按当前 configured roots 和 path classifier 计算 protected boundary；若 classifier 结果为 protected，立即生成 stable conflict 并跳过 source evidence、canonical restore 或其他 mutation action；若 public planned action schema 不能表达 `unknown`，不得伪装成 installer-owned action，并用 mislabel/unknown regression 检查 `repairPlan.actions[]` 或 `updatePlan.actions[]` 不含误导性 action。
+- **全局文档建议**:
+  - 不建议本次升格；该规则偏 update/repair ownership planning 实现检查点，且已有 `CR-SEC-02`、`CR-SEC-05`、`CR-SEC-07` 等相近安全边界规则，本次按用户授权仅写入规则总结。
+- **本次落地**:
+  - Story 4.1 Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+  - Story 4.5 Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-10：File integrity ownership 检查必须使用 configured artifact root
+
+- **来源问题**: Story 4.1 首轮实现中 `validateProject()` 已读取 manifest configured artifact root，但调用 `validateFileIntegrity()` 时没有传入该 root；file-integrity ownership classification 只能识别默认 `_speclite-output`，导致 `.artifacts/report.md` 这类 configured workflow artifact root 下的错标 entry 无法报告 `file-integrity.unsafe-overwrite-risk`。
+- **CR 证据**:
+  - `4-1-code-review-summary-20260531-round-1.md`: Finding #2 指出 `validateFileIntegrity()` 调用 `classifyOwnership()` 时未接收 configured artifact root。
+  - `4-1-code-review-evaluation-20260531-round-1.md`: evaluator 确认该问题违反 AC6，要求 `validateFileIntegrity()` 接收 `manifest.paths.artifactRoot` 并覆盖 `.artifacts/report.md` 错标场景。
+  - `4-1-code-review-evaluation-20260531-round-2.md`: evaluator 确认 `validateProject()` 已将 configured artifact root 传入 file-integrity rule，回归测试断言 `classifiedOwnership: "workflow-owned"`。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 project validate、file-integrity ownership diagnostics 和 configured workflow artifact root 下的 unsafe overwrite risk 检测。 |
+  | 风险等级 | 2 | configured artifact root 下 protected workflow artifact 错标后会漏报 unsafe overwrite 风险，削弱 update/repair 前置安全门禁。 |
+  | 根因稳定性 | 1 | command aggregation 已读取 configured root 但 rule-level helper 未消费，是 validation 接入层常见遗漏。 |
+  | 可执行性 | 2 | 可通过函数入参传递、classifier 调用携带 artifactRoot，并用 configured root mislabel focused test 检查。 |
+  | 文档缺口 | 0 | 既有 artifact root containment 规则已有相近原则，本条沉淀 file-integrity ownership validation 的接入检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: file-integrity validation、project validate aggregation、configured workflow artifact root ownership classification 和 unsafe overwrite diagnostics。
+- **规避指南**:
+  - 不得在 rule-level ownership 检查中只使用默认 artifact root，而忽略 manifest/config 中的 configured artifact root。
+- **最佳实践**:
+  - 在 command aggregation 层读取 manifest configured artifact root 后，必须传入所有需要 ownership classification 的 validation helper；focused test 应覆盖非默认 root 下 workflow-owned path 被 files-index 错标为 `installer-owned` 时仍报告 `file-integrity.unsafe-overwrite-risk`。
+- **全局文档建议**:
+  - 不建议本次升格；`CR-SEC-05` 已覆盖 configured artifact root 边界原则，本条作为 file-integrity validation 接入细则 record-only 沉淀。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluator 明确两项均为 P1 阻塞修复项，不降级为 TODO；Round 2 reviewer/evaluator 明确新增 finding 0、CR TODO 0，本次不修改 `cr-todo-backlog.md`。
+
+### Story 4-2 / 2026-05-31
+
+- **Story**: 4-2
+- **分析来源**:
+  - `4-2-code-review-summary-20260531-round-1.md`
+  - `4-2-code-review-evaluation-20260531-round-1.md`
+  - `4-2-code-review-summary-20260531-round-2.md`
+  - `4-2-code-review-evaluation-20260531-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 `patch` finding，并由 evaluator 评估为 P1 阻塞：`speclite update` / `speclite update --repair` 的 public `targetProject` 显示名绕过四层 config resolver，只读取 base `_speclite/config.toml`。
+  - Fixer 已修复该项：update/repair 结果显示名优先通过 shared `resolveProjectConfig({ keys: ["core.project_name"] })` 读取四层 merged config value，缺失或不可用时才走既有 fallback。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需要修复项 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5.5。本次按用户授权执行默认推荐决策：record-only 写入本规则总结；全局架构文档已有 `src/config/` 作为唯一 merge implementation、`resolve config` 四层顺序和 diagnostics/output 统一渲染等相近约束，本次不扩大修改全局文档，不新增 TODO。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Config 派生的 public command result 字段必须复用 shared resolver | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-19：Config 派生的 public command result 字段必须复用 shared resolver
+
+- **来源问题**: Story 4.2 首轮实现中 `runUpdateCommand` 在 planning 前计算 `targetProject`，但显示名 fallback 只读取 `_speclite/config.toml`，没有调用 shared config resolver，也没有合并 `_speclite/config.user.toml`、`_speclite/custom/config.toml`、`_speclite/custom/config.user.toml`。因此 update/repair 的 public JSON/human result 会展示 base config 值，而不是 Story AC1 要求的四层 merged value。
+- **CR 证据**:
+  - `4-2-code-review-summary-20260531-round-1.md`: Finding #1 指出 `src/commands/update.ts` 的 `targetProject` 通过旧 helper 直接读取 base `_speclite/config.toml`，绕过四层 config resolver。
+  - `4-2-code-review-evaluation-20260531-round-1.md`: evaluator 确认该问题违反 Story 4-2 AC1，并要求复用 `src/config/config-reader.ts` 的 shared resolver。
+  - `4-2-code-review-evaluation-20260531-round-2.md`: evaluator 确认 `resolveUpdateTargetProjectDisplayName` 已调用 `resolveProjectConfig({ keys: ["core.project_name"] })`，update 与 repair regression 均覆盖四层覆盖顺序。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭；与既有 resolver activation 规则有同类实现边界复现迹象。 |
+  | 影响范围 | 1 | 影响 update/repair command result、JSON/human output 显示名和 config merge order 的 public projection。 |
+  | 风险等级 | 1 | 会让用户可见输出与 canonical resolver 语义不一致，造成自动化或人工判断使用错误项目名。 |
+  | 根因稳定性 | 1 | command 层为显示字段单独读取 config 是容易复现的实现习惯，尤其在 planning context 已使用 resolver 但未回传显示值时。 |
+  | 可执行性 | 2 | 可要求所有 config 派生 public 字段调用 shared resolver，并用四层覆盖 regression 覆盖 update 与 repair 两条 command path。 |
+  | 文档缺口 | 1 | 全局文档已有集中 resolver 与 diagnostics/output 原则，但未细化 public command result 显示字段也必须复用 shared resolver。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: update/repair/status/validate 等 command result 中任何由 project config 或 customization 派生的 public JSON/human output 字段。
+- **规避指南**:
+  - 不得为 public command result 的显示字段在 command 或 diagnostics helper 中新增 base-config-only 读取路径；不得因为 planning 阶段已调用 resolver，就默认外层 public result 也使用了 merged value。
+- **最佳实践**:
+  - public result 字段若来自 config/customization，必须直接复用 shared resolver 或消费 resolver 已返回的 merged value；focused regression 应覆盖至少一条后层 override，并同时断言主要 command path 与 repair/alternate path。
+- **全局文档建议**:
+  - 不建议本次升格；`_bmad-output/planning-artifacts/architecture/04-implementation-patterns-consistency-rules实现模式与一致性规则.md` 已要求 config/customization merge logic 集中在 `src/config/`，并要求 public result 渲染由 diagnostics/output 层统一处理。本条作为 command result 字段接入细则 record-only 沉淀。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluator 明确唯一 finding 为 P1 阻塞修复项，不降级为 TODO；Round 2 reviewer/evaluator 明确新增 finding 0、CR TODO 0，本次不修改 `cr-todo-backlog.md`。
+
+### Story 4-3 / 2026-05-31
+
+- **Story**: 4-3
+- **分析来源**:
+  - `4-3-code-review-summary-20260531-round-1.md`
+  - `4-3-code-review-evaluation-20260531-round-1.md`
+  - `4-3-code-review-summary-20260531-round-2.md`
+  - `4-3-code-review-evaluation-20260531-round-2.md`
+  - `4-3-code-review-summary-20260531-round-3.md`
+  - `4-3-code-review-evaluation-20260531-round-3.md`
+  - `4-3-code-review-summary-20260531-round-4.md`
+  - `4-3-code-review-evaluation-20260531-round-4.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 P1 `patch` findings：Story 4.3 越界暴露 `update --repair` executable repair plan / `restore-canonical`，以及 manifest 存在但缺失或 malformed `sourceDescriptor` 时仍可继续生成 write-capable update plan；另有 1 个非阻塞 defer：默认 `npm test` 5s timeout 慢测治理。
+  - Round 2 reviewer/evaluator 确认 Round 1 两个 blocker 已收敛，但新增 1 个 P1 `patch` finding：manifest 文件缺失、不可读或 YAML parse 失败时仍绕过 source descriptor blocker。
+  - Round 3 reviewer/evaluator 确认 manifest 缺失/读取/parse blocker 已修复，但新增 1 个 P1 `patch` finding：`test/update-command.test.ts` 仍按旧 missing files-index 行为断言，导致全量 `npm test` 失败。
+  - Round 4 reviewer/evaluator 均确认通过：repair 越界行为未回归；缺失或 malformed `sourceDescriptor`、manifest 缺失、不可读或 YAML parse 失败均阻断 write-capable update plan；`test/update-command.test.ts` 旧断言已修复。剩余慢测治理维持 CR TODO / defer。
+  - 本次 04 使用模型：GPT-5.5。本次按用户授权执行默认推荐决策：record-only 写入本规则总结；不修改全局文档；未解决慢测治理交给 05 TODO Tracker。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Source trust evidence 缺失或 malformed 时 update planning 必须 fail closed | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Command fixture 必须显式满足被测 gate 之前的前置 evidence | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| 默认 `npm test` 5s timeout 慢测治理 | 未通过：状态未解决 | - | todo-tracker | 交给 05 TODO Tracker |
+
+### 提炼规则
+
+#### CR-API-20：Source trust evidence 缺失或 malformed 时 update planning 必须 fail closed
+
+- **来源问题**: Story 4.3 首轮实现中，manifest 存在但缺失或 malformed `sourceDescriptor` 时会返回空 issues，继续构建 update plan；Round 2 又发现 manifest 文件缺失、不可读或 YAML parse 失败时也返回空 issues，导致 `--yes` 下仍可能暴露 `writeAuthorized: true` 的 write-capable update plan。
+- **CR 证据**:
+  - `4-3-code-review-evaluation-20260531-round-1.md`: evaluator 确认缺失或 malformed `sourceDescriptor` 会绕过 source trust gate，必须生成 `source-integrity.*` / malformed blocker 并阻断 planning。
+  - `4-3-code-review-evaluation-20260531-round-2.md`: evaluator 确认 manifest 文件缺失、不可读或 YAML parse 失败路径返回空 issues，必须改为 blocking issue。
+  - `4-3-code-review-evaluation-20260531-round-4.md`: evaluator 确认 `readManifestContext()` 与 source descriptor parse 路径均已产生 blocking issue，`updatePlan.actions: []`、`writeAuthorized: false` 行为持续有效。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | 同一 Story 中连续两轮暴露 source trust evidence 不可用时 fail-open 的同类问题，Round 4 复审确认关闭。 |
+  | 影响范围 | 1 | 影响 update planning、repair placeholder、source descriptor trust gate 和 command JSON/human output 的 write authorization 投影。 |
+  | 风险等级 | 2 | 缺少可信 source evidence 时仍暴露 write-capable plan，会破坏 pre-write gate 并可能误导后续写入授权。 |
+  | 根因稳定性 | 1 | 把 manifest/source descriptor 读取失败当作无 evidence 而非 blocking evidence，是 update/repair 前置检查中稳定易复现的实现习惯。 |
+  | 可执行性 | 2 | 可要求所有 manifest/source descriptor 读取、parse、schema 失败路径生成 stable `source-integrity.*` error issue，并用 focused tests 断言空 actions 与 `writeAuthorized: false`。 |
+  | 文档缺口 | 0 | Story 4.3 和 source trust gate 已有业务契约，本条作为 CR 实现检查点沉淀，不扩大到全局文档。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: `speclite update`、`speclite update --repair`、source descriptor trust/evidence gate、以及任何在写入前依赖 manifest/source evidence 构建 plan 的流程。
+- **规避指南**:
+  - 不得在 manifest 缺失、不可读、YAML parse 失败、`sourceDescriptor` 缺失或 schema malformed 时返回空 issues 并继续构建 write-capable plan。
+- **最佳实践**:
+  - source trust evidence 读取链路应 fail closed：失败路径生成 stable error issue，planning 在 action construction 前短路，public result 断言 `requiresConfirmation: false`、`writeAuthorized: false`、`updatePlan.actions: []`。
+- **全局文档建议**:
+  - 不建议本次升格；该规则偏 Story 4.3 update planning/source trust gate 的实现检查点，且本轮用户要求保守默认、不扩大修改全局文档。
+- **本次落地**:
+  - Round 1/2 fixer 已修复，Round 4 reviewer/evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-TEST-02：Command fixture 必须显式满足被测 gate 之前的前置 evidence
+
+- **来源问题**: Story 4.3 Round 3 暴露 `test/update-command.test.ts` 仍使用缺 manifest fixture 断言 missing files-index conflict；但当前 source descriptor gate 应先于 files-index conflict 生效，导致全量 `npm test` 失败，也让测试目标与实际 gate 顺序不一致。
+- **CR 证据**:
+  - `4-3-code-review-summary-20260531-round-3.md`: reviewer 指出 missing files-index conflict 测试没有创建 `_speclite/_config/manifest.yaml`，实际先返回 `source-integrity.missing-source-descriptor`。
+  - `4-3-code-review-evaluation-20260531-round-3.md`: evaluator 确认该测试断言问题为 P1，需要补齐 trusted manifest/source descriptor fixture 或改成 missing manifest gate 断言。
+  - `4-3-code-review-evaluation-20260531-round-4.md`: evaluator 确认 `writeTrustedManifest()` 已让测试越过 source descriptor gate 后继续覆盖 missing files-index conflict，全量 `npm test` 通过。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 4 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 command-level update/repair regression、source descriptor gate 与 files-index conflict 的测试分层。 |
+  | 风险等级 | 1 | 错误 fixture 会让回归套件失败或误测为错误 gate，削弱测试对 public contract 的信号质量。 |
+  | 根因稳定性 | 1 | 多 gate command flow 中，测试 fixture 未显式满足前置 evidence 是容易复现的测试编写缺口。 |
+  | 可执行性 | 2 | 可要求每个 command fixture 写明目标 gate，并补齐前置 trusted manifest/source descriptor 或明确断言前置 gate。 |
+  | 文档缺口 | 1 | 现有测试规则未细化多 gate command fixture 的前置 evidence 要求。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: update/repair/status/validate 等存在 source trust、manifest/index、ownership、conflict 多层 gate 的 command-level tests。
+- **规避指南**:
+  - 不得用缺失前置 evidence 的 fixture 去断言后置 gate；例如要测试 files-index conflict 时，必须先提供可信 manifest/source descriptor。
+- **最佳实践**:
+  - 测试 fixture 应显式服务一个 gate：若目标是后置 conflict，则补齐前置 gate 所需 evidence；若目标是前置 blocker，则断言前置 issue、空 plan 和禁止写入授权。
+- **全局文档建议**:
+  - 不建议本次升格；该规则偏 command regression 编写实践，本次按用户授权 record-only 沉淀。
+- **本次落地**:
+  - Round 3 fixer 已修复，Round 4 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **新增 TODO backlog 候选**: Round 1 / Finding #3、Round 2/3/4 历史 CR TODO 均指向默认 `npm test` 5s timeout 慢测治理。该项未在 Story 4-3 中解决，latest evaluator 明确建议作为 P2 非阻塞 defer 继续记录，因此交给 05 TODO Tracker 写入 `cr-todo-backlog.md`。
+
+### Story 4-4 / 2026-06-01
+
+- **Story**: 4-4
+- **分析来源**:
+  - `4-4-code-review-summary-20260601-round-1.md`
+  - `4-4-code-review-evaluation-20260601-round-1.md`
+  - `4-4-code-review-summary-20260601-round-2.md`
+  - `4-4-code-review-evaluation-20260601-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 4 个 P1 `patch` findings：partial failure diagnostics 缺少已成功写入的 `changedPaths`、validate 漏扫同目录嵌套 stale temp、safe-write cleanup failure 会抛 raw error、`allowExisting=true` 缺少 apply-time ownership/hash baseline preflight。
+  - Fixer 已修复 4 项，并记录 focused tests、`npm run build`、全量 `npm test` 与 `git diff --check` 均通过；Round 2 reviewer/evaluator 均确认通过，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 (codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - `CR-API-07` 已存在等价 partial progress 规则，本次按模板更新该规则的来源 Story、复现频次、评分和 4-4 证据；另新增 3 条 safe-write / validate 安全边界规则。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 非事务写入失败必须通过已契约字段暴露 partial progress | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only，更新既有 `CR-API-07` |
+| Safe-write stale temp 诊断必须覆盖同目录受控 roots | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Safe-write cleanup failure 必须返回稳定 issue 而不是 raw error | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Existing overwrite 必须执行 apply-time ownership/hash baseline preflight | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### 既有规则更新：CR-API-07 非事务写入失败必须通过已契约字段暴露 partial progress
+
+- **处理结果**: 不新建重复规则；已将 Story 4-4 作为第二个来源 Story 写入 `CR-API-07`，并将该规则总分从 7/12 更新为 8/12。
+- **更新依据**: Story 4-4 Round 1 Finding #1 与 Story 1-5 的非事务 partial progress 问题等价，均要求多阶段写入失败时不得隐藏已经完成的 mutation。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-11：Safe-write stale temp 诊断必须覆盖同目录受控 roots
+
+- **来源问题**: `safeWriteFile` 使用 target 同目录 `.speclite-tmp-*` 临时文件，但 validate 首轮只扫描 `_speclite` 顶层 stale temp，漏掉 `_speclite/_config/**` 和 IDE mirror target 目录下的实际 stale temp。
+- **CR 证据**:
+  - `4-4-code-review-summary-20260601-round-1.md`: Finding #2 指出 validate 只扫描 `_speclite` 顶层，漏报 safe-write 同目录产生的嵌套 `.speclite-tmp-*`。
+  - `4-4-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题违反 AC5/AC8，并要求按 installed files index、installer-owned roots 或受控目录集合递归发现。
+  - `4-4-code-review-evaluation-20260601-round-2.md`: evaluator 确认 `_speclite`、`.claude/skills`、`.agents/skills` 与 files-index installer-controlled parent dirs 已纳入受控递归扫描，问题关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 validate file-integrity、safe-write temp cleanup diagnostics、IDE mirror 与 `_speclite/_config` 等 installer-owned roots。 |
+  | 风险等级 | 2 | 漏报 stale temp 会削弱 safe mutation blocker 与人工清理诊断，可能让后续写入被不透明地阻断。 |
+  | 根因稳定性 | 1 | 写入 primitive 使用同目录 temp，而 validation helper 只扫固定顶层，是文件系统安全链路容易复现的集成缺口。 |
+  | 可执行性 | 2 | 可要求基于受控 roots 递归扫描 `.speclite-tmp-*`，输出 project-relative POSIX path，并用嵌套/IDE mirror regression 覆盖。 |
+  | 文档缺口 | 0 | Architecture 已有 safe-write temp 与 validate stale temp 总原则，本条沉淀为 validate 接入检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: safe-write temp cleanup、validate file-integrity stale temp discovery、installer-owned runtime/config/artifact/IDE mirror roots。
+- **规避指南**:
+  - 不得只扫描 `_speclite` 顶层来判断 safe-write stale temp；任何 target 同目录 temp 都必须能被受控范围内的 validate 诊断发现。
+- **最佳实践**:
+  - validate 应从 `_speclite`、IDE skill mirrors 和 files-index installer-controlled parent dirs 构造受控 scan roots；递归发现 `.speclite-tmp-*` 时不得跟随 symlink，并保持 stable project-relative POSIX output。
+- **全局文档建议**:
+  - 不建议本次升格；全局文档已覆盖 safe-write / validate 总原则，本次按用户授权仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-12：Safe-write cleanup failure 必须返回稳定 issue 而不是 raw error
+
+- **来源问题**: 首轮 `safeWriteFile` 在 temp-write 或 rename 异常后直接 `await rm(tempPath, { force: true })`，cleanup 自身失败时会抛出底层错误，绕过稳定 `file-integrity.stale-temp-file` issue。
+- **CR 证据**:
+  - `4-4-code-review-summary-20260601-round-1.md`: Finding #3 指出 safe-write cleanup failure 不是 best-effort，会抛 raw error。
+  - `4-4-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题破坏 controlled failure 和 stable diagnostics，必须修复。
+  - `4-4-code-review-evaluation-20260601-round-2.md`: evaluator 确认 cleanup failure 已返回稳定 issue，`affectedPath` 为 project-relative temp path，不泄露 raw stack 或 absolute path。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 shared safe-write primitive 以及 install/update/repair 等所有使用该 primitive 的写入命令。 |
+  | 风险等级 | 2 | raw cleanup error 会破坏 stable CommandResult projection，并可能泄露本地路径或平台差异。 |
+  | 根因稳定性 | 1 | cleanup 被当作普通 await 而非 best-effort failure branch，是文件系统异常处理中的稳定风险。 |
+  | 可执行性 | 2 | 可要求 cleanup 独立 `try/catch`、stable issue code、manual action 和 serialization negative assertions。 |
+  | 文档缺口 | 0 | 全局已有 stable issue / safe-write 总原则，本条作为 shared primitive 实现检查点记录。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: `src/fs/safe-write.ts`、safe-write cleanup、stale temp diagnostics、所有本地写入 command failure path。
+- **规避指南**:
+  - 不得让 cleanup failure 覆盖原始 safe-write controlled failure，也不得把 Node raw error、absolute temp path 或 stack 直接投影到 public result。
+- **最佳实践**:
+  - cleanup 必须 best-effort；失败时返回稳定 `file-integrity.stale-temp-file` issue，包含 manual action、failed step、pending cleanup steps 和 project-relative affected path，并由 tests 覆盖 serialization 安全。
+- **全局文档建议**:
+  - 不建议本次升格；该规则偏 shared primitive 具体实现检查点，本次按用户授权仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-13：Existing overwrite 必须执行 apply-time ownership/hash baseline preflight
+
+- **来源问题**: 首轮 `safeWriteFile(...allowExisting=true)` 只凭 `allowExisting` 放行普通文件 overwrite，没有在 rename 前验证 expected ownership、current hash、path classification、type/symlink 或 stale temp blocker，后续 update/repair apply 误用时存在 unsafe overwrite 风险。
+- **CR 证据**:
+  - `4-4-code-review-summary-20260601-round-1.md`: Finding #4 指出 `allowExisting=true` 缺少 ownership/hash baseline preflight。
+  - `4-4-code-review-evaluation-20260601-round-1.md`: evaluator 确认该问题违反 AC6 和 Task 5，要求 apply-time preflight 阻断 protected/unknown ownership、baseline drift、type mismatch、symlink 和 stale temp blocker。
+  - `4-4-code-review-evaluation-20260601-round-2.md`: evaluator 确认 `safeWriteFile` 已要求 `expectedExistingFile` baseline，并在 rename 前验证 ownership、path classification、stale temp blocker 和 current hash；生产调用面未新增不安全 overwrite。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 2 | 影响 shared safe-write primitive、future update/repair apply、installer-owned baseline 消费和 protected path overwrite 安全。 |
+  | 风险等级 | 2 | 缺少 apply-time baseline 会把 TOCTOU 漂移或错误调用变成覆盖 human/workflow/unknown-owned 文件的风险。 |
+  | 根因稳定性 | 1 | 只在 planning 阶段校验、apply primitive 不复核 baseline，是写入安全链路中容易复现的流程缺口。 |
+  | 可执行性 | 2 | 可要求 existing overwrite 必须提供 baseline，并用 protected ownership、unknown ownership、baseline drift、type mismatch、symlink 和 stale temp tests 检查。 |
+  | 文档缺口 | 0 | 既有 ownership/path-safety 规则覆盖总体原则，本条沉淀 apply-time safe-write baseline preflight 细则。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: safe-write existing target overwrite、future update/repair apply、installer-owned files-index/hash baseline mutation。
+- **规避指南**:
+  - 不得只凭 `allowExisting=true` 覆盖现有文件；existing overwrite 必须在 apply-time 重新证明目标仍为预期 installer-owned baseline。
+- **最佳实践**:
+  - safe-write existing target path 需要 `expectedExistingFile` 或等价 wrapper；rename 前重新 lstat/read/hash/classify，阻断 protected/unknown ownership、baseline drift、type mismatch、symlink/case conflict 和 stale temp blocker。
+- **全局文档建议**:
+  - 不建议本次升格；该规则与既有 ownership/path-safety 文档相近，且全局文档修改超出本次收尾授权。本次只 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 4-5 / 2026-06-01
+
+- **Story**: 4-5
+- **分析来源**:
+  - `4-5-code-review-summary-20260601-round-1.md`
+  - `4-5-code-review-evaluation-20260601-round-1.md`
+  - `4-5-code-review-summary-20260601-round-2.md`
+  - `4-5-code-review-evaluation-20260601-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：classifier unknown path 在 `data.conflicts[]` 中为 `ownership: "unknown"`，但 `updatePlan.actions[]` 被误投影为 `ownership: "installer-owned"`。
+  - Fixer 已按保守方案修复：不扩展 `UpdatePlanActionSchema`，只让 unknown ownership conflict 保留在 `data.conflicts[]`，并新增 `README.md` classifier unknown regression。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 (codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - `CR-SEC-09` 已存在等价 ownership/classifier 边界规则，本次不新建重复规则；已将 Story 4-5 作为复现来源补充到 `CR-SEC-09`，并将该规则总分从 7/12 更新为 8/12。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Protected path classifier 结果必须优先于 files-index ownership | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only，更新既有 `CR-SEC-09` |
+
+### 提炼规则
+
+#### 既有规则更新：CR-SEC-09 Protected path classifier 结果必须优先于 files-index ownership
+
+- **处理结果**: 不新建重复规则；已将 Story 4-5 作为第二个来源 Story 写入 `CR-SEC-09`，并将该规则总分从 7/12 更新为 8/12。
+- **更新依据**: Story 4-5 Round 1 Finding #1 与 Story 4-1 的 protected classifier 优先级问题同源，均要求 classifier 的 `human-owned` / `workflow-owned` / `unknown` protected 结论不得被 files-index ownership 或 public action projection 覆盖。
+- **同步状态**: 已写入规则总结。
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。

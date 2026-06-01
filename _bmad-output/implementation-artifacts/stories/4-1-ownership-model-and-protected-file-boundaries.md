@@ -1,6 +1,6 @@
 # Story 4.1: Ownership Model And Protected File Boundaries（所有权模型与受保护文件边界）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -63,62 +63,62 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
-  - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；本 Story 仍不得把 ready-for-dev story context 当成 Epic 4 源码已完成证据。
-  - [ ] 确认 Epic 1 / Story 1.4 已经或将要只负责 fresh-install create-if-absent project-level custom TOML stubs；Story 4.1 不得反向要求 Story 1.4 依赖完整 update/repair 模型。
-  - [ ] 确认 `src/commands/update.ts` 仍按 Story 3.5 作为 non-write placeholder / public contract seam 存在，并重新检查 `src/update/`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 或等价前置 anchors；缺失的 Epic 4 anchors 只能在本 Story 范围内创建，不得创建孤立的 update-only scaffold 并绕过 CommandResult、manifest 和 fixture contracts。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录当前 behavior、数据 shape、public output 和测试覆盖；不得格式化、重写、同步或回滚与 Story 4.1 无关的文件。
+- [x] Task 1: 验证前置实现与当前仓库状态（AC: 1-7）
+  - [x] 在实现前重新检查 root `package.json`、`src/`、`test/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；本 Story 仍不得把 ready-for-dev story context 当成 Epic 4 源码已完成证据。
+  - [x] 确认 Epic 1 / Story 1.4 已经或将要只负责 fresh-install create-if-absent project-level custom TOML stubs；Story 4.1 不得反向要求 Story 1.4 依赖完整 update/repair 模型。
+  - [x] 确认 `src/commands/update.ts` 仍按 Story 3.5 作为 non-write placeholder / public contract seam 存在，并重新检查 `src/update/`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts` 或等价前置 anchors；缺失的 Epic 4 anchors 只能在本 Story 范围内创建，不得创建孤立的 update-only scaffold 并绕过 CommandResult、manifest 和 fixture contracts。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录当前 behavior、数据 shape、public output 和测试覆盖；不得格式化、重写、同步或回滚与 Story 4.1 无关的文件。
 
-- [ ] Task 2: 建立 ownership model 与 path classifier（AC: 1-6）
-  - [ ] 在 `src/update/ownership-model.ts` 或既有 update ownership anchor 中集中定义 ownership literal：`installer-owned`、`human-owned`、`workflow-owned`，必要时在 internal planning 层保留 `unknown`。
-  - [ ] classifier 输入必须使用 normalized project-relative POSIX path；内部 absolute path 只能存在于 private filesystem state，不得进入 public JSON、manifest/index、files index 或 fixture snapshots。
-  - [ ] 明确 `_speclite/config.toml`、`_speclite/config.user.toml`、manifest/index、files index、runtime scripts、IDE mirror canonical package projection 等 installer-owned 类别。
-  - [ ] 明确 `_speclite/custom/*.toml`、`_speclite/custom/*.user.toml` 为 human-owned，包括 project-level stubs 与 skill-specific customization files。
-  - [ ] 明确 `_speclite-output/**` 以及 configured workflow artifact root 下的产物为 workflow-owned；configured artifact root 必须来自 config/manifest contract，不能硬编码只识别默认路径。
-  - [ ] 对无法判定或路径逃逸的情况返回 protected unknown/conflict outcome，不得默认当作 installer-owned。
+- [x] Task 2: 建立 ownership model 与 path classifier（AC: 1-6）
+  - [x] 在 `src/update/ownership-model.ts` 或既有 update ownership anchor 中集中定义 ownership literal：`installer-owned`、`human-owned`、`workflow-owned`，必要时在 internal planning 层保留 `unknown`。
+  - [x] classifier 输入必须使用 normalized project-relative POSIX path；内部 absolute path 只能存在于 private filesystem state，不得进入 public JSON、manifest/index、files index 或 fixture snapshots。
+  - [x] 明确 `_speclite/config.toml`、`_speclite/config.user.toml`、manifest/index、files index、runtime scripts、IDE mirror canonical package projection 等 installer-owned 类别。
+  - [x] 明确 `_speclite/custom/*.toml`、`_speclite/custom/*.user.toml` 为 human-owned，包括 project-level stubs 与 skill-specific customization files。
+  - [x] 明确 `_speclite-output/**` 以及 configured workflow artifact root 下的产物为 workflow-owned；configured artifact root 必须来自 config/manifest contract，不能硬编码只识别默认路径。
+  - [x] 对无法判定或路径逃逸的情况返回 protected unknown/conflict outcome，不得默认当作 installer-owned。
 
-- [ ] Task 3: 收口 files index ownership projection（AC: 1, 2, 6）
-  - [ ] 复用或扩展 `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper，确保 files index entry 包含 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
-  - [ ] File hash 必须基于 raw bytes；line ending、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得被 hash normalization 隐式吸收。
-  - [ ] `_speclite/.lock` 和 `.speclite-tmp-` safe-write temporary files 不得进入 files index，也不得影响 stable files-index hash。
-  - [ ] Human-owned 和 workflow-owned files 可以为了 protection 被列出，但 automatic update 和 repair 不得 mutate 它们。
-  - [ ] 如果新增或改变 files index schema/version/ownership projection，必须同一变更更新 owning SPEC、executable schema/parser 和 fixture expected outputs；如果本 Story 没有授权修改 SPEC，则只能实现现有契约。
+- [x] Task 3: 收口 files index ownership projection（AC: 1, 2, 6）
+  - [x] 复用或扩展 `src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper，确保 files index entry 包含 `path`、`ownership`、`hash`、`hashAlgorithm: "sha256"`、`executable`、`artifactKind` 和 `sourceRef`。
+  - [x] File hash 必须基于 raw bytes；line ending、executable bit、file mode、symlink handling 和 case conflict 是独立 validation dimensions，不得被 hash normalization 隐式吸收。
+  - [x] `_speclite/.lock` 和 `.speclite-tmp-` safe-write temporary files 不得进入 files index，也不得影响 stable files-index hash。
+  - [x] Human-owned 和 workflow-owned files 可以为了 protection 被列出，但 automatic update 和 repair 不得 mutate 它们。
+  - [x] 如果新增或改变 files index schema/version/ownership projection，必须同一变更更新 owning SPEC、executable schema/parser 和 fixture expected outputs；如果本 Story 没有授权修改 SPEC，则只能实现现有契约。
 
-- [ ] Task 4: 将 ownership 接入 validate/update/repair planning（AC: 1-3, 6-7）
-  - [ ] `validate` 读取 files index/manifest ownership，能报告 missing installer-owned file、hash mismatch、unknown ownership、case conflict、unsafe overwrite risk 等 file-integrity 问题。
-  - [ ] 普通 `speclite update` 在 installer-owned drift 时默认产生 conflict 或 protected skip，不得把 confirmation 或 `--yes` 解释为 repair drift 授权。
-  - [ ] `speclite update --repair` 只允许为 installer-owned paths 生成 `restore-canonical` 或 `regenerate` repair actions；human-owned、workflow-owned、unknown ownership、missing source evidence 或 unsupported repair 必须进入 conflicts。
-  - [ ] `RepairPlan.actions[]` 每个 action 必须包含 `expectedHash`；`regenerate` 必须先 dry-run candidate content 并计算 expected hash 后才能进入 repair plan。
-  - [ ] `changedPaths` / `skippedPaths` 只表示 actual apply result；`writeAuthorized === false` 时必须为空。Planned changes/skips 必须从 `updatePlan.actions` 或 `repairPlan.actions` 读取。
+- [x] Task 4: 将 ownership 接入 validate/update/repair planning（AC: 1-3, 6-7）
+  - [x] `validate` 读取 files index/manifest ownership，能报告 missing installer-owned file、hash mismatch、unknown ownership、case conflict、unsafe overwrite risk 等 file-integrity 问题。
+  - [x] 普通 `speclite update` 在 installer-owned drift 时默认产生 conflict 或 protected skip，不得把 confirmation 或 `--yes` 解释为 repair drift 授权。
+  - [x] `speclite update --repair` 只允许为 installer-owned paths 生成 `restore-canonical` 或 `regenerate` repair actions；human-owned、workflow-owned、unknown ownership、missing source evidence 或 unsupported repair 必须进入 conflicts。
+  - [x] `RepairPlan.actions[]` 每个 action 必须包含 `expectedHash`；`regenerate` 必须先 dry-run candidate content 并计算 expected hash 后才能进入 repair plan。
+  - [x] `changedPaths` / `skippedPaths` 只表示 actual apply result；`writeAuthorized === false` 时必须为空。Planned changes/skips 必须从 `updatePlan.actions` 或 `repairPlan.actions` 读取。
 
-- [ ] Task 5: 保护 human-owned TOML 与 FR51b 分界（AC: 3-5）
-  - [ ] 对 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml`，missing 时允许 fresh install planned create-if-absent；existing 时必须 protected skip，且不得读取敏感内容到 public output。
-  - [ ] 对 `_speclite/custom/{skill}.toml` 与 `_speclite/custom/{skill}.user.toml`，任何 install/update/repair 自动生成行为均为 out of scope；如产品后来需要显式 customization command，必须先新增 owning SPEC/ADR。
-  - [ ] Existing human-owned TOML 即使为空、malformed、包含旧注释、只部分匹配 stub 或顺序不同，也必须保持原始字节不变。
-  - [ ] Resolver 可以读取 human-owned TOML 以解析 configuration/customization，但不得借 update/repair 重排或格式化它们。
+- [x] Task 5: 保护 human-owned TOML 与 FR51b 分界（AC: 3-5）
+  - [x] 对 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml`，missing 时允许 fresh install planned create-if-absent；existing 时必须 protected skip，且不得读取敏感内容到 public output。
+  - [x] 对 `_speclite/custom/{skill}.toml` 与 `_speclite/custom/{skill}.user.toml`，任何 install/update/repair 自动生成行为均为 out of scope；如产品后来需要显式 customization command，必须先新增 owning SPEC/ADR。
+  - [x] Existing human-owned TOML 即使为空、malformed、包含旧注释、只部分匹配 stub 或顺序不同，也必须保持原始字节不变。
+  - [x] Resolver 可以读取 human-owned TOML 以解析 configuration/customization，但不得借 update/repair 重排或格式化它们。
 
-- [ ] Task 6: 输出与诊断保持 CommandResult / ValidationIssue 契约（AC: 7）
-  - [ ] Reuse `src/diagnostics/output.ts` 的 Evidence / Structured profiles，不允许 `update`、`repair` 或 `validate` 自行拼接 status text、issue layout、path display 或 JSON fields。
-  - [ ] Path-level conflicts 必须包含 normalized `affectedPath`、`ownership` 和 stable lower-kebab `reason`，例如 `installer-owned-drift`、`human-owned`、`workflow-owned`、`unknown-ownership`、`missing-source-evidence` 或 `unsupported-repair`。
-  - [ ] `data.conflicts.length > 0` 时只生成一个 command-level `update.conflicts` issue，`category: "update"`，`severity: "error"`，并在 `details.conflictCount` 记录数量。
-  - [ ] `file-integrity.unknown-ownership`、`file-integrity.unsafe-overwrite-risk`、`file-integrity.case-conflict` 等 diagnostics 必须使用 taxonomy 中已有 issue ids；不得发明自由文本 issue id。
-  - [ ] suggested next step 必须优先指向 `speclite validate`、`speclite update --repair`、manual review 或重新运行 update planning，不得默认建议删除/覆盖 human-owned 或 workflow-owned 文件。
+- [x] Task 6: 输出与诊断保持 CommandResult / ValidationIssue 契约（AC: 7）
+  - [x] Reuse `src/diagnostics/output.ts` 的 Evidence / Structured profiles，不允许 `update`、`repair` 或 `validate` 自行拼接 status text、issue layout、path display 或 JSON fields。
+  - [x] Path-level conflicts 必须包含 normalized `affectedPath`、`ownership` 和 stable lower-kebab `reason`，例如 `installer-owned-drift`、`human-owned`、`workflow-owned`、`unknown-ownership`、`missing-source-evidence` 或 `unsupported-repair`。
+  - [x] `data.conflicts.length > 0` 时只生成一个 command-level `update.conflicts` issue，`category: "update"`，`severity: "error"`，并在 `details.conflictCount` 记录数量。
+  - [x] `file-integrity.unknown-ownership`、`file-integrity.unsafe-overwrite-risk`、`file-integrity.case-conflict` 等 diagnostics 必须使用 taxonomy 中已有 issue ids；不得发明自由文本 issue id。
+  - [x] suggested next step 必须优先指向 `speclite validate`、`speclite update --repair`、manual review 或重新运行 update planning，不得默认建议删除/覆盖 human-owned 或 workflow-owned 文件。
 
-- [ ] Task 7: 编写 focused tests 与 release-gate fixture assertions（AC: 1-7）
-  - [ ] Unit tests 覆盖 ownership classifier：installer-owned config/control files、human-owned project-level custom stubs、human-owned skill-specific customization、workflow-owned artifact root、unknown ownership、path escape、case conflict。
-  - [ ] Unit tests 覆盖 files index ownership projection、raw-byte hash、`executable` intent、volatile lock/temp file exclusion。
-  - [ ] Update planning tests 覆盖 installer-owned unchanged -> planned skip `unchanged`，installer-owned drift -> conflict `installer-owned-drift`，human-owned -> protected conflict/skip `human-owned`，workflow-owned -> protected conflict/skip `workflow-owned`，unknown -> `unknown-ownership`。
-  - [ ] Repair planning tests 覆盖 installer-owned `restore-canonical` / `regenerate` 必须带 `expectedHash`，missing source evidence -> conflict，human-owned/workflow-owned 不进入 `repairPlan.actions[]`。
-  - [ ] Diagnostics tests 覆盖 single `update.conflicts` command-level issue、path-level conflicts 不复制到 `issues[]`、`operation-lock.project-locked` 不进入 `data.conflicts`。
-  - [ ] Fixture updates 覆盖 `existing-install-update`、`ide-drift`、`fresh-install-empty-project` 中 ownership projection 与 preservation；human-owned 和 workflow-owned preservation 必须用 content unchanged checks 断言。
-  - [ ] 所有 JSON fixture 用 semantic parse comparison，不比较当前时间、absolute path、home directory、temporary path、cache path、hash 以外非稳定文本或 terminal formatting。
+- [x] Task 7: 编写 focused tests 与 release-gate fixture assertions（AC: 1-7）
+  - [x] Unit tests 覆盖 ownership classifier：installer-owned config/control files、human-owned project-level custom stubs、human-owned skill-specific customization、workflow-owned artifact root、unknown ownership、path escape、case conflict。
+  - [x] Unit tests 覆盖 files index ownership projection、raw-byte hash、`executable` intent、volatile lock/temp file exclusion。
+  - [x] Update planning tests 覆盖 installer-owned unchanged -> planned skip `unchanged`，installer-owned drift -> conflict `installer-owned-drift`，human-owned -> protected conflict/skip `human-owned`，workflow-owned -> protected conflict/skip `workflow-owned`，unknown -> `unknown-ownership`。
+  - [x] Repair planning tests 覆盖 installer-owned `restore-canonical` / `regenerate` 必须带 `expectedHash`，missing source evidence -> conflict，human-owned/workflow-owned 不进入 `repairPlan.actions[]`。
+  - [x] Diagnostics tests 覆盖 single `update.conflicts` command-level issue、path-level conflicts 不复制到 `issues[]`、`operation-lock.project-locked` 不进入 `data.conflicts`。
+  - [x] Fixture updates 覆盖 `existing-install-update`、`ide-drift`、`fresh-install-empty-project` 中 ownership projection 与 preservation；human-owned 和 workflow-owned preservation 必须用 content unchanged checks 断言。
+  - [x] 所有 JSON fixture 用 semantic parse comparison，不比较当前时间、absolute path、home directory、temporary path、cache path、hash 以外非稳定文本或 terminal formatting。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 ownership model、files index、update planning、repair planning、diagnostics projection 和 fixture comparison focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 ownership protection tests。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有实现 Epic 5 source channel 扩展、Epic 6 release fixture matrix 全量范围、Post-MVP `doctor` / `sync` / `uninstall` / 顶级 `repair` / backup-restore / standalone update report / dedicated Copilot-Cursor target ids。
+- [x] Task 8: 本地验证与范围控制（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 ownership model、files index、update planning、repair planning、diagnostics projection 和 fixture comparison focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要跳过 ownership protection tests。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、无关源码或用户改动。
+  - [x] 检查 diff，确认没有实现 Epic 5 source channel 扩展、Epic 6 release fixture matrix 全量范围、Post-MVP `doctor` / `sync` / `uninstall` / 顶级 `repair` / backup-restore / standalone update report / dedicated Copilot-Cursor target ids。
 
 ## Dev Notes（开发备注）
 
@@ -265,17 +265,42 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-TBD by dev-story agent.
+GPT-5.5
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev-story agent.
+- 2026-05-31: 手动 fallback 解析 `bmad-dev-story` workflow；`resolve_customization.py` 因当前 `python3` 缺少 `tomllib` 失败。
+- 2026-05-31: 读取 root `package.json`、`src/`、`test/`、`test/fixtures/`、`src/commands/update.ts`、manifest/diagnostics/validation anchors，确认 Story 4.1 从 Epic 3 anchors 继续实现。
+- 2026-05-31: RED: `npm test -- test/ownership-model.test.ts test/update-planning.test.ts` 失败，缺少 `src/update/ownership-model.ts` 且 `update` 仍返回 placeholder。
+- 2026-05-31: GREEN: ownership classifier、files index projection、update/repair dry-run planning、file-integrity ownership diagnostics 和 focused tests 完成。
+- 2026-05-31: 验证通过：focused Story 4.1 tests、`npm test`、`npm run build`、`git diff --check -- src test _bmad-output/implementation-artifacts/stories/4-1-ownership-model-and-protected-file-boundaries.md _bmad-output/implementation-artifacts/sprint-status.yaml`。
 
 ### Completion Notes List（完成备注）
 
 - Story context created by bmad-create-story sub-agent #1.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 新增 `src/update/ownership-model.ts`，集中定义 `installer-owned`、`human-owned`、`workflow-owned` 与 protected `unknown` classifier，覆盖 `_speclite` runtime/config、custom TOML、IDE mirrors、默认与 configured artifact root、path escape。
+- 新增 `src/update/update-plan.ts`，将 `speclite update` / `speclite update --repair` 从 Epic 3 placeholder 推进为只读 dry-run planning：不会写入文件，`writeAuthorized` 保持 false，actual `changedPaths` / `skippedPaths` 保持空数组。
+- 扩展 files index helper：按 raw bytes 计算 `sha256`，投影 ownership/executable/artifactKind/sourceRef，并排除 `_speclite/.lock` 与 `_speclite/.speclite-tmp-*` volatile paths。
+- 扩展 file-integrity validation：补充 `file-integrity.unsafe-overwrite-risk` 与 `file-integrity.case-conflict`，并保持 human/workflow-owned protected boundary 的 suggested next step 不默认建议删除或覆盖。
+- 更新 update human output，复用 CommandResult 数据展示 write authorization 与 path-level conflicts；`data.conflicts` 非空时仍只由 shared producer 生成一个 command-level `update.conflicts` issue。
+- 测试覆盖新增 ownership classifier、files index projection、update planning、repair planning、file-integrity ownership diagnostics、update command contract 与 validate regression；全量 `npm test` 通过。
 
 ### File List（文件列表）
 
-- TBD by dev-story agent.
+- src/commands/update.ts
+- src/diagnostics/output.ts
+- src/manifest/manifest-generator.ts
+- src/update/ownership-model.ts
+- src/update/update-plan.ts
+- src/validation/rules/file-integrity.ts
+- test/file-integrity-ownership.test.ts
+- test/ownership-model.test.ts
+- test/update-command.test.ts
+- test/update-planning.test.ts
+- _bmad-output/implementation-artifacts/sprint-status.yaml
+- _bmad-output/implementation-artifacts/stories/4-1-ownership-model-and-protected-file-boundaries.md
+
+### Change Log（变更记录）
+
+- 2026-05-31: 实现 Story 4.1 ownership model、protected file boundaries、files-index ownership projection、update/repair dry-run planning、file-integrity diagnostics 与 focused tests；Story 状态更新为 review。

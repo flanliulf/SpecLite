@@ -1,6 +1,6 @@
 # Story 4.2: Config And Customization Merge Order For Updates（更新中的配置与定制化合并顺序）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -56,80 +56,80 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树与只读边界（AC: 1-6）
-  - [ ] 在实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Story 4.1 anchors 与本 Story 所需 resolver integration 仍必须按当前源码验证。
-  - [ ] 确认 Story 2.4 的 resolver implementation anchors 已真实存在：`src/commands/resolve.ts`、`src/config/resolve-output-schema.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/config-schema.ts`、`src/config/customization-schema.ts`。
-  - [ ] 确认 Story 4.1 的 ownership model / protected boundary anchors 已真实存在或已在当前 implementation sequence 中计划完成：`src/update/ownership-model.ts`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts`。
-  - [ ] 如果前置 implementation anchors 尚不存在，先完成前置 stories 或在本 Story 的范围内只补 resolver consumption 所需最小 integration；不得创建孤立的 update-only resolver copy。
-  - [ ] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、Story 4.1、源码或用户改动；不得格式化、重写、同步或回滚无关文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output 和 tests；不得用本 Story 重构无关模块。
+- [x] Task 1: 验证前置实现、工作树与只读边界（AC: 1-6）
+  - [x] 在实现前重新检查 root `package.json`、`src/`、`test/`、`tests/`、`fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Story 4.1 anchors 与本 Story 所需 resolver integration 仍必须按当前源码验证。
+  - [x] 确认 Story 2.4 的 resolver implementation anchors 已真实存在：`src/commands/resolve.ts`、`src/config/resolve-output-schema.ts`、`src/config/config-reader.ts`、`src/config/customization-reader.ts`、`src/config/merge-rules.ts`、`src/config/config-schema.ts`、`src/config/customization-schema.ts`。
+  - [x] 确认 Story 4.1 的 ownership model / protected boundary anchors 已真实存在或已在当前 implementation sequence 中计划完成：`src/update/ownership-model.ts`、`src/manifest/manifest-generator.ts` / `src/manifest/manifest-schema.ts` 或等价 files-index helper、`src/diagnostics/command-result-schema.ts`、`src/validation/issue-model.ts`。
+  - [x] 如果前置 implementation anchors 尚不存在，先完成前置 stories 或在本 Story 的范围内只补 resolver consumption 所需最小 integration；不得创建孤立的 update-only resolver copy。
+  - [x] 检查当前 worktree dirty 状态，保留与本 Story 无关的 planning artifacts、已有 story 文件、Story 4.1、源码或用户改动；不得格式化、重写、同步或回滚无关文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output 和 tests；不得用本 Story 重构无关模块。
 
-- [ ] Task 2: 将 update/repair planning 接入 shared config resolver（AC: 1, 3-5）
-  - [ ] 在 `src/update/update-plan.ts`、`src/commands/update.ts` 或既有 update orchestration 中调用 `src/config/` resolver API，取得 resolved config、resolver diagnostics 和 layer status。
-  - [ ] Config merge order 固定为：
+- [x] Task 2: 将 update/repair planning 接入 shared config resolver（AC: 1, 3-5）
+  - [x] 在 `src/update/update-plan.ts`、`src/commands/update.ts` 或既有 update orchestration 中调用 `src/config/` resolver API，取得 resolved config、resolver diagnostics 和 layer status。
+  - [x] Config merge order 固定为：
     1. `_speclite/config.toml`（required, installer-owned）
     2. `_speclite/config.user.toml`（optional, installer-owned）
     3. `_speclite/custom/config.toml`（optional, human-owned）
     4. `_speclite/custom/config.user.toml`（optional, human-owned）
-  - [ ] `_speclite/config.toml` required layer 缺失、不可读或解析失败必须阻断 update/repair planning，并生成稳定 diagnostic；不得输出 partial resolved config 伪装成功。
-  - [ ] Optional layers missing 时作为 `{}`；optional read/parse failure 时输出 warning diagnostic、该 layer 作为 `{}`，且无 error/critical 时继续 conservative planning。
-  - [ ] Human-owned `_speclite/custom/config*.toml` 只能被读取；即使为空、malformed、包含旧注释或顺序不同，也不得被 rewrite、sort、format、normalize 或删除。
-  - [ ] `--yes`、interactive confirmation 或 `update --repair` 不得改变 human-owned TOML 的只读保护语义。
+  - [x] `_speclite/config.toml` required layer 缺失、不可读或解析失败必须阻断 update/repair planning，并生成稳定 diagnostic；不得输出 partial resolved config 伪装成功。
+  - [x] Optional layers missing 时作为 `{}`；optional read/parse failure 时输出 warning diagnostic、该 layer 作为 `{}`，且无 error/critical 时继续 conservative planning。
+  - [x] Human-owned `_speclite/custom/config*.toml` 只能被读取；即使为空、malformed、包含旧注释或顺序不同，也不得被 rewrite、sort、format、normalize 或删除。
+  - [x] `--yes`、interactive confirmation 或 `update --repair` 不得改变 human-owned TOML 的只读保护语义。
 
-- [ ] Task 3: 将 update/repair planning 接入 shared customization resolver（AC: 2-5）
-  - [ ] 对每个需要 resolver context 的 installed skill，使用 installed self-contained skill directory 作为 `--skill` / API input，而不是 source checkout、archive planning docs 或 IDE adapter display label。
-  - [ ] Customization merge order 固定为：
+- [x] Task 3: 将 update/repair planning 接入 shared customization resolver（AC: 2-5）
+  - [x] 对每个需要 resolver context 的 installed skill，使用 installed self-contained skill directory 作为 `--skill` / API input，而不是 source checkout、archive planning docs 或 IDE adapter display label。
+  - [x] Customization merge order 固定为：
     1. skill `customize.toml`（required defaults）
     2. `_speclite/custom/{skill}.toml`（optional, human-owned team custom）
     3. `_speclite/custom/{skill}.user.toml`（optional, human-owned user custom）
-  - [ ] `{skill}` lookup key 必须来自 skill directory basename。MVP 不支持第二个 customization key；未来若 IDE adapter 需要重命名 canonical skill directory，必须先更新 manifest/index SPEC、resolve command SPEC、schema/parser 和 fixtures。
-  - [ ] Required `customize.toml` 缺失、不可读或解析失败必须阻断该 skill 的 resolver result，并以稳定 diagnostic 表达；不得 fallback 到 source checkout 或 `config.toml.example`。
-  - [ ] Optional skill custom layer 缺失不产生 issue；optional layer 读取或解析失败只产生 warning，并在没有 error/critical 时允许 update/repair 继续生成保守 plan。
-  - [ ] 不得为缺失 skill-specific `_speclite/custom/{skill}.toml` 或 `_speclite/custom/{skill}.user.toml` 自动创建 stub；这些文件默认由用户手工创建或未来显式 customization command 创建。
+  - [x] `{skill}` lookup key 必须来自 skill directory basename。MVP 不支持第二个 customization key；未来若 IDE adapter 需要重命名 canonical skill directory，必须先更新 manifest/index SPEC、resolve command SPEC、schema/parser 和 fixtures。
+  - [x] Required `customize.toml` 缺失、不可读或解析失败必须阻断该 skill 的 resolver result，并以稳定 diagnostic 表达；不得 fallback 到 source checkout 或 `config.toml.example`。
+  - [x] Optional skill custom layer 缺失不产生 issue；optional layer 读取或解析失败只产生 warning，并在没有 error/critical 时允许 update/repair 继续生成保守 plan。
+  - [x] 不得为缺失 skill-specific `_speclite/custom/{skill}.toml` 或 `_speclite/custom/{skill}.user.toml` 自动创建 stub；这些文件默认由用户手工创建或未来显式 customization command 创建。
 
-- [ ] Task 4: 复用 structural merge semantics 与 Python parity baseline（AC: 1, 2, 6）
-  - [ ] 复用 `src/config/merge-rules.ts` 或等价 shared module；不得在 update planner、repair planner、fixture helper 或 renderer 中复制 merge rules。
-  - [ ] Scalar 或 incompatible type：override wins。
-  - [ ] Table + table：递归 deep merge。
-  - [ ] Array + array：只有 base + override 的所有 elements 都是 tables，且全部共享同一个 `code` key 或全部共享同一个 `id` key 时 keyed merge。
-  - [ ] Keyed merge 命中相同 key 时，override item 替换整个 base item；不做 item-level deep merge，不保留 base item 中 override 未写的字段。
-  - [ ] Mixed `code`/`id`、部分元素缺 key、non-table element、空数组或 schema smell 均走 append fallback。
-  - [ ] MVP 没有 deletion mechanism；不得通过 `null`、`enabled=false`、`remove`、empty arrays 或特殊字段删除 base items。
-  - [ ] Legacy Python resolver 中的 `resolve_customization.py` 注释有“highest priority first”字样，但实际代码和 owning SPEC 都是 defaults -> team -> user merge。实现以 `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md` 和代码行为为准，不以误导性注释反向改变顺序。
+- [x] Task 4: 复用 structural merge semantics 与 Python parity baseline（AC: 1, 2, 6）
+  - [x] 复用 `src/config/merge-rules.ts` 或等价 shared module；不得在 update planner、repair planner、fixture helper 或 renderer 中复制 merge rules。
+  - [x] Scalar 或 incompatible type：override wins。
+  - [x] Table + table：递归 deep merge。
+  - [x] Array + array：只有 base + override 的所有 elements 都是 tables，且全部共享同一个 `code` key 或全部共享同一个 `id` key 时 keyed merge。
+  - [x] Keyed merge 命中相同 key 时，override item 替换整个 base item；不做 item-level deep merge，不保留 base item 中 override 未写的字段。
+  - [x] Mixed `code`/`id`、部分元素缺 key、non-table element、空数组或 schema smell 均走 append fallback。
+  - [x] MVP 没有 deletion mechanism；不得通过 `null`、`enabled=false`、`remove`、empty arrays 或特殊字段删除 base items。
+  - [x] Legacy Python resolver 中的 `resolve_customization.py` 注释有“highest priority first”字样，但实际代码和 owning SPEC 都是 defaults -> team -> user merge。实现以 `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md` 和代码行为为准，不以误导性注释反向改变顺序。
 
-- [ ] Task 5: 诊断输出接入 `ValidationIssue` / `CommandResult` 边界（AC: 5, 6）
-  - [ ] `speclite resolve` 自身仍是 explicit exception：stdout 只输出 resolved JSON object，不包裹 `CommandResult`；stderr 以 JSON Lines 输出 `ValidationIssue` shape diagnostics。
-  - [ ] `speclite update` / `speclite update --repair` 内部消费 resolver 时，resolver warning 必须按 covered command reporter 的规则进入 `CommandResult` semantic source；不要让 warning 只出现在 human-readable prose。
-  - [ ] 使用 taxonomy 中已有 category / issue id。若确需新增 public issue id，必须先更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 和 fixtures；本 Story 没有授权时不得发明自由文本 issue id。
-  - [ ] Optional layer warning 的 `details` 只能包含 deterministic、redaction-safe 字段，例如 `layerRole`、`layerKind`、`component`、`readStatus` 或 `parseStatus`；不得包含 raw absolute path、home directory、stack trace、timestamp、random id、credential、hash 或 raw parser message。
-  - [ ] Public path fields 必须使用 project-relative POSIX path 或 display-safe component；project-root absolute path 只能存在于 private filesystem state。
-  - [ ] `data.conflicts.length > 0` 时仍只生成一个 command-level `update.conflicts` issue；optional resolver warning 不得把 path-level conflict 复制成多个 command-level issues。
+- [x] Task 5: 诊断输出接入 `ValidationIssue` / `CommandResult` 边界（AC: 5, 6）
+  - [x] `speclite resolve` 自身仍是 explicit exception：stdout 只输出 resolved JSON object，不包裹 `CommandResult`；stderr 以 JSON Lines 输出 `ValidationIssue` shape diagnostics。
+  - [x] `speclite update` / `speclite update --repair` 内部消费 resolver 时，resolver warning 必须按 covered command reporter 的规则进入 `CommandResult` semantic source；不要让 warning 只出现在 human-readable prose。
+  - [x] 使用 taxonomy 中已有 category / issue id。若确需新增 public issue id，必须先更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 和 fixtures；本 Story 没有授权时不得发明自由文本 issue id。
+  - [x] Optional layer warning 的 `details` 只能包含 deterministic、redaction-safe 字段，例如 `layerRole`、`layerKind`、`component`、`readStatus` 或 `parseStatus`；不得包含 raw absolute path、home directory、stack trace、timestamp、random id、credential、hash 或 raw parser message。
+  - [x] Public path fields 必须使用 project-relative POSIX path 或 display-safe component；project-root absolute path 只能存在于 private filesystem state。
+  - [x] `data.conflicts.length > 0` 时仍只生成一个 command-level `update.conflicts` issue；optional resolver warning 不得把 path-level conflict 复制成多个 command-level issues。
 
-- [ ] Task 6: 将 resolved config/customization 纳入 update/repair plan-before-write flow（AC: 1-6）
-  - [ ] Update/repair 在生成 plan 前读取 installed state、source descriptor、files index、ownership 信息和 resolved config/customization；在 resolver 完成前不得写入任何 project file。
-  - [ ] Resolver diagnostics 必须能影响 conservative planning：存在 error/critical 时阻断；只有 warning 时可继续，但 plan/summary 应清楚展示仍有 warning 需要处理。
-  - [ ] `changedPaths` / `skippedPaths` 只表示 actual apply result；`writeAuthorized === false` 时必须为空。Resolved config/customization 只影响 planning，不得直接触发 writes。
-  - [ ] Ordinary `update` 不能因为 resolver 读取了 human-owned custom TOML 就把这些文件加入 overwrite plan。
-  - [ ] `update --repair` 仍只能 repair installer-owned paths；human-owned custom files 和 workflow-owned artifacts 不得作为 `RepairPlan.actions[]` 出现。
-  - [ ] Missing optional custom layer 不得产生 conflict；malformed optional layer 可以产生 warning，并继续生成保守 plan。若后续 planner 发现安全性无法证明，应使用 owning SPEC 的 conflict reason，而不是把 parser warning 当作 overwrite 授权。
+- [x] Task 6: 将 resolved config/customization 纳入 update/repair plan-before-write flow（AC: 1-6）
+  - [x] Update/repair 在生成 plan 前读取 installed state、source descriptor、files index、ownership 信息和 resolved config/customization；在 resolver 完成前不得写入任何 project file。
+  - [x] Resolver diagnostics 必须能影响 conservative planning：存在 error/critical 时阻断；只有 warning 时可继续，但 plan/summary 应清楚展示仍有 warning 需要处理。
+  - [x] `changedPaths` / `skippedPaths` 只表示 actual apply result；`writeAuthorized === false` 时必须为空。Resolved config/customization 只影响 planning，不得直接触发 writes。
+  - [x] Ordinary `update` 不能因为 resolver 读取了 human-owned custom TOML 就把这些文件加入 overwrite plan。
+  - [x] `update --repair` 仍只能 repair installer-owned paths；human-owned custom files 和 workflow-owned artifacts 不得作为 `RepairPlan.actions[]` 出现。
+  - [x] Missing optional custom layer 不得产生 conflict；malformed optional layer 可以产生 warning，并继续生成保守 plan。若后续 planner 发现安全性无法证明，应使用 owning SPEC 的 conflict reason，而不是把 parser warning 当作 overwrite 授权。
 
-- [ ] Task 7: 编写 focused tests 与 `resolve-parity` / update fixture assertions（AC: 1-6）
-  - [ ] Unit tests 覆盖 update/repair 调用 shared config resolver：四层顺序、custom 覆盖 installer user、required config failure、optional missing、optional parse warning、human-owned content untouched。
-  - [ ] Unit tests 覆盖 update/repair 调用 shared customization resolver：skill defaults -> team custom -> user custom、basename lookup key、missing optional layers、malformed optional warning、missing required defaults failure。
-  - [ ] Unit tests 覆盖 merge rules reuse：scalar override、table deep merge、keyed array replacement、append fallback、mixed key fallback、non-table fallback、no deletion semantics。
-  - [ ] Integration tests 覆盖 `speclite update --json` 与 `speclite update --repair --json` 在 planning 前解析 config/customization，且在 warning-only resolver diagnostics 下仍输出 conservative unapplied plan。
-  - [ ] Fixture `test/fixtures/resolve-parity/` 必须覆盖 config four-layer merge、customization three-layer merge、optional layer warning diagnostic、required layer failure、keyed array replacement、append fallback、non-ASCII JSON output、explicit `--project-root` 和 customization fallback search behavior。
-  - [ ] Fixture `test/fixtures/existing-install-update/` 应增加 resolver-consumption case，断言 human-owned custom TOML content/order/comments unchanged，并断言 missing optional layer 不进入 conflicts。
-  - [ ] Fixture `test/fixtures/ide-drift/` 若 update/repair 需要 skill customization context，应断言 basename lookup key、resolved customization 不从 source checkout 读取。
-  - [ ] 所有 JSON assertions parse 后 semantic compare；stderr JSON Lines 逐行 parse 为 `ValidationIssue`；不得比较 absolute path、home directory、timestamp、random id、stack trace、terminal formatting 或具体 current time。
-  - [ ] Tests 必须 local-only、deterministic，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
+- [x] Task 7: 编写 focused tests 与 `resolve-parity` / update fixture assertions（AC: 1-6）
+  - [x] Unit tests 覆盖 update/repair 调用 shared config resolver：四层顺序、custom 覆盖 installer user、required config failure、optional missing、optional parse warning、human-owned content untouched。
+  - [x] Unit tests 覆盖 update/repair 调用 shared customization resolver：skill defaults -> team custom -> user custom、basename lookup key、missing optional layers、malformed optional warning、missing required defaults failure。
+  - [x] Unit tests 覆盖 merge rules reuse：scalar override、table deep merge、keyed array replacement、append fallback、mixed key fallback、non-table fallback、no deletion semantics。
+  - [x] Integration tests 覆盖 `speclite update --json` 与 `speclite update --repair --json` 在 planning 前解析 config/customization，且在 warning-only resolver diagnostics 下仍输出 conservative unapplied plan。
+  - [x] Fixture `test/fixtures/resolve-parity/` 必须覆盖 config four-layer merge、customization three-layer merge、optional layer warning diagnostic、required layer failure、keyed array replacement、append fallback、non-ASCII JSON output、explicit `--project-root` 和 customization fallback search behavior。
+  - [x] Fixture `test/fixtures/existing-install-update/` 应增加 resolver-consumption case，断言 human-owned custom TOML content/order/comments unchanged，并断言 missing optional layer 不进入 conflicts。
+  - [x] Fixture `test/fixtures/ide-drift/` 若 update/repair 需要 skill customization context，应断言 basename lookup key、resolved customization 不从 source checkout 读取。
+  - [x] 所有 JSON assertions parse 后 semantic compare；stderr JSON Lines 逐行 parse 为 `ValidationIssue`；不得比较 absolute path、home directory、timestamp、random id、stack trace、terminal formatting 或具体 current time。
+  - [x] Tests 必须 local-only、deterministic，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache 或外部网络。
 
-- [ ] Task 8: 本地验证与范围控制（AC: 1-6）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 config resolver、customization resolver、update planning resolver consumption、repair planning resolver consumption、diagnostics projection 和 affected fixture focused Vitest tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要绕过 shared resolver、不要创建 update-private merge implementation。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有实现 Story 4.3 的完整 update plan UX、Story 4.4 operation lock/safe write、Story 4.5 full conflict detector、Story 4.6 full repair apply、Epic 5 source channel 扩展、Epic 6 release fixture matrix 或 Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair` / backup-restore。
+- [x] Task 8: 本地验证与范围控制（AC: 1-6）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 config resolver、customization resolver、update planning resolver consumption、repair planning resolver consumption、diagnostics projection 和 affected fixture focused Vitest tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass、不要绕过 shared resolver、不要创建 update-private merge implementation。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-3 文件、Story 4.1、无关源码或用户改动。
+  - [x] 检查 diff，确认没有实现 Story 4.3 的完整 update plan UX、Story 4.4 operation lock/safe write、Story 4.5 full conflict detector、Story 4.6 full repair apply、Epic 5 source channel 扩展、Epic 6 release fixture matrix 或 Post-MVP `doctor` / `sync` / `uninstall` / top-level `repair` / backup-restore。
 
 ## Dev Notes（开发备注）
 
@@ -333,17 +333,41 @@ Rules：
 
 ### Agent Model Used（使用模型）
 
-TBD by dev-story agent.
+GPT-5.5
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev-story agent.
+- 2026-05-31 17:55 CST: `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` failed because the available `python3` lacks stdlib `tomllib`; followed skill fallback by manually reading base/team/user customization files. No team/user override files existed.
+- 2026-05-31 17:55 CST: Loaded full Story 4.2, full `sprint-status.yaml`, `_bmad-output/project-context.md`, and checked dirty worktree before implementation.
+- 2026-05-31 18:05 CST: Red phase ran `npm test -- test/update-planning.test.ts`; new resolver-consumption tests failed as expected because update/repair did not yet consume config/customization resolver diagnostics.
+- 2026-05-31 18:06 CST: Green phase ran `npm test -- test/update-planning.test.ts`; 7 tests passed after integrating shared resolver consumption.
+- 2026-05-31 18:06 CST: Ran `npm test -- test/update-command.test.ts test/resolve-readers.test.ts test/config-merge-rules.test.ts`; fixed CLI fixture expectations for required config resolution, then 13 tests passed.
+- 2026-05-31 18:07 CST: Ran `npm run build`; tsup ESM and DTS builds passed.
+- 2026-05-31 18:07 CST: Ran full `npm test`; 28 test files and 174 tests passed.
+- 2026-05-31 18:08 CST: Ran scoped `git diff --check`; no whitespace errors in Story 4.2 touched files.
+- 2026-05-31 18:10 CST: Final `workflow.on_complete` resolution via `python3.12` returned an empty value; no terminal follow-up instruction was required.
 
 ### Completion Notes List（完成备注）
 
 - Story context created by bmad-create-story sub-agent #2.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Implemented update/repair pre-planning resolver consumption through shared `src/config/` readers, with required config/customization errors blocking planning and warning-only optional layer diagnostics preserving conservative dry-run planning.
+- Preserved `speclite resolve` as the explicit non-`CommandResult` exception; update and repair now project resolver diagnostics through covered command `CommandResult` issues.
+- Ensured installed skill customization lookup uses installed skill directory basename from files-index skill paths; no source checkout, display label, target id, or alias fallback was introduced.
+- Added focused deterministic tests for required config failure, optional config/customization warning propagation, human-owned TOML preservation, basename customization lookup, CLI JSON projection, merge-rule reuse, and resolver reader parity.
+- Added minimal fixture metadata anchors for `existing-install-update` and `ide-drift`; no `_bmad-output/planning-artifacts/`, Story 4.1, or unrelated source cleanup was performed.
 
 ### File List（文件列表）
 
-- TBD by dev-story agent.
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/4-2-config-and-customization-merge-order-for-updates.md`
+- `src/commands/update.ts`
+- `src/update/update-plan.ts`
+- `test/update-command.test.ts`
+- `test/update-planning.test.ts`
+- `test/fixtures/existing-install-update/fixture-case.json`
+- `test/fixtures/ide-drift/fixture-case.json`
+
+### Change Log（变更日志）
+
+- 2026-05-31: Story 4.2 dev implementation complete; update/repair now consume shared config/customization resolvers before planning, preserve human-owned TOML read-only semantics, project resolver diagnostics through `CommandResult`, and include focused tests plus fixture anchors.

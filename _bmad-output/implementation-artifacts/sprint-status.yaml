@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-05-29 18:11 CST
+# last_updated: 2026-06-01 14:20 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-05-29 18:11 CST
+last_updated: 2026-06-01 14:20 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -67,15 +67,15 @@ development_status:
   3-4-runtime-path-menu-target-legacy-entry-and-artifact-path-validation: done
   3-5-commandresult-and-validationissue-json-contract: done
   3-6-validation-progress-category-coverage-and-local-determinism: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
 
-  epic-4: in-progress
-  4-1-ownership-model-and-protected-file-boundaries: ready-for-dev
-  4-2-config-and-customization-merge-order-for-updates: ready-for-dev
-  4-3-update-plan-before-write: ready-for-dev
-  4-4-project-operation-lock-and-safe-write: ready-for-dev
-  4-5-conflict-detection-and-default-non-overwrite-behavior: ready-for-dev
-  4-6-explicit-repair-for-recoverable-installer-owned-drift: ready-for-dev
+  epic-4: done
+  4-1-ownership-model-and-protected-file-boundaries: done
+  4-2-config-and-customization-merge-order-for-updates: done
+  4-3-update-plan-before-write: done
+  4-4-project-operation-lock-and-safe-write: done
+  4-5-conflict-detection-and-default-non-overwrite-behavior: done
+  4-6-explicit-repair-for-recoverable-installer-owned-drift: done
   epic-4-retrospective: optional
 
   epic-5: in-progress
