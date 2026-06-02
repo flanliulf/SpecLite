@@ -331,6 +331,7 @@ export function parseExpectedStderrJsonLines(value: string) {
 export function getFixtureGateClassification(caseId: string): FixtureGateClassification | undefined {
   if (caseId in FIXTURE_GATE_REGISTRY.fixtureProjectGates) return "fixture-project-gate";
   if (caseId in FIXTURE_GATE_REGISTRY.fixtureGroupSubCases) return "fixture-group-sub-case";
+  if (isSourceIntegrityVariantGate(caseId)) return "fixture-group-sub-case";
   if (caseId in FIXTURE_GATE_REGISTRY.releaseChecklistGates) return "release-checklist-gate";
   return undefined;
 }
@@ -627,6 +628,16 @@ function hasEntry(entries: readonly string[], requiredPath: string): boolean {
 
 function isLowerKebab(value: string): boolean {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+function isSourceIntegrityVariantGate(caseId: string): boolean {
+  const match = /^source-integrity\/([^/]+)\/([^/]+)$/.exec(caseId);
+  if (match === null) return false;
+  const [, subCaseId, variantId] = match;
+  return (
+    REQUIRED_SOURCE_INTEGRITY_SUB_CASES.includes(subCaseId as (typeof REQUIRED_SOURCE_INTEGRITY_SUB_CASES)[number]) &&
+    isLowerKebab(variantId)
+  );
 }
 
 function stripAnsi(value: string): string {

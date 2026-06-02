@@ -48,6 +48,9 @@ describe("fixture contract registry and layout", () => {
     expect(getFixtureGateClassification("source-integrity/git-floating-blocked")).toBe(
       "fixture-group-sub-case",
     );
+    expect(
+      getFixtureGateClassification("source-integrity/source-unreadable-blocked/local-tarball-unreadable"),
+    ).toBe("fixture-group-sub-case");
     expect(getFixtureGateClassification("packaging-acceptance")).toBe("release-checklist-gate");
     expect(getFixtureGateClassification("richer-example")).toBeUndefined();
   });

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -171,6 +171,26 @@ describe("speclite resolve CLI", () => {
       releaseGate: true,
     });
   });
+
+  it("keeps real resolve-parity input layers in fixture-owned assets", async () => {
+    const inputRoot = "test/fixtures/resolve-parity/input";
+    const fixtureLayerFiles = [
+      "config/_speclite/config.toml",
+      "config/_speclite/config.user.toml",
+      "config/_speclite/custom/config.toml",
+      "config/_speclite/custom/config.user.toml",
+      "config-broken-optional/_speclite/config.toml",
+      "config-broken-optional/_speclite/custom/config.toml",
+      "customization/.claude/skills/speclite-create-story/customize.toml",
+      "customization/_speclite/custom/speclite-create-story.toml",
+      "customization/_speclite/custom/speclite-create-story.user.toml",
+    ];
+
+    for (const relativePath of fixtureLayerFiles) {
+      const contents = await readFile(`${inputRoot}/${relativePath}`, "utf8");
+      expect(contents.length).toBeGreaterThan(0);
+    }
+  });
 });
 
 type RunResolveOptions = {
@@ -209,62 +229,15 @@ async function runResolve(args: string[], options: RunResolveOptions = {}) {
 
 async function createResolveParityFixture(options: { brokenOptionalConfig?: boolean } = {}): Promise<string> {
   const fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-resolve-parity-"));
-
-  await writeProjectFile(fixtureRoot, "_speclite/config.toml", [
-    "[core]",
-    'project_name = "Fixture Base"',
-    'communication_language = "中文"',
-    "",
-    "[[modules.sdlc.agents]]",
-    'code = "dev"',
-    'label = "Base Dev"',
-    "",
-    "[[modules.sdlc.appendFallback]]",
-    'code = "a"',
-  ].join("\n"));
-  await writeProjectFile(fixtureRoot, "_speclite/config.user.toml", [
-    "[core]",
-    'project_name = "Fixture User"',
-  ].join("\n"));
-  await writeProjectFile(
+  const inputRoot = path.join("test/fixtures/resolve-parity/input");
+  await cp(
+    path.join(inputRoot, options.brokenOptionalConfig ? "config-broken-optional" : "config"),
     fixtureRoot,
-    "_speclite/custom/config.toml",
-    options.brokenOptionalConfig
-      ? "[core\nbroken = true"
-      : [
-          "[core]",
-          'document_output_language = "Mandarin"',
-          "",
-          "[[modules.sdlc.agents]]",
-          'code = "dev"',
-          'label = "Team Dev"',
-          "",
-          "[[modules.sdlc.appendFallback]]",
-          'id = "b"',
-        ].join("\n"),
+    { recursive: true },
   );
-  await writeProjectFile(fixtureRoot, "_speclite/custom/config.user.toml", "");
-  await writeProjectFile(fixtureRoot, ".claude/skills/speclite-create-story/customize.toml", [
-    "[workflow]",
-    'on_complete = "base"',
-    'persistent_facts = ["base"]',
-  ].join("\n"));
-  await writeProjectFile(fixtureRoot, "_speclite/custom/speclite-create-story.toml", [
-    "[workflow]",
-    'persistent_facts = ["team"]',
-  ].join("\n"));
-  await writeProjectFile(fixtureRoot, "_speclite/custom/speclite-create-story.user.toml", [
-    "[workflow]",
-    'on_complete = "用户完成"',
-  ].join("\n"));
+  await cp(path.join(inputRoot, "customization"), fixtureRoot, { recursive: true });
 
   return fixtureRoot;
-}
-
-async function writeProjectFile(projectRoot: string, relativePath: string, contents: string): Promise<void> {
-  const filePath = path.join(projectRoot, relativePath);
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${contents}\n`, "utf8");
 }
 
 function parseJsonLines(text: string): unknown[] {

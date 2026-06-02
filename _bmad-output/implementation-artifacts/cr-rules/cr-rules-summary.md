@@ -59,6 +59,7 @@
 | CR-API-27 | Manifest 枚举字段必须绑定 executable registry schema | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-28 | Normal update apply 成功后必须同步 installed-state projection | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-29 | Conflict failure 输出必须同时保持 structured step state 与准确 summary | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-03 | Companion SPEC mirror 必须同步契约收敛 wording | 6-6 | 5/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -1977,6 +1978,70 @@
   - 不建议本次升格；该规则与既有 ownership/path-safety 文档相近，且全局文档修改超出本次收尾授权。本次只 record-only。
 - **本次落地**:
   - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 6-6 / 2026-06-02
+
+- **Story**: 6-6
+- **分析来源**:
+  - `6-6-code-review-summary-20260602-round-1.md`
+  - `6-6-code-review-evaluation-20260602-round-1.md`
+  - `6-6-code-review-summary-20260602-round-2.md`
+  - `6-6-code-review-evaluation-20260602-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 `auditor` 来源、`patch` 分类 finding：English companion SPEC 中 `generatedAt` wording 仍保留 broader parseable ISO，与 schema、中文 owning SPEC 和 regression test 已选择的 canonical UTC / JavaScript `Date.toISOString()` 契约不一致。
+  - Fixer 已同步 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.en.md` 两处 wording 和 `_bmad-output/planning-artifacts/specs/08-fixture-contract.en.md` 一处 wording，并用 `rg` 确认 English companion SPEC 不再残留 broader wording pattern。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需要修复项 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5.5 (gpt-5.5)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改 project-context、architecture、AGENTS/CLAUDE、owning SPEC 或源码。
+  - 该问题属于当前 Story 的 companion SPEC mirror 同步收敛检查点，不升格为全局文档规则。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Companion SPEC mirror 必须同步契约收敛 wording | 通过 | 5/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-DOC-03：Companion SPEC mirror 必须同步契约收敛 wording
+
+- **来源问题**: Story 6.6 AC2 已将 `generatedAt` 契约收敛为 canonical UTC / JavaScript `Date.toISOString()` millisecond UTC form，但 English companion SPEC 仍保留 broader ISO parseability wording，导致 schema、测试、中文 SPEC 与英文 companion SPEC 对外表达不一致。
+- **CR 证据**:
+  - `6-6-code-review-summary-20260602-round-1.md`: Finding #1 指出 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.en.md` 与 `_bmad-output/planning-artifacts/specs/08-fixture-contract.en.md` 仍保留 broader `generatedAt` wording。
+  - `6-6-code-review-evaluation-20260602-round-1.md`: evaluator 确认该 finding 违反 AC2，要求同步 English companion SPEC wording，并记录修复范围。
+  - `6-6-code-review-evaluation-20260602-round-2.md`: evaluator 确认 English companion SPEC 已收敛为 canonical UTC / `Date.toISOString()` wording，且未发现新的 `decision_needed`、`patch`、`defer` 或 `dismiss` findings。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 companion SPEC mirror、fixture semantic assertion wording 和 downstream contract readers。 |
+  | 风险等级 | 1 | companion SPEC wording 漂移会误导实现者或文档消费者，但本次未造成 runtime schema 漏检。 |
+  | 根因稳定性 | 1 | 中英文/companion SPEC 同步时容易只改 owning text 或代码契约，漏掉镜像 wording。 |
+  | 可执行性 | 2 | 可用 focused `rg` pattern 检查 broader wording 残留，并要求 mirror SPEC 与 schema/test 选择同一契约。 |
+  | 文档缺口 | 0 | 该规则是 Story 6.6 的 companion SPEC mirror 检查点，不需要升级为全局文档约束。 |
+
+- **总分**: 5/12
+- **建议去向**: rules-summary
+- **适用范围**: 涉及 English companion SPEC、中文 owning SPEC、schema/test wording 同步收敛的 fixture / manifest contract 维护。
+- **规避指南**:
+  - 不得只同步中文 owning SPEC 或 runtime schema；当 Story 明确要求 wording 与 schema/test 同步时，companion SPEC mirror 中的 broader 或旧 wording 也必须复核。
+- **最佳实践**:
+  - 契约收敛后使用 focused `rg` 覆盖 owning SPEC 与 companion SPEC 的旧 wording pattern；CR 记录中列出镜像文件的修复位置和残留检查命令。
+- **全局文档建议**:
+  - 不建议本次升格；该问题主要绑定 Story 6.6 的 companion SPEC mirror 同步场景，按用户要求不扩大到 project-context 或 architecture。
+- **本次落地**:
+  - Round 1 fixer 已修复三处 English companion SPEC wording；Round 2 reviewer/evaluator 确认通过。
 - **同步状态**: 已写入规则总结
 
 #### 05 TODO Tracker 交接

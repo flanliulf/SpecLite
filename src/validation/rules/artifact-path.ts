@@ -73,7 +73,7 @@ export async function validateArtifactPathContract(input: {
           containerPath: configuredRoot.relativePath,
           containedPath: actualArtifactPath.relativePath,
           pathRole: "actualArtifactPath",
-          reason: "outside-configured-root",
+          reason: "path-escapes-project",
         }),
       );
     }
@@ -204,7 +204,7 @@ function validateContainedArtifactPath(input: {
   containerPath: string;
   containedPath: string;
   pathRole: ArtifactPathRole;
-  reason: "outside-configured-root";
+  reason: "outside-configured-root" | "path-escapes-project";
 }): ValidationIssue[] {
   if (isSameOrDescendantPath(input.containedPath, input.containerPath)) return [];
 

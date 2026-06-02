@@ -1,0 +1,9 @@
+[core]
+document_output_language = "Mandarin"
+
+[[modules.sdlc.agents]]
+code = "dev"
+label = "Team Dev"
+
+[[modules.sdlc.appendFallback]]
+id = "b"

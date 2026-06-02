@@ -1,0 +1,10 @@
+[core]
+project_name = "Fixture Base"
+communication_language = "中文"
+
+[[modules.sdlc.agents]]
+code = "dev"
+label = "Base Dev"
+
+[[modules.sdlc.appendFallback]]
+code = "a"

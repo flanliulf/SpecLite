@@ -120,6 +120,18 @@ describe("Story 6.4 path-portability fixture", () => {
           expect.objectContaining({ issueId: "file-integrity.unsafe-overwrite-risk" }),
         ]),
       );
+      expect(validate.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            issueId: "artifact-path.escapes-project",
+            affectedPath: "artifact:actualArtifactPath",
+            details: expect.objectContaining({
+              pathRole: "actualArtifactPath",
+              reason: "path-escapes-project",
+            }),
+          }),
+        ]),
+      );
 
       for (const value of [install, status, update, repair, validate, resolveConfig, resolveCustomization]) {
         assertNoPortablePathLeak(JSON.stringify(value));
@@ -427,7 +439,20 @@ async function introducePathPortabilityValidationFaults(projectRoot: string): Pr
     throw new Error("path-portability fixture requires _speclite/config.toml in files-index.");
   }
 
-  await mkdir(path.join(projectRoot, "reports"), { recursive: true });
+  await mkdir(path.join(projectRoot, "reports/outside-artifacts"), { recursive: true });
+  await writeFile(
+    path.join(projectRoot, "reports/outside-artifacts/review.md"),
+    [
+      "---",
+      "workflowType: code-review",
+      "sourceSkill: speclite-code-review-01-reviewer",
+      "generatedAt: 2026-06-02T00:00:00.000Z",
+      "---",
+      "# Review",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
   filesIndex.entries.push({
     ...runtimeConfigEntry,
     path: "_speclite/Config.toml",

@@ -90,6 +90,13 @@ describe("workflow artifact metadata encoding", () => {
         generatedAt: "May 27 2026",
       }).success,
     ).toBe(false);
+    const offsetTimestamp = parseWorkflowArtifactMetadata({
+      workflowType: "dev-story",
+      sourceSkill: "speclite-dev-story",
+      generatedAt: "2026-05-27T14:00:00+08:00",
+    });
+    expect(offsetTimestamp.success).toBe(false);
+    expect(offsetTimestamp.error?.issues[0]?.message).toMatch(/canonical UTC.*Date\.toISOString/);
   });
 
   it("identifies workflow-owned artifact and sidecar paths inside configured artifact roots", () => {

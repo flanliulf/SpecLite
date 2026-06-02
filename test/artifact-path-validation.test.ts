@@ -171,7 +171,7 @@ describe("artifact path validation", () => {
     }
   });
 
-  it("reports artifact paths outside the configured artifact root", async () => {
+  it("reports actual artifact paths outside the configured artifact root with escape reason", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-path-root-"));
 
     try {
@@ -198,7 +198,7 @@ describe("artifact path validation", () => {
           affectedPath: "artifact:actualArtifactPath",
           details: {
             pathRole: "actualArtifactPath",
-            reason: "outside-configured-root",
+            reason: "path-escapes-project",
           },
         }),
       ]);

@@ -1,0 +1,18 @@
+[workflow]
+on_complete = "base"
+persistent_facts = ["base"]
+
+[[codeReplacement]]
+code = "same"
+label = "base"
+
+[[idReplacement]]
+id = "same"
+label = "base"
+
+[[appendFallback]]
+code = "base"
+
+[[noDeletion]]
+code = "keep"
+enabled = true

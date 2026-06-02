@@ -125,7 +125,7 @@ File content 应通过 normalized expected tree 加 hash 比较，其中 install
 
 Stable snapshot comparison 只能忽略 SPEC 明确声明为 non-stable 的字段，例如允许的 generated metadata timestamps。
 
-Artifact metadata 必须包含 `generatedAt`。Fixture 必须只做 semantic assertion：value 可 parse 为 ISO 8601 string。Stable snapshots 必须 normalize、omit 或单独标记该字段为 non-stable，不得比较具体 timestamp value。
+Artifact metadata 必须包含 `generatedAt`。Fixture 必须只做 semantic assertion：value 符合 canonical UTC ISO string / JavaScript `Date.toISOString()` form。Stable snapshots 必须 normalize、omit 或单独标记该字段为 non-stable，不得比较具体 timestamp value。
 
 Duration、elapsed time、p95 measurement、profiling sample 和阶段耗时默认不得进入 stable command JSON snapshots。若某个 command JSON schema 显式引入这类字段，该字段必须被标记为 non-stable，并在 fixture comparison 中 normalize 或 exclude。
 

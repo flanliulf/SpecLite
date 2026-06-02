@@ -91,7 +91,7 @@ export const WorkflowArtifactMetadataSchema = z
       .refine((value) => {
         const parsed = Date.parse(value);
         return Number.isFinite(parsed) && new Date(parsed).toISOString() === value;
-      }, "generatedAt must be a parseable ISO 8601 string"),
+      }, "generatedAt must be a canonical UTC ISO string produced by Date.toISOString()"),
   })
   .strict();
 export const ArtifactContractSchema = z

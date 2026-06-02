@@ -123,7 +123,7 @@ On Windows, fixtures must not require POSIX chmod behavior. They must still asse
 
 Stable snapshot comparison may ignore only fields explicitly declared as non-stable by a SPEC, such as allowed generated metadata timestamps.
 
-When artifact metadata contains `generatedAt`, fixtures must only make a semantic assertion: the value is parseable as an ISO 8601 string. Stable snapshots must normalize, omit, or separately mark this field as non-stable; they must not compare the concrete timestamp value.
+When artifact metadata contains `generatedAt`, fixtures must only make a semantic assertion: the value matches the canonical UTC ISO string / JavaScript `Date.toISOString()` millisecond UTC form. Stable snapshots must normalize, omit, or separately mark this field as non-stable; they must not compare the concrete timestamp value.
 
 Duration, elapsed time, p95 measurements, profiling samples, and per-step duration must not enter stable command JSON snapshots by default. If a command JSON schema explicitly introduces such a field, that field must be marked non-stable and normalized or excluded during fixture comparison.
 

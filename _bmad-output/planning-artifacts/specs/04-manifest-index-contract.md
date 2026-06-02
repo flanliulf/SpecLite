@@ -118,7 +118,7 @@ Metadata value rules：
 
 - `workflowType` 必须是 non-empty stable string。
 - `sourceSkill` 必须是 non-empty stable canonical skill id。
-- Artifact metadata 必须包含 `generatedAt`。它必须是 ISO 8601 string，且除非 fixture 显式 normalize，否则必须从 stable fixture snapshot comparison 中排除。
+- Artifact metadata 必须包含 `generatedAt`。它必须是 canonical UTC ISO string，即 JavaScript `Date.toISOString()` 产生的 millisecond UTC form；除非 fixture 显式 normalize，否则必须从 stable fixture snapshot comparison 中排除。
 
 ## Artifact Contract Semantics（Artifact Contract 语义）
 
@@ -146,7 +146,7 @@ MVP validation 只检查：
 - required metadata keys 存在且值域合法
 - `workflowType` 和 `sourceSkill` 是 non-empty stable strings
 - `sourceSkill` 与 installed canonical skill id 一致
-- `generatedAt` 存在且可 parse 为 ISO 8601 string，并在 stable fixture snapshot comparison 中 normalize 或 exclude
+- `generatedAt` 存在且符合 canonical UTC ISO string / `Date.toISOString()` form，并在 stable fixture snapshot comparison 中 normalize 或 exclude
 
 Artifact files 是 workflow-owned。Install、update 和 repair 不得把 workflow artifacts 作为 installer-owned changed paths，也不得用 artifact validation 结果触发 overwrite。MVP 不验证叙事质量、内容完整度、人工评审结论或业务正确性。
 

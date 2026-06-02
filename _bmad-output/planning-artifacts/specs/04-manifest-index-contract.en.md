@@ -114,7 +114,7 @@ Metadata value rules:
 
 - `workflowType` must be a non-empty stable string.
 - `sourceSkill` must be a non-empty stable canonical skill id.
-- `generatedAt`, when present in an artifact, must be an ISO 8601 string and must be excluded from stable fixture snapshot comparison unless a fixture explicitly normalizes it.
+- `generatedAt`, when present in an artifact, must be a canonical UTC ISO string in the millisecond UTC form produced by JavaScript `Date.toISOString()` and must be excluded from stable fixture snapshot comparison unless a fixture explicitly normalizes it.
 
 ## Artifact Contract Semantics（Artifact Contract 语义）
 
@@ -131,7 +131,7 @@ MVP validation only checks:
 - required metadata keys exist and have valid value ranges
 - `workflowType` and `sourceSkill` are non-empty stable strings
 - `sourceSkill` matches the installed canonical skill id
-- `generatedAt`, when present, is parseable as an ISO 8601 string and normalized or excluded during stable fixture snapshot comparison
+- `generatedAt`, when present, matches the canonical UTC ISO string / JavaScript `Date.toISOString()` millisecond UTC form and is normalized or excluded during stable fixture snapshot comparison
 
 Artifact files are workflow-owned. Install, update, and repair must not treat workflow artifacts as installer-owned changed paths and must not use artifact validation results to trigger overwrite. MVP does not validate narrative quality, content completeness, human review conclusions, or business correctness.
 

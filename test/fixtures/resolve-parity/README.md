@@ -6,6 +6,7 @@ Layout:
 
 - `input/config/` documents config resolver input grouping.
 - `input/customization/` documents customization resolver input grouping.
+- `input/config-broken-optional/` documents an otherwise valid config project with a malformed optional human-owned layer.
 - `expected/config/` stores pure stdout JSON and stderr JSON Lines diagnostics for config parity cases.
 - `expected/customization/` stores pure stdout JSON and stderr JSON Lines diagnostics for customization parity cases.
 
