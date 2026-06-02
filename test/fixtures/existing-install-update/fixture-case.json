@@ -1,5 +1,5 @@
 {
   "caseId": "existing-install-update",
-  "releaseGate": false,
-  "purpose": "Covers update and repair resolver consumption for existing installs, including human-owned TOML preservation and optional custom layer non-conflict behavior."
+  "releaseGate": true,
+  "purpose": "Covers normal update planned/applied separation, installer-owned planned updates, human-owned custom preservation, workflow-owned artifact preservation, and installer-owned drift conflicts. Explicit update --repair coverage is handed off to Story 6.3 / 6.4."
 }

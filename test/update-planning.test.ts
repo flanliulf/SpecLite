@@ -224,7 +224,7 @@ describe("update ownership planning", () => {
     }
   });
 
-  it("records explicit --yes authorization without rewriting planned updates or mutating files in Story 4.3", async () => {
+  it("applies explicit --yes installer-owned planned updates through normal update", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-yes-auth-"));
 
     try {
@@ -252,11 +252,33 @@ describe("update ownership planning", () => {
       ]);
       expect(parsed.data.requiresConfirmation).toBe(false);
       expect(parsed.data.writeAuthorized).toBe(true);
-      expect(parsed.data.changedPaths).toEqual([]);
+      expect(parsed.data.changedPaths).toEqual(["_speclite/_config/files-index.json", "_speclite/config.toml"]);
       expect(parsed.data.skippedPaths).toEqual([]);
       await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toBe(
-        "[core]\nproject_name = \"Base\"\n",
+        "[core]\nproject_name = \"New\"\n",
       );
+
+      const filesIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/files-index.json"), "utf8"),
+      ) as { entries: Array<{ path: string; hash: string }> };
+      expect(filesIndex.entries.find((entry) => entry.path === "_speclite/config.toml")?.hash).toBe(
+        hashBytes("[core]\nproject_name = \"New\"\n"),
+      );
+
+      const followUp = await runUpdateCommand({ runtime: { cwd: tempRoot, targetProject: "yes-auth" } });
+      const followUpParsed = UpdateCommandResultSchema.parse(followUp.result);
+      expect(followUp.exitCode).toBe(0);
+      expect(followUpParsed.data.conflicts).toEqual([]);
+      expect(followUpParsed.data.updatePlan.actions).toEqual([
+        {
+          affectedPath: "_speclite/config.toml",
+          ownership: "installer-owned",
+          action: "skip",
+          currentHash: hashBytes("[core]\nproject_name = \"New\"\n"),
+          expectedHash: hashBytes("[core]\nproject_name = \"New\"\n"),
+          reason: "unchanged",
+        },
+      ]);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -517,7 +539,7 @@ describe("update ownership planning", () => {
     }
   });
 
-  it("projects installer drift, human-owned, workflow-owned and unknown ownership as path conflicts", async () => {
+  it("projects installer drift and unknown ownership as conflicts while protecting human/workflow paths as skips", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-conflicts-"));
 
     try {
@@ -553,7 +575,14 @@ describe("update ownership planning", () => {
       expect(parsed.issues).toEqual([
         expect.objectContaining({
           issueId: "update.conflicts",
-          details: { conflictCount: 4 },
+          details: {
+            conflictCount: 2,
+            completedSteps: ["installed-state-read", "update-plan"],
+            failedStep: "conflict-check",
+            pendingSteps: ["resolve-conflicts"],
+            manualAction:
+              "Resolve the reported update conflicts, then rerun speclite update before authorizing writes.",
+          },
         }),
       ]);
       expect(parsed.data.conflicts).toEqual([
@@ -563,21 +592,27 @@ describe("update ownership planning", () => {
           reason: "unknown-ownership",
         }),
         expect.objectContaining({
-          affectedPath: "_speclite-output/review.md",
-          ownership: "workflow-owned",
-          reason: "workflow-owned",
-        }),
-        expect.objectContaining({
           affectedPath: "_speclite/config.toml",
           ownership: "installer-owned",
           reason: "installer-owned-drift",
         }),
-        expect.objectContaining({
-          affectedPath: "_speclite/custom/config.toml",
-          ownership: "human-owned",
-          reason: "human-owned",
-        }),
       ]);
+      expect(parsed.data.updatePlan.actions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            affectedPath: "_speclite/custom/config.toml",
+            ownership: "human-owned",
+            action: "skip",
+            reason: "human-owned",
+          }),
+          expect.objectContaining({
+            affectedPath: "_speclite-output/review.md",
+            ownership: "workflow-owned",
+            action: "skip",
+            reason: "workflow-owned",
+          }),
+        ]),
+      );
       expect(parsed.data.updatePlan.actions).not.toContainEqual(
         expect.objectContaining({
           affectedPath: "README.md",
@@ -587,7 +622,12 @@ describe("update ownership planning", () => {
       );
       expect(parsed.data.changedPaths).toEqual([]);
       expect(parsed.data.skippedPaths).toEqual([]);
+      expect(parsed.data.completedSteps).toEqual(["installed-state-read", "update-plan"]);
+      expect(parsed.data.failedStep).toBe("conflict-check");
+      expect(parsed.data.pendingSteps).toEqual(["resolve-conflicts"]);
       expect(human).toContain("Conflicts:");
+      expect(human).toContain("Step State");
+      expect(human).toContain("Failed step: conflict-check");
       expect(human).toContain("_speclite/custom/config.toml");
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
@@ -613,7 +653,7 @@ describe("update ownership planning", () => {
       expect(parsed.issues).toEqual([
         expect.objectContaining({
           issueId: "update.conflicts",
-          details: { conflictCount: 1 },
+          details: expect.objectContaining({ conflictCount: 1 }),
         }),
       ]);
       expect(parsed.data.conflicts).toEqual([
@@ -659,7 +699,7 @@ describe("update ownership planning", () => {
       expect(parsed.issues).toEqual([
         expect.objectContaining({
           issueId: "update.conflicts",
-          details: { conflictCount: 2 },
+          details: expect.objectContaining({ conflictCount: 2 }),
         }),
       ]);
       expect(parsed.data.conflicts).toEqual([

@@ -1,5 +1,6 @@
 {
   "caseId": "source-integrity/bundled-packaging-missing-evidence-blocked",
   "releaseGate": true,
-  "purpose": "Bundled source without package evidence is blocked with stable source-integrity.missing-evidence diagnostics."
+  "purpose": "Bundled source without package evidence is blocked with stable source-integrity.missing-evidence diagnostics.",
+  "expectedGate": "mvp-release"
 }

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "success",
+  "command": "update",
+  "targetProject": "Base",
+  "summary": "SpecLite update applied authorized non-conflicting installer-owned planned updates.",
+  "issues": [],
+  "nextActions": [
+    "Inspect the plan and conflicts before authorizing any future update writes.",
+    "Run speclite validate to cross-check installed-state integrity."
+  ],
+  "data": {
+    "updatePlan": {
+      "actions": [
+        {
+          "affectedPath": "_speclite-output/review.md",
+          "ownership": "workflow-owned",
+          "action": "skip",
+          "currentHash": "sha256:c8ff7435987f33c4389194a253ca6871598c4dbf650d5a08699a7957b4a87c78",
+          "expectedHash": "sha256:c8ff7435987f33c4389194a253ca6871598c4dbf650d5a08699a7957b4a87c78",
+          "reason": "workflow-owned"
+        },
+        {
+          "affectedPath": "_speclite-output/review.md.metadata.json",
+          "ownership": "workflow-owned",
+          "action": "skip",
+          "currentHash": "sha256:0129cc05fb5771c505ab51bd22f963008458751581cbfa3a60bd05ab86d3d363",
+          "expectedHash": "sha256:0129cc05fb5771c505ab51bd22f963008458751581cbfa3a60bd05ab86d3d363",
+          "reason": "workflow-owned"
+        },
+        {
+          "affectedPath": "_speclite/config.toml",
+          "ownership": "installer-owned",
+          "action": "update",
+          "currentHash": "sha256:8f18c7d4934fcfcdd8a33e96e8ba3f33180205b92aabb2ee7c9d14093a894e26",
+          "expectedHash": "sha256:53e3feb156ec25c0360c5db5edf89bff769a7f8e99a20e79d542561c303ab4c9"
+        },
+        {
+          "affectedPath": "_speclite/custom/config.toml",
+          "ownership": "human-owned",
+          "action": "skip",
+          "currentHash": "sha256:648b2b3f1794a8b81da8420d6518ec50cf244782468ba90a7e4ad7db11e4ca57",
+          "expectedHash": "sha256:648b2b3f1794a8b81da8420d6518ec50cf244782468ba90a7e4ad7db11e4ca57",
+          "reason": "human-owned"
+        },
+        {
+          "affectedPath": "_speclite/custom/config.user.toml",
+          "ownership": "human-owned",
+          "action": "skip",
+          "currentHash": "sha256:212470fd13abbe4176b45d2d5a9aa63c5e527ad77ac3edcb7f2c573f8a6d603e",
+          "expectedHash": "sha256:212470fd13abbe4176b45d2d5a9aa63c5e527ad77ac3edcb7f2c573f8a6d603e",
+          "reason": "human-owned"
+        }
+      ]
+    },
+    "changedPaths": [
+      "_speclite/_config/files-index.json",
+      "_speclite/config.toml"
+    ],
+    "skippedPaths": [
+      "_speclite-output/review.md",
+      "_speclite-output/review.md.metadata.json",
+      "_speclite/custom/config.toml",
+      "_speclite/custom/config.user.toml"
+    ],
+    "conflicts": [],
+    "requiresConfirmation": false,
+    "writeAuthorized": true
+  }
+}

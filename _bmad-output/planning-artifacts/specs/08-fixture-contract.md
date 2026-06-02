@@ -34,6 +34,8 @@ MVP fixture cases：
 
 Release gate fixtures、required release-gate sub-cases 和 release checklist gates 必须在 Node 22 和 Node 24 上通过，才能发布 MVP。
 
+`fresh-install-empty-project` release gate 必须验证 selected official modules 下全部 canonical package roots 已进入 `skill-index.json`、`files-index.json` 和每个 selected IDE mirror。对于当前默认官方 `core` + `sdlc` 安装，baseline 应断言 53 个 canonical package roots，而不是只断言代表性 workflow skill。
+
 Regression assets 是必需的 repository assets，但除非 release checklist 明确将其提升为 gate，否则不阻塞 MVP release。
 
 Packaging acceptance 是 release checklist gate，不是 fixture project case。它必须产出 stable packaging manifest artifact `dist/packaging-manifest.json`，并保存 expected assertions 与 CI/release evidence；fixture runner 不得把 packaging acceptance 当作 `test/fixtures/<case>/` 项目目录。MVP release checklist command id 是 `npm run release:packaging-check`；若 package scripts 尚未存在，Story 1.1 的 scaffold 必须创建该 script stub，并在 Epic 6 完成实际 assertions。
@@ -151,7 +153,7 @@ ReadyCheck 是 install 内部的最小就绪检查，不等同于完整 `speclit
 
 - manifest/index 可读，且 schema version 被当前 runtime 支持
 - source descriptor projection 存在且 shape valid
-- selected IDE mirrors 存在，并且 required installed skill entries 可见
+- selected IDE mirrors 存在，并且 selected modules 下全部 canonical package roots 对应的 installed skill entries 可见
 - `_speclite`、configured artifact root 和 required runtime paths 存在
 - install command 本次没有 blocking `ValidationIssue` 或 failed required step
 

@@ -216,6 +216,9 @@ export const UpdateCommandDataSchema = z
     changedPaths: z.array(z.string().min(1).refine(isProjectRelativePosixPath)),
     skippedPaths: z.array(z.string().min(1).refine(isProjectRelativePosixPath)),
     conflicts: z.array(UpdateConflictSchema),
+    completedSteps: z.array(z.string().min(1)).optional(),
+    failedStep: z.string().min(1).optional(),
+    pendingSteps: z.array(z.string().min(1)).optional(),
     requiresConfirmation: z.boolean(),
     writeAuthorized: z.boolean(),
   })

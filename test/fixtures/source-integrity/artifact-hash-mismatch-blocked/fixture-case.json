@@ -2,5 +2,6 @@
   "caseId": "source-integrity/artifact-hash-mismatch-blocked",
   "sourceType": "local-tarball",
   "expectedGate": "mvp-release",
-  "description": "Local artifact expected hash mismatch is blocked and does not treat verified=false as a failure state."
+  "description": "Local artifact expected hash mismatch is blocked and does not treat verified=false as a failure state.",
+  "releaseGate": true
 }

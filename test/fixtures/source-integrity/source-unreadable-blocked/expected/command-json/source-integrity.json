@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "install",
+  "targetProject": "source-unreadable-blocked",
+  "summary": "SpecLite install source integrity fixture blocked before writes.",
+  "issues": [
+    {
+      "issueId": "source-integrity.registry-unreachable",
+      "category": "source-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/_config/manifest.yaml",
+      "component": "source-integrity-fixture",
+      "details": {
+        "reason": "registry-unreachable",
+        "sourceType": "npm",
+        "registryKind": "public"
+      },
+      "impact": "Source integrity failed before any install or update write planning.",
+      "suggestedNextStep": "Resolve source evidence before authorizing writes."
+    },
+    {
+      "issueId": "source-integrity.authentication-required",
+      "category": "source-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/_config/manifest.yaml",
+      "component": "source-integrity-fixture",
+      "details": {
+        "reason": "authentication-required",
+        "sourceType": "private-registry",
+        "registryKind": "private"
+      },
+      "impact": "Source integrity failed before any install or update write planning.",
+      "suggestedNextStep": "Resolve source evidence before authorizing writes."
+    },
+    {
+      "issueId": "source-integrity.tarball-unreadable",
+      "category": "source-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/_config/manifest.yaml",
+      "component": "source-integrity-fixture",
+      "details": {
+        "reason": "tarball-unreadable",
+        "sourceType": "local-tarball"
+      },
+      "impact": "Source integrity failed before any install or update write planning.",
+      "suggestedNextStep": "Resolve source evidence before authorizing writes."
+    },
+    {
+      "issueId": "source-integrity.offline-bundle-unreadable",
+      "category": "source-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/_config/manifest.yaml",
+      "component": "source-integrity-fixture",
+      "details": {
+        "reason": "offline-bundle-unreadable",
+        "sourceType": "offline-bundle"
+      },
+      "impact": "Source integrity failed before any install or update write planning.",
+      "suggestedNextStep": "Resolve source evidence before authorizing writes."
+    }
+  ],
+  "nextActions": [
+    "Resolve source-integrity issues before authorizing install writes."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "offline-bundle",
+      "resolvedRoot": "redacted-offline-bundle",
+      "integrityEvidence": [],
+      "trustStatus": "blocked"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [
+      "source-discovery"
+    ],
+    "pendingSteps": [
+      "source-integrity",
+      "write-planning"
+    ]
+  }
+}

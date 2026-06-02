@@ -1,0 +1,16 @@
+[
+  {
+    "issueId": "source-integrity.local-source-self-reference",
+    "category": "source-integrity",
+    "severity": "error",
+    "affectedPath": "_speclite/_config/manifest.yaml",
+    "component": "source-integrity-fixture",
+    "details": {
+      "reason": "local-source-self-reference",
+      "sourceType": "local",
+      "blockedRootKind": "installed-state"
+    },
+    "impact": "Source integrity failed before any install or update write planning.",
+    "suggestedNextStep": "Resolve source evidence before authorizing writes."
+  }
+]

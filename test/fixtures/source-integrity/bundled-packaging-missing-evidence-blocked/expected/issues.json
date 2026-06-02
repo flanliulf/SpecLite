@@ -1,0 +1,15 @@
+[
+  {
+    "issueId": "source-integrity.missing-evidence",
+    "category": "source-integrity",
+    "severity": "error",
+    "affectedPath": "_speclite/_config/manifest.yaml",
+    "component": "source-integrity-fixture",
+    "details": {
+      "reason": "missing-bundled-packaging-evidence",
+      "sourceType": "bundled"
+    },
+    "impact": "Source integrity failed before any install or update write planning.",
+    "suggestedNextStep": "Resolve source evidence before authorizing writes."
+  }
+]

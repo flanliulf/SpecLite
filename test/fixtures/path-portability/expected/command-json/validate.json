@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "validate",
+  "targetProject": "Path Portability",
+  "summary": "SpecLite validate found path portability issues in checked categories.",
+  "issues": [
+    {
+      "issueId": "file-integrity.case-conflict",
+      "category": "file-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/Skills/speclite-help/SKILL.md",
+      "component": "path-portability-fixture",
+      "details": {
+        "reason": "case-insensitive-path-conflict"
+      },
+      "impact": "The planned write path could produce different results on case-insensitive filesystems.",
+      "suggestedNextStep": "Resolve the case-only path conflict before release."
+    },
+    {
+      "issueId": "artifact-path.symlink-escape",
+      "category": "artifact-path",
+      "severity": "error",
+      "affectedPath": "_speclite/link/config.toml",
+      "component": "path-portability-fixture",
+      "details": {
+        "reason": "existing-path-segment-is-symlink"
+      },
+      "impact": "The path crosses a symlink and cannot be proven to stay inside the target project.",
+      "suggestedNextStep": "Replace the symlink with a real project directory before release."
+    },
+    {
+      "issueId": "artifact-path.escapes-project",
+      "category": "artifact-path",
+      "severity": "error",
+      "affectedPath": "artifact:actualArtifactPath",
+      "component": "path-portability-fixture",
+      "details": {
+        "pathRole": "actualArtifactPath",
+        "reason": "path-escapes-project"
+      },
+      "impact": "A workflow artifact path is not safely contained inside the target project.",
+      "suggestedNextStep": "Use a project-relative POSIX artifact path inside the configured artifact root."
+    },
+    {
+      "issueId": "file-integrity.unsafe-overwrite-risk",
+      "category": "file-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite-output/review.md",
+      "component": "path-portability-fixture",
+      "details": {
+        "ownership": "installer-owned",
+        "artifactKind": "workflow-artifact",
+        "expectedHashAlgorithm": "sha256",
+        "reason": "unsafe-overwrite-risk",
+        "classifiedOwnership": "workflow-owned"
+      },
+      "impact": "An installer-owned or installer-controlled installed file no longer matches the files index boundary.",
+      "suggestedNextStep": "Run speclite validate and manually review the protected boundary before planning update or repair."
+    }
+  ],
+  "nextActions": [
+    "Run speclite update --repair --json only for explicit installer-owned repair scenarios."
+  ],
+  "data": {
+    "issueCounts": {
+      "info": 0,
+      "warning": 0,
+      "error": 4,
+      "critical": 0
+    },
+    "checkedCategories": [
+      "runtime-path",
+      "artifact-path",
+      "file-integrity",
+      "ide-mirror"
+    ],
+    "checkedTargets": [
+      "claude",
+      "agents"
+    ],
+    "validatedPaths": [
+      "_speclite/_config/manifest.yaml",
+      "_speclite/_config/files-index.json",
+      ".claude/skills/speclite-help/SKILL.md",
+      ".agents/skills/speclite-help/SKILL.md"
+    ]
+  }
+}

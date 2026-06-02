@@ -1,5 +1,21 @@
 {
   "caseId": "skill-artifact-loop",
   "releaseGate": true,
-  "purpose": "Covers installed skill activation, resolver access, workflow artifact write, required metadata validation and generatedAt normalization for Story 2.5."
+  "purpose": "Covers installed IDE entry discovery, installed runtime support activation, deterministic workflow artifact write, required metadata validation and generatedAt normalization for Story 6.5.",
+  "expectedOutputClass": "manifest-index-snapshot",
+  "documentationExampleClassification": "fixture-project-gate",
+  "docsExamples": [
+    {
+      "path": "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+      "classification": "packaged-documentation-example",
+      "derivedFrom": [
+        "test/fixtures/fresh-install-empty-project/expected/installed-tree.txt",
+        "test/fixtures/fresh-install-empty-project/expected/installed-state/manifest-full.json",
+        "test/fixtures/path-portability/expected/command-json/status.json",
+        "test/fixtures/path-portability/expected/command-json/validate.json",
+        "test/fixtures/existing-install-update/expected/command-json/normal-update-success.json"
+      ],
+      "isReleaseGateFixture": false
+    }
+  ]
 }

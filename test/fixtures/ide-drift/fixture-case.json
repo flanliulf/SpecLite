@@ -1,5 +1,5 @@
 {
   "caseId": "ide-drift",
-  "releaseGate": false,
-  "purpose": "Covers installed skill customization lookup by skill directory basename and rejects source checkout, target id, display label, and adapter alias as alternate customization keys."
+  "releaseGate": true,
+  "purpose": "Diagnostic-only validate fixture for IDE mirror canonical package hash drift; does not produce repair execution payload."
 }

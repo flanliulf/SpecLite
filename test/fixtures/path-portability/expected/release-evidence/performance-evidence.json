@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "speclite.release-performance-evidence.v1",
+  "baselineId": "path-portability-runtime-baseline",
+  "generatedAtPolicy": "non-stable-excluded-from-fixture-snapshots",
+  "measurements": [
+    {
+      "command": "status",
+      "fixtureCase": "path-portability",
+      "nodeVersion": "22",
+      "osFamily": "macos",
+      "sampleCount": 9,
+      "p95DurationMs": 120,
+      "acceptedBaselineMs": 150,
+      "regressionPercentage": 0,
+      "profilingSampleLocation": "release-evidence/path-portability/status-profile.cpuprofile",
+      "conclusion": "pass"
+    },
+    {
+      "command": "validate",
+      "fixtureCase": "path-portability",
+      "nodeVersion": "24",
+      "osFamily": "windows",
+      "sampleCount": 9,
+      "p95DurationMs": 180,
+      "acceptedBaselineMs": 220,
+      "regressionPercentage": 0,
+      "profilingSampleLocation": "release-evidence/path-portability/validate-profile.cpuprofile",
+      "conclusion": "pass"
+    }
+  ]
+}

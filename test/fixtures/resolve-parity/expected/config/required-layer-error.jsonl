@@ -1,0 +1,1 @@
+{"issueId":"runtime-path.missing-entry","category":"runtime-path","severity":"error","affectedPath":"_speclite/config.toml","component":"config-resolver","details":{"layerKind":"config","layerRole":"required-config","status":"missing"},"impact":"Resolve layer diagnostic prevents silent parity drift.","suggestedNextStep":"Inspect the resolve layer and rerun the command."}

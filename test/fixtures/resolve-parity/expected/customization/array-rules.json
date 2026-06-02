@@ -1,0 +1,30 @@
+{
+  "codeReplacement": [
+    {
+      "code": "same",
+      "label": "override"
+    }
+  ],
+  "idReplacement": [
+    {
+      "id": "same",
+      "label": "override"
+    }
+  ],
+  "appendFallback": [
+    {
+      "code": "base"
+    },
+    {
+      "id": "override"
+    },
+    "literal"
+  ],
+  "noDeletion": [
+    {
+      "code": "keep",
+      "enabled": false,
+      "remove": true
+    }
+  ]
+}

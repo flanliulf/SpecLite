@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "speclite.skill-index.v1",
+  "entries": [
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-code-review-01-reviewer",
+      "moduleId": "sdlc",
+      "sourcePackagePath": "_speclite/packages/speclite-code-review-01-reviewer",
+      "canonicalPackageHash": "sha256:fixture-code-review-package",
+      "installedTargets": [
+        "claude"
+      ],
+      "phaseIds": [
+        "implementation-review"
+      ]
+    }
+  ]
+}

@@ -178,6 +178,7 @@ export function createUpdateCommandResult(input: {
   const issues = projectUpdateCommandIssues({
     issues: input.issues ?? [],
     conflictCount: data.conflicts.length,
+    updateLifecycleState: getUpdateLifecycleState(data),
   });
   const status = deriveCommandStatus({
     issues,
@@ -297,6 +298,11 @@ function countValidationIssues(issues: ValidationIssue[]): ValidateCommandData["
 function projectUpdateCommandIssues(input: {
   issues: ValidationIssue[];
   conflictCount: number;
+  updateLifecycleState?: {
+    completedSteps: string[];
+    failedStep?: string;
+    pendingSteps: string[];
+  };
 }): ValidationIssue[] {
   const issues = input.issues.filter((issue) => issue.issueId !== "update.conflicts");
   if (input.conflictCount > 0) {
@@ -307,6 +313,17 @@ function projectUpdateCommandIssues(input: {
       component: "update-command",
       details: {
         conflictCount: input.conflictCount,
+        ...(input.updateLifecycleState === undefined
+          ? {}
+          : {
+              completedSteps: input.updateLifecycleState.completedSteps,
+              ...(input.updateLifecycleState.failedStep === undefined
+                ? {}
+                : { failedStep: input.updateLifecycleState.failedStep }),
+              pendingSteps: input.updateLifecycleState.pendingSteps,
+              manualAction:
+                "Resolve the reported update conflicts, then rerun speclite update before authorizing writes.",
+            }),
       },
       impact: "Update planning found one or more path-level conflicts.",
       suggestedNextStep: "Inspect the conflict details before authorizing update writes.",
@@ -324,6 +341,24 @@ function sortUpdateCommandData(data: UpdateCommandData): UpdateCommandData {
     changedPaths: sortPaths(data.changedPaths),
     skippedPaths: sortPaths(data.skippedPaths),
     conflicts: [...data.conflicts].sort(compareUpdateConflicts),
+  };
+}
+
+function getUpdateLifecycleState(data: UpdateCommandData):
+  | {
+    completedSteps: string[];
+    failedStep?: string;
+    pendingSteps: string[];
+  }
+  | undefined {
+  if (data.completedSteps === undefined && data.failedStep === undefined && data.pendingSteps === undefined) {
+    return undefined;
+  }
+
+  return {
+    completedSteps: data.completedSteps ?? [],
+    ...(data.failedStep === undefined ? {} : { failedStep: data.failedStep }),
+    pendingSteps: data.pendingSteps ?? [],
   };
 }
 

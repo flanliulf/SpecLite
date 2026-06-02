@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -11,13 +11,19 @@ import {
   writeMarkdownWorkflowArtifactMetadata,
 } from "../src/validation/artifact-metadata.js";
 import { validateArtifactPathContract } from "../src/validation/rules/artifact-path.js";
-import { FixtureCaseManifestSchema } from "../src/fixtures/fixture-contract.js";
+import {
+  FixtureCaseManifestSchema,
+  parseExpectedManifestSnapshot,
+  RELEASE_FIXTURE_MATRIX,
+  validateFixtureCaseLayout,
+} from "../src/fixtures/fixture-contract.js";
 
 const supportedRuntime = {
   nodeVersion: "v22.12.0",
   platform: "darwin",
   platformRelease: "23.0.0",
 } as const;
+const skillArtifactLoopRoot = "test/fixtures/skill-artifact-loop";
 
 describe("skill artifact loop activation fixture", () => {
   it("loads an installed IDE entry activation protocol without source checkout paths", async () => {
@@ -165,6 +171,7 @@ describe("skill artifact loop activation fixture", () => {
           artifactType: codeReviewRow.artifactContract.artifactType,
           metadata: artifactMetadata,
           metadataLocation: "frontmatter",
+          expectedSourceSkill: "speclite-code-review-01-reviewer",
         }),
       ).resolves.toEqual([]);
 
@@ -175,15 +182,246 @@ describe("skill artifact loop activation fixture", () => {
         caseId: "skill-artifact-loop",
         releaseGate: true,
         purpose: expect.stringContaining("workflow artifact write"),
+        expectedOutputClass: "manifest-index-snapshot",
+        documentationExampleClassification: "fixture-project-gate",
+        docsExamples: [
+          expect.objectContaining({
+            path: "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+            classification: "packaged-documentation-example",
+            isReleaseGateFixture: false,
+          }),
+        ],
       });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("uses fixture-owned installed state for deterministic entry discovery and artifact metadata validation", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-skill-artifact-loop-fixture-"));
+
+    try {
+      await cp(path.join(skillArtifactLoopRoot, "input"), tempRoot, { recursive: true });
+
+      expect(
+        validateFixtureCaseLayout({
+          relativeCasePath: skillArtifactLoopRoot,
+          caseId: "skill-artifact-loop",
+          entries: await listFixtureEntries(skillArtifactLoopRoot),
+        }),
+      ).toEqual([]);
+      expect(RELEASE_FIXTURE_MATRIX.find((entry) => entry.fixtureId === "skill-artifact-loop")).toEqual({
+        fixtureId: "skill-artifact-loop",
+        status: "required",
+      });
+
+      const manifest = parseExpectedManifestSnapshot(
+        await readJson(path.join(tempRoot, "_speclite/_config/manifest.json")),
+      );
+      const skillIndex = parseExpectedManifestSnapshot(
+        await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json")),
+      ) as { entries: Array<{ canonicalSkillId: string; installedTargets: string[] }> };
+      const helpIndex = parseExpectedManifestSnapshot(
+        await readJson(path.join(tempRoot, "_speclite/_config/help-index.json")),
+      ) as { entries: Array<{ canonicalSkillId: string; activationTarget: string; targetIds: string[] }> };
+      const phaseCoverage = parseExpectedManifestSnapshot(
+        await readJson(path.join(tempRoot, "_speclite/_config/phase-coverage.json")),
+      ) as {
+        rows: Array<{
+          canonicalSkillId: string;
+          ideTargets: Array<{ targetId: string; entryPath: string; activationTarget: string; status: string }>;
+          artifactContract: {
+            artifactType: string;
+            defaultOutputPath: string;
+            requiredMetadata: string[];
+          };
+        }>;
+      };
+      parseExpectedManifestSnapshot(await readJson(path.join(tempRoot, "_speclite/_config/files-index.json")));
+
+      expect(JSON.stringify(manifest)).not.toContain(process.cwd());
+      expect(JSON.stringify(phaseCoverage)).not.toContain("assets/source/speclite");
+
+      const row = phaseCoverage.rows.find(
+        (entry) => entry.canonicalSkillId === "speclite-code-review-01-reviewer",
+      );
+      expect(row).toBeDefined();
+      const mappedTarget = row!.ideTargets.find((target) => target.targetId === "claude");
+      const expectedDiscovery = await readJson(path.join(skillArtifactLoopRoot, "expected/entry-discovery.json"));
+
+      expect(skillIndex.entries.filter((entry) => entry.canonicalSkillId === row!.canonicalSkillId)).toHaveLength(1);
+      expect(helpIndex.entries.filter((entry) => entry.canonicalSkillId === row!.canonicalSkillId)).toHaveLength(1);
+      expect(mappedTarget).toMatchObject({
+        targetId: "claude",
+        entryPath: ".claude/skills/speclite-code-review-01-reviewer",
+        activationTarget: ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+        status: "mapped",
+      });
+      expect(row!.ideTargets.map((target) => target.targetId)).toEqual(["claude"]);
+      expect(JSON.stringify(row)).not.toMatch(/copilot|cursor|command pointer/i);
+      await expect(stat(path.join(tempRoot, mappedTarget!.activationTarget))).resolves.toBeDefined();
+      await expect(stat(path.join(tempRoot, mappedTarget!.entryPath))).resolves.toBeDefined();
+      expect({
+        canonicalSkillId: row!.canonicalSkillId,
+        targetId: mappedTarget!.targetId,
+        entryPath: mappedTarget!.entryPath,
+        activationTarget: mappedTarget!.activationTarget,
+        installedPackageDirectory: mappedTarget!.entryPath,
+        artifactContract: row!.artifactContract,
+      }).toEqual(expectedDiscovery);
+
+      const installedSkill = await readFile(path.join(tempRoot, mappedTarget!.activationTarget), "utf8");
+      expect(installedSkill).toContain("speclite resolve config --project-root {project-root}");
+      expect(installedSkill).toContain(
+        "speclite resolve customization --skill {skill-root} --project-root {project-root}",
+      );
+      expect(installedSkill).not.toMatch(/resolve_customization\.py|assets\/source\/speclite|node dist|package cache/i);
+
+      const configResolve = await runResolve([
+        "resolve",
+        "config",
+        "--project-root",
+        tempRoot,
+        "--key",
+        "core.project_name",
+      ]);
+      const customizationResolve = await runResolve([
+        "resolve",
+        "customization",
+        "--skill",
+        path.join(tempRoot, mappedTarget!.entryPath),
+        "--project-root",
+        tempRoot,
+        "--key",
+        "workflow",
+      ]);
+      expect(configResolve.exitCodes).toEqual([0]);
+      expect(configResolve.stderr).toBe("");
+      expect(JSON.parse(configResolve.stdout)).toEqual({
+        "core.project_name": "Skill Artifact Loop User Override",
+      });
+      expect(customizationResolve.exitCodes).toEqual([0]);
+      expect(customizationResolve.stderr).toBe("");
+      expect(JSON.parse(customizationResolve.stdout)).toEqual({
+        workflow: {
+          mode: "fixture-team",
+          artifact_type: "code-review-summary",
+        },
+      });
+
+      const artifactPath = "_speclite-output/implementation-artifacts/code-reviews/skill-artifact-loop.md";
+      const artifactMetadata = createWorkflowArtifactMetadata({
+        workflowType: "code-review",
+        sourceSkill: row!.canonicalSkillId,
+        generatedAt: "2026-06-02T01:23:00.000Z",
+      });
+      await mkdir(path.dirname(path.join(tempRoot, artifactPath)), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, artifactPath),
+        writeMarkdownWorkflowArtifactMetadata({
+          contents: "# Code Review Fixture\n\nMetadata-only fixture artifact.\n",
+          metadata: artifactMetadata,
+        }),
+        "utf8",
+      );
+      const artifact = await readFile(path.join(tempRoot, artifactPath), "utf8");
+      const normalizedMetadata = normalizeWorkflowArtifactMetadataForSnapshot(
+        readMarkdownWorkflowArtifactMetadata(artifact),
+      );
+      const expectedMetadata = await readJson(
+        path.join(skillArtifactLoopRoot, "expected/artifact/metadata-normalized.json"),
+      );
+      expect(normalizedMetadata).toEqual(expectedMetadata);
+      await expect(
+        validateArtifactPathContract({
+          projectRoot: tempRoot,
+          configuredRoot: "_speclite-output/implementation-artifacts",
+          defaultOutputPath: row!.artifactContract.defaultOutputPath,
+          actualArtifactPath: artifactPath,
+          artifactType: row!.artifactContract.artifactType,
+          metadata: artifactMetadata,
+          metadataLocation: "frontmatter",
+          expectedSourceSkill: row!.canonicalSkillId,
+        }),
+      ).resolves.toEqual([]);
+
+      for (const invalid of [
+        {},
+        { workflowType: "code-review", sourceSkill: row!.canonicalSkillId, generatedAt: "not-a-date" },
+        {
+          workflowType: "code-review",
+          sourceSkill: "speclite-dev-story",
+          generatedAt: "2026-06-02T01:23:00.000Z",
+        },
+      ]) {
+        const issues = await validateArtifactPathContract({
+          projectRoot: tempRoot,
+          configuredRoot: "_speclite-output/implementation-artifacts",
+          defaultOutputPath: row!.artifactContract.defaultOutputPath,
+          actualArtifactPath: artifactPath,
+          artifactType: row!.artifactContract.artifactType,
+          metadata: invalid,
+          metadataLocation: "frontmatter",
+          expectedSourceSkill: row!.canonicalSkillId,
+        });
+        expect(issues.map((issue) => issue.issueId)).toContain(
+          Object.keys(invalid).length === 0
+            ? "artifact-path.missing-required-metadata"
+            : "artifact-path.invalid-required-metadata",
+        );
+      }
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps fixture-derived documentation examples classified separately from release gate fixtures", async () => {
+    const fixtureCase = FixtureCaseManifestSchema.parse(
+      await readJson(path.join(skillArtifactLoopRoot, "fixture-case.json")),
+    ) as {
+      docsExamples: Array<{
+        path: string;
+        classification: string;
+        derivedFrom: string[];
+        isReleaseGateFixture: boolean;
+      }>;
+    };
+    const classification = await readJson(
+      path.join(skillArtifactLoopRoot, "expected/docs-examples/classification.json"),
+    );
+    const docsExample = fixtureCase.docsExamples[0]!;
+    const docsText = await readFile(docsExample.path, "utf8");
+
+    expect(docsExample).toEqual(classification);
+    expect(docsExample.classification).toBe("packaged-documentation-example");
+    expect(docsExample.isReleaseGateFixture).toBe(false);
+    for (const source of docsExample.derivedFrom) {
+      await expect(stat(source)).resolves.toBeDefined();
+      expect(docsText).toContain(source);
+    }
+    expect(docsText).not.toContain("type WorkflowArtifactMetadata");
+    expect(docsText).not.toContain("CommandResult<TData>");
+    expect(docsText).not.toMatch(/2026-\d\d-\d\dT\d\d:\d\d:\d\d/);
+  });
 });
 
 async function readJson(filePath: string): Promise<any> {
   return JSON.parse(await readFile(filePath, "utf8"));
+}
+
+async function listFixtureEntries(root: string): Promise<string[]> {
+  const entries: string[] = [];
+  async function visit(current: string): Promise<void> {
+    const children = await readdir(current, { withFileTypes: true });
+    for (const child of children) {
+      const childPath = path.join(current, child.name);
+      const relative = childPath.split(path.sep).join("/");
+      entries.push(relative);
+      if (child.isDirectory()) await visit(childPath);
+    }
+  }
+  await visit(root);
+  return entries.sort((left, right) => left.localeCompare(right));
 }
 
 async function runResolve(args: string[]) {

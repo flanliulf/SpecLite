@@ -6,6 +6,13 @@
   "bin": {
     "speclite": "./dist/bin/speclite.js"
   },
+  "files": [
+    "dist/",
+    "assets/source/speclite/",
+    "package.json",
+    "README.md",
+    "README.en.md"
+  ],
   "engines": {
     "node": ">=22"
   },
@@ -13,7 +20,7 @@
     "build": "tsup",
     "dev": "tsx src/bin/speclite.ts",
     "test": "vitest run",
-    "release:packaging-check": "node -e \"console.log('release:packaging-check stub: packaging file inventory assertions are deferred to Epic 6.')\""
+    "release:packaging-check": "node scripts/release/packaging-check.mjs"
   },
   "dependencies": {
     "commander": "14.0.3",

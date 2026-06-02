@@ -1,0 +1,643 @@
+{
+  "schemaVersion": "speclite.help-index.v1",
+  "entries": [
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Business Analyst",
+      "canonicalSkillId": "speclite-agent-analyst",
+      "activationTarget": ".claude/skills/speclite-agent-analyst/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Brownfield Baseline",
+      "canonicalSkillId": "speclite-brownfield-context-builder",
+      "activationTarget": ".claude/skills/speclite-brownfield-context-builder/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Domain Research",
+      "canonicalSkillId": "speclite-domain-research",
+      "activationTarget": ".claude/skills/speclite-domain-research/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Market Research",
+      "canonicalSkillId": "speclite-market-research",
+      "activationTarget": ".claude/skills/speclite-market-research/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "PRFAQ Challenge",
+      "canonicalSkillId": "speclite-prfaq",
+      "activationTarget": ".claude/skills/speclite-prfaq/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Create Brief",
+      "canonicalSkillId": "speclite-product-brief",
+      "activationTarget": ".claude/skills/speclite-product-brief/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Technical Research",
+      "canonicalSkillId": "speclite-technical-research",
+      "activationTarget": ".claude/skills/speclite-technical-research/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "2-planning",
+      "entryLabel": "Product Manager",
+      "canonicalSkillId": "speclite-agent-pm",
+      "activationTarget": ".claude/skills/speclite-agent-pm/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "2-planning",
+      "entryLabel": "UX Designer",
+      "canonicalSkillId": "speclite-agent-ux-designer",
+      "activationTarget": ".claude/skills/speclite-agent-ux-designer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "2-planning",
+      "entryLabel": "Create PRD",
+      "canonicalSkillId": "speclite-create-prd",
+      "activationTarget": ".claude/skills/speclite-create-prd/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "2-planning",
+      "entryLabel": "Create UX",
+      "canonicalSkillId": "speclite-create-ux-design",
+      "activationTarget": ".claude/skills/speclite-create-ux-design/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "2-planning",
+      "entryLabel": "Edit PRD",
+      "canonicalSkillId": "speclite-edit-prd",
+      "activationTarget": ".claude/skills/speclite-edit-prd/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "2-planning",
+      "entryLabel": "Validate PRD",
+      "canonicalSkillId": "speclite-validate-prd",
+      "activationTarget": ".claude/skills/speclite-validate-prd/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Solution Architect",
+      "canonicalSkillId": "speclite-agent-architect",
+      "activationTarget": ".claude/skills/speclite-agent-architect/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Check Implementation Readiness",
+      "canonicalSkillId": "speclite-check-implementation-readiness",
+      "activationTarget": ".claude/skills/speclite-check-implementation-readiness/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Create Architecture",
+      "canonicalSkillId": "speclite-create-architecture",
+      "activationTarget": ".claude/skills/speclite-create-architecture/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Create Epics and Stories",
+      "canonicalSkillId": "speclite-create-epics-and-stories",
+      "activationTarget": ".claude/skills/speclite-create-epics-and-stories/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Story Review",
+      "canonicalSkillId": "speclite-story-review-01-reviewer",
+      "activationTarget": ".claude/skills/speclite-story-review-01-reviewer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Story Review Evaluate",
+      "canonicalSkillId": "speclite-story-review-02-evaluator",
+      "activationTarget": ".claude/skills/speclite-story-review-02-evaluator/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Story Review Fix",
+      "canonicalSkillId": "speclite-story-review-03-fixer",
+      "activationTarget": ".claude/skills/speclite-story-review-03-fixer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Developer Agent",
+      "canonicalSkillId": "speclite-agent-dev",
+      "activationTarget": ".claude/skills/speclite-agent-dev/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Checkpoint",
+      "canonicalSkillId": "speclite-checkpoint-preview",
+      "activationTarget": ".claude/skills/speclite-checkpoint-preview/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Code Review Round",
+      "canonicalSkillId": "speclite-code-review-01-reviewer",
+      "activationTarget": ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Code Review Evaluate",
+      "canonicalSkillId": "speclite-code-review-02-evaluator",
+      "activationTarget": ".claude/skills/speclite-code-review-02-evaluator/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Code Review Fix",
+      "canonicalSkillId": "speclite-code-review-03-fixer",
+      "activationTarget": ".claude/skills/speclite-code-review-03-fixer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Code Review Rules",
+      "canonicalSkillId": "speclite-code-review-04-rules-extractor",
+      "activationTarget": ".claude/skills/speclite-code-review-04-rules-extractor/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Code Review TODO",
+      "canonicalSkillId": "speclite-code-review-05-todo-tracker",
+      "activationTarget": ".claude/skills/speclite-code-review-05-todo-tracker/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Code Review Finalize",
+      "canonicalSkillId": "speclite-code-review-06-finalizer",
+      "activationTarget": ".claude/skills/speclite-code-review-06-finalizer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Create Story",
+      "canonicalSkillId": "speclite-create-story",
+      "activationTarget": ".claude/skills/speclite-create-story/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Validate Story",
+      "canonicalSkillId": "speclite-create-story",
+      "activationTarget": ".claude/skills/speclite-create-story/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Dev Story",
+      "canonicalSkillId": "speclite-dev-story",
+      "activationTarget": ".claude/skills/speclite-dev-story/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Flow Gate",
+      "canonicalSkillId": "speclite-flow-gate",
+      "activationTarget": ".claude/skills/speclite-flow-gate/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "QA Automation Test",
+      "canonicalSkillId": "speclite-qa-generate-e2e-tests",
+      "activationTarget": ".claude/skills/speclite-qa-generate-e2e-tests/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Retrospective",
+      "canonicalSkillId": "speclite-retrospective",
+      "activationTarget": ".claude/skills/speclite-retrospective/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Sprint Planning",
+      "canonicalSkillId": "speclite-sprint-planning",
+      "activationTarget": ".claude/skills/speclite-sprint-planning/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Sprint Status",
+      "canonicalSkillId": "speclite-sprint-status",
+      "activationTarget": ".claude/skills/speclite-sprint-status/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Advanced Elicitation",
+      "canonicalSkillId": "speclite-advanced-elicitation",
+      "activationTarget": ".claude/skills/speclite-advanced-elicitation/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Explain Concept",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Mermaid Generate",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Update Standards",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Validate Document",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Write Document",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Brainstorming",
+      "canonicalSkillId": "speclite-brainstorming",
+      "activationTarget": ".claude/skills/speclite-brainstorming/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Correct Course",
+      "canonicalSkillId": "speclite-correct-course",
+      "activationTarget": ".claude/skills/speclite-correct-course/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "SpecLite Customize",
+      "canonicalSkillId": "speclite-customize",
+      "activationTarget": ".claude/skills/speclite-customize/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Distillator",
+      "canonicalSkillId": "speclite-distillator",
+      "activationTarget": ".claude/skills/speclite-distillator/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Document Project",
+      "canonicalSkillId": "speclite-document-project",
+      "activationTarget": ".claude/skills/speclite-document-project/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Editorial Review - Prose",
+      "canonicalSkillId": "speclite-editorial-review-prose",
+      "activationTarget": ".claude/skills/speclite-editorial-review-prose/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Editorial Review - Structure",
+      "canonicalSkillId": "speclite-editorial-review-structure",
+      "activationTarget": ".claude/skills/speclite-editorial-review-structure/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Generate Project Context",
+      "canonicalSkillId": "speclite-generate-project-context",
+      "activationTarget": ".claude/skills/speclite-generate-project-context/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "SpecLite Help",
+      "canonicalSkillId": "speclite-help",
+      "activationTarget": ".claude/skills/speclite-help/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Index Docs",
+      "canonicalSkillId": "speclite-index-docs",
+      "activationTarget": ".claude/skills/speclite-index-docs/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Party Mode",
+      "canonicalSkillId": "speclite-party-mode",
+      "activationTarget": ".claude/skills/speclite-party-mode/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Quick Dev",
+      "canonicalSkillId": "speclite-quick-dev",
+      "activationTarget": ".claude/skills/speclite-quick-dev/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Acceptance Auditor",
+      "canonicalSkillId": "speclite-review-acceptance-auditor",
+      "activationTarget": ".claude/skills/speclite-review-acceptance-auditor/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Adversarial Review",
+      "canonicalSkillId": "speclite-review-adversarial-general",
+      "activationTarget": ".claude/skills/speclite-review-adversarial-general/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Edge Case Hunter Review",
+      "canonicalSkillId": "speclite-review-edge-case-hunter",
+      "activationTarget": ".claude/skills/speclite-review-edge-case-hunter/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Shard Document",
+      "canonicalSkillId": "speclite-shard-doc",
+      "activationTarget": ".claude/skills/speclite-shard-doc/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    }
+  ]
+}

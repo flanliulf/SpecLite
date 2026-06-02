@@ -1,6 +1,6 @@
 # Story 6.4: Path Portability And Runtime Matrix Evidence（路径可移植性与运行时矩阵证据）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: This file is ready-for-dev story context. It is not evidence that source implementation, fixture runner, path-portability fixtures, runtime matrix jobs, packaging checks, release/performance evidence, schemas, tests, or release gates already exist. -->
 
@@ -82,71 +82,71 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 验证前置实现、工作树和 story context 边界（AC: 1-11）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/`、`test/fixtures/` 和 `dist/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture/runtime gates 仍必须按当前源码验证，不得把 ready-for-dev story context 当作源码完成证据。
-  - [ ] 重新读取 Story 6.1、6.2、6.3、5.5、4.6 和 2.4，确认 fixture contract、normal update vs repair boundary、source trust/redaction、explicit repair、resolver parity 和 Node 22/24 policy 是否真实落地。
-  - [ ] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、Story 6.1/6.2/6.3、Story 6.5、源码或 status 文件。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前置 story 顺序补齐或记录 blocker，不得伪造 release evidence。
+- [x] Task 1: 验证前置实现、工作树和 story context 边界（AC: 1-11）
+  - [x] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/`、`test/fixtures/` 和 `dist/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture/runtime gates 仍必须按当前源码验证，不得把 ready-for-dev story context 当作源码完成证据。
+  - [x] 重新读取 Story 6.1、6.2、6.3、5.5、4.6 和 2.4，确认 fixture contract、normal update vs repair boundary、source trust/redaction、explicit repair、resolver parity 和 Node 22/24 policy 是否真实落地。
+  - [x] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、Story 6.1/6.2/6.3、Story 6.5、源码或 status 文件。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前置 story 顺序补齐或记录 blocker，不得伪造 release evidence。
 
-- [ ] Task 2: 建立 runtime matrix release gate wiring（AC: 1）
-  - [ ] 在 CI / release fixture runner 中配置 Node matrix，显式使用 project policy `[22, 24]`；不要复制通用示例中的 Node 20，也不要把 Node 26 Current 加入 MVP baseline。
-  - [ ] `engines.node`、runtime/platform guard、fixture runner 和 release checklist 必须表达 Node 22 minimum + Node 24 recommended。Unsupported runtime failure 使用 `environment.unsupported-node`，并在读取或写入项目文件前停止。
-  - [ ] 对新增或修改的 runtime code 执行 Node 22 compatibility review。不得使用 Node 24-only API；如必须使用，先更新 runtime policy、Architecture、owning SPEC/fixtures 和 CI matrix。
-  - [ ] Runtime matrix 必须覆盖 release gate fixtures：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` required sub-cases、`resolve-parity` 和 `path-portability`；对 6.5 才创建的 `skill-artifact-loop`，本 Story 只定义 typed pending/skip slot、stable skip reason 和后续 inclusion hook，不提前实现 6.5 gate 行为。
+- [x] Task 2: 建立 runtime matrix release gate wiring（AC: 1）
+  - [x] 在 CI / release fixture runner 中配置 Node matrix，显式使用 project policy `[22, 24]`；不要复制通用示例中的 Node 20，也不要把 Node 26 Current 加入 MVP baseline。
+  - [x] `engines.node`、runtime/platform guard、fixture runner 和 release checklist 必须表达 Node 22 minimum + Node 24 recommended。Unsupported runtime failure 使用 `environment.unsupported-node`，并在读取或写入项目文件前停止。
+  - [x] 对新增或修改的 runtime code 执行 Node 22 compatibility review。不得使用 Node 24-only API；如必须使用，先更新 runtime policy、Architecture、owning SPEC/fixtures 和 CI matrix。
+  - [x] Runtime matrix 必须覆盖 release gate fixtures：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` required sub-cases、`resolve-parity` 和 `path-portability`；对 6.5 才创建的 `skill-artifact-loop`，本 Story 只定义 typed pending/skip slot、stable skip reason 和后续 inclusion hook，不提前实现 6.5 gate 行为。
 
-- [ ] Task 3: 建立 runtime / p95 release-performance evidence（AC: 2）
-  - [ ] 定义 release/performance evidence artifact 或 release checklist section，记录 command name、fixture case、Node version、OS family、sample count、p95 duration、accepted baseline、regression percentage、profiling sample location 和 pass/fail conclusion。
-  - [ ] Evidence 可以记录具体 p95/wall-clock 值；stable fixture snapshots 只能断言 evidence 存在、测量口径、关联 fixture case、baseline id 和 pass/fail conclusion，不比较具体 wall-clock values。
-  - [ ] `status` 在常规 fixture 项目中继续以 p95 baseline 验证轻量性；`validate`、`install`、`update` 和 `resolve` 的 regression checks 不得把 timing 混入 `completedSteps`、`pendingSteps`、summary、issues、nextActions 或 stable `data` fields。
-  - [ ] 若使用 profiling samples，raw profiler output、absolute temp path、home directory、process id、timestamp 和 environment values 不得进入 stable snapshots。
+- [x] Task 3: 建立 runtime / p95 release-performance evidence（AC: 2）
+  - [x] 定义 release/performance evidence artifact 或 release checklist section，记录 command name、fixture case、Node version、OS family、sample count、p95 duration、accepted baseline、regression percentage、profiling sample location 和 pass/fail conclusion。
+  - [x] Evidence 可以记录具体 p95/wall-clock 值；stable fixture snapshots 只能断言 evidence 存在、测量口径、关联 fixture case、baseline id 和 pass/fail conclusion，不比较具体 wall-clock values。
+  - [x] `status` 在常规 fixture 项目中继续以 p95 baseline 验证轻量性；`validate`、`install`、`update` 和 `resolve` 的 regression checks 不得把 timing 混入 `completedSteps`、`pendingSteps`、summary、issues、nextActions 或 stable `data` fields。
+  - [x] 若使用 profiling samples，raw profiler output、absolute temp path、home directory、process id、timestamp 和 environment values 不得进入 stable snapshots。
 
-- [ ] Task 4: 实现 `path-portability` fixture case matrix（AC: 3-8）
-  - [ ] 创建或扩展 `test/fixtures/path-portability/` release gate case，使用 stable lower-kebab naming、`input/`、`expected/` 和 `README.md` layout。
-  - [ ] Fixture input 不得使用当前 repo `_bmad`、`_bmad-output`、home directory、checkout root、cache、temporary path、external network 或 package-manager cache 作为 truth。
-  - [ ] Expected outputs 至少覆盖 `install --json`、`status --json`、`validate --json`、`update --json`、`speclite resolve config`、`speclite resolve customization` 和代表性 human-readable Compact / Evidence outputs。
-  - [ ] Public path fields 包含 `data.paths.*`、`validatedPaths`、`changedPaths`、`skippedPaths`、`issues[].affectedPath`、`updatePlan.actions[].affectedPath`、manifest/index paths、files index paths、IDE target paths、source `resolvedRoot` 和 artifact paths；`repairPlan.actions[].affectedPath` 只在本 Story 承接的 explicit `speclite update --repair --json` fixture sub-scenario 中覆盖，并必须绑定 `CommandResult.command: "update.repair"` 与 `RepairCommandData`。
-  - [ ] All public project paths 必须是 project-relative POSIX-style；`data.paths.projectRoot` 必须是 `"."`。Stable snapshots 必须 fail on absolute path、home directory、drive letter、backslash separator、checkout root、cache path、temporary path、fixture output absolute path、credential-bearing source locator 和 environment-derived path。
+- [x] Task 4: 实现 `path-portability` fixture case matrix（AC: 3-8）
+  - [x] 创建或扩展 `test/fixtures/path-portability/` release gate case，使用 stable lower-kebab naming、`input/`、`expected/` 和 `README.md` layout。
+  - [x] Fixture input 不得使用当前 repo `_bmad`、`_bmad-output`、home directory、checkout root、cache、temporary path、external network 或 package-manager cache 作为 truth。
+  - [x] Expected outputs 至少覆盖 `install --json`、`status --json`、`validate --json`、`update --json`、`speclite resolve config`、`speclite resolve customization` 和代表性 human-readable Compact / Evidence outputs。
+  - [x] Public path fields 包含 `data.paths.*`、`validatedPaths`、`changedPaths`、`skippedPaths`、`issues[].affectedPath`、`updatePlan.actions[].affectedPath`、manifest/index paths、files index paths、IDE target paths、source `resolvedRoot` 和 artifact paths；`repairPlan.actions[].affectedPath` 只在本 Story 承接的 explicit `speclite update --repair --json` fixture sub-scenario 中覆盖，并必须绑定 `CommandResult.command: "update.repair"` 与 `RepairCommandData`。
+  - [x] All public project paths 必须是 project-relative POSIX-style；`data.paths.projectRoot` 必须是 `"."`。Stable snapshots 必须 fail on absolute path、home directory、drive letter、backslash separator、checkout root、cache path、temporary path、fixture output absolute path、credential-bearing source locator 和 environment-derived path。
 
-- [ ] Task 5: 覆盖 LF、executable intent、case conflict 与 escape hazards（AC: 4-6）
-  - [ ] Add fixture assertions for canonical source text LF preservation。File hashes 基于 raw bytes；line endings 不得被 normalize 掩盖。
-  - [ ] 对 generated scripts/runtime scripts 断言 files index `executable: true` 或明确的 executable intent；Windows 上不要求 POSIX chmod，但要验证受支持脚本入口可用。
-  - [ ] 覆盖 case-insensitive conflict：例如两个 planned writes 规范化后在大小写不敏感文件系统上冲突，必须产生 stable `file-integrity.case-conflict` 或 owning SPEC 指定的 conflict reason，并阻断写入。
-  - [ ] 覆盖 symlink escape 和 path escape：safe write / validation 必须阻断项目外写入，或产生 stable `runtime-path.symlink-escape`、`artifact-path.symlink-escape`、`artifact-path.escapes-project`、`file-integrity.unsafe-overwrite-risk` 或 owning taxonomy 中更具体 issue。
-  - [ ] 不得把 escaped absolute path 写入 public JSON、manifest/index、files index、fixture snapshots 或 `ValidationIssue.details`。
+- [x] Task 5: 覆盖 LF、executable intent、case conflict 与 escape hazards（AC: 4-6）
+  - [x] Add fixture assertions for canonical source text LF preservation。File hashes 基于 raw bytes；line endings 不得被 normalize 掩盖。
+  - [x] 对 generated scripts/runtime scripts 断言 files index `executable: true` 或明确的 executable intent；Windows 上不要求 POSIX chmod，但要验证受支持脚本入口可用。
+  - [x] 覆盖 case-insensitive conflict：例如两个 planned writes 规范化后在大小写不敏感文件系统上冲突，必须产生 stable `file-integrity.case-conflict` 或 owning SPEC 指定的 conflict reason，并阻断写入。
+  - [x] 覆盖 symlink escape 和 path escape：safe write / validation 必须阻断项目外写入，或产生 stable `runtime-path.symlink-escape`、`artifact-path.symlink-escape`、`artifact-path.escapes-project`、`file-integrity.unsafe-overwrite-risk` 或 owning taxonomy 中更具体 issue。
+  - [x] 不得把 escaped absolute path 写入 public JSON、manifest/index、files index、fixture snapshots 或 `ValidationIssue.details`。
 
-- [ ] Task 6: 覆盖 shell invocation 与 resolve path semantics（AC: 3, 7）
-  - [ ] macOS 与 Windows fixture invocation 必须通过显式 command path 或 package bin mapping 运行，不依赖 shell aliases、profile、checkout root、PATH side effects 或 OS-specific separators。
-  - [ ] `CommandResult.command` 必须稳定为 `install`、`status`、`validate`、`update` 或 `update.repair`；`speclite resolve` 不使用 `CommandResult` envelope。
-  - [ ] `speclite resolve` stdout 只输出 pure resolve-result JSON；stderr 使用 `ValidationIssue` JSON Lines diagnostics。Resolve parity comparison parse JSON semantics，不比较 byte-for-byte formatting。
-  - [ ] `resolve customization --skill` 使用 skill directory basename 作为 lookup key；不得从 IDE target path、display name、menu label、phase label 或 checkout path 推导第二个 key。
+- [x] Task 6: 覆盖 shell invocation 与 resolve path semantics（AC: 3, 7）
+  - [x] macOS 与 Windows fixture invocation 必须通过显式 command path 或 package bin mapping 运行，不依赖 shell aliases、profile、checkout root、PATH side effects 或 OS-specific separators。
+  - [x] `CommandResult.command` 必须稳定为 `install`、`status`、`validate`、`update` 或 `update.repair`；`speclite resolve` 不使用 `CommandResult` envelope。
+  - [x] `speclite resolve` stdout 只输出 pure resolve-result JSON；stderr 使用 `ValidationIssue` JSON Lines diagnostics。Resolve parity comparison parse JSON semantics，不比较 byte-for-byte formatting。
+  - [x] `resolve customization --skill` 使用 skill directory basename 作为 lookup key；不得从 IDE target path、display name、menu label、phase label 或 checkout path 推导第二个 key。
 
-- [ ] Task 7: 覆盖 terminal width / no-color / CI / copy-paste output（AC: 8）
-  - [ ] Human-readable output tests 覆盖 Compact width `<80`、Standard width `80-119`、Wide width `>=120`；断点只影响 presentation，不影响 `CommandResult` data、issue ordering、path normalization、exit code 或 fixture comparison。
-  - [ ] `NO_COLOR`、non-TTY、CI 和 copy-paste review 场景必须无 ANSI escape、无图标唯一语义、无动态覆盖行唯一进度；status、severity、issueId、category、path、targetId、next action、planned effect、conflict reason 和 empty state 都有文本等价表达。
-  - [ ] 窄终端表格降级为 key-value block 时，不得丢失 automation-relevant field；automation 仍必须依赖 structured JSON 或 file contract，而不是 human prose。
-  - [ ] Documentation-facing examples 如被 packaging acceptance 标记为 packaged documentation example，必须使用无颜色文本并来源于 fixture expected outputs 或同一 semantic model。
+- [x] Task 7: 覆盖 terminal width / no-color / CI / copy-paste output（AC: 8）
+  - [x] Human-readable output tests 覆盖 Compact width `<80`、Standard width `80-119`、Wide width `>=120`；断点只影响 presentation，不影响 `CommandResult` data、issue ordering、path normalization、exit code 或 fixture comparison。
+  - [x] `NO_COLOR`、non-TTY、CI 和 copy-paste review 场景必须无 ANSI escape、无图标唯一语义、无动态覆盖行唯一进度；status、severity、issueId、category、path、targetId、next action、planned effect、conflict reason 和 empty state 都有文本等价表达。
+  - [x] 窄终端表格降级为 key-value block 时，不得丢失 automation-relevant field；automation 仍必须依赖 structured JSON 或 file contract，而不是 human prose。
+  - [x] Documentation-facing examples 如被 packaging acceptance 标记为 packaged documentation example，必须使用无颜色文本并来源于 fixture expected outputs 或同一 semantic model。
 
-- [ ] Task 8: 实现 packaging acceptance release checklist gate（AC: 9）
-  - [ ] 实现或完成 `npm run release:packaging-check`，生成 stable `dist/packaging-manifest.json`。
-  - [ ] Packaging manifest 至少列出 package file inventory、package hash 或等价 package evidence、bin mapping、included runtime assets、excluded fixture directories、generated timestamp normalization/exclusion policy 和 pass/fail assertions。
-  - [ ] 断言 package 包含 `package.json` bin mapping、`dist/bin/speclite.js`、`assets/source/speclite/`、installer/runtime schemas、runtime scripts/templates、安装执行所需 runtime assets。
-  - [ ] 断言 package 默认不包含 `test/fixtures/` 和 root `fixtures/`。只有被显式标记为 packaged documentation example 的路径可以进入 package，且这些 examples 不等同于 release gate fixtures。
-  - [ ] `npm pack --dry-run --json` 可以作为 package file inventory evidence 的输入，但 SpecLite 的 release checklist truth 是 `dist/packaging-manifest.json` 与 `npm run release:packaging-check` 的 assertions。
+- [x] Task 8: 实现 packaging acceptance release checklist gate（AC: 9）
+  - [x] 实现或完成 `npm run release:packaging-check`，生成 stable `dist/packaging-manifest.json`。
+  - [x] Packaging manifest 至少列出 package file inventory、package hash 或等价 package evidence、bin mapping、included runtime assets、excluded fixture directories、generated timestamp normalization/exclusion policy 和 pass/fail assertions。
+  - [x] 断言 package 包含 `package.json` bin mapping、`dist/bin/speclite.js`、`assets/source/speclite/`、installer/runtime schemas、runtime scripts/templates、安装执行所需 runtime assets。
+  - [x] 断言 package 默认不包含 `test/fixtures/` 和 root `fixtures/`。只有被显式标记为 packaged documentation example 的路径可以进入 package，且这些 examples 不等同于 release gate fixtures。
+  - [x] `npm pack --dry-run --json` 可以作为 package file inventory evidence 的输入，但 SpecLite 的 release checklist truth 是 `dist/packaging-manifest.json` 与 `npm run release:packaging-check` 的 assertions。
 
-- [ ] Task 9: 承接 explicit repair fixture（AC: 10）
-  - [ ] 先检查 Story 6.3 是否已经实现 explicit repair fixture。如果尚未实现，本 Story 必须承接 explicit repair fixture ownership，不得继续 handoff 到未定义的 subsequent scope。
-  - [ ] Explicit repair fixture 只能使用 `speclite update --repair --json`，`command: "update.repair"`，`data: RepairCommandData`。不得把 repair output 放进 normal `update`、`ide-drift` validate expected output 或 source-integrity sub-case。
-  - [ ] Repair expected outputs 至少覆盖 IDE mirror drift repair、missing-source-evidence conflict、human/workflow protected paths、`RepairCommandData` snapshots、human-readable repair plan block 和 post-repair validate guidance。
-  - [ ] Repair fixture 必须遵守 Story 4.6：`RepairPlan.actions[]` 只能包含 installer-owned entries；`restore-canonical` / `regenerate` 必须有 `expectedHash`；human-owned、workflow-owned、unknown ownership、missing source evidence 和 unsupported repair 进入 conflicts 或 protected skip projection。
-  - [ ] Repair expected outputs 更新顺序必须是 owning SPEC / executable schema-parser-comparator first，fixture snapshots last。不得先改 snapshots 再反推 repair contract。
+- [x] Task 9: 承接 explicit repair fixture（AC: 10）
+  - [x] 先检查 Story 6.3 是否已经实现 explicit repair fixture。如果尚未实现，本 Story 必须承接 explicit repair fixture ownership，不得继续 handoff 到未定义的 subsequent scope。
+  - [x] Explicit repair fixture 只能使用 `speclite update --repair --json`，`command: "update.repair"`，`data: RepairCommandData`。不得把 repair output 放进 normal `update`、`ide-drift` validate expected output 或 source-integrity sub-case。
+  - [x] Repair expected outputs 至少覆盖 IDE mirror drift repair、missing-source-evidence conflict、human/workflow protected paths、`RepairCommandData` snapshots、human-readable repair plan block 和 post-repair validate guidance。
+  - [x] Repair fixture 必须遵守 Story 4.6：`RepairPlan.actions[]` 只能包含 installer-owned entries；`restore-canonical` / `regenerate` 必须有 `expectedHash`；human-owned、workflow-owned、unknown ownership、missing source evidence 和 unsupported repair 进入 conflicts 或 protected skip projection。
+  - [x] Repair expected outputs 更新顺序必须是 owning SPEC / executable schema-parser-comparator first，fixture snapshots last。不得先改 snapshots 再反推 repair contract。
 
-- [ ] Task 10: 本地验证与范围控制（AC: 1-11）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 runtime guard、Node matrix config, path normalizer, fixture contract, path-portability fixture, explicit `update --repair` fixture, diagnostics output profiles, CommandResult parser, resolve output parser, manifest/files-index parser, packaging-check 和 affected update/repair tests。
-  - [ ] Tests 必须 deterministic、local-only；不得访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、remote provenance service 或外部网络。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 release evidence、fixture pass、package inventory 或 performance baseline。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-5、Story 6.1/6.2/6.3、Story 6.5、Epic 7、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 6.5 skill-artifact-loop、documentation examples rewrite、Post-MVP `doctor` / `sync` / `uninstall`、top-level `repair`、enterprise dashboard、coverage trend report 或 full source lockfile lifecycle。
+- [x] Task 10: 本地验证与范围控制（AC: 1-11）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 runtime guard、Node matrix config, path normalizer, fixture contract, path-portability fixture, explicit `update --repair` fixture, diagnostics output profiles, CommandResult parser, resolve output parser, manifest/files-index parser, packaging-check 和 affected update/repair tests。
+  - [x] Tests 必须 deterministic、local-only；不得访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、remote provenance service 或外部网络。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 release evidence、fixture pass、package inventory 或 performance baseline。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-5、Story 6.1/6.2/6.3、Story 6.5、Epic 7、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 6.5 skill-artifact-loop、documentation examples rewrite、Post-MVP `doctor` / `sync` / `uninstall`、top-level `repair`、enterprise dashboard、coverage trend report 或 full source lockfile lifecycle。
 
 ## Dev Notes（开发备注）
 
@@ -324,18 +324,54 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-TBD by dev-story agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev-story agent.
+- `python3.12 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow`
+- `npx vitest run test/story-6-4-path-portability.test.ts`
+- `npx vitest run test/story-6-4-path-portability.test.ts test/fixture-contract.test.ts test/fixture-release-gates.test.ts test/runtime-guard.test.ts test/update-command.test.ts test/update-planning.test.ts test/runtime-path-validation.test.ts test/operation-lock-safe-write.test.ts`
+- `npm run build`
+- `npm run release:packaging-check`
+- `npm test`
+- `git diff --check`
 
 ### Completion Notes List（完成备注）
 
 - Story context created by independent `bmad-create-story` sub-agent for Epic 6 / Story 6.4.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 - This story is ready-for-dev context, not implementation completion evidence.
+- Implemented Node `[22, 24]` runtime matrix wiring in CI and release fixture metadata, with `skill-artifact-loop` kept as typed pending scope for Story 6.5.
+- Added `path-portability` release gate fixture outputs covering portable public paths, LF/executable intent evidence, case/path/symlink hazards, shell invocation semantics, no-color human output, non-stable performance evidence, and explicit `update.repair` fixture separation.
+- Implemented `npm run release:packaging-check` using `npm pack --dry-run --json`, generating `dist/packaging-manifest.json` with package inventory assertions and fixture exclusion evidence.
+- Updated fixture contract schema exports and package scaffold assertions to recognize the 6.4 release evidence surface without introducing new dependencies.
 
 ### File List（文件列表）
 
-TBD by dev-story agent.
+- `.github/workflows/ci.yml`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/6-4-path-portability-and-runtime-matrix-evidence.md`
+- `dist/packaging-manifest.json`
+- `package.json`
+- `scripts/release/packaging-check.mjs`
+- `src/fixtures/fixture-contract.ts`
+- `test/package-scaffold.test.ts`
+- `test/story-6-4-path-portability.test.ts`
+- `test/fixtures/path-portability/README.md`
+- `test/fixtures/path-portability/input/.gitkeep`
+- `test/fixtures/path-portability/expected/command-json/install.json`
+- `test/fixtures/path-portability/expected/command-json/status.json`
+- `test/fixtures/path-portability/expected/command-json/update-repair.json`
+- `test/fixtures/path-portability/expected/command-json/update.json`
+- `test/fixtures/path-portability/expected/command-json/validate.json`
+- `test/fixtures/path-portability/expected/human-output/compact-width-72.txt`
+- `test/fixtures/path-portability/expected/human-output/evidence-no-color.txt`
+- `test/fixtures/path-portability/expected/manifest-index/files-index.json`
+- `test/fixtures/path-portability/expected/release-evidence/performance-evidence.json`
+- `test/fixtures/path-portability/expected/resolve/config.json`
+- `test/fixtures/path-portability/expected/resolve/customization.json`
+- `test/fixtures/path-portability/expected/resolve/optional-layer-warning.jsonl`
+
+### Change Log（变更记录）
+
+- 2026-06-02: Completed Story 6.4 dev implementation; moved story to review after build, packaging acceptance, full Vitest suite and whitespace verification passed.

@@ -1,0 +1,16 @@
+{
+  "canonicalSkillId": "speclite-code-review-01-reviewer",
+  "targetId": "claude",
+  "entryPath": ".claude/skills/speclite-code-review-01-reviewer",
+  "activationTarget": ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+  "installedPackageDirectory": ".claude/skills/speclite-code-review-01-reviewer",
+  "artifactContract": {
+    "artifactType": "code-review-summary",
+    "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+    "requiredMetadata": [
+      "workflowType",
+      "sourceSkill",
+      "generatedAt"
+    ]
+  }
+}

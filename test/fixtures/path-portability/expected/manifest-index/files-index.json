@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "speclite.files-index.v1",
+  "entries": [
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/core-skills/speclite-help/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:lf-canonical-skill-text",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "canonical-text",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-help/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/scripts/resolve_config.py",
+      "ownership": "installer-owned",
+      "hash": "sha256:lf-runtime-script",
+      "hashAlgorithm": "sha256",
+      "executable": true,
+      "artifactKind": "runtime-script",
+      "sourceRef": "assets/source/speclite/scripts/resolve_config.py"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-help/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:lf-ide-mirror-text",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-entry",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-help/SKILL.md"
+    }
+  ]
+}

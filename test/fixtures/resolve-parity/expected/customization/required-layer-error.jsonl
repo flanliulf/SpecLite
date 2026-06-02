@@ -1,0 +1,1 @@
+{"issueId":"runtime-path.missing-entry","category":"runtime-path","severity":"error","affectedPath":"customize.toml","component":"customization-resolver","details":{"layerKind":"customization","layerRole":"skill-defaults","status":"missing"},"impact":"Resolve layer diagnostic prevents silent parity drift.","suggestedNextStep":"Inspect the resolve layer and rerun the command."}

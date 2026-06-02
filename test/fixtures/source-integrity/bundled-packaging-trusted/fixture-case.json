@@ -1,5 +1,6 @@
 {
   "caseId": "source-integrity/bundled-packaging-trusted",
   "releaseGate": true,
-  "purpose": "Bundled source with package lock packaging evidence is trusted through a package lock match trust anchor."
+  "purpose": "Bundled source with package lock packaging evidence is trusted through a package lock match trust anchor.",
+  "expectedGate": "mvp-release"
 }

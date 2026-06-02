@@ -94,10 +94,19 @@ describe("speclite resolve CLI", () => {
       expect(result.exitCodes).toEqual([1]);
       expect(result.stdout).toBe("");
       const diagnostics = parseJsonLines(result.stderr);
-      expect(diagnostics[0]).toMatchObject({
+      const expectedDiagnostics = parseJsonLines(
+        await readFile("test/fixtures/resolve-parity/expected/config/required-layer-error.jsonl", "utf8"),
+      );
+      const parsedDiagnostic = ResolveStderrJsonLineSchema.parse(diagnostics[0]);
+      const parsedExpectedDiagnostic = ResolveStderrJsonLineSchema.parse(expectedDiagnostics[0]);
+      expect(parsedDiagnostic.details?.layerRole).toBe(parsedExpectedDiagnostic.details?.layerRole);
+      expect(parsedDiagnostic).toMatchObject({
         issueId: "runtime-path.missing-entry",
         severity: "error",
         affectedPath: "_speclite/config.toml",
+        details: {
+          layerRole: "required-config",
+        },
       });
       expect(result.stderr).not.toContain(fixtureRoot);
     } finally {

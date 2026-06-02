@@ -1,0 +1,1493 @@
+{
+  "schemaVersion": "speclite.phase-coverage.v1",
+  "rows": [
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-analyst",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-analyst",
+          "activationTarget": ".claude/skills/speclite-agent-analyst/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-analyst",
+          "activationTarget": ".agents/skills/speclite-agent-analyst/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-brownfield-context-builder",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-brownfield-context-builder",
+          "activationTarget": ".claude/skills/speclite-brownfield-context-builder/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-brownfield-context-builder",
+          "activationTarget": ".agents/skills/speclite-brownfield-context-builder/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-domain-research",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-domain-research",
+          "activationTarget": ".claude/skills/speclite-domain-research/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-domain-research",
+          "activationTarget": ".agents/skills/speclite-domain-research/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-market-research",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-market-research",
+          "activationTarget": ".claude/skills/speclite-market-research/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-market-research",
+          "activationTarget": ".agents/skills/speclite-market-research/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-prfaq",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-prfaq",
+          "activationTarget": ".claude/skills/speclite-prfaq/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-prfaq",
+          "activationTarget": ".agents/skills/speclite-prfaq/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "prfaq-document",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-product-brief",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-product-brief",
+          "activationTarget": ".claude/skills/speclite-product-brief/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-product-brief",
+          "activationTarget": ".agents/skills/speclite-product-brief/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "product-brief",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-technical-research",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-technical-research",
+          "activationTarget": ".claude/skills/speclite-technical-research/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-technical-research",
+          "activationTarget": ".agents/skills/speclite-technical-research/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "2-planning",
+      "phaseLabel": "Planning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-pm",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-pm",
+          "activationTarget": ".claude/skills/speclite-agent-pm/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-pm",
+          "activationTarget": ".agents/skills/speclite-agent-pm/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "2-planning",
+      "phaseLabel": "Planning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-ux-designer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-ux-designer",
+          "activationTarget": ".claude/skills/speclite-agent-ux-designer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-ux-designer",
+          "activationTarget": ".agents/skills/speclite-agent-ux-designer/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "2-planning",
+      "phaseLabel": "Planning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-prd",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-prd",
+          "activationTarget": ".claude/skills/speclite-create-prd/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-prd",
+          "activationTarget": ".agents/skills/speclite-create-prd/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "prd",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "2-planning",
+      "phaseLabel": "Planning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-ux-design",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-ux-design",
+          "activationTarget": ".claude/skills/speclite-create-ux-design/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-ux-design",
+          "activationTarget": ".agents/skills/speclite-create-ux-design/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "ux-design",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "2-planning",
+      "phaseLabel": "Planning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-edit-prd",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-edit-prd",
+          "activationTarget": ".claude/skills/speclite-edit-prd/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-edit-prd",
+          "activationTarget": ".agents/skills/speclite-edit-prd/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "updated-prd",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "2-planning",
+      "phaseLabel": "Planning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-validate-prd",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-validate-prd",
+          "activationTarget": ".claude/skills/speclite-validate-prd/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-validate-prd",
+          "activationTarget": ".agents/skills/speclite-validate-prd/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "prd-validation-report",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-architect",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-architect",
+          "activationTarget": ".claude/skills/speclite-agent-architect/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-architect",
+          "activationTarget": ".agents/skills/speclite-agent-architect/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-check-implementation-readiness",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-check-implementation-readiness",
+          "activationTarget": ".claude/skills/speclite-check-implementation-readiness/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-check-implementation-readiness",
+          "activationTarget": ".agents/skills/speclite-check-implementation-readiness/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "readiness-report",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-architecture",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-architecture",
+          "activationTarget": ".claude/skills/speclite-create-architecture/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-architecture",
+          "activationTarget": ".agents/skills/speclite-create-architecture/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "architecture",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-epics-and-stories",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-epics-and-stories",
+          "activationTarget": ".claude/skills/speclite-create-epics-and-stories/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-epics-and-stories",
+          "activationTarget": ".agents/skills/speclite-create-epics-and-stories/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "epics-and-stories",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-story-review-01-reviewer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-story-review-01-reviewer",
+          "activationTarget": ".claude/skills/speclite-story-review-01-reviewer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-story-review-01-reviewer",
+          "activationTarget": ".agents/skills/speclite-story-review-01-reviewer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "story-review-summary",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-story-review-02-evaluator",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-story-review-02-evaluator",
+          "activationTarget": ".claude/skills/speclite-story-review-02-evaluator/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-story-review-02-evaluator",
+          "activationTarget": ".agents/skills/speclite-story-review-02-evaluator/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "story-review-evaluation",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-story-review-03-fixer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-story-review-03-fixer",
+          "activationTarget": ".claude/skills/speclite-story-review-03-fixer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-story-review-03-fixer",
+          "activationTarget": ".agents/skills/speclite-story-review-03-fixer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "updated-story-documents",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-dev",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-dev",
+          "activationTarget": ".claude/skills/speclite-agent-dev/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-dev",
+          "activationTarget": ".agents/skills/speclite-agent-dev/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-checkpoint-preview",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-checkpoint-preview",
+          "activationTarget": ".claude/skills/speclite-checkpoint-preview/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-checkpoint-preview",
+          "activationTarget": ".agents/skills/speclite-checkpoint-preview/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-01-reviewer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-01-reviewer",
+          "activationTarget": ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-01-reviewer",
+          "activationTarget": ".agents/skills/speclite-code-review-01-reviewer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "code-review-summary",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-02-evaluator",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-02-evaluator",
+          "activationTarget": ".claude/skills/speclite-code-review-02-evaluator/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-02-evaluator",
+          "activationTarget": ".agents/skills/speclite-code-review-02-evaluator/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "code-review-evaluation",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-03-fixer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-03-fixer",
+          "activationTarget": ".claude/skills/speclite-code-review-03-fixer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-03-fixer",
+          "activationTarget": ".agents/skills/speclite-code-review-03-fixer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "fix-summary",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-04-rules-extractor",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-04-rules-extractor",
+          "activationTarget": ".claude/skills/speclite-code-review-04-rules-extractor/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-04-rules-extractor",
+          "activationTarget": ".agents/skills/speclite-code-review-04-rules-extractor/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "review-rules",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/cr-rules",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-05-todo-tracker",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-05-todo-tracker",
+          "activationTarget": ".claude/skills/speclite-code-review-05-todo-tracker/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-05-todo-tracker",
+          "activationTarget": ".agents/skills/speclite-code-review-05-todo-tracker/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "cr-todo-backlog",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/cr-rules",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-06-finalizer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-06-finalizer",
+          "activationTarget": ".claude/skills/speclite-code-review-06-finalizer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-06-finalizer",
+          "activationTarget": ".agents/skills/speclite-code-review-06-finalizer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "updated-status-files",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-story",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-story",
+          "activationTarget": ".claude/skills/speclite-create-story/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-story",
+          "activationTarget": ".agents/skills/speclite-create-story/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "story",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/stories",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-story",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-story",
+          "activationTarget": ".claude/skills/speclite-create-story/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-story",
+          "activationTarget": ".agents/skills/speclite-create-story/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "story-validation-report",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-dev-story",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-dev-story",
+          "activationTarget": ".claude/skills/speclite-dev-story/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-dev-story",
+          "activationTarget": ".agents/skills/speclite-dev-story/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-flow-gate",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-flow-gate",
+          "activationTarget": ".claude/skills/speclite-flow-gate/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-flow-gate",
+          "activationTarget": ".agents/skills/speclite-flow-gate/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "flow-gate-report",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/flow-gates",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-qa-generate-e2e-tests",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-qa-generate-e2e-tests",
+          "activationTarget": ".claude/skills/speclite-qa-generate-e2e-tests/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-qa-generate-e2e-tests",
+          "activationTarget": ".agents/skills/speclite-qa-generate-e2e-tests/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "test-suite",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-retrospective",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-retrospective",
+          "activationTarget": ".claude/skills/speclite-retrospective/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-retrospective",
+          "activationTarget": ".agents/skills/speclite-retrospective/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "retrospective",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-sprint-planning",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-sprint-planning",
+          "activationTarget": ".claude/skills/speclite-sprint-planning/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-sprint-planning",
+          "activationTarget": ".agents/skills/speclite-sprint-planning/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "sprint-status",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-sprint-status",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-sprint-status",
+          "activationTarget": ".claude/skills/speclite-sprint-status/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-sprint-status",
+          "activationTarget": ".agents/skills/speclite-sprint-status/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-advanced-elicitation",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-advanced-elicitation",
+          "activationTarget": ".claude/skills/speclite-advanced-elicitation/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-advanced-elicitation",
+          "activationTarget": ".agents/skills/speclite-advanced-elicitation/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-brainstorming",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-brainstorming",
+          "activationTarget": ".claude/skills/speclite-brainstorming/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-brainstorming",
+          "activationTarget": ".agents/skills/speclite-brainstorming/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "brainstorming-session",
+        "defaultOutputPath": "_speclite-output/brainstorming",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-customize",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-customize",
+          "activationTarget": ".claude/skills/speclite-customize/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-customize",
+          "activationTarget": ".agents/skills/speclite-customize/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-distillator",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-distillator",
+          "activationTarget": ".claude/skills/speclite-distillator/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-distillator",
+          "activationTarget": ".agents/skills/speclite-distillator/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-editorial-review-prose",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-editorial-review-prose",
+          "activationTarget": ".claude/skills/speclite-editorial-review-prose/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-editorial-review-prose",
+          "activationTarget": ".agents/skills/speclite-editorial-review-prose/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-editorial-review-structure",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-editorial-review-structure",
+          "activationTarget": ".claude/skills/speclite-editorial-review-structure/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-editorial-review-structure",
+          "activationTarget": ".agents/skills/speclite-editorial-review-structure/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-help",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-help",
+          "activationTarget": ".claude/skills/speclite-help/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-help",
+          "activationTarget": ".agents/skills/speclite-help/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-index-docs",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-index-docs",
+          "activationTarget": ".claude/skills/speclite-index-docs/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-index-docs",
+          "activationTarget": ".agents/skills/speclite-index-docs/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-party-mode",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-party-mode",
+          "activationTarget": ".claude/skills/speclite-party-mode/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-party-mode",
+          "activationTarget": ".agents/skills/speclite-party-mode/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-review-acceptance-auditor",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-review-acceptance-auditor",
+          "activationTarget": ".claude/skills/speclite-review-acceptance-auditor/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-review-acceptance-auditor",
+          "activationTarget": ".agents/skills/speclite-review-acceptance-auditor/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-review-adversarial-general",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-review-adversarial-general",
+          "activationTarget": ".claude/skills/speclite-review-adversarial-general/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-review-adversarial-general",
+          "activationTarget": ".agents/skills/speclite-review-adversarial-general/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-review-edge-case-hunter",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-review-edge-case-hunter",
+          "activationTarget": ".claude/skills/speclite-review-edge-case-hunter/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-review-edge-case-hunter",
+          "activationTarget": ".agents/skills/speclite-review-edge-case-hunter/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-shard-doc",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-shard-doc",
+          "activationTarget": ".claude/skills/speclite-shard-doc/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-shard-doc",
+          "activationTarget": ".agents/skills/speclite-shard-doc/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-tech-writer",
+          "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-tech-writer",
+          "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-tech-writer",
+          "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-tech-writer",
+          "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "mermaid-diagram",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-tech-writer",
+          "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-tech-writer",
+          "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-tech-writer",
+          "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-tech-writer",
+          "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "validation-report",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-tech-writer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-tech-writer",
+          "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-tech-writer",
+          "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-correct-course",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-correct-course",
+          "activationTarget": ".claude/skills/speclite-correct-course/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-correct-course",
+          "activationTarget": ".agents/skills/speclite-correct-course/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "change-proposal",
+        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-document-project",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-document-project",
+          "activationTarget": ".claude/skills/speclite-document-project/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-document-project",
+          "activationTarget": ".agents/skills/speclite-document-project/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-generate-project-context",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-generate-project-context",
+          "activationTarget": ".claude/skills/speclite-generate-project-context/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-generate-project-context",
+          "activationTarget": ".agents/skills/speclite-generate-project-context/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "project-context",
+        "defaultOutputPath": "_speclite-output",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-quick-dev",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-quick-dev",
+          "activationTarget": ".claude/skills/speclite-quick-dev/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-quick-dev",
+          "activationTarget": ".agents/skills/speclite-quick-dev/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "spec-and-project-implementation",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Story 6.2: Fresh Install And Existing Update Fixture Gates（Fresh Install 与 Existing Update Fixture Gate）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: This file is ready-for-dev story context. It is not evidence that source implementation, fixture runner, schemas, tests, or release gates already exist. -->
 
@@ -69,71 +69,71 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 实现前置核对与契约阅读（AC: 1-9）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture gates 仍必须按当前源码验证，不得把本 ready-for-dev story 当作源码完成证据。
-  - [ ] 按 `_bmad-output/planning-artifacts/specs/README.md` 的 implementation reading order 读取 owning SPEC。至少读取 `01-command-result-json-contract.md`、`03-install-plan-contract.md`、`04-manifest-index-contract.md`、`05-ide-adapter-registry-contract.md`、`07-validation-issue-taxonomy.md` 和 `08-fixture-contract.md`。
-  - [ ] 重新读取 Story 6.1 的 fixture contract foundation 和 Story 5.5 的 source descriptor / redaction closure，确认 comparator、fixture classification、redaction 和 no-network assumptions 是否已真实落地。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得伪造 fixture pass。
-  - [ ] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、Story 6.1、其它 Epic 6 story、源码或 status 文件。
+- [x] Task 1: 实现前置核对与契约阅读（AC: 1-9）
+  - [x] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture gates 仍必须按当前源码验证，不得把本 ready-for-dev story 当作源码完成证据。
+  - [x] 按 `_bmad-output/planning-artifacts/specs/README.md` 的 implementation reading order 读取 owning SPEC。至少读取 `01-command-result-json-contract.md`、`03-install-plan-contract.md`、`04-manifest-index-contract.md`、`05-ide-adapter-registry-contract.md`、`07-validation-issue-taxonomy.md` 和 `08-fixture-contract.md`。
+  - [x] 重新读取 Story 6.1 的 fixture contract foundation 和 Story 5.5 的 source descriptor / redaction closure，确认 comparator、fixture classification、redaction 和 no-network assumptions 是否已真实落地。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得伪造 fixture pass。
+  - [x] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、Story 6.1、其它 Epic 6 story、源码或 status 文件。
 
-- [ ] Task 2: 建立 `fresh-install-empty-project` release gate fixture（AC: 1-3）
-  - [ ] 在 `test/fixtures/fresh-install-empty-project/` 或等价 fixture root 下创建 stable lower-kebab fixture layout：`input/`、`expected/`、`README.md`。
-  - [ ] Input state 必须表示 empty target project，不得依赖当前 repo `_bmad`、`_bmad-output`、home directory、checkout root、cache、temporary path 或 network state。
-  - [ ] Expected installed tree 必须覆盖 `_speclite/` metadata/control hub、`_speclite-output/` artifact repository、`.claude/skills/` 和 `.agents/skills/` execution plane。
-  - [ ] Expected installed tree 必须列出默认 `core` + `sdlc` 的全部 canonical skill mirror entries：`.claude/skills/*/SKILL.md` 为 `53` 个，`.agents/skills/*/SKILL.md` 为 `53` 个。
-  - [ ] Expected manifest/index snapshots 必须覆盖 manifest、skill index、help index、files index 和 phase coverage index 的 required schema versions、canonical target order 和 project-relative POSIX paths。
-  - [ ] Expected manifest/index snapshots 必须断言 `skill-index.json` 有 `53` 个 canonical package root entries，`files-index.json` 覆盖每个 selected mirror 中对应 package files。
-  - [ ] Expected command JSON 必须使用 `CommandResult<InstallCommandData>`，包含 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps` 和 `pendingSteps`；不得新增未契约化 `readySummary` JSON blob。
+- [x] Task 2: 建立 `fresh-install-empty-project` release gate fixture（AC: 1-3）
+  - [x] 在 `test/fixtures/fresh-install-empty-project/` 或等价 fixture root 下创建 stable lower-kebab fixture layout：`input/`、`expected/`、`README.md`。
+  - [x] Input state 必须表示 empty target project，不得依赖当前 repo `_bmad`、`_bmad-output`、home directory、checkout root、cache、temporary path 或 network state。
+  - [x] Expected installed tree 必须覆盖 `_speclite/` metadata/control hub、`_speclite-output/` artifact repository、`.claude/skills/` 和 `.agents/skills/` execution plane。
+  - [x] Expected installed tree 必须列出默认 `core` + `sdlc` 的全部 canonical skill mirror entries：`.claude/skills/*/SKILL.md` 为 `53` 个，`.agents/skills/*/SKILL.md` 为 `53` 个。
+  - [x] Expected manifest/index snapshots 必须覆盖 manifest、skill index、help index、files index 和 phase coverage index 的 required schema versions、canonical target order 和 project-relative POSIX paths。
+  - [x] Expected manifest/index snapshots 必须断言 `skill-index.json` 有 `53` 个 canonical package root entries，`files-index.json` 覆盖每个 selected mirror 中对应 package files。
+  - [x] Expected command JSON 必须使用 `CommandResult<InstallCommandData>`，包含 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps` 和 `pendingSteps`；不得新增未契约化 `readySummary` JSON blob。
 
-- [ ] Task 3: 实现 ReadyCheck 与 ready summary fixture assertions（AC: 2, 8）
-  - [ ] 使用 stable progress `stepId` 断言 lifecycle order，至少覆盖 `source-discovery`、`manifest-generation`、`ide-mirror-creation`、`config-initialization`、`ready-check` 和 ready summary gate。
-  - [ ] `ReadyCheck` 必须至少确认 manifest/index 可读且 schema version supported、source descriptor projection valid、selected IDE mirrors 存在、selected modules 下全部 canonical package roots 对应 installed skill entries 可见、`_speclite` / artifact root / runtime paths 存在，且本次 install 没有 blocking issue 或 failed required step。
-  - [ ] `ReadyCheck` 不得执行 full hash scan、remote source access、remote freshness/provenance revalidation、implicit update check 或 repair planning。
-  - [ ] 失败路径 expected output 必须断言 completed steps、failed step、pending steps、blocking issue 和 suggested manual action；不得展示 ready summary 或 release-ready summary。
-  - [ ] Human-readable Evidence profile 必须展示 Summary、Steps、Paths、Targets、Issues 和 Next actions；Structured profile 必须由 parsed JSON semantic comparison 覆盖。
+- [x] Task 3: 实现 ReadyCheck 与 ready summary fixture assertions（AC: 2, 8）
+  - [x] 使用 stable progress `stepId` 断言 lifecycle order，至少覆盖 `source-discovery`、`manifest-generation`、`ide-mirror-creation`、`config-initialization`、`ready-check` 和 ready summary gate。
+  - [x] `ReadyCheck` 必须至少确认 manifest/index 可读且 schema version supported、source descriptor projection valid、selected IDE mirrors 存在、selected modules 下全部 canonical package roots 对应 installed skill entries 可见、`_speclite` / artifact root / runtime paths 存在，且本次 install 没有 blocking issue 或 failed required step。
+  - [x] `ReadyCheck` 不得执行 full hash scan、remote source access、remote freshness/provenance revalidation、implicit update check 或 repair planning。
+  - [x] 失败路径 expected output 必须断言 completed steps、failed step、pending steps、blocking issue 和 suggested manual action；不得展示 ready summary 或 release-ready summary。
+  - [x] Human-readable Evidence profile 必须展示 Summary、Steps、Paths、Targets、Issues 和 Next actions；Structured profile 必须由 parsed JSON semantic comparison 覆盖。
 
-- [ ] Task 4: 建立 `existing-install-update` normal update release gate fixture（AC: 4-7）
-  - [ ] 在 `test/fixtures/existing-install-update/` 或等价 fixture root 下创建 existing installed state，包含 installer-owned baseline、human-owned custom files、workflow-owned artifacts 和一个 installer-owned planned update case。
-  - [ ] 使用 files index / manifest hash baseline 表达 ownership 和 expected hashes；不要在 fixture helper 中定义第二套 ownership truth。
-  - [ ] 普通 update expected JSON 必须使用 `CommandResult<UpdateCommandData>`，断言 `updatePlan.actions`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation` 和 `writeAuthorized` 的语义分离。
-  - [ ] Installer-owned planned update 只在无 drift、无 conflict、write authorization 成立时进入 actual `changedPaths`；dry-run 或未授权路径必须保持 `changedPaths` 和 `skippedPaths` 为空，并保留真实 planned actions。
-  - [ ] Human-owned custom 文件保持 unchanged；expected outputs 必须用 unchanged content checks 或 hash/assertion 证明未被 rewrite、reformat、normalize 或 delete。
-  - [ ] Workflow-owned artifacts 保持 unchanged；metadata frontmatter、sidecar JSON、directory artifact metadata 和 artifact order 不得被 update 改写或重排。
+- [x] Task 4: 建立 `existing-install-update` normal update release gate fixture（AC: 4-7）
+  - [x] 在 `test/fixtures/existing-install-update/` 或等价 fixture root 下创建 existing installed state，包含 installer-owned baseline、human-owned custom files、workflow-owned artifacts 和一个 installer-owned planned update case。
+  - [x] 使用 files index / manifest hash baseline 表达 ownership 和 expected hashes；不要在 fixture helper 中定义第二套 ownership truth。
+  - [x] 普通 update expected JSON 必须使用 `CommandResult<UpdateCommandData>`，断言 `updatePlan.actions`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation` 和 `writeAuthorized` 的语义分离。
+  - [x] Installer-owned planned update 只在无 drift、无 conflict、write authorization 成立时进入 actual `changedPaths`；dry-run 或未授权路径必须保持 `changedPaths` 和 `skippedPaths` 为空，并保留真实 planned actions。
+  - [x] Human-owned custom 文件保持 unchanged；expected outputs 必须用 unchanged content checks 或 hash/assertion 证明未被 rewrite、reformat、normalize 或 delete。
+  - [x] Workflow-owned artifacts 保持 unchanged；metadata frontmatter、sidecar JSON、directory artifact metadata 和 artifact order 不得被 update 改写或重排。
 
-- [ ] Task 5: 收口 normal update conflict 与 failure behavior（AC: 7-8）
-  - [ ] 为 installer-owned drift 建立普通 update conflict sub-scenario；`UpdateConflict.reason` 使用 stable lower-kebab reason code `installer-owned-drift`。
-  - [ ] 当 `conflicts.length > 0` 时，`issues` 必须包含且仅包含 command-level blocking issue `update.conflicts`，并在 `details.conflictCount` 中记录 conflict count；不要把每个 conflict 复制为独立 command-level issue。
-  - [ ] `CommandResult.status` 为 `failure`，exit code non-zero；human-readable output 不展示 ready/release-ready summary，必须展示 conflict reason、affected path、ownership 和 suggested manual action。
-  - [ ] `operation-lock.project-locked` 等 pre-planning blocker 不得放进 `data.conflicts`，也不得输出 update plan 假装 planning 完成。
-  - [ ] Partial write failure 必须列出 completed mutations 与 blocking issue/conflict，不得声称 transaction rollback；recovery 指向 `validate`、normal `update` 或 explicit `update --repair`，视 owning SPEC 语义而定。
+- [x] Task 5: 收口 normal update conflict 与 failure behavior（AC: 7-8）
+  - [x] 为 installer-owned drift 建立普通 update conflict sub-scenario；`UpdateConflict.reason` 使用 stable lower-kebab reason code `installer-owned-drift`。
+  - [x] 当 `conflicts.length > 0` 时，`issues` 必须包含且仅包含 command-level blocking issue `update.conflicts`，并在 `details.conflictCount` 中记录 conflict count；不要把每个 conflict 复制为独立 command-level issue。
+  - [x] `CommandResult.status` 为 `failure`，exit code non-zero；human-readable output 不展示 ready/release-ready summary，必须展示 conflict reason、affected path、ownership 和 suggested manual action。
+  - [x] `operation-lock.project-locked` 等 pre-planning blocker 不得放进 `data.conflicts`，也不得输出 update plan 假装 planning 完成。
+  - [x] Partial write failure 必须列出 completed mutations 与 blocking issue/conflict，不得声称 transaction rollback；recovery 指向 `validate`、normal `update` 或 explicit `update --repair`，视 owning SPEC 语义而定。
 
-- [ ] Task 6: 明确 `update --repair` fixture handoff 与更新顺序（AC: 9）
-  - [ ] 本 Story 默认不实现 `update --repair` release gate fixture；普通 `existing-install-update` fixture 不得包含 `RepairPlan` expected output，不得调用 `speclite update --repair`，不得把 repair actions 混入 `UpdatePlan.actions`。
-  - [ ] 在 fixture README、test naming 或 release gate registry 中明确记录：repair 行为由显式 `update --repair` fixture handoff 给 Story 6.3 / 6.4 承接，除非本 Story 被重新授权新增单独 `update-repair-*` fixture。
-  - [ ] 若实现期间必须覆盖 repair，必须创建显式 `update --repair` fixture 或 sub-scenario，command id 必须是 `update.repair`，data 必须是 `RepairCommandData`，且 repair actions 只能覆盖 installer-owned paths。
-  - [ ] 无论 repair 归属本 Story还是后续 Story，都必须遵守更新顺序：先更新 owning SPEC，再更新 executable schema/parser/comparator，最后更新 fixture snapshots。不得先改 snapshots 反推 repair contract。
-  - [ ] Repair expected outputs 的后续 handoff 必须说明：normal update conflict expected outputs 先稳定，repair fixture 在此基础上只验证 explicit repair eligibility、expectedHash、restore-canonical/regenerate、missing-source-evidence 和 protected human/workflow paths。
+- [x] Task 6: 明确 `update --repair` fixture handoff 与更新顺序（AC: 9）
+  - [x] 本 Story 默认不实现 `update --repair` release gate fixture；普通 `existing-install-update` fixture 不得包含 `RepairPlan` expected output，不得调用 `speclite update --repair`，不得把 repair actions 混入 `UpdatePlan.actions`。
+  - [x] 在 fixture README、test naming 或 release gate registry 中明确记录：repair 行为由显式 `update --repair` fixture handoff 给 Story 6.3 / 6.4 承接，除非本 Story 被重新授权新增单独 `update-repair-*` fixture。
+  - [x] 若实现期间必须覆盖 repair，必须创建显式 `update --repair` fixture 或 sub-scenario，command id 必须是 `update.repair`，data 必须是 `RepairCommandData`，且 repair actions 只能覆盖 installer-owned paths。
+  - [x] 无论 repair 归属本 Story还是后续 Story，都必须遵守更新顺序：先更新 owning SPEC，再更新 executable schema/parser/comparator，最后更新 fixture snapshots。不得先改 snapshots 反推 repair contract。
+  - [x] Repair expected outputs 的后续 handoff 必须说明：normal update conflict expected outputs 先稳定，repair fixture 在此基础上只验证 explicit repair eligibility、expectedHash、restore-canonical/regenerate、missing-source-evidence 和 protected human/workflow paths。
 
-- [ ] Task 7: Deterministic comparison 与 release gate classification（AC: 1-9）
-  - [ ] 使用 Story 6.1 的 `src/fixtures/fixture-contract.ts` 或等价 anchor 识别 `fresh-install-empty-project` 与 `existing-install-update` 为 fixture project release gates。
-  - [ ] Command JSON、manifest/index snapshots 和 validation issue sets 必须 parse 后 semantic comparison，不比较 raw pretty-printed bytes。
-  - [ ] Stable outputs 中不得出现 absolute paths、home directories、drive letters、OS-specific separators、timestamps、random ids、process ids、environment variables、credentials、cache paths、temporary paths、stack traces、duration、elapsed time、p95 measurement 或 profiling sample。
-  - [ ] Public arrays 使用 owning SPEC 排序规则：`ideTargets` / `checkedTargets` 遵守 canonical target order `claude`、`agents`；`updatePlan.actions`、`conflicts`、`changedPaths`、`skippedPaths` 按 normalized path 与 contract-defined key 排序。
-  - [ ] Human-readable snapshots 覆盖 Compact / Evidence / Structured representative profiles，且 `NO_COLOR`、non-TTY、CI 和 narrow terminal `<80` fallback 不丢失 severity、issueId、affectedPath、targetId、entryPath、next action、planned effect、conflict reason 或 artifact metadata。
+- [x] Task 7: Deterministic comparison 与 release gate classification（AC: 1-9）
+  - [x] 使用 Story 6.1 的 `src/fixtures/fixture-contract.ts` 或等价 anchor 识别 `fresh-install-empty-project` 与 `existing-install-update` 为 fixture project release gates。
+  - [x] Command JSON、manifest/index snapshots 和 validation issue sets 必须 parse 后 semantic comparison，不比较 raw pretty-printed bytes。
+  - [x] Stable outputs 中不得出现 absolute paths、home directories、drive letters、OS-specific separators、timestamps、random ids、process ids、environment variables、credentials、cache paths、temporary paths、stack traces、duration、elapsed time、p95 measurement 或 profiling sample。
+  - [x] Public arrays 使用 owning SPEC 排序规则：`ideTargets` / `checkedTargets` 遵守 canonical target order `claude`、`agents`；`updatePlan.actions`、`conflicts`、`changedPaths`、`skippedPaths` 按 normalized path 与 contract-defined key 排序。
+  - [x] Human-readable snapshots 覆盖 Compact / Evidence / Structured representative profiles，且 `NO_COLOR`、non-TTY、CI 和 narrow terminal `<80` fallback 不丢失 severity、issueId、affectedPath、targetId、entryPath、next action、planned effect、conflict reason 或 artifact metadata。
 
-- [ ] Task 8: 编写 focused tests 与 CI matrix hooks（AC: 1-9）
-  - [ ] Unit tests 覆盖 fixture registry、release gate classification、ReadyCheck gating、generated tree comparison、manifest/index parser wiring、CommandResult parser wiring 和 update conflict projection。
-  - [ ] Integration / fixture tests 覆盖 `fresh-install-empty-project` success、fresh install controlled failure、`existing-install-update` success with planned installer-owned update、human-owned unchanged、workflow-owned unchanged 和 installer-owned drift conflict。
-  - [ ] Negative tests 覆盖 ready summary premature display、release-ready summary on failure、human-owned rewrite、workflow artifact deletion/reorder、silent installer-owned drift overwrite、repair action accidentally appearing in normal update output。
-  - [ ] Tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、remote provenance service 或外部网络。
-  - [ ] CI/release evidence 应准备 Node 22 和 Node 24 matrix。可使用 `actions/setup-node` with explicit `node-version: ${{ matrix.node }}`，matrix 仅覆盖 SpecLite MVP baseline `[22, 24]`，不要加入 Node 26 作为 MVP baseline。
+- [x] Task 8: 编写 focused tests 与 CI matrix hooks（AC: 1-9）
+  - [x] Unit tests 覆盖 fixture registry、release gate classification、ReadyCheck gating、generated tree comparison、manifest/index parser wiring、CommandResult parser wiring 和 update conflict projection。
+  - [x] Integration / fixture tests 覆盖 `fresh-install-empty-project` success、fresh install controlled failure、`existing-install-update` success with planned installer-owned update、human-owned unchanged、workflow-owned unchanged 和 installer-owned drift conflict。
+  - [x] Negative tests 覆盖 ready summary premature display、release-ready summary on failure、human-owned rewrite、workflow artifact deletion/reorder、silent installer-owned drift overwrite、repair action accidentally appearing in normal update output。
+  - [x] Tests 必须 deterministic、local-only，不访问 npm registry、private registry、Git remote、offline bundle origin、package-manager cache、remote provenance service 或外部网络。
+  - [x] CI/release evidence 应准备 Node 22 和 Node 24 matrix。可使用 `actions/setup-node` with explicit `node-version: ${{ matrix.node }}`，matrix 仅覆盖 SpecLite MVP baseline `[22, 24]`，不要加入 Node 26 作为 MVP baseline。
 
-- [ ] Task 9: 本地验证与交付边界（AC: 1-9）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 affected fixture contract、fresh install fixture、existing update fixture、diagnostics output、manifest/index parser、CommandResult parser、path normalization 和 update conflict tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass，不要跳过 conflict/protection/ReadyCheck tests，不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-5、Story 6.1、Story 6.3-6.5、Epic 7、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 Story 6.3 source-integrity full sub-case matrix、Story 6.4 runtime/path matrix 或 Story 6.5 skill-artifact-loop。
+- [x] Task 9: 本地验证与交付边界（AC: 1-9）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 affected fixture contract、fresh install fixture、existing update fixture、diagnostics output、manifest/index parser、CommandResult parser、path normalization 和 update conflict tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass，不要跳过 conflict/protection/ReadyCheck tests，不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-5、Story 6.1、Story 6.3-6.5、Epic 7、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 Story 6.3 source-integrity full sub-case matrix、Story 6.4 runtime/path matrix 或 Story 6.5 skill-artifact-loop。
 
 ## Dev Notes（开发备注）
 
@@ -296,11 +296,15 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：失败，系统 Python 缺 `tomllib`；已按 skill fallback 读取 `customize.toml`，team/user override 不存在。
+- `npx vitest run test/fixture-release-gates.test.ts`：先红后绿，最终 4 tests passed。
+- `npx vitest run test/update-planning.test.ts test/update-command.test.ts test/install-progress-ready-summary.test.ts test/fixture-contract.test.ts`：4 files / 46 tests passed。
+- `npm run build`：通过，tsup ESM/DTS build success。
+- `npm test`：36 files / 270 tests passed。
 
 ### Completion Notes List（完成备注列表）
 
@@ -308,7 +312,42 @@ TBD by dev agent.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 - This story is ready-for-dev context, not implementation completion evidence.
 - Repair ownership ambiguity from readiness report Minor Concern #3 is resolved by keeping normal `existing-install-update` separate from explicit `update --repair` fixture handoff.
+- 已完成 preflight：完整读取 Story 6.2、`sprint-status.yaml`、`_bmad-output/project-context.md`、owning SPEC 01/03/04/05/07/08、Story 6.1 fixture foundation、Story 5.5 source descriptor/redaction closure、root `package.json` / `package-lock.json` 摘要、`src/` / `test/` / `test/fixtures/` 当前结构和目标 UPDATE anchors。
+- 已将 `fresh-install-empty-project` 明确为 release gate fixture，补齐 full manifest/index expected snapshots，并新增 focused fixture release gate tests，断言 53 个 canonical package roots、两个 IDE mirror 各 53 个 `SKILL.md`、project-relative POSIX paths、ReadyCheck-gated ready summary 和 repeated-run determinism。
+- 已将 `existing-install-update` 明确为 normal update release gate fixture，补齐 input installed state、expected command JSON、README repair handoff，并覆盖 installer-owned planned update、human-owned custom preservation、workflow-owned artifact preservation、installer-owned drift conflict 和 normal update 不混入 repair。
+- 已实现 normal `speclite update --yes` 的最小 safe-write apply：仅在无 conflict 且 write authorized 时应用 installer-owned planned `create/update`，actual `changedPaths` 与 protected `skippedPaths` 来自 apply result；dry-run / not-authorized 保持 `changedPaths` 和 `skippedPaths` 为空。
+- 已调整 protected ownership 投影：human-owned / workflow-owned files 在 normal update plan 中使用 `skip` + stable reason code，不再作为 path conflicts；unknown ownership 和 installer-owned drift 仍阻断 normal update。
+- 未实现 `update --repair` release gate fixture，未新增 `RepairPlan` expected output，未把 `restore-canonical` / `regenerate` 混入 normal `UpdatePlan.actions`；repair fixture 归属继续 handoff 给 Story 6.3 / 6.4。
+- 范围审计：未修改 `_bmad-output/planning-artifacts/`、Story 1-5、Story 6.1、Story 6.3-6.5 或 Epic 7；工作树中这些既有脏改保持不处理。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `src/commands/update.ts`
+- `src/update/update-plan.ts`
+- `test/fixture-release-gates.test.ts`
+- `test/update-planning.test.ts`
+- `test/fixtures/fresh-install-empty-project/README.md`
+- `test/fixtures/fresh-install-empty-project/fixture-case.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/manifest-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/help-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/phase-coverage-full.json`
+- `test/fixtures/existing-install-update/README.md`
+- `test/fixtures/existing-install-update/fixture-case.json`
+- `test/fixtures/existing-install-update/input/_speclite/config.toml`
+- `test/fixtures/existing-install-update/input/_speclite/_config/manifest.yaml`
+- `test/fixtures/existing-install-update/input/_speclite/_config/files-index.json`
+- `test/fixtures/existing-install-update/input/_speclite/custom/config.toml`
+- `test/fixtures/existing-install-update/input/_speclite/custom/config.user.toml`
+- `test/fixtures/existing-install-update/input/_speclite-output/review.md`
+- `test/fixtures/existing-install-update/input/_speclite-output/review.md.metadata.json`
+- `test/fixtures/existing-install-update/input/canonical/config.toml`
+- `test/fixtures/existing-install-update/expected/command-json/normal-update-success.json`
+- `test/fixtures/existing-install-update/expected/command-json/installer-owned-drift-conflict.json`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/6-2-fresh-install-and-existing-update-fixture-gates.md`
+
+## Change Log（变更日志）
+
+- 2026-06-02：完成 Story 6.2 fresh install / existing update release gate fixtures、normal update safe apply、focused Vitest coverage、Story 状态与 sprint tracking 更新至 review。

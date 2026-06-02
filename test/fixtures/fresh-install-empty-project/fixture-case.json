@@ -1,0 +1,5 @@
+{
+  "caseId": "fresh-install-empty-project",
+  "releaseGate": true,
+  "purpose": "Covers fresh install generated tree, manifest/index snapshots, default core+sdlc canonical package roots, IDE mirrors, deterministic command JSON, and ReadyCheck-gated ready summary."
+}

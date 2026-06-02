@@ -1,0 +1,9 @@
+SpecLite update
+Mode: repair
+Output profile: Evidence (key-value)
+affectedPath=.claude/skills/speclite-help/SKILL.md
+ownership=installer-owned
+action=restore-canonical
+reason=human-owned
+issueId=update.conflicts
+next action=speclite validate

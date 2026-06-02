@@ -1,0 +1,15 @@
+schemaVersion: speclite.manifest.v1
+paths:
+  projectRoot: .
+  specliteRoot: _speclite
+  artifactRoot: _speclite-output
+  manifestPath: _speclite/_config/manifest.yaml
+sourceDescriptor:
+  sourceType: bundled
+  resolvedRoot: assets/source/speclite
+  trustStatus: trusted
+  integrityEvidence:
+    - kind: content-hash
+      algorithm: sha256
+      value: fixture-source
+      verified: true

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "speclite.manifest.v1",
+  "sourceDescriptor": {
+    "sourceType": "bundled",
+    "resolvedRoot": "bundled:speclite-fixture",
+    "integrityEvidence": [
+      {
+        "kind": "version-lock",
+        "packageName": "speclite",
+        "version": "0.0.0",
+        "lockPath": "package-lock.json",
+        "verified": true
+      },
+      {
+        "kind": "content-hash",
+        "algorithm": "sha256",
+        "value": "sha256:fixture-bundled-source",
+        "verified": true
+      }
+    ],
+    "trustStatus": "trusted"
+  },
+  "installedModules": [
+    "sdlc"
+  ],
+  "targetIds": [
+    "claude"
+  ],
+  "paths": {
+    "projectRoot": ".",
+    "specliteRoot": "_speclite",
+    "artifactRoot": "_speclite-output",
+    "manifestPath": "_speclite/_config/manifest.json"
+  }
+}

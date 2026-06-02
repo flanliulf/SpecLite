@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "success",
+  "command": "install",
+  "targetProject": "bundled-packaging-trusted",
+  "summary": "SpecLite install source integrity fixture reached the write planning boundary.",
+  "issues": [],
+  "nextActions": [
+    "Continue with install planning after accepted source evidence."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [
+        {
+          "kind": "version-lock",
+          "packageName": "speclite",
+          "version": "0.0.0",
+          "lockPath": "package-lock.json",
+          "verified": true
+        }
+      ],
+      "trustStatus": "trusted"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [
+      "source-discovery",
+      "source-integrity"
+    ],
+    "pendingSteps": [
+      "module-selection"
+    ]
+  }
+}

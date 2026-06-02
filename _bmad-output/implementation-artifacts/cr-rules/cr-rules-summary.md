@@ -54,6 +54,11 @@
 | CR-API-25 | Git commit evidence 必须经过 commit-ish verification 后才能写入 | 5-4 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-26 | Blocked SourceDescriptor 必须在 schema 与 runtime 写入边界双层 fail closed | 5-5 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-PROCESS-01 | 全仓 typecheck 既有债务必须用 Story touched surface 过滤裁决 | 5-5 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-03 | Semantic JSON fixture comparison 不得依赖对象字段插入顺序 | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-04 | Stable fixture normalization 只能覆盖 schema-declared timestamp fields | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-27 | Manifest 枚举字段必须绑定 executable registry schema | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-28 | Normal update apply 成功后必须同步 installed-state projection | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-29 | Conflict failure 输出必须同时保持 structured step state 与准确 summary | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -1977,6 +1982,249 @@
 #### 05 TODO Tracker 交接
 
 - **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 6-2 / 2026-06-02
+
+- **Story**: 6-2
+- **分析来源**:
+  - `6-2-code-review-summary-20260602-round-1.md`
+  - `6-2-code-review-evaluation-20260602-round-1.md`
+  - `6-2-code-review-summary-20260602-round-2.md`
+  - `6-2-code-review-evaluation-20260602-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 P1 `patch` findings：normal update apply 后未同步 installed-state / files-index projection；existing update conflict failure 缺少 AC8 step state 且 summary 误导为已应用更新。
+  - Fixer 已修复两项：apply 成功后写回 `_speclite/_config/files-index.json` projection，并在 conflict failure 中投影 completed / failed / pending step state、manualAction 和准确 summary。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需要修复项 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局 project-context、architecture、AGENTS/CLAUDE 或源码。
+  - 全局文档已覆盖 update plan / changedPaths / skippedPaths / conflicts、CommandResult summary template 和 command data payload 总体契约；本次两条作为 Story 6.2 暴露出的 implementation checkpoint 沉淀，不重复修改全局文档。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Normal update apply 成功后必须同步 installed-state projection | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Conflict failure 输出必须同时保持 structured step state 与准确 summary | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-28：Normal update apply 成功后必须同步 installed-state projection
+
+- **来源问题**: Story 6.2 首轮实现中，normal update 在 `--yes` 且无 conflict 时写入 installer-owned planned update，但未同步 `_speclite/_config/files-index.json` 中对应 entry 的 hash / projection，导致下一次普通 update 可能把刚由 installer 写入的新内容误判为 `installer-owned-drift`。
+- **CR 证据**:
+  - `6-2-code-review-summary-20260602-round-1.md`: Finding #1 指出 `applyUpdateActions` 只执行写入并返回 `changedPaths` / `skippedPaths`，没有更新 files-index / manifest projection，定向复现第二次 update 失败为 `installer-owned-drift`。
+  - `6-2-code-review-evaluation-20260602-round-1.md`: evaluator 确认该问题违反 AC4/AC7，属于 P1，需要修复 apply 后 projection 同步并增加 follow-up update 回归断言。
+  - `6-2-code-review-evaluation-20260602-round-2.md`: evaluator 确认 `applyUpdateActions` 已记录成功应用 action，并通过 `syncAppliedFilesIndexProjection` 写回 files-index hash，fixture 与 regression 均已覆盖。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 normal update apply、installed-state/files-index projection、fixture release gate 和后续 update baseline。 |
+  | 风险等级 | 2 | 成功写入后的 baseline 不一致会把后续安全 update 误判为 drift conflict，破坏 existing install update 持续可用性。 |
+  | 根因稳定性 | 1 | planned effect、actual write result 与 installed-state projection 三层容易脱节，是 update/repair 实现中的稳定风险。 |
+  | 可执行性 | 2 | 可要求 apply 成功后同步 projection，并用 `update --yes` 后立即再跑普通 `update` 的 regression 检查无同路径 drift。 |
+  | 文档缺口 | 0 | 全局文档已有 changedPaths / skippedPaths 表示实际执行结果、plan actions 表示 planned effects 的总契约，本条作为实现检查点沉淀。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: normal update、installer-owned `create` / `update` action apply、installed-state/files-index projection、existing-install update fixture gate。
+- **规避指南**:
+  - 不得只更新目标文件内容而保留旧 installed-state projection；成功应用 installer-owned planned write 后，baseline metadata 必须与 actual write result 一致。
+- **最佳实践**:
+  - apply 阶段记录成功写入的 installer-owned action，用 planned `expectedHash` 更新 files-index entry，并把 metadata projection write 纳入 `changedPaths`；回归测试应覆盖 follow-up 普通 update 不再出现同路径 `installer-owned-drift`。
+- **全局文档建议**:
+  - 不建议本次升格；全局 update safety 与 command result 契约已覆盖 plan/actual/conflict 总边界，直接修改全局文档会扩大本次 04/05/06 收尾范围。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-29：Conflict failure 输出必须同时保持 structured step state 与准确 summary
+
+- **来源问题**: Story 6.2 首轮实现中，existing update conflict failure 的 `update.conflicts` issue 缺少 AC8 要求的 completed / failed / pending step state 与 manual action，且 expected JSON summary 错误宣称已应用更新，和 `writeAuthorized=false`、`changedPaths=[]`、conflicts failure 状态矛盾。
+- **CR 证据**:
+  - `6-2-code-review-summary-20260602-round-1.md`: Finding #2 指出 conflict projection 只写 `details.conflictCount`，human renderer 不展示 step state，fixture expected JSON summary 错误写成 applied updates。
+  - `6-2-code-review-evaluation-20260602-round-1.md`: evaluator 确认该问题违反 AC8 的 structured automation contract 和 failure messaging correctness，属于 P1。
+  - `6-2-code-review-evaluation-20260602-round-2.md`: evaluator 确认 conflict lifecycle state 已投影到 command data 与 issue details，human output 已展示 Step State，summary 已改为 conflict-before-apply 且 no project files changed。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 update conflict JSON projection、human-readable output、fixture expected output 和 automation consumers。 |
+  | 风险等级 | 2 | 失败 summary 与 structured result 矛盾会误导自动化和人工判断，缺少 step state 会削弱 failure gate 可诊断性。 |
+  | 根因稳定性 | 1 | command summary、issue details、command data 与 renderer 多处 projection 容易不一致，后续 failure path 可能复现。 |
+  | 可执行性 | 2 | 可用 schema、fixture expected JSON、human output 和 focused regression 同时断言 step state、manualAction 与 summary。 |
+  | 文档缺口 | 0 | 全局文档已有 CommandResult summary template、command data payload 和 conflicts failure 总契约，本条作为实现检查点沉淀。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: update / update.repair failure path、`update.conflicts` issue projection、human renderer、fixture release gate 和 command result schema。
+- **规避指南**:
+  - 不得让 failure summary 宣称已应用更新，也不得只在人类输出或只在 issue 中表达失败进度；automation 依赖的 step state 必须进入 structured fields。
+- **最佳实践**:
+  - conflict failure 应稳定投影 completedSteps、failedStep、pendingSteps、blocking conflict reason 和 manualAction；fixture tests 同时覆盖 JSON structured fields、human Step State 和 summary 与 `writeAuthorized` / `changedPaths` 的一致性。
+- **全局文档建议**:
+  - 不建议本次升格；全局 command result 与 update safety 契约已有相近约束，修改全局文档超出本次收尾授权。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 6-1 / 2026-06-02
+
+- **Story**: 6-1
+- **分析来源**:
+  - `6-1-code-review-summary-20260602-round-1.md`
+  - `6-1-code-review-evaluation-20260602-round-1.md`
+  - `6-1-code-review-summary-20260602-round-2.md`
+  - `6-1-code-review-evaluation-20260602-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 3 个 P1 `patch` findings：semantic JSON comparison 依赖 `JSON.stringify` 对象字段顺序、`allowedNonStableFields` 可掩盖非 schema-declared timestamp 字段、manifest `expectedOutputClass` 未绑定 expected output class registry。
+  - Round 1 fixer 已修复 3 个 P1，并记录 `npx vitest run test/fixture-contract.test.ts`、focused Vitest、`npm run build`、`npm test` 均通过。
+  - Round 2 reviewer/evaluator 均确认通过；新增 blocking finding 0。唯一未解决项为 `source-integrity` manifest id 与 release gate registry 粒度不一致，维持 P2 defer / 非阻塞。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+  - `source-integrity` 粒度不一致仍未解决，04 不写入规则总结，交由 05 TODO Tracker 管理。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Semantic JSON fixture comparison 不得依赖对象字段插入顺序 | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Stable fixture normalization 只能覆盖 schema-declared timestamp fields | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Manifest 枚举字段必须绑定 executable registry schema | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+| Source integrity manifest id 与 release gate registry 粒度不一致 | 未通过 | 交给 05 | todo-tracker | 未解决非阻塞项，不写入规则总结 |
+
+### 提炼规则
+
+#### CR-TEST-03：Semantic JSON fixture comparison 不得依赖对象字段插入顺序
+
+- **来源问题**: Story 6.1 首轮实现中，`compareSemanticJson` 在 stable normalization 后直接比较 `JSON.stringify(actual)` 与 `JSON.stringify(expected)`，导致字段和值相同但 object key insertion order 不同的 JSON 被误判为 mismatch。
+- **CR 证据**:
+  - `6-1-code-review-summary-20260602-round-1.md`: Finding #1 指出 semantic JSON comparison 仍按字符串顺序比较对象，违背 Story 6.1 对 parsed JSON semantic comparison 的要求。
+  - `6-1-code-review-evaluation-20260602-round-1.md`: evaluator 确认该问题为 P1，需要修复为结构化 deep equality 或 canonical key ordering，并补充对象字段顺序回归测试。
+  - `6-1-code-review-evaluation-20260602-round-2.md`: evaluator 确认 `compareSemanticJson` 已改为 stable normalization 后使用 `isDeepStrictEqual`，并已有 nested object key insertion order 回归覆盖。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 fixture expected output semantic comparison、command JSON snapshot 和 manifest/index snapshot 比较策略。 |
+  | 风险等级 | 1 | 会造成语义相同的 JSON 误失败，削弱 fixture contract 稳定性并增加维护者按实现细节重排 snapshot 的成本。 |
+  | 根因稳定性 | 1 | 把 serialization output 当作 semantic equality 是测试 helper 中容易复现的实现习惯。 |
+  | 可执行性 | 2 | 可通过结构化 deep equality 或 canonical key ordering 检查，并配套 object key order regression。 |
+  | 文档缺口 | 1 | 全局 SPEC 已有 semantic comparison 原则，本条补充 fixture helper 的可执行实现检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: fixture comparison helper、CommandResult JSON snapshots、manifest/index expected outputs、resolve parity 等需要比较 parsed JSON 语义的测试资产。
+- **规避指南**:
+  - 不得用 `JSON.stringify(actual) === JSON.stringify(expected)` 判断 parsed JSON object 的语义相等。
+- **最佳实践**:
+  - 对 plain object 使用结构化 deep equality 或 canonical key ordering；array 保留 contract ordering 语义，并补充 key insertion order 不同但语义相同的 focused regression。
+- **全局文档建议**:
+  - 不建议本次升格；architecture 与 fixture contract SPEC 已覆盖 semantic comparison 总原则，本条作为 Story 6.1 暴露出的 test helper implementation checkpoint 记录。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-TEST-04：Stable fixture normalization 只能覆盖 schema-declared timestamp fields
+
+- **来源问题**: Story 6.1 首轮实现中，`allowedNonStableFields` 只要包含字段名就会把字段归一化为 `"<iso8601>"`，`randomId`、`processId` 等非 timestamp 字段可被误放行，导致 unstable snapshot 漏检。
+- **CR 证据**:
+  - `6-1-code-review-summary-20260602-round-1.md`: Finding #2 指出 `allowedNonStableFields` 可以掩盖非 timestamp 字段，违反 AC 4 对稳定输出的限制。
+  - `6-1-code-review-evaluation-20260602-round-1.md`: evaluator 确认该问题为 P1，需要将 allowlist 收窄为 schema-declared timestamp fields，并覆盖 `randomId`、`processId`、`durationMs` 负向测试。
+  - `6-1-code-review-evaluation-20260602-round-2.md`: evaluator 确认 `SCHEMA_DECLARED_TIMESTAMP_FIELDS` 已限制为 `createdAt`、`generatedAt`、`timestamp`、`updatedAt`，非 timestamp allowlist 路径已有负向测试。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 stable fixture output、manifest/generated metadata、artifact metadata 和 JSON snapshot normalization。 |
+  | 风险等级 | 2 | 会把 random/process/duration 等不稳定字段伪装为稳定 timestamp，导致本应失败的 fixture snapshot 漏检。 |
+  | 根因稳定性 | 1 | 把字段名 allowlist 当作类型声明是 snapshot normalization 中容易复现的缺口。 |
+  | 可执行性 | 2 | 可检查 schema-declared timestamp allowlist、timestamp parse 校验，并配套正负向 focused tests。 |
+  | 文档缺口 | 0 | 全局 architecture 已约束 stable fixture snapshot 只能 normalize/exclude 明确声明的 timestamp 差异。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: fixture comparison helper、artifact metadata、manifest/index generated metadata、任何 stable snapshot normalization 逻辑。
+- **规避指南**:
+  - 不得仅凭调用方传入字段名就归一化 non-stable field；random id、process id、duration、profiling sample、stack trace 等不得进入 stable output。
+- **最佳实践**:
+  - 归一化前先绑定 owning schema 声明的 timestamp field allowlist，并校验值为可解析 timestamp；focused tests 同时覆盖合法 timestamp 与非 timestamp allowlist 的失败路径。
+- **全局文档建议**:
+  - 不建议本次升格；全局文档已有 timestamp/stable fixture snapshot 原则，本条作为 CR 实现检查点沉淀。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-27：Manifest 枚举字段必须绑定 executable registry schema
+
+- **来源问题**: Story 6.1 首轮实现中，`FixtureCaseManifestSchema.expectedOutputClass` 使用任意非空字符串，未绑定 `ExpectedOutputClassSchema`，导致 manifest 可声明未知 expected output class 并绕过 executable registry。
+- **CR 证据**:
+  - `6-1-code-review-summary-20260602-round-1.md`: Finding #3 指出 manifest `expectedOutputClass` 没有绑定 expected output class registry。
+  - `6-1-code-review-evaluation-20260602-round-1.md`: evaluator 确认该问题为 P1，要求 manifest parser 拒绝未知 expected output class 并补充正负向测试。
+  - `6-1-code-review-evaluation-20260602-round-2.md`: evaluator 确认 `expectedOutputClass` 已改为 `ExpectedOutputClassSchema.optional()`，manifest parser 已覆盖合法 `command-json` 与非法 `unknown-output`。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 fixture manifest parser、expected output class registry、release gate classification 后续消费。 |
+  | 风险等级 | 2 | 未绑定 registry 会让无 parser anchor / comparison rule 的 class 进入合法 manifest，破坏 automation contract。 |
+  | 根因稳定性 | 1 | schema 中用 `z.string()` 表达枚举字段而未复用 registry schema，是后续 manifest 字段扩展中可复现的实现风险。 |
+  | 可执行性 | 2 | 可检查 manifest schema 必须复用 executable enum/registry schema，并用 unknown value negative test 覆盖。 |
+  | 文档缺口 | 0 | 全局 SPEC 已要求 expected output classes explicit，本条作为 manifest parser implementation checkpoint 记录。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: fixture manifest、manifest/index schema、adapter/source/validation 等拥有 executable registry 或 enum vocabulary 的 file contract。
+- **规避指南**:
+  - 不得在 manifest parser 中用任意非空字符串承接已存在 executable registry 的枚举字段。
+- **最佳实践**:
+  - 字段 schema 应直接复用 registry schema 或由 registry 派生；新增 registry value 时同步 parser、classification、fixtures 和 unknown value negative test。
+- **全局文档建议**:
+  - 不建议本次升格；全局 fixture contract SPEC 已覆盖 expected output classes explicit，本条不扩大到全局文档修改。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **新增 TODO 候选**: `source-integrity` manifest id 与 release gate registry 粒度不一致。Round 2 evaluator 明确认可该项为 P2 defer / 非阻塞，适合交由 05 TODO Tracker；04 不将其写入已沉淀规则总结。
 
 ### Story 5-5 / 2026-06-01
 

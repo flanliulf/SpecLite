@@ -1,0 +1,5 @@
+{
+  "caseId": "source-integrity/source-unreadable-blocked",
+  "releaseGate": true,
+  "purpose": "Source integrity sub-case source-unreadable-blocked."
+}

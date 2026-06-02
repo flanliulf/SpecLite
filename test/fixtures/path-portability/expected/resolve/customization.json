@@ -1,0 +1,6 @@
+{
+  "workflow.on_complete": "team",
+  "workflow.persistent_facts": [
+    "runtime matrix uses node 22 and 24"
+  ]
+}

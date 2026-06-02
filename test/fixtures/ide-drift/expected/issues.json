@@ -1,0 +1,21 @@
+[
+  {
+    "issueId": "ide-mirror.hash-mismatch",
+    "category": "ide-mirror",
+    "severity": "error",
+    "affectedPath": ".claude/skills/speclite-help",
+    "component": "ide-mirror-validator",
+    "details": {
+      "targetId": "claude",
+      "canonicalSkillId": "speclite-help",
+      "reason": "hash-mismatch",
+      "baselineKind": "canonical-package-hash",
+      "expectedHashAlgorithm": "sha256",
+      "hashMismatch": true,
+      "expectedHashRecorded": true,
+      "currentHashComputed": true
+    },
+    "impact": "Installed IDE mirror content no longer matches the installed canonical package baseline.",
+    "suggestedNextStep": "Run speclite update --repair or manually inspect the affected IDE mirror entry."
+  }
+]

@@ -4,5 +4,7 @@
   "name": "git-floating-blocked",
   "description": "Confirmed Git source without a requested ref is blocked before install planning and never calls the Git client.",
   "expectedOutputClass": "source-integrity",
-  "releaseGate": "focused"
+  "releaseGate": true,
+  "caseId": "source-integrity/git-floating-blocked",
+  "expectedGate": "mvp-release"
 }

@@ -1,0 +1,12 @@
+{
+  "path": "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+  "classification": "packaged-documentation-example",
+  "derivedFrom": [
+    "test/fixtures/fresh-install-empty-project/expected/installed-tree.txt",
+    "test/fixtures/fresh-install-empty-project/expected/installed-state/manifest-full.json",
+    "test/fixtures/path-portability/expected/command-json/status.json",
+    "test/fixtures/path-portability/expected/command-json/validate.json",
+    "test/fixtures/existing-install-update/expected/command-json/normal-update-success.json"
+  ],
+  "isReleaseGateFixture": false
+}

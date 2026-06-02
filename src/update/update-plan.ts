@@ -53,6 +53,28 @@ export async function planUpdate(input: {
 
   for (const entry of context.filesIndex.entries) {
     const currentHash = await readCurrentHash(input.projectRoot, entry.path);
+    const classification = classifyOwnership({
+      relativePath: entry.path,
+      artifactRoot: context.artifactRoot,
+    });
+    const protectedOwnership = entry.ownership !== "installer-owned"
+      ? entry.ownership
+      : classification.ownership === "human-owned" || classification.ownership === "workflow-owned"
+        ? classification.ownership
+        : undefined;
+
+    if (protectedOwnership !== undefined) {
+      actions.push({
+        affectedPath: entry.path,
+        ownership: protectedOwnership,
+        action: "skip",
+        ...(currentHash === undefined ? {} : { currentHash }),
+        expectedHash: entry.hash,
+        reason: protectedOwnership,
+      });
+      continue;
+    }
+
     const conflict = detectFilesIndexEntryConflict({
       entry,
       currentHash,
@@ -113,7 +135,7 @@ export async function planUpdate(input: {
 
     actions.push({
       affectedPath: entry.path,
-      ownership: entry.ownership,
+      ownership: "installer-owned",
       action: "skip",
       ...(currentHash === undefined ? {} : { currentHash }),
       expectedHash: entry.hash,
@@ -121,17 +143,33 @@ export async function planUpdate(input: {
     });
   }
 
+  const writeAuthorized = input.writeAuthorized === true && conflicts.length === 0 && hasPlannedWrite(actions);
+  const applyResult = writeAuthorized
+    ? await applyUpdateActions({
+        projectRoot: input.projectRoot,
+        artifactRoot: context.artifactRoot,
+        actions,
+        filesIndex: context.filesIndex,
+      })
+    : {
+        changedPaths: [] as string[],
+        skippedPaths: [] as string[],
+        issues: [] as ValidationIssue[],
+        blocked: false,
+      };
+
   return {
     data: {
       updatePlan: { actions },
-      changedPaths: [],
-      skippedPaths: [],
+      changedPaths: applyResult.changedPaths,
+      skippedPaths: applyResult.skippedPaths,
       conflicts,
-      requiresConfirmation: requiresUpdateConfirmation({ actions, conflicts, writeAuthorized: input.writeAuthorized === true }),
-      writeAuthorized: input.writeAuthorized === true && conflicts.length === 0 && hasPlannedWrite(actions),
+      ...createUpdateConflictLifecycleState({ actions, conflicts }),
+      requiresConfirmation: requiresUpdateConfirmation({ actions, conflicts, writeAuthorized }),
+      writeAuthorized,
     },
-    issues: context.issues,
-    blocked: false,
+    issues: [...context.issues, ...applyResult.issues],
+    blocked: applyResult.blocked,
   };
 }
 
@@ -533,6 +571,205 @@ async function readSourceHash(input: {
 }): Promise<`sha256:${string}` | undefined> {
   const sourceBytes = await readSourceEvidence(input);
   return sourceBytes === undefined ? undefined : hashBytes(sourceBytes);
+}
+
+async function applyUpdateActions(input: {
+  projectRoot: string;
+  artifactRoot: string;
+  actions: UpdateCommandData["updatePlan"]["actions"];
+  filesIndex: FilesIndex;
+}): Promise<{
+  changedPaths: string[];
+  skippedPaths: string[];
+  issues: ValidationIssue[];
+  blocked: boolean;
+}> {
+  const changedPaths: string[] = [];
+  const skippedPaths: string[] = [];
+  const appliedActions: UpdateCommandData["updatePlan"]["actions"] = [];
+
+  for (const action of input.actions) {
+    if (action.action === "skip") {
+      if (action.reason === "human-owned" || action.reason === "workflow-owned") {
+        skippedPaths.push(action.affectedPath);
+      }
+      continue;
+    }
+    if (action.action === "conflict") continue;
+
+    const entry = input.filesIndex.entries.find((candidate) => candidate.path === action.affectedPath);
+    if (entry === undefined) {
+      return {
+        changedPaths,
+        skippedPaths,
+        issues: [
+          createUpdateApplyIssue({
+            affectedPath: action.affectedPath,
+            reason: "missing-files-index-entry",
+            changedPaths,
+            pendingPaths: pendingUpdatePaths(input.actions, action.affectedPath),
+          }),
+        ],
+        blocked: true,
+      };
+    }
+
+    const sourceBytes = await readSourceEvidence({
+      projectRoot: input.projectRoot,
+      sourceRef: entry.sourceRef,
+    });
+    if (sourceBytes === undefined) {
+      return {
+        changedPaths,
+        skippedPaths,
+        issues: [
+          createUpdateApplyIssue({
+            affectedPath: action.affectedPath,
+            reason: "missing-source-evidence",
+            changedPaths,
+            pendingPaths: pendingUpdatePaths(input.actions, action.affectedPath),
+          }),
+        ],
+        blocked: true,
+      };
+    }
+
+    const write = await safeWriteFile({
+      projectRoot: input.projectRoot,
+      relativePath: action.affectedPath,
+      contents: sourceBytes,
+      executable: entry.executable,
+      allowExisting: action.currentHash !== undefined,
+      ...(action.currentHash === undefined
+        ? {}
+        : {
+            expectedExistingFile: {
+              ownership: "installer-owned" as const,
+              hash: action.currentHash,
+              artifactRoot: input.artifactRoot,
+            },
+          }),
+      component: "update-apply",
+    });
+
+    if (!write.ok) {
+      return {
+        changedPaths,
+        skippedPaths,
+        issues: [
+          {
+            ...write.issue,
+            details: {
+              ...(write.issue.details ?? {}),
+              completedSteps: changedPaths.map((changedPath) => `changed:${changedPath}`),
+              failedStep: `update:${action.affectedPath}`,
+              pendingSteps: pendingUpdatePaths(input.actions, action.affectedPath).map(
+                (pendingPath) => `update:${pendingPath}`,
+              ),
+              changedPaths,
+              manualAction:
+                "Run speclite validate, inspect the failed update target, then rerun speclite update after resolving the blocker.",
+            },
+          },
+        ],
+        blocked: true,
+      };
+    }
+
+    changedPaths.push(write.path);
+    appliedActions.push(action);
+  }
+
+  const projectionResult = await syncAppliedFilesIndexProjection({
+    projectRoot: input.projectRoot,
+    artifactRoot: input.artifactRoot,
+    filesIndex: input.filesIndex,
+    appliedActions,
+  });
+  if (!projectionResult.ok) {
+    return {
+      changedPaths,
+      skippedPaths,
+      issues: [
+        {
+          ...projectionResult.issue,
+          details: {
+            ...(projectionResult.issue.details ?? {}),
+            completedSteps: changedPaths.map((changedPath) => `changed:${changedPath}`),
+            failedStep: "update:_speclite/_config/files-index.json",
+            pendingSteps: [],
+            changedPaths,
+            manualAction:
+              "Run speclite validate, inspect _speclite/_config/files-index.json, then rerun speclite update after resolving the projection write blocker.",
+          },
+        },
+      ],
+      blocked: true,
+    };
+  }
+  if (projectionResult.changedPath !== undefined) {
+    changedPaths.push(projectionResult.changedPath);
+  }
+
+  return {
+    changedPaths,
+    skippedPaths,
+    issues: [],
+    blocked: false,
+  };
+}
+
+async function syncAppliedFilesIndexProjection(input: {
+  projectRoot: string;
+  artifactRoot: string;
+  filesIndex: FilesIndex;
+  appliedActions: UpdateCommandData["updatePlan"]["actions"];
+}): Promise<
+  | { ok: true; changedPath?: string }
+  | { ok: false; issue: ValidationIssue }
+> {
+  const appliedByPath = new Map(
+    input.appliedActions
+      .filter((action) => action.action === "create" || action.action === "update")
+      .map((action) => [action.affectedPath, action] as const),
+  );
+  if (appliedByPath.size === 0) return { ok: true };
+
+  const projectedFilesIndex: FilesIndex = {
+    ...input.filesIndex,
+    entries: input.filesIndex.entries.map((entry) => {
+      const applied = appliedByPath.get(entry.path);
+      if (applied?.expectedHash === undefined) return entry;
+      return {
+        ...entry,
+        hash: applied.expectedHash,
+      };
+    }),
+  };
+  const filesIndexPath = "_speclite/_config/files-index.json";
+  const currentHash = await readCurrentHash(input.projectRoot, filesIndexPath);
+  if (currentHash === undefined) {
+    return {
+      ok: false,
+      issue: createFilesIndexProjectionIssue("missing-files-index"),
+    };
+  }
+
+  const write = await safeWriteFile({
+    projectRoot: input.projectRoot,
+    relativePath: filesIndexPath,
+    contents: `${JSON.stringify(projectedFilesIndex, null, 2)}\n`,
+    allowExisting: true,
+    expectedExistingFile: {
+      ownership: "installer-owned",
+      hash: currentHash,
+      artifactRoot: input.artifactRoot,
+    },
+    component: "update-files-index-projection",
+  });
+  if (!write.ok) return { ok: false, issue: write.issue };
+
+  return { ok: true, changedPath: write.path };
 }
 
 async function planIdeMirrorRepairActions(input: {
@@ -983,6 +1220,22 @@ function isCoveredByIdePackageRepair(pathValue: string, repairActionPaths: Set<s
   return false;
 }
 
+function createUpdateConflictLifecycleState(input: {
+  actions: UpdateCommandData["updatePlan"]["actions"];
+  conflicts: UpdateCommandData["conflicts"];
+}): Pick<UpdateCommandData, "completedSteps" | "failedStep" | "pendingSteps"> {
+  if (input.conflicts.length === 0) return {};
+
+  return {
+    completedSteps: ["installed-state-read", "update-plan"],
+    failedStep: "conflict-check",
+    pendingSteps: [
+      "resolve-conflicts",
+      ...(hasPlannedWrite(input.actions) ? ["authorize-update-writes", "apply-update-writes"] : []),
+    ],
+  };
+}
+
 function pendingRepairPaths(
   actions: RepairCommandData["repairPlan"]["actions"],
   failedPath: string,
@@ -993,6 +1246,57 @@ function pendingRepairPaths(
     .slice(failedIndex + 1)
     .filter((action) => action.action !== "skip")
     .map((action) => action.affectedPath);
+}
+
+function pendingUpdatePaths(
+  actions: UpdateCommandData["updatePlan"]["actions"],
+  failedPath: string,
+): string[] {
+  const failedIndex = actions.findIndex((action) => action.affectedPath === failedPath);
+  if (failedIndex < 0) return [];
+  return actions
+    .slice(failedIndex + 1)
+    .filter((action) => action.action === "create" || action.action === "update")
+    .map((action) => action.affectedPath);
+}
+
+function createUpdateApplyIssue(input: {
+  affectedPath: string;
+  reason: "missing-files-index-entry" | "missing-source-evidence";
+  changedPaths: string[];
+  pendingPaths: string[];
+}): ValidationIssue {
+  return {
+    issueId: "source-integrity.missing-source-evidence",
+    category: "source-integrity",
+    severity: "error",
+    affectedPath: input.affectedPath,
+    component: "update-apply",
+    details: {
+      reason: input.reason,
+      completedSteps: input.changedPaths.map((changedPath) => `changed:${changedPath}`),
+      failedStep: `update:${input.affectedPath}`,
+      pendingSteps: input.pendingPaths.map((pendingPath) => `update:${pendingPath}`),
+      changedPaths: input.changedPaths,
+      manualAction:
+        "Run speclite validate, restore the missing canonical source evidence, then rerun speclite update.",
+    },
+    impact: "SpecLite could not complete the authorized update because the planned source evidence was no longer available.",
+    suggestedNextStep: "Run speclite validate, restore source evidence, then rerun speclite update.",
+  };
+}
+
+function createFilesIndexProjectionIssue(reason: "missing-files-index"): ValidationIssue {
+  return {
+    issueId: "source-integrity.missing-source-evidence",
+    category: "source-integrity",
+    severity: "error",
+    affectedPath: "_speclite/_config/files-index.json",
+    component: "update-files-index-projection",
+    details: { reason },
+    impact: "SpecLite could not persist the installed-state files-index projection after applying update writes.",
+    suggestedNextStep: "Run speclite validate, restore _speclite/_config/files-index.json, then rerun speclite update.",
+  };
 }
 
 function createRepairApplyIssue(input: {

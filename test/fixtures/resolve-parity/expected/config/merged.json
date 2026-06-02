@@ -1,0 +1,25 @@
+{
+  "core": {
+    "project_name": "Fixture User",
+    "communication_language": "中文",
+    "document_output_language": "Mandarin"
+  },
+  "modules": {
+    "sdlc": {
+      "agents": [
+        {
+          "code": "dev",
+          "label": "Team Dev"
+        }
+      ],
+      "appendFallback": [
+        {
+          "code": "a"
+        },
+        {
+          "id": "b"
+        }
+      ]
+    }
+  }
+}

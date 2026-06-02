@@ -1,0 +1,13 @@
+{
+  "forbiddenSubstrings": [
+    "/Users/",
+    "C:\\",
+    "~/",
+    "token=",
+    "password=",
+    "credential=",
+    "Stack trace",
+    "raw stderr",
+    "fixture-output"
+  ]
+}

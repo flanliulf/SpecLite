@@ -1,6 +1,6 @@
 # Story 6.1: Fixture Case Layout And Expected Output Contract（Fixture Case 布局与 Expected Output 契约）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: This file is ready-for-dev story context. It is not evidence that source implementation, fixture runner, schemas, or tests already exist. -->
 
@@ -64,69 +64,69 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 实现前置核对与范围边界（AC: 1-8）
-  - [ ] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture contract 仍必须按当前源码验证，不得把本 story context 当作源码完成证据。
-  - [ ] 重新读取 `_bmad-output/planning-artifacts/specs/README.md`，再按 owning SPEC 顺序读取 `01`、`04`、`05`、`06`、`07`、`08` 中与 fixture/output 相关的 sections；不要从 PRD、Architecture 或旧 story 复制 field-level truth。
-  - [ ] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得在本 Story 内伪造通过状态。
-  - [ ] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、其它 Epic 6 story、源码或 status 文件。
+- [x] Task 1: 实现前置核对与范围边界（AC: 1-8）
+  - [x] 重新检查 root `package.json`、`package-lock.json`、`src/`、`test/`、`tests/`、root `fixtures/` 和 `test/fixtures/` 是否与当前 sprint/source 状态一致。截至 2026-05-29，Epic 3 提交 `395b017` 已提供 root TypeScript CLI scaffold、`src/commands/update.ts`、`CommandResult` / `ValidationIssue` anchors 和 validation/diagnostics tests；Epic 4/5 behavior 与本 Epic fixture contract 仍必须按当前源码验证，不得把本 story context 当作源码完成证据。
+  - [x] 重新读取 `_bmad-output/planning-artifacts/specs/README.md`，再按 owning SPEC 顺序读取 `01`、`04`、`05`、`06`、`07`、`08` 中与 fixture/output 相关的 sections；不要从 PRD、Architecture 或旧 story 复制 field-level truth。
+  - [x] 修改任何 UPDATE 文件前完整读取该文件，记录 current behavior、data shape、public output、tests 和必须保留的 behavior。若前置 implementation 尚未存在，按前序 story 顺序补齐或记录 blocker，不得在本 Story 内伪造通过状态。
+  - [x] 检查 dirty worktree，保留用户、父 agent 或其它 sub-agent 的改动；不得格式化、重写、同步或回滚无关 planning docs、Story 1-5、其它 Epic 6 story、源码或 status 文件。
 
-- [ ] Task 2: 建立 fixture contract executable anchor（AC: 1-2, 7-8）
-  - [ ] 在 `src/fixtures/fixture-contract.ts` 或等价 module 中集中定义 fixture manifest parsing、case layout validation、expected output class registry、comparison policy 和 gate classification。该 module 是 implementation anchor，不是第二份契约真源。
-  - [ ] 定义 `FixtureCaseId`、`FixtureGroupId`、`FixtureSubCaseId`、`ExpectedOutputClass`、`FixtureGateClassification` 等 producer-facing types，并强制 lower-kebab validation。
-  - [ ] 将 release gate fixture project cases 固化为 registry-driven data：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` group、`resolve-parity`、`path-portability`、`skill-artifact-loop`。
-  - [ ] 将 `source-integrity` required sub-cases 固化为 registry-driven data：`bundled-packaging-trusted`、`bundled-packaging-missing-evidence-blocked`、`registry-lock-trusted`、`registry-unverified`、`git-floating-blocked`、`local-source-snapshot-unverified`、`local-source-path-redacted`、`local-source-installed-state-blocked`、`artifact-hash-mismatch-blocked`、`source-unreadable-blocked`。
-  - [ ] 明确 `packaging-acceptance` 是 release checklist gate，不是 `test/fixtures/<case>/` fixture project case；它的 stable artifact 是 `dist/packaging-manifest.json`。
+- [x] Task 2: 建立 fixture contract executable anchor（AC: 1-2, 7-8）
+  - [x] 在 `src/fixtures/fixture-contract.ts` 或等价 module 中集中定义 fixture manifest parsing、case layout validation、expected output class registry、comparison policy 和 gate classification。该 module 是 implementation anchor，不是第二份契约真源。
+  - [x] 定义 `FixtureCaseId`、`FixtureGroupId`、`FixtureSubCaseId`、`ExpectedOutputClass`、`FixtureGateClassification` 等 producer-facing types，并强制 lower-kebab validation。
+  - [x] 将 release gate fixture project cases 固化为 registry-driven data：`fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` group、`resolve-parity`、`path-portability`、`skill-artifact-loop`。
+  - [x] 将 `source-integrity` required sub-cases 固化为 registry-driven data：`bundled-packaging-trusted`、`bundled-packaging-missing-evidence-blocked`、`registry-lock-trusted`、`registry-unverified`、`git-floating-blocked`、`local-source-snapshot-unverified`、`local-source-path-redacted`、`local-source-installed-state-blocked`、`artifact-hash-mismatch-blocked`、`source-unreadable-blocked`。
+  - [x] 明确 `packaging-acceptance` 是 release checklist gate，不是 `test/fixtures/<case>/` fixture project case；它的 stable artifact 是 `dist/packaging-manifest.json`。
 
-- [ ] Task 3: 实现 fixture layout validator（AC: 1, 3, 8）
-  - [ ] 验证 single case layout：`test/fixtures/<case>/input/`、`test/fixtures/<case>/expected/`、`test/fixtures/<case>/README.md`。
-  - [ ] 验证 group sub-case layout：`test/fixtures/<group>/<sub-case>/input/`、`test/fixtures/<group>/<sub-case>/expected/`、`test/fixtures/<group>/<sub-case>/README.md`。
-  - [ ] 允许 `fixtures/sources/` 存放 reusable source packages，允许 `fixtures/expected/` 存放 shared expected snapshots，但每个 test 必须显式说明它验证的 fixture case 或 sub-case。
-  - [ ] 阻止或报告 generated output、cache、temporary、build output、`node_modules`、checkout root、home directory 或 absolute local path 被登记为 expected truth。
-  - [ ] 保持 fixture source assets、expected outputs 和 docs examples 的边界：fixture expected outputs 是 contract test assets，不是普通文档示例；文档示例只能引用或派生自 expected outputs。
+- [x] Task 3: 实现 fixture layout validator（AC: 1, 3, 8）
+  - [x] 验证 single case layout：`test/fixtures/<case>/input/`、`test/fixtures/<case>/expected/`、`test/fixtures/<case>/README.md`。
+  - [x] 验证 group sub-case layout：`test/fixtures/<group>/<sub-case>/input/`、`test/fixtures/<group>/<sub-case>/expected/`、`test/fixtures/<group>/<sub-case>/README.md`。
+  - [x] 允许 `fixtures/sources/` 存放 reusable source packages，允许 `fixtures/expected/` 存放 shared expected snapshots，但每个 test 必须显式说明它验证的 fixture case 或 sub-case。
+  - [x] 阻止或报告 generated output、cache、temporary、build output、`node_modules`、checkout root、home directory 或 absolute local path 被登记为 expected truth。
+  - [x] 保持 fixture source assets、expected outputs 和 docs examples 的边界：fixture expected outputs 是 contract test assets，不是普通文档示例；文档示例只能引用或派生自 expected outputs。
 
-- [ ] Task 4: 定义 expected output class registry（AC: 2, 4, 7）
-  - [ ] 为 expected installed tree 建立 normalized file-tree summary 规则，并要求 installer-owned file 使用 hash assertion。
-  - [ ] 为 manifest/index snapshots 绑定 `src/manifest/manifest-schema.ts` executable parser；不得在 fixture helper 中 hand-roll manifest/index field checks。
-  - [ ] 为 command JSON output 绑定 `src/diagnostics/command-result-schema.ts` parser，并按 `CommandResult` semantic fields 比较。
-  - [ ] 为 validation issue set 绑定 `ValidationIssue` shape 和 taxonomy ordering；比较 severity、category、issueId、affectedPath/component、details、impact、suggestedNextStep。
-  - [ ] 为 `speclite resolve` stdout/stderr expected outputs 绑定 `src/config/resolve-output-schema.ts`：stdout parse 为 JSON semantics，stderr 逐行 parse 为 `ValidationIssue` JSON Lines。
-  - [ ] 为 human-readable output profiles 定义 normalized assertion helper：断言 field presence、section ordering、no ANSI、text equivalent、profile-specific content，而不是把 terminal wrapping 当作 raw bytes truth。
+- [x] Task 4: 定义 expected output class registry（AC: 2, 4, 7）
+  - [x] 为 expected installed tree 建立 normalized file-tree summary 规则，并要求 installer-owned file 使用 hash assertion。
+  - [x] 为 manifest/index snapshots 绑定 `src/manifest/manifest-schema.ts` executable parser；不得在 fixture helper 中 hand-roll manifest/index field checks。
+  - [x] 为 command JSON output 绑定 `src/diagnostics/command-result-schema.ts` parser，并按 `CommandResult` semantic fields 比较。
+  - [x] 为 validation issue set 绑定 `ValidationIssue` shape 和 taxonomy ordering；比较 severity、category、issueId、affectedPath/component、details、impact、suggestedNextStep。
+  - [x] 为 `speclite resolve` stdout/stderr expected outputs 绑定 `src/config/resolve-output-schema.ts`：stdout parse 为 JSON semantics，stderr 逐行 parse 为 `ValidationIssue` JSON Lines。
+  - [x] 为 human-readable output profiles 定义 normalized assertion helper：断言 field presence、section ordering、no ANSI、text equivalent、profile-specific content，而不是把 terminal wrapping 当作 raw bytes truth。
 
-- [ ] Task 5: 实现 stable comparison normalizers（AC: 3-6）
-  - [ ] 建立 project-relative POSIX path normalizer，并复用 `src/fs/path-normalizer.ts` 或等价共享 helper；不要在 fixture runner 内创建第二套路劲规则。
-  - [ ] 建立 non-stable field policy：只允许 schema-declared generated metadata timestamps 等明确字段被 normalize/exclude；unknown timestamp-like、random-like 或 environment-specific fields 必须 fail。
-  - [ ] 检查 stable outputs 中不得出现 absolute path、home directory、drive letter、OS-specific separator、credential、token、cache path、temporary path、process id、environment variable、stack trace、duration 或 profiling sample。
-  - [ ] 对 public JSON arrays 使用 contract ordering rules；不得依赖 filesystem traversal、object insertion order、async completion order、adapter completion order 或 test execution order。
-  - [ ] 对 human-readable output 分别覆盖 Compact width `<80`、Standard width `80-119`、Wide width `>=120` 和 Structured mode；断点只影响 presentation，不影响 `CommandResult` data、issue ordering、path normalization、exit code 或 fixture comparison。
+- [x] Task 5: 实现 stable comparison normalizers（AC: 3-6）
+  - [x] 建立 project-relative POSIX path normalizer，并复用 `src/fs/path-normalizer.ts` 或等价共享 helper；不要在 fixture runner 内创建第二套路劲规则。
+  - [x] 建立 non-stable field policy：只允许 schema-declared generated metadata timestamps 等明确字段被 normalize/exclude；unknown timestamp-like、random-like 或 environment-specific fields 必须 fail。
+  - [x] 检查 stable outputs 中不得出现 absolute path、home directory、drive letter、OS-specific separator、credential、token、cache path、temporary path、process id、environment variable、stack trace、duration 或 profiling sample。
+  - [x] 对 public JSON arrays 使用 contract ordering rules；不得依赖 filesystem traversal、object insertion order、async completion order、adapter completion order 或 test execution order。
+  - [x] 对 human-readable output 分别覆盖 Compact width `<80`、Standard width `80-119`、Wide width `>=120` 和 Structured mode；断点只影响 presentation，不影响 `CommandResult` data、issue ordering、path normalization、exit code 或 fixture comparison。
 
-- [ ] Task 6: 收口 output profile fixture policy（AC: 5-6）
-  - [ ] 在 `src/diagnostics/output.ts` 或现有 output layer 中保持 Compact、Evidence、Structured profiles 共享同一 semantic model；command modules 不得自行拼接 status text、issue layout、path display 或 profile-specific private fields。
-  - [ ] Compact profile 覆盖 command title、high-level health/source/version/target count/next action 等快速摘要，不输出 automation-only hidden state。
-  - [ ] Evidence profile 覆盖 Summary、Steps/Checked、Paths/Targets、Issues/Conflicts、Next actions，并适用于 `install`、`validate`、`update` 默认 human-readable output。
-  - [ ] Structured profile 绑定 `CommandResult`、`ValidationIssue`、command-specific data payload、resolve JSON 或 governance artifact data，不受 terminal width、TTY、颜色、locale 或平台影响。
-  - [ ] `NO_COLOR`、non-TTY、CI 和 copy-paste review 场景必须无 ANSI escape，且 status、severity、issueId、category、path、next action 和 reason code 都有文本表达。
+- [x] Task 6: 收口 output profile fixture policy（AC: 5-6）
+  - [x] 在 `src/diagnostics/output.ts` 或现有 output layer 中保持 Compact、Evidence、Structured profiles 共享同一 semantic model；command modules 不得自行拼接 status text、issue layout、path display 或 profile-specific private fields。
+  - [x] Compact profile 覆盖 command title、high-level health/source/version/target count/next action 等快速摘要，不输出 automation-only hidden state。
+  - [x] Evidence profile 覆盖 Summary、Steps/Checked、Paths/Targets、Issues/Conflicts、Next actions，并适用于 `install`、`validate`、`update` 默认 human-readable output。
+  - [x] Structured profile 绑定 `CommandResult`、`ValidationIssue`、command-specific data payload、resolve JSON 或 governance artifact data，不受 terminal width、TTY、颜色、locale 或平台影响。
+  - [x] `NO_COLOR`、non-TTY、CI 和 copy-paste review 场景必须无 ANSI escape，且 status、severity、issueId、category、path、next action 和 reason code 都有文本表达。
 
-- [ ] Task 7: 明确 release gate 与 regression asset 分类（AC: 8）
-  - [ ] 在 fixture registry 中标记 release gate fixture project、release-gate group sub-case、release checklist gate、regression asset 和 documentation example。
-  - [ ] Release gate fixtures 必须作为 MVP release 前的 blocking evidence；local developer runs 可以缩小 matrix，但 release evidence 必须包含 Node 22、Node 24、macOS 和 Windows path-portability coverage。
-  - [ ] Regression assets 是必需 repository assets，但除非 release checklist 显式提升为 gate，否则不阻塞 MVP release。
-  - [ ] `test/fixtures/` 与 root `fixtures/` 默认不得进入 package；除非某路径被明确标记为 packaged documentation example。Packaged examples 不等同于 release gate fixtures。
-  - [ ] Documentation examples 必须引用或派生自 fixture expected outputs，不能复制 schema 真源或定义第二套 contract。
+- [x] Task 7: 明确 release gate 与 regression asset 分类（AC: 8）
+  - [x] 在 fixture registry 中标记 release gate fixture project、release-gate group sub-case、release checklist gate、regression asset 和 documentation example。
+  - [x] Release gate fixtures 必须作为 MVP release 前的 blocking evidence；local developer runs 可以缩小 matrix，但 release evidence 必须包含 Node 22、Node 24、macOS 和 Windows path-portability coverage。
+  - [x] Regression assets 是必需 repository assets，但除非 release checklist 显式提升为 gate，否则不阻塞 MVP release。
+  - [x] `test/fixtures/` 与 root `fixtures/` 默认不得进入 package；除非某路径被明确标记为 packaged documentation example。Packaged examples 不等同于 release gate fixtures。
+  - [x] Documentation examples 必须引用或派生自 fixture expected outputs，不能复制 schema 真源或定义第二套 contract。
 
-- [ ] Task 8: 编写 focused tests 与 minimum contract examples（AC: 1-8）
-  - [ ] Unit tests 覆盖 lower-kebab validation、single case layout、group sub-case layout、missing required directories、invalid expected class、gate classification 和 packaging-acceptance 非 fixture-project boundary。
-  - [ ] Comparator tests 覆盖 semantic JSON comparison、manifest/index parser wiring、stderr JSON Lines parsing、ValidationIssue ordering、path normalization、timestamp normalization/exclusion 和 random/env/path leak failure。
-  - [ ] Human output tests 覆盖 Compact/Evidence/Structured profiles、`NO_COLOR`、non-TTY、CI、narrow terminal key-value fallback 和 no spinner-only progress。
-  - [ ] Path portability tests 至少在 normalizer 层覆盖 POSIX style path、Windows separator normalization、drive letter leak rejection、home directory leak rejection、checkout-root-independent comparison 和 symlink/path escape diagnostic handoff。
-  - [ ] Snapshot or fixture update tests 必须证明 snapshot update 需要 explicit local action，CI 下 mismatch、missing 或 obsolete snapshots fail；不得让 CI 自动写入 expected outputs。
-  - [ ] 若实际 fixture cases 尚未具备前序 command implementation，可先建立 contract-level fixture examples 与 comparator tests；不要实现 Story 6.2-6.5 的完整 fixture matrix。
+- [x] Task 8: 编写 focused tests 与 minimum contract examples（AC: 1-8）
+  - [x] Unit tests 覆盖 lower-kebab validation、single case layout、group sub-case layout、missing required directories、invalid expected class、gate classification 和 packaging-acceptance 非 fixture-project boundary。
+  - [x] Comparator tests 覆盖 semantic JSON comparison、manifest/index parser wiring、stderr JSON Lines parsing、ValidationIssue ordering、path normalization、timestamp normalization/exclusion 和 random/env/path leak failure。
+  - [x] Human output tests 覆盖 Compact/Evidence/Structured profiles、`NO_COLOR`、non-TTY、CI、narrow terminal key-value fallback 和 no spinner-only progress。
+  - [x] Path portability tests 至少在 normalizer 层覆盖 POSIX style path、Windows separator normalization、drive letter leak rejection、home directory leak rejection、checkout-root-independent comparison 和 symlink/path escape diagnostic handoff。
+  - [x] Snapshot or fixture update tests 必须证明 snapshot update 需要 explicit local action，CI 下 mismatch、missing 或 obsolete snapshots fail；不得让 CI 自动写入 expected outputs。
+  - [x] 若实际 fixture cases 尚未具备前序 command implementation，可先建立 contract-level fixture examples 与 comparator tests；不要实现 Story 6.2-6.5 的完整 fixture matrix。
 
-- [ ] Task 9: 本地验证与交付边界（AC: 1-8）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test`，或至少运行 fixture contract、normalizer、comparator、diagnostics output profile、manifest/index parser wiring、CommandResult parser wiring 和 affected fixture tests。
-  - [ ] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass，不要跳过 comparison/redaction/profile tests，不要创建 private JSON shape。
-  - [ ] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-5、其它 Epic 6 story、Post-MVP Epic 7、无关源码或用户改动。
-  - [ ] 检查 diff，确认没有提前实现 `fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` full sub-case matrix、`resolve-parity` full behavior、`path-portability` OS matrix、`skill-artifact-loop` 或 complete packaging acceptance；本 Story 只提供 fixture contract foundation。
+- [x] Task 9: 本地验证与交付边界（AC: 1-8）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test`，或至少运行 fixture contract、normalizer、comparator、diagnostics output profile、manifest/index parser wiring、CommandResult parser wiring 和 affected fixture tests。
+  - [x] 如果前置 implementation 尚未完成，保留失败为有效前置信号；不要伪造 fixture pass，不要跳过 comparison/redaction/profile tests，不要创建 private JSON shape。
+  - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、已有 Story 1-5、其它 Epic 6 story、Post-MVP Epic 7、无关源码或用户改动。
+  - [x] 检查 diff，确认没有提前实现 `fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` full sub-case matrix、`resolve-parity` full behavior、`path-portability` OS matrix、`skill-artifact-loop` 或 complete packaging acceptance；本 Story 只提供 fixture contract foundation。
 
 ## Dev Notes（开发备注）
 
@@ -297,18 +297,35 @@ test/fixtures/<group>/<sub-case>/
 
 ### Agent Model Used（使用的代理模型）
 
-TBD by dev agent.
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-TBD by dev agent.
+- `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` 失败：系统 Python 缺 `tomllib`，已按 skill fallback 手动读取 customization；配置事实来自 `.agents/skills/bmad-dev-story/customize.toml`，team/user override 文件不存在。
+- `npx vitest run test/fixture-contract.test.ts`：先红后绿，最终 8 tests passed。
+- `npm run build`：通过，tsup ESM/DTS build success。
+- `npx vitest run test/fixture-contract.test.ts test/contract-anchors.test.ts test/skill-artifact-loop.test.ts test/validate-command.test.ts test/update-planning.test.ts`：5 files / 52 tests passed。
+- `npm test`：35 files / 266 tests passed。
 
 ### Completion Notes List（完成备注列表）
 
 - Story context created by bmad-create-story sub-agent for Story 6.1 only.
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 - This story is ready-for-dev context, not implementation completion evidence.
+- 完成 fixture contract executable anchor 扩展：fixture case/group/sub-case lower-kebab validation、layout validator、expected output class registry、release gate / group sub-case / packaging checklist gate classification。
+- 完成 expected output parser wiring：CommandResult、ValidationIssue set、stderr JSON Lines diagnostics、manifest/index snapshots 均复用 owning executable schemas。
+- 完成 stable comparison foundation：project-relative POSIX path normalization、schema-declared non-stable timestamp normalization、absolute/home/drive/cache/temp/build/credential/stack/random field leak failure。
+- 完成 human-readable output profile assertion helper：Compact/Evidence/Structured profiles、no ANSI、icon/spinner-only rejection、narrow terminal key-value fallback required fields。
+- 完成 snapshot update discipline guard：expected output update 必须在 owning SPEC 与 executable parser/comparator 更新后，通过显式 local action 执行，CI 中不得自动写 snapshot。
+- 未新增第三方依赖；未实现 Story 6.2-6.5 的 full fixture matrix、OS runtime matrix、full release packaging checker 或 documentation examples rewrite。
 
 ### File List（文件列表）
 
-TBD by dev agent.
+- `src/fixtures/fixture-contract.ts`
+- `test/fixture-contract.test.ts`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/6-1-fixture-case-layout-and-expected-output-contract.md`
+
+## Change Log（变更日志）
+
+- 2026-06-02：实现 Story 6.1 fixture contract foundation、focused Vitest coverage、Story 状态与 sprint tracking 更新至 review。

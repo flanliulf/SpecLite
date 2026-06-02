@@ -20,9 +20,8 @@ describe("package scaffold", () => {
         build: "tsup",
         test: "vitest run",
         dev: "tsx src/bin/speclite.ts",
-        "release:packaging-check": expect.stringContaining("deferred to Epic 6"),
+        "release:packaging-check": "node scripts/release/packaging-check.mjs",
       }),
     );
   });
 });
-

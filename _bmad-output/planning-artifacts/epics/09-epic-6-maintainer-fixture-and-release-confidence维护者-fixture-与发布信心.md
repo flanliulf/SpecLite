@@ -61,6 +61,7 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **前提** `fresh-install-empty-project` fixture
 **当** 测试运行 fresh install
 **则** expected outputs 验证 `_speclite`、`_speclite-output`、manifest/index、`.claude/skills` 和 `.agents/skills` 已按预期生成
+**并且** fresh install baseline 必须断言 `core-skills/` 与 `sdlc-skills/` 下全部 53 个 canonical package roots 均出现在 skill index 和每个 selected IDE mirror 中
 **并且** ready summary 只在 ReadyCheck 成功后出现。
 
 **前提** fresh install fixture 完成
@@ -248,6 +249,11 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **当** 检查生成 artifact
 **则** 只校验 artifact type、默认输出路径和 metadata 值域
 **并且** `generatedAt` 必须存在且可 parse 为 ISO 8601 string，并在 stable snapshot 中 normalize 或 exclude；不把叙事质量、人工评审结论或内容完整度作为 MVP validation 范围。
+
+**前提** `skill-artifact-loop` 只激活一个或少量代表性 workflow skill
+**当** release gate 汇总 MVP 安装证据
+**则** 该 fixture 只能证明 activation/artifact metadata 最小闭环
+**并且** 不得替代 full canonical skill set install/mirror/index fixture assertions。
 
 **前提** 文档读者查看安装示例
 **当** 文档展示 fresh install、目录树、manifest/index、status/validate 输出或 update 保护示例

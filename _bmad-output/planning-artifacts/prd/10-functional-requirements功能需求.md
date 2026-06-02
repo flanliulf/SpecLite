@@ -15,8 +15,8 @@
 - FR11: 系统可以展示每个目标 AI IDE 的配置结果。
 - FR12: 系统可以为目标项目创建 SpecLite 项目级运行元数据结构。
 - FR13: 系统可以为目标项目创建 SpecLite 过程产物输出结构。
-- FR14: 系统可以发现正式可分发的 SpecLite source skills。
-- FR15: 系统可以将同一 canonical skill 暴露到多个目标 AI IDE。
+- FR14: 系统可以发现正式可分发的 SpecLite source skills；MVP 默认官方安装集合必须递归发现 `core-skills/` 与 `sdlc-skills/` 下全部包含 `SKILL.md` 的 canonical package roots，并排除 `support-skills/`、已删除入口和非正式分发辅助来源。
+- FR15: 系统可以将同一 canonical skill 暴露到多个目标 AI IDE；对于被选中模块下的每个 canonical package root，MVP 必须在每个已选择且支持的 IDE target 中生成 self-contained skill entry，并在 skill index / files index 中记录 source reference 与 hash。
 - FR16: 项目维护者可以查看安装完成后的项目结构和安装摘要。
 - FR17: 项目维护者可以查看安装完成后的下一步使用指引。
 

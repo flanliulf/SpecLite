@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "speclite.phase-coverage.v1",
+  "rows": [
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "implementation-review",
+      "phaseLabel": "Implementation Review",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-01-reviewer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-01-reviewer",
+          "activationTarget": ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "code-review-summary",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    }
+  ]
+}

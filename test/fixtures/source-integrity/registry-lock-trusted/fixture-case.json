@@ -1,5 +1,6 @@
 {
   "caseId": "source-integrity/registry-lock-trusted",
   "releaseGate": true,
-  "purpose": "Registry source resolves to a version-lock matched SourceDescriptor and derives trusted from lock evidence only."
+  "purpose": "Registry source resolves to a version-lock matched SourceDescriptor and derives trusted from lock evidence only.",
+  "expectedGate": "mvp-release"
 }

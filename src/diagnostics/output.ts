@@ -232,6 +232,20 @@ export function renderUpdateHumanOutput(
     lines.push("No writes authorized.");
   }
 
+  if (
+    result.data.completedSteps !== undefined ||
+    result.data.failedStep !== undefined ||
+    result.data.pendingSteps !== undefined
+  ) {
+    lines.push(
+      "",
+      "Step State",
+      `Completed steps: ${formatList(result.data.completedSteps ?? [])}`,
+      `Failed step: ${result.data.failedStep ?? "none"}`,
+      `Pending steps: ${formatList(result.data.pendingSteps ?? [])}`,
+    );
+  }
+
   lines.push("", "Changed Paths");
   if (result.data.changedPaths.length === 0) {
     lines.push("No paths changed yet.");
@@ -426,7 +440,17 @@ function getConflictNextAction(conflict: UpdateCommandResult["data"]["conflicts"
 
 function formatIssue(issue: ValidationIssue): string {
   const location = issue.affectedPath ?? issue.component ?? "unknown";
-  return `[${issue.severity}] category=${issue.category} issueId=${issue.issueId} location=${location} impact=${issue.impact} suggestedNextStep=${issue.suggestedNextStep}`;
+  const detailText = formatIssueDetails(issue.details);
+  return `[${issue.severity}] category=${issue.category} issueId=${issue.issueId} location=${location}${detailText} impact=${issue.impact} suggestedNextStep=${issue.suggestedNextStep}`;
+}
+
+function formatIssueDetails(details: ValidationIssue["details"]): string {
+  if (details === undefined) return "";
+  const fields = Object.entries(details)
+    .filter(([, value]) => value === null || ["string", "number", "boolean"].includes(typeof value))
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}=${String(value)}`);
+  return fields.length === 0 ? "" : ` details=${fields.join(";")}`;
 }
 
 function formatPlanAction(

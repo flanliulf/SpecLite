@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "update",
+  "targetProject": "Path Portability",
+  "summary": "SpecLite update found conflicts before apply. No project files were changed.",
+  "issues": [
+    {
+      "issueId": "update.conflicts",
+      "category": "update",
+      "severity": "error",
+      "component": "update-command",
+      "details": {
+        "conflictCount": 1
+      },
+      "impact": "Update planning found one or more path-level conflicts.",
+      "suggestedNextStep": "Inspect the conflict details before authorizing update writes."
+    }
+  ],
+  "nextActions": [
+    "Inspect the plan and conflicts before authorizing any future update writes."
+  ],
+  "data": {
+    "updatePlan": {
+      "actions": [
+        {
+          "affectedPath": ".claude/skills/speclite-help/SKILL.md",
+          "ownership": "installer-owned",
+          "action": "conflict",
+          "currentHash": "sha256:current",
+          "expectedHash": "sha256:expected"
+        }
+      ]
+    },
+    "changedPaths": [],
+    "skippedPaths": [],
+    "conflicts": [
+      {
+        "affectedPath": ".claude/skills/speclite-help/SKILL.md",
+        "ownership": "installer-owned",
+        "currentHash": "sha256:current",
+        "expectedHash": "sha256:expected",
+        "reason": "installer-owned-drift"
+      }
+    ],
+    "requiresConfirmation": true,
+    "writeAuthorized": false
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "success",
+  "command": "install",
+  "targetProject": "Path Portability",
+  "summary": "SpecLite install completed with portable project-relative paths.",
+  "issues": [],
+  "nextActions": [
+    "Run speclite validate --json before release evidence collection."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "channel": "stable",
+      "version": "0.0.0",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [
+        {
+          "kind": "version-lock",
+          "packageName": "speclite",
+          "version": "0.0.0",
+          "lockPath": "package-lock.json",
+          "verified": true
+        }
+      ],
+      "trustStatus": "trusted"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [
+      "core",
+      "sdlc"
+    ],
+    "ideTargets": [
+      {
+        "id": "claude",
+        "status": "configured",
+        "targetPath": ".claude/skills",
+        "skillCount": 53
+      },
+      {
+        "id": "agents",
+        "status": "configured",
+        "targetPath": ".agents/skills",
+        "skillCount": 53
+      }
+    ],
+    "paths": {
+      "projectRoot": ".",
+      "specliteRoot": "_speclite",
+      "artifactRoot": "_speclite-output",
+      "manifestPath": "_speclite/_config/manifest.yaml"
+    },
+    "completedSteps": [
+      "source-discovery",
+      "module-selection",
+      "config-initialization",
+      "runtime-structure",
+      "ide-mirror-creation",
+      "manifest-generation",
+      "ready-check",
+      "ready-summary"
+    ],
+    "pendingSteps": []
+  }
+}

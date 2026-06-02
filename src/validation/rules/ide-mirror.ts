@@ -76,6 +76,9 @@ export async function validateIdeMirror(input: {
               reason: "hash-mismatch",
               baselineKind: "canonical-package-hash",
               expectedHashAlgorithm: "sha256",
+              hashMismatch: true,
+              expectedHashRecorded: true,
+              currentHashComputed: true,
             }),
           );
         }
@@ -178,6 +181,9 @@ function createIdeMirrorIssue(input: {
   reason: "missing-entry" | "hash-mismatch" | "duplicate-entry";
   baselineKind: "canonical-package-hash" | "installed-targets";
   expectedHashAlgorithm?: "sha256";
+  hashMismatch?: boolean;
+  expectedHashRecorded?: boolean;
+  currentHashComputed?: boolean;
   shape?: "symlink-in-canonical-package";
 }): ValidationIssue {
   return {
@@ -185,6 +191,7 @@ function createIdeMirrorIssue(input: {
     category: "ide-mirror",
     severity: "error",
     affectedPath: input.affectedPath,
+    component: "ide-mirror-validator",
     details: {
       targetId: input.targetId,
       canonicalSkillId: input.canonicalSkillId,
@@ -193,6 +200,13 @@ function createIdeMirrorIssue(input: {
       ...(input.expectedHashAlgorithm === undefined
         ? {}
         : { expectedHashAlgorithm: input.expectedHashAlgorithm }),
+      ...(input.hashMismatch === undefined ? {} : { hashMismatch: input.hashMismatch }),
+      ...(input.expectedHashRecorded === undefined
+        ? {}
+        : { expectedHashRecorded: input.expectedHashRecorded }),
+      ...(input.currentHashComputed === undefined
+        ? {}
+        : { currentHashComputed: input.currentHashComputed }),
       ...(input.shape === undefined ? {} : { shape: input.shape }),
     },
     impact: "Installed IDE mirror content no longer matches the installed canonical package baseline.",

@@ -40,6 +40,8 @@ MVP 不定义 team governance dashboard、coverage percentage、trend report 或
 Source-side truth：
 
 - `assets/source/speclite/` 下的 module metadata 和 source skill packages 定义 canonical modules、canonical skill ids、source package content、phase metadata、help/menu labels 和 default artifact contracts。
+- 对 selected modules，`skill-index.json` 必须覆盖该模块下全部 canonical package roots；help/menu metadata 缺失不得导致 package root 从 skill index、files index 或 IDE mirrors 中消失。
+- `help-index.json` 与 `phase-coverage.json` 是 discovery/menu/phase projections。它们可以只包含有 help/menu metadata 的 entries，但必须引用已存在于 `skill-index.json` 的 `canonicalSkillId`，不得定义第二套 installed skill inventory。
 - Help index source data 必须引用 canonical skill ids。它不得定义第二套 skill identity。
 - `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md` 负责 adapter ids、target ids、target order 和 adapter capability semantics。
 - `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 负责 fixture layout 和 release gate policy。

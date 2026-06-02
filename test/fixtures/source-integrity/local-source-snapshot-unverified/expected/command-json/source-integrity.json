@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "success",
+  "command": "install",
+  "targetProject": "local-source-snapshot-unverified",
+  "summary": "SpecLite install source integrity fixture reached the write planning boundary.",
+  "issues": [],
+  "nextActions": [
+    "Continue with install planning after accepted source evidence."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "local",
+      "resolvedRoot": "external-local-source",
+      "contentHash": "sha256:local-snapshot-fixture",
+      "integrityEvidence": [
+        {
+          "kind": "content-hash",
+          "algorithm": "sha256",
+          "value": "sha256:local-snapshot-fixture",
+          "verified": false
+        }
+      ],
+      "trustStatus": "unverified"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [
+      "source-discovery",
+      "source-integrity"
+    ],
+    "pendingSteps": [
+      "module-selection"
+    ]
+  }
+}

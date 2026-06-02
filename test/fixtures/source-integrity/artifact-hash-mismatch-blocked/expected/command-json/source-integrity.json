@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "install",
+  "targetProject": "artifact-hash-mismatch-blocked",
+  "summary": "SpecLite install source integrity fixture blocked before writes.",
+  "issues": [
+    {
+      "issueId": "source-integrity.hash-mismatch",
+      "category": "source-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/_config/manifest.yaml",
+      "component": "source-integrity-fixture",
+      "details": {
+        "reason": "artifact-hash-mismatch",
+        "sourceType": "local-tarball"
+      },
+      "impact": "Source integrity failed before any install or update write planning.",
+      "suggestedNextStep": "Resolve source evidence before authorizing writes."
+    }
+  ],
+  "nextActions": [
+    "Resolve source-integrity issues before authorizing install writes."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "local-tarball",
+      "resolvedRoot": "redacted-local-artifact",
+      "contentHash": "sha256:actual-artifact-fixture",
+      "integrityEvidence": [
+        {
+          "kind": "content-hash",
+          "algorithm": "sha256",
+          "value": "sha256:expected-artifact-fixture",
+          "verified": false
+        }
+      ],
+      "trustStatus": "blocked"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [
+      "source-discovery"
+    ],
+    "pendingSteps": [
+      "source-integrity",
+      "write-planning"
+    ]
+  }
+}

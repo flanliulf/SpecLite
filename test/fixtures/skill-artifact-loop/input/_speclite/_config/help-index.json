@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "speclite.help-index.v1",
+  "entries": [
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "implementation-review",
+      "entryLabel": "Code Review",
+      "canonicalSkillId": "speclite-code-review-01-reviewer",
+      "activationTarget": ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+      "targetIds": [
+        "claude"
+      ]
+    }
+  ]
+}

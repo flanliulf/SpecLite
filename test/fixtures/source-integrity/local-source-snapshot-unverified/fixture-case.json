@@ -2,5 +2,6 @@
   "caseId": "source-integrity/local-source-snapshot-unverified",
   "sourceType": "local",
   "expectedGate": "mvp-release",
-  "description": "Local source snapshot records allowlist-based content-hash evidence and remains unverified without a trust anchor."
+  "description": "Local source snapshot records allowlist-based content-hash evidence and remains unverified without a trust anchor.",
+  "releaseGate": true
 }

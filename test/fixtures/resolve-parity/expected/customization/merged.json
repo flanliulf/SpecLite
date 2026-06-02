@@ -1,0 +1,9 @@
+{
+  "workflow": {
+    "on_complete": "用户完成",
+    "persistent_facts": [
+      "base",
+      "team"
+    ]
+  }
+}

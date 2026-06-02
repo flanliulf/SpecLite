@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "speclite.files-index.v1",
+  "entries": [
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-code-review-01-reviewer/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:fixture-installed-skill",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "installed-skill-entry",
+      "sourceRef": "_speclite/packages/speclite-code-review-01-reviewer/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-code-review-01-reviewer/customize.toml",
+      "ownership": "installer-owned",
+      "hash": "sha256:fixture-installed-customize",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "installed-skill-resource",
+      "sourceRef": "_speclite/packages/speclite-code-review-01-reviewer/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite-output/implementation-artifacts/code-reviews/skill-artifact-loop.md",
+      "ownership": "workflow-owned",
+      "hash": "sha256:fixture-workflow-owned-artifact",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "workflow-artifact",
+      "sourceRef": "workflow:speclite-code-review-01-reviewer"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ export async function validateArtifactPathContract(input: {
   artifactType: string;
   metadata?: Partial<WorkflowArtifactMetadata> | Record<string, unknown>;
   metadataLocation: MetadataLocation;
+  expectedSourceSkill?: string;
 }): Promise<ValidationIssue[]> {
   const issues: ValidationIssue[] = [];
   const configuredRoot = await validateProjectPathRole({
@@ -229,6 +230,7 @@ function validateRequiredMetadata(input: {
   artifactType: string;
   metadata?: Partial<WorkflowArtifactMetadata> | Record<string, unknown>;
   metadataLocation: MetadataLocation;
+  expectedSourceSkill?: string;
 }): ValidationIssue[] {
   const metadata = isRecord(input.metadata) ? input.metadata : {};
   const requiredKeys = ["workflowType", "sourceSkill", "generatedAt"] as const;
@@ -250,7 +252,28 @@ function validateRequiredMetadata(input: {
   }
 
   const parsed = WorkflowArtifactMetadataSchema.safeParse(metadata);
-  if (parsed.success) return [];
+  if (parsed.success) {
+    if (
+      input.expectedSourceSkill !== undefined &&
+      parsed.data.sourceSkill !== input.expectedSourceSkill
+    ) {
+      return [
+        createArtifactPathIssue({
+          issueId: "artifact-path.invalid-required-metadata",
+          affectedPath: "artifact:metadata",
+          details: {
+            artifactType: input.artifactType,
+            metadataKeys: ["sourceSkill"],
+            metadataLocation: input.metadataLocation,
+          },
+          impact: "Workflow artifact metadata sourceSkill does not match the installed canonical skill id.",
+          suggestedNextStep: "Regenerate artifact metadata using the installed canonical skill id.",
+        }),
+      ];
+    }
+
+    return [];
+  }
 
   const metadataKeys = [
     ...new Set(

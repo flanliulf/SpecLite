@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "success",
+  "command": "status",
+  "targetProject": "Path Portability",
+  "summary": "SpecLite status completed with portable installed-state paths.",
+  "issues": [],
+  "nextActions": [
+    "Continue with release fixture gates."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "channel": "stable",
+      "version": "0.0.0",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [
+        {
+          "kind": "version-lock",
+          "packageName": "speclite",
+          "version": "0.0.0",
+          "lockPath": "package-lock.json",
+          "verified": true
+        }
+      ],
+      "trustStatus": "trusted"
+    },
+    "manifestPresent": true,
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [
+      "core",
+      "sdlc"
+    ],
+    "ideTargets": [
+      {
+        "id": "claude",
+        "status": "configured",
+        "targetPath": ".claude/skills",
+        "skillCount": 53
+      },
+      {
+        "id": "agents",
+        "status": "configured",
+        "targetPath": ".agents/skills",
+        "skillCount": 53
+      }
+    ],
+    "highLevelHealth": "configured",
+    "paths": {
+      "projectRoot": ".",
+      "specliteRoot": "_speclite",
+      "artifactRoot": "_speclite-output",
+      "manifestPath": "_speclite/_config/manifest.yaml"
+    }
+  }
+}

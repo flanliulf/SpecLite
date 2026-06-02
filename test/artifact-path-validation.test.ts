@@ -334,4 +334,40 @@ describe("artifact path validation", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("rejects workflow artifact metadata with the wrong canonical sourceSkill", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-source-skill-mismatch-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite-output/reports"), { recursive: true });
+      const issues = await validateArtifactPathContract({
+        projectRoot: tempRoot,
+        configuredRoot: "_speclite-output/reports",
+        defaultOutputPath: "_speclite-output/reports",
+        actualArtifactPath: "_speclite-output/reports/report.md",
+        artifactType: "report",
+        metadata: {
+          workflowType: "code-review",
+          sourceSkill: "speclite-dev-story",
+          generatedAt: "2026-06-02T01:23:00.000Z",
+        },
+        metadataLocation: "frontmatter",
+        expectedSourceSkill: "speclite-code-review-01-reviewer",
+      });
+
+      expect(issues).toEqual([
+        expect.objectContaining({
+          issueId: "artifact-path.invalid-required-metadata",
+          affectedPath: "artifact:metadata",
+          details: {
+            artifactType: "report",
+            metadataKeys: ["sourceSkill"],
+            metadataLocation: "frontmatter",
+          },
+        }),
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
 });

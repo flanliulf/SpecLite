@@ -1,0 +1,3 @@
+[workflow]
+mode = "fixture-default"
+artifact_type = "code-review-summary"

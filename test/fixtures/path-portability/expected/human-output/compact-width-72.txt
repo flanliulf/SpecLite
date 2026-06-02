@@ -1,0 +1,8 @@
+SpecLite validate
+Status: failure
+Output profile: Evidence (key-value)
+issueId=file-integrity.case-conflict
+severity=error
+affectedPath=_speclite/Skills/speclite-help/SKILL.md
+targetId=claude
+next action=Resolve the case-only path conflict before release.

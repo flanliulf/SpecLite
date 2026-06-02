@@ -119,10 +119,7 @@ export async function runUpdateCommand(input: {
     return createUpdateCommandResult({
       command: "update",
       targetProject,
-      summary:
-        writeAuthorized
-          ? "SpecLite update produced an authorized update plan. Story 4.3 does not apply file writes."
-          : "SpecLite update produced an unapplied pre-write update plan. No project files were changed.",
+      summary: summarizeUpdateResult({ writeAuthorized, data: plan.data }),
       nextActions,
       data: plan.data,
       issues: plan.issues,
@@ -190,4 +187,24 @@ function summarizeRepairResult(input: {
   return input.writeAuthorized
     ? "SpecLite update --repair found no repairable installer-owned drift to apply."
     : "SpecLite update --repair found no repairable installer-owned drift. No project files were changed.";
+}
+
+function summarizeUpdateResult(input: {
+  writeAuthorized: boolean;
+  data: UpdateCommandResult["data"];
+}): string {
+  if (input.data.conflicts.length > 0) {
+    return "SpecLite update found conflicts before apply. No project files were changed.";
+  }
+  if (input.data.writeAuthorized) {
+    return input.data.changedPaths.length > 0
+      ? "SpecLite update applied authorized non-conflicting installer-owned planned updates."
+      : "SpecLite update completed with authorization; no file mutations were required.";
+  }
+  if (input.data.updatePlan.actions.some((action) => action.action === "create" || action.action === "update")) {
+    return "SpecLite update produced an unapplied pre-write update plan. No project files were changed.";
+  }
+  return input.writeAuthorized
+    ? "SpecLite update found no installer-owned planned updates to apply."
+    : "SpecLite update found no installer-owned planned updates. No project files were changed.";
 }

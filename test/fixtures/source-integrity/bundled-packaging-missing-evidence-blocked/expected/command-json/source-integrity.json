@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "speclite.command-result.v1",
+  "status": "failure",
+  "command": "install",
+  "targetProject": "bundled-packaging-missing-evidence-blocked",
+  "summary": "SpecLite install source integrity fixture blocked before writes.",
+  "issues": [
+    {
+      "issueId": "source-integrity.missing-evidence",
+      "category": "source-integrity",
+      "severity": "error",
+      "affectedPath": "_speclite/_config/manifest.yaml",
+      "component": "source-integrity-fixture",
+      "details": {
+        "reason": "missing-bundled-packaging-evidence",
+        "sourceType": "bundled"
+      },
+      "impact": "Source integrity failed before any install or update write planning.",
+      "suggestedNextStep": "Resolve source evidence before authorizing writes."
+    }
+  ],
+  "nextActions": [
+    "Resolve source-integrity issues before authorizing install writes."
+  ],
+  "data": {
+    "sourceDescriptor": {
+      "sourceType": "bundled",
+      "resolvedRoot": "assets/source/speclite",
+      "integrityEvidence": [],
+      "trustStatus": "blocked"
+    },
+    "manifestVersion": "speclite.manifest.v1",
+    "installedModules": [],
+    "ideTargets": [],
+    "paths": {
+      "projectRoot": "."
+    },
+    "completedSteps": [
+      "source-discovery"
+    ],
+    "pendingSteps": [
+      "source-integrity",
+      "write-planning"
+    ]
+  }
+}

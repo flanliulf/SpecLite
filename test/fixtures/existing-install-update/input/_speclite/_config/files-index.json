@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "speclite.files-index.v1",
+  "entries": [
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/config.toml",
+      "ownership": "installer-owned",
+      "hash": "sha256:8f18c7d4934fcfcdd8a33e96e8ba3f33180205b92aabb2ee7c9d14093a894e26",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "runtime-config",
+      "sourceRef": "canonical/config.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/custom/config.toml",
+      "ownership": "human-owned",
+      "hash": "sha256:648b2b3f1794a8b81da8420d6518ec50cf244782468ba90a7e4ad7db11e4ca57",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "project-custom-stub",
+      "sourceRef": "local:human-custom"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/custom/config.user.toml",
+      "ownership": "human-owned",
+      "hash": "sha256:212470fd13abbe4176b45d2d5a9aa63c5e527ad77ac3edcb7f2c573f8a6d603e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "project-custom-stub",
+      "sourceRef": "local:human-custom"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite-output/review.md",
+      "ownership": "workflow-owned",
+      "hash": "sha256:c8ff7435987f33c4389194a253ca6871598c4dbf650d5a08699a7957b4a87c78",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "workflow-artifact",
+      "sourceRef": "local:workflow-artifact"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite-output/review.md.metadata.json",
+      "ownership": "workflow-owned",
+      "hash": "sha256:0129cc05fb5771c505ab51bd22f963008458751581cbfa3a60bd05ab86d3d363",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "workflow-artifact-metadata",
+      "sourceRef": "local:workflow-artifact"
+    }
+  ]
+}
