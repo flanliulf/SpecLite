@@ -172,7 +172,7 @@ MVP 无网络服务。内部 service boundary 通过 TypeScript module API 和 f
 - `_speclite/`: metadata/control hub。
 - `assets/source/speclite/`: product-shipped bundled source assets。
 - `.claude/skills/`、`.agents/skills/`: MVP IDE execution plane；target id 分别为 `claude` 与 `agents`。Copilot/Cursor 专用 command pointer 或 adapter 是 Post-MVP，MVP 中不得伪造 `copilot` 或 `cursor` target id。
-- `_speclite-output/`: workflow artifact repository。
+- `_speclite-output/`: workflow artifact repository；SDLC workflow 的 `planning_artifacts`、`implementation_artifacts`、`project_knowledge`、`story_location`、`story_root`、`flow_gate_root`、`sprint_status_file` 和 related lifecycle artifact path 语义以 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md` 为准。
 - `docs/`: project knowledge。
 - `test/fixtures/`: acceptance and regression assets。
 
@@ -233,7 +233,8 @@ MVP 无网络服务。内部 service boundary 通过 TypeScript module API 和 f
 
 **Manifest And Index Semantics（清单与索引语义）：**
 
-- Source 侧以 `assets/source/speclite/` 下的 module metadata 与 source skill package 作为 canonical truth。
+- Source 侧以 `assets/source/speclite/` 下的 module metadata 与 source skill package 作为 canonical truth；对于默认官方 `core` 与 `sdlc` 模块，canonical package inventory 必须递归覆盖 `core-skills/` 与 `sdlc-skills/` 下全部包含 `SKILL.md` 的 package roots，`support-skills/` 不属于目标项目默认运行时 SDLC 方法论安装集合。
+- `module-help.csv` 是 help/menu/phase metadata source，不是 canonical package inventory 的唯一来源；implementation 必须以 discovered package roots 生成 skill index 和 IDE mirrors，再用 help metadata 生成 help index 与 phase coverage。
 - Installed 侧以 manifest/index 作为 selected modules、source descriptor、IDE targets、phase coverage、installed files、ownership 和 hash 的投影。
 - Help index 只能引用 `canonicalSkillId`、phase、entry label 和 activation target；不得定义第二套 skill identity、alias-only identity 或 IDE-specific skill identity。
 - Canonical skill package hash 用于验证同一 canonical package 在不同 IDE targets 中内容一致；files index 的 file-level hash 用于 drift detection、update planning、repair planning、changed paths、skipped paths 和 conflicts。

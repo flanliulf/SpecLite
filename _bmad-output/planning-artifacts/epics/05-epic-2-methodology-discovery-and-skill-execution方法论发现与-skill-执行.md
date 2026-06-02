@@ -12,7 +12,8 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 
 **前提** SpecLite 已完成所选模块的安装规划
 **当** 系统生成 discovery metadata
-**则** 每个可发现能力都会记录 phaseId、phaseLabel、moduleId、canonicalSkillId、skill 名称、entry label 和 activation target
+**则** 每个 canonical package root 都会在 skill index 中记录 canonicalSkillId、moduleId、source package path 和 installed targets
+**并且** 每个有 help/menu metadata 的可发现能力都会记录 phaseId、phaseLabel、moduleId、canonicalSkillId、skill 名称、entry label 和 activation target
 **并且** canonicalSkillId 必须来自 source skill package，不得由 IDE adapter 重新命名。
 
 **前提** 某个 skill 属于 SPEC、方案评审、故事规划、实现、测试或审查阶段
@@ -45,12 +46,12 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 
 **前提** discovery metadata 已生成
 **当** 系统处理 `claude` IDE target
-**则** 每个可映射的 canonical skill 会生成 `.claude/skills` 下的 self-contained skill entry
+**则** 所选模块下每个 canonical package root 都会生成 `.claude/skills` 下的 self-contained skill entry
 **并且** entry 会保留 canonical skill package 内容，不因 target 不同而改写。
 
 **前提** discovery metadata 已生成
 **当** 系统处理 `agents` IDE target
-**则** 每个可映射的 canonical skill 会生成 `.agents/skills` 下的 self-contained skill entry
+**则** 所选模块下每个 canonical package root 都会生成 `.agents/skills` 下的 self-contained skill entry
 **并且** GitHub Copilot 或 Cursor 在 MVP 中只通过 `agents` target 兼容使用，不生成专用 target id。
 
 **前提** 某个 IDE target 支持映射
@@ -95,6 +96,11 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 **当** 用户或验证器查看阶段覆盖结果
 **则** 系统会清晰表达该阶段未覆盖或 unsupported
 **并且** 不会用 alias-only identity 或 IDE-specific identity 伪造覆盖。
+
+**前提** 某个 installed canonical skill 没有 phase/help row
+**当** 系统生成 MVP 最小阶段覆盖矩阵
+**则** 该 skill 不得从 skill index 或 IDE mirror 中消失
+**并且** validation 必须能区分“已安装但未暴露到 phase coverage”与“缺失 installed skill entry”。
 
 **前提** 用户从 IDE entry 激活某个 skill
 **当** skill 的激活协议开始执行

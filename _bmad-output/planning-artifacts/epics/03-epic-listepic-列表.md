@@ -1,5 +1,15 @@
 # Epic List（Epic 列表）
 
+## Cross-Epic SDLC Workflow Contract（跨 Epic SDLC Workflow 契约）
+
+所有 MVP Epic 和 Story 的开发流转必须引用 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`，不得在单个 Story、review 记录或 finalizer 中重新定义第二套流程契约。
+
+Runtime artifact roots 使用 `modules.sdlc.planning_artifacts`、`modules.sdlc.implementation_artifacts`、`modules.sdlc.project_knowledge` 以及对应 `{planning_artifacts}`、`{implementation_artifacts}`、`{project_knowledge}` placeholders。Story lifecycle 使用 `sprint_status_file`、`{sprint_status_file}`、`sprint_status`、`{sprint_status}`、`story_location`、`story_location_absolute`、`story_root`、`{story_root}`、`flow_gate_root`、`{flow_gate_root}`、`default_output_file` 和 `{default_output_file}`。
+
+Sprint 状态和 Story lifecycle 字段使用 `development_status`、`development_status{story_key}`、`{current_sprint_status}`、`epic_status`、`story_completion_status`、`dependency_gate`、`anchor_contract_map` 和 `evidence_plan`。Flow Gate mode 固定为 `story-kickoff`、`story-completion`、`epic-completion`、`epic-kickoff`；Flow Gate result 固定为 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE`、`DECISION_NEEDED`。
+
+Story dependency 必须按 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor`、`Guidance Anchor` 分类。固定文件名只有在 owning SPEC 明确要求时才是 hard gate；否则必须先检查 equivalent functional implementation 和 evidence anchors。历史 Story 不批量回填新版 `Dependency Gate`、`Anchor Contract Map`、`Equivalent Implementation Policy`、`Evidence Plan`、`Anchor Evidence Summary`，但新建或后续修改的 Story 必须体现这些章节或记录等价映射。
+
 ## Epic 1: Project Installation Onboarding（项目安装引导）
 
 项目维护者可以使用默认官方内置来源，从选择目录、官方模块和 AI IDE targets 到生成 `_speclite` runtime、IDE skill mirrors、`_speclite-output` 和 ready summary，完成一次可信 fresh install。npm/private registry、local tarball、offline bundle、Git source 和 local path 等替代来源路径由 Epic 5 扩展，不属于 Epic 1 的最小垂直切片。

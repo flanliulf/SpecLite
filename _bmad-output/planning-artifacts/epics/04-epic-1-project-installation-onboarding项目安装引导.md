@@ -124,7 +124,8 @@
 
 **前提** 用户选择模块后继续
 **当** 系统生成安装范围摘要
-**则** 摘要会列出已选择的模块、版本和将参与安装的能力范围
+**则** 摘要会列出已选择的模块、版本、将参与安装的能力范围，以及每个模块下将安装的 canonical package root count
+**并且** 默认官方安装集合中，`core` 与 `sdlc` 选中后必须包含各自目录下全部包含 `SKILL.md` 的 canonical package roots
 **并且** 该摘要在写入项目前展示给用户确认。
 
 **前提** 没有发现任何可安装官方模块
@@ -202,13 +203,13 @@
 
 **前提** 用户选择了 `claude` IDE target
 **当** 系统创建 IDE execution mirror
-**则** 系统会把所选 canonical skills 安装到 `.claude/skills`
+**则** 系统会把所选模块下全部 canonical package roots 安装到 `.claude/skills`
 **并且** 记录每个 skill 的 canonical identity、target path 和 source reference
 **并且** 缺 canonical skill package 的 module 不得作为默认 installed module 进入 IDE mirror 或 ReadyCheck，除非后续补齐 packages 或 owning SPEC 明确 metadata-only module contract。
 
 **前提** 用户选择了 `agents` IDE target
 **当** 系统创建 IDE execution mirror
-**则** 系统会把同一批 canonical skills 安装到 `.agents/skills`
+**则** 系统会把同一批完整 canonical package roots 安装到 `.agents/skills`
 **并且** canonical skill package 内容不会因 IDE target 不同而变化。
 
 **前提** 写入过程中目标路径已存在
@@ -220,6 +221,11 @@
 **当** 系统生成安装投影
 **则** manifest/index 会记录安装模块、IDE targets、skill/help/files index、ownership 和 hash 信息
 **并且** 所有 public path 使用 project-relative POSIX-style path。
+
+**前提** 所选模块包含 canonical package roots
+**当** 系统生成 skill index 与 files index
+**则** `skill-index.json` 必须包含所选模块下每一个 canonical package root 的 `canonicalSkillId`、`sourcePackagePath`、`canonicalPackageHash` 和 installedTargets
+**并且** `files-index.json` 必须包含每个 IDE target 中对应 package files 的 installer-owned hash projection。
 
 **前提** 任一关键写入步骤失败
 **当** 命令返回失败结果
@@ -249,7 +255,7 @@
 
 **前提** install 内部运行 ReadyCheck
 **当** 系统判断是否可以展示 ready summary
-**则** ReadyCheck 只检查 manifest/index 可读、source descriptor projection 有效、selected IDE mirrors 和 required installed skill entries 可见、required runtime paths 存在，以及本次 install 没有 blocking issue 或 failed required step
+**则** ReadyCheck 只检查 manifest/index 可读、source descriptor projection 有效、selected IDE mirrors 和 selected modules 下全部 canonical package roots 的 installed skill entries 可见、required runtime paths 存在，以及本次 install 没有 blocking issue 或 failed required step
 **并且** 默认 installed modules 必须具备 canonical skill package evidence，缺 packages 的 module 不得计入 ready result，除非 owning SPEC 明确 metadata-only module contract
 **并且** ReadyCheck 不执行 full hash scan、remote source access、implicit update check 或 repair planning。
 

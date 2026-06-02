@@ -69,10 +69,20 @@
 **则** 系统会验证 canonical skill id、moduleId、source reference、target projection 和 hash 字段是否满足 manifest/index owning SPEC
 **并且** 不允许 skill index 定义第二套 skill identity。
 
+**前提** selected modules 下存在 canonical package roots
+**当** validate 检查 skill index
+**则** `skill-index.json` 必须覆盖 selected modules 下全部 canonical package roots
+**并且** 缺少任一 selected canonical package root 时必须报告 stable issue，而不是把该 package root 从 installed inventory 中静默省略。
+
 **前提** help index 存在
 **当** validate 检查 help index
 **则** 系统会验证 help entry 只引用 canonicalSkillId、phase、entry label 和 activation target
 **并且** menu target 必须能在后续检查中解析到唯一 installed self-contained skill entry。
+
+**前提** help index 或 phase coverage 引用 canonicalSkillId
+**当** validate 检查引用完整性
+**则** 每个 referenced canonicalSkillId 必须存在于 `skill-index.json`
+**并且** 未知 canonicalSkillId 必须报告 stable `menu-target` issue。
 
 **前提** files index 存在
 **当** validate 检查 files index
@@ -116,6 +126,11 @@
 **当** 某个 expected skill entry 缺失或额外 entry 与 canonical skill id 重叠
 **则** 系统会报告 missing、mismatched 或 drift 诊断
 **并且** 建议用户运行后续明确的 update/repair 路径，而不是静默覆盖。
+
+**前提** selected modules 下存在 canonical package roots
+**当** validate 检查 `.claude/skills` 或 `.agents/skills`
+**则** 任一 selected canonical package entry 缺失都必须报告 stable `ide-mirror` 或 `menu-target` issue
+**并且** affected path 使用 project-relative POSIX path。
 
 **前提** 同一安装状态连续运行 `speclite validate` 三次
 **当** IDE mirrors 和 files index 未发生变化

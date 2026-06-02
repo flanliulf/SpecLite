@@ -93,6 +93,8 @@ CommandResult 行为在实现中的关键边界是：
 
 Manifest/index 文件契约必须引用 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`，不得在 Architecture type snippet 中复制字段真源。Validation issue taxonomy 必须引用 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`，不得由单个 validation rule 自行定义 category 语义。
 
+SDLC workflow lifecycle 字段和流程术语必须引用 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`，不得由单个 Story、review skill 或 finalizer 自行定义第二套 gate/status schema。该 SPEC 管理 `modules.sdlc.planning_artifacts`、`modules.sdlc.implementation_artifacts`、`modules.sdlc.project_knowledge`、`{planning_artifacts}`、`{implementation_artifacts}`、`story_location`、`story_root`、`flow_gate_root`、`sprint_status_file`、`development_status`、`development_status{story_key}`、`anchor_contract_map`、`dependency_gate`、`evidence_plan`、`story_completion_status`、Flow Gate mode/result 和 legacy baseline rule。
+
 ## Communication Patterns（通信模式）
 
 **Event System Patterns（事件系统模式）：**
@@ -134,6 +136,14 @@ Machine-readable progress `stepId` 必须使用这些 stable lower-kebab names�
 
 **Loading State Patterns（加载状态模式）：**
 长操作 CLI 命令输出有序 progress events。Progress `stepId` 必须与上面的 installer step names 一致；human-readable label 可以独立渲染。只有 required steps 全部通过后才能展示 ready summary。自动化集成必须读取 `CommandResult.data.completedSteps`、`CommandResult.data.pendingSteps` 或契约化 file outputs，不得解析 spinner/progress stream 作为 API。
+
+**SDLC Workflow Lifecycle Patterns（SDLC Workflow 生命周期模式）：**
+
+SpecLite 自身 canonical skill 流程使用显式 lifecycle gates，而不是在 `dev-story` 执行中途才发现前置契约漂移。`story-kickoff` 必须发生在 `ready-for-dev` -> `in-progress` 前；`story-completion` 必须发生在 Story 进入 `review` 前；`epic-completion` 生成 Epic 实现证据摘要；`epic-kickoff` 在下一 Epic 开始前核对前序输出与当前前置假设。
+
+Flow Gate result 只允许 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 和 `DECISION_NEEDED`。固定文件名只有在 owning SPEC 明确要求时才是 hard gate；否则必须先检查 Contract Anchor、Functional Anchor、Evidence Anchor 和 Guidance Anchor 的关系，并允许通过 `PASS_EQUIVALENT` 记录等价实现。
+
+历史 Story 不因新增 `Dependency Gate`、`Anchor Contract Map`、`Equivalent Implementation Policy`、`Evidence Plan` 或 `Anchor Evidence Summary` 而被批量回填。新建 Story、重新打开的 Story、进入开发前的 Story 和进入 review 前的 Story 必须遵守 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`。
 
 ## Enforcement Guidelines（执行与约束指南）
 
