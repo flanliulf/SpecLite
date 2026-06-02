@@ -477,6 +477,7 @@ describe("git source resolver boundary", () => {
       });
       expect(output).toContain(`version=${commitSha}`);
       expect(output).toContain("trustStatus=unverified");
+      expect(output).toContain("confirmationState=confirmed");
       expect(output).not.toContain("token");
       expect(output).not.toContain("secret");
       expect(output).not.toContain("git.example.test");

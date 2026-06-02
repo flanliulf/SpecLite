@@ -264,3 +264,92 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **当** 更新 documentation examples
 **则** 同步更新相关 fixture 输入、expected outputs 和 validation assertions
 **并且** 保持最小 `skill-artifact-loop` release gate 与 richer regression assets 的分类明确。
+
+## Story 6.6: Fixture Contract Hardening（Fixture Contract 收口）
+
+作为 SpecLite 维护者，
+我希望收口 release confidence fixture 的输入外置、时间戳契约、fixture 分类和路径逃逸断言，
+以便 CR TODO 中暴露的 fixture contract 缺口被证据化关闭，而不是继续依赖 test helper 或弱断言。
+
+**验收标准：**
+
+**前提** `resolve-parity` fixture 运行
+**当** 测试 config 和 customization merge parity
+**则** input config/customization layers 必须来自 `test/fixtures/resolve-parity/input/` 下的 fixture assets
+**并且** test helper 不得再硬编码真实 layer 内容或维护第二套 merge input。
+
+**前提** public JSON、manifest/index 或 artifact metadata 包含 `generatedAt`
+**当** schema、fixture comparator 和 expected outputs 校验时间戳
+**则** `generatedAt` 契约必须在 owning SPEC、executable schema/parser、fixture normalization 和 story/test wording 中保持一致
+**并且** 不允许出现 schema 只接受 canonical UTC、fixture/story 却声称任意 ISO parseable string 的漂移。
+
+**前提** `source-integrity` fixture 使用多层 case id
+**当** fixture registry 对 sub-case 和 variant 分类
+**则** 三段式 id 必须由 contract、registry、manifest 和 tests 明确定义
+**并且** 不得让 release gate 变体因为未注册而落到 undefined 或 ambiguous classification。
+
+**前提** path-portability dynamic CLI gate 覆盖 path escape
+**当** validation issue 指向项目边界外路径
+**则** dynamic test 必须断言 `artifact-path.escapes-project` 的 `details.reason = path-escapes-project`
+**并且** 不得只断言 issue id 存在。
+
+**前提** 上述缺口被修复
+**当** 更新 CR TODO backlog
+**则** 仅关闭有代码、fixture 和测试证据支撑的 TODO
+**并且** 不得提前关闭 packaging gate、默认测试稳定性或 Git confirmationState 相关 TODO。
+
+## Story 6.7: Packaging Gate Hardening（Packaging Gate 收口）
+
+作为 SpecLite 维护者，
+我希望 release packaging gate 拥有稳定的串行入口、前置构建保障和文档示例打包断言，
+以便发布前 package inventory 与 documentation example boundary 可以由单一 release command 验证。
+
+**验收标准：**
+
+**前提** 维护者执行 release verification
+**当** 运行 package release gate
+**则** 必须存在稳定入口串行执行 build 和 packaging check
+**并且** packaging check 不得在 stale `dist/` 或未构建 runtime assets 上产生假阳性。
+
+**前提** `npm run release:packaging-check` 或等价 gate 生成 `dist/packaging-manifest.json`
+**当** 校验 packaged documentation examples
+**则** packaged documentation examples 必须有非空断言和明确 classification
+**并且** 空数组、缺失路径或误把 `test/fixtures/` 当作 docs example 都不得通过。
+
+**前提** package inventory 被断言
+**当** npm package、local tarball 或 offline bundle acceptance 运行
+**则** 必须覆盖 runtime bin、schemas、templates/scripts、assets/source/speclite 和明确允许的 docs examples
+**并且** 默认排除 root `fixtures/` 和 `test/fixtures/`。
+
+**前提** packaging gate 修复完成
+**当** 更新 CR TODO backlog
+**则** 只关闭 packaging script 和 docs example assertion 相关 TODO
+**并且** 保留未完成的 fixture contract 或 test stability TODO。
+
+## Story 6.8: Test Stability And CR TODO Closure（测试稳定性与 CR TODO 收尾）
+
+作为 SpecLite 维护者，
+我希望复核默认测试稳定性、补强 Git source confirmation assertion，并对 Epic 6 CR TODO backlog 做最终证据化关闭，
+以便 Epic 6 在新增收口项完成后可以重新进入可靠收尾。
+
+**验收标准：**
+
+**前提** 维护者运行默认测试命令
+**当** 执行 `npm test`
+**则** 默认 test timeout、fixture suite runtime 和 Vitest 配置必须能稳定支持当前 suite
+**并且** 若仍需更长 timeout，必须通过配置或脚本显式化，而不是依赖 story 里的人工命令记忆。
+
+**前提** confirmed Git source install scenario 运行
+**当** Git source 拥有 version、contentHash 或等价 confirmation evidence
+**则** confirmed-path test 必须断言输出或 public projection 中的 `confirmationState=confirmed`
+**并且** pending/unconfirmed scenario 仍保留独立断言。
+
+**前提** Story 6.6 和 6.7 相关修复已经完成
+**当** 复核 `_bmad-output/implementation-artifacts/cr-rules/cr-todo-backlog.md`
+**则** 所有已实现 TODO 必须移动到 resolved section，并更新统计、resolved date、resolution evidence 和 affected files
+**并且** 任何缺少代码或测试证据的 TODO 仍保持 open。
+
+**前提** CR TODO 全部关闭或剩余项明确延期
+**当** 准备再次收尾 Epic 6
+**则** 必须运行 focused tests、`npm run build`、默认 `npm test` 和可用的 release verification command
+**并且** sprint/story 状态更新不得早于代码、测试和 backlog 证据。
