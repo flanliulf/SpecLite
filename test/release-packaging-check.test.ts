@@ -1,0 +1,153 @@
+import { mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import {
+  collectPackagingPrerequisiteIssues,
+  validatePackagedDocumentationExamples,
+} from "../scripts/release/packaging-check.mjs";
+
+describe("Story 6.7 release packaging gate", () => {
+  it("exposes a serial build-first release verification script", async () => {
+    const packageJson = JSON.parse(await readFile("package.json", "utf8")) as {
+      scripts: Record<string, string>;
+    };
+
+    expect(packageJson.scripts["release:verify"]).toBe("npm run build && npm run release:packaging-check");
+    expect(packageJson.scripts["release:packaging-check"]).toBe("node scripts/release/packaging-check.mjs");
+  });
+
+  it("fails fast when required build output is missing", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-packaging-missing-build-"));
+
+    try {
+      await writeRequiredRuntimeAssets(tempRoot);
+
+      const issues = collectPackagingPrerequisiteIssues(tempRoot);
+
+      expect(issues).toEqual(
+        expect.arrayContaining([
+          "missing build output: dist/bin/speclite.js",
+          "missing build output: dist/bin/speclite.d.ts",
+        ]),
+      );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails fast when build output is older than source input", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-packaging-stale-build-"));
+
+    try {
+      await writeRequiredRuntimeAssets(tempRoot);
+      await writeFileWithMtime(tempRoot, "dist/bin/speclite.js", "old build", new Date("2026-06-02T00:00:00Z"));
+      await writeFileWithMtime(tempRoot, "dist/bin/speclite.d.ts", "old types", new Date("2026-06-02T00:00:00Z"));
+      await writeFileWithMtime(
+        tempRoot,
+        "src/bin/speclite.ts",
+        "new source",
+        new Date("2026-06-02T00:01:00Z"),
+      );
+
+      const issues = collectPackagingPrerequisiteIssues(tempRoot);
+
+      expect(issues).toEqual(
+        expect.arrayContaining([
+          "stale build output: dist/bin/speclite.js older than src/bin/speclite.ts",
+          "stale build output: dist/bin/speclite.d.ts older than src/bin/speclite.ts",
+        ]),
+      );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("requires packaged documentation examples to be non-empty and explicitly classified", () => {
+    const packageFiles = new Set([
+      "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+      "dist/bin/speclite.js",
+      "package.json",
+    ]);
+    const validExamples = [
+      {
+        path: "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+        classification: "packaged-documentation-example",
+        isReleaseGateFixture: false,
+      },
+    ];
+
+    expect(validatePackagedDocumentationExamples(validExamples, packageFiles)).toEqual({
+      passed: true,
+    });
+    expect(validatePackagedDocumentationExamples([], packageFiles)).toEqual({
+      passed: false,
+      reason: "packagedDocumentationExamples must not be empty",
+    });
+    expect(
+      validatePackagedDocumentationExamples(
+        [
+          {
+            path: "assets/source/speclite/docs/examples/missing.md",
+            classification: "packaged-documentation-example",
+            isReleaseGateFixture: false,
+          },
+        ],
+        packageFiles,
+      ),
+    ).toEqual({
+      passed: false,
+      reason: "packaged documentation example is not in package inventory: assets/source/speclite/docs/examples/missing.md",
+    });
+    expect(
+      validatePackagedDocumentationExamples(
+        [
+          {
+            path: "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+            classification: "release-gate-fixture",
+            isReleaseGateFixture: false,
+          },
+        ],
+        packageFiles,
+      ),
+    ).toEqual({
+      passed: false,
+      reason: "packaged documentation example has invalid classification: assets/source/speclite/docs/examples/fixture-derived-examples.md",
+    });
+    expect(
+      validatePackagedDocumentationExamples(
+        [
+          {
+            path: "test/fixtures/path-portability/README.md",
+            classification: "packaged-documentation-example",
+            isReleaseGateFixture: false,
+          },
+        ],
+        new Set(["test/fixtures/path-portability/README.md"]),
+      ),
+    ).toEqual({
+      passed: false,
+      reason: "packaged documentation example path is not allowed: test/fixtures/path-portability/README.md",
+    });
+  });
+});
+
+async function writeRequiredRuntimeAssets(root: string): Promise<void> {
+  await writeFileAt(root, "assets/source/speclite/scripts/resolve_config.py", "# resolver\n");
+  await writeFileAt(root, "assets/source/speclite/core-skills/module.yaml", "id: core\n");
+  await writeFileAt(root, "assets/source/speclite/sdlc-skills/module.yaml", "id: sdlc\n");
+  await writeFileAt(root, "assets/source/speclite/docs/examples/fixture-derived-examples.md", "# Example\n");
+  await writeFileAt(root, "assets/source/speclite/core-skills/example/SKILL.md", "# Skill\n");
+}
+
+async function writeFileWithMtime(root: string, relativePath: string, content: string, mtime: Date): Promise<void> {
+  await writeFileAt(root, relativePath, content);
+  const absolutePath = path.join(root, relativePath);
+  await utimes(absolutePath, mtime, mtime);
+}
+
+async function writeFileAt(root: string, relativePath: string, content: string): Promise<void> {
+  const absolutePath = path.join(root, relativePath);
+  await mkdir(path.dirname(absolutePath), { recursive: true });
+  await writeFile(absolutePath, content, "utf8");
+}
