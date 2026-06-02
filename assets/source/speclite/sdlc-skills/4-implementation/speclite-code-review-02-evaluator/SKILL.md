@@ -1,6 +1,6 @@
 ---
 name: speclite-code-review-02-evaluator
-description: "Evaluate code review results from a cross-LLM review round and generate a structured evaluation document. Use when user mentions 'CR evaluate', 'CR evaluation', 'evaluate CR', 'review assessment', 'code review evaluation', '评估审查结果', '评估 CR', '评估 CR 结果', 'CR 评估', '审查结果评估', 'CR 结果评估', '代码审查评估', or wants to assess code review findings. Capable of reading latest review results, assessing finding validity, and producing evaluation documents with round numbering."
+description: "评估 CR review 结果并生成结构化评估文档。用于用户要求 CR evaluate、review assessment、代码审查评估或判断 CR findings 是否有效。核心能力：读取最新 review、验证问题有效性、按轮次输出 evaluation 文件。"
 allowed-tools: Read, Write, Grep, Glob
 metadata:
   version: "1.0.0"

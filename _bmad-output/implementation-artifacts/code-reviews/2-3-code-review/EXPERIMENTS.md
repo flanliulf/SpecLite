@@ -1,5 +1,99 @@
 # EXPERIMENTS
 
+## 2026-05-28 Post-CR Closeout（CR 通过后收尾）
+
+### Attempt 1（04 Rules Extractor）
+
+- 方案：按 `bmenhance-cr-04-rules-extractor` 读取 Story 2-3 全部 CR summary/evaluation 和 promotion rules，分析 round 1-4 findings、修复状态、模型时间线与规则沉淀去向。
+- 结果：历史规则仍是既有 3 条 `rules-summary` 规则：`CR-API-10`、`CR-API-11`、`CR-API-12`；round 4 reviewer/evaluator 为通过、0 findings、Fix Items 0，没有新增候选规则，也没有未解决项需要交给 TODO Tracker。
+- 默认决策：按用户授权采用 record-only，不修改全局文档；仅在 `_bmad-output/implementation-artifacts/cr-rules/cr-rules-summary.md` 的 Story 2-3 既有小节补记 round 4 source 与确认证据。
+
+### Attempt 2（05 TODO Tracker）
+
+- 方案：按 `bmenhance-cr-05-todo-tracker` extract/check Story 2-3 CR 文件中的非阻塞项，并核对 `_bmad-output/implementation-artifacts/cr-rules/cr-todo-backlog.md`。
+- 结果：`2-3-code-review-evaluation-20260528-round-4.md` 明确 “本轮没有建议延迟处理的非阻塞项”，历史 evaluations 也未保留待跟踪项；现有 backlog 仅有 Story 2-4 / 2-5 的 TODO-001、TODO-002。
+- 默认决策：不新增、不修改 `cr-todo-backlog.md`。
+
+### Attempt 3（06 Finalizer）
+
+- 方案：按 `bmenhance-cr-06-finalizer` 验证最新 evaluator round 4 通过结论，然后同步 Story 2-3 状态与 sprint 状态。
+- 结果：最新评估文件 `2-3-code-review-evaluation-20260528-round-4.md` 确认 reviewer round 4 通过、0 findings、无需 fixer；Story 文件 `Status` 已从 `review` 更新为 `done`；`sprint-status.yaml` 中 `2-3-skill-activation-and-phase-capability-coverage` 已从 `review` 更新为 `done`，`last_updated` 更新为 `2026-05-28 18:05 CST`。
+- 跳过项：`_bmad-output/planning-artifacts/bmm-workflow-status.yaml` 不存在，按 finalizer 容错规则跳过。
+- Epic 决策：同步后 Epic 2 下 `2-1` 到 `2-5` 均为 `done`；但 finalizer skill 没有提供默认 Epic 主状态更新建议，本轮不擅自修改 `epic-2: in-progress`。
+
+## 2026-05-28 CR Round 4 Evaluator（评估第 4 轮）
+
+### Attempt 1（定位与轮次检测）
+
+- 方案：读取 `bmenhance-cr-02-evaluator` 配置/模板、Story 2-3、最新 reviewer round 4、现有 evaluation round 1-3 和本目录进度记录。
+- 原因：用户要求即使 reviewer 建议不需要 evaluator，本步骤仍需执行 evaluator，并且不得执行 fixer/finalizer 或修改源码。
+- 结果：最新 review 文件确认为 `2-3-code-review-summary-20260528-round-4.md`；已有 evaluation round 1-3，本轮应生成 `2-3-code-review-evaluation-20260528-round-4.md`；reviewer 结论为通过，0 findings。
+
+### Attempt 2（独立代码证据复核）
+
+- 方案：复核 reviewer 引用的核心实现和 regression tests，包括 `menu-target` validation、ReadyCheck selected inventory gate、IDE target writer 的 no-help-row inventory 分层。
+- 关键证据：
+  - `src/validation/rules/menu-target.ts` 已校验 installedTargets、help/phase target path、canonical skill basename 绑定，并且不要求所有 installed skills 都有 help/phase row。
+  - `src/ide/target-writer.ts` 先对 selected package roots 写完整 `skillIndexEntries`，再只对有 help metadata 的 entries 写 help index / phase coverage。
+  - `src/commands/install.ts` 将 `finalSelectedModules` 传入 `runReadyCheck`；`src/installer/ready-check.ts` 对 selected package roots、target skill count 和 configured target entry 做 blocking validation。
+  - `test/menu-target-validation.test.ts`、`test/install-progress-ready-summary.test.ts`、`test/ide-target-writer.test.ts` 覆盖历史 P1 与 corrective verification 场景。
+- 结论：reviewer round 4 pass / 0 findings 有当前代码与测试证据支撑，未发现遗漏的阻塞项。
+
+### Attempt 3（验证命令）
+
+- 执行命令：
+  - `node -e "const p=require('./package.json'); console.log(JSON.stringify(p.scripts||{}, null, 2))"`
+  - `npm test -- test/source-and-modules.test.ts test/runtime-structure.test.ts test/install-module-selection.test.ts test/manifest-discovery.test.ts test/menu-target-validation.test.ts test/install-progress-ready-summary.test.ts test/ide-target-writer.test.ts`
+  - `npm run build`
+  - `npm test`
+  - `git diff --check`
+- 结果：
+  - `package.json` 没有 `lint` script。
+  - targeted Vitest 通过，7 files / 54 tests。
+  - build 通过。
+  - full Vitest 通过，20 files / 118 tests。
+  - `git diff --check` 通过。
+- 结论：CR round 4 evaluator 通过；不需要 fixer。本轮未执行 fixer / finalizer，也未修改源码。
+
+## 2026-05-28 CR Round 4 Reviewer（复审第 4 轮）
+
+### Attempt 1（定位与轮次检测）
+
+- 方案：读取 `bmenhance-cr-01-reviewer` 配置、Story 2-3、现有 CR 目录、round 3 summary/evaluation、corrective dev verification 记录和当前 `git status`。
+- 原因：用户明确要求本轮只做 reopened corrective dev verification 后的 Story 2-3 reviewer，不重新开发，不执行 evaluator/fixer/finalizer。
+- 结果：2-3 已有 reviewer summary round 1-3，本轮应生成 `2-3-code-review-summary-20260528-round-4.md`；`sprint-status.yaml` 中 Story 2-3 为 `review`；当前工作树包含大量前序 Story CR 修复和收尾改动，本轮只评估 2-3 相关影响。
+
+### Attempt 2（三层审查降级）
+
+- 方案：按 skill 要求执行 Blind Hunter、Edge Case Hunter、Acceptance Auditor 三个视角；因当前工具集中没有 Agent 子代理工具，降级为当前模型串行审查。
+- 审查输入：Story File List、round 1-3 reviewer/evaluator 历史、corrective dev verification 记录、`src/validation/rules/menu-target.ts`、`src/installer/ready-check.ts`、`src/ide/target-writer.ts`、`src/commands/install.ts`、相关 focused tests。
+- 结果：历史 3 个 P1 修复仍有代码和 regression 覆盖；corrective patch 保持 no-help-row skill 进入 skill index / IDE mirrors，同时不要求它出现在 help index 或 phase coverage；ReadyCheck 已对 selected package roots 和 target skill count 增加 blocking gate。
+- 结论：未发现新的 patch / decision_needed findings。
+
+### Attempt 3（验证命令）
+
+- 执行命令：
+  - `node -e "const p=require('./package.json'); console.log(JSON.stringify(p.scripts||{}, null, 2))"`
+  - `npm test -- test/source-and-modules.test.ts test/runtime-structure.test.ts test/install-module-selection.test.ts test/manifest-discovery.test.ts test/menu-target-validation.test.ts test/install-progress-ready-summary.test.ts test/ide-target-writer.test.ts`
+  - `npm run build`
+  - `npm test`
+  - `git diff --check`
+- 结果：
+  - `package.json` 没有 `lint` script。
+  - targeted Vitest 通过，7 files / 54 tests。
+  - build 通过。
+  - full Vitest 通过，20 files / 118 tests。
+  - `git diff --check` 通过。
+- 结论：CR round 4 reviewer 通过；不需要进入 fixer。本轮未执行 evaluator / fixer / finalizer。
+
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+### Attempt 0（准备与分流）
+
+- 方案：先核对 `sprint-status.yaml` 中 Story 2-3 的状态，再决定是否执行 dev-story。
+- 原因：用户明确要求如果 story 对应 sprint 状态是 `review`，则跳过 `/bmad-dev-story story {story id}`。
+- 结果：Story 2-3 当前状态为 `review`，本轮跳过 dev-story，等待前序 Story 闭环完成后进入 reviewer -> evaluator -> fixer 串行闭环。
+
 ## 2026-05-27 12:42 - Preflight
 
 - 方案：确认 Story 2.3 文件、`sprint-status.yaml` 状态和当前工作树，再启动 fresh dev sub-agent。

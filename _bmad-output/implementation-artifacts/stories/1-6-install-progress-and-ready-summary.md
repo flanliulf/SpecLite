@@ -31,7 +31,7 @@ Status: done
 3. **ReadyCheck has a deliberately small local-only scope.**  
    **前提** source discovery、module selection、config initialization、runtime structure、IDE mirror creation、manifest generation 和 Story 1.5 write phase 已成功完成；  
    **当** install 内部运行 `ReadyCheck`；  
-   **则** ReadyCheck 只检查 manifest/index 可读且 schema version 支持、source descriptor projection 存在且 shape valid、selected IDE mirrors 和 required installed skill entries 可见、`_speclite`、configured artifact root 和 required runtime paths 存在，以及本次 install 没有 blocking `ValidationIssue` 或 failed required step；  
+   **则** ReadyCheck 只检查 manifest/index 可读且 schema version 支持、source descriptor projection 存在且 shape valid、selected IDE mirrors 和 selected modules 下全部 canonical package roots 对应的 installed skill entries 可见、`_speclite`、configured artifact root 和 required runtime paths 存在，以及本次 install 没有 blocking `ValidationIssue` 或 failed required step；
    **并且** 默认 installed modules 必须来自具备 canonical self-contained skill packages 的 modules，且 package discovery 必须支持 nested `SKILL.md` package roots，不得只检查 module directory top-level；缺 canonical packages 的 module 不得作为默认 installed module 进入 IDE mirror 或 ReadyCheck，除非后续补齐 packages 或 owning SPEC 明确 metadata-only module contract；  
    **并且** ReadyCheck 不得执行 full hash scan、remote source access、remote freshness/provenance revalidation、implicit update check、repair planning 或完整 `speclite validate` category coverage。
 
@@ -146,6 +146,12 @@ Status: done
   - [x] 如新增或改变 public JSON field、step id、issue id、target status、fixture comparison behavior 或 manifest/index projection，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
   - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
   - [x] 检查 diff，确认没有实现 full `validate`、remote source freshness/provenance revalidation、implicit update check、repair planning、Post-MVP commands 或 branded Copilot/Cursor targets。
+
+- [x] Corrective Task 9: 让 ReadyCheck 绑定 full canonical installed set（AC: 3, 4, 8, 10）
+  - [x] ReadyCheck 必须从 selected modules、skill index 和 selected target mirrors 验证全部 canonical package roots 可见；默认 `core` + `sdlc` baseline 为 `53`。
+  - [x] `CommandResult.data.ideTargets[].skillCount` 必须反映每个 selected target 实际安装的 full canonical package root count。
+  - [x] Ready summary 的 installed modules / IDE targets evidence 不得让 partial canonical install 被误判为 ready。
+  - [x] Focused tests 必须覆盖 full canonical set ReadyCheck success，以及少一个 selected package root 时 ReadyCheck failure。
 
 ## Dev Notes（开发备注）
 
@@ -398,6 +404,9 @@ Codex GPT-5
 - `npm test` passed: 10 test files, 63 tests.
 - `npm run build` passed with tsup ESM and DTS output.
 - `git diff --check` passed.
+- 2026-05-28 15:38 CST: RED corrective test showed ReadyCheck still passed when `skill-index.json` omitted a selected package root.
+- 2026-05-28 15:40 CST: GREEN corrective tests passed after ReadyCheck started validating selected module package roots against skill-index and IDE target skill counts.
+- 2026-05-28 15:40 CST: Targeted verification passed, 7 files / 52 tests; full `npm test` passed, 20 files / 116 tests; `git diff --check` passed.
 
 ### Completion Notes List（完成备注）
 
@@ -408,6 +417,9 @@ Codex GPT-5
 - Added ready summary rendering from the same `CommandResult<InstallCommandData>` semantic model, with no `readySummary` JSON blob and no ANSI/spinner-only output dependency.
 - Updated focused unit/integration/fixture assertions for ready summary gating, failure no-ready-summary behavior, canonical target order and JSON contract absence checks.
 - Cleaned generated validation outputs `node_modules/` and `dist/` after running tests/build.
+- Corrective ReadyCheck now accepts internal selected module inventory from install flow and verifies every selected package root appears in `skill-index.json`.
+- ReadyCheck now rejects target skill count mismatches between `CommandResult.data.ideTargets[].skillCount` and indexed installed targets.
+- Added focused failure coverage for the "one selected package root missing" partial install case.
 
 ### File List（文件列表）
 
@@ -431,7 +443,11 @@ Codex GPT-5
 - `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
 - `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-node.json`
 - `test/fixtures/fresh-install-empty-project/expected/command-json/unsupported-platform.json`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/PLAN.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENT_NOTES.md`
 
 ### Change Log（变更日志）
 
 - 2026-05-27: Implemented Story 1.6 install lifecycle progress, ReadyCheck, ready summary, JSON projection and focused tests; moved status to review.
+- 2026-05-28: Corrective verification bound ReadyCheck to selected module full canonical inventory and validated partial-install failure coverage; Story 状态重新推进至 review。

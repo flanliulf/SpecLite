@@ -1,5 +1,47 @@
 # EXPERIMENT_NOTES
 
+## 2026-05-28 Post-CR Closeout（CR 通过后收尾）
+
+- 已按用户指定顺序严格串行执行：`bmenhance-cr-04-rules-extractor` -> `bmenhance-cr-05-todo-tracker` -> `bmenhance-cr-06-finalizer`。
+- 04 结果：Story 2-3 既有 `CR-API-10`、`CR-API-11`、`CR-API-12` 仍有效；round 4 无新增 findings / 无新增规则候选。本次只补记 round 4 证据到 `cr-rules-summary.md`，不修改全局文档。
+- 05 结果：round 4 evaluation 明确无非阻塞 CR TODO；历史 evaluations 也无 Story 2-3 backlog 项。本次不新增、不修改 `cr-todo-backlog.md`。
+- 06 结果：最新 evaluation round 4 已通过；Story 2-3 文件与 `sprint-status.yaml` 已同步为 `done`，`last_updated` 为 `2026-05-28 18:05 CST`。
+- 跳过项：`bmm-workflow-status.yaml` 不存在，按 finalizer 容错跳过。
+- Epic 决策：Story 2-1 到 2-5 现在均为 `done`；由于 finalizer skill 没有给出默认 Epic 主状态更新建议，本轮不擅自修改 `epic-2: in-progress`。
+
+## 2026-05-28 CR Round 4 Evaluator（评估第 4 轮）
+
+- 已按 `/bmenhance-cr-02-evaluator 2-3` 执行 evaluator round 4；本步骤只做 evaluator，没有执行 fixer / finalizer，也没有修改源码或 Story 文档。
+- 评估对象：`2-3-code-review-summary-20260528-round-4.md`。
+- 轮次检测：已有 evaluation round 1-3，round 4 输出文件为 `2-3-code-review-evaluation-20260528-round-4.md`。
+- 独立复核结论：reviewer round 4 的通过结论成立，0 findings 没有发现遗漏的阻塞项或需要纳入 CR TODO 的非阻塞项。
+- 关键证据：
+  - 历史 Round 1 两个 P1 与 Round 2 一个 P1 的 validator / ReadyCheck regression 持续有效。
+  - no-help-row installed skill 会进入 skill index / IDE mirrors，不要求进入 help index 或 phase coverage。
+  - selected canonical package root 缺失由 ReadyCheck 的 selected inventory / IDE mirror gate 阻断，不依赖 phase coverage 伪造覆盖。
+- 验证通过：targeted Vitest 7 files / 54 tests，`npm run build`，full `npm test` 20 files / 118 tests，`git diff --check`。
+- `package.json` 未定义 `lint` script，本轮 lint 标记为不适用。
+- 结论：CR round 4 evaluator 通过；不需要 fixer；未执行 finalizer。
+
+## 2026-05-28 CR Round 4 Reviewer（复审第 4 轮）
+
+- 已按 `/bmenhance-cr-01-reviewer 2-3` 执行 reviewer round 4；本步骤只做 reviewer，没有执行 evaluator / fixer / finalizer。
+- 轮次检测：现有 summary round 1-3，round 4 输出文件为 `2-3-code-review-summary-20260528-round-4.md`。
+- Agent 子代理工具不可用，按 skill 降级规则由当前模型串行完成 Blind Hunter、Edge Case Hunter、Acceptance Auditor 三层审查。
+- 历史复核：Round 1 两个 P1 与 Round 2 一个 P1 的 validator / ReadyCheck regression 持续有效。
+- Corrective 复核：
+  - `writeIdeMirrors` 仍从 selected module `packageRoots` 写完整 `skillIndexEntries`，help index / phase coverage 只写有 help metadata 的投影。
+  - `validateMenuTargets` 不要求每个 installed skill 都有 help/phase row。
+  - `runReadyCheck` 在 install flow 中收到 `selectedModules`，并对 selected package root 缺失、target skill count mismatch 和 configured target missing entry 做 blocking gate。
+- 验证通过：targeted Vitest 7 files / 54 tests，`npm run build`，full `npm test` 20 files / 118 tests，`git diff --check`。
+- `package.json` 未定义 `lint` script，本轮 lint 标记为不适用。
+- 结论：CR round 4 reviewer 通过；没有 findings，不需要进入 fixer。
+
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+- 当前判断：Story 2-3 已处于 `review`，说明上一轮 corrective dev verification 已完成到待审状态。
+- 下一步：等待前序 Story 完成后，启动全新 sub-agent 执行 `/bmenhance-cr-01-reviewer 2-3`。
+
 ## 2026-05-27 12:42
 
 - 当前执行 Story：`2-3-skill-activation-and-phase-capability-coverage`。

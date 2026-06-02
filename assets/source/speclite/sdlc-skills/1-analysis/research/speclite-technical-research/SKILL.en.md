@@ -1,6 +1,6 @@
 ---
 name: speclite-technical-research
-description: "Technical Research workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'technical research', 'speclite technical research', 'create technical research', 'run technical research', 'Technical Research', '创建Technical Research', '生成Technical Research', '执行Technical Research', '检查Technical Research', '运行Technical Research'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "Runs the SpecLite Technical Research workflow to study technology choices, architecture constraints, and implementation risks. Use when the user asks for technical research, speclite technical research, create technical research, or run technical research. Capable of config-driven activation, source artifact discovery, step-file orchestration, output generation, and completion handoff."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

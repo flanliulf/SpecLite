@@ -1,6 +1,6 @@
 ---
 name: speclite-document-project
-description: "Document Project workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'document project', 'speclite document project', 'create document project', 'run document project', 'Document Project', '创建Document Project', '生成Document Project', '执行Document Project', '检查Document Project', '运行Document Project'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Document Project workflow，为既有项目生成面向规划的项目文档。用于用户要求 document project、speclite document project、创建项目文档或运行项目文档流程。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"
@@ -40,7 +40,7 @@ metadata:
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-document-project`。
     - `references/workflow-details.md` 和配套 reference 文件均为有效执行规约，不是背景资料。
     - 模板或示例骨架位于 `assets/deep-dive-template.md`、`assets/index-template.md`、`assets/project-overview-template.md`、`assets/project-scan-report-schema.json`、`assets/source-tree-template.md`。
-    - 数据和结构化参考位于 `data/documentation-requirements.csv`。
+    - 数据和结构化参考位于 `data/documentation-requirements.csv`、`data/project-types.csv`。
     - `config.toml.example` 仅作字段结构参考，不作为 runtime fallback。
     - 当前运行规约不得依赖旧运行目录、旧 YAML 配置或旧命令命名空间。
     - 输出文档末尾必须追加 `*本文档由 speclite-document-project Skill 自动生成*` 标注。

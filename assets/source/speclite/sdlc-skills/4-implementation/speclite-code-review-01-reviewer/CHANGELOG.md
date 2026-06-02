@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.0.1] - 2026-05-27
+
+### Added
+
+- Acceptance Auditor 读取 `Anchor Evidence Summary` 和 story-completion gate report。
+- CR 审查输入增加 fixed path hard gate 与 equivalent implementation policy 的核对要求。
+
 ## [1.0.0] - 2026-05-11
 
 ### Added

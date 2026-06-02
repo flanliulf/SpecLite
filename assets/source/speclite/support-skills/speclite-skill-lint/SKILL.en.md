@@ -1,22 +1,23 @@
 ---
 name: speclite-skill-lint
-description: "Validate Agent Skills against Anthropic open standard specifications, checking YAML frontmatter, file naming, description quality, version consistency, and content constraints. Use when user mentions 'speclite skill lint', 'speclite-skill-lint', 'skills-lint', 'lint skill', 'validate skill', 'check skill', 'skill lint', 'skill check', 'skill validation', '检查 Skill', '检查 Skill 规范', '验证技能', 'Skill 规范检查', 'Skill 合规检查', '技能验证', '检查技能格式', or wants to audit an existing Skill for compliance. Capable of YAML violation detection, naming convention verification, bilingual trigger keyword coverage analysis, version mismatch identification, forbidden file scanning, and structured report generation."
+description: "Validates Agent Skills against specification, including YAML, naming, description quality, version consistency, and content constraints. Use when the user asks for speclite-skill-lint, lint skill, validate skill, check skill, skill compliance, or audit an existing Skill. Capable of YAML violation detection, bilingual trigger coverage analysis, version mismatch checks, forbidden file scanning, and structured report generation."
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.3.0"
+  version: "2.5.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
 [Overview]
-    A read-only Skill compliance checker. It scans a target Skill directory against 34 rules and returns a structured report without modifying files. The rule list is in `references/check-rules.md`; the detailed scan flow is in `references/lint-workflow.md`.
+    A read-only Skill compliance checker. It scans a target Skill directory against 36 rules and returns a structured report without modifying files. The rule list is in `references/check-rules.md`; the detailed scan flow is in `references/lint-workflow.md`.
 
 [Core Capabilities]
     - **YAML frontmatter validation**: Check name, description, allowed-tools, the metadata field contract, and safety boundaries.
     - **Description quality analysis**: Verify three-part description shape, bilingual trigger coverage, trigger specificity, and angle bracket safety.
     - **File structure compliance**: Check SKILL.md, SKILL.en.md, CHANGELOG.md, directory naming, README.md prohibition, and reserved prefixes.
     - **Version and mirror consistency**: Verify version, YAML, and reference alignment across SKILL.md, SKILL.en.md, and CHANGELOG.md.
-    - **Body and Workflow density checks**: Count body length, Workflow length, and Workflow ratio to identify flows that should move into references/.
+    - **Body and Workflow density checks**: Count body length, Workflow length, and Workflow ratio to identify flows that should move into references/, and check whether fixed path hard gates cite an owning SPEC or equivalent implementation policy.
+    - **Config reference classification checks**: Classify local definitions, local placeholders, runtime config, artifact paths, workflow variables, template placeholders, schema fields, and external project references so explainable references are not reported as missing config.
     - **Naming and file classification checks**: Check naming and responsibility boundaries for references/, scripts/, and assets/.
     - **Structured reporting**: Output rule tables, summaries, and concrete repair guidance separated by Error and Warning.
 
@@ -31,7 +32,7 @@ metadata:
         `python3 scripts/check_skill_density.py <skill-dir>`
         Use the script JSON result as the only source for BODY-07 and BODY-08 decisions.
 
-    Step 3: Run 34 checks
+    Step 3: Run 36 checks
         Follow the grouped flow in `references/lint-workflow.md` to check YAML, description, file structure, version, body, naming, mirror, classification, and Workflow density. Do not modify target files.
 
     Step 4: Report and rescan

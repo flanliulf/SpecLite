@@ -1,6 +1,6 @@
 ---
 name: speclite-correct-course
-description: "Correct Course workflow for Speclite 实施与交付推进, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'correct course', 'speclite correct course', 'create correct course', 'run correct course', 'Correct Course', '创建Correct Course', '生成Correct Course', '执行Correct Course', '检查Correct Course', '运行Correct Course'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "Runs the SpecLite Correct Course workflow to handle major scope or direction changes during a sprint. Use when the user asks to correct course, create a sprint change proposal, adjust direction, or analyze a sprint change. Capable of config-driven activation, context discovery, impact analysis, step-file orchestration, and change recommendation output."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

@@ -1,9 +1,9 @@
 ---
 name: speclite-quick-dev
-description: "Quick Dev workflow for Speclite 实施与交付推进, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'quick dev', 'speclite quick dev', 'create quick dev', 'run quick dev', 'Quick Dev', '创建Quick Dev', '生成Quick Dev', '执行Quick Dev', '检查Quick Dev', '运行Quick Dev'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Quick Dev workflow，把明确需求转成可审查的实现补丁。用于用户要求 quick dev、快速修复、添加功能、重构、修改代码或运行 quick dev。核心能力：澄清范围、规划变更、实现、测试并进入 review。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "fancyliu"
   catalog: "speclite"
 ---

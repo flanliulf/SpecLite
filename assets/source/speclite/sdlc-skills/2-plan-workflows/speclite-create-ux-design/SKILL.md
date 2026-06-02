@@ -1,6 +1,6 @@
 ---
 name: speclite-create-ux-design
-description: "Create Ux Design workflow for Speclite 规划与产品设计, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'create ux design', 'speclite create ux design', 'create create ux design', 'run create ux design', 'Create Ux Design', '创建Create Ux Design', '生成Create Ux Design', '执行Create Ux Design', '检查Create Ux Design', '运行Create Ux Design'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Create UX Design workflow，生成用户体验与交互设计规格。用于用户要求 create UX design、创建 UX 设计、生成 UX spec 或规划体验。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成 `.md` 输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

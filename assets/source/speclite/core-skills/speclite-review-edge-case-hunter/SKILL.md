@@ -1,6 +1,6 @@
 ---
 name: speclite-review-edge-case-hunter
-description: "Exhaustively walk branching paths and boundary conditions, reporting only unhandled edge cases. Use when user needs edge-case analysis, boundary review, path tracing, diff edge cases, 边界条件审查, 分支路径检查, 穷举边界, 异常路径分析, or wants unhandled conditions in code, specs, or diffs. Capable of scope detection, exhaustive path enumeration, completeness validation, and strict JSON findings output."
+description: "穷举分支路径与边界条件，只报告未处理的 edge case。用于用户要求 edge-case analysis、boundary review、路径追踪、边界条件审查或异常路径分析。核心能力：识别范围、枚举路径、校验完整性、输出 JSON findings。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

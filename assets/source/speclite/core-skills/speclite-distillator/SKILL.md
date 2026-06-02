@@ -1,6 +1,6 @@
 ---
 name: speclite-distillator
-description: "Lossless LLM-optimized compression of source documents into dense distillates. Use when user requests distill documents, create a distillate, compress source docs, LLM context compression, 文档蒸馏, 无损压缩, 生成蒸馏文档, 压缩上下文, or wants source documents converted into token-efficient context. Capable of source analysis, compressor subagent orchestration, semantic splitting, completeness checks, output writing, and optional round-trip validation."
+description: "将源文档无损压缩为适合 LLM 使用的高密度 distillate。用于用户要求 distill documents、文档蒸馏、上下文压缩或把资料变成省 token 语境。核心能力：分析来源、分段压缩、校验完整性、写出结果。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
   version: "1.0.0"

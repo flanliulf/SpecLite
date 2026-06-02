@@ -15,8 +15,10 @@ Status: done
 1. **Discovery metadata records canonical capability identity.**  
    **前提** SpecLite 已完成所选模块的安装规划，且 Epic 1 的 source discovery、module selection、config initialization、runtime structure、IDE mirror 和 manifest/index 生成已真实实现；  
    **当** 系统生成 discovery metadata；  
-   **则** 每个可发现能力都会记录 `phaseId`、`phaseLabel`、`moduleId`、`canonicalSkillId`、skill 名称、entry label 和 activation target；  
+   **则** 每个 selected canonical package root 都会在 skill index 中记录 `canonicalSkillId`、`moduleId`、source package path 和 installed targets；
+   **并且** 每个有 help/menu metadata 的可发现能力都会记录 `phaseId`、`phaseLabel`、`moduleId`、`canonicalSkillId`、skill 名称、entry label 和 activation target；
    **并且** `canonicalSkillId` 必须来自 source skill package 或 source module metadata，不得由 IDE adapter、menu label、directory traversal order 或 display name 重新命名；  
+   **并且** 缺少 help/menu row 的 installed canonical package root 不得从 skill index、files index 或 IDE mirrors 中消失；
    **并且** 若 source metadata、help row 或 selected module 引用了缺失的 canonical skill package，系统不得合成空 skill、伪造 metadata 或静默跳过 required entry。
 
 2. **Minimum phase coverage can represent key SDLC phases.**  
@@ -80,6 +82,7 @@ Status: done
 
 - [x] Task 2: 从 source module metadata 和 help rows 构建 canonical capability inputs（AC: 1, 2, 3）
   - [x] 读取 `assets/source/speclite/core-skills/module.yaml`、`assets/source/speclite/core-skills/module-help.csv`、`assets/source/speclite/sdlc-skills/module.yaml` 和 `assets/source/speclite/sdlc-skills/module-help.csv`。
+  - [x] 读取 selected modules 下全部 canonical package roots 作为 skill inventory source；`module-help.csv` 只作为 help/menu/phase projection source。
   - [x] 将 `module-help.csv` 中的 `skill` 作为 `canonicalSkillId` 引用；不得从 `display-name`、`menu-code`、`description`、target path 或 IDE label 反推 skill id。
   - [x] 对每个 selected module 校验 referenced canonical skill package 是否存在 `SKILL.md`，并保留 source package relative path；缺失时产生 reserved diagnostic 或先更新 taxonomy，不得静默跳过。
   - [x] 为每个可发现能力归一化 `moduleId`、`phaseId`、`phaseLabel`、`entryLabel`、`activationTarget` 和 skill display name；phase label 可以由 source phase/config 映射生成，但映射必须集中在 manifest generator 或 schema helper 中。
@@ -132,6 +135,12 @@ Status: done
   - [x] Fixture `skill-artifact-loop` 在本 Story 只验证 discovery metadata、entry / activation target 边界和 artifact metadata 值域可被表达；resolver success release gate 推迟到 Story 2.4，full artifact write loop 推迟到 Story 2.5。
   - [x] 运行 `npm run build`、`npm test`，或至少运行 Story 2.1 touched modules 的 focused Vitest tests 与相关 fixture tests。
   - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动，且没有实现 Story 2.2 self-contained entry mapping 之外的 command pointer / branded adapter / Post-MVP governance dashboard。
+
+- [x] Corrective Task 9: 区分 full skill inventory 与 help/phase projection（AC: 1, 3, 8）
+  - [x] 默认 `core` + `sdlc` install 后，`skill-index.json` 必须包含 `53` 个 canonical package root entries。
+  - [x] `help-index.json` 与 `phase-coverage.json` 可以只投影有 help/menu metadata 的 rows，但所有引用必须解析到现有 skill index entry。
+  - [x] Tests 必须同时覆盖 package root inventory completeness 和 help/menu reference integrity，避免用 phase coverage row count 代替 installed skill count。
+  - [x] `module-help.csv` 中出现未知 `canonicalSkillId` 时继续报告 reserved `menu-target` / metadata diagnostic；但缺 help row 的 package root 不得被视为未安装。
 
 ## Dev Notes（开发备注）
 
@@ -360,6 +369,8 @@ GPT-5 Codex
 - 2026-05-27 11:19 CST: Targeted and full test verification showed Epic 1 manifest/index functionality exists through centralized `manifest-generator.ts`, `runtime-structure.ts`, `target-writer.ts`, `manifest-schema.ts`, `fixture-contract.ts`, and fixture/tests. The earlier standalone-file HALT interpretation is superseded by the functional anchor standard in this Story.
 - 2026-05-27 11:33 CST: Resumed Story 2.1 under the functional anchor standard. Added failing focused tests first, then implemented metadata projection in the existing manifest/index pipeline.
 - 2026-05-27 11:35 CST: Validation passed: `npm run build`, `npm test` (11 test files / 66 tests), and `git diff --check`.
+- 2026-05-28 15:40 CST: Corrective focused tests passed for package-root inventory completeness, no-help-row projection separation and menu-target reference integrity.
+- 2026-05-28 15:40 CST: Targeted verification passed, 7 files / 52 tests; full `npm test` passed, 20 files / 116 tests; `git diff --check` passed.
 
 ### Completion Notes List（完成备注）
 
@@ -369,6 +380,9 @@ GPT-5 Codex
 - Implemented Story 2.1 discovery metadata extension through the existing `manifest-generator.ts` / `target-writer.ts` path: source help rows now preserve `required` and `outputs`, phase labels are centralized, phase coverage rows are deterministically sorted, target activation paths are project-relative, and eligible workflow outputs project minimal `artifactContract` summaries.
 - Added reserved `menu-target.unknown-skill` diagnostics for orphan `module-help.csv` canonical skill references without leaking absolute paths.
 - Added unit, integration and fixture assertions for canonical skill id preservation, artifact contract omission/presence, phase mapping, deterministic sorting, canonical target order, missing package diagnostics, and absence of command pointer / branded `copilot` / `cursor` projection.
+- Corrective verification confirmed `skill-index.json` contains the full selected package root inventory (`53` entries for default `core` + `sdlc`), while help/phase projections remain metadata views.
+- Added focused coverage proving installed package roots without help/phase rows remain indexed and mirrored, and are not treated as missing installed skills.
+- Preserved reserved `menu-target.unknown-skill` behavior for help/phase rows that reference unknown canonical skill ids.
 
 ### File List（文件列表）
 
@@ -386,7 +400,15 @@ GPT-5 Codex
 - test/manifest-discovery.test.ts
 - test/runtime-structure.test.ts
 - test/source-and-modules.test.ts
+- _bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/PLAN.md
+- _bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENTS.md
+- _bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENT_NOTES.md
+- src/installer/ready-check.ts
+- test/ide-target-writer.test.ts
+- test/install-progress-ready-summary.test.ts
+- test/menu-target-validation.test.ts
 
 ### Change Log（变更日志）
 
 - 2026-05-27: Completed Story 2.1 methodology discovery metadata generation and moved status to `review`.
+- 2026-05-28: Corrective verification separated full skill inventory from help/phase projections and validated targeted/full regression; Story 状态重新推进至 review。

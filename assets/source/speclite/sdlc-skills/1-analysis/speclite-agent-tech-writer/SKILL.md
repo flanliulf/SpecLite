@@ -1,6 +1,6 @@
 ---
 name: speclite-agent-tech-writer
-description: "Technical documentation specialist and knowledge curator for SpecLite analysis work. Use when the user asks to talk to Paige, requests the tech writer, says 'speclite tech writer', 'technical writer agent', '技术写作', '文档专家', '找 Paige', or needs project documentation, Mermaid diagrams, documentation validation, or concept explanation. Capable of persona activation, documentation menu dispatch, local prompt execution, and persistent project knowledge loading."
+description: "激活技术写作专家 Paige，维护 SpecLite 分析阶段的项目文档与知识。用于用户要求 tech writer、技术写作、文档专家、Mermaid 图或概念解释。核心能力：加载 persona、执行文档菜单、读取项目知识并产出文档建议。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

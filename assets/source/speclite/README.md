@@ -10,7 +10,7 @@
 | ---- | ---- |
 | `core-skills/` | 多个 SDLC 工作流共享的 Speclite 基础能力，例如启发、头脑风暴、帮助、文档索引、文档拆分和评审辅助能力。 |
 | `sdlc-skills/` | 按生命周期阶段组织的 Speclite SDLC 工作流 Skill，包括分析、计划、方案设计和实现阶段。 |
-| `support/` | 用于创建、迁移、检查和对齐 Speclite Skill / Agent 包的支撑 Skill。 |
+| `support-skills/` | 用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义的支撑 Skill。 |
 | `scripts/` | 共享运行时辅助脚本的源码副本，例如配置解析和 customization 解析。目标项目运行时应安装到 `{project-root}/_speclite/scripts`。 |
 | `custom/` | 团队级和用户级 customization 覆盖示例。目标项目运行时应放在 `{project-root}/_speclite/custom`。 |
 
@@ -94,7 +94,7 @@ Story Review 工作流位于 `sdlc-skills/3-solutioning/`，采用 01-03 编号�
 - `speclite-story-review-02-evaluator`：评估 SR findings 并生成评估文档。
 - `speclite-story-review-03-fixer`：按评估结论修订 Story 文档并记录修订摘要。
 
-现有非编号 `speclite-code-review` 仍保留为单次交互式代码审查入口；编号 `speclite-code-review-01-reviewer` 承接 BMEnhance CR-01 的跨轮产物链路语义。
+非编号 `speclite-code-review` 已不再作为 canonical skill 源头入口；代码审查链路从 `speclite-code-review-01-reviewer` 开始，并由 CR2/CR3/CR6 等编号 skill 完成评估、修复与收尾。
 
 Review 产物目录约定如下：
 
@@ -106,13 +106,10 @@ Review 产物目录约定如下：
 
 ### Support Skills
 
-`support/` 包含创作和验证工具：
+`support-skills/` 包含 canonical skill 源定义的创作和验证工具：
 
 - `speclite-skill-creator`：创建或迁移 workflow 风格的 Speclite Skill 包。
 - `speclite-skill-lint`：验证通用 Skill 规则，以及 Speclite runtime 和迁移对齐规则。
-- `speclite-skill-alignment-checker`：执行更聚焦的 runtime model 对齐审计。
-- `speclite-agent-creator`：创建或迁移 Agent 定义包，并保留 persona 和菜单语义。
-- `speclite-agent-lint`：验证 Speclite Agent 包。
 
 ## 验证建议
 

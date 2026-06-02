@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.6.0] - 2026-05-27
+
+### Added
+
+- 新增 Flow Gate guidance 创建规则：涉及 Story/Epic 状态推进、Story 文件消费或 implementation anchor 检查的 workflow skill，必须按 Contract -> Functional -> Evidence 表达门控。
+- 新增 fixed path hard gate 约束：固定源码路径只有 owning SPEC 明确要求时才是 hard gate，否则必须说明 equivalent implementation policy。
+
 ## [1.5.0] - 2026-05-26
 
 ### Added

@@ -1,6 +1,6 @@
 ---
 name: speclite-checkpoint-preview
-description: "Checkpoint Preview workflow for Speclite 实施与交付推进, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'checkpoint preview', 'speclite checkpoint preview', 'create checkpoint preview', 'run checkpoint preview', 'Checkpoint Preview', '创建Checkpoint Preview', '生成Checkpoint Preview', '执行Checkpoint Preview', '检查Checkpoint Preview', '运行Checkpoint Preview'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "Runs the SpecLite Checkpoint Preview workflow to help a human inspect the important differences and risks in a change. Use when the user asks for checkpoint, human review, walk me through this change, review current changes, or preview a checkpoint. Capable of config-driven activation, artifact discovery, step-file orchestration, and reviewable summary output."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

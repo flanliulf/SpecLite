@@ -1,6 +1,6 @@
 ---
 name: speclite-agent-analyst
-description: "Strategic business analyst and requirements expert for SpecLite analysis work. Use when the user asks to talk to Mary, requests the business analyst, says 'speclite analyst', 'business analyst agent', '业务分析师', '需求分析', '找 Mary', or needs research, brainstorming, product brief, PRFAQ, or project documentation guidance. Capable of persona activation, persistent fact loading, menu dispatch, and evidence-grounded analysis facilitation."
+description: "激活 SpecLite 业务分析师 Mary，支持分析阶段的需求与研究工作。用于用户要求 talk to Mary、business analyst、需求分析、Product Brief、PRFAQ 或项目调研指导。核心能力：加载 persona 与事实、分发菜单、基于证据推动分析。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

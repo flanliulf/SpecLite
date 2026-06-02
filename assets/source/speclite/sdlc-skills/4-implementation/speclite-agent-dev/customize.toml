@@ -46,8 +46,8 @@ skill = "speclite-qa-generate-e2e-tests"
 
 [[agent.menu]]
 code = "CR"
-description = "Initiate a comprehensive code review across multiple quality facets"
-skill = "speclite-code-review"
+description = "Initiate the first code review round across multiple quality facets"
+skill = "speclite-code-review-01-reviewer"
 
 [[agent.menu]]
 code = "SP"

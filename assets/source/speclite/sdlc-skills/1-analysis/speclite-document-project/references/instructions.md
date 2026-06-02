@@ -41,7 +41,7 @@
 
     <critical>CONDITIONAL CSV LOADING FOR RESUME:</critical>
     <action>For each cached project_type_id, load ONLY the corresponding row from: ./documentation-requirements.csv</action>
-    <action>Skip loading project-types.csv and architecture_registry.csv (not needed on resume)</action>
+    <action>Skip loading project-types.csv (not needed on resume)</action>
     <action>Store loaded doc requirements for use in remaining steps</action>
 
     <action>Display: "Resuming {{workflow_mode}} from {{current_step}} with cached project type(s): {{cached_project_types}}"</action>

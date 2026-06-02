@@ -1,6 +1,6 @@
 ---
 name: speclite-domain-research
-description: "Domain Research workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'domain research', 'speclite domain research', 'create domain research', 'run domain research', 'Domain Research', '创建Domain Research', '生成Domain Research', '执行Domain Research', '检查Domain Research', '运行Domain Research'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Domain Research workflow，调研业务领域并生成规划上下文。用于用户要求 domain research、speclite domain research、创建领域研究或运行领域研究。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

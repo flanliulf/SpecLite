@@ -1,5 +1,24 @@
 # EXPERIMENT_NOTES
 
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+- 当前判断：Story 2-1 已处于 `review`，说明上一轮 corrective dev verification 已完成到待审状态。
+- 下一步：等待前序 Story 完成后，启动全新 sub-agent 执行 `/bmenhance-cr-01-reviewer 2-1`。
+- 2026-05-28 Round 3 reviewer 更新：本轮按用户最新指令只执行 `/bmenhance-cr-01-reviewer 2-1`，不进入 evaluator / fixer / finalizer。
+- Agent 工具不可用，已采用 skill 定义的串行降级；Blind Hunter、Edge Case Hunter、Acceptance Auditor 三层审查逻辑均在主上下文完成。
+- 结论：Story 2-1 corrective verification 的 package-root inventory、no-help-row projection separation、ReadyCheck completeness 与 focused regression 覆盖均通过复审；未发现新的阻塞项。
+- 输出：`_bmad-output/implementation-artifacts/code-reviews/2-1-code-review/2-1-code-review-summary-20260528-round-3.md`。
+- 2026-05-28 Round 3 evaluator 更新：用户要求即使 reviewer 建议无需 evaluator，也必须执行 `/bmenhance-cr-02-evaluator 2-1` 作为停止条件。
+- 评估结论：reviewer 通过结论成立，0 findings 未发现遗漏；targeted tests、full tests、build、lint 和 `git diff --check` 均通过。
+- 决策：本轮无需 fixer；按用户要求不执行 fixer / finalizer。
+- 输出：`_bmad-output/implementation-artifacts/code-reviews/2-1-code-review/2-1-code-review-evaluation-20260528-round-3.md`。
+- 2026-05-28 CR 收尾启动：按用户要求严格串行执行 `bmenhance-cr-04-rules-extractor`、`bmenhance-cr-05-todo-tracker`、`bmenhance-cr-06-finalizer`，只处理 Story 2-1。
+- 默认决策：04/05 如无新增规则或 TODO，只在进度文件记录 no-op 结果；不重复写入既有规则、不创建无内容 TODO、不改全局文档。
+- 2026-05-28 CR 04 更新：已完成 `bmenhance-cr-04-rules-extractor 2-1`。Round 3 没有新增 finding 或规则候选；既有 2-1 规则 `CR-SEC-03` / `CR-API-08` 已覆盖 Round 1 的可复用问题，本轮不重复沉淀、不改全局文档。
+- 2026-05-28 CR 05 更新：已完成 `bmenhance-cr-05-todo-tracker 2-1`。Round 3 reviewer/evaluator 均明确 CR TODO 0；现有 backlog 仅有 2-4 与 2-5 来源的 open TODO，和 Story 2-1 本次收尾不匹配。本轮不修改 `cr-todo-backlog.md`。
+- 2026-05-28 CR 06 更新：已完成 `bmenhance-cr-06-finalizer 2-1`。Latest evaluator 为 `2-1-code-review-evaluation-20260528-round-3.md`，结论为 CR 评估通过；Story 文件与 `sprint-status.yaml` 中 Story 2-1 均已同步为 `done`。
+- `bmm-workflow-status.yaml` 不存在，按 finalizer 容错跳过；Epic 2 仍有 `2-2`、`2-3` 为 `review`，本次不更新 `epic-2` 主状态。
+
 ## 2026-05-27 10:31
 
 - 当前执行 Story：`2-1-methodology-discovery-metadata-generation`。

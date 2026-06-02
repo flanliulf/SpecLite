@@ -1,0 +1,1221 @@
+{
+  "generatedAt": "2026-05-28T04:04:50.713Z",
+  "sourceMatrix": "_bmad-output/implementation-artifacts/config-audits/speclite-canonical-skill-config-audit/results/rule-coverage-matrix.json",
+  "sourceConsistency": "_bmad-output/implementation-artifacts/config-audits/speclite-canonical-skill-config-audit/results/rule-consistency-findings.json",
+  "coverageRiskCounts": {
+    "INVENTORY_ONLY": 2741,
+    "COVERED": 152,
+    "MISSING_STORY_COVERAGE": 96
+  },
+  "riskyCoverageItemCount": 96,
+  "riskyCoverageGroupCount": 40,
+  "consistencyFindingCount": 0,
+  "acceptedConsistencyVariantCount": 6,
+  "auditRuleTuningCandidateCount": 0,
+  "resolvedAuditRuleTuningCount": 13,
+  "globalRuleAggregationCount": 13,
+  "dispositionCounts": [
+    {
+      "name": "LEGACY_BASELINE",
+      "count": 40
+    }
+  ],
+  "bucketCounts": [
+    {
+      "name": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "count": 19
+    },
+    {
+      "name": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "count": 12
+    },
+    {
+      "name": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "count": 9
+    }
+  ],
+  "coverageGroups": [
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-mode",
+      "value": "story-completion",
+      "itemCount": 8,
+      "skillCount": 8,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-code-review-02-evaluator",
+        "speclite-code-review-03-fixer",
+        "speclite-code-review-04-rules-extractor",
+        "speclite-code-review-05-todo-tracker",
+        "speclite-code-review-06-finalizer",
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/cr-config.md",
+        "line": 41,
+        "context": "| Story completion gate | `{story-id}-story-completion-gate.md` | `speclite-flow-gate` 生成，01-reviewer / 06-finalizer 消费 |"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-result",
+      "value": "DECISION_NEEDED",
+      "itemCount": 7,
+      "skillCount": 7,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-code-review-02-evaluator",
+        "speclite-code-review-04-rules-extractor",
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-story-review-01-reviewer",
+        "speclite-story-review-02-evaluator"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/assets/output-template.md",
+        "line": 33,
+        "context": "- **分类**：<四桶分类标签，如 decision_needed / patch / defer>（可选）"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-result",
+      "value": "PASS_EQUIVALENT",
+      "itemCount": 6,
+      "skillCount": 6,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-code-review-06-finalizer",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-sprint-status"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/review-engine.md",
+        "line": 57,
+        "context": "- 若 gate report 缺失或结果不是 `PASS` / `PASS_EQUIVALENT`，把该事实追加到 `$spec_content` 的审查约束中，交由 Acceptance Auditor 判断是否阻断验收"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-mode",
+      "value": "story-kickoff",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-sprint-status"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 41,
+        "context": "- Required gate mode: `story-kickoff`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-mode",
+      "value": "epic-completion",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-code-review-06-finalizer",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
+        "line": 97,
+        "context": "- 提示用户：\"Epic {epic-num} 下所有 Story 已全部完成。先运行 speclite-flow-gate mode=epic-completion 生成 Epic 实现证据摘要，再决定是否将 Epic 状态更新为 done。\""
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-result",
+      "value": "FAIL_CONTRACT",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 151,
+        "context": "- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-result",
+      "value": "FAIL_EVIDENCE",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 151,
+        "context": "- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-result",
+      "value": "FAIL_FUNCTION",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 151,
+        "context": "- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "flow-gate-mode",
+      "value": "epic-kickoff",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md",
+        "line": 23,
+        "context": "| `epic-kickoff` | Epic number | `epic-{n}-kickoff-gate.md` |"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "FLOW_GATE_FUTURE_STORY_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Architecture/Specs/Epics 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建、重新打开、进入开发或进入 review 的 Story 必须体现该 Flow Gate rule。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "story_location",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-sprint-planning",
+        "speclite-sprint-status"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 10,
+        "context": "- `story_root` = `story_location` from `{sprint_status}` when present, otherwise `{implementation_artifacts}/stories`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "development_status",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-code-review-06-finalizer",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-quick-dev"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
+        "line": 77,
+        "context": "- 在 `development_status` 段中找到匹配当前 Story 的条目（通过 story-id 前缀匹配）"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "{sprint_status}",
+      "itemCount": 3,
+      "skillCount": 3,
+      "skills": [
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-quick-dev"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 112,
+        "context": "- 必须从头到尾完整读取 `{sprint_status}` 文件以保留顺序，不要跳过任何内容。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "development_status{story_key}",
+      "itemCount": 3,
+      "skillCount": 3,
+      "skills": [
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-quick-dev"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 317,
+        "context": "- 更新 `development_status[{story_key}]` = `ready-for-dev`。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "{story_root}",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-dev-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 69,
+        "context": "- `default_output_file` = `{story_root}/{story_key}.md`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "flow_gate_root",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-sprint-status"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 11,
+        "context": "- `flow_gate_root` = `{implementation_artifacts}/flow-gates`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "story_root",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-flow-gate",
+        "speclite-sprint-status"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md",
+        "line": 10,
+        "context": "- `story_root` = value of `story_location` from `sprint-status.yaml`, otherwise `{implementation_artifacts}/stories`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "{default_output_file}",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-create-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 252,
+        "context": "- 读取 `assets/story-template.md` 中 fenced markdown 代码块内的内容作为模板基底，初始化 `{default_output_file}`。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "{flow_gate_root}",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md",
+        "line": 61,
+        "context": "7. Write the report under `{flow_gate_root}` using `assets/report-template.md`."
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "{sprint_status_file}",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-sprint-status"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/references/workflow-details.md",
+        "line": 61,
+        "context": "- `story_root` = `story_location` from `{sprint_status_file}` when present, otherwise `{implementation_artifacts}/stories`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "sprint_status_file",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-retrospective"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-retrospective/references/workflow-details.md",
+        "line": 105,
+        "context": "<action>PRIORITY 1: Check {sprint_status_file} first</action>"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "artifact-path-contract",
+      "value": "story_location_absolute",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-sprint-planning"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-planning/references/workflow-details.md",
+        "line": 143,
+        "context": "- Check: `{story_location_absolute}/{story-key}.md` (e.g., `stories/1-1-user-authentication.md`)"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "{current_sprint_status}",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-dev-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 166,
+        "context": "- 保存 `{current_sprint_status}` 供后续使用"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "anchor_contract_map",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-create-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 268,
+        "context": "10. `anchor_contract_map`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "dependency_gate",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-create-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 267,
+        "context": "9. `dependency_gate`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "epic_status",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-create-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 145,
+        "context": "- 不属于 backlog/contexted/in-progress/done → 输出 `🚫 错误：epic 状态非法 '{epic_status}'，期望值为 backlog/in-progress/done`，提示手动修复 sprint-status.yaml 或运行 sprint-planning，HALT。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "evidence_plan",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-create-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 270,
+        "context": "12. `evidence_plan`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "sprint_status",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md",
+        "line": 9,
+        "context": "- `sprint_status` = `{implementation_artifacts}/sprint-status.yaml`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "schema-field-reference",
+      "value": "story_completion_status",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-create-story"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md",
+        "line": 282,
+        "context": "- 第 18 段：`story_completion_status`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_LIFECYCLE_FUTURE_ENFORCEMENT",
+      "priority": "P2",
+      "action": "Story lifecycle schema 已有中央契约；当前缺口仅表示历史 Story 未批量回填。新建或后续修改的 Story 必须体现该 lifecycle field/path。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "equivalent-implementation-policy",
+      "value": "Evidence Anchor",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-brownfield-context-builder",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/references/known-failure-patterns.md",
+        "line": 142,
+        "context": "| Evidence Anchor | M4 | baseline 事实必须可机械反查 |"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "evidence-rule",
+      "value": "Anchor Evidence Summary",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/review-engine.md",
+        "line": 55,
+        "context": "- 提取 Story 文档中的 `Anchor Evidence Summary` 章节内容 → `$anchor_evidence_summary`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "story-template-section",
+      "value": "Anchor Evidence Summary",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/review-engine.md",
+        "line": 55,
+        "context": "- 提取 Story 文档中的 `Anchor Evidence Summary` 章节内容 → `$anchor_evidence_summary`"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "equivalent-implementation-policy",
+      "value": "Guidance Anchor",
+      "itemCount": 3,
+      "skillCount": 3,
+      "skills": [
+        "speclite-create-story",
+        "speclite-flow-gate",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 48,
+        "context": "| `<dependency>` | `Contract Anchor / Functional Anchor / Evidence Anchor / Guidance Anchor` | `<path or section>` | `<test, fixture, command, or source evidence>` | `<PASS / PASS_EQUIVALENT / failure condition>` |"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "equivalent-implementation-policy",
+      "value": "equivalent implementation policy",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 50,
+        "context": "### Equivalent Implementation Policy"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "evidence-rule",
+      "value": "Evidence Plan",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 56,
+        "context": "### Evidence Plan"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "evidence-rule",
+      "value": "测试证据",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "epics",
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/review-engine.md",
+        "line": 124,
+        "context": "> 1. 核对 Story `Anchor Evidence Summary` 是否覆盖 File List、测试证据和等价实现说明。"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "story-template-section",
+      "value": "Anchor Contract Map",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 44,
+        "context": "### Anchor Contract Map"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "story-template-section",
+      "value": "Dependency Gate",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 38,
+        "context": "### Dependency Gate"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "story-template-section",
+      "value": "Equivalent Implementation Policy",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 50,
+        "context": "### Equivalent Implementation Policy"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "story-template-section",
+      "value": "Evidence Plan",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "missingExpectedLayers": [
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 56,
+        "context": "### Evidence Plan"
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    },
+    {
+      "risk": "MISSING_STORY_COVERAGE",
+      "category": "evidence-rule",
+      "value": "test evidence",
+      "itemCount": 1,
+      "skillCount": 1,
+      "skills": [
+        "speclite-flow-gate"
+      ],
+      "missingExpectedLayers": [
+        "epics",
+        "stories"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md",
+        "line": 76,
+        "context": "- Validate `Anchor Evidence Summary`, File List, changed source paths, and test evidence."
+      },
+      "disposition": "LEGACY_BASELINE",
+      "bucket": "STORY_TEMPLATE_MIGRATION_BASELINE",
+      "priority": "P2",
+      "action": "这是新 Story 模板和 evidence policy 引入后的历史基线缺口；不回改已完成 Story，只要求后续 create-story 产物包含这些章节或等价证据。"
+    }
+  ],
+  "consistencyGroups": [],
+  "auditRuleTuningCandidates": [],
+  "globalRuleAggregations": [
+    {
+      "rule": "flow-gate-mode: story-completion",
+      "category": "flow-gate-mode",
+      "value": "story-completion",
+      "itemCount": 8,
+      "skillCount": 8,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-code-review-02-evaluator",
+        "speclite-code-review-03-fixer",
+        "speclite-code-review-04-rules-extractor",
+        "speclite-code-review-05-todo-tracker",
+        "speclite-code-review-06-finalizer",
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/cr-config.md",
+        "line": 41,
+        "context": "| Story completion gate | `{story-id}-story-completion-gate.md` | `speclite-flow-gate` 生成，01-reviewer / 06-finalizer 消费 |"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-result: DECISION_NEEDED",
+      "category": "flow-gate-result",
+      "value": "DECISION_NEEDED",
+      "itemCount": 7,
+      "skillCount": 7,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-code-review-02-evaluator",
+        "speclite-code-review-04-rules-extractor",
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-story-review-01-reviewer",
+        "speclite-story-review-02-evaluator"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/assets/output-template.md",
+        "line": 33,
+        "context": "- **分类**：<四桶分类标签，如 decision_needed / patch / defer>（可选）"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-result: PASS_EQUIVALENT",
+      "category": "flow-gate-result",
+      "value": "PASS_EQUIVALENT",
+      "itemCount": 6,
+      "skillCount": 6,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-code-review-06-finalizer",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-sprint-status"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/review-engine.md",
+        "line": 57,
+        "context": "- 若 gate report 缺失或结果不是 `PASS` / `PASS_EQUIVALENT`，把该事实追加到 `$spec_content` 的审查约束中，交由 Acceptance Auditor 判断是否阻断验收"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-mode: story-kickoff",
+      "category": "flow-gate-mode",
+      "value": "story-kickoff",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate",
+        "speclite-sprint-status"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 41,
+        "context": "- Required gate mode: `story-kickoff`"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-mode: epic-completion",
+      "category": "flow-gate-mode",
+      "value": "epic-completion",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-code-review-06-finalizer",
+        "speclite-flow-gate"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
+        "line": 97,
+        "context": "- 提示用户：\"Epic {epic-num} 下所有 Story 已全部完成。先运行 speclite-flow-gate mode=epic-completion 生成 Epic 实现证据摘要，再决定是否将 Epic 状态更新为 done。\""
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-result: FAIL_CONTRACT",
+      "category": "flow-gate-result",
+      "value": "FAIL_CONTRACT",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 151,
+        "context": "- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-result: FAIL_EVIDENCE",
+      "category": "flow-gate-result",
+      "value": "FAIL_EVIDENCE",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 151,
+        "context": "- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "flow-gate-result: FAIL_FUNCTION",
+      "category": "flow-gate-result",
+      "value": "FAIL_FUNCTION",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md",
+        "line": 151,
+        "context": "- 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "story-template-section: Anchor Evidence Summary",
+      "category": "story-template-section",
+      "value": "Anchor Evidence Summary",
+      "itemCount": 4,
+      "skillCount": 4,
+      "skills": [
+        "speclite-code-review-01-reviewer",
+        "speclite-create-story",
+        "speclite-dev-story",
+        "speclite-flow-gate"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/review-engine.md",
+        "line": 55,
+        "context": "- 提取 Story 文档中的 `Anchor Evidence Summary` 章节内容 → `$anchor_evidence_summary`"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "story-template-section: Anchor Contract Map",
+      "category": "story-template-section",
+      "value": "Anchor Contract Map",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 44,
+        "context": "### Anchor Contract Map"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "story-template-section: Dependency Gate",
+      "category": "story-template-section",
+      "value": "Dependency Gate",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 38,
+        "context": "### Dependency Gate"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "story-template-section: Equivalent Implementation Policy",
+      "category": "story-template-section",
+      "value": "Equivalent Implementation Policy",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 50,
+        "context": "### Equivalent Implementation Policy"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    },
+    {
+      "rule": "story-template-section: Evidence Plan",
+      "category": "story-template-section",
+      "value": "Evidence Plan",
+      "itemCount": 2,
+      "skillCount": 2,
+      "skills": [
+        "speclite-create-story",
+        "speclite-story-review-01-reviewer"
+      ],
+      "firstSource": {
+        "file": "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md",
+        "line": 56,
+        "context": "### Evidence Plan"
+      },
+      "aggregationPolicy": "该规则是全局生命周期契约，已按 category + value 汇总；per-skill source evidence 只用于追溯，不再计为独立修复任务。"
+    }
+  ]
+}

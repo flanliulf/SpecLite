@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.0.1] - 2026-05-27
+
+### Added
+
+- 标记 Story 为 Done 前要求 story-completion gate result 为 `PASS` 或 `PASS_EQUIVALENT`。
+- Epic 全部 Story 完成时推荐先运行 `speclite-flow-gate mode=epic-completion` 生成 Epic 实现证据摘要。
+
 ## [1.0.0] - 2026-05-11
 
 ### Added

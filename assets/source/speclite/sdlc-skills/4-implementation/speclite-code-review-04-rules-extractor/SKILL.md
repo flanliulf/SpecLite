@@ -1,6 +1,6 @@
 ---
 name: speclite-code-review-04-rules-extractor
-description: "Analyze historical code review, evaluation, and fix records to extract reusable development guidelines and best practices for project-level documentation. Use when user mentions 'extract CR rules', 'CR summary', 'extract CR guidelines', 'CR best practices', 'code review lessons', '提炼 CR 规则', 'CR 总结', '提取 CR 最佳实践', 'CR 经验总结', '代码审查规则提炼', '总结 CR 经验', or wants to distill patterns from CR history. Capable of analyzing multi-round CR findings, identifying recurring issues, and proposing updates to global project documents like project-context.md and architect.md."
+description: "从历史 CR review、evaluation 与 fix 记录中提炼可复用开发规则。用于用户要求 extract CR rules、CR summary、代码审查经验总结或提取最佳实践。核心能力：分析多轮记录、识别重复问题、提出 project-context.md 等文档更新建议。"
 allowed-tools: Read, Write, Grep, Glob
 metadata:
   version: "1.0.0"

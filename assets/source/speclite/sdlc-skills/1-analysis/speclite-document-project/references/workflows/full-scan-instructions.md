@@ -157,7 +157,7 @@ Your choice [1/2/3] (default: 1):
 
 - Directory structure (presence of client/, server/, api/, src/, app/, etc.)
 - Key files (package.json, go.mod, requirements.txt, etc.)
-- Technology markers matching detection_keywords from project-types.csv
+- Technology markers matching detection_signals from project-types.csv
   </action>
 
 <action>Detect if project is:

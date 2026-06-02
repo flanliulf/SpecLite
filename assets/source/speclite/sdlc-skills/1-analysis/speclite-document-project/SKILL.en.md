@@ -1,6 +1,6 @@
 ---
 name: speclite-document-project
-description: "Document Project workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'document project', 'speclite document project', 'create document project', 'run document project', 'Document Project', '创建Document Project', '生成Document Project', '执行Document Project', '检查Document Project', '运行Document Project'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "Runs the SpecLite Document Project workflow to document an existing project for planning handoff. Use when the user asks for document project, speclite document project, create document project, or run document project. Capable of config-driven activation, source artifact discovery, step-file orchestration, output generation, and completion handoff."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"
@@ -37,6 +37,7 @@ metadata:
 [Notes]
     - The directory name and YAML `name` must remain `speclite-document-project`.
     - `references/workflow-details.md` and related references are executable instructions, not background reading.
+    - Data and structured references live in `data/documentation-requirements.csv` and `data/project-types.csv`.
     - `config.toml.example` is only a reference and is never a runtime fallback.
     - The current workflow must not depend on legacy runtime directories, YAML config, or command namespaces.
 

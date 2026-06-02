@@ -1,6 +1,6 @@
 ---
 name: speclite-flow-gate
-description: "Validate SpecLite story and epic flow gates before or after implementation by checking contract, functional, and evidence anchors. Use when user mentions 'flow gate', 'speclite flow gate', 'story kickoff gate', 'story completion gate', 'epic gate', '门控检查', '流程门控', 'Story 启动门控', 'Story 完成门控', or wants to prevent anchor drift before dev-story or epic handoff. Capable of four mode gate assessment, PASS_EQUIVALENT decisions, anchor classification, report generation, and sprint handoff guidance."
+description: "验证 SpecLite Story 与 Epic 的流程门控，检查 contract、functional 与 evidence anchors。用于用户要求 flow gate、story kickoff gate、epic gate、门控检查或防止 dev-story 前后锚点漂移。核心能力：执行四种 gate 模式、判定 PASS_EQUIVALENT、生成报告与交接建议。"
 allowed-tools: Read, Write, Grep, Glob, Bash
 metadata:
   version: "1.0.0"
@@ -20,7 +20,7 @@ metadata:
     - **流转建议**：给出下一步动作，例如继续 `dev-story`、修订 Story、补测试证据、或先运行 Epic completion gate。
 
 [Workflow（执行流程）]
-    1. 完整阅读 `references/workflow-details.md`；该文件是四种 gate mode、结果枚举、报告格式和 HALT 规则的权威定义。
+    1. 完整阅读 `references/workflow-details.md`；该文件是四种 gate mode、结果枚举、报告格式和 HALT 规则的权威定义。遇到等价实现或固定路径歧义时，同时读取 `references/regression-scenarios.md`。
     2. 解析目标 mode 与目标对象：Story key、Story 文件路径、Epic 编号或下一 Epic 编号。
     3. 加载 `{project-root}/_speclite/config.toml`、`sprint-status.yaml`、目标 Story/Epic、owning SPECs、相关源码和测试证据。
     4. 按 `Contract -> Functional -> Evidence -> Guidance` 顺序做门控判断，并生成 `assets/report-template.md` 规定的报告。

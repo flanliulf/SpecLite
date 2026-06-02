@@ -1,6 +1,6 @@
 ---
 name: speclite-prfaq
-description: "Prfaq workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'prfaq', 'speclite prfaq', 'create prfaq', 'run prfaq', 'Prfaq', '创建Prfaq', '生成Prfaq', '执行Prfaq', '检查Prfaq', '运行Prfaq'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite PRFAQ workflow，用 Working Backwards 方法打磨产品概念。用于用户要求 PRFAQ、work backwards、创建 PRFAQ 或运行 PRFAQ。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

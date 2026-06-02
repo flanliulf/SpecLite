@@ -1,6 +1,6 @@
 ---
 name: speclite-editorial-review-prose
-description: "Clinical copy-editor that reviews text for communication issues and suggests minimal prose fixes. Use when user says review prose, improve prose, copy edit, editorial review prose, 文案审校, 润色文字, 文风检查, 语句审阅, or wants communication issues in text identified without changing ideas. Capable of validating input, respecting style guides, skipping code or markup, deduplicating issues, and outputting a three-column fix table."
+description: "审校文本表达问题并给出最小 prose 修复建议。用于用户要求 review prose、copy edit、润色文字、文风检查或不改变观点地改善可读性。核心能力：识别沟通问题、遵守 style guide、输出修正表。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1] - 2026-05-27
+
+### Changed
+
+- Epic Story continuity scan now reads prior Story specs from `{implementation_artifacts}/stories`.
+
 ## [1.0.0] - 2026-05-07
 
 ### Added

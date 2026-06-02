@@ -1,6 +1,6 @@
 ---
 name: speclite-market-research
-description: "Market Research workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'market research', 'speclite market research', 'create market research', 'run market research', 'Market Research', '创建Market Research', '生成Market Research', '执行Market Research', '检查Market Research', '运行Market Research'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Market Research workflow，研究市场、竞品与客户信号。用于用户要求 market research、speclite market research、创建市场研究或运行市场研究。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

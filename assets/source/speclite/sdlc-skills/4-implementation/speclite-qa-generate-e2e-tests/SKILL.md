@@ -1,6 +1,6 @@
 ---
 name: speclite-qa-generate-e2e-tests
-description: "QA Generate E2e Tests workflow for Speclite 实施与交付推进, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'qa generate e2e tests', 'speclite qa generate e2e tests', 'create qa generate e2e tests', 'run qa generate e2e tests', 'QA Generate E2e Tests', '创建QA Generate E2e Tests', '生成QA Generate E2e Tests', '执行QA Generate E2e Tests', '检查QA Generate E2e Tests', '运行QA Generate E2e Tests'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite QA Generate E2E Tests workflow，为既有功能生成端到端自动化测试。用于用户要求 qa generate e2e tests、create e2e tests、生成 E2E 测试或 QA 自动化。核心能力：配置驱动激活、发现目标功能、按步骤编排、生成测试输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

@@ -15,7 +15,7 @@ Status: done
 1. **Claude target receives self-contained canonical skill entries.**  
    **前提** discovery metadata 已由 Story 2.1 生成，且 Epic 1 的 source discovery、module selection、runtime structure、IDE mirror writer、manifest/index 和 safe write 代码已真实实现；  
    **当** 系统处理 `claude` IDE target；  
-   **则** 每个可映射的 canonical skill 会生成 `.claude/skills/<canonicalSkillId>/` 下的 self-contained skill entry；  
+   **则** selected modules 下每个 canonical package root 都会生成 `.claude/skills/<canonicalSkillId>/` 下的 self-contained skill entry；
    **并且** entry 至少包含 `SKILL.md`，并按 canonical package 原 relative path 复制存在的 `CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example` 和 `customize.toml`；  
    **并且** `customize.toml` 只在 source package 已包含该文件时复制并声明该 entry 为 customization-capable；adapter 不得为空缺文件隐式生成 defaults；  
    **并且** adapter 不得因 target 不同而改写 canonical skill package content、canonicalSkillId、directory basename、line endings 或 customization lookup key。
@@ -23,7 +23,7 @@ Status: done
 2. **Agents target uses generic `.agents/skills` semantics.**  
    **前提** discovery metadata 已由 Story 2.1 生成；  
    **当** 系统处理 `agents` IDE target；  
-   **则** 每个可映射的 canonical skill 会生成 `.agents/skills/<canonicalSkillId>/` 下的 self-contained skill entry；  
+   **则** selected modules 下每个 canonical package root 都会生成 `.agents/skills/<canonicalSkillId>/` 下的 self-contained skill entry；
    **并且** GitHub Copilot 或 Cursor 在 MVP 中只通过 `agents` target 兼容使用，不生成 `copilot`、`cursor` 或其他 branded target id；  
    **并且** human-readable output、manifest/index、phase coverage、fixture snapshots 和 validation output 都不得把 `agents` 渲染成 Copilot/Cursor readiness。
 
@@ -86,7 +86,8 @@ Status: done
 
 - [x] Task 3: 实现 self-contained skill entry writer（AC: 1, 2, 3, 5）
   - [x] 在 `src/ide/target-writer.ts` 或 existing adapter modules 中实现 registry-driven target writer；`src/commands/install.ts` 只负责编排，不直接复制 skill package。
-  - [x] 输入必须来自 Story 2.1 生成的 canonical discovery metadata / selected module metadata / skill index facts；不得从 display name、menu label、filesystem glob order 或 IDE label 重新推导 identity。
+  - [x] 输入必须来自 Story 2.1 生成的 canonical discovery metadata / selected module packageRoots / skill index facts；不得从 display name、menu label、filesystem glob order 或 IDE label 重新推导 identity。
+  - [x] Target writer 必须使用 selected modules 下全部 canonical package roots；不得只遍历 `module-help.csv`、phase coverage rows 或 required workflow rows。
   - [x] Target entry directory basename 必须是 `<canonicalSkillId>`，路径分别为 `.claude/skills/<canonicalSkillId>/` 与 `.agents/skills/<canonicalSkillId>/`。
   - [x] 每个 entry 至少包含 `SKILL.md`；当 canonical source package 中存在 `CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example` 或 `customize.toml` 时，按相同 relative path 复制。
   - [x] 仅当 canonical source package 存在 `customize.toml` 时，installed entry 才可被视为 customization-capable；不得为缺少 defaults 的 skill 生成空 `customize.toml`、placeholder defaults 或 adapter-owned fallback。
@@ -134,6 +135,12 @@ Status: done
   - [x] 如新增或改变 public JSON field、manifest/index field、target status、issue id、fixture comparison behavior、adapter definition field 或 command pointer behavior，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
   - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
   - [x] 检查 diff，确认没有实现 Story 2.3 activation protocol、Story 2.4 resolver、Story 2.5 workflow artifact validation、Epic 3 full validation、Post-MVP command pointer、branded Copilot/Cursor adapter、coverage dashboard 或治理报告。
+
+- [x] Corrective Task 9: 证明 IDE mapping 覆盖全部 selected package roots（AC: 1, 2, 5, 8）
+  - [x] 默认 `core` + `sdlc` install 后，`.claude/skills` 与 `.agents/skills` 各包含 `53` 个 canonical skill directories。
+  - [x] Integration tests 必须断言 mirror skill ids 与 `skill-index.json` entries 完全一致。
+  - [x] Fixture expected installed tree 必须列出全部 selected canonical package root `SKILL.md` entries，而不是只列出 `speclite-dev-story`。
+  - [x] 保持 help/phase projection 与 installed package inventory 分层：无 phase row 的 skill 仍必须被 mirror 和 indexed。
 
 ## Dev Notes（开发备注）
 
@@ -358,6 +365,8 @@ GPT-5 Codex
 - 2026-05-27 12:11 CST：运行 `npm run build` 通过。
 - 2026-05-27 12:11 CST：运行 `npm test` 通过，12 个 test files / 71 个 tests 全绿。
 - 2026-05-27 12:12 CST：运行 `git diff --check` 通过。
+- 2026-05-28 15:40 CST：Corrective focused tests passed, proving no-help-row package roots are still mirrored/indexed and target skill counts remain full inventory counts.
+- 2026-05-28 15:40 CST：Targeted verification passed, 7 files / 52 tests；full `npm test` passed, 20 files / 116 tests；`git diff --check` passed.
 
 ### Implementation Plan（实现计划）
 
@@ -375,6 +384,9 @@ GPT-5 Codex
 - 已补强 install 编排：用户显式选择 unsupported target（如 `cursor`）时，在写入前返回 `ide-mirror.unsupported-target`，不生成 branded adapter output 或 command pointer artifact。
 - 已补充 focused tests 与 fixture assertions，覆盖 registry order、self-contained layout、optional copied paths、customization-capable 边界、canonical/file hash、unsupported target、redaction-safe output、no Copilot/Cursor target 和 no command pointer artifact。
 - 已运行 `npm run build`、`npm test` 和 `git diff --check`，全部通过。
+- Corrective verification confirmed default `core` + `sdlc` install maps `53` canonical skill directories into each selected IDE target.
+- Integration evidence now asserts mirror skill ids match `skill-index.json` entries exactly for `.claude` and `.agents`.
+- Added focused coverage for package roots that have no phase row, proving they are still mirrored and indexed.
 
 ### File List（文件列表）
 
@@ -388,7 +400,13 @@ GPT-5 Codex
 - `test/ide-target-writer.test.ts`
 - `test/manifest-discovery.test.ts`
 - `test/runtime-structure.test.ts`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/PLAN.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENT_NOTES.md`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
+- `test/menu-target-validation.test.ts`
 
 ### Change Log（变更日志）
 
 - 2026-05-27：实现 Story 2.2 IDE skill entry mapping contract；Story 状态更新为 `review`。
+- 2026-05-28：Corrective verification proved IDE mapping covers the full selected package root inventory and keeps help/phase projection separate; Story 状态重新推进至 review。

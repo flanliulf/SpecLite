@@ -1,5 +1,36 @@
 # EXPERIMENT_NOTES
 
+## 2026-05-28 CR Closeout
+
+- 当前执行 Story：`2-2-ide-skill-entry-mapping`。
+- 执行顺序：`bmenhance-cr-04-rules-extractor` -> `bmenhance-cr-05-todo-tracker` -> `bmenhance-cr-06-finalizer`，严格串行。
+- 默认决策：无新增规则时不修改全局文档；无非阻塞项时不新增 TODO；finalizer 只同步 Story 2-2 相关状态，不处理其他 Story 或 Epic 主状态。
+- 04 结果：Round 3 未产生新 findings；既有 `CR-API-09` 已覆盖 Round 1 的可复用规则；本轮不新增规则总结、不修改全局文档。
+- 05 结果：新增 TODO 0；现有 backlog 的 TODO-001/TODO-002 均非 Story 2-2 来源，且不匹配 Story 2-2 File List；本轮不修改 `cr-todo-backlog.md`。
+- 06 结果：latest evaluation round 3 结论为通过；Story `Status` 已更新为 `done`；`sprint-status.yaml` 对应条目已更新为 `done`；`bmm-workflow-status.yaml` 不存在，按规则跳过。
+- Epic 结果：Epic 2 仍有 `2-3-skill-activation-and-phase-capability-coverage: review`，不更新 `epic-2` 主状态。
+- 当前步骤：三步收尾完成。
+
+## 2026-05-28 Evaluator Round 3
+
+- 已完成 `/bmenhance-cr-02-evaluator 2-2` round 3。
+- 评估对象：`2-2-code-review-summary-20260528-round-3.md`。
+- 评估产物：`2-2-code-review-evaluation-20260528-round-3.md`。
+- evaluator 结论：通过；reviewer pass 成立；未发现 reviewer 漏掉的阻塞项或 CR TODO。
+- fixer 决策：不需要 fixer；按用户边界不执行 fixer/finalizer。
+- 独立验证：targeted tests 7 files / 51 tests 通过；full `npm test` 20 files / 118 tests 通过；`git diff --check` 通过；`npm run lint` Missing script，已确认 `package.json` 未定义 `lint` script。
+
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+- 已完成 `/bmenhance-cr-01-reviewer 2-2` round 3。
+- 复审结论：通过；新 findings：0；阻塞项：0；无需进入 fixer。
+- 主要证据：`writeIdeMirrors()` 使用 selected module `packageRoots` 构建 package entries；runtime test 断言 `skill-index.json` entries 与 `.claude` / `.agents` mirror `SKILL.md` ids 完全一致；fixture expected installed tree 中 `.claude` 与 `.agents` 各 53 个 `SKILL.md` entry。
+- 验证结果：`npm run build` 通过；targeted tests 7 files / 51 tests 通过；full `npm test` 20 files / 118 tests 通过；`git diff --check` 通过；`npm run lint` Missing script，按既有 evaluator 结论视为项目脚本事实。
+- 本轮停止：按用户要求不执行 evaluator/fixer/finalizer。
+
+- 当前判断：Story 2-2 已处于 `review`，说明上一轮 corrective dev verification 已完成到待审状态。
+- 下一步：等待前序 Story 完成后，启动全新 sub-agent 执行 `/bmenhance-cr-01-reviewer 2-2`。
+
 ## 2026-05-27 12:02
 
 - 当前执行 Story：`2-2-ide-skill-entry-mapping`。

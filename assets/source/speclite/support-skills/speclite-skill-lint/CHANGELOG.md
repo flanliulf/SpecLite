@@ -4,6 +4,20 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [2.5.0] - 2026-05-27
+
+### Added
+
+- 新增 BODY-10 Config reference classification rule：配置状引用必须归类为本地定义、本地占位、runtime config、artifact path、workflow 变量、模板占位、schema 字段、workflow 参数、外部项目引用或 contract-defined 引用。
+- 规则总数从 35 条增加到 36 条。
+
+## [2.4.0] - 2026-05-27
+
+### Added
+
+- 新增 BODY-09 Fixed path hard gate rule：当正文出现 `must exist` 与具体源码路径组合时，必须同时说明 owning SPEC 或 equivalent implementation policy。
+- 规则总数从 34 条增加到 35 条。
+
 ## [2.3.0] - 2026-05-26
 
 ### Added

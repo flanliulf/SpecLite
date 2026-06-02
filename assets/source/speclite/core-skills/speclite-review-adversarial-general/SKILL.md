@@ -1,6 +1,6 @@
 ---
 name: speclite-review-adversarial-general
-description: "Perform a cynical adversarial review and produce a findings report for content, specs, stories, diffs, or documents. Use when user requests critical review, adversarial review, cynical review, skeptical review, 批判性审查, 反向评审, 挑刺, 风险审查, or wants missing issues found in an artifact. Capable of loading content, identifying type, applying skeptical analysis, producing at least ten fix-oriented findings, and halting on empty input."
+description: "对内容、spec、story、diff 或文档做批判性审查并产出 findings。用于用户要求 critical review、adversarial review、挑刺或风险审查。核心能力：识别输入类型、应用怀疑式分析、给出可修复问题并在空输入时停止。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

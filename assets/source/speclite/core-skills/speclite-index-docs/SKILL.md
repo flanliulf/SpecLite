@@ -1,6 +1,6 @@
 ---
 name: speclite-index-docs
-description: "Generate or update an index.md that references all documents in a target folder. Use when user asks to index docs, create index, update index.md, document index, 生成索引, 更新 index.md, 文档目录, 文件索引, or wants a folder's documents listed with accurate descriptions. Capable of scanning directories, grouping files, reading content for descriptions, writing organized index.md, and validating relative links."
+description: "为目标目录生成或更新 `index.md` 文档索引。用于用户要求 index docs、create index、更新 index.md、文档目录或整理文件入口。核心能力：扫描目录、读取摘要、分组写入索引并校验相对链接。"
 allowed-tools: Read, Write, Grep, Glob
 metadata:
   version: "1.0.0"

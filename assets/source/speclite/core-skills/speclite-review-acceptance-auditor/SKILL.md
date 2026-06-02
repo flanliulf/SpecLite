@@ -1,6 +1,6 @@
 ---
 name: speclite-review-acceptance-auditor
-description: "Audit code changes against acceptance criteria (AC) from Story specifications, reporting violations, deviations, and unimplemented behaviors as a structured Markdown list. Use when user mentions 'acceptance audit', 'AC audit', 'AC review', 'acceptance criteria check', 'spec compliance', 'acceptance auditor', '验收审计', 'AC 审查', '验收标准检查', '验收对照', '规格合规审查', or needs to verify code against Story acceptance criteria. Capable of cross-referencing AC items with code changes, identifying spec violations and gaps, outputting structured findings with AC references and code evidence."
+description: "按 Story 验收标准 AC 审计代码变更并报告偏差。用于用户要求 acceptance audit、AC review、规格合规检查或核对实现是否满足 Story。核心能力：关联 AC 与代码证据、发现缺口、输出结构化 Markdown findings。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

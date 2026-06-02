@@ -32,6 +32,7 @@ metadata:
 [Notes（注意事项）]
     - <关键约束和边界条件>
     - <质量标准和验证要求（具体化，不用模糊词）>
+    - <若涉及 Story/Epic 状态推进或 implementation anchor，说明 Flow Gate report、owning SPEC 和 equivalent implementation policy>
     - <特殊场景的处理说明>
     - <与其他 Skills 的协作方式（如果适用）>
     - <已知限制和边界情况>
@@ -83,6 +84,7 @@ metadata:
 [Notes]
     - <English mirror of key constraints and boundaries>
     - <English mirror of concrete quality and validation requirements>
+    - <If Story/Epic state advancement or implementation anchors are involved, mirror the Flow Gate report, owning SPEC, and equivalent implementation policy guidance>
     - <English mirror of edge cases and known limitations>
 
 [Generation Metadata]
@@ -114,6 +116,15 @@ python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_
 - 将详细步骤、规则矩阵、命令清单、长检查列表和示例移入 reference。
 - SKILL.md 与 SKILL.en.md 的 Workflow 只保留阶段路由、何时读取 reference、关键停止条件。
 - 两个入口必须引用同一个 workflow reference 路径。
+
+### Flow Gate guidance
+
+如果 Skill 会推进 Story/Epic 状态、读取 Story 文件、检查 implementation anchor 或消费前序 Epic 产物，必须在 Workflow 或 references/ 中生成以下规则：
+- 按 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor`、`Guidance Anchor` 分类依赖。
+- 按 `Contract -> Functional -> Evidence` 顺序检查。
+- 固定源码路径、fixture、schema 或 command 只有 owning SPEC 明确要求时才是 hard gate。
+- Story guidance 或历史实现形态必须允许 equivalent implementation policy，并要求测试、fixture、snapshot 或 command evidence 支撑。
+- 状态推进类 Skill 必须消费或生成 `speclite-flow-gate` report；可继续状态仅为 `PASS` 或 `PASS_EQUIVALENT`。
 
 ### description 生成规则
 
@@ -304,5 +315,6 @@ if __name__ == "__main__":
 - 如果是 Markdown 模板，可包含 YAML frontmatter
 
 ## 版本说明
+- v1.3 (2026-05-27): 增加 Flow Gate guidance 模板规则
 - v1.2 (2026-05-26): 增加 Workflow density gate 模板规则
 - v1.0 (2026-03-25): 初始版本

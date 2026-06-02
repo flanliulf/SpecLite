@@ -1,6 +1,6 @@
 ---
 name: speclite-create-epics-and-stories
-description: "Break PRD, Architecture, and UX inputs into user-value epics and implementation-ready stories. Use when user mentions 'create epics and stories', 'create epic list', 'break requirements into stories', '生成 Epic 和 Story', '创建史诗和故事', '拆分需求', '生成用户故事', '创建 epics.md', or asks to decompose planning artifacts for development. Capable of config-driven activation, requirement extraction, collaborative epic design, sequential story generation, coverage validation, and epics.md output."
+description: "把 PRD、Architecture 与 UX 输入拆解为 Epic 和可实现 Story。用于用户要求 create epics and stories、生成 Epic、拆分需求、创建 `epics.md` 或准备开发 backlog。核心能力：提取需求、设计 Epic、顺序生成 Story、校验覆盖并写出 `epics.md`。"
 allowed-tools: Read, Write, Grep, Glob, Bash
 metadata:
   version: "1.0.0"

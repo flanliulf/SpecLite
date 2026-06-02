@@ -31,7 +31,7 @@ README 当前包含：
 - `core-skills/`、`sdlc-skills/`、`support/`、`scripts/`、`custom/` 的职责边界。
 - 安装后 runtime 模型：`.claude/skills/{skill-name}`、`_speclite/config.toml`、`_speclite/custom`、`_speclite/scripts`。
 - 单个 Skill 包布局规则：根目录入口/版本/配置，`references/` 放规约和步骤，`assets/` 放模板，`data/` 放结构化查表数据，`scripts/` 放本地脚本。
-- Review Skills 小节：支撑层、CR 01-06、SR 01-03、非编号 `speclite-code-review` 入口关系、review artifact 子目录。
+- Review Skills 小节：支撑层、CR 01-06、SR 01-03、编号 CR 起始入口、review artifact 子目录。
 - scoped validation 建议，避免全仓库大 diff。
 
 后续如新增或移动 Speclite catalog 目录，优先同步更新 `README.md` 和 `README.en.md`。
@@ -61,9 +61,8 @@ Story Review 01-03，位于 `assets/source/speclite/sdlc-skills/3-solutioning/`�
 
 保留关系：
 
-- 现有非编号 `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review/` 未被覆盖。
-- 非编号 `speclite-code-review` 仍可作为单次交互式代码审查入口。
-- 编号 `speclite-code-review-01-reviewer` 承接 BMEnhance CR-01 的跨轮产物链路语义。
+- 非编号 `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review/` 已不再作为 canonical skill 源头入口。
+- 编号 `speclite-code-review-01-reviewer` 是 CR 链路起始入口，并承接 BMEnhance CR-01 的跨轮产物链路语义。
 
 ## Review Artifact 目录约定
 
@@ -117,7 +116,7 @@ rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|_bmad-output|bmm-workflow-statu
 
 - 本轮 Speclite review 相关文件在当前状态里显示为未跟踪，因为 `assets/source/speclite/` 下多项内容此前也处于未跟踪状态。
 - 不要回滚用户或其他工具做出的无关改动。
-- 现有 `speclite-code-review/` 目录仍保留，未被编号版替换。
+- 非编号 `speclite-code-review/` 不再作为 canonical skill 源头目录；后续 CR 入口以编号版为准。
 - 仓库此前可能存在大量与本任务无关的既有删除或未跟踪改动，尤其是 `vault/` 相关内容；本 handoff 不要求处理它们。
 
 ## 重要规则与偏好

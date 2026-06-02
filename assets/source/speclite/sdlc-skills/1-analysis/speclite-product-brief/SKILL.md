@@ -1,6 +1,6 @@
 ---
 name: speclite-product-brief
-description: "Product Brief workflow for Speclite 分析与项目发现, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'product brief', 'speclite product brief', 'create product brief', 'run product brief', 'Product Brief', '创建Product Brief', '生成Product Brief', '执行Product Brief', '检查Product Brief', '运行Product Brief'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Product Brief workflow，生成或更新产品愿景与范围简报。用于用户要求 product brief、创建产品简报、更新产品简报或运行产品简报流程。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

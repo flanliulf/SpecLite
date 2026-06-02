@@ -1,6 +1,6 @@
 ---
 name: speclite-advanced-elicitation
-description: "Push the LLM to reconsider, refine, and improve recent output using structured elicitation methods. Use when user asks for deeper critique, advanced elicitation, deeper thinking, Socratic review, first principles, pre-mortem, red team, 深度追问, 高级引导, 苏格拉底式提问, 第一性原理, 预演失败, or wants to improve a generated section. Capable of loading method registry, selecting context-fit techniques, applying iterative enhancement, and returning accepted improvements."
+description: "用结构化引导方法推动 LLM 复盘、质疑并改进近期输出。用于用户要求深度追问、Socratic review、first principles、pre-mortem、red team 或提升草稿质量。核心能力：选择方法、迭代提问、整合改进结论。"
 allowed-tools: Read, Grep, Glob, Bash
 metadata:
   version: "1.0.0"

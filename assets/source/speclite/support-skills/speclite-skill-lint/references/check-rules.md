@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档定义了 Agent Skill 规范检查的 34 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror 和文件分类合理性八个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
+本文档定义了 Agent Skill 规范检查的 36 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror 和文件分类合理性八个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
 
 ## 1. YAML Frontmatter 检查（5 条）
 
@@ -108,7 +108,7 @@
 - 与 SKILL.md 中的 `metadata.version` 必须完全一致
 - 如果 SKILL.en.md 缺失，本规则记为未检查，由 FILE-06 报告
 
-## 5. 正文质量检查（8 条）
+## 5. 正文质量检查（10 条）
 
 | 规则 ID | 检查项 | 严重级别 | 判断标准 |
 |:--------|:-------|:---------|:---------|
@@ -120,6 +120,8 @@
 | BODY-06 | 中文 canonical 语言规则 | Warning | SKILL.md 章节标题使用 English（中文）形式，正文内容使用中文，技术标识使用英文 |
 | BODY-07 | Workflow density | Warning | `workflow_chars > 1500` 且 `workflow_ratio > 0.5` |
 | BODY-08 | Workflow extraction | Warning | 命中 BODY-07 时入口应引用 `references/*workflow*.md` 或等价流程 reference |
+| BODY-09 | Fixed path hard gate | Warning | 出现 `must exist` + 具体源码路径时，必须同时说明 owning SPEC 或 equivalent implementation policy |
+| BODY-10 | Config reference classification | Warning | 配置状引用必须能归类为本地定义、本地占位、runtime config、artifact path、workflow 变量、模板占位、schema 字段、workflow 参数、外部项目引用或已定义契约 |
 
 ### 详细说明
 
@@ -152,6 +154,18 @@
 - 仅在同一入口文件命中 BODY-07 时检查
 - 如果 `has_workflow_reference` 为 false，报告 Warning
 - 修复建议：创建 `references/<skill-name>-workflow.md` 或等价 workflow reference，把详细步骤、规则矩阵、命令清单和长校验列表移入 reference，入口 Workflow 只保留阶段路由、读取条件和停止条件
+
+**BODY-09 Fixed path hard gate**：
+- 扫描 SKILL.md、SKILL.en.md 和 references/ 中的正文指令。
+- 当同一段落同时出现 `must exist`、`required file`、`hard gate`、`必须存在`、`必须有` 等强制门控词，以及 `src/`、`test/`、`assets/source/`、`fixtures/` 等具体源码路径时，必须同时说明该路径来自 owning SPEC，或说明 equivalent implementation policy。
+- 若没有 owning SPEC 或 equivalent implementation policy，报告 Warning。
+- 修复建议：将固定路径要求改写为 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor` 或 `Guidance Anchor`，并明确固定文件名只有 owning SPEC 明确要求时才是 hard gate。
+
+**BODY-10 Config reference classification**：
+- 扫描 SKILL.md、SKILL.en.md 和 references/ 中的配置状引用，包括 `{section.key}`、`section.key`、`*_file`、`*_path`、`*_dir`、`*_status`、`*.json`、`*.yaml`、`*.csv`、runtime path 和 workflow mode。
+- 每个引用必须能被解释为以下类型之一：同 skill 本地配置定义、同 skill 本地文件、同 skill 本地占位引用、runtime config、artifact path、workflow local variable、external project file/pattern、template placeholder、schema field、workflow parameter，或由 planning/implementation contract 明确定义。
+- 若引用无法分类，且也没有 owning contract 或 local file/local config evidence，报告 Warning。
+- 修复建议：补充本地配置定义、修正 stale file/path、把引用改写成明确的 workflow 参数或 schema 字段，或在 reference 中写明该引用属于外部项目扫描样例而不是 SpecLite runtime config。
 
 ## 6. 命名规范检查（3 条）
 
@@ -232,11 +246,13 @@
 | 2 | YML-02  | description 长度 | ✅ | 620/1024 字符 |
 | ...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-总结：X/34 项通过，Y 项警告，Z 项错误
+总结：X/36 项通过，Y 项警告，Z 项错误
 状态：🟢 全部通过 / 🟡 有警告 / 🔴 有错误
 ```
 
 ## 版本说明
+- v1.5 (2026-05-27): 增加 Config reference classification 检查，总计 36 条规则
+- v1.4 (2026-05-27): 增加 Fixed path hard gate 检查，总计 35 条规则
 - v1.3 (2026-05-26): 增加 Workflow density 和 Workflow extraction 检查，总计 34 条规则
 - v1.2 (2026-05-25): 增加 SKILL.en.md mirror、版本一致性和中文 canonical 语言规则检查，总计 32 条规则
 - v1.0 (2026-03-25): 初始版本，22 条规则

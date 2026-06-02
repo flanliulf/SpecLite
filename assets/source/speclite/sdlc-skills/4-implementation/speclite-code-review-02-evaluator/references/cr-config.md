@@ -14,6 +14,7 @@
 | Story 文件目录 | `{impl-artifacts}/stories/` | Story spec 文件所在目录 |
 | 代码审查父目录 | `{impl-artifacts}/code-reviews/` | 所有 Story 的 CR 目录的父目录 |
 | 代码审查目录 | `{impl-artifacts}/code-reviews/{story-id}-code-review/` | 每个 Story 的 CR 产物存放目录 |
+| Flow Gate 目录 | `{impl-artifacts}/flow-gates/` | Story/Epic 门控报告目录 |
 | 临时文件目录 | `$cr_dir/.tmp/` | 审查过程中的中间数据（diff、子审查输出、分类结果），Step 5 结束时自动清理 |
 | CR 规则目录 | `{impl-artifacts}/cr-rules/` | CR 规则文件（todo-backlog、规则文档等） |
 | 回顾总结目录 | `{impl-artifacts}/retrospectives/` | Epic/Sprint 回顾总结文件 |
@@ -37,6 +38,7 @@
 |---------|-----------|--------|
 | 审查总结 | `{story-id}-code-review-summary-{YYYYMMDD}-round-{n}.md` | 01-reviewer 生成，02-evaluator / 04-rules-extractor 消费 |
 | 审查评估 | `{story-id}-code-review-evaluation-{YYYYMMDD}-round-{m}.md` | 02-evaluator 生成，03-fixer / 05-todo-tracker / 06-finalizer 消费 |
+| Story completion gate | `{story-id}-story-completion-gate.md` | `speclite-flow-gate` 生成，01-reviewer / 06-finalizer 消费 |
 | TODO Backlog | `cr-todo-backlog.md` | 05-todo-tracker 管理，位于 CR 规则目录（`{impl-artifacts}/cr-rules/`） |
 | Sprint 状态 | `sprint-status.yaml` | 06-finalizer 更新，位于实现产物目录根 |
 | 工作流状态 | `speclite-workflow-status.yaml` | 06-finalizer 更新，位于规划产物目录 |

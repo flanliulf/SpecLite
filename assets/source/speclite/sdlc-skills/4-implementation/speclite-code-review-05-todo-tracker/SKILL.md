@@ -1,6 +1,6 @@
 ---
 name: speclite-code-review-05-todo-tracker
-description: "Manage CR TODO backlog — add, check, resolve, and list deferred improvement items from code reviews. Use when user mentions 'CR TODO', 'add TODO', 'check TODO', 'resolve TODO', 'list TODO', 'CR backlog', 'extract todos', 'CR 待办', '添加 TODO', '检查 TODO', '解决 TODO', '查看 TODO', 'CR 延迟事项', '批量提取 TODO', or wants to track non-blocking improvements identified during code reviews."
+description: "管理 CR TODO backlog，记录、检查、解决和列出延期改进项。用于用户要求 CR TODO、add TODO、resolve TODO、CR backlog、查看待办或批量提取 TODO。核心能力：维护待办状态、关联审查来源、输出可跟踪清单。"
 allowed-tools: Read, Write, Glob, Grep, Edit
 metadata:
   version: "1.0.0"

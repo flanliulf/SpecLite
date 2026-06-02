@@ -1,6 +1,6 @@
 ---
 name: speclite-code-review-03-fixer
-description: "Execute code fixes based on code review evaluation conclusions and append fix summary to the evaluation document. Use when user mentions 'CR fix', 'CR repair', 'execute fix', 'apply CR fixes', 'code review fix', '执行修复', 'CR 修复', '修复 CR 问题', '执行 CR 修正', '代码审查修复', or wants to implement fixes from CR evaluation. Capable of reading evaluation conclusions, executing targeted code fixes, and recording fix summaries in evaluation documents."
+description: "根据 CR evaluation 结论执行代码修复并记录摘要。用于用户要求 CR fix、apply CR fixes、代码审查修复或执行 CR 修正。核心能力：读取评估结论、定向修改相关代码、在 evaluation 文档追加 fix summary。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 metadata:
   version: "1.0.0"

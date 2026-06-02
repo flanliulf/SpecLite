@@ -1,22 +1,23 @@
 ---
 name: speclite-skill-lint
-description: "Validate Agent Skills against Anthropic open standard specifications, checking YAML frontmatter, file naming, description quality, version consistency, and content constraints. Use when user mentions 'speclite skill lint', 'speclite-skill-lint', 'skills-lint', 'lint skill', 'validate skill', 'check skill', 'skill lint', 'skill check', 'skill validation', '检查 Skill', '检查 Skill 规范', '验证技能', 'Skill 规范检查', 'Skill 合规检查', '技能验证', '检查技能格式', or wants to audit an existing Skill for compliance. Capable of YAML violation detection, naming convention verification, bilingual trigger keyword coverage analysis, version mismatch identification, forbidden file scanning, and structured report generation."
+description: "检查 Agent Skill 是否符合规范，包括 YAML、命名、description、版本与内容约束。用于用户要求 speclite-skill-lint、lint skill、check skill、检查 Skill 规范或验证技能。核心能力：发现 YAML 违规、校验双语触发词、识别版本不一致、输出结构化报告。"
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.3.0"
+  version: "2.5.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
 [Overview（技能说明）]
-    纯只读的 Skill 规范检查器，对指定 Skill 目录执行 34 条合规规则扫描，生成结构化检查报告。不修改任何文件，仅报告问题并提供修复建议。完整规则见 `references/check-rules.md`，详细扫描流程见 `references/lint-workflow.md`。
+    纯只读的 Skill 规范检查器，对指定 Skill 目录执行 36 条合规规则扫描，生成结构化检查报告。不修改任何文件，仅报告问题并提供修复建议。完整规则见 `references/check-rules.md`，详细扫描流程见 `references/lint-workflow.md`。
 
 [Core Capabilities（核心能力）]
     - **YAML 头部验证**：检查 name、description、allowed-tools、metadata 字段契约和安全边界是否符合开放标准。
     - **description 质量分析**：验证三段式结构、中英文双语触发词覆盖、触发词具体性和尖括号安全。
     - **文件结构合规**：检查 SKILL.md、SKILL.en.md、CHANGELOG.md、目录命名、README.md 禁止项和保留前缀。
     - **版本与 mirror 一致性**：验证 SKILL.md、SKILL.en.md、CHANGELOG.md 的版本、YAML 和引用路径同步。
-    - **正文与 Workflow density 检查**：统计正文长度、Workflow 长度和占比，识别需要抽到 references/ 的过重流程。
+    - **正文与 Workflow density 检查**：统计正文长度、Workflow 长度和占比，识别需要抽到 references/ 的过重流程，并检查 fixed path hard gate 是否有 owning SPEC 或 equivalent implementation policy。
+    - **配置引用分类检查**：识别本地定义、本地占位引用、runtime config、artifact path、workflow 变量、模板占位符、schema 字段和外部项目引用，避免把可解释引用误报为配置缺失。
     - **命名与文件分类检查**：检查 references/、scripts/、assets/ 的命名和职责边界。
     - **结构化报告输出**：按 Error 与 Warning 输出规则表、摘要和具体修复建议。
 
@@ -31,7 +32,7 @@ metadata:
         `python3 scripts/check_skill_density.py <skill-dir>`
         使用脚本 JSON 结果作为 BODY-07 与 BODY-08 的唯一判断来源。
 
-    Step 3：执行 34 条规则扫描
+    Step 3：执行 36 条规则扫描
         按 `references/lint-workflow.md` 的分组流程检查 YAML、description、文件结构、版本、正文、命名、mirror、分类和 Workflow density。不得修改目标文件。
 
     Step 4：输出报告并支持复查

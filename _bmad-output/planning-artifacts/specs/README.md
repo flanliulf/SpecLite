@@ -20,6 +20,7 @@ Implementation agents 在实现或变更某个领域的行为之前，必须阅�
 6. `06-resolve-command-contract.md`：`speclite resolve` stdout/stderr、merge order、fallback、array merge、layer failure 和 parity fixtures。
 7. `07-validation-issue-taxonomy.md`：issue categories、issue ids、default severity，以及 validation fixture ownership。
 8. `08-fixture-contract.md`：fixture layout、expected outputs、snapshot comparison、release gate ownership matrix、release gates 和 regression asset policy。
+9. `09-sdlc-workflow-lifecycle-contract.md`：SDLC workflow artifact roots、Story lifecycle schema、Flow Gate mode/result、anchor policy、Story template sections 和 legacy baseline rule。
 
 ## Implementation Anchors（实现锚点）
 
@@ -32,6 +33,17 @@ Owning SPEC 内的 `Implementation Anchor` 是实现侧必须复用的 executabl
 - `src/ide/adapter-registry.ts`
 - `src/config/resolve-output-schema.ts`
 - `src/fixtures/fixture-contract.ts`
+
+## Canonical Skill Contract Anchors（Canonical Skill 契约锚点）
+
+SDLC workflow lifecycle contract 的运行载体是 canonical skill packages 与审计脚本，不是产品 runtime TypeScript schema。对应 source anchors 为：
+
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/SKILL.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/assets/story-template.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-planning/assets/sprint-status-template.yaml`
+- `_bmad-output/implementation-artifacts/config-audits/speclite-canonical-skill-config-audit/scripts/audit-canonical-skill-rule-coverage.mjs`
+- `_bmad-output/implementation-artifacts/config-audits/speclite-canonical-skill-config-audit/scripts/triage-rule-coverage.mjs`
 
 ## MVP Non-Goals（MVP 非目标）
 
@@ -64,7 +76,7 @@ ADR 记录 hard-to-reverse decisions 的背景、理由和 trade-off。它可以
 
 ## Post-MVP Extension SPEC Reservation（Post-MVP 扩展 SPEC 预留）
 
-未来若提升 `speclite init`、`speclite list`、`speclite doctor`、`speclite sync`、`speclite uninstall` 或 migration commands 为实现范围，必须先新增 owning SPEC，再进入 implementation schema/parser 和 fixtures。推荐命名为 `09-post-mvp-command-contracts.md` 或按 command 拆分为独立 contract；这些预留 SPEC 不属于 MVP gate，除非后续 PRD/Architecture 明确改写范围。
+未来若提升 `speclite init`、`speclite list`、`speclite doctor`、`speclite sync`、`speclite uninstall` 或 migration commands 为实现范围，必须先新增 owning SPEC，再进入 implementation schema/parser 和 fixtures。推荐命名为 `10-post-mvp-command-contracts.md` 或按 command 拆分为独立 contract；这些预留 SPEC 不属于 MVP gate，除非后续 PRD/Architecture 明确改写范围。
 
 ## Change Rule（变更规则）
 

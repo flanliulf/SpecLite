@@ -1,6 +1,6 @@
 ---
 name: speclite-brainstorming
-description: "Facilitate interactive brainstorming sessions using diverse creative techniques and ideation methods. Use when user says help me brainstorm, help me ideate, brainstorm ideas, ideation session, 头脑风暴, 帮我发散, 创意生成, 想点子, 方案发散, or wants structured creativity facilitation. Capable of session setup, method selection, technique execution, idea organization, continuation handling, and session output generation."
+description: "组织互动式头脑风暴，用多种创意方法扩展与筛选想法。用于用户说 brainstorm、ideate、头脑风暴、帮我发散或需要结构化创意会话。核心能力：设定目标、选择技法、整理 idea、产出后续行动。"
 allowed-tools: Read, Write, Grep, Glob, Bash
 metadata:
   version: "1.0.0"

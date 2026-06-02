@@ -1,6 +1,6 @@
 ---
 name: speclite-edit-prd
-description: "Edit PRD workflow for Speclite 规划与产品设计, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'edit prd', 'speclite edit prd', 'create edit prd', 'run edit prd', 'Edit PRD', '创建Edit PRD', '生成Edit PRD', '执行Edit PRD', '检查Edit PRD', '运行Edit PRD'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "Runs the SpecLite Edit PRD workflow to revise an existing product requirements document from feedback. Use when the user asks to edit PRD, update PRD, modify requirements, or run edit PRD. Capable of config-driven activation, target `.md` discovery, step-file orchestration, revision writing, and completion handoff."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

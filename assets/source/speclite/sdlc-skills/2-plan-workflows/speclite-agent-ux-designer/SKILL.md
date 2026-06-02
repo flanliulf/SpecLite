@@ -1,6 +1,6 @@
 ---
 name: speclite-agent-ux-designer
-description: "UX designer and UI specialist agent for SpecLite planning work. Use when the user asks to talk to Sally, requests the UX designer, says 'speclite ux designer', 'UX agent', '用户体验设计师', 'UX 设计', '界面设计', '找 Sally', or needs UX specifications that inform architecture and implementation. Capable of persona activation, UX design menu dispatch, persistent fact loading, and user-centered design facilitation."
+description: "激活 UX 设计师 Sally，规划 SpecLite 用户体验与交互规格。用于用户要求 UX designer、UX 设计、界面设计或需要 UX spec 支撑架构和实现。核心能力：加载 persona、分发 UX 菜单、沉淀以用户为中心的设计约束。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

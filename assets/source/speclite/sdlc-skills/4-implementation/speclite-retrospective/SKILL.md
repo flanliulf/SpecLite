@@ -1,6 +1,6 @@
 ---
 name: speclite-retrospective
-description: "Retrospective workflow for Speclite 实施与交付推进, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'retrospective', 'speclite retrospective', 'create retrospective', 'run retrospective', 'Retrospective', '创建Retrospective', '生成Retrospective', '执行Retrospective', '检查Retrospective', '运行Retrospective'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Retrospective workflow，复盘 Epic 或 sprint 并沉淀经验。用于用户要求 retrospective、retro、运行复盘、epic retrospective 或总结交付。核心能力：配置驱动激活、发现相关产物、按步骤编排、生成复盘 `.md` 并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

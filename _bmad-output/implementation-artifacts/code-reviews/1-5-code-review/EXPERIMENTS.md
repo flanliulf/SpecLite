@@ -1,5 +1,65 @@
 # EXPERIMENTS（尝试记录）
 
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+### Attempt 0（准备与分流）
+
+- 方案：先核对 `sprint-status.yaml` 中 Story 1-5 的状态，再决定是否执行 dev-story。
+- 原因：用户明确要求如果 story 对应 sprint 状态是 `review`，则跳过 `/bmad-dev-story story {story id}`。
+- 结果：Story 1-5 当前状态为 `review`，本轮跳过 dev-story，等待 Story 1-3 闭环完成后进入 reviewer -> evaluator -> fixer 串行闭环。
+
+### Attempt 1（第 3 轮 Code Review）
+
+- 方案：严格执行 `/bmenhance-cr-01-reviewer 1-5`，只做 Story 1-5 的 reopened corrective dev verification 复审。
+- 选择原因：用户明确要求本轮只执行 reviewer，不重新开发，也不执行 evaluator/fixer/finalizer。
+- 输入：Story 文件 `_bmad-output/implementation-artifacts/stories/1-5-runtime-structure-artifact-directory-and-ide-mirror-creation.md`、既有 round 1/2 review 与 evaluation、以及 Story 1-5 scoped diff。
+- 执行模式：当前环境未提供独立 `Agent` 调度工具，按 skill 降级为当前上下文串行三层审查；三层均完成，无失败层。
+- 验证：
+  - `npm test -- test/runtime-structure.test.ts test/ide-target-writer.test.ts test/install-module-selection.test.ts test/cli-smoke.test.ts` 通过，4 files / 26 tests。
+  - `npm test` 通过，20 files / 118 tests。
+  - `npm run build` 通过。
+  - `npm run lint` 不可用，项目未定义 `lint` script。
+  - Story 1-5 scoped `git diff --check` 通过。
+- 结果：生成 `_bmad-output/implementation-artifacts/code-reviews/1-5-code-review/1-5-code-review-summary-20260528-round-3.md`；reviewer 结论通过，findings 0。
+- 决策：本 reviewer 步骤无需进入 fixer；按用户指令本轮不启动 evaluator/fixer/finalizer。
+
+### Attempt 2（第 3 轮 Review Evaluation）
+
+- 方案：严格执行 `/bmenhance-cr-02-evaluator 1-5`，评估最新 round 3 reviewer 输出。
+- 选择原因：用户停止条件要求 reviewer 通过且 evaluator 评估也通过；即使 reviewer 建议不需要 evaluator，本步骤仍需执行。
+- 输入：`1-5-code-review-summary-20260528-round-3.md`、Story 1-5 文件、相关源码与测试证据，以及已有 round 1/2 review/evaluation 记录。
+- 验证：
+  - `npm test -- test/runtime-structure.test.ts test/ide-target-writer.test.ts test/install-module-selection.test.ts test/cli-smoke.test.ts` 通过，4 files / 26 tests。
+  - `npm test` 通过，20 files / 118 tests。
+  - Story 1-5 scoped `git diff --check` 通过。
+  - 未运行 `npm run build`，避免 evaluator 步骤改写 `dist/` 构建产物；`package.json` 当前未定义 `lint` script。
+- 结果：生成 `_bmad-output/implementation-artifacts/code-reviews/1-5-code-review/1-5-code-review-evaluation-20260528-round-3.md`；evaluator 结论 Approved / 通过，确认 reviewer pass 成立，findings 0，无遗漏阻塞项。
+- 决策：需要修复项 0，CR TODO 0，不需要 fixer；按用户指令不执行 fixer/finalizer。
+
+### Attempt 3（CR 规则提炼收尾）
+
+- 方案：严格执行 `bmenhance-cr-04-rules-extractor` for Story 1-5，读取 round 1/2/3 review 与 evaluation 历史。
+- 选择原因：用户要求即使 round 3 无新增 findings，也要按结果执行 04，并采用默认推荐决策避免挂起。
+- 输入：`1-5-code-review-summary-20260526-round-1.md`、`1-5-code-review-evaluation-20260526-round-1.md`、`1-5-code-review-summary-20260527-round-2.md`、`1-5-code-review-evaluation-20260527-round-2.md`、`1-5-code-review-summary-20260528-round-3.md`、`1-5-code-review-evaluation-20260528-round-3.md`。
+- 结果：round 3 reviewer/evaluator 均通过且 findings 0，未产生新的可沉淀规则；已按 record-only 默认决策补充 `_bmad-output/implementation-artifacts/cr-rules/cr-rules-summary.md` 中 Story 1-5 的 round 3 来源、关闭证据和无新增规则结论；未修改全局文档。
+- 决策：保留既有 `CR-SEC-02`、`CR-API-06`、`CR-API-07`，不新增规则，不交给 05 TODO Tracker。
+
+### Attempt 4（CR TODO 跟踪收尾）
+
+- 方案：严格执行 `bmenhance-cr-05-todo-tracker` for Story 1-5，按 extract/check 语义核对最新 CR 是否存在非阻塞延迟项。
+- 选择原因：用户要求即使 evaluation 已声明 CR TODO 0，本次仍要执行 05 并记录结果。
+- 输入：`1-5-code-review-evaluation-20260528-round-3.md`、既有 `_bmad-output/implementation-artifacts/cr-rules/cr-todo-backlog.md`。
+- 结果：round 3 evaluation 明确 `CR TODO 数量: 0`，未识别 Story 1-5 未解决非阻塞项；既有 backlog 仅包含 Story 2-4 与 2-5 条目，未新增、未改动。
+- 决策：Story 1-5 CR TODO 为 0；无需主 agent 后续处理 1-5 TODO。
+
+### Attempt 5（CR Finalizer 收尾）
+
+- 方案：严格执行 `bmenhance-cr-06-finalizer` for Story 1-5，先验证最新 evaluation Approved，再同步状态。
+- 选择原因：Story 1-5 因 corrective reopen 回到 `review`，最新 round 3 evaluator 已通过，用户要求在规则允许范围内重新收回 `done`。
+- 输入：Story 文件 `_bmad-output/implementation-artifacts/stories/1-5-runtime-structure-artifact-directory-and-ide-mirror-creation.md`、`sprint-status.yaml`、最新 evaluation 文件。
+- 结果：将 Story 文件 `Status: review` 更新为 `Status: done`；将 `sprint-status.yaml` 中 `1-5-runtime-structure-artifact-directory-and-ide-mirror-creation` 从 `review` 更新为 `done`，并更新 `last_updated` 为 `2026-05-28 17:09 CST`。
+- 决策：`_bmad-output/planning-artifacts/bmm-workflow-status.yaml` 不存在，按 finalizer 文件容错规则跳过；Epic 1 下 Story 1-6 仍为 `review`，不更新 `epic-1` 主状态。
+
 ## 2026-05-26
 
 ### Experiment 1：Story 1-5 启动预检

@@ -1,5 +1,73 @@
 # EXPERIMENTS
 
+## 2026-05-28 CR Closeout（CR 通过后收尾）
+
+### Attempt 1（04 Rules Extractor 输入定位）
+
+- 方案：按 `bmenhance-cr-04-rules-extractor` 读取 Story 2-2 的全部 CR summary/evaluation、规则升格阈值和既有 `cr-rules-summary.md` 记录。
+- 原因：用户要求即使最新 reviewer/evaluator 已通过且 0 findings，本次仍执行 04，并用默认推荐决策避免挂起。
+- 结果：Round 1 的 `canonicalPackageHash` 输入面问题已在既有 `CR-API-09` 中沉淀；Round 3 reviewer/evaluator 只确认该问题未回归，并确认 selected modules 下全部 canonical package roots 的 corrective 覆盖成立，未产生新的 findings、未解决非阻塞项或可升格规则。
+- 结论：04 完成；默认推荐决策为 no-op，不重复更新 `cr-rules-summary.md`，不修改 project-context、architecture、specs 或其他全局文档。
+
+### Attempt 2（05 TODO Tracker 提取与匹配）
+
+- 方案：按 `bmenhance-cr-05-todo-tracker` extract/check 语义扫描 Story 2-2 CR 历史中的非阻塞、后续改善、CR TODO 记录，并检查现有 open backlog 与 Story 2-2 File List 是否匹配。
+- 原因：用户要求即使最新 evaluator 明确 CR TODO 0，也必须执行 05 并记录结果。
+- 结果：Round 1/2/3 evaluation 均明确没有需要继承、新增或纳入 CR TODO 的事项；现有 `cr-todo-backlog.md` 只有 TODO-001（2-4）和 TODO-002（2-5），均不匹配 Story 2-2 File List。
+- 结论：05 完成；新增 TODO 0，不修改 `cr-todo-backlog.md`，不修改源码。
+
+### Attempt 3（06 Finalizer 状态同步）
+
+- 方案：按 `bmenhance-cr-06-finalizer` 验证 latest evaluation round 3 通过后，将 Story 2-2 从 `review` 收回 `done`，并同步 `sprint-status.yaml` 对应条目。
+- 原因：Story 2-2 当前满足 reviewer 通过 + evaluator 通过停止条件；finalizer 只做状态跟踪收尾。
+- 结果：latest evaluation `2-2-code-review-evaluation-20260528-round-3.md` 明确“最终评估决定：通过”；Story 文件 `Status` 已更新为 `done`；`sprint-status.yaml` 中 `2-2-ide-skill-entry-mapping` 已更新为 `done`，`last_updated` 更新为 `2026-05-28 17:52 CST`。`bmm-workflow-status.yaml` 不存在，按 finalizer 容错规则跳过。
+- 结论：06 完成；Epic 2 下 `2-3-skill-activation-and-phase-capability-coverage` 仍为 `review`，因此不更新 `epic-2` 主状态。
+
+## 2026-05-28 Evaluator Round 3（评估第 3 轮 reviewer）
+
+### Attempt 1（Evaluator 输入定位）
+
+- 方案：按 `bmenhance-cr-02-evaluator` 读取 `cr-config.md`、output template、Story 2-2、latest review summary 和既有 evaluation round 1/2。
+- 原因：用户要求即使 reviewer 建议无需 evaluator，本步骤仍需执行，以满足 reviewer 通过且 evaluator 通过的停止条件。
+- 结果：确认 latest review 为 `2-2-code-review-summary-20260528-round-3.md`；已有 evaluation round 1/2，因此本轮 evaluation 为 round 3；reviewer 结论为通过，0 findings。
+- 结论：继续执行独立代码、fixture 和验证命令核查，不进入 fixer/finalizer。
+
+### Attempt 2（Evaluator 独立证据核查）
+
+- 方案：核查 `src/ide/target-writer.ts` 的 selected module packageRoots 遍历、`src/fs/copy-tree.ts` 的 installed surface predicate、no-help package root tests、runtime mirror inventory tests、menu target validation tests 和 fresh install fixture。
+- 原因：本轮 reviewer pass 的主要风险点是是否遗漏“只 mirror help/phase rows 而非全部 selected package roots”的 corrective 缺陷。
+- 结果：代码显示 `createPackageEntries(input.selectedModules)` 从 `module.packageRoots` 生成 entries；no-help package root 仍会进入 `skillIndexEntries` 和 `.claude` / `.agents` mirror；fixture 记录 canonical package roots total=53 且双 target 各 53 skills。
+- 结论：reviewer 对 corrective 覆盖项的 pass 判断成立。
+
+### Attempt 3（Evaluator 验证命令）
+
+- 方案：运行定向 tests、全量 `npm test`、`git diff --check` 和 `npm run lint`。
+- 原因：需要用当前工作区真实命令结果确认 reviewer 验证摘要是否可复现。
+- 结果：定向 tests 通过，7 files / 51 tests；full `npm test` 通过，20 files / 118 tests；`git diff --check` 通过；`npm run lint` 返回 Missing script。
+- 结论：`package.json` 未定义 `lint` script，Missing script 是项目事实；本轮无阻塞项、无 CR TODO、无需 fixer。
+
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+### Attempt 1（Reviewer Round 3 输入收集）
+
+- 方案：按 `bmenhance-cr-01-reviewer` 读取 `cr-config.md`、`review-engine.md`、输出模板、Story 2-2、round 1/2 reviewer/evaluator 历史与当前 Story 相关 diff。
+- 原因：本轮是复审，需要继承 round 1 P1 与 round 2 双通过结论，并聚焦 reopened corrective dev verification 新增范围。
+- 结果：确认本轮为 round 3；Agent 工具不可用，按 skill 降级为串行三层审查模式；审查输入写入 `.tmp/review-input.diff`，复审上下文写入 `.tmp/review-context.md`。
+- 结论：继续执行代码证据核查与验证命令，不启动 evaluator/fixer/finalizer。
+
+### Attempt 2（Reviewer Round 3 验证）
+
+- 方案：核对 `src/ide/target-writer.ts` 的 package root 遍历、runtime/integration tests、menu target validation 和 fresh install fixture，再运行 build/test/diff checks。
+- 原因：Corrective Task 9 的核心风险是只 mirror help/phase rows，而不是 selected modules 下全部 canonical package roots。
+- 结果：`npm run build` 通过；targeted tests 通过，7 files / 51 tests；full `npm test` 通过，20 files / 118 tests；`git diff --check` 通过；`npm run lint` 因项目未定义 script 返回 Missing script。
+- 结论：未发现新的阻塞项或中高优先级问题；round 3 reviewer 结论通过，无需进入 fixer。
+
+### Attempt 0（准备与分流）
+
+- 方案：先核对 `sprint-status.yaml` 中 Story 2-2 的状态，再决定是否执行 dev-story。
+- 原因：用户明确要求如果 story 对应 sprint 状态是 `review`，则跳过 `/bmad-dev-story story {story id}`。
+- 结果：Story 2-2 当前状态为 `review`，本轮跳过 dev-story，等待前序 Story 闭环完成后进入 reviewer -> evaluator -> fixer 串行闭环。
+
 ## 2026-05-27 12:02 - Preflight
 
 - 方案：确认 Story 2.2 文件、`sprint-status.yaml` 状态和当前工作树，再启动 fresh dev sub-agent。

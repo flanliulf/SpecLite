@@ -183,7 +183,7 @@ development_status:
 #   - backlog: Story only exists in epic file
 #   - ready-for-dev: Story file created in story_location, usually {implementation_artifacts}/stories
 #   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
+#   - review: Ready for code review (start with CR1 / code-review-01-reviewer)
 #   - done: Story completed
 #
 # Retrospective Status:
@@ -195,7 +195,7 @@ development_status:
 # - Epic transitions to 'in-progress' automatically when first story is created
 # - Stories can be worked in parallel if team capacity allows
 # - Developer typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Dev moves story to 'review', then runs code-review-01-reviewer (fresh context, different LLM recommended)
 
 generated: { date }
 last_updated: { date }
@@ -275,7 +275,7 @@ backlog → ready-for-dev → in-progress → review → done
 - **backlog**: Story only exists in epic file
 - **ready-for-dev**: Story file created under `story_location` (usually `stories/`, e.g., `stories/1-3-plant-naming.md`)
 - **in-progress**: Developer actively working
-- **review**: Ready for code review (via Dev's code-review workflow)
+- **review**: Ready for code review (start with CR1 / `code-review-01-reviewer`)
 - **done**: Completed
 
 **Retrospective Status:**

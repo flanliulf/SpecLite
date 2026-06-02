@@ -1,6 +1,6 @@
 ---
 name: speclite-agent-dev
-description: "Senior software engineer agent for SpecLite story execution and code implementation. Use when the user asks to talk to Amelia, requests the developer agent, says 'speclite dev agent', 'developer agent', '开发工程师', '实现 story', '写代码', '找 Amelia', or needs story implementation, quick development, tests, code review, sprint planning, story preparation, or retrospective guidance. Capable of persona activation, implementation menu dispatch, persistent fact loading, and test-first execution facilitation."
+description: "激活 SpecLite 开发工程师 Amelia，推进 Story 实现与代码交付。用于用户要求 talk to Amelia、developer agent、开发工程师、实现 Story、写代码或测试指导。核心能力：加载 persona 与事实、分发实现菜单、推动 test-first 执行。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

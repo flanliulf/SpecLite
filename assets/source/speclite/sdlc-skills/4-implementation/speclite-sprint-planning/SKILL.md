@@ -1,9 +1,9 @@
 ---
 name: speclite-sprint-planning
-description: "Sprint Planning workflow for Speclite 实施与交付推进, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'sprint planning', 'speclite sprint planning', 'create sprint planning', 'run sprint planning', 'Sprint Planning', '创建Sprint Planning', '生成Sprint Planning', '执行Sprint Planning', '检查Sprint Planning', '运行Sprint Planning'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Sprint Planning workflow，把 Epic/Story 规划成 sprint 跟踪状态。用于用户要求 sprint planning、生成 sprint plan、创建 sprint-status.yaml 或计划开发批次。核心能力：配置驱动激活、读取规划产物、生成状态文件、给出下一步建议。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -18,6 +18,7 @@ metadata:
     - **源制品发现与上下文加载**：按 workflow 规约读取项目制品、配置字段、历史上下文和必要数据文件，保持源流程的输入发现语义。
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。
     - **模板化输出生成**：使用 assets 中的模板或示例骨架生成文档、报告、规格或交付产物，输出语言服从 `document_output_language`。
+    - **Story 位置标准化**：生成的 sprint-status 默认把 `story_location` 指向 `{implementation_artifacts}/stories`，使 Story 生产方与消费方路径一致。
     - **质量校验与交接**：执行清单、报告、状态同步或 completion handoff，并在退出前解析和执行 `workflow.on_complete`。
     - **迁移一致性约束**：当前运行规约只依赖 Speclite runtime，不读取旧运行目录、旧配置文件或旧命令命名空间。
 
@@ -33,8 +34,9 @@ metadata:
     1. 先完整阅读 `references/workflow-details.md`；该文件是从源入口转换后的权威工作流规约。随后按需读取 `references/workflow-details.md`、`references/checklist.md`。
     2. 执行工作流前，确认 `{skill-root}`、`{project-root}`、`{speclite-runtime-root}`、`{skill-name}` 四个路径变量均已明确。
     3. 若 workflow 指向 step 文件，必须一次只读取当前 step，完整执行后再进入下一步；遇到菜单或用户确认点时 HALT 等待。
-    4. 生成或更新产物时，按源 workflow 的模板、清单、状态字段和输出位置要求执行，不得因为迁移而改变核心需求。
-    5. 收尾前运行 checklist 或质量检查，解析 `workflow.on_complete`，并在输出文档末尾追加本 Skill 的生成标注。
+    4. 生成 sprint-status 时，默认 `story_location` 与 `story_location_absolute` 指向 `{implementation_artifacts}/stories`，不得回退到 `{implementation_artifacts}` 根目录。
+    5. 生成或更新产物时，按源 workflow 的模板、清单、状态字段和输出位置要求执行，不得因为迁移而改变核心需求。
+    6. 收尾前运行 checklist 或质量检查，解析 `workflow.on_complete`，并在输出文档末尾追加本 Skill 的生成标注。
 
 [注意事项]
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-sprint-planning`。

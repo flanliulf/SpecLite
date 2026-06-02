@@ -1,9 +1,9 @@
 ---
 name: speclite-skill-creator
-description: "Interactive Skill development assistant that creates complete Agent Skills packages through structured dialogue. Use when user mentions 'speclite skill creator', 'speclite-skill-creator', 'create skill', 'new skill', 'build skill', 'generate skill', 'skill creator', '创建 skill', '新建技能', '生成技能', '开发技能', '技能创建', '创建技能包', '帮我做个 Skill', or wants to create SKILL.md files, agent skills, or automate workflow packaging. Capable of progressive disclosure architecture design, five workflow pattern matching, YAML frontmatter generation, reference document structuring, Python/Shell script scaffolding, and trigger testing guidance."
+description: "通过结构化对话创建完整 Agent Skill 包与 `SKILL.md`。用于用户要求 speclite-skill-creator、create skill、新建技能、生成技能包或封装 workflow。核心能力：设计 progressive disclosure、生成 YAML frontmatter、组织 references、脚手架脚本并指导触发测试。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -17,6 +17,7 @@ metadata:
     - **规范转译**：生成三段式 description、kebab-case name、allowed-tools，并按 metadata 字段契约写入 `metadata.version`、`metadata.author` 和可选 `metadata.catalog`。
     - **双语入口生成**：生成中文 canonical `SKILL.md` 与英文 mirror `SKILL.en.md`，保持 YAML、版本、目录和执行语义一致。
     - **Workflow density gate**：使用 deterministic 脚本统计正文长度、Workflow 长度和占比，命中阈值时抽取 workflow reference。
+    - **Flow Gate guidance**：为会推进 Story/Epic 状态或依赖实现锚点的 workflow skill 生成 Contract -> Functional -> Evidence 门控表达，避免固定路径误判。
     - **渐进式文件组织**：按 SKILL.md、SKILL.en.md、CHANGELOG.md、references/、scripts/、assets/ 分配核心指令、详细资料、脚本和模板。
     - **质量与测试指导**：控制正文长度、语言规则、命名规范、生成标注和触发测试建议。
 
@@ -29,13 +30,16 @@ metadata:
     Step 2：规划文件结构并生成入口
         先写入 `forge/<catalog>/<skill-name>/` 或 `forge/<skill-name>/`。生成 SKILL.md、SKILL.en.md、CHANGELOG.md，并按需生成 references/、scripts/、assets/。
 
-    Step 3：运行 Workflow density gate
+    Step 3：加入 Flow Gate guidance
+        若 Skill 会推进 Story/Epic 状态、消费 Story 文件、检查实现 anchor 或写入 implementation artifacts，必须在入口或 reference 中加入 flow-gate guidance：固定路径只有 owning SPEC 明确要求时才是 hard gate，否则应描述 equivalent implementation policy。
+
+    Step 4：运行 Workflow density gate
         生成草稿后，优先调用已安装 `speclite-skill-lint` 的 `scripts/check_skill_density.py`；在本仓库源码中使用 `python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py <skill-dir>`。脚本结果是唯一判断来源。
 
-    Step 4：按 gate 结果拆分 Workflow
+    Step 5：按 gate 结果拆分 Workflow
         若任一入口文件满足 `workflow_chars > 1500` 且 `workflow_ratio > 0.5`，必须创建 `references/<skill-name>-workflow.md` 或等价 workflow reference。入口 Workflow 只保留阶段摘要、何时读取 reference 和关键停止条件。
 
-    Step 5：完成总结
+    Step 6：完成总结
         展示文件树、渐进式披露分层、触发测试建议、版本信息和后续通过 `speclite-skill-lint` / `skills-upgrade` 收敛的入口。
 
 [Notes（注意事项）]
@@ -46,6 +50,7 @@ metadata:
     - YAML frontmatter 只允许 name、description、license、allowed-tools、metadata，且不得包含 XML 尖括号或代码执行逻辑。
     - metadata 仅支持 `version`、`author`、`catalog`：`version` 和 `author` 必填，`catalog` 在 Skill 归入 catalog 时填写并与路径及 mirror 对齐。
     - 目录和 name 字段必须使用 kebab-case，禁止保留前缀 claude-*、codex-*、anthropic-*。
+    - 涉及实现阶段状态推进或 anchor 检查的 workflow skill，必须说明 owning SPEC、equivalent implementation policy 和 Flow Gate report 消费方式。
     - 运行产物写入 output/，过程分析文档写入 docs/analysis/，不得散落在项目根目录。
     - 如需安装测试，只同步到实际存在的安装根；不得凭空创建 `.codex/skills`。
 

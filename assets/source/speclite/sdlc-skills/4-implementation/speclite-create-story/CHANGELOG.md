@@ -4,6 +4,14 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.0.1] - 2026-05-27
+
+### Changed
+
+- Story 文件默认写入 `{implementation_artifacts}/stories/`，上一 Story 扫描也统一读取该子目录。
+- Story 模板和 checklist 增加 Flow Gate、Anchor Contract Map、Equivalent Implementation Policy、Evidence Plan 与 Anchor Evidence Summary 要求。
+- 后续 CR 指引改为从 `code-review-01-reviewer` 开始，不再指向已删除的非编号 `code-review` 聚合入口。
+
 ## [1.0.0] - 2026-04-26
 
 ### 初始版本
@@ -17,8 +25,6 @@
 - 基于模板渲染完整 Story 并置为 `ready-for-dev`
 - Checklist 自检与 `sprint-status.yaml` 状态同步
 - 同时提供中文 SKILL.md 与英文 SKILL.en.md 双版定义
-- Story 文件默认写入 `{implementation_artifacts}/stories/`
-- Story 模板包含 Flow Gate 和 Anchor 证据段
 
 ### 已知问题
 

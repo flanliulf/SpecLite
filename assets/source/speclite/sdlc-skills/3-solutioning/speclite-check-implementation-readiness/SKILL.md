@@ -1,6 +1,6 @@
 ---
 name: speclite-check-implementation-readiness
-description: "Check Implementation Readiness workflow for Speclite 方案与架构准备, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'check implementation readiness', 'speclite check implementation readiness', 'create check implementation readiness', 'run check implementation readiness', 'Check Implementation Readiness', '创建Check Implementation Readiness', '生成Check Implementation Readiness', '执行Check Implementation Readiness', '检查Check Implementation Readiness', '运行Check Implementation Readiness'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Check Implementation Readiness workflow，验证 PRD、UX、Architecture 与 Epics 是否可进入实现。用于用户要求 check implementation readiness、readiness gate、实施就绪检查或运行 IR。核心能力：配置驱动激活、读取规划产物、按步骤审计、输出 readiness 报告。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

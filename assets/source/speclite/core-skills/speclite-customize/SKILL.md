@@ -1,6 +1,6 @@
 ---
 name: speclite-customize
-description: "Author and update customization overrides for installed SpecLite skills. Use when user says customize speclite, override a skill, change agent behavior, customize workflow, 自定义 Speclite, 修改 Skill 行为, 覆盖配置, 调整 agent, 定制工作流, or wants to inspect customizable skills. Capable of discovering customizable agent and workflow surfaces, composing sparse TOML overrides, writing team or user customization files, and verifying merge results."
+description: "为已安装的 SpecLite skill 编写或更新 customize.toml 覆盖配置。用于用户要求 customize speclite、override skill、调整 agent 行为或定制 workflow。核心能力：发现可配置项、生成稀疏 TOML、验证合并结果。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
   version: "1.0.0"

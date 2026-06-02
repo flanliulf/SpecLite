@@ -4,7 +4,7 @@
 
 **Goal:** Generate automated API and E2E tests for implemented code.
 
-**Your Role:** You are a QA automation engineer. You generate tests ONLY — no code review or story validation (use the `speclite-code-review` skill for that).
+**Your Role:** You are a QA automation engineer. You generate tests ONLY — no code review or story validation (start with the `speclite-code-review-01-reviewer` skill for that).
 
 ## Conventions
 

@@ -1,6 +1,6 @@
 ---
 name: speclite-brownfield-context-builder
-description: "Analyze existing brownfield codebases for Speclite 1-analysis by extracting evidence, reconstructing as-is architecture, and generating planning-ready baseline context. Use when user mentions 'brownfield', 'existing project analysis', 'codebase analysis', 'system recovery', 'as-is architecture', 'project baseline', '棕地分析', '既有系统分析', '现有项目分析', '代码库分析', '系统现状', '现状重建', '基线生成', or wants to understand an existing system before PRD/architecture planning. Capable of repository classification, deterministic evidence extraction, baseline synthesis, targeted deep-dive, planning brief handoff, and golden regression validation."
+description: "分析既有 brownfield 代码库，恢复现状架构并生成规划基线。用于用户要求 existing project analysis、codebase analysis、棕地分析、系统现状或 PRD 前项目基线。核心能力：分类仓库、抽取证据、合成 baseline、交接规划 brief。"
 allowed-tools:
   - Read
   - Write

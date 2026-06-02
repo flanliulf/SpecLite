@@ -1,9 +1,9 @@
 ---
 name: speclite-create-story
-description: "Create a comprehensive Story file with all the context the dev agent will need to implement it later, by exhaustively analyzing epics, PRD, architecture, UX, the previous story, and code being modified. Use when user mentions 'create story', 'create the next story', 'create story by identifier', 'next story', 'draft story', '创建 Story', '创建下一个 Story', '生成 Story', '起草 Story', '创建故事', '生成故事文件', '准备开发故事', or provides an epic-story identifier such as '1-2', '1.6', 'epic 1 story 5'. Capable of config-driven activation, sprint-status auto-discovery, artifact analysis, architecture guardrails, web research, previous-story intelligence, modified-file impact analysis, and ready-for-dev Story generation."
+description: "创建包含完整实现上下文的 Story `.md`，供 dev agent 后续开发。用于用户要求 create story、next story、创建下一个 Story、生成故事文件或提供 1-2/epic story id。核心能力：读取 sprint-status、分析规划与代码影响、继承上一 Story、产出 ready-for-dev Story。"
 allowed-tools: Read, Write, Grep, Glob, Bash, WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -43,4 +43,4 @@ metadata:
     - Story 实现要求系统端到端继续工作；既有系统中维持功能正确所需的行为，即使未写入 AC，也必须视为需求。
     - `sprint-status.yaml` 更新必须保留所有注释与结构，包含 STATUS DEFINITIONS，禁止覆写为缩略版。
     - Story 文档末尾必须追加 `*本文档由 speclite-create-story Skill 自动生成*` 标注。
-    - 完成输出必须包含 Story ID、Story Key、文件路径、`ready-for-dev` 状态、`dev-story`、`code-review` 和可选 Test Architect 护栏测试后续指引。
+    - 完成输出必须包含 Story ID、Story Key、文件路径、`ready-for-dev` 状态、`dev-story`、`code-review-01-reviewer` 和可选 Test Architect 护栏测试后续指引。

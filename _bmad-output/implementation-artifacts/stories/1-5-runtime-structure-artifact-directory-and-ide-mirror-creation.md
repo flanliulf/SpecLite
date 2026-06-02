@@ -51,7 +51,7 @@ Status: done
 6. **Claude target mirror uses canonical self-contained skill entries.**  
    **前提** 用户选择了 `claude` target，且 adapter registry 声明该 target 可计划写入；  
    **当** 系统生成 IDE execution mirror；  
-   **则** 必须把 selected modules 中的 canonical skill packages 安装到 `.claude/skills/<canonicalSkillId>/`；  
+   **则** 必须把 selected modules 下全部 canonical package roots 安装到 `.claude/skills/<canonicalSkillId>/`；
    **并且** canonical package discovery 必须支持 selected module directory 下的 nested `SKILL.md` package roots，不得只检查 module directory top-level；  
    **并且** selected module 若缺少 canonical self-contained skill package，不得作为默认 installed module 进入 `.claude/skills` mirror；除非后续 source assets 补齐 packages 或 owning SPEC 定义 metadata-only module contract，否则必须作为 blocking diagnostic 处理；  
    **并且** 每个 entry 至少包含 `SKILL.md`，并按相同 relative path 复制 canonical package 中存在的 `CHANGELOG.md`、`references/`、`assets/`、`scripts/`、`config.toml.example` 和 `customize.toml`；  
@@ -60,7 +60,7 @@ Status: done
 7. **Agents target mirror uses the same canonical packages and target order.**  
    **前提** 用户选择了 `agents` target，且 adapter registry 声明该 target 可计划写入；  
    **当** 系统生成 IDE execution mirror；  
-   **则** 必须把同一批 canonical skill packages 安装到 `.agents/skills/<canonicalSkillId>/`；  
+   **则** 必须把同一批完整 canonical package roots 安装到 `.agents/skills/<canonicalSkillId>/`；
    **并且** `.agents` target 必须使用与 `.claude` 相同的 canonical package eligibility，不得为 missing package module 合成空 skill、metadata-only skill 或 target-specific placeholder；  
    **并且** canonical package bytes、package-level hash 和 source reference 不得因 IDE target 不同而变化；  
    **并且** 所有 target planning、manifest projection、`CommandResult.data.ideTargets`、validation target lists 和 fixture snapshots 必须使用 canonical target order：`claude` 再 `agents`，不得依赖 glob、filesystem、user selection 或 async completion order。
@@ -71,6 +71,8 @@ Status: done
    **则** 必须写入 `_speclite/_config/manifest.yaml`、`skill-index.json`、`help-index.json`、`files-index.json` 和 `phase-coverage.json`；  
    **并且** 每个 artifact 必须包含 owning SPEC 规定的 schema version；  
    **并且** projection 必须记录 selected modules、source descriptor、IDE targets、canonical skill package hash、target entries、help/menu entries、phase coverage、ownership、file-level hash、executable intent、sourceRef 和 project-relative POSIX paths；  
+   **并且** `skill-index.json` 必须包含 selected modules 下每一个 canonical package root 的 `canonicalSkillId`、`moduleId`、`sourcePackagePath`、`canonicalPackageHash` 和 `installedTargets`；默认 `core` + `sdlc` baseline 必须包含 `53` 个 skill index entries；
+   **并且** `files-index.json` 必须包含每个 selected IDE target 中对应 package files 的 installer-owned hash projection；
    **并且** manifest/index 只是 installed projection，source truth 仍来自 `assets/source/speclite/` 的 module metadata 与 canonical skill packages。
 
 9. **Canonical identity, help/menu projection and missing package handling are explicit.**  
@@ -175,6 +177,13 @@ Status: done
   - [x] 检查 diff，确认没有实现 Story 1.6 ReadyCheck、ready summary、full install progress summary 或 final installed-state summary。
   - [x] 检查 diff，确认没有新增 Post-MVP `init`、`list`、`doctor`、`sync`、`uninstall`、top-level `repair`、branded `copilot` / `cursor` target id 或 command pointer artifact。
   - [x] 检查 diff，确认没有格式化、重写或同步 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
+
+- [x] Corrective Task 10: 扩展 IDE mirror 与 index completeness 到全部 canonical package roots（AC: 6, 7, 8, 12）
+  - [x] 确认 target writer 输入来自 selected modules 的 `packageRoots`，而不是 `module-help.csv` rows 或最小 phase coverage rows。
+  - [x] 默认 `core` + `sdlc` fresh install 必须在 `.claude/skills` 与 `.agents/skills` 中各生成 `53` 个 `SKILL.md` entries。
+  - [x] `skill-index.json` 必须有 `53` 个 canonical skill entries，且每个 entry 的 `sourcePackagePath`、`canonicalPackageHash` 和 `installedTargets` 可验证。
+  - [x] `files-index.json` 必须覆盖两个 selected IDE targets 中全部 canonical package files，并保留 sourceRef 与 file-level hash。
+  - [x] Fixture expected tree / manifest-index assertions 必须证明 full canonical set，而不是只证明 `speclite-dev-story`。
 
 ## Dev Notes（开发备注）
 
@@ -419,6 +428,8 @@ GPT-5 Codex
 - GREEN/REFACTOR: `npm run build` passed.
 - GREEN/REFACTOR: `npm test -- test/runtime-structure.test.ts` passed, 5 tests.
 - REGRESSION: `npm test` passed, 9 files / 52 tests.
+- 2026-05-28 15:40 CST: Corrective focused tests verified `writeIdeMirrors` indexes and mirrors package roots with no help/phase row; 4 files / 27 tests passed.
+- 2026-05-28 15:40 CST: Targeted verification passed, 7 files / 52 tests; full `npm test` passed, 20 files / 116 tests; `git diff --check` passed.
 
 ### Completion Notes List（完成备注）
 
@@ -431,6 +442,9 @@ GPT-5 Codex
 - Clarified implementation anchor interpretation: current manifest/index builders are centralized in `src/manifest/manifest-generator.ts` with schemas in `src/manifest/manifest-schema.ts`; separate `skill-index.ts` / `help-index.ts` / `files-index.ts` / `phase-coverage.ts` files are optional split modules, not required proof of completion.
 - Updated install output to use contracted `CommandResult<InstallCommandData>` fields, mark `ide-mirror-creation` and `manifest-generation` completed, and keep `ready-check` / `ready-summary` pending for Story 1.6.
 - Added focused integration and fixture assertions for fresh install shape, target subset, operation lock failure, human-owned stub protection, workflow artifact preservation, artifact symlink escape and no-ready-summary gate.
+- Corrective verification confirmed target writer input is `selectedModules.packageRoots`; `module-help.csv` rows only enrich help/phase projection.
+- Confirmed default `core` + `sdlc` fresh install yields `53` skill-index entries and `53` `.claude` / `.agents` mapped skill entries per selected target.
+- Added focused no-help-row coverage proving installed package inventory remains complete even when a skill has no help/phase projection row.
 
 ### File List（文件列表）
 
@@ -461,7 +475,12 @@ GPT-5 Codex
 - `test/fixtures/fresh-install-empty-project/expected/installed-state/phase-coverage-dev-story.json`
 - `test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-speclite-dev-story.json`
 - `test/fixtures/fresh-install-empty-project/expected/installed-tree.txt`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/PLAN.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENT_NOTES.md`
+- `test/ide-target-writer.test.ts`
 
 ### Change Log（变更日志）
 
 - 2026-05-26: Implemented Story 1.5 runtime structure, artifact directories, IDE mirrors, manifest/index projections and validation coverage.
+- 2026-05-28: Corrective verification confirmed full canonical package root mirror/index completeness and added no-help-row focused coverage; Story 状态重新推进至 review。

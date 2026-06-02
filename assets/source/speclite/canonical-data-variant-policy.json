@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "accepted_basename_variants": [
+    {
+      "basename": "project-types.csv",
+      "reason": "Product planning skills share the PRD discovery schema; create-architecture keeps a phase-specific starter mapping schema under the same legacy basename.",
+      "scopes": [
+        {
+          "scope": "prd-project-discovery",
+          "skills": [
+            "speclite-document-project",
+            "speclite-create-prd",
+            "speclite-edit-prd",
+            "speclite-validate-prd"
+          ],
+          "required_headers": [
+            "project_type",
+            "detection_signals",
+            "key_questions",
+            "required_sections",
+            "skip_sections",
+            "web_search_triggers",
+            "innovation_signals"
+          ]
+        },
+        {
+          "scope": "architecture-starter-mapping",
+          "skills": [
+            "speclite-create-architecture"
+          ],
+          "required_headers": [
+            "project_type",
+            "detection_signals",
+            "description",
+            "typical_starters"
+          ]
+        }
+      ]
+    },
+    {
+      "basename": "domain-complexity.csv",
+      "reason": "PRD and validation skills use domain compliance guidance; create-architecture keeps a phase-specific architecture complexity and research topic mapping.",
+      "scopes": [
+        {
+          "scope": "prd-domain-compliance",
+          "skills": [
+            "speclite-create-prd",
+            "speclite-validate-prd"
+          ],
+          "required_headers": [
+            "domain",
+            "signals",
+            "complexity",
+            "key_concerns",
+            "required_knowledge",
+            "suggested_workflow",
+            "web_searches",
+            "special_sections"
+          ]
+        },
+        {
+          "scope": "architecture-domain-complexity",
+          "skills": [
+            "speclite-create-architecture"
+          ],
+          "required_headers": [
+            "domain",
+            "signals",
+            "complexity_level",
+            "suggested_workflow",
+            "web_searches"
+          ]
+        }
+      ]
+    },
+    {
+      "basename": "speclite-manifest.json",
+      "reason": "Each skill-local manifest describes that skill's capability registration and is expected to differ by skill.",
+      "scopes": [
+        {
+          "scope": "per-skill-capability-manifest",
+          "skills": [
+            "speclite-prfaq",
+            "speclite-product-brief"
+          ],
+          "required_keys": [
+            "module-code",
+            "capabilities"
+          ]
+        }
+      ]
+    }
+  ],
+  "accepted_field_context_variants": [
+    {
+      "field": "detection_signals",
+      "basename": "project-types.csv",
+      "reason": "The field is scoped by project-types.csv variant policy."
+    },
+    {
+      "field": "suggested_workflow",
+      "basename": "domain-complexity.csv",
+      "reason": "The field is scoped by domain-complexity.csv variant policy."
+    },
+    {
+      "field": "web_searches",
+      "basename": "domain-complexity.csv",
+      "reason": "The field is scoped by domain-complexity.csv variant policy."
+    }
+  ]
+}

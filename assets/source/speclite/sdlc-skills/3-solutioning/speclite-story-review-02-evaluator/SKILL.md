@@ -1,6 +1,6 @@
 ---
 name: speclite-story-review-02-evaluator
-description: "Evaluate Story design review results and generate a structured evaluation document. Use when user mentions 'SR evaluate', 'SR evaluation', 'evaluate SR', 'story review evaluation', 'design review evaluation', '评估 SR', '评估审查结果', 'SR 评估', '设计审查评估', 'Story 审查评估', '评估 Story 审查', or wants to assess Story design review findings. Capable of reading latest review results, assessing finding validity with source and bucket awareness, and producing evaluation documents with round numbering."
+description: "评估 Story Review 结果并生成结构化 SR evaluation 文档。用于用户要求 SR evaluate、story review evaluation、评估 SR 或判断设计审查结论。核心能力：读取最新 review、按来源与 bucket 判断有效性、生成带轮次的评估文件。"
 allowed-tools: Read, Write, Grep, Glob
 metadata:
   version: "1.0.0"

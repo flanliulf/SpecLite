@@ -1,9 +1,9 @@
 ---
 name: speclite-story-review-01-reviewer
-description: "Execute Story design review for an Epic or single Story using parallel three-layer adversarial analysis (Structure Hunter, Consistency Checker, Contract Auditor) with four-bucket triage, and save review summary to a structured result file. Use when user mentions 'SR', 'story review', 'story design review', 'epic review', 'story check', 'design review', 'Story 审查', 'SR 审查', '设计审查', 'Story 设计审查', 'Epic 审查', '审查 Story', '审查 Epic', or wants to review Story design documents before development. Capable of dual-granularity review (Epic-level or single-Story), parallel three-layer adversarial analysis, four-bucket triage, auto-detecting review history, batch processing, and generating structured review result documents with round numbering."
+description: "执行 Story 设计审查，对 Epic 或单个 Story 做三层对抗分析并保存结果。用于用户要求 SR、story review、design review、Story 审查或开发前审查。核心能力：识别范围、并行结构/一致性/契约检查、四类分流、生成轮次化 review 文档。"
 allowed-tools: Read, Write, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -16,6 +16,7 @@ metadata:
     - **双粒度审查**：支持 Epic 模式（审查 Epic 下全部 Story，启用跨 Story 维度）和 Story 模式（审查单个 Story，跳过 Story 间冲突维度），根据用户输入自动判定
     - **四桶分类**：将所有发现去重后分入 decision_needed / patch / defer / dismiss 四个桶，每个桶有明确的判定条件
     - **严重性标签映射**：四桶分类与 [高/中/低] 严重性标签并存，基于来源数量和安全关键词进行映射
+    - **Flow Gate 设计审计**：Contract & Boundary Auditor 检查 Story 是否把 guidance path、建议文件名或历史实现形态误写成 hard gate
     - **自动轮次检测**：自动扫描已有审查结果文件，确定当前轮次编号
     - **首轮/复审自适应**：首轮审查聚焦全量文档，复审聚焦上轮修复点和残留问题
     - **大批量分批处理**：Epic 模式下 Story > 5 时自动分批（每批 ≤ 5 个），确保审查质量
@@ -60,6 +61,7 @@ metadata:
             - 必需：`project-context.md`
             - 必需：`epic-{$epic_id}.md`
             - 按需：架构文档（`03-core-decisions.md`、`04-implementation-patterns.md`）
+            - 按需：owning SPEC（当 Story 声称固定源码路径、schema、fixture 或 command 为 hard gate 时必须读取）
             - 按需：前序 Epic 的相关 Story（当本 Epic 引用了前序 Epic 接口时）
         - 若 Epic 文件不存在：终止执行，告知用户
 

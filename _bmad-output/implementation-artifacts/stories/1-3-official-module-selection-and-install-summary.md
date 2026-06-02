@@ -42,6 +42,7 @@ Status: done
    **并且** 当前已知 module metadata 至少包括 `assets/source/speclite/core-skills/module.yaml` 与 `assets/source/speclite/sdlc-skills/module.yaml`；  
    **并且** module help/menu source 至少包括对应的 `module-help.csv`；  
    **并且** module package discovery 必须支持 module directory 下的 nested `SKILL.md` package roots，不得只检查 module directory top-level；  
+   **并且** 默认官方安装集合中，`core` module 必须发现 `assets/source/speclite/core-skills/` 下全部 canonical package roots，`sdlc` module 必须发现 `assets/source/speclite/sdlc-skills/` 下全部 canonical package roots；当前 baseline 为 `core=13`、`sdlc=40`、合计 `53` 个 canonical package roots；
    **并且** 默认可安装、可镜像或可进入 installed-state / ReadyCheck 的 module 必须具备 canonical self-contained skill packages；缺少 canonical packages 的 module 只能作为不可默认安装的 diagnostic state，除非后续补齐 packages 或 owning SPEC 明确引入 metadata-only module contract；  
    **并且** 不得把 `_bmad-output/`、archive docs、test fixtures、local cache、build output、IDE mirrors、workflow output、已删除路径或非目标辅助来源列为可安装模块。
 
@@ -63,7 +64,8 @@ Status: done
 7. **Install scope summary is shown before any project write.**  
    **前提** 用户已选择一个或多个官方模块；  
    **当** 系统生成安装范围摘要；  
-   **则** 摘要必须列出 selected modules、module versions、capability/scope summary、source descriptor summary 和后续会参与安装的能力范围；  
+   **则** 摘要必须列出 selected modules、module versions、capability/scope summary、source descriptor summary、每个 selected module 的 canonical package root count 和后续会参与安装的完整能力范围；
+   **并且** 默认 `core` + `sdlc` 安装范围摘要必须能表达 `53` 个 canonical package roots 将进入后续 IDE mirror、skill index、files index 和 ReadyCheck，而不是只列出代表性 workflow skill；
    **并且** 该摘要必须在任何 project file write 之前展示给用户确认；  
    **并且** 摘要不是 Story 1.6 的 ready summary，不得声称 runtime、manifest、IDE mirrors、config 或 ReadyCheck 已完成。
 
@@ -147,6 +149,12 @@ Status: done
   - [x] 如果 Story 1.3 新增或改变 public JSON field、module metadata schema 或 source descriptor producer behavior，确认同一变更中更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
   - [x] 检查 diff，确认没有实现 Story 1.4 config initialization、Story 1.5 runtime/IDE mirror writes、Story 1.6 ready summary 或 Post-MVP `list` / `doctor` / `sync` / `uninstall`。
   - [x] 检查 no-write tests 覆盖 module discovery failure、module selection pending、missing evidence 和 no official module 分支。
+
+- [x] Corrective Task 10: 同步 full canonical package root closure（AC: 4, 7）
+  - [x] 重新核对 `assets/source/speclite/core-skills/` 与 `assets/source/speclite/sdlc-skills/` 下全部 `SKILL.md` package roots，确认默认官方安装集合 baseline 为 `13 + 40 = 53`。
+  - [x] 更新 module discovery / module summary tests，使它们断言 selected module 的 package root count，而不是只断言存在少数代表性 skill。
+  - [x] 确认 `module-help.csv` 只作为 help/menu/phase metadata source，不得成为 canonical package inventory 的唯一来源。
+  - [x] 修正 install scope summary 的 human-readable / JSON evidence，使完整 package root count 在进入写入阶段前可见。
 
 ## Dev Notes（开发备注）
 
@@ -324,6 +332,9 @@ GPT-5 Codex
 - `npm run build` 通过。
 - `npm test -- --run test/source-and-modules.test.ts test/install-module-selection.test.ts` 通过：2 files, 10 tests。
 - `npm test` 通过：7 files, 33 tests。
+- 2026-05-28 15:38 CST: RED corrective tests failed as expected because install summary lacked `Canonical package roots: core=13, sdlc=40, total=53.`.
+- 2026-05-28 15:40 CST: GREEN corrective focused tests passed after adding selected module package root count evidence to config / ready summaries.
+- 2026-05-28 15:40 CST: Targeted verification passed, 7 files / 52 tests; full `npm test` passed, 20 files / 116 tests; `git diff --check` passed.
 
 ### Completion Notes List（完成备注）
 
@@ -334,6 +345,9 @@ GPT-5 Codex
 - 为 `core` / `sdlc` module metadata 增加显式 `version`，并用 `required` / `required_dependencies` 表达 core 与 sdlc dependency semantics。
 - 新增 deterministic module selection model，并将 `install --yes` 接入 pre-write install scope summary；JSON 仍复用既有 `CommandResult<InstallCommandData>` 字段，未新增 public automation fields。
 - 已验证 pre-write fresh install 的 `installedModules` 保持为空，target confirmation pending、existing install、missing evidence 与 module selection summary 分支均不创建 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills`。
+- Corrective verification confirmed bundled canonical package roots are `core=13` and `sdlc=40`, total `53`.
+- Added human-readable package root count evidence to install configuration / ready summary without adding non-contract public JSON fields.
+- Verified `module-help.csv` remains projection metadata and package root inventory is discovered from canonical `SKILL.md` package roots.
 
 ### File List（文件列表）
 
@@ -348,7 +362,13 @@ GPT-5 Codex
 - `src/modules/module-selection.ts`
 - `test/source-and-modules.test.ts`
 - `test/install-module-selection.test.ts`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/PLAN.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENT_NOTES.md`
+- `src/installer/config-initialization.ts`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
 
 ### Change Log（变更日志）
 
 - 2026-05-26: 实现 Story 1.3 official bundled source discovery、module metadata parsing、module selection、pre-write install scope summary 和 focused regression tests；Story 状态推进至 review。
+- 2026-05-28: Corrective verification added full canonical package root count evidence (`core=13`, `sdlc=40`, `total=53`) and validated targeted/full regression; Story 状态重新推进至 review。

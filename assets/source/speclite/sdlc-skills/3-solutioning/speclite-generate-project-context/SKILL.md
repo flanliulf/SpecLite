@@ -1,6 +1,6 @@
 ---
 name: speclite-generate-project-context
-description: "Generate Project Context workflow for Speclite 方案与架构准备, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'generate project context', 'speclite generate project context', 'create generate project context', 'run generate project context', 'Generate Project Context', '创建Generate Project Context', '生成Generate Project Context', '执行Generate Project Context', '检查Generate Project Context', '运行Generate Project Context'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Generate Project Context workflow，生成供 AI agent 使用的项目上下文。用于用户要求 generate project context、创建 project-context.md、刷新项目上下文或运行上下文生成。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成 `project-context.md` 并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

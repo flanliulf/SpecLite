@@ -1,9 +1,9 @@
 ---
 name: speclite-code-review-01-reviewer
-description: "Execute cross-LLM code review for a Story using parallel adversarial review layers (Blind Hunter, Edge Case Hunter, Acceptance Auditor) with structured triage, and save review summary to a structured result file. Use when user mentions 'CR', 'code review', 'crossllm review', 're-review', 'code review summary', '代码审查', 'CR 审查', '跨模型审查', '代码复审', '代码评审', '审查代码', or wants to review Story code changes. Capable of first-round and subsequent-round code reviews, parallel three-layer adversarial analysis, four-bucket triage, auto-detecting review history, and generating structured review result documents with round numbering."
+description: "执行 Story 代码审查，用三层对抗分析检查实现并保存 CR 结果。用于用户要求 CR、code review、cross-LLM review、代码审查、复审或审查 Story 变更。核心能力：识别轮次、并行 Blind Hunter/Edge Case/AC 审计、四类分流、生成 review 文档。"
 allowed-tools: Read, Write, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "fancyliu"
   catalog: "speclite"
 ---

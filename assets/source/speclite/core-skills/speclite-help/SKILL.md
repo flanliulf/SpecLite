@@ -1,6 +1,6 @@
 ---
 name: speclite-help
-description: "Analyze current workflow state and user query to answer SpecLite questions or recommend next skills. Use when user asks for help, speclite help, what to do next, where am I, next skill, 使用帮助, 下一步, 我现在该做什么, Speclite 帮助, or wants orientation in a SpecLite workflow. Capable of reading skill catalog, config, artifacts, project knowledge, and module docs to give grounded recommendations."
+description: "分析当前 SpecLite workflow 状态并回答使用问题或推荐下一步 skill。用于用户询问 help、next skill、下一步、我现在该做什么或需要流程定位。核心能力：读取 catalog、配置、产物与项目知识，给出有证据的路由建议。"
 allowed-tools: Read, Grep, Glob, Bash
 metadata:
   version: "1.0.0"

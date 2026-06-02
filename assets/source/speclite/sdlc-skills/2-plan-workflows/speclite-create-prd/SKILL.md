@@ -1,6 +1,6 @@
 ---
 name: speclite-create-prd
-description: "Create PRD workflow for Speclite 规划与产品设计, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'create prd', 'speclite create prd', 'create create prd', 'run create prd', 'Create PRD', '创建Create PRD', '生成Create PRD', '执行Create PRD', '检查Create PRD', '运行Create PRD'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "执行 SpecLite Create PRD workflow，从发现信息生成产品需求文档。用于用户要求 create PRD、创建 PRD、生成 PRD 或启动 PRD 编写。核心能力：配置驱动激活、发现来源产物、按步骤编排、生成 `.md` 输出并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

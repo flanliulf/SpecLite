@@ -1,6 +1,6 @@
 ---
 name: speclite-validate-prd
-description: "Validate PRD workflow for Speclite 规划与产品设计, migrated from a legacy source skill with runtime-model conversion. Use when user mentions 'validate prd', 'speclite validate prd', 'create validate prd', 'run validate prd', 'Validate PRD', '创建Validate PRD', '生成Validate PRD', '执行Validate PRD', '检查Validate PRD', '运行Validate PRD'. Capable of config-driven activation, three-tier customization, source artifact discovery, step-file orchestration, output generation, and completion handoff."
+description: "Runs the SpecLite Validate PRD workflow to check a product requirements document for completeness and implementability. Use when the user asks to validate PRD, run PRD validation, check PRD, or review requirements quality. Capable of config-driven activation, target `.md` reading, step-file checks, and validation output."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
   version: "1.0.0"

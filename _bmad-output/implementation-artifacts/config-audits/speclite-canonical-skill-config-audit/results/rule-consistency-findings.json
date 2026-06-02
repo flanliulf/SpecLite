@@ -1,0 +1,266 @@
+{
+  "generatedAt": "2026-05-28T04:04:26.592Z",
+  "consistencyFindingCount": 0,
+  "acceptedConsistencyVariantCount": 6,
+  "policyFile": "assets/source/speclite/canonical-data-variant-policy.json",
+  "findings": [],
+  "acceptedVariants": [
+    {
+      "kind": "accepted-basename-variant",
+      "basename": "domain-complexity.csv",
+      "variantCount": 2,
+      "files": [
+        {
+          "skill": "speclite-create-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/domain-complexity.csv",
+          "basename": "domain-complexity.csv",
+          "hash": "f775f09fb4dc1b9214ca22db4a3994ce53343d976d7f6e5384949835db6d2770"
+        },
+        {
+          "skill": "speclite-validate-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/domain-complexity.csv",
+          "basename": "domain-complexity.csv",
+          "hash": "f775f09fb4dc1b9214ca22db4a3994ce53343d976d7f6e5384949835db6d2770"
+        },
+        {
+          "skill": "speclite-create-architecture",
+          "file": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/domain-complexity.csv",
+          "basename": "domain-complexity.csv",
+          "hash": "3dc34ed39f1fc79a51f7b8fc92087edb7cd85c4393a891d220f2e8dd5a101c70"
+        }
+      ],
+      "scopes": [
+        {
+          "scope": "prd-domain-compliance",
+          "skills": [
+            "speclite-create-prd",
+            "speclite-validate-prd"
+          ],
+          "required_headers": [
+            "domain",
+            "signals",
+            "complexity",
+            "key_concerns",
+            "required_knowledge",
+            "suggested_workflow",
+            "web_searches",
+            "special_sections"
+          ]
+        },
+        {
+          "scope": "architecture-domain-complexity",
+          "skills": [
+            "speclite-create-architecture"
+          ],
+          "required_headers": [
+            "domain",
+            "signals",
+            "complexity_level",
+            "suggested_workflow",
+            "web_searches"
+          ]
+        }
+      ],
+      "reason": "PRD and validation skills use domain compliance guidance; create-architecture keeps a phase-specific architecture complexity and research topic mapping."
+    },
+    {
+      "kind": "accepted-basename-variant",
+      "basename": "project-types.csv",
+      "variantCount": 2,
+      "files": [
+        {
+          "skill": "speclite-document-project",
+          "file": "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/data/project-types.csv",
+          "basename": "project-types.csv",
+          "hash": "b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e"
+        },
+        {
+          "skill": "speclite-create-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/project-types.csv",
+          "basename": "project-types.csv",
+          "hash": "b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e"
+        },
+        {
+          "skill": "speclite-edit-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/data/project-types.csv",
+          "basename": "project-types.csv",
+          "hash": "b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e"
+        },
+        {
+          "skill": "speclite-validate-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/project-types.csv",
+          "basename": "project-types.csv",
+          "hash": "b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e"
+        },
+        {
+          "skill": "speclite-create-architecture",
+          "file": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/project-types.csv",
+          "basename": "project-types.csv",
+          "hash": "12343635a2f11343edb1d46906981d6f5e12b9cad2f612e13b09460b5e5106e7"
+        }
+      ],
+      "scopes": [
+        {
+          "scope": "prd-project-discovery",
+          "skills": [
+            "speclite-document-project",
+            "speclite-create-prd",
+            "speclite-edit-prd",
+            "speclite-validate-prd"
+          ],
+          "required_headers": [
+            "project_type",
+            "detection_signals",
+            "key_questions",
+            "required_sections",
+            "skip_sections",
+            "web_search_triggers",
+            "innovation_signals"
+          ]
+        },
+        {
+          "scope": "architecture-starter-mapping",
+          "skills": [
+            "speclite-create-architecture"
+          ],
+          "required_headers": [
+            "project_type",
+            "detection_signals",
+            "description",
+            "typical_starters"
+          ]
+        }
+      ],
+      "reason": "Product planning skills share the PRD discovery schema; create-architecture keeps a phase-specific starter mapping schema under the same legacy basename."
+    },
+    {
+      "kind": "accepted-basename-variant",
+      "basename": "speclite-manifest.json",
+      "variantCount": 2,
+      "files": [
+        {
+          "skill": "speclite-prfaq",
+          "file": "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq/data/speclite-manifest.json",
+          "basename": "speclite-manifest.json",
+          "hash": "7908cab6f0cd66f1f3427b4cc659975b4737bdc44f789b23c6a895fcd084c4bc"
+        },
+        {
+          "skill": "speclite-product-brief",
+          "file": "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief/data/speclite-manifest.json",
+          "basename": "speclite-manifest.json",
+          "hash": "549634fc3631cce3091d5e41538a3cbfe3c2b8ad2c55d385cfbf18ec461686c7"
+        }
+      ],
+      "scopes": [
+        {
+          "scope": "per-skill-capability-manifest",
+          "skills": [
+            "speclite-prfaq",
+            "speclite-product-brief"
+          ],
+          "required_keys": [
+            "module-code",
+            "capabilities"
+          ]
+        }
+      ],
+      "reason": "Each skill-local manifest describes that skill's capability registration and is expected to differ by skill."
+    },
+    {
+      "kind": "accepted-local-config-key-context-variant",
+      "value": "suggested_workflow",
+      "basename": "domain-complexity.csv",
+      "skillCount": 3,
+      "contextCount": 2,
+      "reason": "The field is scoped by domain-complexity.csv variant policy.",
+      "samples": [
+        {
+          "skill": "speclite-create-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/domain-complexity.csv",
+          "line": 1,
+          "context": "domain,signals,complexity,key_concerns,required_knowledge,suggested_workflow,web_searches,special_sections"
+        },
+        {
+          "skill": "speclite-validate-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/domain-complexity.csv",
+          "line": 1,
+          "context": "domain,signals,complexity,key_concerns,required_knowledge,suggested_workflow,web_searches,special_sections"
+        },
+        {
+          "skill": "speclite-create-architecture",
+          "file": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/domain-complexity.csv",
+          "line": 1,
+          "context": "domain,signals,complexity_level,suggested_workflow,web_searches"
+        }
+      ]
+    },
+    {
+      "kind": "accepted-local-config-key-context-variant",
+      "value": "web_searches",
+      "basename": "domain-complexity.csv",
+      "skillCount": 3,
+      "contextCount": 2,
+      "reason": "The field is scoped by domain-complexity.csv variant policy.",
+      "samples": [
+        {
+          "skill": "speclite-create-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/domain-complexity.csv",
+          "line": 1,
+          "context": "domain,signals,complexity,key_concerns,required_knowledge,suggested_workflow,web_searches,special_sections"
+        },
+        {
+          "skill": "speclite-validate-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/domain-complexity.csv",
+          "line": 1,
+          "context": "domain,signals,complexity,key_concerns,required_knowledge,suggested_workflow,web_searches,special_sections"
+        },
+        {
+          "skill": "speclite-create-architecture",
+          "file": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/domain-complexity.csv",
+          "line": 1,
+          "context": "domain,signals,complexity_level,suggested_workflow,web_searches"
+        }
+      ]
+    },
+    {
+      "kind": "accepted-local-config-key-context-variant",
+      "value": "detection_signals",
+      "basename": "project-types.csv",
+      "skillCount": 5,
+      "contextCount": 2,
+      "reason": "The field is scoped by project-types.csv variant policy.",
+      "samples": [
+        {
+          "skill": "speclite-document-project",
+          "file": "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/data/project-types.csv",
+          "line": 1,
+          "context": "project_type,detection_signals,key_questions,required_sections,skip_sections,web_search_triggers,innovation_signals"
+        },
+        {
+          "skill": "speclite-create-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/project-types.csv",
+          "line": 1,
+          "context": "project_type,detection_signals,key_questions,required_sections,skip_sections,web_search_triggers,innovation_signals"
+        },
+        {
+          "skill": "speclite-edit-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/data/project-types.csv",
+          "line": 1,
+          "context": "project_type,detection_signals,key_questions,required_sections,skip_sections,web_search_triggers,innovation_signals"
+        },
+        {
+          "skill": "speclite-validate-prd",
+          "file": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/project-types.csv",
+          "line": 1,
+          "context": "project_type,detection_signals,key_questions,required_sections,skip_sections,web_search_triggers,innovation_signals"
+        },
+        {
+          "skill": "speclite-create-architecture",
+          "file": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/project-types.csv",
+          "line": 1,
+          "context": "project_type,detection_signals,description,typical_starters"
+        }
+      ]
+    }
+  ]
+}

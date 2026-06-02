@@ -32,13 +32,15 @@ Status: done
    **则** 每个关键阶段都会显示是否存在 mapped skill entry；  
    **并且** 每个可检查 entry 至少包含 `phaseId`、`phaseLabel`、`moduleId`、`canonicalSkillId`、`ideTargets[].targetId`、`ideTargets[].entryPath`、`ideTargets[].activationTarget` 和 `ideTargets[].status`；  
    **并且** rows 必须使用 `speclite.phase-coverage.v1` shape，并按 `phaseId`、`moduleId`、`canonicalSkillId` 稳定排序。
+   **并且** phase coverage 是阶段导航与审计投影，不是完整 installed skill inventory；无 phase/help row 的 installed canonical skill 仍必须保留在 skill index、files index 和 IDE mirror 中。
 
 4. **Missing coverage is explicit and cannot be faked（缺失覆盖必须显式且不可伪造）**  
    **前提** 某个关键阶段没有 mapped skill entry，或某个 selected target 无法表示该 entry；  
    **当** 用户、validator 或 fixture 查看阶段覆盖结果；  
    **则** 系统会清晰表达该阶段未覆盖、`unsupported`、`failed` 或 no mapped target；  
    **并且** 不得使用 alias-only identity、IDE-specific identity、display-only row、empty generated skill、copilot/cursor branded target 或 command pointer placeholder 伪造覆盖；  
-   **并且** validation 必须使用 reserved issue ids，例如 `menu-target.no-mapped-target`、`menu-target.missing-target`、`menu-target.ambiguous-target` 或 `menu-target.unknown-skill`。
+   **并且** validation 必须使用 reserved issue ids，例如 `menu-target.no-mapped-target`、`menu-target.missing-target`、`menu-target.ambiguous-target` 或 `menu-target.unknown-skill`；
+   **并且** validation 必须区分“installed canonical skill 未暴露到 phase coverage”与“selected canonical package root 缺失 installed skill entry”，不得把前者误报为 mirror/index 缺失。
 
 5. **Skill activation follows the installed `SKILL.md` activation protocol（Skill 激活遵守已安装 `SKILL.md` 协议）**  
    **前提** 用户从 IDE entry 激活某个 skill；  
@@ -128,6 +130,12 @@ Status: done
   - [x] 如新增或改变 public JSON field、manifest/index field、phase coverage field、target status、issue id、fixture comparison behavior 或 output profile，确认同一变更中先更新 owning SPEC、executable schema/parser 和 fixture expected outputs。
   - [x] 检查 diff，确认没有修改 `_bmad-output/planning-artifacts/`、其他 story 文件或无关用户改动。
   - [x] 检查 diff，确认没有实现 Story 2.4 config/customization resolver、Story 2.5 workflow artifact writing/metadata validation、Epic 3 full `status` / `validate` installed-state validation、Post-MVP command pointer、branded Copilot/Cursor adapter、coverage dashboard 或治理报告。
+
+- [x] Corrective Task 9: 保持 phase coverage 与 full installed inventory 分层（AC: 3, 4, 8）
+  - [x] Tests 必须证明 `skill-index.json` / IDE mirrors 覆盖全部 selected canonical package roots，phase coverage rows 只是有阶段 metadata 的投影。
+  - [x] 对没有 help/phase row 的 installed canonical skill，validation 不得报告 `ide-mirror.missing-entry` 或 `menu-target.unknown-skill`。
+  - [x] 对 help index / phase coverage 引用未知 `canonicalSkillId` 的情况，继续报告 `menu-target.unknown-skill`。
+  - [x] 对 selected canonical package root 未进入 skill index 或 selected IDE mirror 的情况，交由 manifest/index 或 IDE mirror validation 报告缺失，而不是用 phase coverage row 伪造覆盖。
 
 ## Dev Notes（开发备注）
 
@@ -321,6 +329,8 @@ GPT-5 Codex
 - `npm test -- --run test/runtime-structure.test.ts` passed.
 - `npm run build` passed.
 - `npm test` passed with 14 test files and 78 tests.
+- 2026-05-28 15:40 CST: Corrective focused tests passed for no-help-row validation behavior and selected package root missing failure via ReadyCheck / IDE mirror validation.
+- 2026-05-28 15:40 CST: Targeted verification passed, 7 files / 52 tests; full `npm test` passed, 20 files / 116 tests; `git diff --check` passed.
 
 ### Implementation Plan（实现计划）
 
@@ -342,6 +352,9 @@ GPT-5 Codex
 - Menu-target validation covers `missing-target`, `ambiguous-target`, `unknown-skill` and `no-mapped-target`, and ReadyCheck blocks invalid installed-state projections.
 - Phase coverage evidence renderer consumes semantic phase coverage rows and avoids dashboard metrics or branded Copilot/Cursor readiness.
 - Fixture coverage now verifies installed `SKILL.md` activation protocol readability and no source-checkout dependency boundary without implementing Story 2.4 resolver success or Story 2.5 artifact writing.
+- Corrective verification confirmed phase coverage remains a navigation/audit projection, not the full installed inventory.
+- Added validation coverage proving installed skills without help/phase rows do not produce `ide-mirror.missing-entry` or `menu-target.unknown-skill`.
+- ReadyCheck now reports selected package roots missing from `skill-index.json` / selected mirrors through IDE mirror validation rather than phase coverage substitution.
 
 ### File List（文件清单）
 
@@ -361,7 +374,12 @@ GPT-5 Codex
 - `test/menu-target-validation.test.ts`
 - `test/runtime-structure.test.ts`
 - `test/skill-artifact-loop.test.ts`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/PLAN.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENTS.md`
+- `_bmad-output/implementation-artifacts/dev-verifications/epic-1-2-corrective-dev-verification/EXPERIMENT_NOTES.md`
+- `test/install-progress-ready-summary.test.ts`
 
 ### Change Log（变更日志）
 
 - 2026-05-27: Implemented Story 2.3 activation target parsing/resolution, phase coverage evidence, menu-target validation, focused tests and fixture assertions; moved Story status to `review`.
+- 2026-05-28: Corrective verification preserved phase coverage vs full installed inventory layering and validated partial inventory failure behavior; Story 状态重新推进至 review。

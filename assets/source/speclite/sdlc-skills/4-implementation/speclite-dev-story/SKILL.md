@@ -1,6 +1,6 @@
 ---
 name: speclite-dev-story
-description: "Execute story implementation following a context filled story spec file as the developer agent. Use when user mentions 'dev this story', 'dev story', 'implement story', 'implement the next story in the sprint plan', 'develop story file', '开发 Story', '实现 Story', '执行 Story 实现', '继续开发 Story', '开发下一个 Story', '实现故事', '编码实现 Story', or provides a story file path. Capable of customize.toml three-tier resolution and config-driven activation, sprint-status driven story discovery and review-continuation detection, red-green-refactor implementation with multi-level testing and HALT triggers, definition-of-done validation per references/checklist.md, sprint-status synchronization preserving comments, and on_complete terminal directive execution."
+description: "按上下文完整的 Story `.md` 执行实现工作。用于用户要求 dev story、implement story、开发 Story、实现下一个 Story 或提供 Story 文件路径。核心能力：发现目标 Story、红绿重构、运行多层测试、校验 DoD 并同步 sprint-status。"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 metadata:
     version: "1.0.3"

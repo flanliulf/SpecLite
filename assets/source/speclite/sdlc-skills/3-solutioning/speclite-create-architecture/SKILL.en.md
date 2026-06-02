@@ -1,6 +1,6 @@
 ---
 name: speclite-create-architecture
-description: "Create architecture solution design decisions for AI agent consistency through collaborative step-by-step discovery, ensuring multiple AI agents implement the system consistently. Use when user mentions 'create architecture', 'lets create architecture', 'create technical architecture', 'create a solution design', 'architecture design', 'solution architecture', '创建架构', '设计架构', '生成架构', '技术架构', '架构方案', '解决方案设计', '架构决策', '系统架构设计', or wants to design a complete technical architecture before implementation. Capable of customize.toml three-tier resolution, persistent_facts loading, config.toml driven activation, micro-file step orchestration, fresh-vs-continue detection, A/P/C collaboration menu enforcement, project-context-aware decisions, web-research backed technology selection, AI-agent consistency pattern definition, and complete project-tree generation."
+description: "Creates SpecLite technical architecture decisions that let multiple AI agents implement consistently. Use when the user asks to create architecture, technical architecture, solution design, architecture design, or solution architecture. Capable of step-file orchestration, project-context-aware decisions, technology research, architecture `.md` output, and project-tree generation."
 allowed-tools: Read, Write, Grep, Glob, Bash, WebSearch
 metadata:
   version: "1.0.3"

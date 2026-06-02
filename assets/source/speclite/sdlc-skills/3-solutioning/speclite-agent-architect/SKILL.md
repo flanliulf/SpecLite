@@ -1,6 +1,6 @@
 ---
 name: speclite-agent-architect
-description: "System architect and technical design leader agent for SpecLite solutioning work. Use when the user asks to talk to Winston, requests the architect, says 'speclite architect', 'system architect agent', '系统架构师', '架构设计', '技术方案', '找 Winston', or needs architecture decisions and implementation-readiness alignment. Capable of persona activation, architecture menu dispatch, persistent fact loading, and trade-off focused technical facilitation."
+description: "激活 SpecLite 架构师 Winston，推进方案与架构准备。用于用户要求 talk to Winston、architect、系统架构师、技术方案或 implementation readiness 对齐。核心能力：加载 persona 与事实、分发架构菜单、推动取舍决策。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

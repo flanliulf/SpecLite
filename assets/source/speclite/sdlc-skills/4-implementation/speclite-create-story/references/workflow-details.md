@@ -334,7 +334,7 @@
 **后续步骤：**
 1. 在 {story_file} 中审阅完整的 story
 2. 运行 dev 智能体的 `dev-story` 进行优化实现
-3. 完成后运行 `code-review`（自动标记为 done）
+3. 完成后从 `code-review-01-reviewer` 开始执行 CR 链路，并在 CR 通过后运行 `code-review-06-finalizer` 标记 done
 4. 可选：若已安装 Test Architect 模块，可在 `dev-story` 后运行对应的自动化测试生成流程来补充护栏测试
 
 **开发者现已拥有无瑕实现所需的一切！**

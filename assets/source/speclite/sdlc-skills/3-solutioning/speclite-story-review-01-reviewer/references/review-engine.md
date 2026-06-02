@@ -43,6 +43,7 @@
 - 提取关键信息摘要（避免全文传入子代理导致上下文溢出）：
   - `project-context.md`：全局规则、技术约束、非功能性要求
   - 架构文档（如 `03-core-decisions.md`、`04-implementation-patterns.md`）：接口签名、模块边界、类型定义
+  - owning SPEC：当 Story 将具体源码路径、fixture、schema、command 或文件名写成 hard gate 时，核对该要求是否来自 owning SPEC
   - 前序 Epic Story（如有引用）：共享契约定义（公共接口、类型、错误处理约定）
 
 ### A3：写入审查输入文件
@@ -167,6 +168,7 @@
 审查目标：对以下 Story 设计文档进行契约和边界审查，专注于两个维度：
 1. **跨 Epic 共享契约**：当 Story 引用前序 Epic 定义的公共接口（如 Reporter、PathResolver、GlobalError、类型定义等）时，核对契约是否一致。识别"Story 隐式改写公共契约"和"文档内部可读但跨文档冲突"的隐蔽模式。
 2. **交互/认证/安全/性能口径**：涉及用户交互（TTY/非 TTY 行为）、认证、安全处理规则、性能可衡量标准的 Story 是否定义了清晰规则。是否与 project-context.md 的全局规则一致。
+3. **Flow Gate 契约表达**：检查 Story 的 Dependency Gate、Anchor Contract Map、Equivalent Implementation Policy、Evidence Plan 是否按 Contract -> Functional -> Evidence 表达。固定源码路径、fixture、schema 或 command 只有在 owning SPEC 明确要求时才允许作为 hard gate；否则必须写为 Guidance Anchor，并说明 equivalent implementation policy。
 
 每个问题必须包含：具体的文件名、章节名、与哪个基准文档存在什么样的不一致。
 

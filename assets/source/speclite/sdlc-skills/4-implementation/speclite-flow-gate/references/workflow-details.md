@@ -52,7 +52,7 @@ Classify every dependency in the Story/Epic into one of four types:
 2. Load target Story/Epic and relevant prior Story records. For Story mode, read the complete Story file.
 3. Locate owning SPECs from Story references, project-context, and planning-artifact specs index. If the Story names a contract but no owning SPEC can be found, mark that item `DECISION_NEEDED`.
 4. Inspect actual source files and tests referenced by File List, Dev Notes, previous gate reports, or git diff. Do not mutate files.
-5. Evaluate in this exact order:
+5. Evaluate in this exact order: `Contract -> Functional -> Evidence -> Guidance`.
    - Contract: required anchors from owning SPECs exist and are not contradicted.
    - Functional: runtime/source behavior exists in a centralized or split implementation.
    - Evidence: focused tests, fixture snapshots, command output, or release evidence prove behavior.
@@ -68,6 +68,7 @@ Classify every dependency in the Story/Epic into one of four types:
 - Must run before `speclite-dev-story` changes `ready-for-dev` to `in-progress`.
 - Validate all predecessor dependencies in the Story's first task and Dev Notes.
 - If the only mismatch is a non-contract suggested file name with equivalent implementation evidence, output `PASS_EQUIVALENT`.
+- Apply `references/regression-scenarios.md` for guidance path drift: missing split files are not a hard gate when owning SPEC, functional implementation, and evidence anchors prove equivalent behavior.
 
 ### `story-completion`
 

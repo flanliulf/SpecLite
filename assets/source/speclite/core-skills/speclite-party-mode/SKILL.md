@@ -1,6 +1,6 @@
 ---
 name: speclite-party-mode
-description: "Orchestrate group discussions between installed SpecLite agents using independent subagents or solo roleplay fallback. Use when user requests party mode, multi-agent conversation, roundtable, multiple perspectives, 群聊模式, 多 Agent 讨论, 圆桌讨论, 多角色评审, or wants several agents to discuss a project. Capable of resolving agent roster, choosing relevant voices, spawning parallel subagents, presenting unabridged responses, and managing follow-up rounds."
+description: "编排多个已安装 SpecLite agent 进行圆桌讨论，必要时退化为角色扮演。用于用户要求 party mode、多 Agent 讨论、roundtable、多视角评审或项目群议。核心能力：选择角色、收集独立观点、汇总回合与追问。"
 allowed-tools: Read, Grep, Glob, Bash
 metadata:
   version: "1.0.0"

@@ -8,7 +8,7 @@
 | ---- | ------- |
 | `core-skills/` | Cross-workflow Speclite capabilities shared by multiple SDLC flows, such as elicitation, brainstorming, help, document indexing, sharding, and review helpers. |
 | `sdlc-skills/` | Speclite SDLC workflow skills grouped by lifecycle phase: analysis, planning, solutioning, and implementation. |
-| `support/` | Creator, lint, migration, and alignment skills used to author or validate Speclite skill and agent packages. |
+| `support-skills/` | Creator, migration, and lint skills used to author or validate SpecLite canonical skill source definitions. |
 | `scripts/` | Source copies of shared runtime helper scripts, including config and customization resolution. Runtime projects should install these under `{project-root}/_speclite/scripts`. |
 | `custom/` | Source examples of team/user customization overlays. Runtime projects should place overlays under `{project-root}/_speclite/custom`. |
 
@@ -92,7 +92,7 @@ The Story Review workflow lives under `sdlc-skills/3-solutioning/` and uses the 
 - `speclite-story-review-02-evaluator`: evaluates SR findings and generates an evaluation document.
 - `speclite-story-review-03-fixer`: updates Story documents according to evaluation conclusions and records the revision summary.
 
-The existing unnumbered `speclite-code-review` remains as a single-run interactive code review entrypoint; numbered `speclite-code-review-01-reviewer` carries the BMEnhance CR-01 cross-round artifact workflow semantics.
+The unnumbered `speclite-code-review` is no longer a canonical source skill entrypoint. Code review starts with `speclite-code-review-01-reviewer`, then continues through the numbered CR2/CR3/CR6 skills for evaluation, fixes, and finalization.
 
 Review artifact directories are:
 
@@ -104,13 +104,10 @@ Review artifact directories are:
 
 ### Support Skills
 
-`support/` contains authoring and validation tools:
+`support-skills/` contains authoring and validation tools for canonical skill source definitions:
 
 - `speclite-skill-creator`: creates or migrates workflow-style Speclite skill packages.
 - `speclite-skill-lint`: validates generic skill rules plus Speclite runtime and migration alignment.
-- `speclite-skill-alignment-checker`: performs focused runtime-model alignment audits.
-- `speclite-agent-creator`: creates or migrates agent definition packages while preserving persona/menu semantics.
-- `speclite-agent-lint`: validates Speclite agent packages.
 
 ## Validation Guidance
 

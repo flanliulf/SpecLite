@@ -1,6 +1,6 @@
 ---
 name: speclite-shard-doc
-description: "Split large markdown documents into smaller organized files by heading sections using markdown-tree-parser. Use when user says shard document, split markdown, explode docs, break up large doc, 拆分文档, 分片 Markdown, 拆大文档, 文档切片, or wants a large markdown file split into section files. Capable of source validation, destination selection, npx sharding execution, output verification, completion reporting, and original document handling."
+description: "按 Markdown 标题把大型 `.md` 文档拆分为有组织的小文件。用于用户要求 shard document、split markdown、拆分文档或文档切片。核心能力：校验来源、选择目标目录、执行分片、核对输出并处理原文件。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
   version: "1.0.0"

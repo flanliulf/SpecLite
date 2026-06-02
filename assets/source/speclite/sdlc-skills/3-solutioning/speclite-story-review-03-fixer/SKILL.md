@@ -1,6 +1,6 @@
 ---
 name: speclite-story-review-03-fixer
-description: "Execute Story document revisions based on SR evaluation conclusions and append revision summary to the evaluation document. Use when user mentions 'SR fix', 'SR revise', 'story revision', 'apply SR fixes', 'story review fix', 'design fix', '执行修订', 'SR 修订', '修订 Story', '执行 SR 修正', 'Story 设计修订', '修订 Story 文档', or wants to implement revisions from SR evaluation. Capable of reading evaluation conclusions, executing targeted document revisions, and recording revision summaries in evaluation documents."
+description: "根据 SR evaluation 结论修订 Story 文档并追加修复摘要。用于用户要求 SR fix、story revision、apply SR fixes、修订 Story 或执行设计修正。核心能力：读取评估结论、定向修改 Story `.md`、记录 revision summary。"
 allowed-tools: Read, Write, Edit, Grep, Glob
 metadata:
   version: "1.0.0"

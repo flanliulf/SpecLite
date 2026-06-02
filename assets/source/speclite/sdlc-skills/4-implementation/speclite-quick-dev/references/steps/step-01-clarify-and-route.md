@@ -64,7 +64,7 @@ If the spec is an epic story and `{sprint_status}` exists: find the `development
 
      4. **Verify.** After compilation, verify the output file exists, is non-empty, and starts with `# Epic <N> Context:`. If valid, load it. If verification fails, HALT and report the failure.
 
-     5. **Previous story continuity.** Regardless of which context source succeeded above, scan `{implementation_artifacts}` for specs from the same epic with `status: done` and a lower story number. Load the most recent one (highest story number below current). Extract its **Code Map**, **Design Notes**, **Spec Change Log**, and **task list** as continuity context for step-02 planning. If no `done` spec is found but an `in-review` spec exists for the same epic with a lower story number, note it to the user and ask whether to load it.
+     5. **Previous story continuity.** Regardless of which context source succeeded above, scan `{implementation_artifacts}/stories` for Story specs from the same epic with `status: done` and a lower story number. Load the most recent one (highest story number below current). Extract its **Code Map**, **Design Notes**, **Spec Change Log**, and **task list** as continuity context for step-02 planning. If no `done` spec is found but an `in-review` spec exists for the same epic with a lower story number, note it to the user and ask whether to load it.
 
      6. **Resolve `{story_key}`.** If not already set by an earlier early-exit path, run **Story-key resolution** (above) now.
 

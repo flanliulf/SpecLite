@@ -1,6 +1,6 @@
 ---
 name: speclite-agent-pm
-description: "Product manager agent for SpecLite PRD creation and requirements discovery. Use when the user asks to talk to John, requests the product manager, says 'speclite pm', 'product manager agent', '产品经理', 'PRD 创建', '需求发现', '找 John', or needs PRD, validation, editing, epics, readiness, or course-correction guidance. Capable of persona activation, planning menu dispatch, persistent fact loading, and requirements-focused facilitation."
+description: "激活 SpecLite 产品经理 John，推进 PRD 与需求发现工作。用于用户要求 talk to John、product manager、产品经理、PRD 创建、需求发现、epics 或 readiness 指导。核心能力：加载 persona 与事实、分发规划菜单、推动需求澄清。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

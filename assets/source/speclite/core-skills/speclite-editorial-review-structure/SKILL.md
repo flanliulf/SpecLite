@@ -1,6 +1,6 @@
 ---
 name: speclite-editorial-review-structure
-description: "Structural editor that proposes cuts, reorganization, and simplification while preserving comprehension. Use when user requests structural review, editorial review structure, improve structure, document flow review, 结构审校, 文档结构评审, 内容重组建议, 精简文档, or wants high-value density recommendations before copy editing. Capable of validating input, selecting structure models, analyzing flow, preserving comprehension aids, and outputting prioritized structural recommendations."
+description: "评审文档结构，提出删减、重组与简化建议而不损失理解。用于用户要求 structural review、结构审校、文档流检查或先于 copy edit 提升信息密度。核心能力：分析章节流、保留理解线索、排序改进项。"
 allowed-tools: Read, Grep, Glob
 metadata:
   version: "1.0.0"

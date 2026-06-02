@@ -30,7 +30,7 @@ After presenting the summary, display this note:
 
 ---
 
-Before approving, you can open the spec file in an editor or ask me questions and tell me what to change. You can also use `speclite-advanced-elicitation`, `speclite-party-mode`, or `speclite-code-review` skills, ideally in another session to avoid context bloat.
+Before approving, you can open the spec file in an editor or ask me questions and tell me what to change. You can also use `speclite-advanced-elicitation`, `speclite-party-mode`, or `speclite-code-review-01-reviewer` skills, ideally in another session to avoid context bloat.
 
 ---
 

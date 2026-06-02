@@ -1,6 +1,6 @@
 ---
 name: speclite-flow-gate
-description: "Validate SpecLite story and epic flow gates before or after implementation by checking contract, functional, and evidence anchors. Use when user mentions 'flow gate', 'speclite flow gate', 'story kickoff gate', 'story completion gate', 'epic gate', '门控检查', '流程门控', 'Story 启动门控', 'Story 完成门控', or wants to prevent anchor drift before dev-story or epic handoff. Capable of four mode gate assessment, PASS_EQUIVALENT decisions, anchor classification, report generation, and sprint handoff guidance."
+description: "Validates SpecLite Story and Epic flow gates by checking contract, functional, and evidence anchors. Use when the user asks for flow gate, story kickoff gate, story completion gate, epic gate, or anchor drift prevention around dev-story handoff. Capable of four gate modes, PASS_EQUIVALENT decisions, anchor classification, report generation, and handoff guidance."
 allowed-tools: Read, Write, Grep, Glob, Bash
 metadata:
   version: "1.0.0"
@@ -20,7 +20,7 @@ metadata:
     - **Flow handoff guidance**: Recommends the next action, such as continuing `dev-story`, revising Story text, adding test evidence, or running an Epic completion gate.
 
 [Workflow]
-    1. Read `references/workflow-details.md` in full; it is the authoritative definition for modes, result enum, report format, and HALT rules.
+    1. Read `references/workflow-details.md` in full; it is the authoritative definition for modes, result enum, report format, and HALT rules. When equivalent implementation or fixed-path ambiguity appears, also read `references/regression-scenarios.md`.
     2. Resolve the target mode and target object: Story key, Story file path, Epic number, or next Epic number.
     3. Load `{project-root}/_speclite/config.toml`, `sprint-status.yaml`, target Story/Epic, owning SPECs, related source files, and test evidence.
     4. Evaluate in `Contract -> Functional -> Evidence -> Guidance` order, then generate the report using `assets/report-template.md`.

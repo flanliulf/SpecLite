@@ -1,5 +1,57 @@
 # EXPERIMENT_NOTES（实时笔记）
 
+## 2026-05-28 Corrective CR Reopen Run（校正复审轮次）
+
+- 当前判断：Story 1-3 已处于 `review`，说明上一轮 corrective dev verification 已完成到待审状态。
+- 下一步：启动全新 sub-agent 执行 `/bmenhance-cr-01-reviewer 1-3`，等待完成后再启动 evaluator。
+- 用户最新边界：本轮只执行 reviewer，不执行 evaluator / fixer / finalizer。
+- 当前工具限制：无独立 `Agent` 工具；按 reviewer skill 降级为主流程串行三层审查，并在结果中说明。
+- Round 检测：已有 round 1/2 review summary，本轮输出 round 3。
+- 验证证据：canonical package roots 计数为 `core=13`、`sdlc=40`、total `53`；`git diff --check` 通过；定向测试 6 files / 45 tests 通过；全量 `npm test` 20 files / 116 tests 通过；`npm run build` 通过；`npm run lint` 因脚本缺失失败。
+- 本轮 reviewer 判断：corrective 代码把 count 加入 config summary 与 ready summary，但成功 install path 没有把写入前 config summary 展示给用户；最终 result summary 是写入和 ReadyCheck 后生成的 ready summary。因此 AC7 的“before any project write”展示仍存在缺口。
+- 预计结论：Round 3 不通过；新 finding 1 个，分类 `patch`；需要进入 fixer，但本轮按用户要求停止在 reviewer。
+- 用户最新边界：现在仅执行 `/bmenhance-cr-02-evaluator 1-3`，不执行 fixer / finalizer，不主动修改源码。
+- Round 3 evaluator 检测：已有 evaluation round 1/2，本轮应生成 `1-3-code-review-evaluation-20260528-round-3.md`。
+- 评估证据：`src/installer/config-initialization.ts` 的 summary 包含 canonical package root count，但 `src/commands/install.ts` 成功路径只在 config failure 时返回该 summary；成功时进入 `applyInstallPlan`，最终用户可见的 count 出现在写入后的 ready summary。
+- 命令证据：core package roots 数量为 13，sdlc package roots 数量为 40；限定路径 `git diff --check` 通过。
+- 本轮 evaluator 判断：reviewer finding 有效，非误报；评估结论不通过，fixer 需要执行，但本轮不启动 fixer。
+- 用户最新边界：现在仅执行 `/bmenhance-cr-01-reviewer 1-3`，复检 Round 3 fixer 后状态，不执行 evaluator / fixer / finalizer。
+- Round 4 reviewer 检测：已有 review summary round 1/2/3，本轮应生成 `1-3-code-review-summary-20260528-round-4.md`。
+- fixer diff 事实：`src/commands/install.ts` 将 `createPrewriteModuleSummary` 接入非 JSON human `configureProject` prompt；`test/install-module-selection.test.ts` 新增 pre-write prompt 包含 count 且写入前无 `_speclite` / `_speclite-output` / IDE mirror 产物的断言。
+- 验证证据：`find assets/source/speclite/core-skills -name SKILL.md | wc -l` 返回 13；`find assets/source/speclite/sdlc-skills -name SKILL.md | wc -l` 返回 40；限定路径 `git diff --check` 通过；targeted test 1 file / 9 tests 通过；相关 8 files / 57 tests 通过；全量 `npm test` 20 files / 117 tests 通过；`npm run build` 通过；`npm run lint` 因脚本缺失失败。
+- 定向复现：`configureProject` 在 detailed mode 中把 `selectedModuleIds` 改为 `["core"]` 时，pre-write prompt 仍展示 `core=13, sdlc=40, total=53`，随后实际写入为 `installedModules: ["core"]`，final summary 为 `core=13, total=13`。
+- 本轮 reviewer 判断：Round 3 P1 对默认 quick human path 已部分修复，但未在最终 selected module set 确定后展示 / 确认，因此 AC7 仍有阻塞缺口。
+- 预计结论：Round 4 不通过；上轮遗留 finding 1 个，分类 `patch`；需要进入 evaluator/fixer，但本轮按用户要求停止在 reviewer。
+- 用户最新边界：现在仅执行 `/bmenhance-cr-02-evaluator 1-3`，评估最新 Round 4 reviewer 输出，不执行 fixer / finalizer，不主动修改源码。
+- Round 4 evaluator 检测：已有 evaluation round 1/2/3，本轮应生成 `1-3-code-review-evaluation-20260528-round-4.md`。
+- 评估证据：`src/commands/install.ts` 在 `configSelection` 之前生成 pre-write prompt，但在 detailed config 返回 `selectedModuleIds` 后才计算 `finalSelectedModules` 并进入 `applyInstallPlan`；`src/bin/speclite.ts` 的 detailed flow 确实允许重新选择 modules。
+- 命令证据：`npm test -- --run test/install-module-selection.test.ts` 通过，1 file / 9 tests；限定路径 `git diff --check` 通过；canonical package root count 仍为 `core=13`、`sdlc=40`。
+- 定向复现结果：`selectedModuleIds: ["core"]` 时，pre-write prompt 为 `core=13, sdlc=40, total=53`，最终安装范围为 `core` only；finding 有效。
+- 本轮 evaluator 判断：Round 4 reviewer finding 有效，非误报；评估结论不通过，fixer 需要执行，但本轮不启动 fixer。
+- 用户最新边界：现在仅执行 `/bmenhance-cr-01-reviewer 1-3`，复检 Round 4 fixer 后状态，不执行 evaluator / fixer / finalizer。
+- Round 5 reviewer 检测：已有 review summary round 1/2/3/4，本轮应生成 `1-3-code-review-summary-20260528-round-5.md`。
+- fixer diff 事实：`src/commands/install.ts` 新增 `confirmPrewriteInstallScope` callback；在 `finalSelectedModules` 与 `configPlan` 确定后生成 `finalPrewriteSummary`，并在 non-JSON human flow 中于 `InstallPlanSchema.parse(...)` / `applyInstallPlan(...)` 前调用确认；`src/bin/speclite.ts` 接入最终确认 prompt。
+- 测试证据：`test/install-module-selection.test.ts` 新增 detailed config 改为 `core` only 的 regression test，断言最终 pre-write prompt 为 `core=13, total=13`，不包含旧的 `core=13, sdlc=40, total=53`，并在确认回调中验证尚未写入安装产物。
+- 命令证据：`npm test -- --run test/install-module-selection.test.ts test/cli-smoke.test.ts` 通过，2 files / 14 tests；`npm test` 20 files / 118 tests 通过；`npm run build` 通过；`git diff --check` 通过；`npm run lint` 因脚本缺失失败；canonical package root count 仍为 `core=13`、`sdlc=40`。
+- 本轮 reviewer 判断：Round 4 P1 已关闭，未发现新阻塞项或中高优先级问题。
+- 预计结论：Round 5 通过；findings 0；不需要进入 evaluator/fixer；本轮按用户要求停止在 reviewer。
+- 用户最新边界：现在仅执行 `/bmenhance-cr-02-evaluator 1-3`，评估最新 Round 5 reviewer 输出；不执行 fixer / finalizer，不主动修改源码。
+- Round 5 evaluator 检测：已有 evaluation round 1/2/3/4，本轮应生成 `1-3-code-review-evaluation-20260528-round-5.md`。
+- 评估证据：`src/commands/install.ts` 先计算 `finalSelectedModules` 并生成 `configPlan`，再生成 `finalPrewriteSummary`；`confirmPrewriteInstallScope` 发生在 `InstallPlanSchema.parse(...)` 与 `applyInstallPlan(...)` 前。summary 基于最终 selected modules，包含 canonical package root counts、planned write phases 和 no-write evidence。
+- 测试证据：detailed config 改为 `core` only 的 regression test 断言最终 prompt 为 `core=13, total=13`，不含旧的 `core=13, sdlc=40, total=53`，并在确认回调内验证尚无安装写入；CLI smoke test 断言 human install path 出现第三个最终 pre-write prompt。
+- 命令证据：本轮 evaluator 独立重跑 `npm test -- --run test/install-module-selection.test.ts test/cli-smoke.test.ts` 通过，2 files / 14 tests；`npm test` 20 files / 118 tests 通过；`npm run build` 通过；限定路径 `git diff --check` 通过；`npm run lint` 因 `package.json` 未定义 lint script 失败；canonical package root count 为 `core=13`、`sdlc=40`。
+- 本轮 evaluator 判断：同意 reviewer pass，Round 4 P1 已关闭；未发现遗漏的阻塞项或中高优先级问题。
+- 结论：Round 5 evaluator 通过；Fix Items: 0；不需要 fixer；按用户要求停止在 evaluator。
+- 用户最新边界：现在执行 Story 1-3 CR 通过后收尾 sub-agent，严格串行执行 04、05、06；前两个 skill 即使原本不要求也要根据结果执行。
+- 04 执行事实：读取 Story 1-3 全部 5 轮 CR summary/evaluation；Round 3/4 暴露同一类 AC7 pre-write summary 绑定问题，Round 5 reviewer/evaluator 均通过，Fix Items: 0。
+- 04 默认决策：record-only，不修改全局文档；在 `cr-rules-summary.md` 追加 `CR-DOC-02`，记录 final pre-write install scope summary 必须绑定最终 selected module set。
+- 下一步：执行 05 TODO tracker，检查 Round 5 非阻塞项和既有 backlog 是否需要新增 Story 1-3 TODO。
+- 05 执行事实：Story 1-3 CR 文件中未发现可延迟项；Round 5 evaluator 明确无非阻塞 CR TODO；现有 backlog 的 TODO-001/TODO-002 均非 Story 1-3 来源。
+- 05 默认决策：不新增 TODO，不修改 `cr-todo-backlog.md`；继续执行 06 finalizer，把 Story 1-3 收回 `done`。
+- 06 执行事实：最新 evaluation 为 `1-3-code-review-evaluation-20260528-round-5.md`，结论 `Approved / 通过`，`Fix Items: 0`。
+- 06 更新：Story 文件 `Status: done`；`sprint-status.yaml` 中 `1-3-official-module-selection-and-install-summary: done`，`last_updated: 2026-05-28 16:53 CST`。
+- 06 跳过项：`_bmad-output/planning-artifacts/bmm-workflow-status.yaml` 不存在，按 finalizer 规则跳过；不更新 Epic 主状态或其他 Story。
+
 ## 2026-05-26
 
 - Story 1-1 与 Story 1-2 已完成开发、CR、评估、修复收口和 04/05/06 收尾，状态为 done。

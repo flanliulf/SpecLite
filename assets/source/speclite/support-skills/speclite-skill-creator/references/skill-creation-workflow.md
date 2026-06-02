@@ -15,6 +15,7 @@
 - 输入是什么：文件、参数、MCP 数据、其他 Skill 输出或用户上下文。
 - 输出是什么：新文件、现有文件修改、分析结果或外部服务调用。
 - 是否有明确执行步骤。
+- 是否会推进 Story/Epic 状态、消费 Story 文件、检查 implementation anchor，或依赖前序 Epic 的实现证据。
 - catalog 是什么。已有参考：`skill-tooling`、`daily-work`、`ai-forge`、`bmenhance`、`speclite`。
 - 是否需要 scripts/、references/ 或 assets/。
 
@@ -23,6 +24,7 @@
 - 核心功能、触发场景和触发关键词。
 - 输入、输出、catalog。
 - 工作流模式和推荐理由。
+- 是否需要 Flow Gate guidance，以及 owning SPEC / equivalent implementation policy 的表达方式。
 - 文件结构草案。
 - 是否需要脚本、reference 或模板。
 
@@ -70,6 +72,17 @@ CHANGELOG.md：
 - 日期使用 YYYY-MM-DD。
 - 从 Core Capabilities 提取初始功能清单。
 - 如有已知限制，写入已知问题。
+
+## Flow Gate Guidance（流程门控指引）
+
+当新 Skill 属于 implementation workflow，或会推进 Story/Epic 状态、读取 Story 文件、检查 implementation anchor、消费前序 Epic 产物时，生成内容必须包含：
+- `Contract Anchor`、`Functional Anchor`、`Evidence Anchor`、`Guidance Anchor` 的区分。
+- `Contract -> Functional -> Evidence` 的检查顺序。
+- 固定源码路径、fixture、schema 或 command 只有在 owning SPEC 明确要求时才是 hard gate。
+- 如果固定路径只是 Story guidance 或历史实现形态，必须允许 equivalent implementation policy，并要求测试、fixture、snapshot 或 command evidence 支撑。
+- 若 Skill 会推进状态，必须说明应消费或生成的 `speclite-flow-gate` report，以及允许继续的结果仅为 `PASS` 或 `PASS_EQUIVALENT`。
+
+不得生成只写"某文件 must exist"却没有 owning SPEC 或 equivalent implementation policy 的 workflow 规则。
 
 ## Workflow Density Gate（Workflow 密度门禁）
 

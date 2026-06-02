@@ -1,9 +1,9 @@
 ---
 name: speclite-skill-creator
-description: "Interactive Skill development assistant that creates complete Agent Skills packages through structured dialogue. Use when user mentions 'speclite skill creator', 'speclite-skill-creator', 'create skill', 'new skill', 'build skill', 'generate skill', 'skill creator', '创建 skill', '新建技能', '生成技能', '开发技能', '技能创建', '创建技能包', '帮我做个 Skill', or wants to create SKILL.md files, agent skills, or automate workflow packaging. Capable of progressive disclosure architecture design, five workflow pattern matching, YAML frontmatter generation, reference document structuring, Python/Shell script scaffolding, and trigger testing guidance."
+description: "Creates complete Agent Skill packages through structured dialogue, including `SKILL.md`. Use when the user asks for speclite-skill-creator, create skill, new skill, build skill, generate skill, or package a workflow. Capable of progressive disclosure design, YAML frontmatter generation, reference structuring, script scaffolding, and trigger testing guidance."
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -17,6 +17,7 @@ metadata:
     - **Specification translation**: Generate three-part description, kebab-case name, allowed-tools, and metadata fields: `metadata.version`, `metadata.author`, and optional `metadata.catalog`.
     - **Bilingual entry generation**: Generate canonical Chinese SKILL.md and English mirror SKILL.en.md with aligned YAML, versions, directories, and execution semantics.
     - **Workflow density gate**: Use a deterministic script to count body length, Workflow length, and ratio, then extract workflow references when thresholds are triggered.
+    - **Flow Gate guidance**: For workflow skills that advance Story/Epic state or depend on implementation anchors, generate Contract -> Functional -> Evidence gate wording and avoid fixed-path false gates.
     - **Progressive file organization**: Allocate core instructions, detailed knowledge, scripts, and templates across SKILL.md, SKILL.en.md, CHANGELOG.md, references/, scripts/, and assets/.
     - **Quality and testing guidance**: Enforce body length, language rules, naming, generation metadata, and trigger tests.
 
@@ -29,24 +30,26 @@ metadata:
     Step 2: Plan file structure and generate entries
         Write first to `forge/<catalog>/<skill-name>/` or `forge/<skill-name>/`. Generate SKILL.md, SKILL.en.md, CHANGELOG.md, and optional references/, scripts/, and assets/.
 
-    Step 3: Run Workflow density gate
-        After drafting files, prefer the installed `speclite-skill-lint` `scripts/check_skill_density.py`; in this repository use `python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py <skill-dir>`. The script result is the only decision source.
+    Step 3: Add Flow Gate guidance
+        If the Skill advances Story/Epic state, consumes Story files, checks implementation anchors, or writes implementation artifacts, include flow-gate guidance in the entry or reference: fixed paths are hard gates only when required by an owning SPEC; otherwise describe the equivalent implementation policy.
 
-    Step 4: Extract Workflow when needed
-        If any entry file satisfies `workflow_chars > 1500` and `workflow_ratio > 0.5`, create `references/<skill-name>-workflow.md` or an equivalent workflow reference. Keep only phase summary, reference loading conditions, and stop conditions in the entry Workflow.
+    Step 4: Run Workflow density gate
+        After drafting files, run `speclite-skill-lint/scripts/check_skill_density.py <skill-dir>` or this repository's equivalent script. The script result is the only decision source.
 
-    Step 5: Summarize completion
+    Step 5: Extract Workflow when needed
+        If any entry file satisfies `workflow_chars > 1500` and `workflow_ratio > 0.5`, create `references/<skill-name>-workflow.md` or equivalent. Keep only phase summary, reference loading conditions, and stop conditions in the entry Workflow.
+
+    Step 6: Summarize completion
         Show the file tree, progressive disclosure layers, trigger test suggestions, version information, and follow-up entry points through `speclite-skill-lint` and `skills-upgrade`.
 
 [Notes]
-    - SKILL.md is the canonical Chinese document with English-Chinese section headings, Chinese body content, and English technical identifiers.
-    - SKILL.en.md is an English mirror and must not add capabilities, steps, limits, or trigger conditions absent from SKILL.md.
+    - SKILL.md is the canonical Chinese document; SKILL.en.md is an English mirror with no extra capabilities, steps, limits, or triggers.
     - Every Skill must include SKILL.md, SKILL.en.md, and CHANGELOG.md with synchronized versions.
     - Chinese and English entry bodies must each stay under 5000 characters; Workflow density gate is a Warning-level quality rule, but creation must extract Workflow when triggered.
-    - YAML frontmatter allows only name, description, license, allowed-tools, and metadata, and must not contain XML angle brackets or executable logic.
-    - metadata supports only `version`, `author`, and `catalog`: `version` and `author` are required, while `catalog` is set when the Skill belongs to a catalog and must align with the path and mirror.
+    - YAML frontmatter allows only name, description, license, allowed-tools, and metadata; metadata supports only `version`, `author`, and optional `catalog`.
     - Directory and name fields must be kebab-case and must not use reserved prefixes claude-*, codex-*, or anthropic-*.
-    - Runtime outputs go under output/, process analysis documents go under docs/analysis/, and neither should be scattered in the repository root.
+    - Workflow skills that advance implementation state or check anchors must describe the owning SPEC, equivalent implementation policy, and Flow Gate report consumption.
+    - Runtime outputs go under output/; process analysis goes under docs/analysis/.
     - Install test copies only into existing install roots; do not create `.codex/skills` when it does not exist.
 
 [Generation Metadata]

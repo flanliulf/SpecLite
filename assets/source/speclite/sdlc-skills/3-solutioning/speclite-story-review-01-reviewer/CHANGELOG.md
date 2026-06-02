@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.0.1] - 2026-05-27
+
+### Added
+
+- Contract & Boundary Auditor 增加 Flow Gate 契约表达审计，检查 Story 是否把 guidance path 或建议文件名误写成 hard gate。
+- Story 设计审查在固定源码路径、fixture、schema 或 command 被声明为 gate 时要求追溯 owning SPEC 或 equivalent implementation policy。
+
 ## [1.0.0] - 2026-05-11
 
 ### Added
