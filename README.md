@@ -54,6 +54,8 @@ flowchart LR
 
 ## Quick Start（快速开始）
 
+详细安装和首次使用指南见 [docs/quick-start.md](docs/quick-start.md)。
+
 开发仓库内运行：
 
 ```sh

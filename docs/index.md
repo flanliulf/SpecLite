@@ -14,6 +14,7 @@
 
 | 路径 | 简要说明 |
 |---|---|
+| `quick-start.md` | 面向新用户的 SpecLite 安装、首次使用、验证、更新与排查指南。 |
 | `glossary/glossary.md` | 术语总览文档，作为 glossary 条目的聚合入口。 |
 | `glossary/file-ownership-boundaries.md` | File Ownership Boundaries（文件所有权边界）术语说明。 |
 | `glossary/ide-specific-discovery-metadata.md` | IDE-specific Discovery Metadata 术语说明。 |
