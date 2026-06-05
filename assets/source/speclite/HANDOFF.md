@@ -18,6 +18,12 @@
 - 更新 `assets/source/speclite/README.md` 与 `assets/source/speclite/README.en.md`，新增 Review Skills 小节。
 - 更新 `assets/source/speclite/sdlc-skills/module.yaml` 与 `module-help.csv`，补充安装目录和菜单索引。
 
+2026-06-05 后续更新：
+
+- 新增 `assets/source/speclite/sdlc-skills/5-devops/`，作为 SDLC 第 5 阶段，承载研发完成后的 CI/CD、部署、发布和包分发类 DevOps skill。
+- 新增 `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/`，用于开源 Node.js 项目发布到 npm。
+- 后续维护 `assets/source/speclite/` 下的 canonical skill 源定义时，默认使用本项目 `support-skills/speclite-skill-creator` 和 `support-skills/speclite-skill-lint`；外部 `skills-creator` 仓库只保留 forge mirror 或历史参考角色。
+
 ## Speclite Catalog README
 
 关键文件：
@@ -28,10 +34,11 @@
 
 README 当前包含：
 
-- `core-skills/`、`sdlc-skills/`、`support/`、`scripts/`、`custom/` 的职责边界。
+- `core-skills/`、`sdlc-skills/`、`support-skills/`、`scripts/`、`custom/` 的职责边界。
 - 安装后 runtime 模型：`.claude/skills/{skill-name}`、`_speclite/config.toml`、`_speclite/custom`、`_speclite/scripts`。
 - 单个 Skill 包布局规则：根目录入口/版本/配置，`references/` 放规约和步骤，`assets/` 放模板，`data/` 放结构化查表数据，`scripts/` 放本地脚本。
 - Review Skills 小节：支撑层、CR 01-06、SR 01-03、编号 CR 起始入口、review artifact 子目录。
+- DevOps Skills 阶段：`5-devops/` 用于 CI/CD、部署、发布和包分发工作流。
 - scoped validation 建议，避免全仓库大 diff。
 
 后续如新增或移动 Speclite catalog 目录，优先同步更新 `README.md` 和 `README.en.md`。

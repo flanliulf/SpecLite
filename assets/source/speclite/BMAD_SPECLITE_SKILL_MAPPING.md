@@ -22,7 +22,7 @@
 - `SPECLITE_ONLY`：SpecLite 为解决自身方法论和流程可靠性新增的能力，BMAD 无直接同名来源。
 - `SUPPORT_ONLY`：只服务 canonical skill 源定义的创建和维护，不作为目标项目运行时 SDLC skill。
 
-当前所有标记为 `DIRECT` 和 `SPLIT_CHAIN` 的 SpecLite canonical skill，都是以对应 BMAD skill 定义为参考，通过 `support-skills/speclite-skill-creator` 进行体系化和自定义创建，并通过 `support-skills/speclite-skill-lint` 进行结构、密度、runtime model 和迁移一致性检查后沉淀而来。后续新增或重构这两类映射时，也应继续把这两个 support skill 作为 canonical skill 体系建设的基础支撑工具。
+当前所有标记为 `DIRECT` 和 `SPLIT_CHAIN` 的 SpecLite canonical skill，都是以对应 BMAD skill 定义为参考，通过 `support-skills/speclite-skill-creator` 进行体系化和自定义创建，并通过 `support-skills/speclite-skill-lint` 进行结构、密度、runtime model 和迁移一致性检查后沉淀而来。后续新增或重构 canonical skill 时，也应继续把本项目内的这两个 support skill 作为基础支撑工具，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 固定源码路径、anchor 文件名或产物路径不应在映射中被当作硬门控。只有 owning SPEC、template 或明确 contract 要求固定路径时，固定路径才可成为 hard gate；否则必须优先按 `Contract -> Functional -> Evidence` 判断等价实现。
 
@@ -83,6 +83,7 @@
 | `bmad-qa-generate-e2e-tests` | `sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests` | ADAPTED | QA 生成应引用 SpecLite story、fixture 和 test evidence。 |
 | `bmad-quick-dev` | `sdlc-skills/4-implementation/speclite-quick-dev` | ADAPTED | 快速开发仍需遵守 SpecLite contract 和 artifact 边界。 |
 | `bmad-retrospective` | `sdlc-skills/4-implementation/speclite-retrospective` | ADAPTED | 回顾结论应能反馈到 canonical skill、template、lint 或 gate。 |
+| BMAD no direct equivalent | `sdlc-skills/5-devops/speclite-npm-publisher` | SPECLITE_ONLY | 面向开源 Node.js 项目的 npm 发布执行，覆盖 registry、tarball smoke、publish 授权和发布后验证。 |
 
 ## Support Skills Boundary（Support Skills 边界）
 

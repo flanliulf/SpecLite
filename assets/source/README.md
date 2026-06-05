@@ -32,7 +32,7 @@
 
 | 路径 | 定位 |
 | ---- | ---- |
-| `speclite/` | SpecLite 官方内置 source catalog，承载 core skills、SDLC skills、共享 scripts、customization 示例和 module metadata。 |
+| `speclite/` | SpecLite 官方内置 source catalog，承载 core skills、SDLC skills（含 DevOps 发布阶段）、共享 scripts、customization 示例和 module metadata。 |
 
 其中 `assets/source/speclite/` 的内部说明见 [`speclite/README.md`](speclite/README.md)。
 
@@ -46,6 +46,7 @@
 - phase metadata
 - help/menu labels
 - default artifact contracts
+- DevOps release and deployment skill definitions
 
 manifest/index 是安装后的投影；IDE mirrors 是可再生成的 execution-plane projections。它们可以用于验证安装状态，但不能成为新的 canonical source。
 

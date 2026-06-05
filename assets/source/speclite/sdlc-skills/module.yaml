@@ -1,7 +1,7 @@
 code: sdlc
 name: "SpecLite SDLC"
 version: "0.0.0"
-description: "AI-driven software development lifecycle framework for product discovery, planning, solutioning, and implementation"
+description: "AI-driven software development lifecycle framework for product discovery, planning, solutioning, implementation, and DevOps release operations"
 default_selected: true
 required_dependencies:
   - core
@@ -42,6 +42,11 @@ implementation_artifacts:
   default: "{output_folder}/implementation-artifacts"
   result: "{project-root}/{value}"
 
+devops_artifacts:
+  prompt: "Where should DevOps artifacts be stored? (CI/CD, release gates, deployment plans, publishing reports)"
+  default: "{output_folder}/devops-artifacts"
+  result: "{project-root}/{value}"
+
 project_knowledge:
   prompt: "Where should long-term project knowledge be stored? (docs, research, references)"
   default: "docs"
@@ -58,6 +63,10 @@ directories:
   - "{implementation_artifacts}/story-reviews"
   - "{implementation_artifacts}/cr-rules"
   - "{implementation_artifacts}/retrospectives"
+  - "{devops_artifacts}"
+  - "{devops_artifacts}/ci-cd"
+  - "{devops_artifacts}/deployments"
+  - "{devops_artifacts}/npm-releases"
   - "{project_knowledge}"
   - "{project_knowledge}/brownfield"
   - "{project_knowledge}/brownfield/evidence"

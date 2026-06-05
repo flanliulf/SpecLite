@@ -7,7 +7,7 @@
 | Path | Purpose |
 | ---- | ------- |
 | `core-skills/` | Cross-workflow Speclite capabilities shared by multiple SDLC flows, such as elicitation, brainstorming, help, document indexing, sharding, and review helpers. |
-| `sdlc-skills/` | Speclite SDLC workflow skills grouped by lifecycle phase: analysis, planning, solutioning, and implementation. |
+| `sdlc-skills/` | Speclite SDLC workflow skills grouped by lifecycle phase: analysis, planning, solutioning, implementation, and DevOps release operations. |
 | `support-skills/` | Creator, migration, and lint skills used to author or validate SpecLite canonical skill source definitions. |
 | `scripts/` | Source copies of shared runtime helper scripts, including config and customization resolution. Runtime projects should install these under `{project-root}/_speclite/scripts`. |
 | `custom/` | Source examples of team/user customization overlays. Runtime projects should place overlays under `{project-root}/_speclite/custom`. |
@@ -62,8 +62,11 @@ Within an individual skill package, use these conventions:
 - `2-plan-workflows/`: PRD creation/editing/validation, UX design, PM and UX agent packages.
 - `3-solutioning/`: architecture, epics and stories, project context, implementation readiness, Story Review 01-03, architect agent.
 - `4-implementation/`: story creation/development, quick development, sprint status/planning, Code Review 01-06, QA test generation, retrospective, checkpoint preview, corrective course, developer agent.
+- `5-devops/`: post-development CI/CD, deployment, release, and package publishing workflows, including open-source Node.js npm publishing.
 
 Implementation-stage runtime artifacts default to `{project-root}/_speclite-output/implementation-artifacts/`; review-related subdirectories include `stories/`, `code-reviews/`, `story-reviews/`, `cr-rules/`, and `retrospectives/`.
+
+DevOps-stage runtime artifacts default to `{project-root}/_speclite-output/devops-artifacts/`; npm release reports go under `npm-releases/`.
 
 Brownfield analysis lives under `sdlc-skills/1-analysis/speclite-brownfield-context-builder/`. It reconstructs existing repositories into evidence, baseline, deep-dive, and planning handoff layers, defaults outputs to `{project_knowledge}/brownfield/`, and hands the brownfield planning brief to downstream PRD, Architecture, and Epics/Stories workflows for refinement.
 
@@ -108,6 +111,8 @@ Review artifact directories are:
 
 - `speclite-skill-creator`: creates or migrates workflow-style Speclite skill packages.
 - `speclite-skill-lint`: validates generic skill rules plus Speclite runtime and migration alignment.
+
+When maintaining canonical skill source definitions under `assets/source/speclite/`, use the in-project `speclite-skill-creator` and `speclite-skill-lint` by default instead of the generic creator/lint skills from the external `skills-creator` repository.
 
 ## Validation Guidance
 

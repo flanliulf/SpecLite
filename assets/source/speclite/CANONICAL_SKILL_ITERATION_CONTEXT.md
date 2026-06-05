@@ -6,7 +6,7 @@ SpecLite 当前一边使用 BMAD 框架推进自身研发，一边建设类似 B
 
 因此，BMAD 在本项目开发过程中暴露的问题，应被视为 SpecLite canonical skill 迭代的高价值反馈来源。尤其是 `create-story`、`dev-story`、SR、CR、finalizer 等阶段中出现的 late HALT、anchor drift、path drift 和 evidence drift，不能只作为单个 Story 个案处理，而应抽象成可复用的 skill、template、lint 和 gate 改进。
 
-当前所有直接映射或拆链映射自 BMAD 的 SpecLite canonical skill，均通过 `support-skills/speclite-skill-creator` 参考 BMAD skill 定义进行体系化和自定义创建，并通过 `support-skills/speclite-skill-lint` 完成结构、密度、runtime model 和迁移一致性检查。后续 SpecLite canonical skill 体系建设中，这两个 support skill 将继续作为基础支撑能力。
+当前所有直接映射或拆链映射自 BMAD 的 SpecLite canonical skill，均通过 `support-skills/speclite-skill-creator` 参考 BMAD skill 定义进行体系化和自定义创建，并通过 `support-skills/speclite-skill-lint` 完成结构、密度、runtime model 和迁移一致性检查。后续 `assets/source/speclite/` 下新增或调整 canonical skill 源定义时，默认使用本项目的 `speclite-skill-creator` 与 `speclite-skill-lint`，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 ## Development Context（开发背景）
 
@@ -24,7 +24,7 @@ SpecLite 的目标不是复制 BMAD 的路径、文件名或运行时细节，�
 | Source Area | Role（角色） | Runtime Meaning（运行时含义） |
 | --- | --- | --- |
 | `core-skills/` | 跨 SDLC workflow 共享的基础能力，例如启发、帮助、文档处理和 review 支撑。 | 属于目标项目可安装的 canonical skill 来源。 |
-| `sdlc-skills/` | 按 SDLC 阶段组织的 workflow 和 agent skills。 | 属于目标项目可安装的 canonical skill 来源，是 SpecLite 本地研发方法论主体。 |
+| `sdlc-skills/` | 按 SDLC 阶段组织的 workflow 和 agent skills，覆盖分析、计划、方案设计、实现和 DevOps 发布阶段。 | 属于目标项目可安装的 canonical skill 来源，是 SpecLite 本地研发方法论主体。 |
 | `support-skills/` | 创建、迁移、检查和迭代 canonical skill 源定义的 authoring support。 | 不属于目标项目默认运行时 SDLC 方法论的安装集合。 |
 | `scripts/` | 共享运行时辅助脚本源码副本。 | 安装后作为 `_speclite/scripts` 被 runtime 使用。 |
 | `custom/` | customization 示例和默认覆盖。 | 安装后作为 `_speclite/custom` 的参考或初始配置。 |
@@ -89,12 +89,14 @@ SpecLite canonical skill 应采用以下通用策略：
 
 - `speclite-skill-creator` 应帮助创建符合 SpecLite runtime model 的 skill 源包，并避免复制 BMAD 中已知的固定路径门控问题。
 - `speclite-skill-lint` 应帮助发现 canonical skill 源定义中的路径漂移、runtime model 漂移、过密 SKILL 入口、缺失 mirror 或 hard gate 表述。
+- 新增或调整 `assets/source/speclite/` 下的 skill 时，必须优先使用本项目内的 `speclite-skill-creator` 与 `speclite-skill-lint`；外部 `skills-creator` 仓库只保留 mirror 或历史参考角色。
 - support skill 的产物和规则可以影响 canonical skill 质量，但不应被写成目标项目普通开发者必须运行的 SDLC gate。
 - 对于 `DIRECT` 和 `SPLIT_CHAIN` 类型的 canonical skill，support skill 应保留“参考 BMAD、体系化改造、SpecLite 自定义、lint 验证”的标准建设路径。
 
 ## Maintenance Rules（维护规则）
 
 - 修改 `core-skills/` 或 `sdlc-skills/` 时，应检查是否有 BMAD 对应 skill 的经验需要同步反映。
+- 新增 SDLC 阶段目录时，应同步更新 `module.yaml`、`module-help.csv`、README、映射文档、安装基线和相关 fixture。
 - 修改 BMAD-to-SpecLite 映射时，应同时检查是否影响 help、module metadata、templates、lint rules 或 flow gates。
 - 新增 split chain 时，应明确入口 skill、后续 skill、状态流转和产物目录，不应保留含混的聚合入口。
 - 删除 canonical skill 源头目录后，应同步清理映射、help 和引用，不应在新文档中重新恢复旧入口。

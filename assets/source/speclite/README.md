@@ -9,7 +9,7 @@
 | 路径 | 用途 |
 | ---- | ---- |
 | `core-skills/` | 多个 SDLC 工作流共享的 Speclite 基础能力，例如启发、头脑风暴、帮助、文档索引、文档拆分和评审辅助能力。 |
-| `sdlc-skills/` | 按生命周期阶段组织的 Speclite SDLC 工作流 Skill，包括分析、计划、方案设计和实现阶段。 |
+| `sdlc-skills/` | 按生命周期阶段组织的 Speclite SDLC 工作流 Skill，包括分析、计划、方案设计、实现和 DevOps 发布阶段。 |
 | `support-skills/` | 用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义的支撑 Skill。 |
 | `scripts/` | 共享运行时辅助脚本的源码副本，例如配置解析和 customization 解析。目标项目运行时应安装到 `{project-root}/_speclite/scripts`。 |
 | `custom/` | 团队级和用户级 customization 覆盖示例。目标项目运行时应放在 `{project-root}/_speclite/custom`。 |
@@ -64,8 +64,11 @@ Speclite Skill 文档应描述安装后的运行模型，而不是本仓库的�
 - `2-plan-workflows/`：PRD 创建、编辑、验证，UX 设计，PM 和 UX Agent 包。
 - `3-solutioning/`：架构、Epic 和 Story、项目上下文、实现就绪检查、Story Review 01-03、架构师 Agent。
 - `4-implementation/`：Story 创建和开发、快速开发、Sprint 状态和计划、Code Review 01-06、QA 测试生成、回顾、检查点预览、纠偏、开发者 Agent。
+- `5-devops/`：研发完成后的 CI/CD、部署、发布和包分发工作流，例如开源 Node.js 项目发布到 npm。
 
 实现阶段运行产物默认位于 `{project-root}/_speclite-output/implementation-artifacts/`，其中 review 相关子目录包括：`stories/`、`code-reviews/`、`story-reviews/`、`cr-rules/`、`retrospectives/`。
+
+DevOps 发布阶段运行产物默认位于 `{project-root}/_speclite-output/devops-artifacts/`，其中 npm 发布报告写入 `npm-releases/`。
 
 既有系统分析能力位于 `sdlc-skills/1-analysis/speclite-brownfield-context-builder/`。它将 brownfield 仓库恢复为 evidence、baseline、deep-dives、planning handoff 四层产物，默认写入 `{project_knowledge}/brownfield/`，并把 brownfield planning brief 交给后续 PRD、Architecture、Epics/Stories 工作流继续细化。
 
@@ -110,6 +113,8 @@ Review 产物目录约定如下：
 
 - `speclite-skill-creator`：创建或迁移 workflow 风格的 Speclite Skill 包。
 - `speclite-skill-lint`：验证通用 Skill 规则，以及 Speclite runtime 和迁移对齐规则。
+
+维护 `assets/source/speclite/` 下的 canonical skill 源定义时，默认使用本目录内的 `speclite-skill-creator` 与 `speclite-skill-lint`，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 ## 验证建议
 
