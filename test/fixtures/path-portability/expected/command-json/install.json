@@ -12,13 +12,13 @@
     "sourceDescriptor": {
       "sourceType": "bundled",
       "channel": "stable",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "resolvedRoot": "assets/source/speclite",
       "integrityEvidence": [
         {
           "kind": "version-lock",
-          "packageName": "speclite",
-          "version": "0.0.0",
+          "packageName": "@fancyliu/speclite",
+          "version": "0.1.0",
           "lockPath": "package-lock.json",
           "verified": true
         }
@@ -35,13 +35,13 @@
         "id": "claude",
         "status": "configured",
         "targetPath": ".claude/skills",
-        "skillCount": 53
+        "skillCount": 54
       },
       {
         "id": "agents",
         "status": "configured",
         "targetPath": ".agents/skills",
-        "skillCount": 53
+        "skillCount": 54
       }
     ],
     "paths": {

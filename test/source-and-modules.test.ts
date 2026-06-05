@@ -14,8 +14,8 @@ import { createModuleSelection } from "../src/modules/module-selection.js";
 import { runInstallCommand } from "../src/commands/install.js";
 
 const EXPECTED_CORE_PACKAGE_ROOT_COUNT = 13;
-const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 40;
-const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 53;
+const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 41;
+const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 54;
 
 describe("bundled source descriptor discovery", () => {
   it("projects bundled official source through a display-safe SourceDescriptor", async () => {
@@ -31,8 +31,8 @@ describe("bundled source descriptor discovery", () => {
     expect(descriptor.integrityEvidence).toEqual([
       expect.objectContaining({
         kind: "version-lock",
-        packageName: "speclite",
-        version: "0.0.0",
+        packageName: "@fancyliu/speclite",
+        version: "0.1.0",
         lockPath: "package-lock.json",
         verified: true,
       }),
@@ -112,6 +112,7 @@ describe("official module metadata parser", () => {
         "3-solutioning/speclite-agent-architect",
         "4-implementation/speclite-agent-dev",
         "4-implementation/speclite-dev-story",
+        "5-devops/speclite-npm-publisher",
       ]),
     );
     expect(

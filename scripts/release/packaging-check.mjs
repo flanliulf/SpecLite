@@ -92,7 +92,16 @@ export function createPackagingManifest(packResult, packageJson) {
   const assertions = [
     {
       id: "package-json-bin-mapping",
-      passed: packageJson.bin?.speclite === "./dist/bin/speclite.js" && fileSet.has("package.json"),
+      passed: packageJson.bin?.speclite === "dist/bin/speclite.js" && fileSet.has("package.json"),
+    },
+    {
+      id: "scoped-public-package-metadata",
+      passed:
+        packageJson.name === "@fancyliu/speclite" &&
+        packageJson.version !== "0.0.0" &&
+        packageJson.license === "MIT" &&
+        packageJson.publishConfig?.registry === "https://registry.npmjs.org/" &&
+        packageJson.publishConfig?.access === "public",
     },
     {
       id: "cli-bin-included",

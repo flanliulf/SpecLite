@@ -3,7 +3,7 @@
   "status": "success",
   "command": "install",
   "targetProject": "fresh-install-empty-project",
-  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=13, sdlc=40, total=53. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC 0.0.0). IDE targets: claude (53 skills at .claude/skills), agents (53 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
+  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=13, sdlc=41, total=54. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC 0.0.0). IDE targets: claude (54 skills at .claude/skills), agents (54 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
   "issues": [],
   "nextActions": [
     "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
@@ -17,8 +17,8 @@
       "integrityEvidence": [
         {
           "kind": "version-lock",
-          "packageName": "speclite",
-          "version": "0.0.0",
+          "packageName": "@fancyliu/speclite",
+          "version": "0.1.0",
           "lockPath": "package-lock.json",
           "verified": true
         }
@@ -35,13 +35,13 @@
         "id": "claude",
         "status": "configured",
         "targetPath": ".claude/skills",
-        "skillCount": 53
+        "skillCount": 54
       },
       {
         "id": "agents",
         "status": "configured",
         "targetPath": ".agents/skills",
-        "skillCount": 53
+        "skillCount": 54
       }
     ],
     "paths": {

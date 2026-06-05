@@ -12,6 +12,7 @@ const artifactRoots: ArtifactRootContext = {
   output_folder: "_speclite-output",
   planning_artifacts: "_speclite-output/planning-artifacts",
   implementation_artifacts: "_speclite-output/implementation-artifacts",
+  devops_artifacts: "_speclite-output/devops-artifacts",
   project_knowledge: "docs",
 };
 

@@ -382,7 +382,7 @@ describe("Story 6.4 packaging acceptance", () => {
     const packFiles = packResult.files.map((file) => file.path).sort((left, right) => left.localeCompare(right));
 
     expect(secondManifestText).toBe(firstManifestText);
-    expect(manifest.packageJson.bin.speclite).toBe("./dist/bin/speclite.js");
+    expect(manifest.packageJson.bin.speclite).toBe("dist/bin/speclite.js");
     expect(manifest.files).toContain("package.json");
     expect(manifest.files).toContain("dist/bin/speclite.js");
     expect(manifest.files).toContain("dist/packaging-manifest.json");

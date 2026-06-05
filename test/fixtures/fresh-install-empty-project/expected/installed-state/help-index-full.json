@@ -399,6 +399,17 @@
     },
     {
       "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "5-devops",
+      "entryLabel": "NPM Publisher",
+      "canonicalSkillId": "speclite-npm-publisher",
+      "activationTarget": ".claude/skills/speclite-npm-publisher/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
       "phaseId": "anytime",
       "entryLabel": "Advanced Elicitation",
       "canonicalSkillId": "speclite-advanced-elicitation",

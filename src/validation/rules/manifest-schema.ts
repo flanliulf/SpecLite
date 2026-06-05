@@ -87,7 +87,7 @@ const ARTIFACTS = {
   },
 } as const;
 
-const CORE_SDLC_BASELINE_ENTRY_COUNT = 53;
+const CORE_SDLC_BASELINE_ENTRY_COUNT = 54;
 const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
   core: [
     "assets/source/speclite/core-skills/speclite-advanced-elicitation",
@@ -145,6 +145,7 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-retrospective",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-planning",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher",
   ],
 } as const;
 

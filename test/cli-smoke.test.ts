@@ -1,11 +1,58 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import { createSpecliteProgram } from "../src/bin/speclite.js";
+import { createSpecliteProgram, isDirectCliEntrypoint, runCli } from "../src/bin/speclite.js";
 import { InstallCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
 
 describe("CLI smoke", () => {
+  it("recognizes npm .bin symlinks as the direct CLI entrypoint", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-symlink-"));
+
+    try {
+      const target = path.join(tempRoot, "dist/bin/speclite.js");
+      const linkedBin = path.join(tempRoot, "node_modules/.bin/speclite");
+      await mkdir(path.dirname(target), { recursive: true });
+      await mkdir(path.dirname(linkedBin), { recursive: true });
+      await writeFile(target, "#!/usr/bin/env node\n", "utf8");
+      await symlink(target, linkedBin);
+
+      expect(isDirectCliEntrypoint(pathToFileURL(target).href, linkedBin)).toBe(true);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("supports publish smoke checks for help and version without stack traces", async () => {
+    const helpStdout: string[] = [];
+    const helpStderr: string[] = [];
+    const versionStdout: string[] = [];
+    const versionStderr: string[] = [];
+
+    await expect(
+      runCli(["node", "speclite", "--help"], {
+        io: {
+          stdout: (text) => helpStdout.push(text),
+          stderr: (text) => helpStderr.push(text),
+        },
+      }),
+    ).resolves.toBeUndefined();
+    await expect(
+      runCli(["node", "speclite", "--version"], {
+        io: {
+          stdout: (text) => versionStdout.push(text),
+          stderr: (text) => versionStderr.push(text),
+        },
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(helpStdout.join("")).toContain("Usage: speclite [options] [command]");
+    expect(helpStderr.join("")).not.toContain("CommanderError");
+    expect(versionStdout.join("").trim()).toBe("0.1.0");
+    expect(versionStderr.join("")).toBe("");
+  });
+
   it("loads the install command skeleton and emits JSON result", async () => {
     const stdout: string[] = [];
     const exitCodes: number[] = [];

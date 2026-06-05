@@ -3,10 +3,10 @@
   "generatedAtPolicy": "normalized-self-entry-excluded-from-package-hash",
   "source": "npm-pack-dry-run-json",
   "packageJson": {
-    "name": "speclite",
-    "version": "0.0.0",
+    "name": "@fancyliu/speclite",
+    "version": "0.1.0",
     "bin": {
-      "speclite": "./dist/bin/speclite.js"
+      "speclite": "dist/bin/speclite.js"
     },
     "engines": {
       "node": ">=22"
@@ -14,12 +14,12 @@
     "files": [
       "dist/",
       "assets/source/speclite/",
+      "docs/quick-start.md",
       "package.json",
-      "README.md",
-      "README.en.md"
+      "README.md"
     ]
   },
-  "packageHash": "sha256:b3b76465120325fc84c95d21353dabc766c656362c0e7891898786a323ac3e11",
+  "packageHash": "sha256:86c562a92d5efbb04ebf6a008224d233b984cdc63fbaf49f18943e71af0a62bf",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/BMAD_SPECLITE_SKILL_MAPPING.md",
@@ -502,6 +502,10 @@
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/references/workflow-details.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/SKILL.en.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/SKILL.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/references/speclite-npm-publisher-workflow.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/SKILL.md",
     "assets/source/speclite/sdlc-skills/module-help.csv",
     "assets/source/speclite/sdlc-skills/module.yaml",
     "assets/source/speclite/skill-description-normalization/EXPERIMENT_NOTES.md",
@@ -525,7 +529,9 @@
     "dist/bin/speclite.js",
     "dist/bin/speclite.js.map",
     "dist/packaging-manifest.json",
-    "package.json"
+    "docs/quick-start.md",
+    "package.json",
+    "README.md"
   ],
   "includedRuntimeAssets": [
     "assets/source/speclite/BMAD_SPECLITE_SKILL_MAPPING.md",
@@ -1008,6 +1014,10 @@
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/references/workflow-details.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/SKILL.en.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status/SKILL.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/references/speclite-npm-publisher-workflow.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/SKILL.md",
     "assets/source/speclite/sdlc-skills/module-help.csv",
     "assets/source/speclite/sdlc-skills/module.yaml",
     "assets/source/speclite/skill-description-normalization/EXPERIMENT_NOTES.md",
@@ -1047,6 +1057,10 @@
   "assertions": [
     {
       "id": "package-json-bin-mapping",
+      "passed": true
+    },
+    {
+      "id": "scoped-public-package-metadata",
       "passed": true
     },
     {

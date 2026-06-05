@@ -244,6 +244,18 @@ function createSdlcConfig(input: {
   });
   if (!implementationArtifacts.ok) return implementationArtifacts;
 
+  const devopsArtifacts = normalizeFieldPath({
+    field: "devops_artifacts",
+    value: trimOrDefault(
+      input.values.devops_artifacts,
+      promptDefault(input.selectedModules, "devops_artifacts", `${input.outputFolder}/devops-artifacts`, {
+        directory_name: input.targetProject,
+        output_folder: input.outputFolder,
+      }),
+    ),
+  });
+  if (!devopsArtifacts.ok) return devopsArtifacts;
+
   const projectKnowledge = normalizeFieldPath({
     field: "project_knowledge",
     value: trimOrDefault(
@@ -268,6 +280,7 @@ function createSdlcConfig(input: {
       ),
       planning_artifacts: planningArtifacts.path,
       implementation_artifacts: implementationArtifacts.path,
+      devops_artifacts: devopsArtifacts.path,
       project_knowledge: projectKnowledge.path,
     },
   };
@@ -287,6 +300,7 @@ function createInstallerConfigToml(model: ProjectConfigModel): ConfigTomlDocumen
       sdlc: {
         planning_artifacts: model.modules.sdlc.planning_artifacts,
         implementation_artifacts: model.modules.sdlc.implementation_artifacts,
+        devops_artifacts: model.modules.sdlc.devops_artifacts,
         project_knowledge: model.modules.sdlc.project_knowledge,
       },
     };
@@ -418,6 +432,7 @@ async function findArtifactSymlinkIssue(
     model.core.output_folder,
     model.modules.sdlc?.planning_artifacts,
     model.modules.sdlc?.implementation_artifacts,
+    model.modules.sdlc?.devops_artifacts,
     model.modules.sdlc?.project_knowledge,
   ]) {
     if (artifactPath === undefined) continue;

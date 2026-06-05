@@ -7,13 +7,15 @@ describe("package scaffold", () => {
       await readFile(new URL("../package.json", import.meta.url), "utf8"),
     ) as {
       type?: string;
+      license?: string;
       bin?: Record<string, string>;
       engines?: Record<string, string>;
       scripts?: Record<string, string>;
     };
 
     expect(packageJson.type).toBe("module");
-    expect(packageJson.bin?.speclite).toBe("./dist/bin/speclite.js");
+    expect(packageJson.license).toBe("MIT");
+    expect(packageJson.bin?.speclite).toBe("dist/bin/speclite.js");
     expect(packageJson.engines?.node).toBe(">=22");
     expect(packageJson.scripts).toEqual(
       expect.objectContaining({
@@ -21,6 +23,7 @@ describe("package scaffold", () => {
         test: "vitest run",
         dev: "tsx src/bin/speclite.ts",
         "release:packaging-check": "node scripts/release/packaging-check.mjs",
+        "release:check": "npm run build && npm test && npm run release:packaging-check",
       }),
     );
   });

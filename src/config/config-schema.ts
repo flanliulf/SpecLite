@@ -13,6 +13,7 @@ export const SDLC_CONFIG_FIELDS = [
   "user_skill_level",
   "planning_artifacts",
   "implementation_artifacts",
+  "devops_artifacts",
   "project_knowledge",
 ] as const;
 

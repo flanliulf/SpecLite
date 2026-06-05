@@ -74,6 +74,7 @@ describe("fresh-install-empty-project release gate fixture", () => {
         "speclite.phase-coverage.v1",
       );
       await expect(readdir(path.join(firstRoot, "_speclite-output"))).resolves.toEqual([
+        "devops-artifacts",
         "implementation-artifacts",
         "planning-artifacts",
       ]);
@@ -85,12 +86,12 @@ describe("fresh-install-empty-project release gate fixture", () => {
         await readFile(path.join(firstRoot, "_speclite/_config/files-index.json"), "utf8"),
       ) as { entries: Array<{ path: string }> };
 
-      expect(skillIndex.entries).toHaveLength(53);
-      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(53);
-      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(53);
+      expect(skillIndex.entries).toHaveLength(54);
+      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(54);
+      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(54);
       expect(skillIndex.entries.every((entry) => entry.installedTargets.join(",") === "claude,agents")).toBe(true);
       expect(filesIndex.entries.some((entry) => entry.path === "_speclite/_config/manifest.yaml")).toBe(true);
-      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(106);
+      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(108);
       expect(filesIndex.entries.every((entry) => isProjectRelativePosixPath(entry.path))).toBe(true);
 
       expect(normalizeFreshInstallResult(first.result)).toEqual(normalizeFreshInstallResult(second.result));
@@ -591,12 +592,12 @@ async function writeIdeDriftInstalledState(projectRoot: string): Promise<void> {
       "sourceDescriptor:",
       '  sourceType: "bundled"',
       '  channel: "stable"',
-      '  version: "0.0.0"',
+      '  version: "0.1.0"',
       '  resolvedRoot: "assets/source/speclite"',
       "  integrityEvidence:",
       '    - kind: "version-lock"',
-      '      packageName: "speclite"',
-      '      version: "0.0.0"',
+      '      packageName: "@fancyliu/speclite"',
+      '      version: "0.1.0"',
       '      lockPath: "package-lock.json"',
       "      verified: true",
       '  trustStatus: "trusted"',

@@ -8,6 +8,9 @@ _speclite/_config/help-index.json
 _speclite/_config/files-index.json
 _speclite/_config/phase-coverage.json
 _speclite-output/planning-artifacts
+_speclite-output/devops-artifacts/ci-cd
+_speclite-output/devops-artifacts/deployments
+_speclite-output/devops-artifacts/npm-releases
 _speclite-output/implementation-artifacts/stories
 _speclite-output/implementation-artifacts/code-reviews
 docs/brownfield/evidence
@@ -47,6 +50,7 @@ docs/brownfield/evidence
 .claude/skills/speclite-help/SKILL.md
 .claude/skills/speclite-index-docs/SKILL.md
 .claude/skills/speclite-market-research/SKILL.md
+.claude/skills/speclite-npm-publisher/SKILL.md
 .claude/skills/speclite-party-mode/SKILL.md
 .claude/skills/speclite-prfaq/SKILL.md
 .claude/skills/speclite-product-brief/SKILL.md
@@ -100,6 +104,7 @@ docs/brownfield/evidence
 .agents/skills/speclite-help/SKILL.md
 .agents/skills/speclite-index-docs/SKILL.md
 .agents/skills/speclite-market-research/SKILL.md
+.agents/skills/speclite-npm-publisher/SKILL.md
 .agents/skills/speclite-party-mode/SKILL.md
 .agents/skills/speclite-prfaq/SKILL.md
 .agents/skills/speclite-product-brief/SKILL.md

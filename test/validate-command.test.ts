@@ -499,7 +499,7 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          expectedCount: 53,
+          expectedCount: 54,
           actualCount: 1,
         },
       });
@@ -536,8 +536,8 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          expectedCount: 53,
-          actualCount: 53,
+          expectedCount: 54,
+          actualCount: 54,
           duplicateRoot: "core:assets/source/speclite/core-skills/speclite-brainstorming",
         },
       });
@@ -576,15 +576,15 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          expectedCount: 53,
-          actualCount: 53,
+          expectedCount: 54,
+          actualCount: 54,
           expectedModuleCounts: {
             core: 13,
-            sdlc: 40,
+            sdlc: 41,
           },
           actualModuleCounts: {
             core: 13,
-            sdlc: 40,
+            sdlc: 41,
           },
           missingRoot: "core:assets/source/speclite/core-skills/speclite-advanced-elicitation",
           unexpectedRoot: "core:assets/source/speclite/core-skills/speclite-unexpected-core-skill",
@@ -1318,6 +1318,7 @@ const SKILL_SOURCE_PACKAGE_PATHS = [
   "assets/source/speclite/sdlc-skills/4-implementation/speclite-retrospective",
   "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-planning",
   "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status",
+  "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher",
 ] as const;
 
 async function writeJson(projectRoot: string, relativePath: string, value: unknown): Promise<void> {

@@ -351,6 +351,7 @@ function createArtifactDirectories(model: ProjectConfigModel, modules: OfficialM
     model.core.output_folder,
     values.planning_artifacts,
     values.implementation_artifacts,
+    values.devops_artifacts,
     values.project_knowledge,
     ...modules.flatMap((module) => module.directories),
   ];
@@ -365,6 +366,8 @@ function createArtifactRootContext(model: ProjectConfigModel): ArtifactRootConte
       model.modules.sdlc?.planning_artifacts ?? `${model.core.output_folder}/planning-artifacts`,
     implementation_artifacts:
       model.modules.sdlc?.implementation_artifacts ?? `${model.core.output_folder}/implementation-artifacts`,
+    devops_artifacts:
+      model.modules.sdlc?.devops_artifacts ?? `${model.core.output_folder}/devops-artifacts`,
     project_knowledge: model.modules.sdlc?.project_knowledge ?? "docs",
   };
 }
@@ -375,6 +378,7 @@ function interpolateDirectory(
     output_folder: string;
     planning_artifacts: string;
     implementation_artifacts: string;
+    devops_artifacts: string;
     project_knowledge: string;
   },
 ): string {
@@ -382,6 +386,7 @@ function interpolateDirectory(
     .replaceAll("{output_folder}", values.output_folder)
     .replaceAll("{planning_artifacts}", values.planning_artifacts)
     .replaceAll("{implementation_artifacts}", values.implementation_artifacts)
+    .replaceAll("{devops_artifacts}", values.devops_artifacts)
     .replaceAll("{project_knowledge}", values.project_knowledge);
 }
 

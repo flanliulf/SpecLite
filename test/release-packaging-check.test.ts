@@ -8,12 +8,59 @@ import {
 } from "../scripts/release/packaging-check.mjs";
 
 describe("Story 6.7 release packaging gate", () => {
+  it("declares scoped public npm package metadata for the first publish", async () => {
+    const packageJson = JSON.parse(await readFile("package.json", "utf8")) as {
+      name: string;
+      version: string;
+      license: string;
+      bin: Record<string, string>;
+      files: string[];
+      publishConfig?: Record<string, string>;
+      repository?: { type: string; url: string };
+      bugs?: { url: string };
+      homepage?: string;
+      keywords?: string[];
+    };
+
+    expect(packageJson).toMatchObject({
+      name: "@fancyliu/speclite",
+      version: "0.1.0",
+      license: "MIT",
+      bin: {
+        speclite: "dist/bin/speclite.js",
+      },
+      publishConfig: {
+        registry: "https://registry.npmjs.org/",
+        access: "public",
+      },
+      repository: {
+        type: "git",
+        url: "git+ssh://git@github.com/flanliulf/SpecLite.git",
+      },
+      bugs: {
+        url: "https://github.com/flanliulf/SpecLite/issues",
+      },
+      homepage: "https://github.com/flanliulf/SpecLite#readme",
+    });
+    expect(packageJson.files).toEqual([
+      "dist/",
+      "assets/source/speclite/",
+      "docs/quick-start.md",
+      "package.json",
+      "README.md",
+    ]);
+    expect(packageJson.keywords).toEqual(
+      expect.arrayContaining(["speclite", "ai-coding", "cli", "sdlc"]),
+    );
+  });
+
   it("exposes a serial build-first release verification script", async () => {
     const packageJson = JSON.parse(await readFile("package.json", "utf8")) as {
       scripts: Record<string, string>;
     };
 
     expect(packageJson.scripts["release:verify"]).toBe("npm run build && npm run release:packaging-check");
+    expect(packageJson.scripts["release:check"]).toBe("npm run build && npm test && npm run release:packaging-check");
     expect(packageJson.scripts["release:packaging-check"]).toBe("node scripts/release/packaging-check.mjs");
   });
 

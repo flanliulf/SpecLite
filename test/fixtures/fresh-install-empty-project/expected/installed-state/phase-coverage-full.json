@@ -975,6 +975,36 @@
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "5-devops",
+      "phaseLabel": "DevOps",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-npm-publisher",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-npm-publisher",
+          "activationTarget": ".claude/skills/speclite-npm-publisher/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-npm-publisher",
+          "activationTarget": ".agents/skills/speclite-npm-publisher/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "npm-release-report",
+        "defaultOutputPath": "_speclite-output/devops-artifacts/npm-releases",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
       "phaseId": "anytime",
       "phaseLabel": "Anytime",
       "moduleId": "core",

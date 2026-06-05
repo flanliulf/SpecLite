@@ -15,7 +15,7 @@ const fixtureExpectedRoot = path.join(
   process.cwd(),
   "test/fixtures/fresh-install-empty-project/expected",
 );
-const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 53;
+const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 54;
 const REQUIRED_METHOD_LOOP_SKILL_IDS = [
   "speclite-advanced-elicitation",
   "speclite-review-acceptance-auditor",

@@ -130,6 +130,7 @@ export type ArtifactRootContext = {
   output_folder: string;
   planning_artifacts: string;
   implementation_artifacts: string;
+  devops_artifacts: string;
   project_knowledge: string;
 };
 
@@ -140,6 +141,7 @@ export function getPhaseLabel(phaseId: string): string {
     "2-planning": "Planning",
     "3-solutioning": "Solutioning",
     "4-implementation": "Implementation",
+    "5-devops": "DevOps",
   };
 
   return labels[phaseId] ?? phaseId;
@@ -187,6 +189,7 @@ function normalizeArtifactOutputPath(
     .replaceAll("{output_folder}", artifactRoots.output_folder)
     .replaceAll("{planning_artifacts}", artifactRoots.planning_artifacts)
     .replaceAll("{implementation_artifacts}", artifactRoots.implementation_artifacts)
+    .replaceAll("{devops_artifacts}", artifactRoots.devops_artifacts)
     .replaceAll("{project_knowledge}", artifactRoots.project_knowledge);
 
   if (resolved.includes("{") || resolved.includes("}") || resolved.trim().length === 0) {
@@ -202,6 +205,7 @@ function normalizeArtifactOutputPath(
     artifactRoots.output_folder,
     artifactRoots.planning_artifacts,
     artifactRoots.implementation_artifacts,
+    artifactRoots.devops_artifacts,
   ]
     .map(normalizeProjectRelativePosixPath)
     .filter((root): root is string => root !== undefined);

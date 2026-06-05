@@ -48,6 +48,7 @@ describe("project config initialization", () => {
         user_skill_level: "intermediate",
         planning_artifacts: "custom-output/planning-artifacts",
         implementation_artifacts: "custom-output/implementation-artifacts",
+        devops_artifacts: "custom-output/devops-artifacts",
         project_knowledge: "docs",
       });
       expect(result.configToml.core).not.toHaveProperty("user_name");
@@ -116,6 +117,7 @@ describe("project config initialization", () => {
         sdlc: {
           planning_artifacts: "_speclite-output/plans",
           implementation_artifacts: "_speclite-output/implementation-artifacts",
+          devops_artifacts: "_speclite-output/devops-artifacts",
           project_knowledge: "docs",
         },
       },

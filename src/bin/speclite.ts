@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { realpathSync } from "node:fs";
+import { createRequire } from "node:module";
 import { createInterface } from "node:readline/promises";
+import { fileURLToPath } from "node:url";
 import type { ConfigInputValues, ProjectConfigField } from "../config/config-schema.js";
 import {
   renderCommandResultJson,
@@ -39,7 +42,14 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
   const io = createCliIo(options.io);
   const program = new Command();
 
-  program.name("speclite").description("SpecLite local-first CLI control plane.");
+  program
+    .name("speclite")
+    .description("SpecLite local-first CLI control plane.")
+    .version(readPackageVersion());
+  program.configureOutput({
+    writeOut: io.stdout,
+    writeErr: io.stderr,
+  });
   program.exitOverride();
 
   registerResolveCommand(program, io);
@@ -182,7 +192,14 @@ export async function runCli(
   argv: string[],
   options: CreateCliOptions = {},
 ): Promise<void> {
-  await createSpecliteProgram(options).parseAsync(argv, { from: "node" });
+  try {
+    await createSpecliteProgram(options).parseAsync(argv, { from: "node" });
+  } catch (error) {
+    if (isCommanderInformationalExit(error)) {
+      return;
+    }
+    throw error;
+  }
 }
 
 function createCliIo(overrides: Partial<CliIo> = {}): CliIo {
@@ -206,6 +223,24 @@ function createCliIo(overrides: Partial<CliIo> = {}): CliIo {
         }
       }),
   };
+}
+
+function readPackageVersion(): string {
+  const require = createRequire(import.meta.url);
+  const packageJson = require("../../package.json") as { version?: unknown };
+  return typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
+}
+
+function isCommanderInformationalExit(error: unknown): boolean {
+  if (typeof error !== "object" || error === null || !("code" in error) || !("exitCode" in error)) {
+    return false;
+  }
+
+  const commanderExit = error as { code?: unknown; exitCode?: unknown };
+  return (
+    commanderExit.exitCode === 0 &&
+    (commanderExit.code === "commander.helpDisplayed" || commanderExit.code === "commander.version")
+  );
 }
 
 function createModuleSelectionQuestion(input: ModuleSelectionPromptInput): string {
@@ -275,6 +310,7 @@ async function collectConfigInitializationSelection(
       "user_skill_level",
       "planning_artifacts",
       "implementation_artifacts",
+      "devops_artifacts",
       "project_knowledge",
     ] satisfies ProjectConfigField[]) {
       await collectConfigValue(io, values, field);
@@ -361,6 +397,18 @@ function formatModuleIdList(moduleIds: string[]): string {
   return moduleIds.length === 0 ? "none" : moduleIds.join(", ");
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+export function isDirectCliEntrypoint(moduleUrl: string, argvPath: string | undefined): boolean {
+  if (argvPath === undefined) {
+    return false;
+  }
+
+  try {
+    return realpathSync(fileURLToPath(moduleUrl)) === realpathSync(argvPath);
+  } catch {
+    return fileURLToPath(moduleUrl) === argvPath;
+  }
+}
+
+if (isDirectCliEntrypoint(import.meta.url, process.argv[1])) {
   await runCli(process.argv);
 }
