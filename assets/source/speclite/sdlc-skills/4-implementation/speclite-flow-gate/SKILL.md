@@ -34,4 +34,4 @@ metadata:
     - 中英文入口必须同步更新；新增 mode 或结果枚举时同步更新 `references/workflow-details.md`。
 
 [Generation Metadata（生成信息）]
-    本 Skill 由 skills-creator 自动生成。如需修改，必须同步更新 SKILL.md 与 SKILL.en.md，并通过 skills-upgrade 管理版本。
+    本 Skill 由 speclite-skill-creator 自动生成。如需修改，必须同步更新 SKILL.md 与 SKILL.en.md，并通过 skills-upgrade 管理版本。

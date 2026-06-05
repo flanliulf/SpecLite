@@ -77,4 +77,4 @@ metadata:
     - Step / 输出话术 / 分支 / 错误处理 的所有细节以 `references/workflow-steps.md` 与 `references/activation.md` 为准
 
 [生成信息]
-    本 Skill 由 skills-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。
+    本 Skill 由 speclite-skill-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。

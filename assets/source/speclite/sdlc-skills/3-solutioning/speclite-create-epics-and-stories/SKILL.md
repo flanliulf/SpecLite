@@ -44,4 +44,4 @@ metadata:
     - `epics.md` 末尾必须追加 `*本文档由 speclite-create-epics-and-stories Skill 自动生成*` 标注。
 
 [生成信息]
-    本 Skill 由 skills-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。
+    本 Skill 由 speclite-skill-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。

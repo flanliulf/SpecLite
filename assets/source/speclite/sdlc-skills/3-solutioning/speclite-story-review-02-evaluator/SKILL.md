@@ -93,4 +93,4 @@ metadata:
     - 如果找不到审查结果文件，立即停止并告知用户
 
 [生成信息]
-    本 Skill 由 skills-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。
+    本 Skill 由 speclite-skill-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。

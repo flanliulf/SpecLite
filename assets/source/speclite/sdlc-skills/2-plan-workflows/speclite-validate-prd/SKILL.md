@@ -46,4 +46,4 @@ metadata:
     - 输出文档末尾必须追加 `*本文档由 speclite-validate-prd Skill 自动生成*` 标注。
 
 [生成信息]
-    本 Skill 由 skills-creator 自动生成。
+    本 Skill 由 speclite-skill-creator 自动生成。

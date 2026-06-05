@@ -116,4 +116,4 @@ metadata:
     - Story 模式下审查范围章节需注明"Story 间冲突与依赖维度未启用"
 
 [生成信息]
-    本 Skill 由 skills-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。
+    本 Skill 由 speclite-skill-creator 自动生成。如需修改，建议同步更新 forge/ 和 .claude/skills/ 两份副本，或通过 skills-upgrade 管理版本。
