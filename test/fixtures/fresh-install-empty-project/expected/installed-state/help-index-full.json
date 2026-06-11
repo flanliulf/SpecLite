@@ -367,6 +367,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "4-implementation",
+      "entryLabel": "QA Test Guide",
+      "canonicalSkillId": "speclite-qa-write-test-guide",
+      "activationTarget": ".claude/skills/speclite-qa-write-test-guide/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
       "entryLabel": "Retrospective",
       "canonicalSkillId": "speclite-retrospective",
       "activationTarget": ".claude/skills/speclite-retrospective/SKILL.md",

@@ -55,6 +55,7 @@ docs/brownfield/evidence
 .claude/skills/speclite-prfaq/SKILL.md
 .claude/skills/speclite-product-brief/SKILL.md
 .claude/skills/speclite-qa-generate-e2e-tests/SKILL.md
+.claude/skills/speclite-qa-write-test-guide/SKILL.md
 .claude/skills/speclite-quick-dev/SKILL.md
 .claude/skills/speclite-retrospective/SKILL.md
 .claude/skills/speclite-review-acceptance-auditor/SKILL.md
@@ -109,6 +110,7 @@ docs/brownfield/evidence
 .agents/skills/speclite-prfaq/SKILL.md
 .agents/skills/speclite-product-brief/SKILL.md
 .agents/skills/speclite-qa-generate-e2e-tests/SKILL.md
+.agents/skills/speclite-qa-write-test-guide/SKILL.md
 .agents/skills/speclite-quick-dev/SKILL.md
 .agents/skills/speclite-retrospective/SKILL.md
 .agents/skills/speclite-review-acceptance-auditor/SKILL.md

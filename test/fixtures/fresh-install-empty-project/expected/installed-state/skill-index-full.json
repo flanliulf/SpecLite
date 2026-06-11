@@ -577,6 +577,20 @@
     },
     {
       "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-qa-write-test-guide",
+      "moduleId": "sdlc",
+      "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide",
+      "canonicalPackageHash": "sha256:31d2892d664c9796862135fd9eb0451763b83ccd5407dddbdc9f5d420f79f96f",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "4-implementation"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
       "canonicalSkillId": "speclite-quick-dev",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev",

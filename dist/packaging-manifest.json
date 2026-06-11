@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:86c562a92d5efbb04ebf6a008224d233b984cdc63fbaf49f18943e71af0a62bf",
+  "packageHash": "sha256:8c030c95417ad5d03a90a9e11808c5867ca6454810ea3ba569b0d52b59e5e1dc",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/BMAD_SPECLITE_SKILL_MAPPING.md",
@@ -467,6 +467,11 @@
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/references/workflow-details.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/SKILL.en.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/SKILL.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/assets/test-guide-template.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/references/speclite-qa-write-test-guide-workflow.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/SKILL.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev/assets/spec-template.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev/CHANGELOG.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev/config.toml.example",
@@ -979,6 +984,11 @@
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/references/workflow-details.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/SKILL.en.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/SKILL.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/assets/test-guide-template.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/references/speclite-qa-write-test-guide-workflow.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/SKILL.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev/assets/spec-template.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev/CHANGELOG.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev/config.toml.example",

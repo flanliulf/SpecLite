@@ -5,7 +5,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/help-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:826b72881b407321a3efb77f162693745bb3ee19952068f1d65cd5d31f7ee83f",
+      "hash": "sha256:6ac8c7d1bfca807d8571302cc6f86e1957e362f70ce065edc08db65f16c84376",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "help-index",
@@ -25,7 +25,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/phase-coverage.json",
       "ownership": "installer-owned",
-      "hash": "sha256:3922b582dd0e4e6f00bdd14a379414f8898a0d02aac91d2df998b4abcff07d7f",
+      "hash": "sha256:0676a16e1309e32dc00acfba559e4ce66cb33d8381c5d76cc08fb7c3e471f0e5",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "phase-coverage",
@@ -35,7 +35,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/skill-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:a20e281831acea415c34dd121ef6b452057b1f8bc120df533a50b5cbcd83a66e",
+      "hash": "sha256:b397c39222816f8c193cd632bfa83bb0dc866ab96f00e207cf302033ea036949",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "skill-index",
@@ -3530,6 +3530,46 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-qa-write-test-guide/assets/test-guide-template.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:df7d58f31a80d438e604f4e0c7ec0bc41fad35c604342ac640a17e5e3473b41a",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/assets/test-guide-template.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-qa-write-test-guide/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:56ff93b7680eedc7f30e279c0aa5fa660cd89ec525e032a2df42ab9752b72c8f",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-qa-write-test-guide/references/speclite-qa-write-test-guide-workflow.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:6d7f3e676c9ecf4038364c619590e020b4e5753aaab70e56ff7fad1d421b74f9",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/references/speclite-qa-write-test-guide-workflow.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-qa-write-test-guide/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:3ad0f683735a30521dd9e4589936c5ada7a838c5c2ec384cda790dfec1727735",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -7810,6 +7850,46 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-qa-write-test-guide/assets/test-guide-template.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:df7d58f31a80d438e604f4e0c7ec0bc41fad35c604342ac640a17e5e3473b41a",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/assets/test-guide-template.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-qa-write-test-guide/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:56ff93b7680eedc7f30e279c0aa5fa660cd89ec525e032a2df42ab9752b72c8f",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-qa-write-test-guide/references/speclite-qa-write-test-guide-workflow.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:6d7f3e676c9ecf4038364c619590e020b4e5753aaab70e56ff7fad1d421b74f9",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/references/speclite-qa-write-test-guide-workflow.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-qa-write-test-guide/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:3ad0f683735a30521dd9e4589936c5ada7a838c5c2ec384cda790dfec1727735",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",

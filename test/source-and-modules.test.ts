@@ -14,8 +14,8 @@ import { createModuleSelection } from "../src/modules/module-selection.js";
 import { runInstallCommand } from "../src/commands/install.js";
 
 const EXPECTED_CORE_PACKAGE_ROOT_COUNT = 13;
-const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 41;
-const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 54;
+const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 42;
+const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 55;
 
 describe("bundled source descriptor discovery", () => {
   it("projects bundled official source through a display-safe SourceDescriptor", async () => {
@@ -112,6 +112,7 @@ describe("official module metadata parser", () => {
         "3-solutioning/speclite-agent-architect",
         "4-implementation/speclite-agent-dev",
         "4-implementation/speclite-dev-story",
+        "4-implementation/speclite-qa-write-test-guide",
         "5-devops/speclite-npm-publisher",
       ]),
     );

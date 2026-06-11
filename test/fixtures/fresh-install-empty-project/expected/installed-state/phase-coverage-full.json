@@ -897,6 +897,36 @@
       "phaseId": "4-implementation",
       "phaseLabel": "Implementation",
       "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-qa-write-test-guide",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-qa-write-test-guide",
+          "activationTarget": ".claude/skills/speclite-qa-write-test-guide/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-qa-write-test-guide",
+          "activationTarget": ".agents/skills/speclite-qa-write-test-guide/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "qa-test-guide",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-retrospective",
       "ideTargets": [
         {
