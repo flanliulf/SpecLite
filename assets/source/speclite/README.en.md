@@ -111,8 +111,10 @@ Review artifact directories are:
 
 - `speclite-skill-creator`: creates or migrates workflow-style Speclite skill packages.
 - `speclite-skill-lint`: validates generic skill rules plus Speclite runtime and migration alignment.
+- `speclite-agent-creator`: creates or migrates `speclite-agent-*` / `bmad-agent-*` role activation Agent definition packages.
+- `speclite-agent-lint`: validates Agent-specific `[agent]` customization, persona, menu targets, prompt references, and runtime residue.
 
-When maintaining canonical skill source definitions under `assets/source/speclite/`, use the in-project `speclite-skill-creator` and `speclite-skill-lint` by default instead of the generic creator/lint skills from the external `skills-creator` repository.
+When maintaining canonical skill source definitions under `assets/source/speclite/`, use `speclite-skill-creator` and `speclite-skill-lint` for workflow-style Skills, and `speclite-agent-creator` and `speclite-agent-lint` for Agent definition packages. Do not fall back to the generic creator/lint skills from the external `skills-creator` repository.
 
 ## Validation Guidance
 
@@ -124,3 +126,10 @@ rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|assets/source/speclite/(src|scr
 ```
 
 Also check editor diagnostics for the target skill package and verify that `metadata.version` matches the latest `CHANGELOG.md` entry.
+
+For `speclite-agent-*` packages, use the Agent-specific checker:
+
+```sh
+python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py <agent-dir>
+python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py --all assets/source/speclite/sdlc-skills
+```

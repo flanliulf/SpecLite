@@ -3,7 +3,7 @@ name: speclite-skill-lint
 description: "Validates Agent Skills against specification, including YAML, naming, description quality, version consistency, and content constraints. Use when the user asks for speclite-skill-lint, lint skill, validate skill, check skill, skill compliance, or audit an existing Skill. Capable of YAML violation detection, bilingual trigger coverage analysis, version mismatch checks, forbidden file scanning, and structured report generation."
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.6.0"
+  version: "2.7.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -15,6 +15,7 @@ metadata:
     - **YAML frontmatter validation**: Check name, description, allowed-tools, the metadata field contract, and safety boundaries.
     - **Description quality analysis**: Verify three-part description shape, bilingual trigger coverage, trigger specificity, and angle bracket safety.
     - **File structure compliance**: Check SKILL.md, SKILL.en.md, CHANGELOG.md, directory naming, README.md prohibition, reserved prefixes, and the `speclite-` namespace prefix.
+    - **Agent routing detection**: When the target is `speclite-agent-*` or an Agent definition package with `[agent]`, route to `speclite-agent-lint` to avoid workflow-only false positives.
     - **Version and mirror consistency**: Verify version, YAML, and reference alignment across SKILL.md, SKILL.en.md, and CHANGELOG.md.
     - **Body and Workflow density checks**: Count body length, Workflow length, and Workflow ratio to identify flows that should move into references/, and check whether fixed path hard gates cite an owning SPEC or equivalent implementation policy.
     - **Config reference classification checks**: Classify local definitions, local placeholders, runtime config, artifact paths, workflow variables, template placeholders, schema fields, and external project references so explainable references are not reported as missing config.
@@ -26,6 +27,7 @@ metadata:
 
     Step 1: Locate target Skill
         Accept a full directory, Skill name, or "all Skills". Search actual existing roots under `assets/source/speclite/`, `.claude/skills/`, `.agents/skills/`, and `.codex/skills/`. The target must contain SKILL.md.
+        If the target directory name matches `speclite-agent-*`, or if it has `customize.toml` with `[agent]`, stop the generic lint flow and use `speclite-agent-lint`.
 
     Step 2: Read rules and compute density
         Read `references/check-rules.md` and `references/lint-workflow.md`. Run the read-only script:
@@ -43,6 +45,7 @@ metadata:
     - Error means hard compliance failure; Warning means quality, maintainability, or progressive disclosure risk.
     - BODY-07 uses fixed thresholds: `workflow_chars > 1500` and `workflow_ratio > 0.5`; BODY-08 warns when BODY-07 is triggered without a workflow reference.
     - New or updated Skills must include canonical Chinese SKILL.md and English mirror SKILL.en.md.
+    - Agent definition packages are the exception: `speclite-agent-*` package `SKILL.en.md` is optional and must be checked with Agent-specific rules in `speclite-agent-lint`.
     - SpecLite canonical and installed Skill copies must have name and directory values that start with `speclite-`.
     - Chinese SKILL.md must use English-Chinese section headings, Chinese body content, and English technical identifiers.
 

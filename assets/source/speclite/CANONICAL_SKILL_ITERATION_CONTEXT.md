@@ -6,7 +6,7 @@ SpecLite 当前一边使用 BMAD 框架推进自身研发，一边建设类似 B
 
 因此，BMAD 在本项目开发过程中暴露的问题，应被视为 SpecLite canonical skill 迭代的高价值反馈来源。尤其是 `create-story`、`dev-story`、SR、CR、finalizer 等阶段中出现的 late HALT、anchor drift、path drift 和 evidence drift，不能只作为单个 Story 个案处理，而应抽象成可复用的 skill、template、lint 和 gate 改进。
 
-当前所有直接映射或拆链映射自 BMAD 的 SpecLite canonical skill，均通过 `support-skills/speclite-skill-creator` 参考 BMAD skill 定义进行体系化和自定义创建，并通过 `support-skills/speclite-skill-lint` 完成结构、密度、runtime model 和迁移一致性检查。后续 `assets/source/speclite/` 下新增或调整 canonical skill 源定义时，默认使用本项目的 `speclite-skill-creator` 与 `speclite-skill-lint`，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+当前所有直接映射或拆链映射自 BMAD 的 SpecLite canonical skill，均通过 support skill 体系参考 BMAD skill 定义进行体系化和自定义创建。workflow 风格 Skill 使用 `support-skills/speclite-skill-creator` 与 `support-skills/speclite-skill-lint`；`speclite-agent-*` 这类 role activation Agent 定义包使用 `support-skills/speclite-agent-creator` 与 `support-skills/speclite-agent-lint`。后续 `assets/source/speclite/` 下新增或调整 canonical skill 源定义时，默认使用本项目内 support skill，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 ## Development Context（开发背景）
 
@@ -29,9 +29,9 @@ SpecLite 的目标不是复制 BMAD 的路径、文件名或运行时细节，�
 | `scripts/` | 共享运行时辅助脚本源码副本。 | 安装后作为 `_speclite/scripts` 被 runtime 使用。 |
 | `custom/` | customization 示例和默认覆盖。 | 安装后作为 `_speclite/custom` 的参考或初始配置。 |
 
-`support-skills/` 的定位需要特别保持清晰。`speclite-skill-creator` 与 `speclite-skill-lint` 是为了支持 SpecLite canonical skill 源定义本身的创建和演进，不应被当作目标项目日常开发中必须安装到 AI IDE 的 SDLC workflow skill。
+`support-skills/` 的定位需要特别保持清晰。`speclite-skill-creator`、`speclite-skill-lint`、`speclite-agent-creator` 与 `speclite-agent-lint` 是为了支持 SpecLite canonical skill 源定义本身的创建和演进，不应被当作目标项目日常开发中必须安装到 AI IDE 的 SDLC workflow skill。
 
-换言之，它们是 SpecLite 方法论生产线的一部分，而不是方法论运行时的一部分：`creator` 负责把 BMAD 参考定义和本项目沉淀经验转化为 SpecLite canonical skill 源包，`lint` 负责检查这些源包是否满足 SpecLite 的结构和运行模型约束。
+换言之，它们是 SpecLite 方法论生产线的一部分，而不是方法论运行时的一部分：workflow support skill 负责普通流程型 Skill 的创建和检查；agent support skill 负责 persona、`[agent]`、menu dispatch 和持续身份这类 Agent 定义包的创建和检查。
 
 ## BMAD Feedback Loop（BMAD 反馈闭环）
 
@@ -87,9 +87,11 @@ SpecLite canonical skill 应采用以下通用策略：
 
 因此：
 
-- `speclite-skill-creator` 应帮助创建符合 SpecLite runtime model 的 skill 源包，并避免复制 BMAD 中已知的固定路径门控问题。
-- `speclite-skill-lint` 应帮助发现 canonical skill 源定义中的路径漂移、runtime model 漂移、过密 SKILL 入口、缺失 mirror 或 hard gate 表述。
-- 新增或调整 `assets/source/speclite/` 下的 skill 时，必须优先使用本项目内的 `speclite-skill-creator` 与 `speclite-skill-lint`；外部 `skills-creator` 仓库只保留 mirror 或历史参考角色。
+- `speclite-skill-creator` 应帮助创建符合 SpecLite runtime model 的 workflow skill 源包，并避免复制 BMAD 中已知的固定路径门控问题。
+- `speclite-skill-lint` 应帮助发现 workflow skill 源定义中的路径漂移、runtime model 漂移、过密 SKILL 入口、缺失 mirror 或 hard gate 表述。
+- `speclite-agent-creator` 应帮助创建或迁移符合 SpecLite runtime model 的 Agent 定义包，并保留 persona、`[agent]`、menu dispatch、prompt 引用和持续身份语义。
+- `speclite-agent-lint` 应帮助发现 Agent 定义包中的 `[agent]` 漂移、菜单目标断链、prompt 文件缺失、runtime 残留和可选 mirror 不一致。
+- 新增或调整 `assets/source/speclite/` 下的 skill 时，必须优先使用本项目内对应类型的 support skill；外部 `skills-creator` 仓库只保留 mirror 或历史参考角色。
 - support skill 的产物和规则可以影响 canonical skill 质量，但不应被写成目标项目普通开发者必须运行的 SDLC gate。
 - 对于 `DIRECT` 和 `SPLIT_CHAIN` 类型的 canonical skill，support skill 应保留“参考 BMAD、体系化改造、SpecLite 自定义、lint 验证”的标准建设路径。
 

@@ -32,7 +32,7 @@ principles = [
 [[agent.menu]]
 code = "BP"
 description = "Expert guided brainstorming facilitation"
-prompt = "Read and follow the instructions in {skill-root}/references/brainstorming.md"
+skill = "speclite-brainstorming"
 
 [[agent.menu]]
 code = "MR"

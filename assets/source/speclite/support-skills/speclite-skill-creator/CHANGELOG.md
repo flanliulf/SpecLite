@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.8.0] - 2026-06-11
+
+### Changed
+
+- 新增 Agent 定义包路由规则：遇到 `speclite-agent-*`、`bmad-agent-*` 或 `[agent]` 定制面时，交给 `speclite-agent-creator`，不套用普通 workflow Skill 创建规则。
+- 明确 `speclite-agent-*` 的 `SKILL.en.md` 是可选镜像，由 agent 专属 support skill 管理。
+
 ## [1.7.0] - 2026-06-05
 
 ### Changed

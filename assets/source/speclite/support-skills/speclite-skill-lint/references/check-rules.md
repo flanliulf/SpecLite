@@ -2,7 +2,9 @@
 
 ## 概述
 
-本文档定义了 Agent Skill 规范检查的 36 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror 和文件分类合理性八个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
+本文档定义了普通 workflow 风格 Agent Skill 规范检查的 36 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror 和文件分类合理性八个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
+
+`speclite-agent-*` Agent 定义包不直接套用本规则集。若目标目录名匹配 `speclite-agent-*`，或 `customize.toml` 包含 `[agent]`，应改用 `speclite-agent-lint`；其 `SKILL.en.md` 是可选镜像，存在时才检查一致性。
 
 ## 1. YAML Frontmatter 检查（5 条）
 

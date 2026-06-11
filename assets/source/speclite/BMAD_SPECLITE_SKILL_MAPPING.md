@@ -22,7 +22,7 @@
 - `SPECLITE_ONLY`：SpecLite 为解决自身方法论和流程可靠性新增的能力，BMAD 无直接同名来源。
 - `SUPPORT_ONLY`：只服务 canonical skill 源定义的创建和维护，不作为目标项目运行时 SDLC skill。
 
-当前所有标记为 `DIRECT` 和 `SPLIT_CHAIN` 的 SpecLite canonical skill，都是以对应 BMAD skill 定义为参考，通过 `support-skills/speclite-skill-creator` 进行体系化和自定义创建，并通过 `support-skills/speclite-skill-lint` 进行结构、密度、runtime model 和迁移一致性检查后沉淀而来。后续新增或重构 canonical skill 时，也应继续把本项目内的这两个 support skill 作为基础支撑工具，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+当前所有标记为 `DIRECT` 和 `SPLIT_CHAIN` 的 SpecLite canonical skill，都是以对应 BMAD skill 定义为参考，通过本项目 `support-skills/` 进行体系化和自定义创建，并通过对应 lint 完成结构、runtime model 和迁移一致性检查后沉淀而来。workflow 风格 Skill 使用 `speclite-skill-creator/lint`；Agent 定义包使用 `speclite-agent-creator/lint`。后续新增或重构 canonical skill 时，也应继续把本项目内 support skill 作为基础支撑工具，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 固定源码路径、anchor 文件名或产物路径不应在映射中被当作硬门控。只有 owning SPEC、template 或明确 contract 要求固定路径时，固定路径才可成为 hard gate；否则必须优先按 `Contract -> Functional -> Evidence` 判断等价实现。
 
@@ -91,10 +91,12 @@
 | --- | --- | --- |
 | `support-skills/speclite-skill-creator` | SUPPORT_ONLY | 支持创建、迁移和迭代 SpecLite canonical skill 源定义；不是目标项目运行时 SDLC 方法论的一部分。 |
 | `support-skills/speclite-skill-lint` | SUPPORT_ONLY | 支持检查 canonical skill 源定义的结构、密度、runtime model 和 migration 对齐；不是目标项目运行时 SDLC 方法论的一部分。 |
+| `support-skills/speclite-agent-creator` | SUPPORT_ONLY | 支持创建和迁移 `speclite-agent-*` 这类 role activation Agent 定义包，保留 persona、`[agent]`、menu 和 prompt 语义。 |
+| `support-skills/speclite-agent-lint` | SUPPORT_ONLY | 支持检查 Agent 定义包的 `[agent]` 定制面、菜单目标、prompt 引用、runtime 残留和可选 mirror 一致性。 |
 
 `support-skills/` 的问题反馈对象是 skill 源定义本身。除非某个目标项目明确选择安装这些 authoring support 工具，否则不应把它们写入目标项目的默认 AI IDE runtime install set。
 
-在 SpecLite canonical skill 源体系建设中，`speclite-skill-creator` 和 `speclite-skill-lint` 是基础支撑 skill：前者负责把 BMAD 参考定义体系化改造成 SpecLite skill 源包，后者负责检查改造后的包是否符合 SpecLite 的结构、语义和 runtime 约束。
+在 SpecLite canonical skill 源体系建设中，support skill 按对象模型分工：`speclite-skill-creator/lint` 负责 workflow 风格 Skill，`speclite-agent-creator/lint` 负责 role activation Agent 定义包。两类工具共同负责把 BMAD 参考定义体系化改造成 SpecLite skill 源包，并检查改造后的包是否符合 SpecLite 的结构、语义和 runtime 约束。
 
 ## Feedback Workflow（反馈流程）
 

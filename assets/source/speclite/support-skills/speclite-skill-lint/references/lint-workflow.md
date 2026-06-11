@@ -4,6 +4,8 @@
 
 本文档承载 `speclite-skill-lint` 的详细扫描流程。入口 SKILL.md 只保留阶段路由；执行 36 条规则时按本文档逐组检查。若入口与本文档冲突，以本文档的执行细则为准。
 
+本 workflow 只适用于普通 workflow 风格 Skill。若目标名称匹配 `speclite-agent-*`，或目标目录包含 `customize.toml` 且其中有 `[agent]`，必须停止当前通用 lint 流程并改用 `speclite-agent-lint`。
+
 ## Target Discovery（目标定位）
 
 支持三类输入：
@@ -12,6 +14,8 @@
 - "所有 Skill"，批量扫描上述实际存在目录。
 
 目标目录必须包含 SKILL.md。缺少 SKILL.md 时报告关键文件缺失并终止该目标。
+
+目标目录名匹配 `speclite-agent-*`，或 `customize.toml` 包含 `[agent]` 时，不执行 FILE-06 mirror 必需规则、Workflow density 规则或 workflow-only 分类判断；改由 `speclite-agent-lint` 按 Agent 专属规则检查。
 
 ## Read Phase（读取阶段）
 

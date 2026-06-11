@@ -4,12 +4,16 @@
 
 本文档承载 `speclite-skill-creator` 的详细创建流程。入口 SKILL.md 只保留阶段路由；执行创建时按本文档收集需求、规划结构、生成文件、运行 density gate 并总结交付。
 
+本 workflow 只适用于普通 workflow 风格 Skill。若目标名称匹配 `speclite-agent-*` / `bmad-agent-*`，或源目录包含 `customize.toml` 的 `[agent]` 定制面，必须停止当前流程并改用 `speclite-agent-creator`。
+
 ## Requirement Collection（需求收集）
 
 一次最多问 3 个问题。核心问题：
 1. Skill 名称是什么？最终目录名自动转为以 `speclite-` 开头的 kebab-case。
 2. Skill 要解决什么问题？核心功能是什么？
 3. 什么时候触发？至少提供 3-5 个触发关键词，并覆盖中英文双语。
+
+如果答案表明这是 Agent 定义包，而不是一次性 workflow SOP，例如用户提到 persona、talk to、agent menu、`[agent]`、`bmad-agent-*` 或 `speclite-agent-*`，立即转交 `speclite-agent-creator`。
 
 按需追问：
 - 输入是什么：文件、参数、MCP 数据、其他 Skill 输出或用户上下文。
@@ -45,6 +49,8 @@
 - SKILL.md：中文 canonical 入口。
 - SKILL.en.md：英文 mirror 入口。
 - CHANGELOG.md：版本记录。
+
+例外：`speclite-agent-*` Agent 定义包不在本 workflow 中创建；其 `SKILL.en.md` 可选性由 `speclite-agent-creator` 管理。
 
 按需添加：
 - references/：低频详细资料、复杂工作流、规则矩阵、示例说明。

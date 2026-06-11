@@ -113,8 +113,10 @@ Review 产物目录约定如下：
 
 - `speclite-skill-creator`：创建或迁移 workflow 风格的 Speclite Skill 包。
 - `speclite-skill-lint`：验证通用 Skill 规则，以及 Speclite runtime 和迁移对齐规则。
+- `speclite-agent-creator`：创建或迁移 `speclite-agent-*` / `bmad-agent-*` 这类 role activation Agent 定义包。
+- `speclite-agent-lint`：验证 Agent 专属 `[agent]` 定制面、persona、菜单目标、prompt 引用和 runtime 残留。
 
-维护 `assets/source/speclite/` 下的 canonical skill 源定义时，默认使用本目录内的 `speclite-skill-creator` 与 `speclite-skill-lint`，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+维护 `assets/source/speclite/` 下的 canonical skill 源定义时，workflow 风格 Skill 默认使用 `speclite-skill-creator` 与 `speclite-skill-lint`；Agent 定义包默认使用 `speclite-agent-creator` 与 `speclite-agent-lint`。不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 ## 验证建议
 
@@ -126,3 +128,10 @@ rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|assets/source/speclite/(src|scr
 ```
 
 同时检查目标 Skill 包的编辑器诊断，并确认 `metadata.version` 与 `CHANGELOG.md` 最新版本一致。
+
+检查 `speclite-agent-*` 时，使用 Agent 专属脚本：
+
+```sh
+python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py <agent-dir>
+python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py --all assets/source/speclite/sdlc-skills
+```

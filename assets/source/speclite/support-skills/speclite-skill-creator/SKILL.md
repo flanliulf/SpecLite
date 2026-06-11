@@ -3,7 +3,7 @@ name: speclite-skill-creator
 description: "通过结构化对话创建完整 Agent Skill 包与 `SKILL.md`。用于用户要求 speclite-skill-creator、create skill、新建技能、生成技能包或封装 workflow。核心能力：设计 progressive disclosure、生成 YAML frontmatter、组织 references、脚手架脚本并指导触发测试。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.7.0"
+  version: "1.8.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -14,6 +14,7 @@ metadata:
 [Core Capabilities（核心能力）]
     - **需求挖掘**：一次最多提问 3 个，收集名称、目标、触发词、输入输出、catalog 和执行步骤。
     - **工作流匹配**：根据业务特征推荐顺序、多 MCP、迭代、上下文感知或领域专有模式，详见 `references/workflow-patterns.md`。
+    - **Agent 路由识别**：遇到 `speclite-agent-*`、`bmad-agent-*` 或包含 `[agent]` 的 role activation skill 时，转交 `speclite-agent-creator`，不套用普通 workflow 生成规则。
     - **规范转译**：生成三段式 description、以 `speclite-` 开头的 kebab-case name、allowed-tools，并按 metadata 字段契约写入 `metadata.version`、`metadata.author` 和可选 `metadata.catalog`。
     - **双语入口生成**：生成中文 canonical `SKILL.md` 与英文 mirror `SKILL.en.md`，保持 YAML、版本、目录和执行语义一致。
     - **Workflow density gate**：使用 deterministic 脚本统计正文长度、Workflow 长度和占比，命中阈值时抽取 workflow reference。
@@ -26,6 +27,7 @@ metadata:
 
     Step 1：收集并确认需求
         读取 `references/skill-creation-workflow.md` 的 Requirement Collection 部分，按最多 3 个问题一组收集信息，并在生成前展示确认清单。
+        如果目标是 Agent 定义包，即名称匹配 `speclite-agent-*` / `bmad-agent-*`，或源目录包含 `customize.toml` 的 `[agent]`，停止当前 workflow 创建流程并使用 `speclite-agent-creator`。
 
     Step 2：规划文件结构并生成入口
         先写入 `assets/source/speclite/<group>/<skill-name>/`，其中 `<group>` 为 `core-skills`、`sdlc-skills/<phase>` 或 `support-skills`。生成 SKILL.md、SKILL.en.md、CHANGELOG.md，并按需生成 references/、scripts/、assets/；需要外部 forge mirror 时，再同步到 `/Users/fancyliu/Repos/skills-creator/forge/speclite/` 对应分区。
@@ -46,6 +48,7 @@ metadata:
     - SKILL.md 是中文 canonical 文档，正文使用中文；章节标题使用 English（中文）形式；命令、路径、字段名、fixture 名称、schema/issue id 等技术标识使用英文。
     - SKILL.en.md 是英文 mirror，不得新增中文入口没有的能力、步骤、限制或触发条件。
     - 每个 Skill 必须包含 SKILL.md、SKILL.en.md 和 CHANGELOG.md，版本号保持同步。
+    - Agent 定义包例外：`speclite-agent-*` 的 `SKILL.en.md` 是可选镜像，应由 `speclite-agent-creator` 和 `speclite-agent-lint` 管理。
     - 中文与英文入口正文分别控制在 5000 字以内；Workflow density gate 是 Warning 级质量规则，但创建时命中必须拆分。
     - YAML frontmatter 只允许 name、description、license、allowed-tools、metadata，且不得包含 XML 尖括号或代码执行逻辑。
     - metadata 仅支持 `version`、`author`、`catalog`：`version` 和 `author` 必填，`catalog` 在 Skill 归入 catalog 时填写并与路径及 mirror 对齐。
