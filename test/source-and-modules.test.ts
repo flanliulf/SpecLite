@@ -32,7 +32,7 @@ describe("bundled source descriptor discovery", () => {
       expect.objectContaining({
         kind: "version-lock",
         packageName: "@fancyliu/speclite",
-        version: "0.1.0",
+        version: "0.1.1",
         lockPath: "package-lock.json",
         verified: true,
       }),
@@ -60,6 +60,51 @@ describe("bundled source descriptor discovery", () => {
         severity: "error",
         component: "bundled-source",
       });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("uses the release packaging manifest as bundled source evidence when package-lock is not published", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-packaging-manifest-evidence-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "dist"), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, "dist/packaging-manifest.json"),
+        JSON.stringify({
+          schemaVersion: "speclite.packaging-manifest.v1",
+          packageJson: {
+            name: "@fancyliu/speclite",
+            version: "0.1.1",
+          },
+          packageHash: "sha256:packaged-source",
+        }),
+        "utf8",
+      );
+
+      const descriptor = await discoverBundledSourceDescriptor({ projectRoot: tempRoot });
+
+      expect(descriptor).toMatchObject({
+        sourceType: "bundled",
+        resolvedRoot: "assets/source/speclite",
+        trustStatus: "trusted",
+      });
+      expect(descriptor.integrityEvidence).toEqual([
+        {
+          kind: "version-lock",
+          packageName: "@fancyliu/speclite",
+          version: "0.1.1",
+          lockPath: "dist/packaging-manifest.json",
+          verified: true,
+        },
+        {
+          kind: "content-hash",
+          algorithm: "sha256",
+          value: "sha256:packaged-source",
+          verified: true,
+        },
+      ]);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

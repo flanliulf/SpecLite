@@ -9,16 +9,16 @@ export const BUNDLED_SOURCE_DISPLAY_ROOT = "assets/source/speclite" as const;
 export async function discoverBundledSourceDescriptor(input: {
   projectRoot: string;
 }): Promise<SourceDescriptor> {
-  const evidence = await readPackageLockEvidence(input.projectRoot);
+  const evidence = await readBundledSourceEvidence(input.projectRoot);
 
   return {
     sourceType: "bundled",
     resolvedRoot: BUNDLED_SOURCE_DISPLAY_ROOT,
-    integrityEvidence: evidence === undefined ? [] : [evidence],
+    integrityEvidence: evidence,
     trustStatus: deriveSourceTrustStatus({
-      integrityEvidence: evidence === undefined ? [] : [evidence],
+      integrityEvidence: evidence,
       explicitlyConfirmed: true,
-      hasBlockingIssue: evidence === undefined,
+      hasBlockingIssue: evidence.length === 0,
     }),
   };
 }
@@ -33,6 +33,15 @@ export function createMissingBundledSourceEvidenceIssue(): ValidationIssue {
     suggestedNextStep:
       "Restore package-lock.json or add a packaging evidence anchor before continuing install.",
   };
+}
+
+async function readBundledSourceEvidence(projectRoot: string): Promise<SourceIntegrityEvidence[]> {
+  const packageLockEvidence = await readPackageLockEvidence(projectRoot);
+  if (packageLockEvidence !== undefined) {
+    return [packageLockEvidence];
+  }
+
+  return await readPackagingManifestEvidence(projectRoot);
 }
 
 async function readPackageLockEvidence(
@@ -63,6 +72,53 @@ async function readPackageLockEvidence(
     lockPath: "package-lock.json",
     verified: true,
   };
+}
+
+async function readPackagingManifestEvidence(projectRoot: string): Promise<SourceIntegrityEvidence[]> {
+  const manifestPath = path.join(projectRoot, "dist/packaging-manifest.json");
+  if (!(await pathExists(manifestPath))) {
+    return [];
+  }
+
+  const parsed = JSON.parse(await readFile(manifestPath, "utf8")) as {
+    schemaVersion?: unknown;
+    packageJson?: {
+      name?: unknown;
+      version?: unknown;
+    };
+    packageHash?: unknown;
+  };
+
+  if (parsed.schemaVersion !== "speclite.packaging-manifest.v1") {
+    return [];
+  }
+
+  const packageName = asNonEmptyString(parsed.packageJson?.name);
+  const version = asNonEmptyString(parsed.packageJson?.version);
+  if (packageName === undefined || version === undefined) {
+    return [];
+  }
+
+  const evidence: SourceIntegrityEvidence[] = [
+    {
+      kind: "version-lock",
+      packageName,
+      version,
+      lockPath: "dist/packaging-manifest.json",
+      verified: true,
+    },
+  ];
+  const packageHash = asNonEmptyString(parsed.packageHash);
+  if (packageHash !== undefined) {
+    evidence.push({
+      kind: "content-hash",
+      algorithm: "sha256",
+      value: packageHash,
+      verified: true,
+    });
+  }
+
+  return evidence;
 }
 
 async function pathExists(targetPath: string): Promise<boolean> {

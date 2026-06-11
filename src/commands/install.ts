@@ -1224,20 +1224,21 @@ function shouldStopBeforeSourceSelection(
 }
 
 function createTargetSummary(state: TargetDirectoryState, displayPath: string): string {
+  const publicDisplayPath = formatTargetDisplayPath(displayPath);
   switch (state.kind) {
     case "missing":
-      return `Target: ${displayPath}. Directory state: missing. After confirmation, the target directory can be created by a later install stage; no project files were changed.`;
+      return `Target: ${publicDisplayPath}. Directory state: missing. After confirmation, the target directory can be created by a later install stage; no project files were changed.`;
     case "empty":
-      return `Target: ${displayPath}. Directory state: empty. After confirmation, later install stages may create SpecLite runtime files; no project files were changed.`;
+      return `Target: ${publicDisplayPath}. Directory state: empty. After confirmation, later install stages may create SpecLite runtime files; no project files were changed.`;
     case "non-empty":
-      return `Target: ${displayPath}. Directory state: non-empty. After confirmation, later install stages may continue against this project root; no project files were changed.`;
+      return `Target: ${publicDisplayPath}. Directory state: non-empty. After confirmation, later install stages may continue against this project root; no project files were changed.`;
     case "regular-file":
-      return `Target: ${displayPath}. Directory state: regular-file. Choose a directory target before install continues; no project files were changed.`;
+      return `Target: ${publicDisplayPath}. Directory state: regular-file. Choose a directory target before install continues; no project files were changed.`;
     case "unsafe-symlink":
-      return `Target: ${displayPath}. Directory state: unsafe-symlink. Symlink targets are not inspected as project roots because they can escape the project boundary; no project files were changed.`;
+      return `Target: ${publicDisplayPath}. Directory state: unsafe-symlink. Symlink targets are not inspected as project roots because they can escape the project boundary; no project files were changed.`;
     case "existing-install":
       return [
-        `Target: ${displayPath}.`,
+        `Target: ${publicDisplayPath}.`,
         "Directory state: existing-install.",
         `Detected runtime: ${state.detectedRuntime ? "present" : "not-present"}.`,
         `Manifest version: ${state.manifestVersion ?? UNAVAILABLE_INSTALL_MANIFEST_VERSION}.`,
@@ -1246,6 +1247,10 @@ function createTargetSummary(state: TargetDirectoryState, displayPath: string): 
         "No project files were changed.",
       ].join(" ");
   }
+}
+
+function formatTargetDisplayPath(displayPath: string): string {
+  return displayPath === "." ? "current directory" : displayPath;
 }
 
 function createTargetNextActions(

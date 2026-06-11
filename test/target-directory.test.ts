@@ -363,6 +363,8 @@ describe("install target directory no-write orchestration", () => {
 
       expect(outcome.exitCode).toBe(0);
       expect(outcome.result.summary).toContain("Directory state: non-empty");
+      expect(outcome.result.summary).toContain("Target: current directory.");
+      expect(outcome.result.summary).not.toContain("Target: ..");
 
       await assertNoInstallWrites(tempRoot);
     } finally {
