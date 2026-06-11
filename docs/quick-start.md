@@ -1,8 +1,14 @@
 # Quick Start（快速开始）
 
-本文面向第一次接触 SpecLite 的使用者，说明如何把 SpecLite 安装到一个本地项目中，并完成安装后的基础使用和检查。
+本文面向第一次接触 SpecLite 的使用者，说明如何把 SpecLite 安装到一个本地项目中，并完成安装后的基础检查和首次使用。
 
 SpecLite 不是普通文档包。它是一套面向企业级生产项目的 AI Coding 落地方法论，通过 CLI 安装到本地项目后，会生成 runtime、IDE skill mirrors、manifest/index 和过程产物目录，让团队可以在多个 AI IDE 中使用一致的工作流入口。
+
+首次安装只需要记住三件事：
+
+- `speclite install /path/to/project` 是安全预览，不写入项目文件。
+- `speclite install /path/to/project --yes` 才会授权写入并完成安装。
+- `speclite status` 和 `speclite validate` 是只读检查命令，用于已有安装或安装后验证，不是安装入口。
 
 ## Prerequisites（前置条件）
 
@@ -13,7 +19,14 @@ SpecLite 不是普通文档包。它是一套面向企业级生产项目的 AI C
 - 你知道要把 SpecLite 安装到哪个项目根目录，例如 `/path/to/project`。
 - 如果目标项目已有 SpecLite 安装状态，先执行 `status` 或 `validate` 了解现状，不要直接覆盖。
 
-## Install CLI（安装 CLI）
+## Install CLI Tool（安装命令行工具）
+
+SpecLite 有两层安装：
+
+| Step | What it does |
+|---|---|
+| 安装 CLI tool | 让本机可以运行 `speclite` 命令。 |
+| 安装到 target project root | 把 SpecLite runtime、IDE skill mirrors、manifest/index 和过程产物目录写入目标项目。 |
 
 当前公开 npm 包名是 `@fancyliu/speclite`，安装后提供的 CLI 命令名是 `speclite`。
 
@@ -22,10 +35,10 @@ npm install -g @fancyliu/speclite
 speclite --version
 ```
 
-如果不想全局安装，可以用 `npx` 一次性运行：
+如果不想全局安装，可以用 `npx` 一次性运行 CLI。先确认 CLI 能正常启动：
 
 ```sh
-npx @fancyliu/speclite@latest status /path/to/project
+npx @fancyliu/speclite@latest --version
 ```
 
 如果你正在使用本仓库开发版，请在 SpecLite 仓库中安装依赖并构建：
@@ -38,41 +51,69 @@ npm run build
 开发版可以通过 `npm run dev --` 运行 CLI：
 
 ```sh
-npm run dev -- status /path/to/project
+npm run dev -- --version
 ```
 
-后续示例默认使用发布包命令 `speclite`。如果你使用 `npx`，把命令前缀替换为 `npx @fancyliu/speclite@latest`；如果你使用开发版，把命令前缀替换为 `npm run dev --`。
+## Choose Command Prefix（选择命令前缀）
+
+后续示例默认使用全局安装后的命令前缀 `speclite`。如果你选择其它运行方式，只替换命令前缀，后面的子命令和参数保持不变。
+
+| Scenario | Command prefix | Example |
+|---|---|---|
+| 推荐给新用户：全局安装后使用 | `speclite` | `speclite install /path/to/project --yes` |
+| 不全局安装：通过 npm 临时运行 | `npx @fancyliu/speclite@latest` | `npx @fancyliu/speclite@latest install /path/to/project --yes` |
+| 开发者：在 SpecLite 仓库内运行源码版 | `npm run dev --` | `npm run dev -- install /path/to/project --yes` |
 
 ## Choose Target Project（选择目标项目）
 
-`target-directory` 是你要安装 SpecLite 的项目根目录：
+`target-directory` 是你要安装 SpecLite 的项目根目录。本文统一用 `/path/to/project` 表示 target project root。
 
-```sh
-speclite status /path/to/project
-```
+后续命令中的 `/path/to/project` 都需要替换成你自己的项目路径。建议新用户显式传入目标路径，避免把 SpecLite 安装到错误目录。
 
-如果省略 `target-directory`，SpecLite 会以当前工作目录作为目标项目：
+如果省略 `target-directory`，SpecLite 会以当前工作目录作为 target project root：
 
 ```sh
 cd /path/to/project
-speclite status
+speclite install
 ```
 
-建议新用户显式传入目标路径，避免把 SpecLite 安装到错误目录。
+## Preview Install Target（预览安装目标）
 
-## Run Preflight（执行安装前检查）
-
-先不授权写入，只检查目标目录状态：
+先不授权写入，只预览 target project root 的状态：
 
 ```sh
 speclite install /path/to/project
 ```
 
-这一步不会写入项目文件。当前实现会在没有 `--yes` 时停在写入授权之前，并提示下一步如何继续。它适合用来确认目标目录是否存在、是否是已有安装、是否存在不安全路径或明显阻塞。
+这一步不会写入项目文件。当前实现会在没有 `--yes` 时停在写入授权之前，并提示下一步如何继续。它适合确认 target project root 是否存在、是否是已有安装、是否存在不安全路径或明显阻塞。
 
-## Install SpecLite（安装 SpecLite）
+如果输出提示目标项目已经安装过 SpecLite，先运行 `speclite status /path/to/project` 或 `speclite validate /path/to/project` 了解现状，再决定是否进入 update 或 repair 流程。
 
-确认目标目录正确后，使用 `--yes` 授权安装写入：
+## Choose Install Configuration（选择安装配置）
+
+安装过程中的配置阶段支持两种模式：
+
+- `quick`：使用 deterministic defaults，适合大多数新用户。
+- `detailed`：允许调整项目名、用户显示名、沟通语言、文档输出语言、输出目录、模块产物路径和 IDE targets。
+
+如果你不确定选什么，使用默认 `quick`。
+
+常见默认值：
+
+| Field | Default |
+|---|---|
+| `user_name` | `SpecLite` |
+| `project_name` | target project root 的目录名 |
+| `communication_language` | `Chinese` |
+| `document_output_language` | `Chinese` |
+| `output_folder` | `_speclite-output` |
+| `planning_artifacts` | `_speclite-output/planning-artifacts` |
+| `implementation_artifacts` | `_speclite-output/implementation-artifacts` |
+| `project_knowledge` | `docs` |
+
+## Install Into Project（安装到项目）
+
+确认 target project root 正确后，使用 `--yes` 授权安装写入：
 
 ```sh
 speclite install /path/to/project --yes
@@ -98,28 +139,6 @@ speclite install /path/to/project --yes
 - 运行 `speclite status` 查看 installed-state summary。
 - 运行 `speclite validate` 做更深入的本地校验。
 
-## Quick Config vs Detailed Config（快速配置与详细配置）
-
-安装时的配置阶段支持两种模式：
-
-- `quick`：使用 deterministic defaults，适合大多数新用户。
-- `detailed`：允许调整项目名、用户显示名、沟通语言、文档输出语言、输出目录、模块产物路径和 IDE targets。
-
-如果你不确定选什么，使用默认 `quick`。
-
-常见默认值：
-
-| Field | Default |
-|---|---|
-| `user_name` | `SpecLite` |
-| `project_name` | 目标目录名 |
-| `communication_language` | `Chinese` |
-| `document_output_language` | `Chinese` |
-| `output_folder` | `_speclite-output` |
-| `planning_artifacts` | `_speclite-output/planning-artifacts` |
-| `implementation_artifacts` | `_speclite-output/implementation-artifacts` |
-| `project_knowledge` | `docs` |
-
 ## Verify Installation（验证安装）
 
 安装后先看 summary：
@@ -143,9 +162,19 @@ speclite validate /path/to/project --json
 
 `validate` 会检查 installed-state、runtime path、manifest/index、IDE mirrors、source integrity、file ownership 等安装健康度相关问题。
 
+## Success Criteria（成功标准）
+
+一次成功安装至少应满足：
+
+- `speclite --version` 可以正常输出版本号。
+- `speclite install /path/to/project --yes` 结束时没有阻塞性错误。
+- `speclite status /path/to/project` 能看到 installed-state summary，而不是未配置提示。
+- `speclite validate /path/to/project` 没有报告需要立即处理的安装健康度问题。
+- target project root 下出现 `_speclite/`、`_speclite-output/`，以及你选择的 IDE skill directory，例如 `.claude/skills/` 或 `.agents/skills/`。
+
 ## Use Installed Skills（使用已安装的 Skills）
 
-安装完成后，在目标项目中打开对应 AI IDE：
+安装完成后，在 target project root 中打开对应 AI IDE：
 
 - Claude Code：查看 `.claude/skills/`。
 - 支持 `.agents/skills` 的 IDE 或 agent runtime：查看 `.agents/skills/`。
@@ -170,7 +199,22 @@ SpecLite skills 按能力分层：
 
 如果不知道从哪里开始，先调用 `speclite-help`，让它根据当前项目状态和你的意图推荐下一步。
 
-## Update and Repair（更新与修复）
+## Troubleshooting（排查问题）
+
+| Symptom | What to do |
+|---|---|
+| 不确定该运行哪个命令 | 首次安装用 `speclite install /path/to/project --yes`。不带 `--yes` 是安全预览；`status` 和 `validate` 是只读检查。 |
+| 安装没有写入文件 | 检查是否缺少 `--yes`。无 `--yes` 时 install 会停在写入授权前。 |
+| 目标项目已有安装 | 先运行 `speclite status /path/to/project` 或 `speclite validate /path/to/project`，确认 installed-state 后再决定 update 或 repair。 |
+| Validate 报 IDE mirror 问题 | 检查 `.claude/skills` 和 `.agents/skills` 是否被手工改动，再运行 `speclite update /path/to/project --repair` 查看 repair plan。 |
+| Update 发现 conflict | 先阅读 update plan 和 conflicts，不要手工覆盖 human-owned 或 workflow-owned 文件。 |
+| 自定义来源被阻塞 | 优先使用 bundled source；如果必须使用自定义来源，确认 source type、source value 和 resolver 支持状态。 |
+
+## Advanced Usage（高级用法）
+
+首次安装不需要阅读本节。完成安装和验证后，再根据需要使用 update、repair、自定义来源或自动化输出。
+
+### Update and Repair（更新与修复）
 
 查看可用更新计划：
 
@@ -198,7 +242,7 @@ speclite update /path/to/project --repair --yes
 
 `update` 和 `repair` 遵守文件所有权边界：human-owned custom files 和 workflow-owned artifacts 不会被静默覆盖。
 
-## Custom Sources（自定义来源）
+### Custom Sources（自定义来源）
 
 默认安装来源是 `bundled`。CLI 也接受以下 source type：
 
@@ -217,7 +261,7 @@ speclite install /path/to/project --yes --source local --source-value /path/to/s
 
 非 bundled source 会先记录 source access intent，并在读取外部 metadata 或本地 artifact 前要求确认。不同 source resolver 的可用程度取决于当前实现状态；如果遇到 `source-integrity.unsupported-source`，请改用 bundled source 或等待对应 source resolver 完成。
 
-## Automation（自动化用法）
+### Automation（自动化用法）
 
 脚本或 CI 中建议使用 `--json`：
 
@@ -232,16 +276,6 @@ speclite validate /path/to/project --json
 - `--json` 会输出 machine-readable CommandResult JSON。
 - 自动化不要依赖 spinner、颜色、emoji 或 human-readable 文本。
 - 写入类命令仍然需要显式 `--yes`。
-
-## Troubleshooting（排查问题）
-
-| Symptom | What to do |
-|---|---|
-| 安装没有写入文件 | 检查是否缺少 `--yes`。无 `--yes` 时 install 会停在写入授权前。 |
-| 目标目录已有安装 | 先运行 `speclite status` 或 `speclite validate`，确认 installed-state 后再决定 update 或 repair。 |
-| Validate 报 IDE mirror 问题 | 检查 `.claude/skills` 和 `.agents/skills` 是否被手工改动，再运行 `speclite update --repair` 查看 repair plan。 |
-| Update 发现 conflict | 先阅读 update plan 和 conflicts，不要手工覆盖 human-owned 或 workflow-owned 文件。 |
-| 自定义来源被阻塞 | 优先使用 bundled source；如果必须使用自定义来源，确认 source type、source value 和 resolver 支持状态。 |
 
 ## Next Steps（下一步）
 
