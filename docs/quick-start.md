@@ -15,10 +15,17 @@ SpecLite 不是普通文档包。它是一套面向企业级生产项目的 AI C
 
 ## Install CLI（安装 CLI）
 
-如果团队已经发布了 `speclite` npm 包，可以按团队发布渠道安装：
+当前公开 npm 包名是 `@fancyliu/speclite`，安装后提供的 CLI 命令名是 `speclite`。
 
 ```sh
-npm install -g speclite
+npm install -g @fancyliu/speclite
+speclite --version
+```
+
+如果不想全局安装，可以用 `npx` 一次性运行：
+
+```sh
+npx @fancyliu/speclite@latest status /path/to/project
 ```
 
 如果你正在使用本仓库开发版，请在 SpecLite 仓库中安装依赖并构建：
@@ -34,7 +41,7 @@ npm run build
 npm run dev -- status /path/to/project
 ```
 
-后续示例默认使用发布包命令 `speclite`。如果你使用开发版，把命令前缀替换为 `npm run dev --` 即可。
+后续示例默认使用发布包命令 `speclite`。如果你使用 `npx`，把命令前缀替换为 `npx @fancyliu/speclite@latest`；如果你使用开发版，把命令前缀替换为 `npm run dev --`。
 
 ## Choose Target Project（选择目标项目）
 

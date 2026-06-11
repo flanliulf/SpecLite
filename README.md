@@ -56,6 +56,22 @@ flowchart LR
 
 详细安装和首次使用指南见 [docs/quick-start.md](docs/quick-start.md)。
 
+通过 npm 使用已发布包：
+
+```sh
+npm install -g @fancyliu/speclite
+speclite --version
+speclite install /path/to/project
+speclite status /path/to/project
+speclite validate /path/to/project
+```
+
+无需全局安装时，可以用 `npx` 一次性运行：
+
+```sh
+npx @fancyliu/speclite@latest status /path/to/project
+```
+
 开发仓库内运行：
 
 ```sh
@@ -64,14 +80,6 @@ npm run build
 npm run dev -- install /path/to/project
 npm run dev -- status /path/to/project
 npm run dev -- validate /path/to/project
-```
-
-发布包安装后的典型命令形式：
-
-```sh
-speclite install /path/to/project
-speclite status /path/to/project
-speclite validate /path/to/project
 ```
 
 机器可读输出：
@@ -125,7 +133,7 @@ SpecLite 是 CLI API + file-contract API，不是 REST、GraphQL 或 hosted serv
 npm install
 npm run build
 npm test
-npm run release:verify
+npm run release:check
 ```
 
 | Script | Purpose |
@@ -133,7 +141,8 @@ npm run release:verify
 | `npm run build` | 使用 `tsup` 构建 CLI。 |
 | `npm run dev` | 通过 `tsx src/bin/speclite.ts` 运行开发入口。 |
 | `npm test` | 运行 Vitest 测试。 |
-| `npm run release:verify` | 构建并执行 packaging check。 |
+| `npm run release:verify` | 构建并执行 packaging check，不运行测试。 |
+| `npm run release:check` | 构建、运行 Vitest 并执行 packaging check，作为 publish 前门禁。 |
 
 ## Maintainer Notes（维护者说明）
 
