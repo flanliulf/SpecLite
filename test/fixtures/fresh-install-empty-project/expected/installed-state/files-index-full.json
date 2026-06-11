@@ -15,7 +15,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/manifest.yaml",
       "ownership": "installer-owned",
-      "hash": "sha256:afee816a73a1c19ca53aa0f94f4d3832f2bf650e99564e11e8b1ef83d48bd7c5",
+      "hash": "sha256:7c71586ae46819dc85bb69e1429323a6b3d8cd4d0962c11c17a74c24b331b750",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "manifest",

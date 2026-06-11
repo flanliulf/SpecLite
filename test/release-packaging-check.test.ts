@@ -24,7 +24,7 @@ describe("Story 6.7 release packaging gate", () => {
 
     expect(packageJson).toMatchObject({
       name: "@fancyliu/speclite",
-      version: "0.1.0",
+      version: "0.1.1",
       license: "MIT",
       bin: {
         speclite: "dist/bin/speclite.js",

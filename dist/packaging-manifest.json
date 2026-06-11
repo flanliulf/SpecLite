@@ -4,7 +4,7 @@
   "source": "npm-pack-dry-run-json",
   "packageJson": {
     "name": "@fancyliu/speclite",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "bin": {
       "speclite": "dist/bin/speclite.js"
     },
@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:8c030c95417ad5d03a90a9e11808c5867ca6454810ea3ba569b0d52b59e5e1dc",
+  "packageHash": "sha256:581fa64fd15861339360cfc0a77f8e1c1bb4fffdf8eaf457133561bd03f69711",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/BMAD_SPECLITE_SKILL_MAPPING.md",
