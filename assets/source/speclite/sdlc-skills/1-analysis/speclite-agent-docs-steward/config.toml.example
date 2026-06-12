@@ -1,0 +1,11 @@
+[core]
+project_name = "SpecLite"
+user_name = "SpecLite"
+communication_language = "Chinese"
+document_output_language = "Chinese"
+output_folder = "{project-root}/_speclite-output"
+
+[modules.sdlc]
+planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
+implementation_artifacts = "{project-root}/_speclite-output/implementation-artifacts"
+project_knowledge = "{project-root}/docs"

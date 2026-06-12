@@ -1320,6 +1320,27 @@
       "phaseId": "anytime",
       "phaseLabel": "Anytime",
       "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-agent-docs-steward",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-agent-docs-steward",
+          "activationTarget": ".claude/skills/speclite-agent-docs-steward/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-agent-docs-steward",
+          "activationTarget": ".agents/skills/speclite-agent-docs-steward/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-agent-tech-writer",
       "ideTargets": [
         {
@@ -1548,6 +1569,27 @@
           "generatedAt"
         ]
       }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-write-opensource-docs",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-write-opensource-docs",
+          "activationTarget": ".claude/skills/speclite-write-opensource-docs/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-write-opensource-docs",
+          "activationTarget": ".agents/skills/speclite-write-opensource-docs/SKILL.md",
+          "status": "mapped"
+        }
+      ]
     }
   ]
 }

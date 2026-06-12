@@ -87,7 +87,7 @@ const ARTIFACTS = {
   },
 } as const;
 
-const CORE_SDLC_BASELINE_ENTRY_COUNT = 55;
+const CORE_SDLC_BASELINE_ENTRY_COUNT = 57;
 const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
   core: [
     "assets/source/speclite/core-skills/speclite-advanced-elicitation",
@@ -109,11 +109,13 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/1-analysis/research/speclite-market-research",
     "assets/source/speclite/sdlc-skills/1-analysis/research/speclite-technical-research",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-analyst",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-docs-steward",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-write-opensource-docs",
     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-agent-pm",
     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-agent-ux-designer",
     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd",

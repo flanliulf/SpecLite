@@ -18,6 +18,7 @@ docs/brownfield/evidence
 .claude/skills/speclite-agent-analyst/SKILL.md
 .claude/skills/speclite-agent-architect/SKILL.md
 .claude/skills/speclite-agent-dev/SKILL.md
+.claude/skills/speclite-agent-docs-steward/SKILL.md
 .claude/skills/speclite-agent-pm/SKILL.md
 .claude/skills/speclite-agent-tech-writer/SKILL.md
 .claude/skills/speclite-agent-ux-designer/SKILL.md
@@ -69,10 +70,12 @@ docs/brownfield/evidence
 .claude/skills/speclite-story-review-03-fixer/SKILL.md
 .claude/skills/speclite-technical-research/SKILL.md
 .claude/skills/speclite-validate-prd/SKILL.md
+.claude/skills/speclite-write-opensource-docs/SKILL.md
 .agents/skills/speclite-advanced-elicitation/SKILL.md
 .agents/skills/speclite-agent-analyst/SKILL.md
 .agents/skills/speclite-agent-architect/SKILL.md
 .agents/skills/speclite-agent-dev/SKILL.md
+.agents/skills/speclite-agent-docs-steward/SKILL.md
 .agents/skills/speclite-agent-pm/SKILL.md
 .agents/skills/speclite-agent-tech-writer/SKILL.md
 .agents/skills/speclite-agent-ux-designer/SKILL.md
@@ -124,3 +127,4 @@ docs/brownfield/evidence
 .agents/skills/speclite-story-review-03-fixer/SKILL.md
 .agents/skills/speclite-technical-research/SKILL.md
 .agents/skills/speclite-validate-prd/SKILL.md
+.agents/skills/speclite-write-opensource-docs/SKILL.md

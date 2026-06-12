@@ -433,6 +433,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "anytime",
+      "entryLabel": "SpecLite Agent Docs Steward",
+      "canonicalSkillId": "speclite-agent-docs-steward",
+      "activationTarget": ".claude/skills/speclite-agent-docs-steward/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
       "entryLabel": "Explain Concept",
       "canonicalSkillId": "speclite-agent-tech-writer",
       "activationTarget": ".claude/skills/speclite-agent-tech-writer/SKILL.md",
@@ -656,6 +667,17 @@
       "entryLabel": "Shard Document",
       "canonicalSkillId": "speclite-shard-doc",
       "activationTarget": ".claude/skills/speclite-shard-doc/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "SpecLite Write OpenSource Docs",
+      "canonicalSkillId": "speclite-write-opensource-docs",
+      "activationTarget": ".claude/skills/speclite-write-opensource-docs/SKILL.md",
       "targetIds": [
         "claude",
         "agents"

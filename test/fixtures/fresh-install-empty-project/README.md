@@ -14,6 +14,6 @@
 - `_speclite/_config/files-index.json`
 - `_speclite/_config/phase-coverage.json`
 
-当前默认 `core` + `sdlc` baseline 必须安装 55 个 canonical package roots，并在 `.claude/skills` 与 `.agents/skills` 中各生成 55 个 `SKILL.md` mirror entries。
+当前默认 `core` + `sdlc` baseline 必须安装 57 个 canonical package roots，并在 `.claude/skills` 与 `.agents/skills` 中各生成 57 个 `SKILL.md` mirror entries。
 
 Ready summary 只能在 `ReadyCheck` 成功后出现；failure expected outputs 不得包含 ready summary 或 release-ready summary。All path fields and expected tree entries use project-relative POSIX-style paths.

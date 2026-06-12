@@ -56,7 +56,7 @@ describe("install official module selection orchestration", () => {
       expect(outcome.result.status).toBe("success");
       expect(outcome.result.summary).toContain("Selected modules: core");
       expect(outcome.result.summary).toContain("sdlc");
-      expect(outcome.result.summary).toContain("Canonical package roots: core=13, sdlc=42, total=55.");
+      expect(outcome.result.summary).toContain("Canonical package roots: core=13, sdlc=44, total=57.");
       expect(outcome.result.summary).toContain("Source: bundled assets/source/speclite");
       expect(outcome.result.summary).toContain("Final configuration summary");
       expect(outcome.result.data.sourceDescriptor).toMatchObject({
@@ -122,7 +122,7 @@ describe("install official module selection orchestration", () => {
           expect(input.targetAdapters.map((adapter) => adapter.targetId)).toEqual(["claude", "agents"]);
           expect(input.prompt).toContain("Selected modules: core");
           expect(input.prompt).toContain("sdlc");
-          expect(input.prompt).toContain("Canonical package roots: core=13, sdlc=42, total=55.");
+          expect(input.prompt).toContain("Canonical package roots: core=13, sdlc=44, total=57.");
           expect(input.prompt).toContain("Pending: runtime structure creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary have not happened.");
           expect(input.prompt).toContain("No project files were changed.");
           await assertNoInstallWrites(tempRoot);
@@ -164,7 +164,7 @@ describe("install official module selection orchestration", () => {
           expect(input.prompt).toContain("Selected modules: core (SpecLite Core Module 0.0.0).");
           expect(input.prompt).not.toContain("Selected modules: core (SpecLite Core Module 0.0.0), sdlc");
           expect(input.prompt).toContain("Canonical package roots: core=13, total=13.");
-          expect(input.prompt).not.toContain("Canonical package roots: core=13, sdlc=42, total=55.");
+          expect(input.prompt).not.toContain("Canonical package roots: core=13, sdlc=44, total=57.");
           expect(input.prompt).toContain("Capability scope: core:");
           expect(input.prompt).toContain("Planned config writes: _speclite/config.toml=create");
           expect(input.prompt).toContain("Planned write phases: config initialization, runtime structure creation, artifact directory creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary.");

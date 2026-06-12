@@ -86,12 +86,12 @@ describe("fresh-install-empty-project release gate fixture", () => {
         await readFile(path.join(firstRoot, "_speclite/_config/files-index.json"), "utf8"),
       ) as { entries: Array<{ path: string }> };
 
-      expect(skillIndex.entries).toHaveLength(55);
-      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(55);
-      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(55);
+      expect(skillIndex.entries).toHaveLength(57);
+      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(57);
+      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(57);
       expect(skillIndex.entries.every((entry) => entry.installedTargets.join(",") === "claude,agents")).toBe(true);
       expect(filesIndex.entries.some((entry) => entry.path === "_speclite/_config/manifest.yaml")).toBe(true);
-      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(110);
+      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(114);
       expect(filesIndex.entries.every((entry) => isProjectRelativePosixPath(entry.path))).toBe(true);
 
       expect(normalizeFreshInstallResult(first.result)).toEqual(normalizeFreshInstallResult(second.result));
