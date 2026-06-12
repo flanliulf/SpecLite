@@ -41,18 +41,39 @@ speclite --version
 npx @fancyliu/speclite@latest --version
 ```
 
-如果你正在使用本仓库开发版，请在 SpecLite 仓库中安装依赖并构建：
+如果你正在使用本仓库开发版，请先进入 **SpecLite 仓库目录**，再安装依赖并构建：
 
 ```sh
+cd /path/to/SpecLite
 npm install
 npm run build
 ```
 
-开发版可以通过 `npm run dev --` 运行 CLI：
+开发版通过 `npm run dev --` 从 SpecLite 源码运行 CLI。这个命令也必须在 **SpecLite 仓库目录**执行：
 
 ```sh
 npm run dev -- --version
 ```
+
+## Where to Run Commands（命令在哪个目录执行）
+
+新手最容易混淆的是：CLI 命令的执行目录，不一定等于要安装 SpecLite 的目标项目目录。
+
+| Scenario | Run command from | Target project is |
+|---|---|---|
+| 全局安装后的 `speclite` | 任意目录；建议显式传 `/path/to/project` | `install` 命令中的 `/path/to/project` |
+| `npx @fancyliu/speclite@latest` | 任意目录；建议显式传 `/path/to/project` | `install` 命令中的 `/path/to/project` |
+| 开发版 `npm install` / `npm run build` | SpecLite 仓库目录，例如 `/path/to/SpecLite` | 不涉及目标项目，只是在准备开发版 CLI |
+| 开发版 `npm run dev -- ...` | SpecLite 仓库目录，例如 `/path/to/SpecLite` | `npm run dev -- install /path/to/project --yes` 中的 `/path/to/project` |
+
+开发版安装到目标项目的完整形态是：
+
+```sh
+cd /path/to/SpecLite
+npm run dev -- install /path/to/project --yes
+```
+
+> Caution: 使用 `npm run dev --` 时不要省略 `target-directory`。因为该命令需要在 SpecLite 仓库目录执行；如果省略目标路径，当前工作目录就是 SpecLite 仓库本身，容易把 SpecLite 安装到错误位置。
 
 ## Choose Command Prefix（选择命令前缀）
 
@@ -85,18 +106,26 @@ speclite install
 speclite install /path/to/project
 ```
 
-这一步不会写入项目文件。当前实现会在没有 `--yes` 时停在写入授权之前，并提示下一步如何继续。它适合确认 target project root 是否存在、是否是已有安装、是否存在不安全路径或明显阻塞。
+这一步不会写入项目文件。当前实现会在没有 `--yes` 时停在 target preflight 之后，不进入 source selection、module selection、config initialization 或 write phase。它适合确认 target project root 是否存在、是否是已有安装、是否存在不安全路径或明显阻塞。
 
 如果输出提示目标项目已经安装过 SpecLite，先运行 `speclite status /path/to/project` 或 `speclite validate /path/to/project` 了解现状，再决定是否进入 update 或 repair 流程。
 
 ## Choose Install Configuration（选择安装配置）
+
+默认安装是无交互 happy path：`speclite install /path/to/project --yes` 会使用默认 modules、`quick` config 和默认 IDE targets，不再继续询问普通配置问题。
+
+需要自定义 modules、配置模式或 IDE targets 时，显式使用 interactive mode：
+
+```sh
+speclite install /path/to/project --yes --interactive
+```
 
 安装过程中的配置阶段支持两种模式：
 
 - `quick`：使用 deterministic defaults，适合大多数新用户。
 - `detailed`：允许调整项目名、用户显示名、沟通语言、文档输出语言、输出目录、模块产物路径和 IDE targets。
 
-如果你不确定选什么，使用默认 `quick`。
+如果你不确定选什么，使用默认 `quick`。默认 human-readable output 使用 `zh-CN`；如需英文输出，可以加 `--locale en-US`，或设置 `SPECLITE_LOCALE=en-US`。locale 只影响自然语言，不改变 JSON contract。
 
 常见默认值：
 
@@ -113,10 +142,16 @@ speclite install /path/to/project
 
 ## Install Into Project（安装到项目）
 
-确认 target project root 正确后，使用 `--yes` 授权安装写入：
+确认 target project root 正确后，使用 `--yes` 授权默认无交互安装写入：
 
 ```sh
 speclite install /path/to/project --yes
+```
+
+脚本或 CI 需要 machine-readable output 时，可以使用：
+
+```sh
+speclite install /path/to/project --json --yes
 ```
 
 默认安装使用 bundled source，也就是随当前 CLI 包携带的 `assets/source/speclite/` 方法论源包。安装过程会选择官方模块、初始化配置、创建 runtime 结构、写入 IDE mirrors、生成 manifest/index，并执行 ReadyCheck。
@@ -204,7 +239,9 @@ SpecLite skills 按能力分层：
 | Symptom | What to do |
 |---|---|
 | 不确定该运行哪个命令 | 首次安装用 `speclite install /path/to/project --yes`。不带 `--yes` 是安全预览；`status` 和 `validate` 是只读检查。 |
-| 安装没有写入文件 | 检查是否缺少 `--yes`。无 `--yes` 时 install 会停在写入授权前。 |
+| 安装没有写入文件 | 检查是否缺少 `--yes`。无 `--yes` 时 install 只执行 target preflight。 |
+| 想自定义 module、config 或 IDE targets | 使用 `speclite install /path/to/project --yes --interactive`。 |
+| 想看英文安装输出 | 使用 `--locale en-US` 或设置 `SPECLITE_LOCALE=en-US`。 |
 | 目标项目已有安装 | 先运行 `speclite status /path/to/project` 或 `speclite validate /path/to/project`，确认 installed-state 后再决定 update 或 repair。 |
 | Validate 报 IDE mirror 问题 | 检查 `.claude/skills` 和 `.agents/skills` 是否被手工改动，再运行 `speclite update /path/to/project --repair` 查看 repair plan。 |
 | Update 发现 conflict | 先阅读 update plan 和 conflicts，不要手工覆盖 human-owned 或 workflow-owned 文件。 |

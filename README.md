@@ -62,6 +62,7 @@ flowchart LR
 npm install -g @fancyliu/speclite
 speclite --version
 speclite install /path/to/project
+speclite install /path/to/project --yes
 speclite status /path/to/project
 speclite validate /path/to/project
 ```
@@ -78,6 +79,7 @@ npx @fancyliu/speclite@latest status /path/to/project
 npm install
 npm run build
 npm run dev -- install /path/to/project
+npm run dev -- install /path/to/project --yes
 npm run dev -- status /path/to/project
 npm run dev -- validate /path/to/project
 ```
@@ -103,11 +105,14 @@ speclite validate /path/to/project --json
 
 `resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。
 
+`install` 的默认 human-readable output 使用 `zh-CN`。`speclite install /path/to/project --yes` 是默认无交互安装；需要自定义 modules、config 或 IDE targets 时使用 `--yes --interactive`。英文输出可用 `--locale en-US` 或 `SPECLITE_LOCALE=en-US`，JSON 输出不受 locale 影响。
+
 ## Safety Model（安全模型）
 
 SpecLite 的默认策略是保守写入、可审查变更：
 
 - `--dry-run` 只生成 plan，不写文件。
+- `install` 不带 `--yes` 只执行 target preflight，不进入后续 source/module/config/write 阶段。
 - `--yes` 只表示 command-level write authorization，不表示接受 unverified source 或 policy rejection。
 - Human-owned custom files 和 workflow-owned artifacts 不会被静默覆盖。
 - Installer-owned files 更新前必须通过 ownership manifest 和 hash comparison。
