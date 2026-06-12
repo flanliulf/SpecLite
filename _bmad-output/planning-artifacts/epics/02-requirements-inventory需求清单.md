@@ -36,6 +36,8 @@ FR16: 项目维护者可以查看安装完成后的项目结构和安装摘要�
 
 FR17: 项目维护者可以查看安装完成后的下一步使用指引。
 
+FR17a: 首次安装的 human-readable CLI 输出必须使用分阶段 block 呈现模块选择、配置模式、写入计划确认、写入进度和 Ready Summary；日志、摘要、提示和用户输入必须在视觉上分离，不得把长段 summary 与 prompt 拼接到同一个输入问题中。
+
 FR18: 安装器可以生成 IDE-specific discovery metadata，列出研发阶段、canonical skill id、skill 名称、目标 IDE entry path 和激活 target，并遵守 manifest/index 与 IDE adapter registry 的 owning SPEC 契约。
 
 FR19: MVP 中每个 IDE adapter 必须把 discovery metadata 映射为该 IDE target directory 中的 self-contained skill entry，并报告 mapped、unsupported 或 failed 状态；MVP 不生成 command pointer artifact。
@@ -112,6 +114,8 @@ FR46: 项目维护者可以在安装过程中配置过程产物输出目录。
 
 FR47: 项目维护者可以选择快速配置或详细配置模式。
 
+FR47a: `speclite install --yes` 必须表示使用安全默认值并授权无 conflict 的 planned writes；默认情况下不得继续要求模块选择、配置模式或最终写入确认等普通交互输入。需要自定义模块、配置或 IDE targets 时，必须通过显式 interactive mode 或显式 flags 进入。
+
 FR48: 项目维护者可以使用项目级配置定义用户称呼、项目名称、交流语言、文档输出语言、产物路径、安装模块和 IDE targets。
 
 FR49: 用户可以通过定制化配置覆盖 skill workflow、agent persona、菜单项和输出路径默认值。
@@ -156,9 +160,13 @@ FR63: 系统可以在安装完成后展示包含安装路径、manifest version�
 
 FR63a: Ready summary 的 human-readable 输出可以包含解释性文案，但 automation 依赖必须进入 install --json 的 InstallCommandData 字段，例如 sourceDescriptor、manifestVersion、installedModules、ideTargets、paths、completedSteps 和 pendingSteps；MVP 不新增未契约化的 readySummary JSON blob。
 
+FR63b: Human-readable install output 必须支持 CLI message catalog。MVP 默认 locale 为 `zh-CN`，并提供 `en-US` fallback；locale 可以通过 `--locale` 或 `SPECLITE_LOCALE` 显式指定。Message catalog 只翻译自然语言，不翻译 command name、flag、module id、target id、step id、path、schema id、issue id、reason code 或 JSON field。
+
 FR64: 系统可以在安装完成后展示用户下一步如何启动 AI agent 和调用帮助 skill。
 
 FR65: 系统可以在安装完成后展示安装位置、已安装模块和已配置工具清单。
+
+FR65a: 安装写入前的 final review 必须以稳定顺序展示 target、source descriptor、config mode、selected modules、IDE targets、planned writes 和 pending phases，并明确说明当前是否已写入项目文件以及确认后将发生的写入阶段。
 
 FR66: SpecLite 维护者可以验证新增或修改的 source skill 是否可安装。
 
@@ -194,11 +202,13 @@ Post-MVP FR72-FR78 只作为 backlog inventory，不得进入 MVP sprint backlog
 
 ### Traceability Count Convention（可追踪计数口径）
 
-本文档保留 PRD 的 base numbering：FR1-FR78 与 NFR1-NFR40 表示主编号范围。为 implementation readiness、fixture planning 和 story acceptance tracking，lettered extensions 也作为独立可追踪条目统计；当前显式条目为 94 个 FR entries 与 95 个 NFR entries。后续报告应同时说明 base range 与 explicit tracked entry count，避免把 lettered extensions 误判为缺失或额外范围。
+本文档保留 PRD 的 base numbering：FR1-FR78 与 NFR1-NFR40 表示主编号范围。为 implementation readiness、fixture planning 和 story acceptance tracking，lettered extensions 也作为独立可追踪条目统计；当前显式条目为 98 个 FR entries 与 99 个 NFR entries。后续报告应同时说明 base range 与 explicit tracked entry count，避免把 lettered extensions 误判为缺失或额外范围。
 
 ## NonFunctional Requirements（非功能需求）
 
 NFR1: 在常规 fixture 项目中，fresh install 必须至少输出 source discovery、manifest generation、IDE mirror creation、config initialization 和 ready check 5 个阶段状态；fixture baseline 应记录阶段顺序和完成结果。Machine-readable progress `stepId` 必须使用 stable lower-kebab id，例如 `ready-check`，作为 fixture-observable deterministic signal；它不是 MVP automation API。Automation 依赖必须读取 `CommandResult.data.completedSteps` 和 `CommandResult.data.pendingSteps`。human-readable step label 可以是 ready check；contract/internal guard 名称统一为 ReadyCheck。阶段耗时只作为 performance evidence 或 human-readable/profiling 数据，默认不得进入 stable command JSON snapshots。
+
+NFR1a: Fresh install human-readable output 必须按稳定 block hierarchy 展示阶段标题、摘要、prompt 和确认说明；prompt 必须单独占行且与上一段 summary 空行分隔。默认输出不得把多段摘要拼成单个长段落，也不得把 summary 与用户输入确认内容拼接到同一个 `readline.question()` 文案中。
 
 NFR2: status 在常规 fixture 项目中应在 2 秒内返回项目安装摘要，不执行完整文件完整性扫描；性能基准以 3 次连续运行的 p95 结果为准。
 
@@ -225,6 +235,8 @@ NFR9a: MVP validate 必须是本地确定性命令，不得访问 npm registry�
 NFR10: 安装失败时，系统不得展示 ready summary；失败结果必须列出 completed steps、failed step、pending steps 和 manual action，且退出状态不得为成功。
 
 NFR11: ready summary 只能在 source discovery、manifest generation、IDE mirror creation、config initialization 和 ReadyCheck 全部成功后展示；ReadyCheck 是 install 内部最小就绪检查，不等同于完整 speclite validate。
+
+NFR11a: `install --yes` happy path 必须是 no-prompt flow：使用默认 modules、quick config 和默认 IDE targets，并在 human-readable 输出中说明采用了默认值。需要用户选择模块、配置模式或 IDE targets 的流程必须通过显式 interactive mode 或显式 flags 进入；`--json --yes` 必须保持无交互。
 
 NFR12: 安装器不得在 install plan 未声明且用户未确认的情况下访问远程 source、下载额外资源或执行外部脚本；install summary 必须记录每个 external access 的 redacted/display-safe source、reason 和 confirmation state。
 
@@ -354,6 +366,8 @@ NFR35b-12: CommandResult.summary 必须使用 command-specific stable summary te
 
 NFR35b-13: Human-readable output 可以更丰富，但不得成为自动化依赖的唯一承载位置；automation 需要的值必须进入 structured JSON 或 file contract，human output 也必须遵守 credential、cache path、temporary extraction path、home directory 和 local absolute source path 的 redaction/display-safe 策略。
 
+NFR35b-14: Human-readable CLI message 必须通过 message catalog 渲染。默认 locale 为 `zh-CN`，`en-US` 作为 fallback；locale 变化不得改变 `CommandResult` JSON、exit code、issue ordering、path normalization、fixture stable JSON comparison 或 manifest/index 内容。
+
 NFR35c: command-specific data payload 不得使用未记录字段作为自动化依赖；新增、弃用或重命名 payload 字段必须通过 CommandResult.schemaVersion 和 fixture expected outputs 管理。
 
 NFR35d: JSON path fields 必须可跨 macOS/Windows 和不同 checkout root 稳定比较；fixture snapshots 不得依赖 absolute local path、OS-specific separators 或 home directory；data.paths.projectRoot 必须为 "."。
@@ -387,6 +401,8 @@ NFR40b: MVP release gate fixtures 必须包含最小 skill-artifact-loop，覆�
 NFR40c: source-integrity release gate 必须拆为稳定 sub-cases，至少覆盖 bundled-packaging-trusted、bundled-packaging-missing-evidence-blocked、registry-lock-trusted、registry-unverified、git-floating-blocked、local-source-snapshot-unverified、local-source-path-redacted、local-source-installed-state-blocked、artifact-hash-mismatch-blocked 和 source-unreadable-blocked。
 
 NFR40d: Release packaging acceptance 必须作为 release checklist gate 生成 packaging manifest，验证 npm package、local tarball 和 offline bundle 包含 compiled CLI、package.json bin mapping、assets/source/speclite/、installer/runtime schemas、runtime scripts/templates 和安装执行所需 runtime assets；test/fixtures/ 与 root fixtures/ 默认不得进入 package，除非明确标记为 packaged documentation example。Packaging acceptance 不一定是 fixture project case，但必须有 stable artifact、expected assertions 和 CI/release evidence。
+
+NFR40e: Install interaction fixture / CLI smoke 必须覆盖默认中文 human-readable 输出、英文 locale fallback、prompt/summary 分离、`install --yes` no-prompt flow、`install --interactive --yes` 或等价显式交互入口、`NO_COLOR` / non-TTY / CI 无 ANSI 输出，以及 `install --json --yes` 无交互稳定输出。
 
 ## Additional Requirements（补充需求）
 
@@ -477,18 +493,18 @@ NFR40d: Release packaging acceptance 必须作为 release checklist gate 生成 
 
 | NFR Group | Primary Coverage | Owning Contract / Validation Anchor |
 | --- | --- | --- |
-| NFR1、NFR10-NFR11、NFR34 | Epic 1 / Story 1.6 覆盖 install progress、ready summary gate、失败时不展示 ready summary 和安装摘要信息；Epic 6 / Story 6.2 用 fixture gate 验证。 | `01-command-result-json-contract.md`、`08-fixture-contract.md` |
+| NFR1、NFR1a、NFR10-NFR11a、NFR34 | Epic 1 / Story 1.6 与 Story 1.7 覆盖 install progress、prompt/summary 分离、`--yes` no-prompt flow、ready summary gate、失败时不展示 ready summary 和安装摘要信息；Epic 6 / Story 6.2 用 fixture gate 验证。 | `01-command-result-json-contract.md`、`08-fixture-contract.md` |
 | NFR2-NFR3、NFR5-NFR5a、NFR9-NFR9a、NFR33 | Epic 3 / Story 3.1 与 Story 3.6 覆盖 lightweight status、local deterministic validate、checked categories 和 status/validate 分工；Epic 6 / Story 6.4 覆盖 performance evidence。 | `01-command-result-json-contract.md`、`07-validation-issue-taxonomy.md`、`08-fixture-contract.md` |
 | NFR4-NFR8、NFR14-NFR17b、NFR25a-NFR25c、NFR32f-NFR32g | Epic 4 / Story 4.1-4.6 覆盖 ownership/hash、update conflict、operation lock、safe write、repair planning 和 protected files；Epic 6 / Story 6.2-6.3 用 drift/update fixtures 验证。 | `03-install-plan-contract.md`、`04-manifest-index-contract.md`、`08-fixture-contract.md` |
 | NFR12-NFR13e、NFR22 | Epic 5 / Story 5.1-5.5 覆盖 source selection、source integrity evidence、trust status、redaction、Git pinning 和 validate no-network boundary。 | `02-source-descriptor-contract.md`、`03-install-plan-contract.md`、`07-validation-issue-taxonomy.md` |
 | NFR18-NFR21、NFR35d、NFR40a | Epic 1 / Story 1.1 覆盖 runtime/platform guard；Epic 3 / Story 3.6 和 Epic 6 / Story 6.4 覆盖 project-relative POSIX path、Node 22/24、macOS/Windows portability、case/symlink/path escape 和 executable intent。 | `01-command-result-json-contract.md`、`04-manifest-index-contract.md`、`08-fixture-contract.md` |
 | NFR23-NFR29、NFR24a、NFR28b | Epic 2 / Story 2.1-2.3 覆盖 discovery metadata、IDE target mapping 和 phase coverage；Epic 3 / Story 3.2-3.4 覆盖 manifest/help/menu/IDE mirror/artifact root validation；Epic 6 / Story 6.3 验证 drift。 | `04-manifest-index-contract.md`、`05-ide-adapter-registry-contract.md` |
-| NFR30-NFR32e、NFR35-NFR35j | Epic 3 / Story 3.5-3.6 覆盖 `CommandResult`、`ValidationIssue`、exit code、issue ordering、summary、nextActions、stable details 和 JSON determinism。 | `01-command-result-json-contract.md`、`07-validation-issue-taxonomy.md` |
-| NFR36-NFR40 | Architecture component boundaries 与 Epic 6 release confidence 覆盖 source/module/adapter/manifest/validation 独立边界、schema evolution、统一 resolver 和 fixture release gate。 | `04-manifest-index-contract.md`、`06-resolve-command-contract.md`、`08-fixture-contract.md` |
+| NFR30-NFR32e、NFR35-NFR35j、NFR35b-14 | Epic 3 / Story 3.5-3.6 覆盖 `CommandResult`、`ValidationIssue`、exit code、issue ordering、summary、nextActions、stable details、JSON determinism 和 message catalog 与 JSON 契约分离。 | `01-command-result-json-contract.md`、`07-validation-issue-taxonomy.md` |
+| NFR36-NFR40e | Architecture component boundaries、Epic 1 / Story 1.7 与 Epic 6 release confidence 覆盖 source/module/adapter/manifest/validation 独立边界、schema evolution、统一 resolver、install interaction fixture 和 release gate。 | `04-manifest-index-contract.md`、`06-resolve-command-contract.md`、`08-fixture-contract.md` |
 
 ## UX Design Requirements（UX 设计需求）
 
-已纳入独立 UX Design 文档：`_bmad-output/planning-artifacts/ux-design-specification.md`。
+已纳入独立 UX Design 文档：`_bmad-output/planning-artifacts/ux-design-specification.md`。安装 CLI 交互修订补充见：`_bmad-output/planning-artifacts/ux-install-cli-interaction-spec-2026-06-12.md`。
 
 UX 设计确认 SpecLite MVP 不提供传统 Web、mobile 或 desktop GUI；核心体验是 terminal + local filesystem control plane。UX 要求通过 CLI 输出、文件系统空间模型、structured JSON、fixture expected outputs 和文档示例共同实现。
 
@@ -505,8 +521,11 @@ UX 设计确认 SpecLite MVP 不提供传统 Web、mobile 或 desktop GUI；核�
 - UX-DR9: Human-readable output 必须在 compact terminal width、standard width、wide width 下保持关键字段可读；窄终端宽表格必须降级为 key-value block。
 - UX-DR10: `NO_COLOR`、non-TTY 和 CI 环境下 human-readable output 不得包含 ANSI escape，且不依赖 spinner-only progress、颜色、图标或动态覆盖行传达唯一信息。
 - UX-DR11: 文档示例默认使用无颜色、固定顺序、可复制输出，并应与 fixture expected outputs 的结构语言一致。
+- UX-DR12: `speclite install` 首次安装必须使用分阶段 block、独立 prompt 行和明确写入确认说明，避免日志、摘要、确认和用户输入混在同一文本流中。
+- UX-DR13: Human-readable CLI 默认 locale 为 `zh-CN`，通过 message catalog 提供 `en-US` fallback；技术标识保持英文且不本地化。
+- UX-DR14: `install --yes` 是默认值 + 写入授权的 no-prompt flow；需要交互选择时必须进入显式 interactive mode 或显式 flags。
 
-这些 UX-DR 通过现有 stories 承接，不新增 MVP Epic：Story 1.6 承接 ready summary 与 install progress；Story 3.5 承接 shared semantic model 与 renderer profiles；Story 3.6 承接 validate ordering、terminal fallback 和 no-color/non-TTY 可读性；Story 4.3 承接 update plan block；Story 6.1 与 Story 6.4 承接 fixture/snapshot、terminal width、no-color/CI 和 cross-platform evidence。
+这些 UX-DR 通过现有 stories 与 corrective Story 承接，不新增 MVP Epic：Story 1.6 承接 ready summary 与 install progress；Story 1.7 承接 install prompt 分区、默认中文 message catalog 和 `--yes` no-prompt flow；Story 3.5 承接 shared semantic model 与 renderer profiles；Story 3.6 承接 validate ordering、terminal fallback 和 no-color/non-TTY 可读性；Story 4.3 承接 update plan block；Story 6.1 与 Story 6.4 承接 fixture/snapshot、terminal width、no-color/CI 和 cross-platform evidence。
 
 ## FR Coverage Map（FR 覆盖映射）
 

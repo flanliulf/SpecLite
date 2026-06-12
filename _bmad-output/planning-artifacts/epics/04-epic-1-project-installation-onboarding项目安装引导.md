@@ -288,3 +288,55 @@
 **当** 系统渲染 progress、failure 或 ready summary
 **则** 输出不得包含 ANSI escape、spinner-only progress 或依赖颜色/符号才能理解的状态
 **并且** status、step id、target id、path 和 next action 必须有文本等价表达。
+
+## Story 1.7: Install CLI Interaction And Localized Human Output（安装 CLI 交互与本地化人类输出）
+
+作为首次安装 SpecLite 的项目维护者，
+我希望 `speclite install` 的终端输出按阶段清晰区分日志、摘要、提示和确认，
+以便在中文默认输出中安全理解安装范围、写入时机和下一步动作，同时让 `--yes` 与 `--json` 适合自动化和新手 happy path。
+
+**验收标准：**
+
+**前提** 用户执行 `speclite install` 的 human-readable flow
+**当** 系统展示模块选择、配置模式、写入计划确认、写入进度和 Ready Summary
+**则** 每个阶段必须使用稳定 heading block，例如 `Step 1/4 Select modules（选择模块）`
+**并且** summary、safety statement、prompt 和用户输入必须在视觉上分离
+**并且** prompt 必须单独占行，不得把长段 summary 与 `readline.question()` 的输入提示拼接在同一段文本中。
+
+**前提** 用户未显式指定 locale
+**当** CLI 渲染 human-readable install output
+**则** 默认使用 `zh-CN` message catalog
+**并且** 自然语言提示、阶段标题和摘要说明默认中文
+**并且** command name、flag、module id、target id、step id、path、schema id、issue id、reason code 和 JSON field 不得本地化。
+
+**前提** 用户通过 `--locale en-US` 或 `SPECLITE_LOCALE=en-US` 指定英文
+**当** CLI 渲染 human-readable install output
+**则** 使用 `en-US` fallback catalog
+**并且** locale 变化不得改变 `CommandResult` JSON、exit code、issue ordering、path normalization、manifest/index 内容或 fixture stable JSON comparison。
+
+**前提** 用户执行 `speclite install --yes`
+**当** 目标目录、source resolution 和 write plan 均没有 blocking issue
+**则** 命令必须使用默认 modules、quick config 和默认 IDE targets 形成写入计划
+**并且** 不再要求模块选择、配置模式或最终写入确认等普通交互输入
+**并且** human-readable 输出必须说明本次使用了默认值并已由 `--yes` 授权无 conflict planned writes。
+
+**前提** 用户需要自定义模块、配置模式或 IDE targets
+**当** 用户进入自定义安装流程
+**则** 必须通过显式 interactive mode 或显式 flags 进入
+**并且** `--json --yes` 必须保持无交互，不得等待 stdin。
+
+**前提** 系统生成 final pre-write review
+**当** 任何项目文件尚未写入
+**则** review 必须按稳定顺序展示 target、source descriptor、config mode、selected modules、IDE targets、planned writes 和 pending phases
+**并且** 明确说明当前状态为尚未写入项目文件
+**并且** 明确说明确认后会开始写入 `_speclite`、artifact root、IDE mirrors 和 manifest/index。
+
+**前提** install output 运行在 `NO_COLOR`、non-TTY、CI 或窄终端环境
+**当** 系统渲染阶段、prompt、失败结果或 Ready Summary
+**则** 输出不得包含 ANSI escape，不得依赖 spinner-only progress、颜色、图标或动态覆盖行表达唯一语义
+**并且** 窄终端必须降级为 key-value block，不得丢失 target、source、planned writes、issue id、step id、path 或 next action。
+
+**前提** 开发者实现本 Story
+**当** 修改 CLI prompt adapter、install renderer、message catalog 或 `--yes` 行为
+**则** 必须补充 focused CLI smoke / fixture tests，覆盖默认中文输出、英文 locale fallback、prompt/summary 分离、`install --yes` no-prompt flow、`install --json --yes` 无交互稳定输出、`NO_COLOR` / non-TTY / CI 无 ANSI 输出
+**并且** 不得新增未契约化 JSON 字段；若确需新增 public JSON 字段，必须先更新 owning SPEC、schema/parser 和 fixture expected outputs。

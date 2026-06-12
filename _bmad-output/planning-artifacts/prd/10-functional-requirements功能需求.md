@@ -19,6 +19,7 @@
 - FR15: 系统可以将同一 canonical skill 暴露到多个目标 AI IDE；对于被选中模块下的每个 canonical package root，MVP 必须在每个已选择且支持的 IDE target 中生成 self-contained skill entry，并在 skill index / files index 中记录 source reference 与 hash。
 - FR16: 项目维护者可以查看安装完成后的项目结构和安装摘要。
 - FR17: 项目维护者可以查看安装完成后的下一步使用指引。
+- FR17a: 首次安装的 human-readable CLI 输出必须使用分阶段 block 呈现模块选择、配置模式、写入计划确认、写入进度和 Ready Summary；日志、摘要、提示和用户输入必须在视觉上分离，不得把长段 summary 与 prompt 拼接到同一个输入问题中。
 
 ## Methodology Discovery & Execution（方法论发现与执行）
 
@@ -79,6 +80,7 @@
 - FR45: 项目维护者可以在安装过程中配置文档输出语言。
 - FR46: 项目维护者可以在安装过程中配置过程产物输出目录。
 - FR47: 项目维护者可以选择快速配置或详细配置模式。
+- FR47a: `speclite install --yes` 必须表示使用安全默认值并授权无 conflict 的 planned writes；默认情况下不得继续要求模块选择、配置模式或最终写入确认等普通交互输入。需要自定义模块、配置或 IDE targets 时，必须通过显式 interactive mode 或显式 flags 进入。
 - FR48: 项目维护者可以使用项目级配置定义用户称呼、项目名称、交流语言、文档输出语言、产物路径、安装模块和 IDE targets。
 - FR49: 用户可以通过定制化配置覆盖 skill workflow、agent persona、菜单项和输出路径默认值。
 - FR50: 系统可以按 installer base、installer user、team custom、user custom 的优先级解析并合并配置。
@@ -107,8 +109,10 @@
 - FR62: 系统可以展示每个已配置 AI IDE 的 skill 数量和目标目录。
 - FR63: 系统可以在安装完成后展示包含安装路径、manifest version、source descriptor、已安装模块、IDE targets、关键目录和下一步命令的 SpecLite ready summary。
 - FR63a: Ready summary 的 human-readable 输出可以包含解释性文案，但 automation 依赖必须进入 `install --json` 的 `InstallCommandData` 字段，例如 `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps` 和 `pendingSteps`；MVP 不新增未契约化的 `readySummary` JSON blob。
+- FR63b: Human-readable install output 必须支持 CLI message catalog。MVP 默认 locale 为 `zh-CN`，并提供 `en-US` fallback；locale 可以通过 `--locale` 或 `SPECLITE_LOCALE` 显式指定。Message catalog 只翻译自然语言，不翻译 command name、flag、module id、target id、step id、path、schema id、issue id、reason code 或 JSON field。
 - FR64: 系统可以在安装完成后展示用户下一步如何启动 AI agent 和调用帮助 skill。
 - FR65: 系统可以在安装完成后展示安装位置、已安装模块和已配置工具清单。
+- FR65a: 安装写入前的 final review 必须以稳定顺序展示 target、source descriptor、config mode、selected modules、IDE targets、planned writes 和 pending phases，并明确说明当前是否已写入项目文件以及确认后将发生的写入阶段。
 
 ## Maintainer Workflow & Examples（维护者工作流与示例）
 
