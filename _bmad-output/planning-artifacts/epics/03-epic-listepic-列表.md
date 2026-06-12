@@ -55,3 +55,13 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **MVP guard：** FR72-FR78 不进入 MVP sprint backlog、MVP release gate 或 MVP fixture release gate。MVP 只需保证这些未来能力可以复用现有 `CommandResult`、manifest/index、fixture 和 owning SPEC 边界。
 
 **覆盖 FR：** FR72, FR73, FR74, FR75, FR76, FR77, FR78
+
+## Epic 8: CLI Outcome-Oriented Human Output System（CLI Outcome 导向人类输出体系）
+
+项目维护者、工具链维护者和 AI IDE 使用者可以在所有当前 CLI 命令中看到 outcome-oriented、中文默认、结构稳定、下一步明确的 human-readable output，清楚区分只读检查、写入前暂停、计划待授权、conflict、失败、已执行和就绪状态。
+
+**实施范围：** Corrective planning Epic。覆盖 `install`、`update`、`update --repair`、`status`、`validate`、`resolve config` 和 `resolve customization` 的 human-readable 输出体系，不新增 GUI/TUI，不改变 command core behavior，不破坏 `CommandResult` JSON contract。
+
+**MVP guard：** 本 Epic 只重构 presentation semantics、message catalog、Next Actions 和测试/文档示例。任何新增 public JSON 字段必须先更新 owning SPEC、schema/parser 和 fixture expected outputs；否则不得进入实现。
+
+**覆盖 FR / NFR / UX：** FR35a, FR35b, FR41, FR41c, FR52a, FR52b, FR63a, FR71, NFR35b-12, UX CLI human-readable output, UX Next Actions, UX JSON parity
