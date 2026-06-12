@@ -6,6 +6,7 @@ import type {
   ValidateCommandResult,
   ValidationIssue,
 } from "./command-result-schema.js";
+import type { CliLocale } from "../cli/messages.js";
 import type { PhaseCoverage } from "../manifest/manifest-schema.js";
 import { CANONICAL_ISSUE_CATEGORY_ORDER } from "../validation/validation-order.js";
 
@@ -15,6 +16,7 @@ export type HumanOutputOptions = {
   isTty?: boolean;
   ci?: boolean;
   screenReader?: boolean;
+  locale?: CliLocale;
 };
 
 export type ArtifactEvidence = {
@@ -39,9 +41,17 @@ export function renderCommandResultJson(
   return `${JSON.stringify(result, null, 2)}\n`;
 }
 
-export function renderInstallHumanOutput(result: InstallCommandResult): string {
+export function renderInstallHumanOutput(
+  result: InstallCommandResult,
+  options: HumanOutputOptions = {},
+): string {
+  const locale = options.locale ?? "en-US";
   if (isReadySummaryResult(result)) {
-    return renderInstallReadySummary(result);
+    return renderInstallReadySummary(result, locale);
+  }
+
+  if (locale === "zh-CN") {
+    return renderInstallHumanOutputZh(result);
   }
 
   const lines = [result.summary];
@@ -75,6 +85,58 @@ export function renderInstallHumanOutput(result: InstallCommandResult): string {
 
   if (result.nextActions.length > 0) {
     lines.push("Next actions:");
+    for (const action of result.nextActions) {
+      lines.push(`- ${action}`);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+function renderInstallHumanOutputZh(result: InstallCommandResult): string {
+  const lines = [
+    "Step 4/4 Install result（安装结果）",
+    "",
+    "Summary（摘要）",
+    result.status === "success"
+      ? "install 已完成当前阶段，详细状态如下。"
+      : "install 未完成，详细状态和下一步如下。",
+    "",
+    "Source（来源）",
+    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+    "",
+    "External Access（外部访问）",
+    ...formatInstallExternalAccessZh(result.data.sourceDescriptor),
+    "",
+    "Authorization（授权）",
+    result.data.sourceDescriptor.trustStatus === "blocked"
+      ? "source 在写入计划前已被 blocked。"
+      : "command-level write authorization 与 source selection 分离。",
+    "",
+    "State（状态）",
+    `manifestVersion=${result.data.manifestVersion}`,
+    `completedSteps=${formatList(result.data.completedSteps)}`,
+    `pendingSteps=${formatList(result.data.pendingSteps)}`,
+  ];
+
+  if (result.data.ideTargets.length > 0) {
+    lines.push("", "IDE Targets（IDE 目标）");
+    for (const target of result.data.ideTargets) {
+      const pathSuffix = target.targetPath === undefined ? "" : `; targetPath=${target.targetPath}`;
+      const skillCountSuffix = target.skillCount === undefined ? "" : `; skillCount=${target.skillCount}`;
+      lines.push(`- id=${target.id}; status=${target.status}${pathSuffix}${skillCountSuffix}`);
+    }
+  }
+
+  if (result.issues.length > 0) {
+    lines.push("", "Issues（问题）");
+    for (const issue of result.issues) {
+      lines.push(formatIssue(issue));
+    }
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("", "Next Actions（下一步）");
     for (const action of result.nextActions) {
       lines.push(`- ${action}`);
     }
@@ -357,7 +419,11 @@ export function renderArtifactEvidence(artifacts: ArtifactEvidence[]): string {
   return `${lines.join("\n")}\n`;
 }
 
-function renderInstallReadySummary(result: InstallCommandResult): string {
+function renderInstallReadySummary(result: InstallCommandResult, locale: CliLocale): string {
+  if (locale === "zh-CN") {
+    return renderInstallReadySummaryZh(result);
+  }
+
   const lines = [
     "SpecLite ready summary",
     "",
@@ -398,6 +464,106 @@ function renderInstallReadySummary(result: InstallCommandResult): string {
   ];
 
   return `${lines.join("\n")}\n`;
+}
+
+function renderInstallReadySummaryZh(result: InstallCommandResult): string {
+  const presentation = getInstallReadyPresentation(result);
+  const lines = [
+    "Step 4/4 Ready Summary（就绪摘要）",
+    "",
+    "Summary（摘要）",
+    `targetProject=${result.targetProject}`,
+    `projectRoot=${result.data.paths.projectRoot}`,
+    `manifestVersion=${result.data.manifestVersion}`,
+    `selectedModules=${formatList(result.data.installedModules)}`,
+    ...formatInstallReadyModeZh(result, presentation),
+    "本次 --yes 授权仅适用于无 conflict 的 planned writes。",
+    "",
+    "Source（来源）",
+    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+    "",
+    "External Access（外部访问）",
+    ...formatInstallExternalAccessZh(result.data.sourceDescriptor),
+    "",
+    "Authorization（授权）",
+    "已通过 --yes 授权无 conflict 的 planned writes；source 与 install scope 已在写入前完成确认。",
+    "",
+    "Completed Steps（已完成步骤）",
+    ...result.data.completedSteps.map((stepId) => `- ${stepId}`),
+    "",
+    "Installed Modules（已安装模块）",
+    ...result.data.installedModules.map((moduleId) => `- ${moduleId}`),
+    "",
+    "IDE Targets（IDE 目标）",
+    ...result.data.ideTargets.map((target) => {
+      const targetPath = target.targetPath ?? "not-configured";
+      const skillCount = target.skillCount ?? 0;
+      return `- id=${target.id}; status=${target.status}; skillCount=${skillCount}; targetPath=${targetPath}`;
+    }),
+    "",
+    "Key Paths（关键路径）",
+    `projectRoot=${result.data.paths.projectRoot}`,
+    `specliteRoot=${result.data.paths.specliteRoot ?? "_speclite"}`,
+    "ideMirrors=.claude/skills,.agents/skills",
+    `artifactRoot=${result.data.paths.artifactRoot ?? "_speclite-output"}`,
+    `manifestPath=${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
+    "",
+    "Next Actions（下一步）",
+    ...result.nextActions.map((action) => `- ${action}`),
+  ];
+
+  return `${lines.join("\n")}\n`;
+}
+
+const INSTALL_READY_PRESENTATION_KEY = "__specliteInstallReadyPresentation";
+
+type InstallReadyPresentation = {
+  installFlow?: "default-no-prompt" | "explicit-interactive";
+  configMode?: "quick" | "detailed";
+};
+
+function getInstallReadyPresentation(result: InstallCommandResult): InstallReadyPresentation | undefined {
+  return (result as InstallCommandResult & {
+    [INSTALL_READY_PRESENTATION_KEY]?: InstallReadyPresentation;
+  })[INSTALL_READY_PRESENTATION_KEY];
+}
+
+function formatInstallReadyModeZh(
+  result: InstallCommandResult,
+  presentation: InstallReadyPresentation | undefined,
+): string[] {
+  if (presentation?.installFlow === "default-no-prompt" || isDefaultInstallReadySummary(result, presentation)) {
+    return ["install --yes 已使用默认 modules、quick config 和默认 IDE targets 完成无交互安装。"];
+  }
+
+  return [
+    "install --yes --interactive 已按显式交互选择完成安装。",
+    `configMode=${presentation?.configMode ?? extractConfigMode(result.summary) ?? "unknown"}`,
+    `ideTargets=${formatList(result.data.ideTargets.map((target) => target.id))}`,
+  ];
+}
+
+function isDefaultInstallReadySummary(
+  result: InstallCommandResult,
+  presentation: InstallReadyPresentation | undefined,
+): boolean {
+  if (presentation !== undefined) return false;
+
+  return (
+    arraysEqual(result.data.installedModules, ["core", "sdlc"]) &&
+    arraysEqual(result.data.ideTargets.map((target) => target.id), ["claude", "agents"]) &&
+    extractConfigMode(result.summary) === "quick"
+  );
+}
+
+function extractConfigMode(summary: string): "quick" | "detailed" | undefined {
+  if (summary.includes("Config mode: detailed.")) return "detailed";
+  if (summary.includes("Config mode: quick.")) return "quick";
+  return undefined;
+}
+
+function arraysEqual(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function isReadySummaryResult(result: InstallCommandResult): boolean {
@@ -543,6 +709,16 @@ function formatInstallExternalAccess(
       `confirmationState=${confirmationState}`,
     ].join("; "),
   ];
+}
+
+function formatInstallExternalAccessZh(
+  sourceDescriptor: InstallCommandResult["data"]["sourceDescriptor"],
+): string[] {
+  if (sourceDescriptor.sourceType === "bundled") {
+    return ["未请求 external source access。"];
+  }
+
+  return formatInstallExternalAccess(sourceDescriptor);
 }
 
 function getInstallExternalAccessReason(sourceType: string): string {

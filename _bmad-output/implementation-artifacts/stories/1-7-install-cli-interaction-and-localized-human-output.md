@@ -1,6 +1,6 @@
 # Story 1.7: Install CLI Interaction And Localized Human Output（安装 CLI 交互与本地化人类输出）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective Story: created after real first-install terminal output exposed CLI interaction and locale gaps. -->
 
@@ -67,39 +67,39 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 建立 CLI message catalog 与 locale resolution（AC: 2, 3）
-  - [ ] 新增 `zh-CN` default catalog 和 `en-US` fallback catalog。
-  - [ ] 支持 `--locale` 和 `SPECLITE_LOCALE`，解析顺序为 explicit flag -> env -> `zh-CN`。
-  - [ ] 保持技术标识不本地化，包括 command、flag、module id、target id、step id、path、schema id、issue id、reason code 和 JSON field。
+- [x] Task 1: 建立 CLI message catalog 与 locale resolution（AC: 2, 3）
+  - [x] 新增 `zh-CN` default catalog 和 `en-US` fallback catalog。
+  - [x] 支持 `--locale` 和 `SPECLITE_LOCALE`，解析顺序为 explicit flag -> env -> `zh-CN`。
+  - [x] 保持技术标识不本地化，包括 command、flag、module id、target id、step id、path、schema id、issue id、reason code 和 JSON field。
 
-- [ ] Task 2: 重构 install prompt adapter，分离 summary 与 prompt（AC: 1, 6, 7）
-  - [ ] 不再把 long summary 拼进同一个 `readline.question()` question。
-  - [ ] 每个 prompt 单独占行，前置空行，并只包含当前需要用户输入的问题。
-  - [ ] 将模块选择、配置模式、final pre-write review 渲染为稳定 block。
+- [x] Task 2: 重构 install prompt adapter，分离 summary 与 prompt（AC: 1, 6, 7）
+  - [x] 不再把 long summary 拼进同一个 `readline.question()` question。
+  - [x] 每个 prompt 单独占行，前置空行，并只包含当前需要用户输入的问题。
+  - [x] 将模块选择、配置模式、final pre-write review 渲染为稳定 block。
 
-- [ ] Task 3: 修正 `--yes` 语义（AC: 4, 5）
-  - [ ] `install --yes` 使用默认 modules、quick config 和默认 IDE targets，不要求普通交互输入。
-  - [ ] `install --json --yes` 不等待 stdin。
-  - [ ] 自定义选择必须进入显式 interactive mode 或显式 flags。
+- [x] Task 3: 修正 `--yes` 语义（AC: 4, 5）
+  - [x] `install --yes` 使用默认 modules、quick config 和默认 IDE targets，不要求普通交互输入。
+  - [x] `install --json --yes` 不等待 stdin。
+  - [x] 自定义选择必须进入显式 interactive mode 或显式 flags。
 
-- [ ] Task 4: 更新 install human-readable renderer（AC: 1, 6, 7）
-  - [ ] 输出稳定 stage heading、key-value summary、safety statement 和 next actions。
-  - [ ] Final pre-write review 按 target、source descriptor、config mode、selected modules、IDE targets、planned writes、pending phases 排序。
-  - [ ] Ready Summary 继续复用 Story 1.6 的 Evidence profile，不新增 JSON blob。
+- [x] Task 4: 更新 install human-readable renderer（AC: 1, 6, 7）
+  - [x] 输出稳定 stage heading、key-value summary、safety statement 和 next actions。
+  - [x] Final pre-write review 按 target、source descriptor、config mode、selected modules、IDE targets、planned writes、pending phases 排序。
+  - [x] Ready Summary 继续复用 Story 1.6 的 Evidence profile，不新增 JSON blob。
 
-- [ ] Task 5: 补充 tests / fixtures（AC: 1-8）
-  - [ ] 更新或新增 `test/cli-smoke.test.ts` 覆盖默认中文输出和英文 fallback。
-  - [ ] 覆盖 prompt/summary 分离，断言 prompt 不包含 long pre-write summary。
-  - [ ] 覆盖 `install --yes` no-prompt flow 与 `install --json --yes` 无交互。
-  - [ ] 覆盖 `NO_COLOR`、non-TTY、CI 无 ANSI 输出。
-  - [ ] 如 human-readable fixture snapshot 存在，更新 expected output；如没有，新增 focused normalized output assertion。
+- [x] Task 5: 补充 tests / fixtures（AC: 1-8）
+  - [x] 更新或新增 `test/cli-smoke.test.ts` 覆盖默认中文输出和英文 fallback。
+  - [x] 覆盖 prompt/summary 分离，断言 prompt 不包含 long pre-write summary。
+  - [x] 覆盖 `install --yes` no-prompt flow 与 `install --json --yes` 无交互。
+  - [x] 覆盖 `NO_COLOR`、non-TTY、CI 无 ANSI 输出。
+  - [x] 如 human-readable fixture snapshot 存在，更新 expected output；如没有，新增 focused normalized output assertion。
 
-- [ ] Task 6: 本地验证与范围控制（AC: 1-8）
-  - [ ] 运行 focused Vitest tests。
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm test` 或说明无法全量运行的原因。
-  - [ ] 运行 `git diff --check`。
-  - [ ] 确认未新增 public JSON 字段、未改变 `CommandResult` schema、未改 manifest/index 契约。
+- [x] Task 6: 本地验证与范围控制（AC: 1-8）
+  - [x] 运行 focused Vitest tests。
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm test` 或说明无法全量运行的原因。
+  - [x] 运行 `git diff --check`。
+  - [x] 确认未新增 public JSON 字段、未改变 `CommandResult` schema、未改 manifest/index 契约。
 
 ## Dev Notes（开发备注）
 
@@ -166,21 +166,40 @@ git diff --check
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-12 | 0.1 | 新增 corrective Story，覆盖安装 CLI 交互、本地化 human output 和 `--yes` no-prompt 语义。 | Sally / John |
+| 2026-06-12 | 0.2 | 实现 locale/prompt adapter、`--yes` no-prompt 语义、install human-readable block 输出与 focused tests。 | Dev Agent |
 
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
 
-待开发阶段填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待开发阶段填写。
+- `npm test -- test/cli-smoke.test.ts`：通过，10 tests passed。
+- `npm test -- test/install-progress-ready-summary.test.ts`：通过，10 tests passed。
+- `npm test -- test/install-module-selection.test.ts`：通过，10 tests passed。
+- `npm test -- test/cli-smoke.test.ts test/install-progress-ready-summary.test.ts`：通过，20 tests passed。
+- `npm run build`：通过，ESM 与 DTS build success。
+- `git diff --check`：通过，无 whitespace error。
+- `npm test`：未全量通过；唯一失败为 `test/fixture-release-gates.test.ts` 中 `speclite-npm-publisher` asset package hash 与 fixture expected hash 不一致。当前工作树没有对应 `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/` 改动，未在本 Story 范围内更新 fixture。
 
 ### Completion Notes（完成说明）
 
-待开发阶段填写。
+- 新增 CLI locale resolution，支持 explicit `--locale`、`SPECLITE_LOCALE`、默认 `zh-CN`，并保留 `en-US` fallback。
+- `speclite install --yes` 改为默认 no-prompt happy path，使用默认 modules、quick config、默认 IDE targets；`--json --yes` 不注册 prompt adapter，不等待 stdin。
+- 新增 explicit `--interactive` 进入自定义 human prompts；prompt summary 通过 `stdout` 分块输出，`readline.question()` 只接收单行当前问题。
+- install human-readable output 支持中文默认 Ready Summary / result block，英文 fallback 不改变 `CommandResult` JSON、exit code 或 schema。
+- final pre-write review 改为稳定 key-value block，按 target、source descriptor、config mode、selected modules、IDE targets、planned writes、pending phases 展示，并声明写入边界。
+- 未新增 public JSON 字段，未修改 `CommandResult` schema、manifest/index schema 或 source/install plan contract。
 
 ### File List（文件清单）
 
-待开发阶段填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/1-7-install-cli-interaction-and-localized-human-output.md`
+- `src/cli/messages.ts`
+- `src/bin/speclite.ts`
+- `src/commands/install.ts`
+- `src/diagnostics/output.ts`
+- `test/cli-smoke.test.ts`
+- `test/install-module-selection.test.ts`

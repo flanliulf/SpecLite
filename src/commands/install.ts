@@ -781,6 +781,10 @@ export async function runInstallCommand(input: {
       sourceDescriptor,
     },
   });
+  annotateInstallReadyPresentation(result, {
+    installFlow: configSelection === undefined ? "default-no-prompt" : "explicit-interactive",
+    configMode: configPlan.mode,
+  });
 
   return { result, exitCode: 0, installPlan };
 }
@@ -1094,8 +1098,31 @@ async function continueInstallWithSourceDescriptor(input: {
       sourceDescriptor,
     },
   });
+  annotateInstallReadyPresentation(result, {
+    installFlow: configSelection === undefined ? "default-no-prompt" : "explicit-interactive",
+    configMode: configPlan.mode,
+  });
 
   return { result, exitCode: 0, installPlan };
+}
+
+const INSTALL_READY_PRESENTATION_KEY = "__specliteInstallReadyPresentation";
+
+type InstallReadyPresentation = {
+  installFlow: "default-no-prompt" | "explicit-interactive";
+  configMode: "quick" | "detailed";
+};
+
+function annotateInstallReadyPresentation(
+  result: ReturnType<typeof createInstallSuccessResult>,
+  presentation: InstallReadyPresentation,
+): void {
+  Object.defineProperty(result, INSTALL_READY_PRESENTATION_KEY, {
+    value: presentation,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
 }
 
 function createSourceSelectionInput(
@@ -1187,19 +1214,40 @@ function createFinalPrewriteInstallScopeSummary(input: {
   const targetIds = input.targetAdapters.map((adapter) => adapter.targetId).join(", ");
 
   return [
-    "Final pre-write install scope summary.",
+    "Step 3/4 Final pre-write review",
+    "",
+    "Review state",
+    "projectFilesWritten=false",
+    "writeStartsAfterConfirmation=true",
+    "",
+    "Target",
     input.targetSummary,
-    `Source descriptor: ${input.sourceDescriptor.sourceType} ${input.sourceDescriptor.resolvedRoot ?? "unknown"}; trust=${input.sourceDescriptor.trustStatus}.`,
-    `Config mode: ${input.configPlan.mode}.`,
-    `Selected modules: ${selectedModuleDetails}.`,
-    `Canonical package roots: ${formatModulePackageRootCounts(input.selectedModules)}.`,
-    `Capability scope: ${capabilityScope}.`,
-    `IDE targets: ${targetIds}.`,
-    `Planned config writes: ${plannedConfigWrites}.`,
-    "Planned write phases: config initialization, runtime structure creation, artifact directory creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary.",
-    "Pending: no runtime structure, artifact directories, IDE mirrors, manifest/index files, ReadyCheck or ready summary have been written yet.",
-    "No project files were changed.",
-  ].join(" ");
+    "",
+    "Source descriptor",
+    `sourceType=${input.sourceDescriptor.sourceType}`,
+    `resolvedRoot=${input.sourceDescriptor.resolvedRoot ?? "unknown"}`,
+    `trustStatus=${input.sourceDescriptor.trustStatus}`,
+    "",
+    "Config mode",
+    `mode=${input.configPlan.mode}`,
+    "",
+    "Selected modules",
+    selectedModuleDetails,
+    `canonicalPackageRoots=${formatModulePackageRootCounts(input.selectedModules)}`,
+    `capabilityScope=${capabilityScope}`,
+    "",
+    "IDE targets",
+    targetIds,
+    "",
+    "Planned writes",
+    plannedConfigWrites,
+    "",
+    "Pending phases",
+    "config-initialization, runtime-structure, artifact-directory, ide-mirror-creation, manifest-generation, ready-check, ready-summary",
+    "",
+    "Write boundary",
+    "confirmationWillWrite=_speclite,_speclite-output,IDE mirrors,manifest/index",
+  ].join("\n");
 }
 
 function formatModulePackageRootCounts(modules: OfficialModule[]): string {

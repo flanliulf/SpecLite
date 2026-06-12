@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import type { ConfigInputValues, ProjectConfigField } from "../config/config-schema.js";
+import { resolveCliLocale, type CliLocale } from "../cli/messages.js";
 import {
   renderCommandResultJson,
   renderInstallHumanOutput,
@@ -136,6 +137,8 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .argument("[target-directory]", "Project directory to inspect before installing SpecLite.")
     .option("--json", "Emit machine-readable CommandResult JSON.")
     .option("--yes", "Authorize command-level writes after preflight gates pass.")
+    .option("--interactive", "Use explicit human prompts for custom module, config and IDE target choices.")
+    .option("--locale <locale>", "Render human-readable install output and prompts with locale: zh-CN or en-US.")
     .option("--source <type>", "Select source type: bundled, npm, private-registry, local-tarball, offline-bundle, git or local.")
     .option("--source-value <value>", "Provide the source value for custom source types.")
     .option("--channel <channel>", "Record the requested source channel before resolution.")
@@ -143,11 +146,15 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .action(async (targetDirectory: string | undefined, commandOptions: {
       json?: boolean;
       yes?: boolean;
+      interactive?: boolean;
+      locale?: string;
       source?: string;
       sourceValue?: string;
       channel?: string;
       version?: string;
     }) => {
+      const locale = resolveCliLocale({ flag: commandOptions.locale, env: process.env });
+      const shouldPrompt = commandOptions.json !== true && commandOptions.interactive === true;
       const installInput = {
         options: {
           json: commandOptions.json ?? false,
@@ -158,20 +165,20 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
           ...(commandOptions.version === undefined ? {} : { requestedVersion: commandOptions.version }),
         },
         ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
-        ...(commandOptions.json === true
-          ? {}
-          : {
+        ...(shouldPrompt
+          ? {
               selectModuleIds: async (selectionInput: ModuleSelectionPromptInput) =>
                 parseModuleSelectionAnswer(
-                  await io.prompt(createModuleSelectionQuestion(selectionInput)),
+                  await promptWithBlock(io, createModuleSelectionQuestion(selectionInput, locale)),
                 ),
               configureProject: async (configInput: ConfigInitializationPromptInput) =>
-                collectConfigInitializationSelection(io, configInput),
+                collectConfigInitializationSelection(io, configInput, locale),
               confirmSourceAccess: async (confirmationInput: SourceAccessConfirmationInput) =>
-                confirmSourceAccess(io, confirmationInput),
+                confirmSourceAccess(io, confirmationInput, locale),
               confirmPrewriteInstallScope: async (confirmationInput: PrewriteInstallScopeConfirmationInput) =>
-                confirmPrewriteInstallScope(io, confirmationInput),
-            }),
+                confirmPrewriteInstallScope(io, confirmationInput, locale),
+            }
+          : {}),
         ...(targetDirectory === undefined ? {} : { targetDirectory }),
       };
       const outcome = await runInstallCommand(installInput);
@@ -179,7 +186,7 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
       if (commandOptions.json) {
         io.stdout(renderCommandResultJson(outcome.result));
       } else {
-        io.stdout(renderInstallHumanOutput(outcome.result));
+        io.stdout(renderInstallHumanOutput(outcome.result, { locale }));
       }
 
       io.setExitCode(outcome.exitCode);
@@ -243,20 +250,42 @@ function isCommanderInformationalExit(error: unknown): boolean {
   );
 }
 
-function createModuleSelectionQuestion(input: ModuleSelectionPromptInput): string {
+type PromptBlock = {
+  body: string;
+  prompt: string;
+};
+
+function createModuleSelectionQuestion(input: ModuleSelectionPromptInput, locale: CliLocale): PromptBlock {
   const moduleLines = input.modules.map((module) => {
     const scope = module.capabilitySummary.join(", ") || module.description;
     return `- ${module.code}: ${module.name} ${module.version}; scope: ${scope}`;
   });
 
-  return [
-    "Select SpecLite official modules before any project files are written.",
-    "Available modules:",
-    ...moduleLines,
-    `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
-    `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
-    "Enter one or more module ids separated by comma or whitespace. Press Enter to use defaults: ",
-  ].join("\n");
+  if (locale === "en-US") {
+    return {
+      body: [
+        "Step 1/4 Select modules",
+        "Select SpecLite official modules before any project files are written.",
+        "Available modules:",
+        ...moduleLines,
+        `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
+        `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
+      ].join("\n"),
+      prompt: "Enter one or more module ids separated by comma or whitespace. Press Enter to use defaults: ",
+    };
+  }
+
+  return {
+    body: [
+      "Step 1/4 Select modules（选择模块）",
+      "在写入任何项目文件前选择 SpecLite official modules。",
+      "Available modules:",
+      ...moduleLines,
+      `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
+      `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
+    ].join("\n"),
+    prompt: "输入一个或多个 module id，可用逗号或空格分隔。直接按 Enter 使用默认值: ",
+  };
 }
 
 function parseModuleSelectionAnswer(answer: string): string[] {
@@ -277,8 +306,11 @@ function parseConfigInitializationAnswer(answer: string): ConfigInitializationSe
 async function collectConfigInitializationSelection(
   io: CliIo,
   input: ConfigInitializationPromptInput,
+  locale: CliLocale,
 ): Promise<ConfigInitializationSelection> {
-  const modeSelection = parseConfigInitializationAnswer(await io.prompt(input.prompt));
+  const modeSelection = parseConfigInitializationAnswer(
+    await promptWithBlock(io, createConfigModePrompt(input, locale)),
+  );
   if (modeSelection.mode !== "detailed") {
     return modeSelection;
   }
@@ -291,7 +323,7 @@ async function collectConfigInitializationSelection(
     "document_output_language",
     "output_folder",
   ] satisfies ProjectConfigField[]) {
-    await collectConfigValue(io, values, field);
+    await collectConfigValue(io, values, field, locale);
   }
 
   const selectedModuleIds = await collectIdSelection({
@@ -313,7 +345,7 @@ async function collectConfigInitializationSelection(
       "devops_artifacts",
       "project_knowledge",
     ] satisfies ProjectConfigField[]) {
-      await collectConfigValue(io, values, field);
+      await collectConfigValue(io, values, field, locale);
     }
   }
 
@@ -340,29 +372,94 @@ async function collectConfigInitializationSelection(
 async function confirmPrewriteInstallScope(
   io: CliIo,
   input: PrewriteInstallScopeConfirmationInput,
+  locale: CliLocale,
 ): Promise<void> {
-  await io.prompt(`${input.prompt}\nReview final install scope before files are written. Press Enter to confirm and continue: `);
+  await promptWithBlock(io, createPrewriteConfirmationPrompt(input, locale));
 }
 
 async function confirmSourceAccess(
   io: CliIo,
   input: SourceAccessConfirmationInput,
+  locale: CliLocale,
 ): Promise<void> {
-  await io.prompt(`${input.prompt}\nPress Enter to confirm this source access intent and continue: `);
+  await promptWithBlock(io, {
+    body: input.prompt,
+    prompt:
+      locale === "en-US"
+        ? "Press Enter to confirm this source access intent and continue: "
+        : "按 Enter 确认本次 source access intent 并继续: ",
+  });
 }
 
 async function collectConfigValue(
   io: CliIo,
   values: ConfigInputValues,
   field: ProjectConfigField,
+  locale: CliLocale,
 ): Promise<void> {
-  const answer = await io.prompt(
-    `Detailed config ${field}. Press Enter to keep the deterministic default from module metadata: `,
-  );
+  const answer = await promptWithBlock(io, {
+    body: locale === "en-US" ? `Detailed config ${field}` : `Detailed config ${field}（详细配置）`,
+    prompt:
+      locale === "en-US"
+        ? `Detailed config ${field}. Press Enter to keep the deterministic default from module metadata: `
+        : `Detailed config ${field}: 按 Enter 保留 module metadata 中的确定性默认值: `,
+  });
   const trimmed = answer.trim();
   if (trimmed.length > 0) {
     values[field] = trimmed;
   }
+}
+
+async function promptWithBlock(io: CliIo, block: PromptBlock): Promise<string> {
+  io.stdout(`${block.body}\n\n`);
+  return io.prompt(`${block.prompt}\n`);
+}
+
+function createConfigModePrompt(
+  input: ConfigInitializationPromptInput,
+  locale: CliLocale,
+): PromptBlock {
+  if (locale === "en-US") {
+    return {
+      body: [
+        "Step 2/4 Configure project",
+        "Choose project configuration mode before any files are written.",
+        "Quick config uses deterministic defaults for project/user/language/artifact paths.",
+        "Detailed config lets you adjust project fields, selected modules and IDE targets.",
+        "This stage does not write _speclite, _speclite-output, IDE mirror files, manifest/index files or operation locks.",
+      ].join("\n"),
+      prompt: "Enter quick or detailed. Press Enter to use quick: ",
+    };
+  }
+
+  return {
+    body: [
+      "Step 2/4 Configure project（配置项目）",
+      "在写入任何文件前选择项目配置模式。",
+      "quick 使用 project/user/language/artifact paths 的确定性默认值。",
+      "detailed 可调整 project fields、selected modules 和 IDE targets。",
+      "此阶段不会写入 _speclite、_speclite-output、IDE mirror files、manifest/index files 或 operation locks。",
+      `Default mode: ${input.defaultMode}.`,
+    ].join("\n"),
+    prompt: "输入 quick 或 detailed。直接按 Enter 使用 quick: ",
+  };
+}
+
+function createPrewriteConfirmationPrompt(
+  input: PrewriteInstallScopeConfirmationInput,
+  locale: CliLocale,
+): PromptBlock {
+  if (locale === "en-US") {
+    return {
+      body: input.prompt,
+      prompt: "Review final install scope before files are written. Press Enter to confirm and continue: ",
+    };
+  }
+
+  return {
+    body: ["Step 3/4 Final pre-write review（最终写入前复核）", input.prompt].join("\n"),
+    prompt: "请在项目文件写入前复核最终安装范围。按 Enter 确认并继续: ",
+  };
 }
 
 async function collectIdSelection(input: {

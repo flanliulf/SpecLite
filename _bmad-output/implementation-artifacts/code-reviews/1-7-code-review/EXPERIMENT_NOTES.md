@@ -1,0 +1,47 @@
+# EXPERIMENT_NOTES（实时笔记）
+
+## 2026-06-12
+
+- 当前 Story：`1-7-install-cli-interaction-and-localized-human-output`。
+- 当前 Story 文件：`_bmad-output/implementation-artifacts/stories/1-7-install-cli-interaction-and-localized-human-output.md`。
+- 当前 CR 输出目录：`_bmad-output/implementation-artifacts/code-reviews/1-7-code-review/`。
+- 初始状态：Story 与 `sprint-status.yaml` 均为 `ready-for-dev`；启动前 `git status --short` 为空。
+- 本轮必须严格串行：dev-story -> reviewer -> evaluator -> fixer -> 必要时重复 reviewer/evaluator/fixer -> rules-extractor -> todo-tracker -> finalizer -> git-commit-convention。
+- 每个顶层步骤使用新的 sub agent，模型为 `gpt-5.5`。
+- 默认决策策略：优先采用保守推荐决策并记录，避免因非必要确认挂起；但不扩大 Story 范围，不擅自修改无关文件。
+- 第一个全新 sub agent 已完成 `/bmad-dev-story story 1-7`。
+- 开发结果：Story 文件 `Status: review`；`sprint-status.yaml` 中 `1-7-install-cli-interaction-and-localized-human-output: review`。
+- 开发修改文件：`_bmad-output/implementation-artifacts/sprint-status.yaml`、Story 文件、`src/cli/messages.ts`、`src/bin/speclite.ts`、`src/commands/install.ts`、`src/diagnostics/output.ts`、`test/cli-smoke.test.ts`、`test/install-module-selection.test.ts`。
+- 开发验证：focused CLI tests、install progress summary tests、install module selection tests、build、`git diff --check` 通过。
+- 当前注意事项：全量 `npm test` 有一个 `test/fixture-release-gates.test.ts` 的 `speclite-npm-publisher` asset hash drift，开发 sub agent 认为不属于 Story 1-7 范围，未修复。
+- 第二个全新 sub agent 已完成 `/bmenhance-cr-01-reviewer 1-7`。
+- Review summary：`_bmad-output/implementation-artifacts/code-reviews/1-7-code-review/1-7-code-review-summary-20260612-round-1.md`。
+- Reviewer 结论：不通过；`patch=1`、`defer=1`。
+- 阻塞 patch：中文 Ready Summary 在 `install --yes --interactive` 且用户自定义选择后仍声明默认值和无交互安装。
+- Defer：`speclite-npm-publisher` fixture hash mismatch，不属于 Story 1-7 当前 diff 范围。
+- 已将 review summary 的 `Model Used` 字段从误写的 `GPT-5 Codex (gpt-5-codex)` 校正为实际执行模型 `GPT-5.5 (gpt-5.5)`。
+- 第三个全新 sub agent 已完成 `/bmenhance-cr-02-evaluator 1-7`。
+- Evaluation 文件：`_bmad-output/implementation-artifacts/code-reviews/1-7-code-review/1-7-code-review-evaluation-20260612-round-1.md`。
+- Evaluator 结论：不通过，需要修复；无需要人工裁决的 blocker。
+- 需要修复：中文 Ready Summary 必须区分默认 no-prompt flow 与 explicit interactive custom flow。
+- 不进入 fixer 范围：`speclite-npm-publisher` fixture hash drift，仅作为范围外 defer / TODO 候选。
+- 第四个全新 sub agent 已完成 `/bmenhance-cr-03-fixer 1-7`。
+- Fixer 结果：P1 已修复；默认 no-prompt 中文输出保留默认/无交互声明，explicit interactive 中文输出改为展示实际 `selectedModules`、`configMode` 和 `ideTargets`。
+- Fixer 修改：`src/commands/install.ts`、`src/diagnostics/output.ts`、`test/cli-smoke.test.ts`，并在 evaluation round 1 追加修复执行记录。
+- Fixer 验证：focused tests、build、`git diff --check` 通过；全量 `npm test` 仍只有范围外 fixture hash drift。
+- 主线程清理：`npm run build` 产生的 `dist/packaging-manifest.json` `packageHash` 副作用已恢复。
+- 第五个全新 sub agent 已完成第 2 轮 `/bmenhance-cr-01-reviewer 1-7`。
+- Round 2 review summary：`_bmad-output/implementation-artifacts/code-reviews/1-7-code-review/1-7-code-review-summary-20260612-round-2.md`。
+- Reviewer round 2 结论：通过；`patch=0`、`decision_needed=0`、`defer=1`。
+- 已修复项复核：Round 1 P1 已完整修复，未引入新的 Story 1-7 blocker。
+- 第六个全新 sub agent 已完成第 2 轮 `/bmenhance-cr-02-evaluator 1-7`。
+- Evaluation round 2：`_bmad-output/implementation-artifacts/code-reviews/1-7-code-review/1-7-code-review-evaluation-20260612-round-2.md`。
+- Evaluator round 2 结论：Approved / 通过；无需 fixer；无 blocker。
+- CR 循环停止条件已满足：reviewer round 2 通过，evaluator round 2 通过。
+- Defer 处理策略：`speclite-npm-publisher` fixture hash mismatch 不进入 Story 1-7 fixer，交由 05 TODO Tracker 按默认推荐追踪。
+- 收尾 sub agent 已完成 04 -> 05 -> 06。
+- 04 结论：analysis-only，无全局规则落地，无 `cr-rules-summary.md` 更新。
+- 05 结论：新增 `TODO-009: 对齐 speclite-npm-publisher fixture hash` 到 `_bmad-output/implementation-artifacts/cr-rules/cr-todo-backlog.md`。
+- 06 结论：Story 1-7 已标记 `done`；`sprint-status.yaml` 中 Story 1-7 已 `done`；Epic 1 已按完成状态同步为 `done`；`bmm-workflow-status.yaml` 不存在，已跳过。
+- 主线程复核：`Status: done`、`1-7...: done`、`epic-1: done`、`TODO-009` 均存在。
+- 下一步：启动最后一个全新 sub agent 使用 `git-commit-convention` 进行本地中文提交，不推送。

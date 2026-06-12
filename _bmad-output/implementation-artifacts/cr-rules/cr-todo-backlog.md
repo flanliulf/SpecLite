@@ -7,7 +7,7 @@
 
 | 状态 | 数量 |
 |------|------|
-| 🔴 open | 0 |
+| 🔴 open | 1 |
 | 🟡 in-progress | 0 |
 | ✅ resolved | 8 |
 
@@ -17,7 +17,16 @@
 
 <!-- 按优先级排序：P1 > P2 > P3 -->
 
-- 当前无 open CR TODO。若后续 code review 产生 deferred improvement，按模板新增到本节。
+### TODO-009: 对齐 `speclite-npm-publisher` fixture hash
+
+- **来源**: 1-7 CR round 1-2 (2026-06-12 ~ 2026-06-12)
+- **优先级**: P2
+- **类别**: test-gap
+- **描述**: Story 1-7 round 1/2 reviewer 与 evaluator 均确认全量 `npm test` 的唯一失败为 `test/fixture-release-gates.test.ts` 中 `speclite-npm-publisher` deterministic fixture hash mismatch，差异集中在 `_speclite/_config/skill-index.json`、`.agents/.claude` 下 `speclite-npm-publisher` 的 `CHANGELOG.md`、`references/speclite-npm-publisher-workflow.md`、`SKILL.md` hash 以及 `canonicalPackageHash`。该问题真实存在并影响全量测试红绿状态，但当前 Story 1-7 diff 未修改 `speclite-npm-publisher` asset package、fresh-install expected fixture 或 release gate test，因此不应混入 Story 1-7 fixer 范围。
+- **涉及文件**: `test/fixture-release-gates.test.ts`, `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher`, `test/fixtures/fresh-install-empty-project`, `_speclite/_config/skill-index.json`
+- **建议时机**: 下次触及 `speclite-npm-publisher` canonical skill package、fresh-install expected fixture 或 release gate fixture hash 维护时处理；需由具备 release gate / fixture 维护上下文的专项步骤同步 canonical package hash 与 expected fixture。
+- **状态**: open
+- **解决记录**:
 
 ---
 

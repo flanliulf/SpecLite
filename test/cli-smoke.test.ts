@@ -4,6 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import { createSpecliteProgram, isDirectCliEntrypoint, runCli } from "../src/bin/speclite.js";
+import { resolveCliLocale } from "../src/cli/messages.js";
 import { InstallCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
 
 describe("CLI smoke", () => {
@@ -129,7 +130,169 @@ describe("CLI smoke", () => {
     }
   });
 
-  it("prompts for human module selection with module identity and scope", async () => {
+  it("uses install --yes as a no-prompt happy path with default Chinese human output", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-yes-defaults-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            throw new Error(`unexpected prompt: ${question}`);
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([0]);
+      expect(prompts).toEqual([]);
+      expect(output).toContain("Step 4/4 Ready Summary（就绪摘要）");
+      expect(output).toContain("install --yes 已使用默认 modules、quick config 和默认 IDE targets 完成无交互安装。");
+      expect(output).toContain("selectedModules=core, sdlc");
+      expect(output).not.toMatch(/\u001b\[[0-9;]*m/);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps Chinese ready summary accurate for custom explicit interactive installs", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-zh-interactive-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            return "core";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([0]);
+      expect(prompts).toHaveLength(3);
+      expect(output).toContain("Step 4/4 Ready Summary（就绪摘要）");
+      expect(output).toContain("install --yes --interactive 已按显式交互选择完成安装。");
+      expect(output).toContain("selectedModules=core");
+      expect(output).toContain("configMode=quick");
+      expect(output).toContain("ideTargets=claude, agents");
+      expect(output).not.toContain("默认 modules");
+      expect(output).not.toContain("无交互安装");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps install --json --yes non-interactive and on the stable JSON contract", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-json-yes-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            throw new Error(`unexpected prompt: ${question}`);
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--json", "--yes"], { from: "node" });
+
+      const parsed = InstallCommandResultSchema.parse(JSON.parse(stdout.join("")));
+      expect(exitCodes).toEqual([0]);
+      expect(prompts).toEqual([]);
+      expect(parsed.data.installedModules).toEqual(["core", "sdlc"]);
+      expect(Object.keys(parsed.data).sort()).toEqual([
+        "completedSteps",
+        "ideTargets",
+        "installedModules",
+        "manifestVersion",
+        "paths",
+        "pendingSteps",
+        "sourceDescriptor",
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders explicit English install locale without changing the install contract", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-locale-en-"));
+    const stdout: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--locale", "en-US"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([0]);
+      expect(output).toContain("SpecLite ready summary");
+      expect(output).toContain("Selected modules: core, sdlc");
+      expect(output).not.toContain("就绪摘要");
+      expect(output).not.toMatch(/\u001b\[[0-9;]*m/);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("resolves install locale from explicit flag, env and zh-CN default", () => {
+    expect(resolveCliLocale({ flag: "en-US", env: { SPECLITE_LOCALE: "zh-CN" } })).toBe("en-US");
+    expect(resolveCliLocale({ env: { SPECLITE_LOCALE: "en-US" } })).toBe("en-US");
+    expect(resolveCliLocale({ flag: "fr-FR", env: { SPECLITE_LOCALE: "fr-FR" } })).toBe("zh-CN");
+    expect(resolveCliLocale()).toBe("zh-CN");
+  });
+
+  it("prompts for human module selection with module identity and scope in explicit interactive mode", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-module-prompt-"));
     const stdout: string[] = [];
     const prompts: string[] = [];
@@ -153,19 +316,21 @@ describe("CLI smoke", () => {
         },
       });
 
-      await program.parseAsync(["node", "speclite", "install", "--yes"], { from: "node" });
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
 
       expect(exitCodes).toEqual([0]);
       expect(prompts).toHaveLength(3);
-      expect(prompts[0]).toContain("core: SpecLite Core Module 0.0.0; scope:");
-      expect(prompts[0]).toContain("sdlc: SpecLite SDLC 0.0.0; scope:");
+      expect(stdout.join("")).toContain("Step 1/4 Select modules");
+      expect(stdout.join("")).toContain("core: SpecLite Core Module 0.0.0; scope:");
+      expect(stdout.join("")).toContain("sdlc: SpecLite SDLC 0.0.0; scope:");
       expect(prompts[0]).toContain("Enter one or more module ids");
-      expect(prompts[1]).toContain("Choose project configuration mode");
+      expect(stdout.join("")).toContain("Step 2/4 Configure project");
       expect(prompts[1]).toContain("quick or detailed");
-      expect(prompts[1]).toContain("does not write _speclite");
-      expect(prompts[2]).toContain("Final pre-write install scope summary");
-      expect(prompts[2]).toContain("Canonical package roots: core=13, total=13.");
-      expect(prompts[2]).toContain("No project files were changed.");
+      expect(stdout.join("")).toContain("Step 3/4 Final pre-write review");
+      expect(stdout.join("")).toContain("canonicalPackageRoots=core=13, total=13");
+      expect(stdout.join("")).toContain("projectFilesWritten=false");
+      expect(prompts[2]).not.toContain("canonicalPackageRoots");
+      expect(prompts[2]).not.toContain("projectFilesWritten=false");
       expect(stdout.join("")).toContain("Selected modules: core");
       expect(stdout.join("")).not.toContain("sdlc (");
     } finally {
@@ -210,7 +375,7 @@ describe("CLI smoke", () => {
         },
       });
 
-      await program.parseAsync(["node", "speclite", "install", "--yes"], { from: "node" });
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
 
       const output = stdout.join("");
       expect(exitCodes).toEqual([0]);
@@ -218,7 +383,7 @@ describe("CLI smoke", () => {
       expect(prompts.some((prompt) => prompt.includes("Detailed config planning_artifacts"))).toBe(true);
       expect(prompts.some((prompt) => prompt.includes("Selected modules"))).toBe(true);
       expect(prompts.some((prompt) => prompt.includes("IDE targets"))).toBe(true);
-      expect(prompts.some((prompt) => prompt.includes("Final pre-write install scope summary"))).toBe(true);
+      expect(output).toContain("Step 3/4 Final pre-write review");
       expect(prompts.some((prompt) => prompt.includes("Review final install scope before files are written"))).toBe(true);
       expect(output).toContain("Config mode: detailed");
       expect(output).toContain("Project name: CLI Demo");
