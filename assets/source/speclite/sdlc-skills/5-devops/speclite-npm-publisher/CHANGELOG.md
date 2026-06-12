@@ -4,6 +4,21 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.1.0] - 2026-06-12
+
+### Added
+
+- SpecLite 迭代发布 SOP：覆盖 bugfix / feature 后的 SemVer 选择、`npm version --no-git-tag-version`、release gate、中文 Conventional Commit、GitHub push、clean publish 和发布后延迟验证。
+- 本机半自动 publish 模式：明确 agent 负责审计、门禁、命令准备和输出解析，用户负责终端中的 npm login、security key / browser confirmation 和 OTP 输入。
+- Commit and Push Gate：吸收精确 `git add -- <files>`、敏感文件扫描、`origin/main` 推送和 publish 前 clean `HEAD` 要求。
+- Claude/Codex Hook Guardrails：定义 `npm publish`、`npm version`、`git push`、`git add -A`、`git add .` 和 `npm dist-tag add` 的阻断条件与提示策略。
+- Propagation retry schedule：发布成功后按 30 秒、2 分钟、5 分钟、10 分钟节奏重试 read-side 验证，避免重复发布同一版本。
+
+### Changed
+
+- 入口能力描述扩展为支持常规 bugfix / feature release SOP，而不只是单次 npm publish 执行。
+- 发布报告模板新增 SemVer 依据、commit hashes、push 目标、clean publish context、hook guardrail 结果和人工认证边界。
+
 ## [1.0.0] - 2026-06-05
 
 ### 初始版本
