@@ -50,7 +50,7 @@ describe("CLI smoke", () => {
 
     expect(helpStdout.join("")).toContain("Usage: speclite [options] [command]");
     expect(helpStderr.join("")).not.toContain("CommanderError");
-    expect(versionStdout.join("").trim()).toBe("0.1.1");
+    expect(versionStdout.join("").trim()).toBe("0.2.0");
     expect(versionStderr.join("")).toBe("");
   });
 
