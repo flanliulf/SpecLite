@@ -37,6 +37,23 @@ stderr 必须以 JSON Lines 输出 diagnostics：
 - 每行使用 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 中的 `ValidationIssue` shape
 - machine mode 中不得混入 human-readable prose
 
+默认 output mode 是 machine mode。`speclite resolve config` 和 `speclite resolve customization` 未传 `--human` 时，stdout / stderr / exit code contract 必须保持本节定义的 pure JSON stdout 与 JSON Lines diagnostics，不得输出 `CommandResult` envelope，也不得混入 prose。
+
+`--human` 是显式 opt-in support mode：
+
+- stdout 输出 human-readable support frame，包含 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`。
+- stderr 不输出 JSON Lines diagnostics；diagnostics 以 human-readable `Issues` 展示。
+- `--human` 不改变 merge order、optional/required layer semantics、fallback project search、default missing-key behavior 或 default machine mode。
+- `--human` Summary 中的 `source path` 必须来自 selected dotted key 的 effective source metadata；未请求具体 key 或多 key 来源不唯一时不得把候选首层伪装为单一真实来源。
+- `--human` 输出不得包含 absolute project root、home directory、package-manager cache path、raw exception、stack trace、environment variable、timestamp、random id 或 credential。
+
+Human support outcomes：
+
+- `resolved`：解析成功且无 warning / fallback support note；输出 requested key、resolved layer、source path 和 value summary。
+- `resolved-with-warnings`：解析成功但 optional layer warning 或 customization fallback project search 需要维护者注意；`Issues` 或 `Evidence` 必须指出 fallback 来源和可检查的 project-relative path。
+- `unresolved`：仅适用于显式 `--human` 下的 missing key 或 empty result；默认 machine mode missing key 仍是 stdout `{}`、exit code 0、stderr empty。
+- `invalid-input`：缺少必需参数、required layer failure 或不支持的 resolver 参数导致无法产生安全结果；`Next Actions` 必须给出合法命令形态或必需修复动作。
+
 Exit code rules：
 
 - parsing 成功且不存在 error/critical diagnostics：exit code 0
@@ -62,6 +79,8 @@ Default missing-key behavior：
 - stdout 为 `{}`
 - exit code 为 0
 - stderr 为空
+
+显式 `--human` 下，missing key 或 empty result 可以渲染为 `Outcome: unresolved`，但不得改变上述 default missing-key behavior。
 
 允许重复使用 `--key`。Output object 必须使用原始 dotted key string 作为 field name。Existing keys 会被包含；missing keys 会被省略。
 

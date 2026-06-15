@@ -612,7 +612,7 @@ describe("validate command manifest/index schema validation", () => {
 
       await program.parseAsync(["node", "speclite", "validate", "--json"], { from: "node" });
       const parsed = ValidateCommandResultSchema.parse(JSON.parse(stdout.join("")));
-      const human = renderValidateHumanOutput(parsed);
+      const human = renderValidateHumanOutput(parsed, { locale: "en-US" });
 
       expect(exitCodes).toEqual([0]);
       expect(parsed.command).toBe("validate");
@@ -650,11 +650,11 @@ describe("validate command manifest/index schema validation", () => {
       expect(outcome.exitCode).toBe(1);
       expect(parsed.data.checkedCategories).toEqual(["manifest-schema"]);
       expect(parsed.data.checkedCategories).not.toContain("source-integrity");
-      expect(human).toContain("Output profile: Evidence (key-value)");
+      expect(human).toContain("输出形式：证据 (key-value)");
       expect(human).toContain(
-        "Not checked categories: environment, source-integrity, ide-mirror, runtime-path, menu-target, legacy-namespace, artifact-path, file-integrity, operation-lock, update",
+        "未检查 categories：environment, source-integrity, ide-mirror, runtime-path, menu-target, legacy-namespace, artifact-path, file-integrity, operation-lock, update",
       );
-      expect(human).toContain("Issue fields: severity, category, issueId, affectedPath, impact, suggestedNextStep");
+      expect(human).toContain("问题字段：severity, category, issueId, affectedPath, impact, suggestedNextStep");
       expect(human).not.toMatch(/\u001b\[[0-9;]*m/);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
@@ -863,7 +863,7 @@ describe("validate command manifest/index schema validation", () => {
     }).result;
 
     for (const columns of [72, 100, 132]) {
-      const human = renderValidateHumanOutput(result, { columns, noColor: true, isTty: false });
+      const human = renderValidateHumanOutput(result, { locale: "en-US", columns, noColor: true, isTty: false });
 
       expect(human).toContain("Status: failure");
       expect(human).toContain("severity");
@@ -883,6 +883,107 @@ describe("validate command manifest/index schema validation", () => {
     expect(json).not.toContain("Output profile");
     expect(json).not.toContain("key-value");
     expect(json).not.toMatch(/\u001b\[[0-9;]*m/);
+  });
+
+  it("sorts validate human checked targets by canonical target order", () => {
+    const result = createValidateCommandResult({
+      targetProject: "renderer-target-order-fixture",
+      issues: [],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["manifest-schema"],
+        checkedTargets: ["agents", "claude"],
+        validatedPaths: ["_speclite/_config/manifest.yaml"],
+      },
+    }).result;
+
+    expect(renderValidateHumanOutput(result, { noColor: true, isTty: false })).toContain(
+      "已检查 targets：claude, agents",
+    );
+  });
+
+  it("maps validate issue state to human outcomes and concrete next actions using canonical issue order", () => {
+    const clean = createValidateCommandResult({
+      targetProject: "validate-clean-fixture",
+      issues: [],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["file-integrity", "manifest-schema"],
+        checkedTargets: ["agents", "claude"],
+        validatedPaths: ["_speclite/config.toml", "_speclite/_config/manifest.yaml"],
+      },
+    }).result;
+    const warningOnly = createValidateCommandResult({
+      targetProject: "validate-warning-fixture",
+      issues: [
+        issue({
+          severity: "warning",
+          category: "file-integrity",
+          issueId: "file-integrity.stale-temp-file",
+          affectedPath: "_speclite/.speclite-tmp-leftover",
+          suggestedNextStep: "Remove the stale safe-write temp file, then rerun speclite validate.",
+        }),
+      ],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["file-integrity", "manifest-schema"],
+        checkedTargets: ["agents", "claude"],
+        validatedPaths: ["_speclite/.speclite-tmp-leftover"],
+      },
+    }).result;
+    const blocking = createValidateCommandResult({
+      targetProject: "validate-blocking-fixture",
+      issues: [
+        issue({
+          severity: "error",
+          category: "file-integrity",
+          issueId: "file-integrity.hash-mismatch",
+          affectedPath: ".claude/skills/speclite-help/SKILL.md",
+          suggestedNextStep: "Inspect installer-owned drift, then rerun speclite validate.",
+        }),
+        issue({
+          severity: "critical",
+          category: "manifest-schema",
+          issueId: "manifest-schema.schema-corruption",
+          affectedPath: "_speclite/_config/manifest.yaml",
+          suggestedNextStep: "Restore _speclite/_config/manifest.yaml from the install source or rerun speclite install.",
+        }),
+      ],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["file-integrity", "manifest-schema"],
+        checkedTargets: ["claude", "agents"],
+        validatedPaths: ["_speclite/_config/manifest.yaml", ".claude/skills/speclite-help/SKILL.md"],
+      },
+    }).result;
+    const cannotValidate: ValidateCommandResult = {
+      ...clean,
+      status: "failure",
+      summary: "SpecLite validate could not complete checked categories.",
+      issues: [],
+      nextActions: ["Rerun speclite validate after restoring installed-state metadata."],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: [],
+        checkedTargets: [],
+        validatedPaths: [],
+      },
+    };
+
+    expect(renderValidateHumanOutput(clean, { locale: "en-US" })).toContain("Outcome: valid");
+    expect(renderValidateHumanOutput(warningOnly, { locale: "en-US" })).toContain("Outcome: valid-with-warnings");
+    const blockingHuman = renderValidateHumanOutput(blocking, { locale: "en-US" });
+    expect(blockingHuman).toContain("Outcome: invalid");
+    expect(blockingHuman.indexOf("issueId=manifest-schema.schema-corruption")).toBeLessThan(
+      blockingHuman.indexOf("issueId=file-integrity.hash-mismatch"),
+    );
+    expect(blockingHuman).toContain("Restore _speclite/_config/manifest.yaml from the install source or rerun speclite install.");
+    expect(blockingHuman).not.toContain("Check configuration");
+    expect(renderValidateHumanOutput(cannotValidate, { locale: "en-US" })).toContain("Outcome: cannot-validate");
+
+    const json = renderCommandResultJson(blocking);
+    expect(json).not.toContain("valid-with-warnings");
+    expect(json).not.toContain("cannot-validate");
   });
 
   it("reports IDE mirror missing entry, hash mismatch and duplicate entry without leaking hashes or absolute paths", async () => {
@@ -1307,6 +1408,7 @@ function issue(input: {
   issueId: string;
   affectedPath?: string;
   component?: string;
+  suggestedNextStep?: string;
 }) {
   return {
     issueId: input.issueId,
@@ -1318,7 +1420,7 @@ function issue(input: {
       reason: "fixture",
     },
     impact: "Fixture issue impact.",
-    suggestedNextStep: "Inspect the fixture issue.",
+    suggestedNextStep: input.suggestedNextStep ?? "Inspect the fixture issue.",
   };
 }
 

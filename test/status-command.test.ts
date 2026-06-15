@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { createSpecliteProgram } from "../src/bin/speclite.js";
 import { runStatusCommand } from "../src/commands/status.js";
 import {
+  StatusCommandDataSchema,
   StatusCommandResultSchema,
   type StatusCommandResult,
 } from "../src/diagnostics/command-result-schema.js";
@@ -270,7 +271,7 @@ describe("status command lightweight installed-state summary", () => {
         skillTargets: ["claude"],
       });
       const outcome = await runStatusCommand({ runtime: { cwd: tempRoot } });
-      const output = renderStatusHumanOutput(outcome.result);
+      const output = renderStatusHumanOutput(outcome.result, { locale: "en-US" });
 
       expect(output).toContain("SpecLite status");
       expect(output).toContain("High-level health: configured");
@@ -284,6 +285,64 @@ describe("status command lightweight installed-state summary", () => {
       expect(output).not.toMatch(/\u001b\[[0-9;]*m/);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("maps status high-level health to human-only outcomes without changing public JSON fields", async () => {
+    const notConfiguredRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-human-empty-"));
+    const partialRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-human-partial-"));
+    const failedRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-human-failed-"));
+    const configuredRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-human-configured-"));
+
+    try {
+      await writeInstalledFixture(partialRoot, {
+        targetIds: ["claude", "agents"],
+        skillTargets: ["claude"],
+      });
+      await writeInstalledFixture(failedRoot, {
+        targetIds: ["claude"],
+        skillTargets: ["claude"],
+      });
+      await writeInstalledManifest(failedRoot, {
+        specliteRoot: "/tmp/speclite-private-root",
+        artifactRoot: "_speclite-output",
+        manifestPath: "_speclite/_config/manifest.yaml",
+      });
+      await writeInstalledFixture(configuredRoot, {
+        targetIds: ["claude"],
+        skillTargets: ["claude"],
+      });
+
+      const cases = [
+        { root: notConfiguredRoot, health: "not-configured", outcome: "not-installed" },
+        { root: configuredRoot, health: "configured", outcome: "installed" },
+        { root: partialRoot, health: "partial", outcome: "partial" },
+        { root: failedRoot, health: "failed", outcome: "failed" },
+      ] as const;
+
+      for (const testCase of cases) {
+        const outcome = await runStatusCommand({ runtime: { cwd: testCase.root } });
+        const parsed = StatusCommandResultSchema.parse(outcome.result);
+        const human = renderStatusHumanOutput(parsed, { locale: "en-US", noColor: true, isTty: false });
+        const json = renderCommandResultJson(parsed);
+
+        expect(parsed.status).toBe("success");
+        expect(parsed.data.highLevelHealth).toBe(testCase.health);
+        expect(StatusCommandDataSchema.shape.highLevelHealth.safeParse("stale").success).toBe(false);
+        expect(StatusCommandDataSchema.shape.highLevelHealth.safeParse("unknown").success).toBe(false);
+        expect(human).toContain(`Outcome: ${testCase.outcome}`);
+        expect(human).toContain(`highLevelHealth=${testCase.health}`);
+        expect(human).toContain("Command status: success means status read completed; it does not certify installation health.");
+        expect(Object.keys(parsed.data)).not.toContain("humanOutcome");
+        expect(json).not.toContain('"highLevelHealth": "stale"');
+        expect(json).not.toContain('"highLevelHealth": "unknown"');
+        expect(Object.keys(parsed.data)).not.toContain("issues");
+      }
+    } finally {
+      await rm(notConfiguredRoot, { recursive: true, force: true });
+      await rm(partialRoot, { recursive: true, force: true });
+      await rm(failedRoot, { recursive: true, force: true });
+      await rm(configuredRoot, { recursive: true, force: true });
     }
   });
 

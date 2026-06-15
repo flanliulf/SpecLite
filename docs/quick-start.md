@@ -179,13 +179,14 @@ speclite install /path/to/project --json --yes
 安装后先看 summary：
 
 ```sh
-speclite status /path/to/project
+PROJECT_ROOT=/path/to/project
+NO_COLOR=1 speclite status "$PROJECT_ROOT"
 ```
 
 再执行完整校验：
 
 ```sh
-speclite validate /path/to/project
+NO_COLOR=1 speclite validate "$PROJECT_ROOT"
 ```
 
 如果你需要给 CI、脚本或其它工具消费结果，使用 JSON 输出：
@@ -196,6 +197,39 @@ speclite validate /path/to/project --json
 ```
 
 `validate` 会检查 installed-state、runtime path、manifest/index、IDE mirrors、source integrity、file ownership 等安装健康度相关问题。
+
+human-readable output 的稳定骨架是 `Outcome`、`Summary`、`Issues` 和 `Next Actions`。下面是无颜色、可复制、不会暴露本机路径的示例形态：
+
+```text
+SpecLite status
+Outcome: not-installed
+
+Summary
+Completed: yes
+Writes: no project files changed
+User action: required
+
+Issues:
+No issues
+
+Next Actions / Next actions:
+- Run `speclite install <target>` to configure this project.
+```
+
+docs 示例只用于解释人类输出；自动化和 contract 判断请使用 `--json`。
+
+## Command Flow Map（命令流程图）
+
+| Flow | Writes project files | Stable command example |
+|---|---:|---|
+| read-only | No | `NO_COLOR=1 speclite status "$PROJECT_ROOT"` |
+| read-only validation | No | `NO_COLOR=1 speclite validate "$PROJECT_ROOT"` |
+| prewrite preview | No | `NO_COLOR=1 speclite install "$PROJECT_ROOT"` |
+| prewrite update preview | No | `NO_COLOR=1 speclite update "$PROJECT_ROOT"` |
+| write-authorized install | Yes | `NO_COLOR=1 speclite install "$PROJECT_ROOT" --yes` |
+| write-authorized update | Yes, only non-conflicting planned writes | `NO_COLOR=1 speclite update "$PROJECT_ROOT" --yes` |
+| repair-authorized | Yes, only explicit repair writes | `NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes` |
+| validation flow for scripts | No | `speclite validate "$PROJECT_ROOT" --json` |
 
 ## Success Criteria（成功标准）
 
@@ -246,6 +280,7 @@ SpecLite skills 按能力分层：
 | Validate 报 IDE mirror 问题 | 检查 `.claude/skills` 和 `.agents/skills` 是否被手工改动，再运行 `speclite update /path/to/project --repair` 查看 repair plan。 |
 | Update 发现 conflict | 先阅读 update plan 和 conflicts，不要手工覆盖 human-owned 或 workflow-owned 文件。 |
 | 自定义来源被阻塞 | 优先使用 bundled source；如果必须使用自定义来源，确认 source type、source value 和 resolver 支持状态。 |
+| CI 或窄终端输出难读 | 使用 `NO_COLOR=1` 和 `--json`；human output 在窄宽度下降级为 key-value evidence，不应依赖颜色、spinner 或动态覆盖行。 |
 
 ## Advanced Usage（高级用法）
 

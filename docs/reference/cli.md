@@ -95,6 +95,7 @@ speclite status [options] [target-directory]
 | Option | Description |
 |---|---|
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
+| `--locale <locale>` | 设置 human-readable status output 的 locale：`zh-CN` 或 `en-US`。 |
 
 ## Validate Options（校验参数）
 
@@ -105,6 +106,7 @@ speclite validate [options] [target-directory]
 | Option | Description |
 |---|---|
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
+| `--locale <locale>` | 设置 human-readable validate output 的 locale：`zh-CN` 或 `en-US`。 |
 
 ## Doctor Options（诊断参数）
 
@@ -132,6 +134,7 @@ speclite update [options] [target-directory]
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
 | `--dry-run` | 生成未应用的 update plan，不授权写入。 |
 | `--yes` | 授权 non-conflicting planned update writes。 |
+| `--locale <locale>` | 设置 human-readable update output 的 locale：`zh-CN` 或 `en-US`。 |
 
 ## Sync Options（同步参数）
 
@@ -180,18 +183,21 @@ speclite governance-report [options] [target-directory]
 ```sh
 speclite resolve config --project-root /path/to/project
 speclite resolve config --project-root /path/to/project --key core.project_name
+speclite resolve config --project-root /path/to/project --key core.project_name --human
 ```
 
 | Option | Description |
 |---|---|
 | `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。 |
 | `--key <dottedKey>` | 选择 merged config 中的 dotted key。可重复。 |
+| `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
 
 解析 skill customization：
 
 ```sh
 speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project
 speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --key agent.menu
+speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project --key agent.menu --human
 ```
 
 | Option | Description |
@@ -199,6 +205,9 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 | `--skill <skillDir>` | 包含 `customize.toml` 的 installed skill 目录。 |
 | `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。可省略。 |
 | `--key <dottedKey>` | 选择 merged customization 中的 dotted key。可重复。 |
+| `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+
+默认 resolve output 是 runtime support machine contract：stdout 只包含 resolved JSON object，stderr 只包含 `ValidationIssue` JSON Lines diagnostics。Missing key 默认仍输出 `{}`、exit code 为 `0`、stderr 为空。`--human` 只用于人工排查，会把结果渲染为 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`；其中 `source path` 表示 selected dotted key 的 effective source，`unresolved` 只适用于显式 human mode。
 
 ## Output Modes（输出模式）
 
@@ -206,8 +215,23 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 |---|---|---|
 | Human-readable | 默认 | 面向终端阅读。`install` 默认中文，支持 `--locale en-US`。 |
 | JSON | `--json` | 面向脚本和工具。使用 `CommandResult` contract。 |
+| Resolve support | `resolve ... --human` | 仅适用于 `resolve config/customization`。默认 resolve 不使用 `CommandResult`，stdout 保持 pure JSON。 |
 
 Human-readable output 可以包含分阶段 heading、key-value block、summary 和 next actions。JSON output 不应被 locale 影响。
+
+## Human Output Flows（人类输出流程）
+
+| Flow | Command example | Output contract |
+|---|---|---|
+| read-only | `NO_COLOR=1 speclite status "$PROJECT_ROOT"` | `Outcome`、`Summary`、`Issues`、`Next Actions`；不写项目文件。 |
+| validation | `NO_COLOR=1 speclite validate "$PROJECT_ROOT"` | 按 issue severity 和 category 稳定排序；窄终端使用 key-value evidence。 |
+| prewrite preview | `NO_COLOR=1 speclite install "$PROJECT_ROOT"` | 停在写入前，`Writes` 显示未写项目文件。 |
+| prewrite update preview | `NO_COLOR=1 speclite update "$PROJECT_ROOT"` | 展示 update plan，不授权写入。 |
+| write-authorized | `NO_COLOR=1 speclite install "$PROJECT_ROOT" --yes` | 只在 gates 通过后写入。 |
+| repair-authorized | `NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes` | 只执行显式 repair writes。 |
+| resolve human mode | `NO_COLOR=1 speclite resolve config --project-root "$PROJECT_ROOT" --key core.project_name --human` | 人工排查 support frame；默认 resolve stdout 仍是 pure JSON。 |
+
+CLI human-readable output 的完整 command/outcome/test/docs matrix 见 [`cli-human-output-matrix.md`](cli-human-output-matrix.md)。docs 示例不是 contract source；`--json` contract 以 schema、SPEC 和 focused tests 为准。
 
 ## Exit Codes（退出码）
 
@@ -244,4 +268,10 @@ speclite uninstall /path/to/project --dry-run
 speclite uninstall /path/to/project --yes
 speclite governance-report /path/to/project
 speclite governance-report /path/to/project --json
+NO_COLOR=1 speclite status "$PROJECT_ROOT"
+NO_COLOR=1 speclite validate "$PROJECT_ROOT"
+NO_COLOR=1 speclite update "$PROJECT_ROOT"
+NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair
+NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
+NO_COLOR=1 speclite resolve config --project-root "$PROJECT_ROOT" --key core.project_name --human
 ```

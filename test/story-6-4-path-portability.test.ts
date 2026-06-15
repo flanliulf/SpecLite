@@ -323,7 +323,7 @@ describe("Story 6.4 path-portability fixture", () => {
         ci: true,
       });
 
-      expect(output).toContain(`Output profile: ${profile.outputProfile}`);
+      expect(output).toContain(`输出形式：证据 ${profile.outputProfile.slice("Evidence ".length)}`);
       expect(output).not.toMatch(/\u001b\[[0-9;]*m/);
       for (const required of [
         "affectedPath",
@@ -331,12 +331,12 @@ describe("Story 6.4 path-portability fixture", () => {
         "action=restore-canonical",
         "reason=human-owned",
         "issueId=update.conflicts",
-        "status",
+        "plan 状态",
         "category=update",
         "[error]",
-        "Protected Boundaries",
+        "受保护边界",
         "nextAction=",
-        "Repair Plan / Planned Effects",
+        "repair plan / planned effects（修复影响）",
         "speclite validate",
       ]) {
         expect(output).toContain(required);

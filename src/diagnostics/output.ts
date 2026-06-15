@@ -12,9 +12,15 @@ import type {
   ValidateCommandResult,
   ValidationIssue,
 } from "./command-result-schema.js";
-import type { CliLocale } from "../cli/messages.js";
+import { formatCliMessage, getCliMessage, type CliLocale } from "../cli/messages.js";
 import type { PhaseCoverage } from "../manifest/manifest-schema.js";
-import { CANONICAL_ISSUE_CATEGORY_ORDER } from "../validation/validation-order.js";
+import {
+  CANONICAL_ISSUE_CATEGORY_ORDER,
+  sortCheckedTargets,
+  sortIssueCategories,
+  sortValidatedPaths,
+  sortValidationIssues,
+} from "../validation/validation-order.js";
 
 export type HumanOutputOptions = {
   columns?: number;
@@ -23,6 +29,77 @@ export type HumanOutputOptions = {
   ci?: boolean;
   screenReader?: boolean;
   locale?: CliLocale;
+};
+
+type CoveredHumanCommandResult =
+  | InstallCommandResult
+  | InitCommandResult
+  | ListCommandResult
+  | StatusCommandResult
+  | ValidateCommandResult
+  | DoctorCommandResult
+  | UpdateCommandResult
+  | RepairCommandResult
+  | SyncCommandResult
+  | UninstallCommandResult
+  | GovernanceReportCommandResult;
+
+type PresentationSection = {
+  title: string;
+  lines: string[];
+};
+
+type PresentationWriteState = "auto" | "changed" | "none";
+
+type InstallHumanOutcome =
+  | "prewrite-paused"
+  | "blocked-before-write"
+  | "write-failed"
+  | "ready-check-failed"
+  | "ready";
+
+type UpdateHumanOutcome =
+  | "plan-ready"
+  | "repair-plan-ready"
+  | "no-op"
+  | "blocked-by-conflict"
+  | "applied"
+  | "partial-or-failed";
+
+type StatusHumanOutcome =
+  | "installed"
+  | "not-installed"
+  | "stale"
+  | "partial"
+  | "failed"
+  | "unknown";
+
+type ValidateHumanOutcome =
+  | "valid"
+  | "valid-with-warnings"
+  | "invalid"
+  | "cannot-validate";
+
+type UpdateExecutionState = {
+  completedSteps: string[];
+  failedStep?: string;
+  pendingSteps: string[];
+};
+
+type PresentationFrameInput = {
+  title: string;
+  result: CoveredHumanCommandResult;
+  outcomeLabel: string;
+  locale: CliLocale;
+  writeState?: PresentationWriteState;
+  summaryLines?: string[];
+  scopeLines?: string[];
+  stateLines?: string[];
+  evidenceLines?: string[];
+  issueLines?: string[];
+  emptyStateLines?: string[];
+  nextActions?: string[];
+  extraSections?: PresentationSection[];
 };
 
 export type ArtifactEvidence = {
@@ -35,6 +112,92 @@ export type ArtifactEvidence = {
   defaultOutputPath: string;
   metadataLocation: "frontmatter" | "sidecar" | "directory";
 };
+
+function renderPresentationFrame(input: PresentationFrameInput): string {
+  const lines = [
+    input.title,
+    `${getCliMessage(input.locale, "outcome")}: ${input.outcomeLabel}`,
+    "",
+    getCliMessage(input.locale, "summary"),
+    ...formatOutcomeSummary(input.result, input.locale, input.writeState),
+    ...(input.summaryLines ?? []),
+  ];
+
+  appendSection(lines, getCliMessage(input.locale, "scope"), input.scopeLines);
+  appendSection(lines, getCliMessage(input.locale, "state"), input.stateLines);
+  appendSection(lines, getCliMessage(input.locale, "evidence"), input.evidenceLines);
+
+  const issueLines = input.issueLines ?? input.result.issues.map((issue) => formatIssue(issue, input.locale));
+  appendSection(lines, getCliMessage(input.locale, "issues"), issueLines);
+
+  appendSection(lines, getCliMessage(input.locale, "emptyState"), input.emptyStateLines);
+
+  for (const section of input.extraSections ?? []) {
+    appendSection(lines, section.title, section.lines);
+  }
+
+  appendSection(
+    lines,
+    getCliMessage(input.locale, "nextActions"),
+    formatPathLines(input.nextActions ?? input.result.nextActions, getCliMessage(input.locale, "actionNotRequired")),
+  );
+
+  return `${lines.join("\n")}\n`;
+}
+
+function appendSection(lines: string[], title: string, sectionLines: string[] | undefined): void {
+  if (sectionLines === undefined) return;
+  lines.push("", title, ...sectionLines);
+}
+
+function formatOutcomeSummary(
+  result: CoveredHumanCommandResult,
+  locale: CliLocale,
+  writeState: PresentationWriteState = "auto",
+): string[] {
+  const completed = result.status === "failure" ? getCliMessage(locale, "completedNo") : getCliMessage(locale, "completedYes");
+  const writes = commandChangedProjectFiles(result, writeState)
+    ? getCliMessage(locale, "writeChanged")
+    : getCliMessage(locale, "writeNone");
+  const action = result.nextActions.length > 0
+    ? getCliMessage(locale, "actionRequired")
+    : getCliMessage(locale, "actionNotRequired");
+  const installReadiness =
+    result.command === "install"
+      ? [
+        locale === "zh-CN"
+          ? `${getCliMessage(locale, "readyState")}：${getInstallHumanOutcome(result) === "ready" ? getCliMessage(locale, "readyYes") : getCliMessage(locale, "readyNo")}`
+          : `${getCliMessage(locale, "readyState")}: ${getInstallHumanOutcome(result) === "ready" ? getCliMessage(locale, "readyYes") : getCliMessage(locale, "readyNo")}`,
+      ]
+      : [];
+
+  if (locale === "zh-CN") {
+    return [
+      `${getCliMessage(locale, "completed")}：${completed}`,
+      `${getCliMessage(locale, "writes")}：${writes}`,
+      `${getCliMessage(locale, "userAction")}：${action}`,
+      ...installReadiness,
+    ];
+  }
+
+  return [
+    `${getCliMessage(locale, "completed")}: ${completed}`,
+    `${getCliMessage(locale, "writes")}: ${writes}`,
+    `${getCliMessage(locale, "userAction")}: ${action}`,
+    ...installReadiness,
+  ];
+}
+
+function commandChangedProjectFiles(
+  result: CoveredHumanCommandResult,
+  writeState: PresentationWriteState = "auto",
+): boolean {
+  if (writeState === "changed") return true;
+  if (writeState === "none") return false;
+  if ("changedPaths" in result.data && result.data.changedPaths.length > 0) return true;
+  if ("removedPaths" in result.data && result.data.removedPaths.length > 0) return true;
+  return false;
+}
 
 export function renderCommandResultJson(
   result:
@@ -145,143 +308,97 @@ export function renderInstallHumanOutput(
   result: InstallCommandResult,
   options: HumanOutputOptions = {},
 ): string {
-  const locale = options.locale ?? "en-US";
+  const locale = options.locale ?? "zh-CN";
+  const installOutcome = getInstallHumanOutcome(result);
   if (isReadySummaryResult(result)) {
     return renderInstallReadySummary(result, locale);
   }
 
-  if (locale === "zh-CN") {
-    return renderInstallHumanOutputZh(result);
-  }
-
-  const lines = [result.summary];
-
-  lines.push(
-    "Source",
-    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
-    "External Access",
-    ...formatInstallExternalAccess(result.data.sourceDescriptor),
-    "Authorization",
-    result.data.sourceDescriptor.trustStatus === "blocked"
-      ? "Source is blocked before write planning."
-      : "Command-level write authorization is separate from source selection.",
-  );
-  lines.push(`Manifest version: ${result.data.manifestVersion}`);
-  lines.push(`Completed steps: ${formatList(result.data.completedSteps)}`);
-  lines.push(`Pending steps: ${formatList(result.data.pendingSteps)}`);
-
-  if (result.data.ideTargets.length > 0) {
-    lines.push("IDE target statuses:");
-    for (const target of result.data.ideTargets) {
-      const pathSuffix = target.targetPath === undefined ? "" : ` (${target.targetPath})`;
-      const skillCountSuffix = target.skillCount === undefined ? "" : `, skills=${target.skillCount}`;
-      lines.push(`- ${target.id}: ${target.status}${pathSuffix}${skillCountSuffix}`);
-    }
-  }
-
-  for (const issue of result.issues) {
-    lines.push(formatIssue(issue));
-  }
-
-  if (result.nextActions.length > 0) {
-    lines.push("Next actions:");
-    for (const action of result.nextActions) {
-      lines.push(`- ${action}`);
-    }
-  }
-
-  return `${lines.join("\n")}\n`;
+  return renderPresentationFrame({
+    title: "SpecLite install",
+    result,
+    outcomeLabel: formatInstallHumanOutcome(locale, installOutcome),
+    locale,
+    writeState: getInstallPresentationWriteState(installOutcome),
+    summaryLines: formatInstallSummaryLines(result, locale, installOutcome),
+    scopeLines: [
+      `targetProject=${result.targetProject}`,
+      `projectRoot=${result.data.paths.projectRoot}`,
+    ],
+    stateLines: [
+      `manifestVersion=${result.data.manifestVersion}`,
+      formatLabelValue(locale, "completedSteps", formatListForLocale(result.data.completedSteps, locale)),
+      `completedSteps=${formatList(result.data.completedSteps)}`,
+      formatLabelValue(locale, "pendingSteps", formatListForLocale(result.data.pendingSteps, locale)),
+      `pendingSteps=${formatList(result.data.pendingSteps)}`,
+      ...formatInstallOutcomeStepStateLines(result, installOutcome, locale),
+      formatInstallIdeTargetStatusesHeading(locale),
+      ...formatInstallIdeTargetStatusLines(result.data.ideTargets, locale),
+    ],
+    evidenceLines: [
+      getCliMessage(locale, "source"),
+      `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+      getCliMessage(locale, "externalAccess"),
+      ...(locale === "zh-CN"
+        ? formatInstallExternalAccessZh(result.data.sourceDescriptor)
+        : formatInstallExternalAccess(result.data.sourceDescriptor)),
+      getCliMessage(locale, "authorization"),
+      result.data.sourceDescriptor.trustStatus === "blocked"
+        ? locale === "zh-CN"
+          ? "source 在写入计划前已处于 blocked 状态。"
+          : "Source is blocked before write planning."
+        : locale === "zh-CN"
+          ? "命令级写入授权与 source 选择分离。"
+          : "Command-level write authorization is separate from source selection.",
+      ...formatInstallOutcomeEvidenceLines(result, locale, installOutcome),
+    ],
+    emptyStateLines: getCommonEmptyStateLines(result, locale),
+    nextActions: formatInstallOutcomeNextActions(result, locale, installOutcome),
+  });
 }
 
-function renderInstallHumanOutputZh(result: InstallCommandResult): string {
-  const lines = [
-    "Step 4/4 Install result（安装结果）",
-    "",
-    "Summary（摘要）",
-    result.status === "success"
-      ? "install 已完成当前阶段，详细状态如下。"
-      : "install 未完成，详细状态和下一步如下。",
-    "",
-    "Source（来源）",
-    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
-    "",
-    "External Access（外部访问）",
-    ...formatInstallExternalAccessZh(result.data.sourceDescriptor),
-    "",
-    "Authorization（授权）",
-    result.data.sourceDescriptor.trustStatus === "blocked"
-      ? "source 在写入计划前已被 blocked。"
-      : "command-level write authorization 与 source selection 分离。",
-    "",
-    "State（状态）",
-    `manifestVersion=${result.data.manifestVersion}`,
-    `completedSteps=${formatList(result.data.completedSteps)}`,
-    `pendingSteps=${formatList(result.data.pendingSteps)}`,
-  ];
-
-  if (result.data.ideTargets.length > 0) {
-    lines.push("", "IDE Targets（IDE 目标）");
-    for (const target of result.data.ideTargets) {
-      const pathSuffix = target.targetPath === undefined ? "" : `; targetPath=${target.targetPath}`;
-      const skillCountSuffix = target.skillCount === undefined ? "" : `; skillCount=${target.skillCount}`;
-      lines.push(`- id=${target.id}; status=${target.status}${pathSuffix}${skillCountSuffix}`);
-    }
-  }
-
-  if (result.issues.length > 0) {
-    lines.push("", "Issues（问题）");
-    for (const issue of result.issues) {
-      lines.push(formatIssue(issue));
-    }
-  }
-
-  if (result.nextActions.length > 0) {
-    lines.push("", "Next Actions（下一步）");
-    for (const action of result.nextActions) {
-      lines.push(`- ${action}`);
-    }
-  }
-
-  return `${lines.join("\n")}\n`;
-}
-
-export function renderStatusHumanOutput(result: StatusCommandResult): string {
-  const lines = [
-    "SpecLite status",
-    `High-level health: ${result.data.highLevelHealth}`,
-    `Source: ${formatOptionalSourceDescriptor(result.data.sourceDescriptor)}`,
-    `Manifest: ${result.data.manifestPresent ? "present" : "missing"}${result.data.manifestVersion === undefined ? "" : `, version=${result.data.manifestVersion}`}`,
-    `Installed modules: ${formatList(result.data.installedModules)}`,
-    "IDE targets:",
-  ];
-
-  if (result.data.ideTargets.length === 0) {
-    lines.push("- none");
-  } else {
-    for (const target of result.data.ideTargets) {
-      const skillCount = target.skillCount ?? 0;
-      const targetPath = target.targetPath ?? "not-configured";
-      const reason = target.reason === undefined ? "" : `, reason=${target.reason}`;
-      lines.push(`- ${target.id}: ${target.status}, skills=${skillCount}, path=${targetPath}${reason}`);
-    }
-  }
-
-  lines.push(
-    "Key paths",
-    `- projectRoot: ${result.data.paths.projectRoot}`,
-    `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"}`,
-    `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"}`,
-    `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
-  );
-
-  if (result.nextActions.length > 0) {
-    lines.push("Next actions");
-    for (const action of result.nextActions) {
-      lines.push(`- ${action}`);
-    }
-  }
-
-  return `${lines.join("\n")}\n`;
+export function renderStatusHumanOutput(
+  result: StatusCommandResult,
+  options: HumanOutputOptions = {},
+): string {
+  const locale = options.locale ?? "zh-CN";
+  const statusOutcome = getStatusHumanOutcome(result);
+  return renderPresentationFrame({
+    title: "SpecLite status",
+    result,
+    outcomeLabel: statusOutcome,
+    locale,
+    summaryLines: [
+      getStatusOutcomeSummary(locale, statusOutcome),
+      formatLabelValue(locale, "commandStatus", `${result.status} ${getCliMessage(locale, "commandStatusStatusNote")}`),
+    ],
+    scopeLines: [
+      `targetProject=${result.targetProject}`,
+      `projectRoot=${result.data.paths.projectRoot}`,
+    ],
+    stateLines: [
+      formatLabelValue(locale, "highLevelHealth", result.data.highLevelHealth),
+      `highLevelHealth=${result.data.highLevelHealth}`,
+      formatLabelValue(locale, "source", formatOptionalSourceDescriptor(result.data.sourceDescriptor)),
+      formatLabelValue(
+        locale,
+        "manifest",
+        `${result.data.manifestPresent ? "present" : "missing"}${result.data.manifestVersion === undefined ? "" : `, version=${result.data.manifestVersion}`}`,
+      ),
+      formatLabelValue(locale, "installedModules", formatListForLocale(result.data.installedModules, locale)),
+      `${getCliMessage(locale, "ideTargets")}${locale === "zh-CN" ? "：" : ":"}`,
+      ...formatIdeTargetStateLines(result.data.ideTargets, locale),
+      getCliMessage(locale, "keyPaths"),
+      `- projectRoot: ${result.data.paths.projectRoot}`,
+      `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"}`,
+      `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"}`,
+      `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
+      `manifestPath=${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
+    ],
+    evidenceLines: formatStatusOutcomeEvidenceLines(result, statusOutcome),
+    emptyStateLines: getCommonEmptyStateLines(result, locale),
+    nextActions: formatStatusOutcomeNextActions(result, locale, statusOutcome),
+  });
 }
 
 export function renderValidateHumanOutput(
@@ -289,52 +406,67 @@ export function renderValidateHumanOutput(
   options: HumanOutputOptions = {},
 ): string {
   const columns = options.columns ?? 100;
+  const locale = options.locale ?? "zh-CN";
   const checkedCategorySet = new Set(result.data.checkedCategories);
   const notCheckedCategories = CANONICAL_ISSUE_CATEGORY_ORDER.filter(
     (category) => !checkedCategorySet.has(category),
   );
+  const checkedCategories = sortIssueCategories(result.data.checkedCategories);
+  const checkedTargets = sortCheckedTargets(result.data.checkedTargets);
+  const sortedIssues = sortValidationIssues(result.issues);
+  const validatedPaths = sortValidatedPaths(result.data.validatedPaths);
+  const validateOutcome = getValidateHumanOutcome(result);
   const presentation =
     columns < 80
       ? "key-value"
       : columns < 120
         ? "compact-table"
         : "full-table";
-  const lines = [
-    "SpecLite validate",
-    `Status: ${result.status}`,
-    `Output profile: Evidence (${presentation})`,
-    `Checked categories: ${formatList(result.data.checkedCategories)}`,
-    `Not checked categories: ${formatList(notCheckedCategories)}`,
-    `Checked targets: ${formatList(result.data.checkedTargets)}`,
-    `Validated paths: ${formatList(result.data.validatedPaths)}`,
-    `Issue counts: critical=${result.data.issueCounts.critical}, error=${result.data.issueCounts.error}, warning=${result.data.issueCounts.warning}, info=${result.data.issueCounts.info}`,
-  ];
-
+  const emptyStateLines = getCommonEmptyStateLines(result, locale);
   if (result.issues.length === 0) {
-    lines.push("No issues found for checked categories.");
-    lines.push("No conflicts detected.");
+    emptyStateLines.push(getCliMessage(locale, "validateNoIssuesForCheckedCategories"));
+    emptyStateLines.push(getCliMessage(locale, "validateNoConflicts"));
     if (result.data.checkedCategories.length === 0) {
-      lines.push("No categories checked.");
+      emptyStateLines.push(getCliMessage(locale, "validateNoCategoriesChecked"));
     }
     if (notCheckedCategories.length > 0) {
-      lines.push("Skipped / not checked categories are listed above and must not be interpreted as healthy.");
-    }
-  } else {
-    lines.push("Issues:");
-    lines.push("Issue fields: severity, category, issueId, affectedPath, impact, suggestedNextStep");
-    for (const issue of result.issues) {
-      lines.push(formatIssue(issue));
+      emptyStateLines.push(getCliMessage(locale, "validateSkippedCategoriesCaveat"));
     }
   }
 
-  if (result.nextActions.length > 0) {
-    lines.push("Next actions");
-    for (const action of result.nextActions) {
-      lines.push(`- ${action}`);
-    }
-  }
-
-  return `${lines.join("\n")}\n`;
+  return renderPresentationFrame({
+    title: "SpecLite validate",
+    result,
+    outcomeLabel: validateOutcome,
+    locale,
+    summaryLines: [
+      getValidateOutcomeSummary(locale, validateOutcome),
+      formatLabelValue(locale, "statusLabel", result.status),
+      formatLabelValue(locale, "outputProfile", `${getCliMessage(locale, "evidenceProfile")} (${presentation})`),
+    ],
+    scopeLines: [
+      `targetProject=${result.targetProject}`,
+      formatLabelValue(locale, "checkedCategories", formatListForLocale(checkedCategories, locale)),
+      formatLabelValue(locale, "notCheckedCategories", formatListForLocale(notCheckedCategories, locale)),
+      formatLabelValue(locale, "checkedTargets", formatListForLocale(checkedTargets, locale)),
+      formatLabelValue(locale, "validatedPaths", formatListForLocale(validatedPaths, locale)),
+    ],
+    stateLines: [
+      formatLabelValue(
+        locale,
+        "issueCounts",
+        `critical=${result.data.issueCounts.critical}, error=${result.data.issueCounts.error}, warning=${result.data.issueCounts.warning}, info=${result.data.issueCounts.info}`,
+      ),
+    ],
+    issueLines: sortedIssues.length === 0
+      ? []
+      : [
+        formatLabelValue(locale, "issueFields", "severity, category, issueId, affectedPath, impact, suggestedNextStep"),
+        ...sortedIssues.map((issue) => formatIssue(issue, locale)),
+      ],
+    emptyStateLines,
+    nextActions: formatValidateOutcomeNextActions(result, locale, sortedIssues, validateOutcome),
+  });
 }
 
 export function renderUpdateHumanOutput(
@@ -342,8 +474,10 @@ export function renderUpdateHumanOutput(
   options: HumanOutputOptions = {},
 ): string {
   const columns = options.columns ?? 100;
+  const locale = options.locale ?? "zh-CN";
   const presentation = columns < 80 ? "key-value" : columns < 120 ? "compact-table" : "full-table";
   const isRepair = result.command === "update.repair";
+  const updateOutcome = getUpdateHumanOutcome(result);
   const planActions = isRepair ? result.data.repairPlan.actions : result.data.updatePlan.actions;
   const plannedWrites = planActions.filter((action) =>
     action.action === "create" ||
@@ -351,113 +485,50 @@ export function renderUpdateHumanOutput(
     action.action === "restore-canonical" ||
     action.action === "regenerate"
   );
-  const authorizationState = getUpdateAuthorizationState(result);
-  const lines = [
-    "SpecLite update",
-    `Status: ${result.status}`,
-    `Mode: ${isRepair ? "repair" : "update"}`,
-    `Output profile: Evidence (${presentation})`,
-    "Summary",
-    result.summary,
-    `Plan status: ${authorizationState}`,
-    "",
-    isRepair ? "Repair Plan / Planned Effects" : "Update Plan / Planned Effects",
-  ];
+  const executionState = getUpdateExecutionState(result);
+  const emptyStateLines = getCommonEmptyStateLines(result, locale);
+  if (plannedWrites.length === 0) emptyStateLines.push(getCliMessage(locale, "noPlannedWrites"));
+  if (result.data.conflicts.length === 0) emptyStateLines.push(getCliMessage(locale, "noConflicts"));
 
-  if (planActions.length === 0) {
-    lines.push("- none");
-  } else {
-    for (const action of planActions) {
-      lines.push(formatPlanAction(action));
-    }
-  }
-
-  lines.push(
-    "",
-    "Authorization",
-    `requiresConfirmation=${result.data.requiresConfirmation}`,
-    `writeAuthorized=${result.data.writeAuthorized}`,
-  );
-  if (result.data.writeAuthorized) {
-    lines.push(
-      isRepair
-        ? "Explicit --yes authorization was recorded for non-conflicting planned repair writes."
-        : "Explicit --yes authorization was recorded for non-conflicting planned update writes.",
-    );
-  } else if (plannedWrites.length > 0) {
-    lines.push(
-      isRepair
-        ? "No writes authorized. Review the repair plan and rerun with --yes to authorize non-conflicting repair writes."
-        : "No writes authorized. Review the plan and rerun with --yes to authorize non-conflicting planned update writes.",
-    );
-  } else {
-    lines.push("No writes authorized.");
-  }
-
-  if (
-    result.data.completedSteps !== undefined ||
-    result.data.failedStep !== undefined ||
-    result.data.pendingSteps !== undefined
-  ) {
-    lines.push(
-      "",
-      "Step State",
-      `Completed steps: ${formatList(result.data.completedSteps ?? [])}`,
-      `Failed step: ${result.data.failedStep ?? "none"}`,
-      `Pending steps: ${formatList(result.data.pendingSteps ?? [])}`,
-    );
-  }
-
-  lines.push("", "Changed Paths");
-  if (result.data.changedPaths.length === 0) {
-    lines.push("No paths changed yet.");
-  } else {
-    for (const changedPath of result.data.changedPaths) lines.push(`- ${changedPath}`);
-  }
-
-  lines.push("", "Skipped Paths");
-  if (result.data.skippedPaths.length === 0) {
-    lines.push("No paths skipped during apply.");
-  } else {
-    for (const skippedPath of result.data.skippedPaths) lines.push(`- ${skippedPath}`);
-  }
-
-  if (result.data.conflicts.length === 0) {
-    lines.push("", isRepair ? "Remaining Conflicts:" : "Conflicts:");
-    lines.push(isRepair ? "No remaining conflicts." : "No conflicts detected.");
-  } else {
-    lines.push("", isRepair ? "Remaining Conflicts:" : "Conflicts:");
-    for (const conflict of result.data.conflicts) {
-      lines.push(
-        `- affectedPath=${conflict.affectedPath}; ownership=${conflict.ownership}; action=conflict; reason=${conflict.reason}; nextAction=${getConflictNextAction(conflict)}`,
-      );
-    }
-  }
-
-  lines.push(
-    "",
-    "Protected Boundaries",
-    "- _speclite/custom: human-owned custom TOML; update does not overwrite, normalize, reorder, or delete it.",
-    "- _speclite-output: workflow-owned artifact repository; update does not overwrite generated artifacts.",
-    "- installer-owned drift: normal update reports conflict; repair is explicit and separate.",
-  );
-
-  if (result.issues.length > 0) {
-    lines.push("");
-    lines.push("Issues:");
-    for (const issue of result.issues) {
-      lines.push(formatIssue(issue));
-    }
-  }
-
-  if (result.nextActions.length > 0) {
-    lines.push("Next actions");
-    for (const action of result.nextActions) {
-      lines.push(`- ${action}`);
-    }
-  }
-
-  return `${lines.join("\n")}\n`;
+  return renderPresentationFrame({
+    title: "SpecLite update",
+    result,
+    outcomeLabel: updateOutcome,
+    locale,
+    writeState: updateOutcome === "applied" ? "changed" : "auto",
+    summaryLines: [
+      getUpdateOutcomeSummary(locale, updateOutcome, isRepair),
+      formatLabelValue(locale, "statusLabel", result.status),
+      formatLabelValue(locale, "mode", isRepair ? "repair" : "update"),
+      formatLabelValue(locale, "outputProfile", `${getCliMessage(locale, "evidenceProfile")} (${presentation})`),
+      formatLabelValue(locale, "planStatus", updateOutcome),
+    ],
+    scopeLines: [`targetProject=${result.targetProject}`],
+    stateLines: [
+      getCliMessage(locale, "authorization"),
+      `requiresConfirmation=${result.data.requiresConfirmation}`,
+      `writeAuthorized=${result.data.writeAuthorized}`,
+      ...formatUpdateAuthorizationGuidance(result, plannedWrites.length, updateOutcome, locale),
+      ...formatUpdateStepStateLines(executionState, locale),
+    ],
+    evidenceLines: [
+      getCliMessage(locale, isRepair ? "repairPlanEffects" : "updatePlanEffects"),
+      ...formatPlanActionLines(planActions, locale),
+      getCliMessage(locale, "changedPaths"),
+      ...formatPathLines(result.data.changedPaths, getCliMessage(locale, "noPathsChangedYet")),
+      getCliMessage(locale, "skippedPaths"),
+      ...formatPathLines(result.data.skippedPaths, getCliMessage(locale, "noPathsSkippedDuringApply")),
+      getCliMessage(locale, isRepair ? "remainingConflicts" : "conflicts"),
+      ...formatConflictLines(result, locale),
+      ...formatUpdateOutcomeEvidenceLines(result, updateOutcome, executionState, locale),
+      getCliMessage(locale, "protectedBoundaries"),
+      `- ${getCliMessage(locale, "protectedBoundaryCustom")}`,
+      `- ${getCliMessage(locale, "protectedBoundaryArtifact")}`,
+      `- ${getCliMessage(locale, "protectedBoundaryInstallerDrift")}`,
+    ],
+    emptyStateLines,
+    nextActions: formatUpdateOutcomeNextActions(result, locale, updateOutcome),
+  });
 }
 
 export function renderSyncHumanOutput(result: SyncCommandResult): string {
@@ -610,6 +681,19 @@ function formatPathLines(paths: string[], emptyText: string): string[] {
   return paths.map((value) => `- ${value}`);
 }
 
+function formatLabelValue(locale: CliLocale, key: CliMessageKeyForOutput, value: string): string {
+  return locale === "zh-CN"
+    ? `${getCliMessage(locale, key)}：${value}`
+    : `${getCliMessage(locale, key)}: ${value}`;
+}
+
+type CliMessageKeyForOutput = Parameters<typeof getCliMessage>[1];
+
+function formatListForLocale(values: string[], locale: CliLocale): string {
+  if (values.length > 0) return values.join(", ");
+  return locale === "zh-CN" ? "无" : "none";
+}
+
 function formatRatioMetric(metric: { covered: number; total: number; rate: number }): string {
   return `${metric.covered}/${metric.total} (${metric.rate})`;
 }
@@ -674,99 +758,68 @@ export function renderArtifactEvidence(artifacts: ArtifactEvidence[]): string {
 }
 
 function renderInstallReadySummary(result: InstallCommandResult, locale: CliLocale): string {
-  if (locale === "zh-CN") {
-    return renderInstallReadySummaryZh(result);
-  }
-
-  const lines = [
-    "SpecLite ready summary",
-    "",
-    "Summary",
-    `Target project: ${result.targetProject}`,
-    `Install location: ${result.data.paths.projectRoot}`,
-    `Manifest version: ${result.data.manifestVersion}`,
-    "Source",
-    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
-    "External Access",
-    ...formatInstallExternalAccess(result.data.sourceDescriptor),
-    "Authorization",
-    "Command-level writes were authorized only after source and install scope confirmation.",
-    result.summary,
-    "",
-    "Completed steps",
-    ...result.data.completedSteps.map((stepId) => `- ${stepId}`),
-    "",
-    "Installed modules",
-    ...result.data.installedModules.map((moduleId) => `- ${moduleId}`),
-    "",
-    "IDE targets",
-    ...result.data.ideTargets.map((target) => {
-      const targetPath = target.targetPath ?? "not-configured";
-      const skillCount = target.skillCount ?? 0;
-      return `- ${target.id}: ${target.status}, skills=${skillCount}, path=${targetPath}`;
-    }),
-    "",
-    "Key paths",
-    `- projectRoot: ${result.data.paths.projectRoot} (install location)`,
-    `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"} (metadata/control hub)`,
-    "- .claude/skills and .agents/skills (IDE execution plane)",
-    `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"} (artifact repository)`,
-    `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"} (installed-state projection)`,
-    "",
-    "Next actions",
-    ...result.nextActions.map((action) => `- ${action}`),
-  ];
-
-  return `${lines.join("\n")}\n`;
-}
-
-function renderInstallReadySummaryZh(result: InstallCommandResult): string {
   const presentation = getInstallReadyPresentation(result);
-  const lines = [
-    "Step 4/4 Ready Summary（就绪摘要）",
-    "",
-    "Summary（摘要）",
-    `targetProject=${result.targetProject}`,
-    `projectRoot=${result.data.paths.projectRoot}`,
-    `manifestVersion=${result.data.manifestVersion}`,
-    `selectedModules=${formatList(result.data.installedModules)}`,
-    ...formatInstallReadyModeZh(result, presentation),
-    "本次 --yes 授权仅适用于无 conflict 的 planned writes。",
-    "",
-    "Source（来源）",
-    `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
-    "",
-    "External Access（外部访问）",
-    ...formatInstallExternalAccessZh(result.data.sourceDescriptor),
-    "",
-    "Authorization（授权）",
-    "已通过 --yes 授权无 conflict 的 planned writes；source 与 install scope 已在写入前完成确认。",
-    "",
-    "Completed Steps（已完成步骤）",
-    ...result.data.completedSteps.map((stepId) => `- ${stepId}`),
-    "",
-    "Installed Modules（已安装模块）",
-    ...result.data.installedModules.map((moduleId) => `- ${moduleId}`),
-    "",
-    "IDE Targets（IDE 目标）",
-    ...result.data.ideTargets.map((target) => {
-      const targetPath = target.targetPath ?? "not-configured";
-      const skillCount = target.skillCount ?? 0;
-      return `- id=${target.id}; status=${target.status}; skillCount=${skillCount}; targetPath=${targetPath}`;
-    }),
-    "",
-    "Key Paths（关键路径）",
-    `projectRoot=${result.data.paths.projectRoot}`,
-    `specliteRoot=${result.data.paths.specliteRoot ?? "_speclite"}`,
-    "ideMirrors=.claude/skills,.agents/skills",
-    `artifactRoot=${result.data.paths.artifactRoot ?? "_speclite-output"}`,
-    `manifestPath=${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
-    "",
-    "Next Actions（下一步）",
-    ...result.nextActions.map((action) => `- ${action}`),
-  ];
-
-  return `${lines.join("\n")}\n`;
+  return renderPresentationFrame({
+    title: locale === "zh-CN" ? "Step 4/4 Ready Summary（就绪摘要）" : "SpecLite ready summary",
+    result,
+    outcomeLabel: formatInstallHumanOutcome(locale, "ready"),
+    locale,
+    writeState: "changed",
+    summaryLines: [
+      getInstallOutcomeSummary(locale, "ready"),
+      ...(locale === "zh-CN"
+        ? [
+          formatLabelValue(locale, "targetProject", result.targetProject),
+          formatLabelValue(locale, "installLocation", result.data.paths.projectRoot),
+        ]
+        : [
+          result.summary,
+          `Target project: ${result.targetProject}`,
+          `Install location: ${result.data.paths.projectRoot}`,
+        ]),
+      `targetProject=${result.targetProject}`,
+      `projectRoot=${result.data.paths.projectRoot}`,
+      formatLabelValue(locale, "manifestVersion", result.data.manifestVersion),
+      `manifestVersion=${result.data.manifestVersion}`,
+      `selectedModules=${formatList(result.data.installedModules)}`,
+      ...(locale === "zh-CN"
+        ? formatInstallReadyModeZh(result, presentation)
+        : formatInstallReadyModeEn(result, presentation)),
+      locale === "zh-CN"
+        ? "本次 --yes 授权仅适用于无 conflict 的 planned writes。"
+        : "Command-level writes were authorized only after source and install scope confirmation.",
+    ],
+    scopeLines: [
+      ...formatInstallReadyKeyPathLines(result, locale),
+      `projectRoot=${result.data.paths.projectRoot}`,
+      `specliteRoot=${result.data.paths.specliteRoot ?? "_speclite"}`,
+      "ideMirrors=.claude/skills,.agents/skills",
+      `artifactRoot=${result.data.paths.artifactRoot ?? "_speclite-output"}`,
+      `manifestPath=${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
+    ],
+    stateLines: [
+      getCliMessage(locale, "completedSteps"),
+      ...result.data.completedSteps.map((stepId) => `- ${stepId}`),
+      getCliMessage(locale, "installedModules"),
+      ...result.data.installedModules.map((moduleId) => `- ${moduleId}`),
+      getCliMessage(locale, "installIdeTargets"),
+      ...formatIdeTargetStateLines(result.data.ideTargets, locale),
+    ],
+    evidenceLines: [
+      getCliMessage(locale, "source"),
+      `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
+      getCliMessage(locale, "externalAccess"),
+      ...(locale === "zh-CN"
+        ? formatInstallExternalAccessZh(result.data.sourceDescriptor)
+        : formatInstallExternalAccess(result.data.sourceDescriptor)),
+      getCliMessage(locale, "authorization"),
+      locale === "zh-CN"
+        ? "已通过 --yes 授权无 conflict 的 planned writes；source 与 install scope 已在写入前完成确认。"
+        : "Command-level writes were authorized only after source and install scope confirmation.",
+    ],
+    emptyStateLines: getCommonEmptyStateLines(result, locale, "changed"),
+    nextActions: formatInstallOutcomeNextActions(result, locale, "ready"),
+  });
 }
 
 const INSTALL_READY_PRESENTATION_KEY = "__specliteInstallReadyPresentation";
@@ -782,17 +835,54 @@ function getInstallReadyPresentation(result: InstallCommandResult): InstallReady
   })[INSTALL_READY_PRESENTATION_KEY];
 }
 
+function formatInstallReadyKeyPathLines(result: InstallCommandResult, locale: CliLocale): string[] {
+  if (locale === "en-US") {
+    return [
+      getCliMessage(locale, "keyPaths"),
+      `- projectRoot: ${result.data.paths.projectRoot} (install location)`,
+      `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"} (metadata/control hub)`,
+      "- .claude/skills and .agents/skills (IDE execution plane)",
+      `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"} (artifact repository)`,
+      `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"} (installed-state projection)`,
+    ];
+  }
+
+  return [
+    getCliMessage(locale, "keyPaths"),
+    `- projectRoot: ${result.data.paths.projectRoot}（安装位置）`,
+    `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"}（metadata 与控制目录）`,
+    "- .claude/skills and .agents/skills（IDE 执行目录）",
+    `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"}（artifact 仓库）`,
+    `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}（installed-state 投影）`,
+  ];
+}
+
 function formatInstallReadyModeZh(
   result: InstallCommandResult,
   presentation: InstallReadyPresentation | undefined,
 ): string[] {
   if (presentation?.installFlow === "default-no-prompt" || isDefaultInstallReadySummary(result, presentation)) {
-    return ["install --yes 已使用默认 modules、quick config 和默认 IDE targets 完成无交互安装。"];
+    return ["install --yes 已使用默认 modules、quick config 和默认 IDE 目标完成无交互安装。"];
   }
 
   return [
     "install --yes --interactive 已按显式交互选择完成安装。",
     `configMode=${presentation?.configMode ?? extractConfigMode(result.summary) ?? "unknown"}`,
+    `ideTargets=${formatList(result.data.ideTargets.map((target) => target.id))}`,
+  ];
+}
+
+function formatInstallReadyModeEn(
+  result: InstallCommandResult,
+  presentation: InstallReadyPresentation | undefined,
+): string[] {
+  if (presentation?.installFlow === "default-no-prompt" || isDefaultInstallReadySummary(result, presentation)) {
+    return ["install --yes completed with default modules, quick config and default IDE targets."];
+  }
+
+  return [
+    "install --yes --interactive completed with explicit interactive selections.",
+    `Config mode: ${presentation?.configMode ?? extractConfigMode(result.summary) ?? "unknown"}`,
     `ideTargets=${formatList(result.data.ideTargets.map((target) => target.id))}`,
   ];
 }
@@ -830,47 +920,903 @@ function isReadySummaryResult(result: InstallCommandResult): boolean {
   );
 }
 
-function getConflictNextAction(conflict: UpdateCommandResult["data"]["conflicts"][number]): string {
+function getCommandOutcomeLabel(result: CoveredHumanCommandResult): string {
+  if (result.command === "install") {
+    return getInstallHumanOutcome(result);
+  }
+  if (result.command === "update") {
+    return getUpdateHumanOutcome(result);
+  }
+  if (result.command === "update.repair") {
+    return getUpdateHumanOutcome(result);
+  }
+  if (result.command === "status") {
+    return getStatusHumanOutcome(result);
+  }
+  if (result.command === "validate") {
+    return getValidateHumanOutcome(result);
+  }
+  return `${result.command}-${result.status}`;
+}
+
+function getStatusHumanOutcome(result: StatusCommandResult): StatusHumanOutcome {
+  switch (result.data.highLevelHealth) {
+    case "configured":
+      return "installed";
+    case "not-configured":
+      return "not-installed";
+    case "partial":
+      return "partial";
+    case "failed":
+      return "failed";
+  }
+}
+
+function getStatusOutcomeSummary(locale: CliLocale, outcome: StatusHumanOutcome): string {
+  switch (outcome) {
+    case "installed":
+      return getCliMessage(locale, "statusSummaryInstalled");
+    case "not-installed":
+      return getCliMessage(locale, "statusSummaryNotInstalled");
+    case "stale":
+      return getCliMessage(locale, "statusSummaryStale");
+    case "partial":
+      return getCliMessage(locale, "statusSummaryPartial");
+    case "failed":
+      return getCliMessage(locale, "statusSummaryFailed");
+    case "unknown":
+      return getCliMessage(locale, "statusSummaryUnknown");
+  }
+}
+
+function formatStatusOutcomeEvidenceLines(result: StatusCommandResult, outcome: StatusHumanOutcome): string[] {
+  const lines = [
+    `highLevelHealth=${result.data.highLevelHealth}`,
+    `manifestPresent=${String(result.data.manifestPresent)}`,
+    `sourceDescriptor=${formatOptionalSourceDescriptor(result.data.sourceDescriptor)}`,
+    `ideTargetSummary=${formatStatusIdeTargetSummary(result)}`,
+  ];
+
+  if (outcome === "stale" || outcome === "unknown") {
+    lines.push(
+      "Human-derived label only; public JSON highLevelHealth remains unchanged.",
+      "Evidence source: manifest, source descriptor, version evidence, or installed-state summary insufficiency.",
+    );
+  }
+
+  return lines;
+}
+
+function formatStatusOutcomeNextActions(
+  result: StatusCommandResult,
+  locale: CliLocale,
+  outcome: StatusHumanOutcome,
+): string[] {
+  if (locale === "en-US") {
+    switch (outcome) {
+      case "installed":
+        return result.nextActions.length === 0 ? [getCliMessage(locale, "nextActionNone")] : result.nextActions;
+      case "not-installed":
+        return dedupeLines([
+          formatCliMessage(locale, "statusActionInstall", { command: "speclite install <target>" }),
+          ...result.nextActions,
+        ]);
+      case "partial":
+        return dedupeLines([
+          formatCliMessage(locale, "statusActionInspectIdeThenValidate", { command: "speclite validate <target>" }),
+          ...result.nextActions,
+        ]);
+      case "failed":
+        return dedupeLines([
+          formatCliMessage(locale, "statusActionInspectManifestThenValidate", { command: "speclite validate <target>" }),
+          ...result.nextActions,
+        ]);
+      case "stale":
+        return dedupeLines([
+          formatCliMessage(locale, "statusActionValidateFreshness", { command: "speclite validate <target>" }),
+          ...result.nextActions,
+        ]);
+      case "unknown":
+        return dedupeLines([
+          formatCliMessage(locale, "statusActionRestoreMetadata", { command: "speclite install <target>" }),
+          ...result.nextActions,
+        ]);
+    }
+  }
+
+  switch (outcome) {
+    case "installed":
+      return [getCliMessage(locale, "nextActionNone")];
+    case "not-installed":
+      return dedupeLines([
+        formatCliMessage(locale, "statusActionInstall", { command: "speclite install <target>" }),
+      ]);
+    case "partial":
+      return dedupeLines([
+        formatCliMessage(locale, "statusActionInspectIdeThenValidate", { command: "speclite validate <target>" }),
+        formatCliMessage(locale, "updateActionStatusAfterWrites", { command: "speclite status <target>" }),
+      ]);
+    case "failed":
+      return dedupeLines([
+        formatCliMessage(locale, "statusActionInspectManifestThenValidate", { command: "speclite validate <target>" }),
+        formatCliMessage(locale, "updateActionStatusAfterWrites", { command: "speclite status <target>" }),
+      ]);
+    case "stale":
+      return dedupeLines([
+        formatCliMessage(locale, "statusActionValidateFreshness", { command: "speclite validate <target>" }),
+      ]);
+    case "unknown":
+      return dedupeLines([
+        formatCliMessage(locale, "statusActionRestoreMetadata", { command: "speclite install <target>" }),
+        formatCliMessage(locale, "updateActionValidateAfterWrites", { command: "speclite validate <target>" }),
+      ]);
+  }
+}
+
+function getValidateHumanOutcome(result: ValidateCommandResult): ValidateHumanOutcome {
+  if (result.status === "failure" && result.issues.length === 0) return "cannot-validate";
+  if (result.data.issueCounts.critical > 0 || result.data.issueCounts.error > 0 || result.status === "failure") {
+    return "invalid";
+  }
+  if (result.data.issueCounts.warning > 0 || result.data.issueCounts.info > 0 || result.status === "warning") {
+    return "valid-with-warnings";
+  }
+  return "valid";
+}
+
+function getValidateOutcomeSummary(locale: CliLocale, outcome: ValidateHumanOutcome): string {
+  switch (outcome) {
+    case "valid":
+      return getCliMessage(locale, "validateSummaryValid");
+    case "valid-with-warnings":
+      return getCliMessage(locale, "validateSummaryValidWithWarnings");
+    case "invalid":
+      return getCliMessage(locale, "validateSummaryInvalid");
+    case "cannot-validate":
+      return getCliMessage(locale, "validateSummaryCannotValidate");
+  }
+}
+
+function formatValidateOutcomeNextActions(
+  result: ValidateCommandResult,
+  locale: CliLocale,
+  sortedIssues: ValidationIssue[],
+  outcome: ValidateHumanOutcome,
+): string[] {
+  if (locale === "en-US") {
+    if (outcome === "valid") {
+      return result.nextActions.length === 0
+        ? [getCliMessage(locale, "nextActionNone")]
+        : result.nextActions;
+    }
+
+    const blockingIssueActions = sortedIssues
+      .filter((issue) => issue.severity === "critical" || issue.severity === "error")
+      .map((issue) => formatIssueSuggestedNextStep(issue, locale, "speclite validate <target>"));
+    const warningIssueActions = sortedIssues
+      .filter((issue) => issue.severity === "warning" || issue.severity === "info")
+      .map((issue) => formatIssueSuggestedNextStep(issue, locale, "speclite validate <target>"));
+
+    if (outcome === "cannot-validate") {
+      return dedupeLines([
+        formatCliMessage(locale, "validateActionRestoreMetadata", { command: "speclite validate <target>" }),
+        ...result.nextActions,
+      ]);
+    }
+
+    return dedupeLines([
+      ...blockingIssueActions,
+      ...warningIssueActions,
+      ...result.nextActions,
+      formatCliMessage(locale, "validateActionRerunAfterIssues", { command: "speclite validate <target>" }),
+    ]);
+  }
+
+  if (outcome === "valid") {
+    return [
+      formatCliMessage(locale, "validateActionContinue", { command: "speclite status <target>" }),
+      formatCliMessage(locale, "updateActionStatusAfterWrites", { command: "speclite status <target>" }),
+    ];
+  }
+
+  const blockingIssueActions = sortedIssues
+    .filter((issue) => issue.severity === "critical" || issue.severity === "error")
+    .map((issue) => formatIssueSuggestedNextStep(issue, locale, "speclite validate <target>"));
+  const warningIssueActions = sortedIssues
+    .filter((issue) => issue.severity === "warning" || issue.severity === "info")
+    .map((issue) => formatIssueSuggestedNextStep(issue, locale, "speclite validate <target>"));
+
+  if (outcome === "cannot-validate") {
+    return dedupeLines([
+      formatCliMessage(locale, "validateActionRestoreMetadata", { command: "speclite validate <target>" }),
+      formatCliMessage(locale, "updateActionStatusAfterWrites", { command: "speclite status <target>" }),
+    ]);
+  }
+
+  return dedupeLines([
+    ...blockingIssueActions,
+    ...warningIssueActions,
+    formatCliMessage(locale, "validateActionRerunAfterIssues", { command: "speclite validate <target>" }),
+    formatCliMessage(locale, "updateActionStatusAfterWrites", { command: "speclite status <target>" }),
+  ]);
+}
+
+function getInstallHumanOutcome(result: InstallCommandResult): InstallHumanOutcome {
+  if (isReadySummaryResult(result)) return "ready";
+  if (isReadyCheckFailure(result)) return "ready-check-failed";
+  if (isWriteStageFailure(result)) return "write-failed";
+  if (result.status === "failure") return "blocked-before-write";
+  return "prewrite-paused";
+}
+
+function isReadyCheckFailure(result: InstallCommandResult): boolean {
+  return (
+    result.status === "failure" &&
+    result.data.completedSteps.includes("manifest-generation") &&
+    result.data.pendingSteps.includes("ready-check")
+  );
+}
+
+function isWriteStageFailure(result: InstallCommandResult): boolean {
+  return (
+    result.status === "failure" &&
+    result.data.completedSteps.includes("config-initialization") &&
+    !isReadyCheckFailure(result)
+  );
+}
+
+function formatInstallHumanOutcome(locale: CliLocale, outcome: InstallHumanOutcome): string {
+  switch (outcome) {
+    case "prewrite-paused":
+      return getCliMessage(locale, "installOutcomePrewritePaused");
+    case "blocked-before-write":
+      return getCliMessage(locale, "installOutcomeBlockedBeforeWrite");
+    case "write-failed":
+      return getCliMessage(locale, "installOutcomeWriteFailed");
+    case "ready-check-failed":
+      return getCliMessage(locale, "installOutcomeReadyCheckFailed");
+    case "ready":
+      return getCliMessage(locale, "installOutcomeReady");
+  }
+}
+
+function getInstallOutcomeSummary(locale: CliLocale, outcome: InstallHumanOutcome): string {
+  switch (outcome) {
+    case "prewrite-paused":
+      return getCliMessage(locale, "installSummaryPrewritePaused");
+    case "blocked-before-write":
+      return getCliMessage(locale, "installSummaryBlockedBeforeWrite");
+    case "write-failed":
+      return getCliMessage(locale, "installSummaryWriteFailed");
+    case "ready-check-failed":
+      return getCliMessage(locale, "installSummaryReadyCheckFailed");
+    case "ready":
+      return getCliMessage(locale, "installSummaryReady");
+  }
+}
+
+function formatInstallSummaryLines(
+  result: InstallCommandResult,
+  locale: CliLocale,
+  outcome: InstallHumanOutcome,
+): string[] {
+  if (locale === "en-US") {
+    return [
+      getInstallOutcomeSummary(locale, outcome),
+      result.summary,
+    ];
+  }
+
+  return [
+    getInstallOutcomeSummary(locale, outcome),
+    formatLabelValue(locale, "targetProject", result.targetProject),
+    formatLabelValue(locale, "projectRoot", result.data.paths.projectRoot),
+  ];
+}
+
+function getInstallPresentationWriteState(outcome: InstallHumanOutcome): PresentationWriteState {
+  if (outcome === "ready" || outcome === "ready-check-failed" || outcome === "write-failed") return "changed";
+  return "none";
+}
+
+function formatInstallOutcomeStepStateLines(
+  result: InstallCommandResult,
+  outcome: InstallHumanOutcome,
+  locale: CliLocale,
+): string[] {
+  if (outcome !== "write-failed" && outcome !== "ready-check-failed") return [];
+  const failedStep = outcome === "ready-check-failed" ? "ready-check" : getInstallFailedStep(result);
+  if (locale === "en-US") {
+    return [
+      `Failed step: ${failedStep}`,
+      `Completed write scope: ${formatList(getCompletedInstallWriteSteps(result))}`,
+    ];
+  }
+
+  return [
+    formatLabelValue(locale, "failedStep", failedStep),
+    formatLabelValue(locale, "completedWrites", formatListForLocale(getCompletedInstallWriteSteps(result), locale)),
+  ];
+}
+
+function formatInstallOutcomeEvidenceLines(
+  result: InstallCommandResult,
+  locale: CliLocale,
+  outcome: InstallHumanOutcome,
+): string[] {
+  if (outcome === "blocked-before-write") {
+    return [getCliMessage(locale, "installActionFixBlockerBeforeYes")];
+  }
+  if (outcome === "write-failed") {
+    return [
+      getCliMessage(locale, "installActionInspectCompletedWrites"),
+      ...formatInstallExecutionEvidenceLines(result, locale, getInstallFailedStep(result)),
+    ];
+  }
+  if (outcome === "ready-check-failed") {
+    return [
+      getCliMessage(locale, "installActionFixReadyCheck"),
+      ...formatInstallExecutionEvidenceLines(result, locale, "ready-check"),
+    ];
+  }
+  return [];
+}
+
+function formatInstallExecutionEvidenceLines(
+  result: InstallCommandResult,
+  locale: CliLocale,
+  failedStep: string,
+): string[] {
+  if (locale === "en-US") {
+    return [
+      `Failed step: ${failedStep}`,
+      `Completed write scope: ${formatList(getCompletedInstallWriteSteps(result))}`,
+      `Pending steps: ${formatList(result.data.pendingSteps)}`,
+    ];
+  }
+
+  return [
+    formatLabelValue(locale, "failedStep", failedStep),
+    formatLabelValue(locale, "completedWrites", formatListForLocale(getCompletedInstallWriteSteps(result), locale)),
+    formatLabelValue(locale, "pendingSteps", formatListForLocale(result.data.pendingSteps, locale)),
+  ];
+}
+
+function formatInstallOutcomeNextActions(
+  result: InstallCommandResult,
+  locale: CliLocale,
+  outcome: InstallHumanOutcome,
+): string[] {
+  const installTarget = formatInstallCommandTarget(result);
+  if (locale === "en-US") {
+    if (outcome === "prewrite-paused") {
+      return [
+        formatCliMessage(locale, "installActionRunYes", { command: `speclite install ${installTarget} --yes` }),
+        formatCliMessage(locale, "installActionRunInteractive", {
+          command: `speclite install ${installTarget} --interactive`,
+        }),
+      ];
+    }
+    if (outcome === "blocked-before-write") {
+      return dedupeLines([
+        ...formatIssueNextActions(result.issues, locale, `speclite install ${installTarget} --yes`),
+        formatCliMessage(locale, "installActionFixBlockerThenRunYes", {
+          command: `speclite install ${installTarget} --yes`,
+        }),
+        ...result.nextActions,
+      ]);
+    }
+    if (outcome === "write-failed") {
+      return dedupeLines([
+        ...formatIssueNextActions(result.issues, locale, `speclite validate ${installTarget}`),
+        formatCliMessage(locale, "installActionInspectCompletedThenValidate", {
+          command: `speclite validate ${installTarget}`,
+        }),
+        ...result.nextActions,
+      ]);
+    }
+    if (outcome === "ready-check-failed") {
+      return dedupeLines([
+        ...formatIssueNextActions(result.issues, locale, `speclite validate ${installTarget}`),
+        formatCliMessage(locale, "installActionFixReadyThenInstallOrValidate", {
+          installCommand: `speclite install ${installTarget} --yes`,
+          validateCommand: `speclite validate ${installTarget}`,
+        }),
+        ...result.nextActions,
+      ]);
+    }
+    return result.nextActions.length === 0 ? [getCliMessage(locale, "nextActionNone")] : result.nextActions;
+  }
+
+  if (outcome === "prewrite-paused") {
+    return [
+      formatCliMessage(locale, "installActionRunYes", { command: `speclite install ${installTarget} --yes` }),
+      formatCliMessage(locale, "installActionRunInteractive", {
+        command: `speclite install ${installTarget} --interactive`,
+      }),
+    ];
+  }
+  if (outcome === "blocked-before-write") {
+    return dedupeLines([
+      ...formatIssueNextActions(result.issues, locale, `speclite install ${installTarget} --yes`),
+      formatCliMessage(locale, "installActionFixBlockerThenRunYes", {
+        command: `speclite install ${installTarget} --yes`,
+      }),
+      formatCliMessage(locale, "updateActionValidateAfterWrites", { command: `speclite validate ${installTarget}` }),
+    ]);
+  }
+  if (outcome === "write-failed") {
+    return dedupeLines([
+      ...formatIssueNextActions(result.issues, locale, `speclite validate ${installTarget}`),
+      formatCliMessage(locale, "installActionInspectCompletedThenValidate", {
+        command: `speclite validate ${installTarget}`,
+      }),
+      formatCliMessage(locale, "updateActionStatusAfterWrites", { command: `speclite status ${installTarget}` }),
+    ]);
+  }
+  if (outcome === "ready-check-failed") {
+    return dedupeLines([
+      ...formatIssueNextActions(result.issues, locale, `speclite validate ${installTarget}`),
+      formatCliMessage(locale, "installActionFixReadyThenInstallOrValidate", {
+        installCommand: `speclite install ${installTarget} --yes`,
+        validateCommand: `speclite validate ${installTarget}`,
+      }),
+      formatCliMessage(locale, "updateActionStatusAfterWrites", { command: `speclite status ${installTarget}` }),
+    ]);
+  }
+  return [getCliMessage(locale, "nextActionNone")];
+}
+
+function getInstallFailedStep(result: InstallCommandResult): string {
+  return result.data.pendingSteps[0] ?? "unknown";
+}
+
+function getCompletedInstallWriteSteps(result: InstallCommandResult): string[] {
+  return result.data.completedSteps.filter((step) =>
+    step === "runtime-structure" ||
+    step === "ide-mirror-creation" ||
+    step === "manifest-generation"
+  );
+}
+
+function formatInstallCommandTarget(result: InstallCommandResult): string {
+  const target = result.targetProject.trim();
+  return /^[A-Za-z0-9._/-]+$/.test(target) ? target : "<target>";
+}
+
+function getCommonEmptyStateLines(
+  result: CoveredHumanCommandResult,
+  locale: CliLocale,
+  writeState: PresentationWriteState = "auto",
+): string[] {
+  const lines: string[] = [];
+  if (result.issues.length === 0) lines.push(getCliMessage(locale, "noIssues"));
+  if (!commandChangedProjectFiles(result, writeState)) lines.push(getCliMessage(locale, "writeNone"));
+  if (result.command === "status" && result.data.installedModules.length === 0 && result.data.ideTargets.length === 0) {
+    lines.push(getCliMessage(locale, "noCheckedItems"));
+  }
+  if (result.command === "validate" && result.data.checkedCategories.length === 0) {
+    lines.push(getCliMessage(locale, "noCheckedItems"));
+  }
+  if ((result.command === "update" || result.command === "update.repair") && result.data.conflicts.length === 0) {
+    lines.push(getCliMessage(locale, "noConflicts"));
+  }
+  return dedupeLines(lines);
+}
+
+function formatIdeTargetStateLines(targets: StatusCommandResult["data"]["ideTargets"], locale: CliLocale = "en-US"): string[] {
+  if (targets.length === 0) return [`- ${formatListForLocale([], locale)}`];
+  return targets.map((target) => {
+    const skillCount = target.skillCount ?? 0;
+    const targetPath = target.targetPath ?? "not-configured";
+    const reason = target.reason === undefined ? "" : `, reason=${target.reason}`;
+    return `- ${target.id}: ${target.status}, skills=${skillCount}, path=${targetPath}${reason}`;
+  });
+}
+
+function formatStatusIdeTargetSummary(result: StatusCommandResult): string {
+  if (result.data.ideTargets.length === 0) return "none";
+  const counts = new Map<string, number>();
+  for (const target of result.data.ideTargets) {
+    counts.set(target.status, (counts.get(target.status) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([status, count]) => `${status}=${count}`)
+    .join(", ");
+}
+
+function formatInstallIdeTargetStatusLines(
+  targets: InstallCommandResult["data"]["ideTargets"],
+  locale: CliLocale = "en-US",
+): string[] {
+  if (targets.length === 0) return [`- ${formatListForLocale([], locale)}`];
+  return targets.map((target) => {
+    const pathSuffix = target.targetPath === undefined ? "" : ` (${target.targetPath})`;
+    const skillCountSuffix = target.skillCount === undefined ? "" : `, skills=${target.skillCount}`;
+    return `- ${target.id}: ${target.status}${pathSuffix}${skillCountSuffix}`;
+  });
+}
+
+function formatInstallIdeTargetStatusesHeading(locale: CliLocale): string {
+  return locale === "en-US"
+    ? `${getCliMessage(locale, "ideTargetStatuses")}:`
+    : getCliMessage(locale, "ideTargetStatuses");
+}
+
+function formatPlanActionLines(
+  actions: UpdateCommandResult["data"]["updatePlan"]["actions"] | RepairCommandResult["data"]["repairPlan"]["actions"],
+  locale: CliLocale = "en-US",
+): string[] {
+  if (actions.length === 0) return [`- ${formatListForLocale([], locale)}`];
+  return actions.map((action) => formatPlanAction(action, locale));
+}
+
+function formatUpdateAuthorizationGuidance(
+  result: UpdateCommandResult | RepairCommandResult,
+  plannedWriteCount: number,
+  outcome: UpdateHumanOutcome,
+  locale: CliLocale = "en-US",
+): string[] {
+  const isRepair = result.command === "update.repair";
+  if (outcome === "blocked-by-conflict") {
+    return [getCliMessage(locale, "conflictsBlockWriteAuthorizationSentence")];
+  }
+  if (outcome === "partial-or-failed") {
+    return [getCliMessage(locale, isRepair ? "repairWriteIncompleteSentence" : "updateWriteIncompleteSentence")];
+  }
+  if (result.data.writeAuthorized) {
+    return [getCliMessage(locale, isRepair ? "repairWritesAuthorizedSentence" : "updateWritesAuthorizedSentence")];
+  }
+  if (plannedWriteCount > 0) {
+    return [getCliMessage(locale, isRepair ? "repairNoWritesAuthorizedSentence" : "updateNoWritesAuthorizedSentence")];
+  }
+  return [getCliMessage(locale, "noWritesAuthorizedSentence")];
+}
+
+function formatUpdateStepStateLines(executionState: UpdateExecutionState, locale: CliLocale = "en-US"): string[] {
+  if (
+    executionState.completedSteps.length === 0 &&
+    executionState.failedStep === undefined &&
+    executionState.pendingSteps.length === 0
+  ) return [];
+
+  return [
+    getCliMessage(locale, "stepState"),
+    formatLabelValue(locale, "completedSteps", formatListForLocale(executionState.completedSteps, locale)),
+    formatLabelValue(locale, "failedStep", executionState.failedStep ?? formatListForLocale([], locale)),
+    formatLabelValue(locale, "pendingSteps", formatListForLocale(executionState.pendingSteps, locale)),
+  ];
+}
+
+function formatConflictLines(result: UpdateCommandResult | RepairCommandResult, locale: CliLocale = "en-US"): string[] {
+  if (result.data.conflicts.length === 0) {
+    return [
+      result.command === "update.repair"
+        ? getCliMessage(locale, "noRemainingConflicts")
+        : getCliMessage(locale, "noConflictsDetectedSentence"),
+    ];
+  }
+  return result.data.conflicts.map((conflict) =>
+    `- affectedPath=${conflict.affectedPath}; ownership=${conflict.ownership}; action=conflict; reason=${conflict.reason}; nextAction=${getConflictNextAction(conflict, locale)}`,
+  );
+}
+
+function dedupeLines(lines: string[]): string[] {
+  return [...new Set(lines)];
+}
+
+function getConflictNextAction(conflict: UpdateCommandResult["data"]["conflicts"][number], locale: CliLocale = "en-US"): string {
   if (conflict.reason === "installer-owned-drift") {
-    return "Run speclite update --repair or manually inspect this path before rerunning update.";
+    return getCliMessage(locale, "conflictActionInstallerOwnedDrift");
   }
   if (conflict.reason === "human-owned") {
-    return "Review the human-owned custom file manually; update will not overwrite, normalize, reorder, or delete it.";
+    return getCliMessage(locale, "conflictActionHumanOwned");
   }
   if (conflict.reason === "workflow-owned") {
-    return "Run speclite validate to inspect workflow-owned artifact metadata; update will not overwrite generated artifacts.";
+    return getCliMessage(locale, "conflictActionWorkflowOwned");
   }
   if (conflict.reason === "unknown-ownership") {
-    return "Run speclite validate and inspect ownership before rerunning update planning.";
+    return getCliMessage(locale, "conflictActionUnknownOwnership");
   }
   if (conflict.reason === "missing-source-evidence") {
-    return "Restore source evidence or run speclite validate before generating write-capable update plans.";
+    return getCliMessage(locale, "conflictActionMissingSourceEvidence");
   }
   if (conflict.reason === "unsupported-repair") {
-    return "Use manual action or wait for a supported repair path; normal update will not overwrite this path.";
+    return getCliMessage(locale, "conflictActionUnsupportedRepair");
   }
   if (conflict.reason === "not-authorized") {
-    return "Review the path policy before authorizing writes; --yes only applies to non-conflicting planned writes.";
+    return getCliMessage(locale, "conflictActionNotAuthorized");
   }
   if (conflict.reason === "unchanged") {
-    return "No action is required for unchanged content.";
+    return getCliMessage(locale, "conflictActionUnchanged");
   }
-  return `Inspect this path before authorizing update writes; unknown reason code is preserved as ${conflict.reason}.`;
+  return formatCliMessage(locale, "conflictActionUnknownReason", { reason: conflict.reason });
 }
 
-function formatIssue(issue: ValidationIssue): string {
+function getUpdateHumanOutcome(result: UpdateCommandResult | RepairCommandResult): UpdateHumanOutcome {
+  if (result.data.conflicts.length > 0) return "blocked-by-conflict";
+  if (isPartialOrFailedUpdate(result)) return "partial-or-failed";
+  if (result.data.writeAuthorized && result.data.changedPaths.length > 0) return "applied";
+
+  const actions = result.command === "update.repair" ? result.data.repairPlan.actions : result.data.updatePlan.actions;
+  const hasWritePlan = actions.some(
+    (action) =>
+      action.action === "create" ||
+      action.action === "update" ||
+      action.action === "restore-canonical" ||
+      action.action === "regenerate",
+  );
+  if (!hasWritePlan) return "no-op";
+  return result.command === "update.repair" ? "repair-plan-ready" : "plan-ready";
+}
+
+function isPartialOrFailedUpdate(result: UpdateCommandResult | RepairCommandResult): boolean {
+  if (result.status !== "failure") return false;
+  if (result.data.conflicts.length > 0) return false;
+  const executionState = getUpdateExecutionState(result);
+  if (
+    executionState.failedStep !== undefined ||
+    executionState.completedSteps.length > 0 ||
+    executionState.pendingSteps.length > 0
+  ) return true;
+
+  return result.issues.some((issue) =>
+    issue.category === "operation-lock" ||
+    issue.component === "operation-lock" ||
+    issue.component === "safe-write" ||
+    issue.issueId.includes("safe-write") ||
+    issue.issueId.includes("operation-lock")
+  );
+}
+
+function getUpdateExecutionState(result: UpdateCommandResult | RepairCommandResult): UpdateExecutionState {
+  const fromData = result.command === "update"
+    ? {
+      completedSteps: result.data.completedSteps ?? [],
+      failedStep: result.data.failedStep,
+      pendingSteps: result.data.pendingSteps ?? [],
+    }
+    : {
+      completedSteps: [],
+      failedStep: undefined,
+      pendingSteps: [],
+    };
+
+  const fromIssues = result.issues.reduce<UpdateExecutionState>(
+    (state, issue) => mergeExecutionState(state, getIssueExecutionState(issue.details)),
+    { completedSteps: [], pendingSteps: [] },
+  );
+  const completedSteps = dedupeLines([
+    ...fromData.completedSteps,
+    ...fromIssues.completedSteps,
+    ...result.data.changedPaths.map((changedPath) => `changed:${changedPath}`),
+  ]);
+  const failedStep = fromData.failedStep ?? fromIssues.failedStep;
+  return {
+    completedSteps,
+    ...(failedStep === undefined ? {} : { failedStep }),
+    pendingSteps: dedupeLines(fromData.pendingSteps.concat(fromIssues.pendingSteps)),
+  };
+}
+
+function getIssueExecutionState(details: ValidationIssue["details"]): UpdateExecutionState {
+  if (details === undefined) return { completedSteps: [], pendingSteps: [] };
+  return {
+    completedSteps: coerceStringList(details.completedSteps),
+    ...(typeof details.failedStep === "string" ? { failedStep: details.failedStep } : {}),
+    pendingSteps: coerceStringList(details.pendingSteps),
+  };
+}
+
+function mergeExecutionState(left: UpdateExecutionState, right: UpdateExecutionState): UpdateExecutionState {
+  const failedStep = left.failedStep ?? right.failedStep;
+  return {
+    completedSteps: dedupeLines([...left.completedSteps, ...right.completedSteps]),
+    ...(failedStep === undefined ? {} : { failedStep }),
+    pendingSteps: dedupeLines([...left.pendingSteps, ...right.pendingSteps]),
+  };
+}
+
+function coerceStringList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value === "string" && value.length > 0) return [value];
+  return [];
+}
+
+function getUpdateOutcomeSummary(locale: CliLocale, outcome: UpdateHumanOutcome, isRepair: boolean): string {
+  switch (outcome) {
+    case "plan-ready":
+      return getCliMessage(locale, "updateSummaryPlanReady");
+    case "repair-plan-ready":
+      return getCliMessage(locale, "updateSummaryRepairPlanReady");
+    case "no-op":
+      return getCliMessage(locale, "updateSummaryNoOp");
+    case "blocked-by-conflict":
+      return getCliMessage(locale, "updateSummaryBlockedByConflict");
+    case "applied":
+      if (locale === "en-US") {
+        return isRepair
+          ? "Authorized repair writes were applied within protected boundaries."
+          : "Authorized update writes were applied within protected boundaries.";
+      }
+      return getCliMessage(locale, "updateSummaryApplied");
+    case "partial-or-failed":
+      return getCliMessage(locale, "updateSummaryPartialOrFailed");
+  }
+}
+
+function formatUpdateOutcomeEvidenceLines(
+  result: UpdateCommandResult | RepairCommandResult,
+  outcome: UpdateHumanOutcome,
+  executionState: UpdateExecutionState,
+  locale: CliLocale = "en-US",
+): string[] {
+  if (outcome !== "partial-or-failed") return [];
+  return [
+    getCliMessage(locale, "executionFailureBoundary"),
+    getCliMessage(locale, "writeRepairIncompleteSentence"),
+    formatLabelValue(locale, "completedWrites", formatListForLocale(result.data.changedPaths, locale)),
+    formatLabelValue(locale, "completedSteps", formatListForLocale(executionState.completedSteps, locale)),
+    formatLabelValue(locale, "failedStep", executionState.failedStep ?? formatListForLocale([], locale)),
+    formatLabelValue(locale, "pendingSteps", formatListForLocale(executionState.pendingSteps, locale)),
+    getCliMessage(locale, "unexecutedItems"),
+    ...formatUnexecutedUpdateItems(result, executionState),
+  ];
+}
+
+function formatUnexecutedUpdateItems(
+  result: UpdateCommandResult | RepairCommandResult,
+  executionState: UpdateExecutionState,
+): string[] {
+  const pendingSet = new Set(executionState.pendingSteps);
+  const actions = result.command === "update.repair" ? result.data.repairPlan.actions : result.data.updatePlan.actions;
+  const pendingActions = actions
+    .filter((action) =>
+      pendingSet.has(`${result.command === "update.repair" ? "repair" : "update"}:${action.affectedPath}`) ||
+      executionState.failedStep === `${result.command === "update.repair" ? "repair" : "update"}:${action.affectedPath}` ||
+      (!result.data.changedPaths.includes(action.affectedPath) && result.status === "failure")
+    )
+    .map((action) => `- affectedPath=${action.affectedPath}; action=${action.action}`);
+  return pendingActions.length === 0 ? ["- none"] : pendingActions;
+}
+
+function formatUpdateOutcomeNextActions(
+  result: UpdateCommandResult | RepairCommandResult,
+  locale: CliLocale,
+  outcome: UpdateHumanOutcome,
+): string[] {
+  const validateAction = formatCliMessage(locale, "updateActionValidateAfterWrites", {
+    command: "speclite validate <target>",
+  });
+  const statusAction = formatCliMessage(locale, "updateActionStatusAfterWrites", {
+    command: "speclite status <target>",
+  });
+  const blockerActions = [
+    ...formatUpdateConflictActions(result, locale),
+    ...formatIssueNextActions(result.issues, locale, "speclite validate <target>"),
+  ];
+
+  if (outcome === "plan-ready") {
+    return [
+      ...blockerActions,
+      formatCliMessage(locale, "updateActionReviewPlanAuthorize", {
+        command: "speclite update <target> --yes",
+      }),
+      validateAction,
+      statusAction,
+    ];
+  }
+  if (outcome === "repair-plan-ready") {
+    return [
+      ...blockerActions,
+      formatCliMessage(locale, "updateActionReviewRepairAuthorize", {
+        command: "speclite update --repair <target> --yes",
+      }),
+      validateAction,
+      statusAction,
+    ];
+  }
+  if (outcome === "partial-or-failed") {
+    return [
+      ...blockerActions,
+      getCliMessage(locale, "updateActionInspectCompleted"),
+      validateAction,
+      statusAction,
+    ];
+  }
+  if (outcome === "applied") {
+    return [
+      validateAction,
+      statusAction,
+    ];
+  }
+  if (outcome === "blocked-by-conflict") {
+    return [
+      ...blockerActions,
+      formatCliMessage(locale, "updateActionReviewPlanAuthorize", {
+        command: result.command === "update.repair"
+          ? "speclite update --repair <target> --yes"
+          : "speclite update <target> --yes",
+      }),
+      validateAction,
+      statusAction,
+    ];
+  }
+  return [validateAction, statusAction];
+}
+
+function formatIssueNextActions(issues: ValidationIssue[], locale: CliLocale, command: string): string[] {
+  const blocking = issues
+    .filter((issue) => issue.severity === "critical" || issue.severity === "error")
+    .map((issue) => formatIssueSuggestedNextStep(issue, locale, command));
+  const nonBlocking = issues
+    .filter((issue) => issue.severity === "warning" || issue.severity === "info")
+    .map((issue) => formatIssueSuggestedNextStep(issue, locale, command));
+  return dedupeLines([...blocking, ...nonBlocking]);
+}
+
+function formatIssueSuggestedNextStep(issue: ValidationIssue, locale: CliLocale, command: string): string {
+  if (locale === "en-US") return issue.suggestedNextStep;
+
+  const key =
+    issue.severity === "critical" || issue.severity === "error"
+      ? "issueActionBlocking"
+      : "issueActionNonBlocking";
+  return formatCliMessage(locale, key, {
+    issueId: issue.issueId,
+    affectedPath: getIssueAffectedPath(issue),
+    reason: getIssueReasonCode(issue),
+    command,
+  });
+}
+
+function formatUpdateConflictActions(
+  result: UpdateCommandResult | RepairCommandResult,
+  locale: CliLocale,
+): string[] {
+  return result.data.conflicts.map((conflict) =>
+    formatCliMessage(locale, "updateActionResolveBlocker", {
+      affectedPath: conflict.affectedPath,
+      reason: conflict.reason,
+    })
+  );
+}
+
+function formatIssue(issue: ValidationIssue, locale: CliLocale = "en-US"): string {
   const location = issue.affectedPath ?? issue.component ?? "unknown";
-  const detailText = formatIssueDetails(issue.details);
-  return `[${issue.severity}] category=${issue.category} issueId=${issue.issueId} location=${location}${detailText} impact=${issue.impact} suggestedNextStep=${issue.suggestedNextStep}`;
+  const detailText = formatIssueDetails(issue.details, locale);
+  const affectedPath = issue.affectedPath === undefined ? "" : ` affectedPath=${issue.affectedPath}`;
+  const impact = locale === "zh-CN" ? getCliMessage(locale, "issueImpactSummary") : issue.impact;
+  return `[${issue.severity}] severity=${issue.severity} category=${issue.category} issueId=${issue.issueId} location=${location}${affectedPath}${detailText} impact=${impact} suggestedNextStep=${formatIssueSuggestedNextStep(issue, locale, "speclite validate <target>")}`;
 }
 
-function formatIssueDetails(details: ValidationIssue["details"]): string {
+function getIssueAffectedPath(issue: ValidationIssue): string {
+  return issue.affectedPath ?? issue.component ?? "command-level";
+}
+
+function getIssueReasonCode(issue: ValidationIssue): string {
+  const reason = issue.details?.reason;
+  if (typeof reason === "string" && reason.length > 0) return reason;
+  const status = issue.details?.status;
+  if (typeof status === "string" && status.length > 0) return status;
+  return issue.issueId;
+}
+
+function formatIssueDetails(details: ValidationIssue["details"], locale: CliLocale = "en-US"): string {
   if (details === undefined) return "";
   const fields = Object.entries(details)
     .filter(([, value]) => value === null || ["string", "number", "boolean"].includes(typeof value))
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([key, value]) => `${key}=${String(value)}`);
+    .map(([key, value]) => `${key}=${formatIssueDetailValue(locale, key, value)}`);
   return fields.length === 0 ? "" : ` details=${fields.join(";")}`;
+}
+
+function formatIssueDetailValue(locale: CliLocale, key: string, value: string | number | boolean | null): string {
+  if (locale === "zh-CN" && key === "manualAction") {
+    return getCliMessage(locale, "issueManualActionLocalized");
+  }
+  return String(value);
 }
 
 function formatPlanAction(
@@ -878,6 +1824,7 @@ function formatPlanAction(
     | UpdateCommandResult["data"]["updatePlan"]["actions"][number]
     | RepairCommandResult["data"]["repairPlan"]["actions"][number]
     | SyncCommandResult["data"]["syncPlan"]["actions"][number],
+  locale: CliLocale = "en-US",
 ): string {
   const fields = [
     `affectedPath=${action.affectedPath}`,
@@ -887,22 +1834,22 @@ function formatPlanAction(
   if (action.currentHash !== undefined) fields.push(`currentHash=${action.currentHash}`);
   if (action.expectedHash !== undefined) fields.push(`expectedHash=${action.expectedHash}`);
   if (action.reason !== undefined) fields.push(`reason=${action.reason}`);
-  fields.push(`nextAction=${getPlanActionNextStep(action.action, action.reason)}`);
+  fields.push(`nextAction=${getPlanActionNextStep(action.action, action.reason, locale)}`);
   return `- ${fields.join("; ")}`;
 }
 
-function getPlanActionNextStep(action: string, reason?: string): string {
+function getPlanActionNextStep(action: string, reason?: string, locale: CliLocale = "en-US"): string {
   if (action === "restore-canonical" || action === "regenerate") {
-    return "Review and rerun speclite update --repair --yes when ready to authorize this repair write.";
+    return getCliMessage(locale, "planActionRepair");
   }
   if (action === "create" || action === "update") {
-    return "Review and rerun with --yes when ready to authorize the planned write.";
+    return getCliMessage(locale, "planActionWrite");
   }
   if (action === "conflict") {
-    return "Resolve the conflict or use the explicit repair flow when applicable.";
+    return getCliMessage(locale, "planActionConflict");
   }
-  if (reason === "unchanged") return "No write required.";
-  return "Review the reason before changing this path.";
+  if (reason === "unchanged") return getCliMessage(locale, "planActionUnchanged");
+  return getCliMessage(locale, "planActionReviewReason");
 }
 
 function getUpdateAuthorizationState(result: UpdateCommandResult | RepairCommandResult): string {
@@ -970,10 +1917,25 @@ function formatInstallExternalAccessZh(
   sourceDescriptor: InstallCommandResult["data"]["sourceDescriptor"],
 ): string[] {
   if (sourceDescriptor.sourceType === "bundled") {
-    return ["未请求 external source access。"];
+    return ["未请求外部 source 访问。"];
   }
 
-  return formatInstallExternalAccess(sourceDescriptor);
+  const sourceValue =
+    sourceDescriptor.resolvedRoot ?? sourceDescriptor.version ?? sourceDescriptor.requestedVersion ?? "redacted-source";
+  const confirmationState =
+    sourceDescriptor.integrityEvidence.length > 0 ||
+    sourceDescriptor.version !== undefined ||
+    sourceDescriptor.contentHash !== undefined
+      ? "confirmed"
+      : "pending";
+  return [
+    [
+      `- sourceType=${sourceDescriptor.sourceType}`,
+      `sourceValue=${sourceValue}`,
+      `reason=${getInstallExternalAccessReasonZh(sourceDescriptor.sourceType)}`,
+      `confirmationState=${confirmationState}`,
+    ].join("; "),
+  ];
 }
 
 function getInstallExternalAccessReason(sourceType: string): string {
@@ -986,6 +1948,18 @@ function getInstallExternalAccessReason(sourceType: string): string {
   if (sourceType === "git") return "Resolve Git source metadata before selecting an installable SpecLite source.";
   if (sourceType === "local") return "Read local source metadata before selecting an installable SpecLite source.";
   return "Review source access intent before enabling source resolution.";
+}
+
+function getInstallExternalAccessReasonZh(sourceType: string): string {
+  if (sourceType === "npm") return "解析 npm package metadata 后再选择可安装的 SpecLite source。";
+  if (sourceType === "private-registry") {
+    return "解析 private registry package metadata 后再选择可安装的 SpecLite source。";
+  }
+  if (sourceType === "local-tarball") return "读取 local tarball metadata 后再选择可安装的 SpecLite source。";
+  if (sourceType === "offline-bundle") return "读取 offline bundle metadata 后再选择可安装的 SpecLite source。";
+  if (sourceType === "git") return "解析 Git source metadata 后再选择可安装的 SpecLite source。";
+  if (sourceType === "local") return "读取 local source metadata 后再选择可安装的 SpecLite source。";
+  return "启用 source resolution 前先检查 source access 意图。";
 }
 
 function formatOptionalSourceDescriptor(sourceDescriptor: StatusCommandResult["data"]["sourceDescriptor"]): string {

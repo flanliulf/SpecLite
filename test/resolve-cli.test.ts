@@ -29,6 +29,165 @@ describe("speclite resolve CLI", () => {
     }
   });
 
+  it("keeps resolve config default output pure JSON when human mode is not requested", async () => {
+    const fixtureRoot = await createResolveParityFixture({ brokenOptionalConfig: true });
+    try {
+      const result = await runResolve([
+        "resolve",
+        "config",
+        "--project-root",
+        fixtureRoot,
+        "--key",
+        "core.project_name",
+      ]);
+
+      expect(result.exitCodes).toEqual([0]);
+      expect(JSON.parse(result.stdout)).toEqual({ "core.project_name": "Fixture User" });
+      expect(result.stdout).not.toContain("Outcome");
+      const diagnostics = parseJsonLines(result.stderr);
+      expect(ResolveStderrJsonLineSchema.parse(diagnostics[0])).toMatchObject({
+        severity: "warning",
+        affectedPath: "_speclite/custom/config.toml",
+      });
+    } finally {
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders explicit human resolve output for successful config keys without leaking absolute paths", async () => {
+    const fixtureRoot = await createResolveParityFixture();
+    try {
+      const result = await runResolve([
+        "resolve",
+        "config",
+        "--human",
+        "--locale",
+        "en-US",
+        "--project-root",
+        fixtureRoot,
+        "--key",
+        "core.project_name",
+      ]);
+
+      expect(result.exitCodes).toEqual([0]);
+      expect(result.stderr).toBe("");
+      expect(result.stdout).toBe(await readExpectedHumanOutput("config-resolved.txt"));
+      expect(result.stdout).not.toContain(fixtureRoot);
+      expect(result.stdout).not.toContain(os.homedir());
+      expect(result.stdout).toContain("requested key: core.project_name");
+      expect(result.stdout).toContain("resolved layer: merged config layers");
+      expect(result.stdout).toContain("source path: _speclite/config.user.toml");
+      expect(result.stdout).toContain("value summary: object with 1 key");
+      expect(result.stdout).toContain("中文 locale preserves technical identifiers");
+    } finally {
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders explicit human resolved-with-warnings output for optional layer diagnostics", async () => {
+    const fixtureRoot = await createResolveParityFixture({ brokenOptionalConfig: true });
+    try {
+      const result = await runResolve([
+        "resolve",
+        "config",
+        "--human",
+        "--locale",
+        "en-US",
+        "--project-root",
+        fixtureRoot,
+      ]);
+
+      expect(result.exitCodes).toEqual([0]);
+      expect(result.stderr).toBe("");
+      expect(result.stdout).toBe(await readExpectedHumanOutput("config-resolved-with-warnings.txt"));
+      expect(result.stdout).not.toContain(fixtureRoot);
+      expect(result.stdout).toContain("Outcome: resolved-with-warnings");
+      expect(result.stdout).toContain("fallback source: optional layer treated as empty object");
+      expect(result.stdout).toContain("source path: multiple");
+      expect(result.stdout).toContain("_speclite/custom/config.toml");
+    } finally {
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders explicit human unresolved output for missing config keys while default mode stays empty success", async () => {
+    const fixtureRoot = await createResolveParityFixture();
+    try {
+      const missing = await runResolve([
+        "resolve",
+        "config",
+        "--project-root",
+        fixtureRoot,
+        "--key",
+        "missing.value",
+      ]);
+      expect(missing.exitCodes).toEqual([0]);
+      expect(missing.stderr).toBe("");
+      expect(JSON.parse(missing.stdout)).toEqual({});
+
+      const human = await runResolve([
+        "resolve",
+        "config",
+        "--human",
+        "--locale",
+        "en-US",
+        "--project-root",
+        fixtureRoot,
+        "--key",
+        "missing.value",
+      ]);
+      expect(human.exitCodes).toEqual([0]);
+      expect(human.stderr).toBe("");
+      expect(human.stdout).toBe(await readExpectedHumanOutput("config-unresolved.txt"));
+      expect(human.stdout).toContain("Outcome: unresolved");
+      expect(human.stdout).toContain("missing key: missing.value");
+    } finally {
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders explicit human invalid-input output for missing resolve options", async () => {
+    const result = await runResolve(["resolve", "config", "--human", "--locale", "en-US"]);
+
+    expect(result.exitCodes).toEqual([1]);
+    expect(result.stderr).toBe("");
+    expect(result.stdout).toBe(await readExpectedHumanOutput("config-invalid-input.txt"));
+    expect(result.stdout).toContain("Outcome: invalid-input");
+    expect(result.stdout).toContain("runtime-path.missing-entry");
+    expect(result.stdout).toContain("speclite resolve config --project-root <projectRoot> [--key <dottedKey>] [--human]");
+  });
+
+  it("renders explicit human customization fallback search as resolved-with-warnings", async () => {
+    const fixtureRoot = await createResolveParityFixture();
+    try {
+      const skillDir = path.join(fixtureRoot, ".claude/skills/speclite-create-story");
+      const cwd = path.join(fixtureRoot, "nested/work");
+      const result = await runResolve([
+        "resolve",
+        "customization",
+        "--human",
+        "--locale",
+        "en-US",
+        "--skill",
+        skillDir,
+        "--key",
+        "workflow.on_complete",
+      ], { cwd });
+
+      expect(result.exitCodes).toEqual([0]);
+      expect(result.stderr).toBe("");
+      expect(result.stdout).not.toContain(fixtureRoot);
+      expect(result.stdout).not.toContain(os.homedir());
+      expect(result.stdout).toContain("Outcome: resolved-with-warnings");
+      expect(result.stdout).toContain("fallback source: project root search");
+      expect(result.stdout).toContain("source path: _speclite/custom/speclite-create-story.user.toml");
+      expect(result.stdout).toContain("_speclite/custom/speclite-create-story.toml");
+      expect(result.stdout).toContain("requested key: workflow.on_complete");
+    } finally {
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
   it("supports missing and repeated key selection with empty success", async () => {
     const fixtureRoot = await createResolveParityFixture();
     try {
@@ -81,6 +240,31 @@ describe("speclite resolve CLI", () => {
         affectedPath: "_speclite/custom/config.toml",
       });
       expect(result.stderr).not.toContain(fixtureRoot);
+    } finally {
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders explicit human invalid-input output for required layer failures without raw exceptions", async () => {
+    const fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-resolve-required-human-"));
+    try {
+      const result = await runResolve([
+        "resolve",
+        "config",
+        "--human",
+        "--locale",
+        "en-US",
+        "--project-root",
+        fixtureRoot,
+      ]);
+
+      expect(result.exitCodes).toEqual([1]);
+      expect(result.stderr).toBe("");
+      expect(result.stdout).toContain("Outcome: invalid-input");
+      expect(result.stdout).toContain("failed layer: _speclite/config.toml");
+      expect(result.stdout).toContain("reason: runtime-path.missing-entry");
+      expect(result.stdout).not.toContain(fixtureRoot);
+      expect(result.stdout).not.toContain("Error:");
     } finally {
       await rm(fixtureRoot, { recursive: true, force: true });
     }
@@ -238,6 +422,10 @@ async function createResolveParityFixture(options: { brokenOptionalConfig?: bool
   await cp(path.join(inputRoot, "customization"), fixtureRoot, { recursive: true });
 
   return fixtureRoot;
+}
+
+async function readExpectedHumanOutput(fileName: string): Promise<string> {
+  return readFile(path.join("test/fixtures/resolve-parity/expected/human", fileName), "utf8");
 }
 
 function parseJsonLines(text: string): unknown[] {

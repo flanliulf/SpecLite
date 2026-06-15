@@ -625,9 +625,9 @@ describe("update ownership planning", () => {
       expect(parsed.data.completedSteps).toEqual(["installed-state-read", "update-plan"]);
       expect(parsed.data.failedStep).toBe("conflict-check");
       expect(parsed.data.pendingSteps).toEqual(["resolve-conflicts"]);
-      expect(human).toContain("Conflicts:");
-      expect(human).toContain("Step State");
-      expect(human).toContain("Failed step: conflict-check");
+      expect(human).toContain("conflicts");
+      expect(human).toContain("step 状态");
+      expect(human).toContain("失败 step：conflict-check");
       expect(human).toContain("_speclite/custom/config.toml");
     } finally {
       await rm(tempRoot, { recursive: true, force: true });

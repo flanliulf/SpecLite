@@ -1,6 +1,6 @@
 # Story 8.1: Shared CLI Outcome And Presentation Contract（共享 CLI Outcome 与展示契约）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: 聚焦当前 CLI human-readable output，不新增 GUI/TUI，不改变 command core behavior。 -->
 
@@ -38,29 +38,29 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Define shared outcome presentation primitives（AC: 1-4）
-  - [ ] 在 `src/diagnostics/output.ts` 或新增 `src/cli/presentation.ts` 中定义 command title、outcome label、Summary、Scope、State、Evidence、Issues、Next Actions、Empty State 的统一 renderer primitive。
-  - [ ] 复用 `CommandResult.status`、command-specific data、`ValidationIssue`、canonical issue ordering 和 project-relative POSIX paths。
-  - [ ] 不新增 public JSON 字段；如确需新增，先更新 owning SPEC 和 executable schema。
+- [x] Task 1: Define shared outcome presentation primitives（AC: 1-4）
+  - [x] 在 `src/diagnostics/output.ts` 或新增 `src/cli/presentation.ts` 中定义 command title、outcome label、Summary、Scope、State、Evidence、Issues、Next Actions、Empty State 的统一 renderer primitive。
+  - [x] 复用 `CommandResult.status`、command-specific data、`ValidationIssue`、canonical issue ordering 和 project-relative POSIX paths。
+  - [x] 不新增 public JSON 字段；如确需新增，先更新 owning SPEC 和 executable schema。
 
-- [ ] Task 2: Introduce outcome taxonomy without cross-command enum leak（AC: 1, 4）
-  - [ ] 为 install、update/repair、status、validate、resolve 分别定义 human outcome vocab，不把所有命令强行塞进同一 enum。
-  - [ ] Outcome label 只属于 human-readable presentation，除非 owning SPEC 明确把它提升为 public JSON field。
-  - [ ] Summary 必须先回答完成状态、写入状态和用户动作。
+- [x] Task 2: Introduce outcome taxonomy without cross-command enum leak（AC: 1, 4）
+  - [x] 为 install、update/repair、status、validate、resolve 分别定义 human outcome vocab，不把所有命令强行塞进同一 enum。
+  - [x] Outcome label 只属于 human-readable presentation，除非 owning SPEC 明确把它提升为 public JSON field。
+  - [x] Summary 必须先回答完成状态、写入状态和用户动作。
 
-- [ ] Task 3: Extend message catalog and locale rules（AC: 2, 3）
-  - [ ] 扩展 `src/cli/messages.ts`，至少支持 `zh-CN` 默认和 `en-US` fallback。
-  - [ ] 自然语言走 catalog；command、flag、path、issue id、schema id、step id、target id、JSON field 保持英文。
-  - [ ] Empty states 使用 catalog，而不是硬编码散落在各 command renderer 中。
+- [x] Task 3: Extend message catalog and locale rules（AC: 2, 3）
+  - [x] 扩展 `src/cli/messages.ts`，至少支持 `zh-CN` 默认和 `en-US` fallback。
+  - [x] 自然语言走 catalog；command、flag、path、issue id、schema id、step id、target id、JSON field 保持英文。
+  - [x] Empty states 使用 catalog，而不是硬编码散落在各 command renderer 中。
 
-- [ ] Task 4: Migrate existing human renderers incrementally（AC: 1-4）
-  - [ ] 先保留 JSON renderer `renderCommandResultJson()` 独立稳定。
-  - [ ] 将 `renderInstallHumanOutput`、`renderStatusHumanOutput`、`renderValidateHumanOutput`、`renderUpdateHumanOutput` 迁移到共享 primitive。
-  - [ ] 不改变 command core behavior、不改变 exit code、不改变 issue ordering。
+- [x] Task 4: Migrate existing human renderers incrementally（AC: 1-4）
+  - [x] 先保留 JSON renderer `renderCommandResultJson()` 独立稳定。
+  - [x] 将 `renderInstallHumanOutput`、`renderStatusHumanOutput`、`renderValidateHumanOutput`、`renderUpdateHumanOutput` 迁移到共享 primitive。
+  - [x] 不改变 command core behavior、不改变 exit code、不改变 issue ordering。
 
-- [ ] Task 5: Tests（AC: 1-4）
-  - [ ] 新增 presentation focused tests，覆盖 title/outcome/Summary/Next Actions、中文技术标识保留、empty state、JSON parity。
-  - [ ] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞、`git diff --check`。
+- [x] Task 5: Tests（AC: 1-4）
+  - [x] 新增 presentation focused tests，覆盖 title/outcome/Summary/Next Actions、中文技术标识保留、empty state、JSON parity。
+  - [x] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -123,22 +123,38 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- 2026-06-16：`python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` 因本机默认 `python3` 缺少 stdlib `tomllib` 失败；已按 skill fallback 读取 base/team/user customization，team/user override 均不存在。
+- 2026-06-16：Red phase 运行 `npm test -- test/cli-output-presentation.test.ts`，4 个 focused presentation tests 预期失败，覆盖 shared frame、zh-CN 技术标识、empty state、JSON parity。
+- 2026-06-16：Green/refactor 后运行 `npm test -- test/cli-output-presentation.test.ts`，4 tests passed。
+- 2026-06-16：Story Evidence Plan 运行 `npm test -- test/cli-smoke.test.ts test/status-command.test.ts test/validate-command.test.ts test/update-command.test.ts`，4 files / 49 tests passed。
+- 2026-06-16：运行 `npm run build`，tsup ESM/DTS build success。
+- 2026-06-16：运行 `npm test`，48 files / 335 tests passed。
+- 2026-06-16：运行 `git diff --check`，通过，无 whitespace error。
+- 2026-06-16：`package.json` 未配置 `lint` script，lint 不适用，未伪造执行结果。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 在 `src/diagnostics/output.ts` 内新增共享 human presentation frame，统一 command title、Outcome、Summary、Scope、State、Evidence、Issues、Empty State 和 Next Actions 的输出顺序。
+- Summary 首三行统一回答完成状态、写入状态、是否需要用户动作；Outcome label 仅在 human-readable output 中派生，未新增 public JSON 字段。
+- install、status、validate、update/repair human renderers 已迁移到共享 primitive；`renderCommandResultJson()` 保持独立，command core behavior、exit code 和 issue ordering 未改变。
+- `src/cli/messages.ts` 扩展 `zh-CN`/`en-US` catalog 和 lookup，empty state 文案集中管理；中文输出保留 command、flag、path、issue id、schema id、step id、target id、JSON field 等技术标识。
+- 新增 focused presentation tests 验证 shared frame、中文技术标识保留、empty state 和 JSON parity。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `src/cli/messages.ts`
+- `src/diagnostics/output.ts`
+- `test/cli-output-presentation.test.ts`
+- `_bmad-output/implementation-artifacts/stories/8-1-shared-cli-outcome-and-presentation-contract.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.1 ready-for-dev Story，定义共享 CLI outcome 与 presentation contract。 | Amelia |
+| 2026-06-16 | 1.0 | 实现共享 CLI outcome presentation primitive、locale catalog 扩展、renderer 迁移和 focused presentation tests，Story 进入 review。 | GPT-5 Codex |

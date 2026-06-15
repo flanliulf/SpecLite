@@ -50,7 +50,7 @@ describe("fresh-install-empty-project release gate fixture", () => {
       expect(parsed.data.pendingSteps).toEqual([]);
       expect(renderCommandResultJson(parsed)).not.toContain("readySummary");
 
-      const humanOutput = renderInstallHumanOutput(parsed);
+      const humanOutput = renderInstallHumanOutput(parsed, { locale: "en-US" });
       expect(humanOutput).toContain("SpecLite ready summary");
       expect(humanOutput).toContain("Completed steps");
       expect(humanOutput).toContain("Installed modules");
@@ -291,9 +291,9 @@ describe("existing-install-update normal update release gate fixture", () => {
       expect(JSON.stringify(parsed.data)).not.toContain("repairPlan");
       expect(JSON.stringify(parsed.data.updatePlan.actions)).not.toContain("restore-canonical");
       expect(JSON.stringify(parsed.data.updatePlan.actions)).not.toContain("regenerate");
-      expect(output).toContain("Conflicts:");
-      expect(output).toContain("Step State");
-      expect(output).toContain("Failed step: conflict-check");
+      expect(output).toContain("conflicts");
+      expect(output).toContain("step 状态");
+      expect(output).toContain("失败 step：conflict-check");
       expect(output).toContain("installer-owned-drift");
       expect(output).toContain("_speclite/config.toml");
       expect(output).not.toContain("ready summary");
@@ -325,7 +325,13 @@ describe("ide-drift validate release gate fixture", () => {
         runtime: { cwd: tempRoot, targetProject: "ide-drift" },
       });
       const parsed = ValidateCommandResultSchema.parse(outcome.result);
-      const output = renderValidateHumanOutput(parsed, { columns: 60, noColor: true, isTty: false, ci: true });
+      const output = renderValidateHumanOutput(parsed, {
+        locale: "en-US",
+        columns: 60,
+        noColor: true,
+        isTty: false,
+        ci: true,
+      });
 
       expect(outcome.exitCode).toBe(1);
       expect(parsed).toEqual(await readIdeDriftExpectedCommandJson());

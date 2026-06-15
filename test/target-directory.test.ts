@@ -448,7 +448,7 @@ describe("install target directory no-write orchestration", () => {
         "Run speclite status or speclite validate for installed-state details.",
       ]);
 
-      const humanOutput = renderInstallHumanOutput(outcome.result);
+      const humanOutput = renderInstallHumanOutput(outcome.result, { locale: "en-US" });
       expect(humanOutput).toContain("Directory state: existing-install");
       expect(humanOutput).toContain("Manifest version: speclite.manifest.v1");
       expect(humanOutput).toContain("IDE target statuses:");

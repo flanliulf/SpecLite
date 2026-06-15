@@ -1,6 +1,6 @@
 # Story 8.4: Status And Validate Human Output Separation（Status 与 Validate 人类输出分层）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: 保持 `status` 轻量方向感，`validate` 完整诊断，不改变 JSON contract。 -->
 
@@ -48,28 +48,28 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Implement status outcome mapping（AC: 1, 2）
-  - [ ] 从 `StatusCommandData.highLevelHealth`、manifest presence、IDE target status、source descriptor 推导 status human outcome。
-  - [ ] 按 AC1 mapping table 实现 `configured -> installed`、`not-configured -> not-installed`、`partial -> partial`、`failed -> failed`。
-  - [ ] 若输出 `stale` 或 `unknown`，必须作为 human-derived label，并在 Evidence 中说明 manifest、source descriptor、version/evidence insufficiency 或 installed-state summary 不足；不得扩展 `status.data.highLevelHealth` public JSON enum，除非先更新 SPEC。
-  - [ ] 对 `not-configured`、`partial`、`failed` 明确说明 command 成功只是读取成功，不代表安装健康通过。
-  - [ ] 不让 `status` 执行 full validation、remote source access、implicit update check 或 repair planning。
+- [x] Task 1: Implement status outcome mapping（AC: 1, 2）
+  - [x] 从 `StatusCommandData.highLevelHealth`、manifest presence、IDE target status、source descriptor 推导 status human outcome。
+  - [x] 按 AC1 mapping table 实现 `configured -> installed`、`not-configured -> not-installed`、`partial -> partial`、`failed -> failed`。
+  - [x] 若输出 `stale` 或 `unknown`，必须作为 human-derived label，并在 Evidence 中说明 manifest、source descriptor、version/evidence insufficiency 或 installed-state summary 不足；不得扩展 `status.data.highLevelHealth` public JSON enum，除非先更新 SPEC。
+  - [x] 对 `not-configured`、`partial`、`failed` 明确说明 command 成功只是读取成功，不代表安装健康通过。
+  - [x] 不让 `status` 执行 full validation、remote source access、implicit update check 或 repair planning。
 
-- [ ] Task 2: Implement validate outcome mapping（AC: 3, 4）
-  - [ ] 从 `ValidateCommandData.issueCounts` 和 `CommandResult.status` 推导 `valid`、`valid-with-warnings`、`invalid`、`cannot-validate`。
-  - [ ] 输出 checkedCategories、checkedTargets、validatedPaths 和 issue list，排序复用 `src/validation/validation-order.ts`。
-  - [ ] error/critical 的 Next Actions 应从 issue category / issue id / suggestedNextStep 推导具体动作。
+- [x] Task 2: Implement validate outcome mapping（AC: 3, 4）
+  - [x] 从 `ValidateCommandData.issueCounts` 和 `CommandResult.status` 推导 `valid`、`valid-with-warnings`、`invalid`、`cannot-validate`。
+  - [x] 输出 checkedCategories、checkedTargets、validatedPaths 和 issue list，排序复用 `src/validation/validation-order.ts`。
+  - [x] error/critical 的 Next Actions 应从 issue category / issue id / suggestedNextStep 推导具体动作。
 
-- [ ] Task 3: Update renderer and catalog（AC: 1-4）
-  - [ ] 扩展 `renderStatusHumanOutput()` 与 `renderValidateHumanOutput()`，使用 Story 8.1 shared frame。
-  - [ ] 扩展 `src/cli/messages.ts` 的 status/validate outcome、empty state 和 Next Actions 文案。
-  - [ ] 技术标识不翻译，路径保持 project-relative POSIX。
+- [x] Task 3: Update renderer and catalog（AC: 1-4）
+  - [x] 扩展 `renderStatusHumanOutput()` 与 `renderValidateHumanOutput()`，使用 Story 8.1 shared frame。
+  - [x] 扩展 `src/cli/messages.ts` 的 status/validate outcome、empty state 和 Next Actions 文案。
+  - [x] 技术标识不翻译，路径保持 project-relative POSIX。
 
-- [ ] Task 4: Tests（AC: 1-4）
-  - [ ] 覆盖 status `not-configured`、`configured`、`partial`、`failed` human output。
-  - [ ] 覆盖 `highLevelHealth` 到 human outcome 的 deterministic mapping，并证明 `stale` / `unknown` 不会作为新的 public JSON enum 输出。
-  - [ ] 覆盖 validate no issues、warning only、error/critical、manifest unreadable/cannot-validate。
-  - [ ] 验证 JSON output 不变，status 不增加 issues 来表达 health。
+- [x] Task 4: Tests（AC: 1-4）
+  - [x] 覆盖 status `not-configured`、`configured`、`partial`、`failed` human output。
+  - [x] 覆盖 `highLevelHealth` 到 human outcome 的 deterministic mapping，并证明 `stale` / `unknown` 不会作为新的 public JSON enum 输出。
+  - [x] 覆盖 validate no issues、warning only、error/critical、manifest unreadable/cannot-validate。
+  - [x] 验证 JSON output 不变，status 不增加 issues 来表达 health。
 
 ## Dev Notes（开发备注）
 
@@ -133,22 +133,34 @@ Outcome 可以由 renderer helper 推导，不必改变 command result shape。R
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- 2026-06-16 03:34 CST：`npm test -- test/status-command.test.ts test/validate-command.test.ts` 红灯，确认现有 human outcome 仍为 `status-*` / `validate-*`。
+- 2026-06-16 03:36 CST：focused suite 通过，2 files / 31 tests passed。
+- 2026-06-16 03:37 CST：`npm run build` 通过；`release/packaging-manifest.json` 无 drift。
+- 2026-06-16 03:37 CST：`npm test` 通过，49 files / 348 tests passed；`git diff --check` 通过。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- `renderStatusHumanOutput()` 现在从 `status.data.highLevelHealth` 推导 human-only outcome：`configured -> installed`、`not-configured -> not-installed`、`partial -> partial`、`failed -> failed`。
+- status human output 明确说明 `CommandResult.status=success` 仅代表读取完成，不等于安装健康通过；未新增 status JSON issues 或 public JSON fields。
+- `renderValidateHumanOutput()` 现在从 `issueCounts` / `CommandResult.status` 推导 `valid`、`valid-with-warnings`、`invalid`、`cannot-validate`，并复用 canonical issue/category/path ordering 展示诊断证据。
+- validate Next Actions 优先使用 error/critical issue 的 `suggestedNextStep`，再追加既有 command-level next actions。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `src/cli/messages.ts`
+- `src/diagnostics/output.ts`
+- `test/status-command.test.ts`
+- `test/validate-command.test.ts`
+- `_bmad-output/implementation-artifacts/stories/8-4-status-and-validate-human-output-separation.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.4 ready-for-dev Story，聚焦 status 与 validate human output 分层。 | Amelia |
+| 2026-06-16 | 1.0 | 实现 status/validate human-only outcome、canonical validate 展示和 focused tests，推进到 review。 | Codex |

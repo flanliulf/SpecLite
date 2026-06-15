@@ -1,6 +1,6 @@
 # Story 8.6: Localized Next Actions And Message Catalog（本地化 Next Actions 与消息目录）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: 收敛默认中文 human-readable output、Next Actions 与 message catalog。 -->
 
@@ -38,26 +38,26 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Expand message catalog model（AC: 1, 2）
-  - [ ] 将 `src/cli/messages.ts` 从 locale resolver 扩展为 command output catalog。
-  - [ ] 为 install/update/status/validate/resolve 提供 `zh-CN` 默认和 `en-US` fallback。
-  - [ ] 技术标识保持英文：command、flag、path、issue id、schema id、step id、target id、JSON field。
+- [x] Task 1: Expand message catalog model（AC: 1, 2）
+  - [x] 将 `src/cli/messages.ts` 从 locale resolver 扩展为 command output catalog。
+  - [x] 为 install/update/status/validate/resolve 提供 `zh-CN` 默认和 `en-US` fallback。
+  - [x] 技术标识保持英文：command、flag、path、issue id、schema id、step id、target id、JSON field。
 
-- [ ] Task 2: Localize Next Actions safely（AC: 1, 3, 4）
-  - [ ] 建立 Next Actions builder，输入 command id、target display path、issues、write state、outcome。
-  - [ ] 默认中文 Next Actions 不直接透传英文内部 `nextActions`，但保留 reason code、affected path 和 technical command。
-  - [ ] 安全排序：blocker 修复优先，授权写入其次，validate/status 最后。
+- [x] Task 2: Localize Next Actions safely（AC: 1, 3, 4）
+  - [x] 建立 Next Actions builder，输入 command id、target display path、issues、write state、outcome。
+  - [x] 默认中文 Next Actions 不直接透传英文内部 `nextActions`，但保留 reason code、affected path 和 technical command。
+  - [x] 安全排序：blocker 修复优先，授权写入其次，validate/status 最后。
 
-- [ ] Task 3: Propagate locale beyond install（AC: 2）
-  - [ ] 在 `src/bin/speclite.ts` 为 update/status/validate/resolve human mode 设计 locale flag/env 解析策略。
-  - [ ] `--json` output 不受 locale、TTY、terminal width 或 NO_COLOR 影响。
-  - [ ] 如果某 command 不支持 locale flag，应通过 shared default resolver 使用 env/default。
+- [x] Task 3: Propagate locale beyond install（AC: 2）
+  - [x] 在 `src/bin/speclite.ts` 为 update/status/validate/resolve human mode 设计 locale flag/env 解析策略。
+  - [x] `--json` output 不受 locale、TTY、terminal width 或 NO_COLOR 影响。
+  - [x] 如果某 command 不支持 locale flag，应通过 shared default resolver 使用 env/default。
 
-- [ ] Task 4: Tests（AC: 1-4）
-  - [ ] 覆盖默认中文 natural language，不翻译技术标识。
-  - [ ] 覆盖 `--locale en-US` 与 `SPECLITE_LOCALE=en-US`。
-  - [ ] 覆盖 issue id/category 映射到本地化 action 且保留 affectedPath/reason。
-  - [ ] 覆盖 JSON output 与 exit code 不随 locale 改变。
+- [x] Task 4: Tests（AC: 1-4）
+  - [x] 覆盖默认中文 natural language，不翻译技术标识。
+  - [x] 覆盖 `--locale en-US` 与 `SPECLITE_LOCALE=en-US`。
+  - [x] 覆盖 issue id/category 映射到本地化 action 且保留 affectedPath/reason。
+  - [x] 覆盖 JSON output 与 exit code 不随 locale 改变。
 
 ## Dev Notes（开发备注）
 
@@ -117,22 +117,42 @@ Catalog 可以拆到 `src/cli/messages/*.ts` 或集中在 `src/cli/messages.ts`�
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `npm test -- test/cli-message-catalog.test.ts`（RED：4 failed；GREEN：4 passed）
+- `npm test -- test/cli-message-catalog.test.ts test/cli-smoke.test.ts test/install-outcome-human-output.test.ts test/status-command.test.ts test/validate-command.test.ts test/update-command.test.ts test/resolve-cli.test.ts`（80 passed）
+- `npm run build`（通过；曾产生 `release/packaging-manifest.json` packageHash drift，已精确恢复）
+- `npm test`（50 files / 360 tests passed）
+- `git diff --check`（通过）
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+实现 `zh-CN` 默认 command output catalog 与 `en-US` fallback，覆盖 install/update/status/validate/resolve 的 human output。Next Actions 改为 human-only localized builder：默认中文不透传内部英文 `nextActions`，命令建议包含实际 target 或 `<target>` 占位，并按 blocker 修复、授权写入、validate/status 复查排序。Issue human `suggestedNextStep` 可按 issue id/category 本地化，同时保留 `issueId`、`affectedPath` 与 reason code；`CommandResult` JSON、exit code、issue ordering 与 path normalization 未改变。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `src/cli/messages.ts`
+- `src/diagnostics/output.ts`
+- `src/bin/speclite.ts`
+- `src/commands/resolve.ts`
+- `test/cli-message-catalog.test.ts`
+- `test/cli-output-presentation.test.ts`
+- `test/fixture-release-gates.test.ts`
+- `test/install-progress-ready-summary.test.ts`
+- `test/resolve-cli.test.ts`
+- `test/source-selection.test.ts`
+- `test/status-command.test.ts`
+- `test/target-directory.test.ts`
+- `test/update-command.test.ts`
+- `test/validate-command.test.ts`
+- `_bmad-output/implementation-artifacts/stories/8-6-localized-next-actions-and-message-catalog.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.6 ready-for-dev Story，聚焦本地化 Next Actions 与 message catalog。 | Amelia |
+| 2026-06-16 | 1.0 | 实现默认 `zh-CN` human output catalog、localized Next Actions、locale propagation 与 focused regression tests。 | GPT-5 Codex |

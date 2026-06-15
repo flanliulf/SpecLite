@@ -225,7 +225,7 @@ describe("redacted SourceDescriptor human reporting", () => {
 
     const output = renderStatusHumanOutput(result);
 
-    expect(output).toContain("Source: sourceType=private-registry");
+    expect(output).toContain("来源：sourceType=private-registry");
     expect(output).toContain("channel=internal");
     expect(output).toContain("version=2.0.0");
     expect(output).toContain("trustStatus=unverified");

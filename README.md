@@ -92,6 +92,28 @@ speclite validate /path/to/project --json
 speclite governance-report /path/to/project --json
 ```
 
+常用 flow 边界：
+
+```sh
+PROJECT_ROOT=/path/to/project
+
+# read-only checks
+NO_COLOR=1 speclite status "$PROJECT_ROOT"
+NO_COLOR=1 speclite validate "$PROJECT_ROOT"
+
+# prewrite previews
+NO_COLOR=1 speclite install "$PROJECT_ROOT"
+NO_COLOR=1 speclite update "$PROJECT_ROOT"
+NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair
+
+# write-authorized and repair-authorized writes
+NO_COLOR=1 speclite install "$PROJECT_ROOT" --yes
+NO_COLOR=1 speclite update "$PROJECT_ROOT" --yes
+NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
+```
+
+这些 human-readable 示例用于帮助人工阅读和复制命令；`--json` 的 contract 以 schema、SPEC 和 focused tests 为准。
+
 ## CLI Commands（命令）
 
 | Command | Purpose |
@@ -107,10 +129,10 @@ speclite governance-report /path/to/project --json
 | `speclite sync [target-directory]` | 对齐 installed source projections 和 IDE mirrors，不隐藏执行 repair 语义。 |
 | `speclite uninstall [target-directory]` | 移除 installer-owned SpecLite 文件，并保留 human-owned 与 workflow-owned 路径。 |
 | `speclite governance-report [target-directory]` | 基于 installed-state evidence 生成只读流程治理覆盖报告。 |
-| `speclite resolve config` | Runtime support command，用于解析项目 config。 |
-| `speclite resolve customization` | Runtime support command，用于解析 skill customization。 |
+| `speclite resolve config` | Runtime support command，用于解析项目 config；默认 stdout 保持 pure JSON，可显式加 `--human` 查看排查用 support output。 |
+| `speclite resolve customization` | Runtime support command，用于解析 skill customization；默认 stdout 保持 pure JSON，可显式加 `--human` 查看排查用 support output。 |
 
-`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](docs/how-to/manage-installed-project.md)。
+`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。未传 `--human` 时，missing key 仍输出 `{}`、exit code 为 `0`、stderr 为空，确保自动化和 installed skills 依赖的 contract 不变。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](docs/how-to/manage-installed-project.md)。
 
 `install` 的默认 human-readable output 使用 `zh-CN`。`speclite install /path/to/project --yes` 是默认无交互安装；需要自定义 modules、config 或 IDE targets 时使用 `--yes --interactive`。英文输出可用 `--locale en-US` 或 `SPECLITE_LOCALE=en-US`，JSON 输出不受 locale 影响。
 
@@ -168,3 +190,5 @@ npm run release:check
 - Planning and implementation artifacts：`_bmad-output/`
 
 涉及 skill package、manifest、fixture、runtime path、validation issue model 或 release packaging 的变更，应同步检查对应 specs、fixtures 和 packaging verification。
+
+CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/cli-human-output-matrix.md](docs/reference/cli-human-output-matrix.md)。

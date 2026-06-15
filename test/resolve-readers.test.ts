@@ -47,6 +47,16 @@ describe("resolve config reader", () => {
         "core.project_name": "User",
         "modules.sdlc.agents": [{ code: "dev", label: "Team Dev" }],
       });
+      expect(result.sources).toMatchObject({
+        "core.project_name": {
+          affectedPath: "_speclite/config.user.toml",
+          role: "optional-config",
+        },
+        "modules.sdlc.agents": {
+          affectedPath: "_speclite/custom/config.toml",
+          role: "optional-config",
+        },
+      });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -123,6 +133,16 @@ describe("resolve customization reader", () => {
       expect(result.value).toEqual({
         "workflow.on_complete": "用户完成",
         "workflow.persistent_facts": ["base", "team"],
+      });
+      expect(result.sources).toMatchObject({
+        "workflow.on_complete": {
+          affectedPath: "_speclite/custom/speclite-create-story.user.toml",
+          role: "user-custom",
+        },
+        "workflow.persistent_facts": {
+          affectedPath: "_speclite/custom/speclite-create-story.toml",
+          role: "team-custom",
+        },
       });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });

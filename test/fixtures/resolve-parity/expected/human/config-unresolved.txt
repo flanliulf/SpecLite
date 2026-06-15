@@ -1,0 +1,27 @@
+SpecLite resolve config
+Outcome: unresolved
+
+Summary
+Completed: yes
+Writes: no project files changed
+User action: required
+- requested key: missing.value
+- resolved layer: merged config layers
+- source path: none
+- value summary: empty object
+
+Scope
+- command: speclite resolve config
+- output mode: human
+- machine contract: default stdout remains pure JSON when --human is omitted
+
+Evidence
+- resolved keys: none
+- source paths: _speclite/config.toml, _speclite/config.user.toml, _speclite/custom/config.toml, _speclite/custom/config.user.toml
+
+Issues:
+- reason: unresolved
+- missing key: missing.value
+
+Next Actions / Next actions:
+- Check the requested dotted key or inspect the resolved config layers.

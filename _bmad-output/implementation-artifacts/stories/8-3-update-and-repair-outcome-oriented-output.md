@@ -1,6 +1,6 @@
 # Story 8.3: Update And Repair Outcome-Oriented Output（Update 与 Repair Outcome 导向输出）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: 聚焦 `speclite update` 与 `speclite update --repair` 的 human-readable output，不改变 update/repair safety semantics。 -->
 
@@ -55,27 +55,27 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Derive update/repair outcomes without changing data schema（AC: 1-6）
-  - [ ] 从 `UpdateCommandData` / `RepairCommandData` 的 `updatePlan`、`repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` 推导 human outcome。
-  - [ ] 当 apply、safe-write、operation-lock 或 partial execution failure 发生时，推导 `partial-or-failed`，并区分已完成写入、失败步骤、未执行项和保护边界。
-  - [ ] 保持 `update.conflicts` command-level issue 只汇总 conflictCount，不把 path-level conflicts 复制成多个 `issues[]`。
-  - [ ] Outcome label 不写入 JSON，除非先更新 SPEC。
+- [x] Task 1: Derive update/repair outcomes without changing data schema（AC: 1-6）
+  - [x] 从 `UpdateCommandData` / `RepairCommandData` 的 `updatePlan`、`repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` 推导 human outcome。
+  - [x] 当 apply、safe-write、operation-lock 或 partial execution failure 发生时，推导 `partial-or-failed`，并区分已完成写入、失败步骤、未执行项和保护边界。
+  - [x] 保持 `update.conflicts` command-level issue 只汇总 conflictCount，不把 path-level conflicts 复制成多个 `issues[]`。
+  - [x] Outcome label 不写入 JSON，除非先更新 SPEC。
 
-- [ ] Task 2: Update renderer and catalog（AC: 1-6）
-  - [ ] 扩展 `renderUpdateHumanOutput()`，支持 `plan-ready`、`repair-plan-ready`、`no-op`、`blocked-by-conflict`、`applied`、`partial-or-failed`。
-  - [ ] 使用 shared output frame：Summary、Scope、State、Evidence、Issues、Next Actions。
-  - [ ] Empty states 明确显示 `无 planned writes`、`无 conflict`、`未写入项目文件`。
-  - [ ] `partial-or-failed` 的 Summary、Evidence、Issues、Next Actions 必须覆盖已完成写入、失败步骤或 blocker、未执行项、protected boundaries 和恢复/验证动作。
+- [x] Task 2: Update renderer and catalog（AC: 1-6）
+  - [x] 扩展 `renderUpdateHumanOutput()`，支持 `plan-ready`、`repair-plan-ready`、`no-op`、`blocked-by-conflict`、`applied`、`partial-or-failed`。
+  - [x] 使用 shared output frame：Summary、Scope、State、Evidence、Issues、Next Actions。
+  - [x] Empty states 明确显示 `无 planned writes`、`无 conflict`、`未写入项目文件`。
+  - [x] `partial-or-failed` 的 Summary、Evidence、Issues、Next Actions 必须覆盖已完成写入、失败步骤或 blocker、未执行项、protected boundaries 和恢复/验证动作。
 
-- [ ] Task 3: Preserve update safety semantics（AC: 3-6）
-  - [ ] 不修改 `src/update/update-plan.ts` 的 ownership/hash/conflict 规则，除非 Story 明确需要修复 renderer 无法表达的数据缺口。
-  - [ ] `--yes` 只能授权无 conflict planned writes；不能把 conflict 转为 repair。
-  - [ ] `update --repair` 必须保持 explicit repair，不作为普通 update 隐藏模式。
+- [x] Task 3: Preserve update safety semantics（AC: 3-6）
+  - [x] 不修改 `src/update/update-plan.ts` 的 ownership/hash/conflict 规则，除非 Story 明确需要修复 renderer 无法表达的数据缺口。
+  - [x] `--yes` 只能授权无 conflict planned writes；不能把 conflict 转为 repair。
+  - [x] `update --repair` 必须保持 explicit repair，不作为普通 update 隐藏模式。
 
-- [ ] Task 4: Tests（AC: 1-6）
-  - [ ] 覆盖 unapplied plan、repair plan、no-op、conflict、applied、operation-lock failure、safe-write failure 和 partial execution failure。
-  - [ ] 覆盖 human-readable 不提示用普通 `--yes` 绕过 conflict。
-  - [ ] 覆盖 JSON output 不新增字段、sorting 不变。
+- [x] Task 4: Tests（AC: 1-6）
+  - [x] 覆盖 unapplied plan、repair plan、no-op、conflict、applied、operation-lock failure、safe-write failure 和 partial execution failure。
+  - [x] 覆盖 human-readable 不提示用普通 `--yes` 绕过 conflict。
+  - [x] 覆盖 JSON output 不新增字段、sorting 不变。
 
 ## Dev Notes（开发备注）
 
@@ -139,22 +139,35 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- 2026-06-16 03:11 CST：新增 Story 8.3 focused tests 后运行 `npm test -- test/update-command.test.ts`，确认现有 renderer 在 outcome label、conflict bypass guidance、partial failure 归类上失败。
+- 2026-06-16 03:13 CST：实现 renderer outcome 推导后运行 `npm test -- test/update-command.test.ts`，12 tests passed。
+- 2026-06-16 03:13 CST：运行 `npm test -- test/update-command.test.ts test/update-planning.test.ts test/ownership-model.test.ts test/operation-lock-safe-write.test.ts`，发现 conflict step state 未透传 `failedStep=conflict-check`。
+- 2026-06-16 03:13 CST：修复 issue details step state 合并后重跑 focused suite，4 files / 44 tests passed。
+- 2026-06-16 03:13 CST：运行 `npm run build`，通过；构建造成 `release/packaging-manifest.json` hash drift 后已恢复。
+- 2026-06-16 03:13 CST：运行 `npm test`，49 files / 346 tests passed。
+- 2026-06-16 03:13 CST：运行 `git diff --check`，通过。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- `renderUpdateHumanOutput()` 现在直接输出 Story 8.3 规定的 human-only outcome：`plan-ready`、`repair-plan-ready`、`no-op`、`blocked-by-conflict`、`applied`、`partial-or-failed`。
+- `partial-or-failed` 仅在非 conflict 的写入/repair 执行失败、safe-write、operation-lock 或 partial execution evidence 下推导，并输出 completed writes、failed step、pending steps、unexecuted items 和 protected boundaries。
+- conflict 输出保持 command-level `update.conflicts` issue 汇总 `conflictCount`，path-level conflicts 仍只在 `data.conflicts` / Evidence 中展示；普通 `--yes` 不被描述为 conflict 绕过方式。
+- 未修改 `src/update/update-plan.ts`，未改变 ownership/hash/conflict planning semantics，未新增 public JSON fields。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/8-3-update-and-repair-outcome-oriented-output.md`
+- `src/diagnostics/output.ts`
+- `test/update-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.3 ready-for-dev Story，聚焦 update/repair outcome-oriented human output。 | Amelia |
+| 2026-06-16 | 1.0 | 实现 update/repair outcome-oriented human output，补充 focused tests 并推进至 review。 | Codex |

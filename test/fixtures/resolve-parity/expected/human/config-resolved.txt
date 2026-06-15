@@ -1,0 +1,27 @@
+SpecLite resolve config
+Outcome: resolved
+
+Summary
+Completed: yes
+Writes: no project files changed
+User action: not required
+- requested key: core.project_name
+- resolved layer: merged config layers
+- source path: _speclite/config.user.toml
+- value summary: object with 1 key
+- 中文 locale preserves technical identifiers: core.project_name
+
+Scope
+- command: speclite resolve config
+- output mode: human
+- machine contract: default stdout remains pure JSON when --human is omitted
+
+Evidence
+- resolved keys: core.project_name
+- source paths: _speclite/config.toml, _speclite/config.user.toml, _speclite/custom/config.toml, _speclite/custom/config.user.toml
+
+Issues:
+No issues
+
+Next Actions / Next actions:
+- No action required

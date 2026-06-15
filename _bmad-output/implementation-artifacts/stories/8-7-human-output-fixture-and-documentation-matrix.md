@@ -1,6 +1,6 @@
 # Story 8.7: Human Output Fixture And Documentation Matrix（人类输出 Fixture 与文档矩阵）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: 收敛 CLI human-readable output 的 focused tests、fixture 和 docs 示例矩阵。 -->
 
@@ -37,29 +37,29 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Build outcome coverage matrix（AC: 1-4）
-  - [ ] 建立 command/outcome/test/docs matrix，覆盖 install、update、update --repair、status、validate、resolve human mode。
-  - [ ] 标记每个 outcome 的 focused test、JSON parity assertion、docs example 或 fixture。
-  - [ ] 不把 docs 示例当成 contract source；contract source 仍是 SPEC 和 schema/tests。
+- [x] Task 1: Build outcome coverage matrix（AC: 1-4）
+  - [x] 建立 command/outcome/test/docs matrix，覆盖 install、update、update --repair、status、validate、resolve human mode。
+  - [x] 标记每个 outcome 的 focused test、JSON parity assertion、docs example 或 fixture。
+  - [x] 不把 docs 示例当成 contract source；contract source 仍是 SPEC 和 schema/tests。
 
-- [ ] Task 2: Add focused tests for missing outcome coverage（AC: 1-3）
-  - [ ] 对每个 renderer outcome 添加 Summary、write state、Issues、Next Actions assertions。
-  - [ ] 覆盖 `NO_COLOR`、non-TTY、CI、compact/narrow terminal fallback。
-  - [ ] 覆盖 `--json` 不受 locale/TTY/terminal width 影响。
+- [x] Task 2: Add focused tests for missing outcome coverage（AC: 1-3）
+  - [x] 对每个 renderer outcome 添加 Summary、write state、Issues、Next Actions assertions。
+  - [x] 覆盖 `NO_COLOR`、non-TTY、CI、compact/narrow terminal fallback。
+  - [x] 覆盖 `--json` 不受 locale/TTY/terminal width 影响。
 
-- [ ] Task 3: Update docs examples（AC: 4）
-  - [ ] 检查 `README.md`、`docs/quick-start.md`、`docs/index.md` 和相关 troubleshooting/reference docs。
-  - [ ] 更新示例，区分 read-only、prewrite preview、write-authorized、repair-authorized 和 validation flows。
-  - [ ] 示例使用无颜色、稳定排序、可复制文本，不包含本机绝对路径或 private source。
+- [x] Task 3: Update docs examples（AC: 4）
+  - [x] 检查 `README.md`、`docs/quick-start.md`、`docs/index.md` 和相关 troubleshooting/reference docs。
+  - [x] 更新示例，区分 read-only、prewrite preview、write-authorized、repair-authorized 和 validation flows。
+  - [x] 示例使用无颜色、稳定排序、可复制文本，不包含本机绝对路径或 private source。
 
-- [ ] Task 4: Fixture/stable comparison integration（AC: 1-3）
-  - [ ] 如新增 human-readable fixture，定义 normalization：颜色、terminal width、timestamps、platform path。
-  - [ ] 确保 release packaging / fixture tests 不把 human docs 示例误当 package runtime assets，除非明确标记为 packaged docs。
+- [x] Task 4: Fixture/stable comparison integration（AC: 1-3）
+  - [x] 如新增 human-readable fixture，定义 normalization：颜色、terminal width、timestamps、platform path。
+  - [x] 确保 release packaging / fixture tests 不把 human docs 示例误当 package runtime assets，除非明确标记为 packaged docs。
 
-- [ ] Task 5: Final verification（AC: 1-4）
-  - [ ] 运行 CLI output focused tests。
-  - [ ] 运行 `npm run build`、`npm test`、`npm run release:packaging-check` 或记录阻塞。
-  - [ ] 运行 `git diff --check`。
+- [x] Task 5: Final verification（AC: 1-4）
+  - [x] 运行 CLI output focused tests。
+  - [x] 运行 `npm run build`、`npm test`、`npm run release:packaging-check` 或记录阻塞。
+  - [x] 运行 `git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -124,22 +124,42 @@ Coverage matrix 可以是 docs 文件、test helper、planning artifact 或 fixt
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `npm test -- test/cli-human-output-matrix.test.ts`：先 RED，缺少 `docs/reference/cli-human-output-matrix.md`；补文档后通过，4 tests passed。
+- `npm test -- test/cli-human-output-matrix.test.ts test/cli-output-presentation.test.ts test/install-outcome-human-output.test.ts test/cli-smoke.test.ts test/install-progress-ready-summary.test.ts test/update-command.test.ts test/status-command.test.ts test/validate-command.test.ts test/resolve-cli.test.ts`：9 files / 96 tests passed。
+- `npm run build`：通过。
+- `npm test`：51 files / 367 tests passed。
+- `npm run release:packaging-check`：通过；测试/packaging check 产生的 `release/packaging-manifest.json` packageHash drift 已精确恢复。
+- `git diff --check`：通过，无 whitespace 输出。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 新增 `docs/reference/cli-human-output-matrix.md`，记录 install、update、update --repair、status、validate、resolve human mode 的 command/outcome/test/docs/fixture coverage，并明确 docs 示例不是 contract source。
+- 新增 `test/cli-human-output-matrix.test.ts`，覆盖 matrix 完整性、`NO_COLOR`/non-TTY/CI/窄终端语义、`--json` parity、resolve human mode 和 packaging boundary。
+- 更新 README、quick-start、CLI reference、install/update/validate how-to docs，区分 read-only、prewrite preview、write-authorized、repair-authorized 和 validation flows，示例使用无颜色稳定文本。
+- 未改变 command core behavior、outcome vocabulary 或 JSON schema；`status` 的 reserved `stale` / `unknown` 在 matrix 中标记为 TODO，不伪造 coverage。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `README.md`
+- `docs/quick-start.md`
+- `docs/index.md`
+- `docs/reference/index.md`
+- `docs/reference/cli.md`
+- `docs/reference/cli-human-output-matrix.md`
+- `docs/how-to/install-speclite.md`
+- `docs/how-to/update-and-repair.md`
+- `docs/how-to/validate-installation.md`
+- `test/cli-human-output-matrix.test.ts`
+- `_bmad-output/implementation-artifacts/stories/8-7-human-output-fixture-and-documentation-matrix.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.7 ready-for-dev Story，聚焦 CLI human output fixture 与 docs matrix。 | Amelia |
+| 2026-06-16 | 1.0 | 实现 human output coverage matrix、focused tests、docs flow 示例和 packaging boundary 验证，Story 推进到 review。 | GPT-5 Codex |

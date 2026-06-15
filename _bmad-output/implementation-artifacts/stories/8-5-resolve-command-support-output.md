@@ -1,6 +1,6 @@
 # Story 8.5: Resolve Command Support Output（Resolve 命令支持输出）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: resolve 是 runtime support command；任何 human output 改动必须保护 installed skills 依赖的 pure JSON stdout。 -->
 
@@ -46,25 +46,25 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Resolve contract decision before changing stdout behavior（AC: 1-4）
-  - [ ] 读取并更新 `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md`，记录默认 stdout/stderr/exit code machine contract 继续不变，并新增显式 `--human` opt-in human-readable output 入口。
-  - [ ] 保护现有 runtime support：默认 `resolve config/customization` stdout 继续 pure JSON；默认 missing key 保持 stdout `{}`、exit code 0、stderr empty。
-  - [ ] 在 commander registration、docs、tests 和 fixtures 中记录 `--human`，并证明未传入 `--human` 时 installed skills 的 automation contract 不被破坏。
-  - [ ] 更新 `src/config/resolve-output-schema.ts` 或等价 schema/parser anchor 时，只允许补充 human mode 所需解析/fixture 支撑，不得把默认 JSON mode 改成 `CommandResult`。
+- [x] Task 1: Resolve contract decision before changing stdout behavior（AC: 1-4）
+  - [x] 读取并更新 `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md`，记录默认 stdout/stderr/exit code machine contract 继续不变，并新增显式 `--human` opt-in human-readable output 入口。
+  - [x] 保护现有 runtime support：默认 `resolve config/customization` stdout 继续 pure JSON；默认 missing key 保持 stdout `{}`、exit code 0、stderr empty。
+  - [x] 在 commander registration、docs、tests 和 fixtures 中记录 `--human`，并证明未传入 `--human` 时 installed skills 的 automation contract 不被破坏。
+  - [x] 更新 `src/config/resolve-output-schema.ts` 或等价 schema/parser anchor 时，只允许补充 human mode 所需解析/fixture 支撑，不得把默认 JSON mode 改成 `CommandResult`。
 
-- [ ] Task 2: Add resolve human output mode（AC: 1-4）
-  - [ ] 在 `src/commands/resolve.ts` 中新增 explicit human output path 或等价 presentation hook。
-  - [ ] Human mode 使用 Story 8.1 shared frame：Outcome、Summary、Scope、Evidence、Issues、Next Actions。
-  - [ ] 成功时展示 requested key、resolved layer/source path、value summary；不得泄露 absolute project root。
+- [x] Task 2: Add resolve human output mode（AC: 1-4）
+  - [x] 在 `src/commands/resolve.ts` 中新增 explicit human output path 或等价 presentation hook。
+  - [x] Human mode 使用 Story 8.1 shared frame：Outcome、Summary、Scope、Evidence、Issues、Next Actions。
+  - [x] 成功时展示 requested key、resolved layer/source path、value summary；不得泄露 absolute project root。
 
-- [ ] Task 3: Preserve JSON Lines diagnostics and parity（AC: 2-4）
-  - [ ] Optional layer warning 仍可作为 `ValidationIssue` shape 输出；human mode 可以渲染，但 JSON mode 必须保持 schema。
-  - [ ] Missing key 的现有默认 `{}` / exit 0 / empty stderr 语义不得改变；human mode 可以把 missing key 或 empty result 解释为 `unresolved`，但只能在显式 `--human` 下发生。
-  - [ ] Invalid input 使用 existing `runtime-path.missing-entry` 或 SPEC 指定 issue id。
+- [x] Task 3: Preserve JSON Lines diagnostics and parity（AC: 2-4）
+  - [x] Optional layer warning 仍可作为 `ValidationIssue` shape 输出；human mode 可以渲染，但 JSON mode 必须保持 schema。
+  - [x] Missing key 的现有默认 `{}` / exit 0 / empty stderr 语义不得改变；human mode 可以把 missing key 或 empty result 解释为 `unresolved`，但只能在显式 `--human` 下发生。
+  - [x] Invalid input 使用 existing `runtime-path.missing-entry` 或 SPEC 指定 issue id。
 
-- [ ] Task 4: Tests（AC: 1-4）
-  - [ ] 扩展 `test/resolve-cli.test.ts`，覆盖默认 pure JSON 不破坏、explicit human mode resolved/resolved-with-warnings/unresolved/invalid-input。
-  - [ ] 覆盖 stdout/stderr separation、JSON Lines diagnostics、中文 locale 技术标识保留和 redaction。
+- [x] Task 4: Tests（AC: 1-4）
+  - [x] 扩展 `test/resolve-cli.test.ts`，覆盖默认 pure JSON 不破坏、explicit human mode resolved/resolved-with-warnings/unresolved/invalid-input。
+  - [x] 覆盖 stdout/stderr separation、JSON Lines diagnostics、中文 locale 技术标识保留和 redaction。
 
 ## Dev Notes（开发备注）
 
@@ -126,22 +126,44 @@ Human output mode 可以通过 flag、profile 或 wrapper command 暴露；只�
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `python3 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：失败，默认 `python3` 缺少 stdlib `tomllib`。
+- `python3.12 /Users/fancyliu/Repos/SpecLite/_bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：通过，workflow 无 prepend/append，persistent fact 为 `project-context.md`。
+- `npm test -- test/resolve-cli.test.ts`：RED 阶段 6 个 `--human` 用例因未知 flag 失败；实现后 15/15 通过。
+- `npm test -- test/resolve-cli.test.ts test/resolve-readers.test.ts`：19/19 通过。
+- `npm run build`：通过。
+- `npm test`：49 个 test files / 356 个 tests 通过。
+- `git diff --check`：通过。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 为 `speclite resolve config/customization` 增加显式 `--human` opt-in support output，输出 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues`、`Next Actions`。
+- 默认 machine mode 未改：stdout 继续 pure JSON，stderr 继续 JSON Lines diagnostics；missing key 默认仍为 stdout `{}`、exit code 0、stderr empty。
+- Human mode 覆盖 `resolved`、`resolved-with-warnings`、`unresolved`、`invalid-input`，并对 fallback / optional layer warning、missing key、required layer failure 和缺少必需参数给出脱敏说明。
+- 更新 resolve contract SPEC、CLI reference、README、schema anchor、fixtures 和 focused tests；未引入 `CommandResult` envelope，未改变 merge order、optional/required layer semantics 或 fallback project search。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `README.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/8-5-resolve-command-support-output.md`
+- `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md`
+- `docs/reference/cli.md`
+- `src/commands/resolve.ts`
+- `src/config/resolve-output-schema.ts`
+- `test/fixtures/resolve-parity/README.md`
+- `test/fixtures/resolve-parity/expected/human/config-invalid-input.txt`
+- `test/fixtures/resolve-parity/expected/human/config-resolved-with-warnings.txt`
+- `test/fixtures/resolve-parity/expected/human/config-resolved.txt`
+- `test/fixtures/resolve-parity/expected/human/config-unresolved.txt`
+- `test/resolve-cli.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.5 ready-for-dev Story，明确 resolve human output 必须保护 pure JSON runtime support contract。 | Amelia |
+| 2026-06-16 | 0.2 | 实现 explicit `--human` resolve support output，并保持默认 pure JSON runtime support contract 不变。 | GPT-5 Codex |

@@ -31,6 +31,7 @@
 | CI 和企业自动化 | [`how-to/ci-enterprise-automation.md`](how-to/ci-enterprise-automation.md) |
 | 流程治理覆盖报告 | [`how-to/process-governance-report.md`](how-to/process-governance-report.md) |
 | CLI 命令参考 | [`reference/cli.md`](reference/cli.md) |
+| CLI human output 覆盖矩阵 | [`reference/cli-human-output-matrix.md`](reference/cli-human-output-matrix.md) |
 | CommandResult JSON | [`reference/command-result-json.md`](reference/command-result-json.md) |
 | runtime layout | [`reference/runtime-layout.md`](reference/runtime-layout.md) |
 | canonical source layout | [`reference/canonical-source-layout.md`](reference/canonical-source-layout.md) |

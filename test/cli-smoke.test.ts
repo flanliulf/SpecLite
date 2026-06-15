@@ -160,7 +160,7 @@ describe("CLI smoke", () => {
       expect(exitCodes).toEqual([0]);
       expect(prompts).toEqual([]);
       expect(output).toContain("Step 4/4 Ready Summary（就绪摘要）");
-      expect(output).toContain("install --yes 已使用默认 modules、quick config 和默认 IDE targets 完成无交互安装。");
+      expect(output).toContain("install --yes 已使用默认 modules、quick config 和默认 IDE 目标完成无交互安装。");
       expect(output).toContain("selectedModules=core, sdlc");
       expect(output).not.toMatch(/\u001b\[[0-9;]*m/);
     } finally {

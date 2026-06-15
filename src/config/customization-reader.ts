@@ -10,6 +10,13 @@ export type ResolverResult = {
   value: TomlDocument;
   issues: ValidationIssue[];
   exitCode: 0 | 1;
+  sources: Record<string, ResolverSourceMetadata>;
+};
+
+export type ResolverSourceMetadata = {
+  key: string;
+  affectedPath: string;
+  role: ResolverLayerRole;
 };
 
 export async function resolveSkillCustomization(input: CustomizationResolveInput): Promise<ResolverResult> {
@@ -69,6 +76,7 @@ export async function resolveTomlLayers(input: {
 }): Promise<ResolverResult> {
   const issues: ValidationIssue[] = [];
   let merged: TomlDocument = {};
+  const sources = new Map<string, ResolverSourceMetadata>();
 
   for (const layer of input.layers) {
     const loaded = await loadTomlLayer({
@@ -80,23 +88,33 @@ export async function resolveTomlLayers(input: {
     if (!loaded.ok) {
       issues.push(loaded.issue);
       if (layer.required) {
-        return { value: {}, issues, exitCode: 1 };
+        return { value: {}, issues, exitCode: 1, sources: {} };
       }
       continue;
     }
 
     merged = deepMergeTomlDocuments(merged, loaded.value);
+    for (const key of collectTomlLeafKeys(loaded.value)) {
+      sources.set(key, {
+        key,
+        affectedPath: layer.affectedPath,
+        role: layer.role,
+      });
+    }
   }
 
   const hasBlockingIssue = issues.some((issue) => issue.severity === "error" || issue.severity === "critical");
   if (hasBlockingIssue) {
-    return { value: {}, issues, exitCode: 1 };
+    return { value: {}, issues, exitCode: 1, sources: {} };
   }
 
+  const requestedKeys = input.keys ?? [];
+  const value = selectDottedKeys(merged, requestedKeys);
   return {
-    value: selectDottedKeys(merged, input.keys ?? []),
+    value,
     issues,
     exitCode: 0,
+    sources: selectSourceMetadata(sources, requestedKeys, value),
   };
 }
 
@@ -222,8 +240,37 @@ function extractDottedKey(value: TomlDocument, dottedKey: string): TomlDocument[
   return current as TomlDocument[string];
 }
 
+function selectSourceMetadata(
+  sources: Map<string, ResolverSourceMetadata>,
+  requestedKeys: string[],
+  selectedValue: TomlDocument,
+): Record<string, ResolverSourceMetadata> {
+  const selectedSources: Record<string, ResolverSourceMetadata> = {};
+  const keys = requestedKeys.length === 0 ? Object.keys(selectedValue) : requestedKeys;
+  for (const key of keys) {
+    const source = sources.get(key);
+    if (source !== undefined && key in selectedValue) {
+      selectedSources[key] = source;
+    }
+  }
+  return selectedSources;
+}
+
+function collectTomlLeafKeys(value: TomlDocument, prefix = ""): string[] {
+  const keys: string[] = [];
+  for (const [key, childValue] of Object.entries(value)) {
+    const dottedKey = prefix.length === 0 ? key : `${prefix}.${key}`;
+    if (isTomlDocument(childValue)) {
+      keys.push(...collectTomlLeafKeys(childValue, dottedKey));
+    } else {
+      keys.push(dottedKey);
+    }
+  }
+  return keys;
+}
+
 function isTomlDocument(value: unknown): value is TomlDocument {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value) && !(value instanceof Date);
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

@@ -254,11 +254,13 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .option("--json", "Emit machine-readable CommandResult JSON.")
     .option("--dry-run", "Generate an unapplied update plan without authorizing writes.")
     .option("--yes", "Authorize non-conflicting planned update writes.")
+    .option("--locale <locale>", "Render human-readable update output with locale: zh-CN or en-US.")
     .action(
       async (
         targetDirectory: string | undefined,
-        commandOptions: { dryRun?: boolean; repair?: boolean; json?: boolean; yes?: boolean },
+        commandOptions: { dryRun?: boolean; repair?: boolean; json?: boolean; yes?: boolean; locale?: string },
       ) => {
+        const locale = resolveCliLocale({ flag: commandOptions.locale, env: process.env });
         const outcome = await runUpdateCommand({
           options: {
             dryRun: commandOptions.dryRun ?? false,
@@ -273,7 +275,7 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
         if (commandOptions.json) {
           io.stdout(renderCommandResultJson(outcome.result));
         } else {
-          io.stdout(renderUpdateHumanOutput(outcome.result));
+          io.stdout(renderUpdateHumanOutput(outcome.result, { locale }));
         }
 
         io.setExitCode(outcome.exitCode);
@@ -285,7 +287,9 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .description("Inspect the local SpecLite installed-state summary.")
     .argument("[target-directory]", "Project directory to inspect.")
     .option("--json", "Emit machine-readable CommandResult JSON.")
-    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean }) => {
+    .option("--locale <locale>", "Render human-readable status output with locale: zh-CN or en-US.")
+    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean; locale?: string }) => {
+      const locale = resolveCliLocale({ flag: commandOptions.locale, env: process.env });
       const outcome = await runStatusCommand({
         options: { json: commandOptions.json ?? false },
         ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
@@ -295,7 +299,7 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
       if (commandOptions.json) {
         io.stdout(renderCommandResultJson(outcome.result));
       } else {
-        io.stdout(renderStatusHumanOutput(outcome.result));
+        io.stdout(renderStatusHumanOutput(outcome.result, { locale }));
       }
 
       io.setExitCode(outcome.exitCode);
@@ -306,7 +310,9 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
     .description("Validate the local SpecLite installed-state schema projection.")
     .argument("[target-directory]", "Project directory to validate.")
     .option("--json", "Emit machine-readable CommandResult JSON.")
-    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean }) => {
+    .option("--locale <locale>", "Render human-readable validate output with locale: zh-CN or en-US.")
+    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean; locale?: string }) => {
+      const locale = resolveCliLocale({ flag: commandOptions.locale, env: process.env });
       const outcome = await runValidateCommand({
         options: { json: commandOptions.json ?? false },
         ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
@@ -316,7 +322,7 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
       if (commandOptions.json) {
         io.stdout(renderCommandResultJson(outcome.result));
       } else {
-        io.stdout(renderValidateHumanOutput(outcome.result));
+        io.stdout(renderValidateHumanOutput(outcome.result, { locale }));
       }
 
       io.setExitCode(outcome.exitCode);

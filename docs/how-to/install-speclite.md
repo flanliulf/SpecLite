@@ -119,13 +119,14 @@ speclite validate /path/to/project --json
 安全预览：
 
 ```sh
-speclite install /path/to/project
+PROJECT_ROOT=/path/to/project
+NO_COLOR=1 speclite install "$PROJECT_ROOT"
 ```
 
 默认中文无交互安装：
 
 ```sh
-speclite install /path/to/project --yes
+NO_COLOR=1 speclite install "$PROJECT_ROOT" --yes
 ```
 
 英文输出：
@@ -143,8 +144,28 @@ speclite install /path/to/project --yes --interactive
 自动化安装并读取 JSON：
 
 ```sh
-speclite install /path/to/project --json --yes
+speclite install "$PROJECT_ROOT" --json --yes
 ```
+
+安全预览的稳定 human-readable 骨架：
+
+```text
+SpecLite install
+Outcome: prewrite-paused
+
+Summary
+Completed: yes
+Writes: no project files changed
+User action: required
+
+Issues:
+No issues
+
+Next Actions / Next actions:
+- Run `speclite install <target> --yes` to install with defaults.
+```
+
+如果出现 `blocked-before-write`、`write-failed` 或 `ready-check-failed`，先处理 `Issues` 和 `Next Actions`，不要为了修复错误而改变安装需求或跳过写入前 gates。
 
 ## Tips（提示）
 

@@ -1,0 +1,27 @@
+SpecLite resolve config
+Outcome: invalid-input
+
+Summary
+Completed: no
+Writes: no project files changed
+User action: required
+- requested key: all
+- resolved layer: none
+- source path: none
+- value summary: not produced
+
+Scope
+- command: speclite resolve config
+- output mode: human
+- machine contract: default stdout remains pure JSON when --human is omitted
+
+Evidence
+- legal command: speclite resolve config --project-root <projectRoot> [--key <dottedKey>] [--human]
+- legal command: speclite resolve customization --skill <skillDir> [--project-root <projectRoot>] [--key <dottedKey>] [--human]
+- reason: runtime-path.missing-entry
+
+Issues:
+- [error] runtime-path.missing-entry --project-root: The resolver command cannot determine the requested runtime input.
+
+Next Actions / Next actions:
+- Pass the required resolver option explicitly and rerun the command.

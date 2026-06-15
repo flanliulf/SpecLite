@@ -1,6 +1,6 @@
 # Story 8.2: Install Outcome-Oriented Output（Install Outcome 导向输出）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Corrective planning Story: 延续 Story 1.7 的 install locale/prompt 基础，聚焦 outcome-oriented result 分支。 -->
 
@@ -48,29 +48,29 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Derive install human outcomes from existing install state（AC: 1-5）
-  - [ ] 在 install human renderer 中从 `CommandResult.status`、`completedSteps`、`pendingSteps`、issues、write authorization 和 ReadyCheck state 推导 human outcome。
-  - [ ] Outcome label 只用于 human-readable output；不得新增 JSON field，除非先改 SPEC。
-  - [ ] 保持 `install --json` schema 不变。
+- [x] Task 1: Derive install human outcomes from existing install state（AC: 1-5）
+  - [x] 在 install human renderer 中从 `CommandResult.status`、`completedSteps`、`pendingSteps`、issues、write authorization 和 ReadyCheck state 推导 human outcome。
+  - [x] Outcome label 只用于 human-readable output；不得新增 JSON field，除非先改 SPEC。
+  - [x] 保持 `install --json` schema 不变。
 
-- [ ] Task 2: Update install renderer and catalog（AC: 1-5）
-  - [ ] 扩展 `src/diagnostics/output.ts` 的 `renderInstallHumanOutput()`，使用 Story 8.1 的 shared frame。
-  - [ ] 扩展 `src/cli/messages.ts`，新增 `prewrite-paused`、`blocked-before-write`、`write-failed`、`ready-check-failed`、`ready` 的 `zh-CN` / `en-US` 文案。
-  - [ ] Summary 必须先说明是否写入、是否 ready、是否需要动作。
+- [x] Task 2: Update install renderer and catalog（AC: 1-5）
+  - [x] 扩展 `src/diagnostics/output.ts` 的 `renderInstallHumanOutput()`，使用 Story 8.1 的 shared frame。
+  - [x] 扩展 `src/cli/messages.ts`，新增 `prewrite-paused`、`blocked-before-write`、`write-failed`、`ready-check-failed`、`ready` 的 `zh-CN` / `en-US` 文案。
+  - [x] Summary 必须先说明是否写入、是否 ready、是否需要动作。
 
-- [ ] Task 3: Preserve Story 1.7 behavior（AC: 1, 5）
-  - [ ] `install --yes` 继续 no-prompt happy path。
-  - [ ] `install --yes --interactive` 继续显示 explicit interactive 文案。
-  - [ ] Prompt/summary 分离、NO_COLOR/non-TTY/CI 无 ANSI 输出保持不变。
+- [x] Task 3: Preserve Story 1.7 behavior（AC: 1, 5）
+  - [x] `install --yes` 继续 no-prompt happy path。
+  - [x] `install --yes --interactive` 继续显示 explicit interactive 文案。
+  - [x] Prompt/summary 分离、NO_COLOR/non-TTY/CI 无 ANSI 输出保持不变。
 
-- [ ] Task 4: Failure branch evidence（AC: 2-4）
-  - [ ] 对 source blocked、target existing install、missing bundled source evidence、safe write failure、ReadyCheck failed 增加 focused assertions。
-  - [ ] write-failed / ready-check-failed 必须展示 completed steps、failed/pending 信息或等价 evidence。
+- [x] Task 4: Failure branch evidence（AC: 2-4）
+  - [x] 对 source blocked、target existing install、missing bundled source evidence、safe write failure、ReadyCheck failed 增加 focused assertions。
+  - [x] write-failed / ready-check-failed 必须展示 completed steps、failed/pending 信息或等价 evidence。
 
-- [ ] Task 5: Verification（AC: 1-5）
-  - [ ] 运行 `npm test -- test/cli-smoke.test.ts test/install-progress-ready-summary.test.ts test/install-module-selection.test.ts`。
-  - [ ] 运行新增 install outcome focused tests。
-  - [ ] 运行 `npm run build`、`npm test` 或记录阻塞、`git diff --check`。
+- [x] Task 5: Verification（AC: 1-5）
+  - [x] 运行 `npm test -- test/cli-smoke.test.ts test/install-progress-ready-summary.test.ts test/install-module-selection.test.ts`。
+  - [x] 运行新增 install outcome focused tests。
+  - [x] 运行 `npm run build`、`npm test` 或记录阻塞、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -134,22 +134,35 @@ Outcome 推导可以在 renderer 或 helper 中实现；只要 JSON 不变、tes
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+Codex（GPT-5）
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `npm test -- test/install-outcome-human-output.test.ts` RED：5 个新增 outcome assertions 先失败，旧输出仍为 `install-progress` / `install-blocked` / `install-ready`。
+- `npm test -- test/install-outcome-human-output.test.ts` GREEN：5 tests passed。
+- `npm test -- test/cli-smoke.test.ts test/install-progress-ready-summary.test.ts test/install-module-selection.test.ts`：3 files / 31 tests passed。
+- `npm run build`：tsup build passed；曾造成 `release/packaging-manifest.json` `packageHash` drift，已恢复该文件，无剩余 diff。
+- `npm test`：49 files / 342 tests passed。
+- `git diff --check`：passed。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 在 install human renderer 层从现有 `InstallCommandResult` 状态、completed/pending lifecycle steps 和 ReadyCheck 阶段推导 `prewrite-paused`、`blocked-before-write`、`write-failed`、`ready-check-failed`、`ready`，未新增 public JSON field。
+- install human output 继续使用 Story 8.1 shared presentation frame，并在 Summary 首部展示完成状态、写入状态、用户动作和 ready 状态。
+- 新增 `zh-CN` / `en-US` install outcome 文案和 branch-specific next-action/evidence 文案；write-failed / ready-check-failed 展示 failed step、completed write scope、pending steps 和人工检查/修复动作。
+- 新增 focused renderer tests 覆盖 prewrite paused、prewrite blocker、write failure、ReadyCheck failure、ready default no-prompt / explicit interactive 文案和 JSON stability。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/8-2-install-outcome-oriented-output.md`
+- `src/cli/messages.ts`
+- `src/diagnostics/output.ts`
+- `test/install-outcome-human-output.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-06-16 | 0.2 | 实现 install outcome-oriented human output，新增 focused tests，并推进 Story 到 review。 | Codex |
 | 2026-06-15 | 0.1 | 创建 Epic 8.2 ready-for-dev Story，聚焦 install outcome-oriented human output。 | Amelia |

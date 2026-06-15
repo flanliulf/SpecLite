@@ -194,7 +194,11 @@ export async function runInstallCommand(input: {
       completedSteps,
       pendingSteps,
       summary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
-      nextActions: createTargetNextActions(targetDirectoryState, context.writeAuthorized),
+      nextActions: createTargetNextActions(
+        targetDirectoryState,
+        context.writeAuthorized,
+        normalizedTarget.displayPath,
+      ),
       data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
     });
 
@@ -1306,6 +1310,7 @@ function formatTargetDisplayPath(displayPath: string): string {
 function createTargetNextActions(
   state: TargetDirectoryState,
   writeAuthorized: boolean,
+  targetDisplayPath: string,
 ): string[] {
   if (state.kind === "existing-install") {
     return [
@@ -1323,7 +1328,10 @@ function createTargetNextActions(
   }
 
   if (!writeAuthorized) {
-    return ["Confirm the target directory before continuing with later install stages."];
+    return [
+      `Run speclite install ${targetDisplayPath} --yes to install with defaults.`,
+      `Run speclite install ${targetDisplayPath} --interactive to customize installation.`,
+    ];
   }
 
   return ["Target directory is confirmed; continue with source selection in the next install stage."];

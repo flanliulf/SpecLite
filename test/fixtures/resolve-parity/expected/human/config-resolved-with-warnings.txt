@@ -1,0 +1,27 @@
+SpecLite resolve config
+Outcome: resolved-with-warnings
+
+Summary
+Completed: yes
+Writes: no project files changed
+User action: required
+- requested key: all
+- resolved layer: merged config layers
+- source path: multiple
+- value summary: object with 2 keys
+
+Scope
+- command: speclite resolve config
+- output mode: human
+- machine contract: default stdout remains pure JSON when --human is omitted
+
+Evidence
+- resolved keys: core, modules
+- source paths: _speclite/config.toml, _speclite/config.user.toml, _speclite/custom/config.toml, _speclite/custom/config.user.toml
+- fallback source: optional layer treated as empty object; check _speclite/custom/config.toml
+
+Issues:
+- [warning] manifest-schema.malformed-field _speclite/custom/config.toml: An optional resolver layer could not be used and was treated as an empty object.
+
+Next Actions / Next actions:
+- Inspect the warning issue and fix optional resolver layers if their values were expected.

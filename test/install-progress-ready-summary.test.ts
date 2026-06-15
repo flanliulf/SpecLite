@@ -590,7 +590,7 @@ describe("install ready summary rendering", () => {
           targetProject: "fresh-install-empty-project",
         },
       });
-      const output = renderInstallHumanOutput(outcome.result);
+      const output = renderInstallHumanOutput(outcome.result, { locale: "en-US" });
 
       expect(outcome.exitCode).toBe(0);
       expect(output).toContain("SpecLite ready summary");
@@ -659,7 +659,7 @@ describe("install ready summary rendering", () => {
       ]);
       expect(output).not.toContain("SpecLite ready summary");
       expect(output).not.toContain("Ready summary");
-      expect(output).toContain("Pending steps");
+      expect(output).toContain("待处理 steps");
       expect(output).toContain("ready-check");
       expect(output).toContain("ready-summary");
     } finally {

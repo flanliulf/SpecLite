@@ -186,7 +186,7 @@ describe("install source selection boundary", () => {
         runtime: { ...supportedRuntime, cwd: tempRoot },
       });
       const parsed = InstallCommandResultSchema.parse(JSON.parse(renderCommandResultJson(outcome.result)));
-      const humanOutput = renderInstallHumanOutput(parsed);
+      const humanOutput = renderInstallHumanOutput(parsed, { locale: "en-US" });
 
       expect(parsed.status).toBe("success");
       expect(parsed.data.sourceDescriptor).toMatchObject({
@@ -243,7 +243,7 @@ describe("install source selection boundary", () => {
       });
       expect(parsed.data.completedSteps).toEqual(["source-discovery"]);
       expect(parsed.data.pendingSteps).toContain("module-selection");
-      expect(output).toContain("External Access");
+      expect(output).toContain("外部访问");
       expect(output).toContain("sourceType=private-registry");
       expect(output).toContain("confirmationState=pending");
       expect(output).not.toContain("token");

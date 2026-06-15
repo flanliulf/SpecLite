@@ -376,6 +376,7 @@ describe("owning SPEC executable anchors", () => {
         },
         issues: [],
         exitCode: 0,
+        sources: {},
       });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
