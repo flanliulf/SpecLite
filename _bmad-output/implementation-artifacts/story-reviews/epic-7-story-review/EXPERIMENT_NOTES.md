@@ -141,3 +141,17 @@ Evaluator 第 2 轮确认 Round 2 reviewer 的通过结论成立：
 - SR 循环已满足 reviewer 通过 + evaluator 通过。
 - 曾执行 fixer，且 fixer 后已重新 review/evaluate。
 - 下一步进入最终提交；提交前必须隔离当前工作树里的无关 staged release / fixture 改动和 Epic 8 untracked Story。
+
+## 2026-06-15 Final Commit Decision（最终提交决策）
+
+已完成本地提交 `7069b0c docs(epic-7): 完成 Story Review 闭环`，未 push。
+
+提交范围决策：
+
+- 纳入 Epic 7 planning、Epic List 中的 Flow Gate scope 修订、Epic 7 的 5 个 Story、Epic 7 SR 记录与 review/evaluation 产物。
+- 排除 `sprint-status.yaml`，因为当前文件同时承载 Epic 7 与 Epic 8 状态变更；为避免把 Epic 8 混入 Epic 7 SR 提交，本次不提交该文件。
+- 排除已有 release / fixture staged 变更、Epic 8 Story、flow gate artifact 和 implementation readiness report。
+
+剩余风险：
+
+- 工作树仍有无关 staged / unstaged / untracked 变更，属于本 SR goal 外部状态，未回滚也未提交。

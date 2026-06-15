@@ -176,3 +176,22 @@
   - 两个 `defer` 项维持为非阻塞改善项。
   - 不需要继续 fixer。
 - **Next Step**: 执行最终 git 状态审计并提交本地中文 Conventional Commit，不 push。
+
+## 2026-06-15 Final Commit（最终提交）
+
+- **Skill**: `git-commit-convention`
+- **Reason**: `goal-orchestrator-epic-story-review-runner` completion criteria 要求 reviewer/evaluator 均通过后完成本地中文 Conventional Commit，默认不 push。
+- **Actions**:
+  - 审计 `git status --short --branch`、`git diff --name-status`、`git diff --cached --name-status`。
+  - 显式 stage Epic 7 SR 相关文件，未使用 `git add -A`。
+  - 发现并清理本次提交范围内的行尾空白。
+  - 运行 path-limited `git diff --cached --check`。
+  - 使用 pathspec 提交，避免混入已有 release / fixture staged 变更。
+- **Result**: `COMMITTED`
+- **Commit**: `7069b0c docs(epic-7): 完成 Story Review 闭环`
+- **Push**: 未执行。
+- **Excluded From Commit**:
+  - 既有 release / fixture staged 变更。
+  - `_bmad-output/implementation-artifacts/sprint-status.yaml`，因为当前 diff 同时包含 Epic 7 与 Epic 8 状态。
+  - Epic 8 Story 文件。
+  - flow gate artifact 与 implementation readiness report。
