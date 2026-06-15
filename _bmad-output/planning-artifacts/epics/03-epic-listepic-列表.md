@@ -48,11 +48,11 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 
 ## Epic 7: Post-MVP Governance Expansion（Post-MVP 治理扩展）
 
-团队后续可以在不破坏 MVP 契约的前提下扩展 init/list/doctor/sync/uninstall、CI/企业自动化集成和规范落地覆盖报告。
+团队后续可以在不破坏 MVP 契约的前提下扩展 Flow Gate hook enforcement、init/list/doctor/sync/uninstall、CI/企业自动化集成和规范落地覆盖报告。
 
 **实施范围：** 仅作为 Post-MVP backlog。Epic 7 不进入 MVP implementation readiness gate，也不阻塞 MVP sprint planning；只有当团队单独启动 Phase 2/Post-MVP planning 时，才把本 Epic 纳入 implementation readiness 检查。
 
-**MVP guard：** FR72-FR78 不进入 MVP sprint backlog、MVP release gate 或 MVP fixture release gate。MVP 只需保证这些未来能力可以复用现有 `CommandResult`、manifest/index、fixture 和 owning SPEC 边界。
+**MVP guard：** FR72-FR78 不进入 MVP sprint backlog、MVP release gate 或 MVP fixture release gate。MVP 只需保证 Flow Gate hook enforcement、Post-MVP command、CI/企业自动化和治理报告等未来能力可以复用现有 `CommandResult`、manifest/index、fixture 和 owning SPEC 边界。
 
 **覆盖 FR：** FR72, FR73, FR74, FR75, FR76, FR77, FR78
 

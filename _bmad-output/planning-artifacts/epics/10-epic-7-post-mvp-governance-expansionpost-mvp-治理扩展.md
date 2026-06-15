@@ -1,41 +1,51 @@
 # Epic 7: Post-MVP Governance Expansion（Post-MVP 治理扩展）
 
-团队后续可以在不破坏 MVP 契约的前提下扩展 init/list/doctor/sync/uninstall、CI/企业自动化集成和规范落地覆盖报告。本 Epic 是 Post-MVP backlog，不得进入 MVP sprint backlog 或 MVP implementation readiness gate。
+团队后续可以在不破坏 MVP 契约的前提下扩展 Flow Gate hook enforcement、doctor/sync/uninstall、CI/企业自动化集成、规范落地覆盖报告和 init/list。本 Epic 是 Post-MVP backlog，不得进入 MVP sprint backlog 或 MVP implementation readiness gate。
 
-MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 owning SPEC 边界，供本 Epic 未来消费；不得把本 Epic 的 command、CI/enterprise integration workflow 或 governance report 作为 MVP release gate。
+MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 owning SPEC 边界，供本 Epic 未来消费；不得把本 Epic 的 hook enforcement、command、CI/enterprise integration workflow 或 governance report 作为 MVP release gate。
 
-## Story 7.1: Project Config Init And Listing Commands（项目配置初始化与列表命令）
+## Story 7.1: Flow Gate Hook Enforcement（Flow Gate Hook 强制执行）
 
-作为项目维护者，
-我希望 Post-MVP 提供 `speclite init` 和 `speclite list`，
-以便在不重新安装全部内容的情况下初始化或重建项目配置，并查看可用模块、skills、IDE targets 或版本。
+作为 SpecLite workflow owner，
+我希望 installer 把 `speclite-flow-gate` 的 `story-kickoff` gate 投射为项目级 Claude/Codex hooks，
+以便 `speclite-dev-story` 在开发 Story 前不能只靠 skill 文案自觉触发 gate，而是由 execution plane 的 hook 先检查 gate evidence。
 
 **验收标准：**
 
-**前提** 项目需要初始化或重建 SpecLite 项目级配置
-**当** 用户运行 Post-MVP `speclite init`
-**则** 命令可以创建或重建项目级配置入口
-**并且** 不得静默覆盖 human-owned custom 文件。
+**前提** SpecLite 需要发布 hook source
+**当** 维护 canonical source tree
+**则** hook source 定义必须位于独立 hooks source root（推荐 `assets/source/speclite/hooks/flow-gate-enforcement/`）
+**并且** 不得把 hook source 埋入 `speclite-dev-story` skill package；相关 skills 只声明被 hook 保护的关系。
 
-**前提** 项目已有 `_speclite` 安装状态
-**当** 用户运行 Post-MVP `speclite init`
-**则** 命令必须读取现有 manifest、config 和 ownership 信息
-**并且** 在修改 installer-owned 配置前展示 plan 和影响范围。
+**前提** 用户安装 SpecLite 到目标项目
+**当** installer 生成 Claude/Codex execution-plane projection
+**则** 项目级 hook 配置、hook runner 和 source metadata 必须作为 installer-managed hook artifacts 被写入或安全合并
+**并且** files index 记录 sha256、executable intent、sourceRef、artifactKind 和 ownership。
 
-**前提** 用户想查看可安装模块、skills、IDE targets 或版本
-**当** 用户运行 Post-MVP `speclite list`
-**则** 命令会从 manifest/index、source metadata 或 adapter registry 中读取可列信息
-**并且** 不定义第二套 skill identity 或 IDE target identity。
+**前提** 目标项目已有 `.claude` 或 `.codex` 配置
+**当** installer 需要启用 hook
+**则** 必须 plan-before-write、保留既有 human-owned 配置、对冲突输出 manual action
+**并且** 不得静默覆盖用户已有 hooks、rules、settings 或 trust 决策。
 
-**前提** Post-MVP `speclite list` 输出机器可读结果
-**当** 用户传入 `--json`
-**则** 输出复用 MVP `CommandResult` envelope 和已契约化 data payload 扩展机制
-**并且** 不破坏 `speclite.command-result.v1` 的既有字段语义。
+**前提** 用户尝试触发 `speclite-dev-story`
+**当** 项目级 hook 识别到开发 Story 的 prompt/command intent
+**则** hook 必须读取对应 `{implementation_artifacts}/flow-gates/{story-key}-story-kickoff-gate.md` 的机器可读 metadata
+**并且** 只有 `mode=story-kickoff` 且 `result=PASS` 或 `PASS_EQUIVALENT` 才允许继续。
 
-**前提** Post-MVP `speclite init` 或 Post-MVP `speclite list` 需要新增 public JSON 字段
-**当** 实现该字段
-**则** 必须先新增或扩展对应 command owning SPEC，再更新 `CommandResult` executable schema/parser 和 fixture expected outputs
-**并且** 不依赖 human-readable output 承载自动化字段。
+**前提** kickoff gate 缺失、非通过、目标不匹配或 metadata 过期
+**当** hook 拦截到 `speclite-dev-story` intent
+**则** hook 必须阻断并给出可执行原因与下一步，例如运行 `speclite-flow-gate mode=story-kickoff target=<story-key>`
+**并且** hook 本身不得生成 gate report、推进 sprint status 或修改 Story。
+
+**前提** Flow Gate report 需要被 hook 稳定消费
+**当** 更新 `speclite-flow-gate`
+**则** report template 必须新增 YAML frontmatter 或 sidecar JSON metadata
+**并且** hook 不得依赖 human-readable Markdown prose 解析 gate result。
+
+**前提** hook enforcement 已进入 installed projection
+**当** 更新相关 skills 与 fixtures
+**则** `speclite-flow-gate`、`speclite-dev-story`、installer tests、fresh install fixtures 和 validation rules 必须覆盖 source-to-installed-to-runtime 全链路
+**并且** Codex 项目 hooks 的 `/hooks` review/trust 边界必须在 install summary 或文档中明确。
 
 ## Story 7.2: Doctor, Sync And Uninstall Commands（Doctor、Sync 与 Uninstall 命令）
 
@@ -153,3 +163,36 @@ MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 ownin
 **当** 生成 human-readable 或 machine-readable output
 **则** 路径和 source 信息遵守 project-relative POSIX path 与 redaction 策略
 **并且** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
+
+## Story 7.5: Project Config Init And Listing Commands（项目配置初始化与列表命令）
+
+作为项目维护者，
+我希望 Post-MVP 提供 `speclite init` 和 `speclite list`，
+以便在不重新安装全部内容的情况下初始化或重建项目配置，并查看可用模块、skills、IDE targets 或版本。
+
+**验收标准：**
+
+**前提** 项目需要初始化或重建 SpecLite 项目级配置
+**当** 用户运行 Post-MVP `speclite init`
+**则** 命令可以创建或重建项目级配置入口
+**并且** 不得静默覆盖 human-owned custom 文件。
+
+**前提** 项目已有 `_speclite` 安装状态
+**当** 用户运行 Post-MVP `speclite init`
+**则** 命令必须读取现有 manifest、config 和 ownership 信息
+**并且** 在修改 installer-owned 配置前展示 plan 和影响范围。
+
+**前提** 用户想查看可安装模块、skills、IDE targets 或版本
+**当** 用户运行 Post-MVP `speclite list`
+**则** 命令会从 manifest/index、source metadata 或 adapter registry 中读取可列信息
+**并且** 不定义第二套 skill identity 或 IDE target identity。
+
+**前提** Post-MVP `speclite list` 输出机器可读结果
+**当** 用户传入 `--json`
+**则** 输出复用 MVP `CommandResult` envelope 和已契约化 data payload 扩展机制
+**并且** 不破坏 `speclite.command-result.v1` 的既有字段语义。
+
+**前提** Post-MVP `speclite init` 或 Post-MVP `speclite list` 需要新增 public JSON 字段
+**当** 实现该字段
+**则** 必须先新增或扩展对应 command owning SPEC，再更新 `CommandResult` executable schema/parser 和 fixture expected outputs
+**并且** 不依赖 human-readable output 承载自动化字段。
