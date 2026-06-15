@@ -356,14 +356,19 @@ describe("Story 6.4 packaging acceptance", () => {
     await unlink("dist/packaging-manifest.json").catch((error: unknown) => {
       if (!isMissingPathError(error)) throw error;
     });
+    await unlink("release/packaging-manifest.json").catch((error: unknown) => {
+      if (!isMissingPathError(error)) throw error;
+    });
     await execFileAsync(process.execPath, ["scripts/release/packaging-check.mjs"], {
       cwd: process.cwd(),
     });
-    const firstManifestText = await readFile("dist/packaging-manifest.json", "utf8");
+    const firstManifestText = await readFile("release/packaging-manifest.json", "utf8");
+    const firstRuntimeManifestText = await readFile("dist/packaging-manifest.json", "utf8");
     await execFileAsync(process.execPath, ["scripts/release/packaging-check.mjs"], {
       cwd: process.cwd(),
     });
-    const secondManifestText = await readFile("dist/packaging-manifest.json", "utf8");
+    const secondManifestText = await readFile("release/packaging-manifest.json", "utf8");
+    const secondRuntimeManifestText = await readFile("dist/packaging-manifest.json", "utf8");
     const manifest = JSON.parse(secondManifestText) as {
       assertions: { passed: boolean; id: string }[];
       files: string[];
@@ -382,6 +387,8 @@ describe("Story 6.4 packaging acceptance", () => {
     const packFiles = packResult.files.map((file) => file.path).sort((left, right) => left.localeCompare(right));
 
     expect(secondManifestText).toBe(firstManifestText);
+    expect(firstRuntimeManifestText).toBe(firstManifestText);
+    expect(secondRuntimeManifestText).toBe(secondManifestText);
     expect(manifest.packageJson.bin.speclite).toBe("dist/bin/speclite.js");
     expect(manifest.files).toContain("package.json");
     expect(manifest.files).toContain("dist/bin/speclite.js");

@@ -52,6 +52,9 @@ describe("fixture contract registry and layout", () => {
       getFixtureGateClassification("source-integrity/source-unreadable-blocked/local-tarball-unreadable"),
     ).toBe("fixture-group-sub-case");
     expect(getFixtureGateClassification("packaging-acceptance")).toBe("release-checklist-gate");
+    expect(FIXTURE_GATE_REGISTRY.releaseChecklistGates["packaging-acceptance"].stableArtifact).toBe(
+      "release/packaging-manifest.json",
+    );
     expect(getFixtureGateClassification("richer-example")).toBeUndefined();
   });
 

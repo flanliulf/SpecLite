@@ -257,7 +257,7 @@ export const FIXTURE_GATE_REGISTRY = {
   releaseChecklistGates: {
     "packaging-acceptance": {
       releaseGate: true,
-      stableArtifact: "dist/packaging-manifest.json",
+      stableArtifact: "release/packaging-manifest.json",
       commandId: "npm run release:packaging-check",
     },
   },

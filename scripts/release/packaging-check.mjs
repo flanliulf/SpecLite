@@ -5,6 +5,9 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+export const RUNTIME_PACKAGING_MANIFEST_PATH = "dist/packaging-manifest.json";
+export const CANONICAL_PACKAGING_MANIFEST_PATH = "release/packaging-manifest.json";
+
 const REQUIRED_BUILD_OUTPUTS = ["dist/bin/speclite.js", "dist/bin/speclite.d.ts"];
 const REQUIRED_RUNTIME_ASSETS = [
   "assets/source/speclite/scripts/resolve_config.py",
@@ -75,9 +78,9 @@ export function validatePackagedDocumentationExamples(entries, packageFiles) {
 }
 
 export function createPackagingManifest(packResult, packageJson) {
-  const stablePackFiles = packResult.files.filter((entry) => entry.path !== "dist/packaging-manifest.json");
+  const stablePackFiles = packResult.files.filter((entry) => entry.path !== RUNTIME_PACKAGING_MANIFEST_PATH);
   const files = Array.from(
-    new Set([...stablePackFiles.map((entry) => entry.path), "dist/packaging-manifest.json"]),
+    new Set([...stablePackFiles.map((entry) => entry.path), RUNTIME_PACKAGING_MANIFEST_PATH]),
   )
     .sort((left, right) => left.localeCompare(right));
   const fileSet = new Set(files);
@@ -130,7 +133,7 @@ export function createPackagingManifest(packResult, packageJson) {
     },
     {
       id: "packaging-manifest-included-in-package-inventory",
-      passed: fileSet.has("dist/packaging-manifest.json"),
+      passed: fileSet.has(RUNTIME_PACKAGING_MANIFEST_PATH),
     },
     {
       id: "packaged-documentation-examples-classified",
@@ -186,12 +189,7 @@ export function runPackagingCheck(projectRoot = process.cwd()) {
   const manifest = createPackagingManifest(packResult, packageJson);
   const failed = manifest.assertions.filter((assertion) => !assertion.passed);
 
-  mkdirSync(path.join(projectRoot, "dist"), { recursive: true });
-  writeFileSync(
-    path.join(projectRoot, "dist/packaging-manifest.json"),
-    `${JSON.stringify(manifest, null, 2)}\n`,
-    "utf8",
-  );
+  writePackagingManifests(projectRoot, manifest);
 
   if (failed.length > 0) {
     throw new Error(`Packaging acceptance failed: ${failed.map((assertion) => assertion.id).join(", ")}`);
@@ -203,10 +201,21 @@ export function runPackagingCheck(projectRoot = process.cwd()) {
 if (isDirectRun()) {
   try {
     runPackagingCheck();
-    console.log("Packaging acceptance passed: dist/packaging-manifest.json");
+    console.log(
+      `Packaging acceptance passed: ${CANONICAL_PACKAGING_MANIFEST_PATH} and ${RUNTIME_PACKAGING_MANIFEST_PATH}`,
+    );
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
+  }
+}
+
+export function writePackagingManifests(projectRoot, manifest) {
+  const content = `${JSON.stringify(manifest, null, 2)}\n`;
+  for (const relativePath of [CANONICAL_PACKAGING_MANIFEST_PATH, RUNTIME_PACKAGING_MANIFEST_PATH]) {
+    const absolutePath = path.join(projectRoot, relativePath);
+    mkdirSync(path.dirname(absolutePath), { recursive: true });
+    writeFileSync(absolutePath, content, "utf8");
   }
 }
 

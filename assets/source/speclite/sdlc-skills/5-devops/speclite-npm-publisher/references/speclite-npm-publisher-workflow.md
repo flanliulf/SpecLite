@@ -98,7 +98,7 @@ npm version <target-version> --no-git-tag-version
 - release metadata tests。
 - command JSON fixtures。
 - source integrity / installed-state fixtures。
-- `dist/packaging-manifest.json`。
+- canonical `release/packaging-manifest.json`。
 
 如果项目有自定义 version sync 脚本，优先使用项目脚本；没有脚本时只改真实受版本绑定的文件，不做全仓盲替换。
 
@@ -115,7 +115,7 @@ npm run release:check
 - 运行命令。
 - test file / test count。
 - packaging check 结果。
-- 是否刷新 `dist/packaging-manifest.json`。
+- 是否刷新 canonical `release/packaging-manifest.json`，并生成包内 runtime `dist/packaging-manifest.json`。
 
 ### Step 4：提交与推送
 
@@ -433,7 +433,7 @@ Hooks 是 deterministic 防护层，不是发布编排层。Skill 仍负责 SemV
 test -z "$(git status --short --untracked-files=all)"
 name=$(node -p "require('./package.json').name")
 version=$(node -p "require('./package.json').version")
-node -e "const p=require('./dist/packaging-manifest.json'); const j=require('./package.json'); if (p.packageJson.version !== j.version) process.exit(1)"
+node -e "const p=require('./release/packaging-manifest.json'); const j=require('./package.json'); if (p.packageJson.version !== j.version) process.exit(1)"
 npm view "$name@$version" version --registry https://registry.npmjs.org/ >/dev/null 2>&1 && exit 1 || true
 git rev-parse --abbrev-ref --symbolic-full-name @{upstream} >/dev/null
 ```
@@ -445,7 +445,7 @@ git rev-parse --abbrev-ref --symbolic-full-name @{upstream} >/dev/null
 建议在关键文件变更后提示：
 
 - `package.json` version 已改但 `package-lock.json` 未同步。
-- `package.json`、`src/**`、`assets/source/**` 已改但没有新的 `dist/packaging-manifest.json`。
+- `package.json`、`src/**`、`assets/source/**` 已改但没有新的 canonical `release/packaging-manifest.json`。
 - `package.json.files` 覆盖的 docs 已改但未纳入 release commit。
 - `assets/source/**/SKILL.md` 已改但对应 `SKILL.en.md` 或 `CHANGELOG.md` 未同步。
 - release baseline commit 后工作区仍有会进入 tarball 的 dirty files。

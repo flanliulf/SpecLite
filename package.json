@@ -42,7 +42,8 @@
     "test": "vitest run",
     "release:packaging-check": "node scripts/release/packaging-check.mjs",
     "release:verify": "npm run build && npm run release:packaging-check",
-    "release:check": "npm run build && npm test && npm run release:packaging-check"
+    "release:check": "npm run build && npm test && npm run release:packaging-check",
+    "prepublishOnly": "npm run release:check"
   },
   "dependencies": {
     "commander": "14.0.3",

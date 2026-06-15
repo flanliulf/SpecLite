@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   collectPackagingPrerequisiteIssues,
+  runPackagingCheck,
   validatePackagedDocumentationExamples,
 } from "../scripts/release/packaging-check.mjs";
 
@@ -62,6 +63,52 @@ describe("Story 6.7 release packaging gate", () => {
     expect(packageJson.scripts["release:verify"]).toBe("npm run build && npm run release:packaging-check");
     expect(packageJson.scripts["release:check"]).toBe("npm run build && npm test && npm run release:packaging-check");
     expect(packageJson.scripts["release:packaging-check"]).toBe("node scripts/release/packaging-check.mjs");
+    expect(packageJson.scripts.prepublishOnly).toBe("npm run release:check");
+  });
+
+  it("writes a tracked canonical manifest and a generated runtime manifest", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-packaging-dual-manifest-"));
+
+    try {
+      await writeFileAt(
+        tempRoot,
+        "package.json",
+        JSON.stringify({
+          name: "@fancyliu/speclite",
+          version: "0.1.1",
+          license: "MIT",
+          bin: {
+            speclite: "dist/bin/speclite.js",
+          },
+          files: ["dist/", "assets/source/speclite/", "package.json"],
+          publishConfig: {
+            registry: "https://registry.npmjs.org/",
+            access: "public",
+          },
+          engines: {
+            node: ">=22",
+          },
+        }),
+      );
+      await writeRequiredRuntimeAssets(tempRoot);
+      const buildMtime = new Date(Date.now() + 60_000);
+      await writeFileWithMtime(tempRoot, "dist/bin/speclite.js", "#!/usr/bin/env node\n", buildMtime);
+      await writeFileWithMtime(tempRoot, "dist/bin/speclite.d.ts", "export {};\n", buildMtime);
+
+      runPackagingCheck(tempRoot);
+
+      const canonicalManifest = await readFile(path.join(tempRoot, "release/packaging-manifest.json"), "utf8");
+      const runtimeManifest = await readFile(path.join(tempRoot, "dist/packaging-manifest.json"), "utf8");
+      const parsed = JSON.parse(canonicalManifest) as {
+        files: string[];
+      };
+
+      expect(runtimeManifest).toBe(canonicalManifest);
+      expect(parsed.files).toContain("dist/packaging-manifest.json");
+      expect(parsed.files).not.toContain("release/packaging-manifest.json");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("fails fast when required build output is missing", async () => {

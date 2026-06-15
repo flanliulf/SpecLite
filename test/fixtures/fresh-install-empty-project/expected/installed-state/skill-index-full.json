@@ -524,7 +524,7 @@
       "canonicalSkillId": "speclite-npm-publisher",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher",
-      "canonicalPackageHash": "sha256:b397e21a1e0927717db64e8e756068a4ec815d89bb55cee60562c2d9e248fb2e",
+      "canonicalPackageHash": "sha256:8e5466369eba0a144080139ad526d63ff5ad0116a2b83136223cacd3362b8050",
       "installedTargets": [
         "claude",
         "agents"
