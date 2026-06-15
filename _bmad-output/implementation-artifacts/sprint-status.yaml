@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-06-15 16:26 CST
+# last_updated: 2026-06-15 16:42 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-06-15 16:26 CST
+last_updated: 2026-06-15 16:42 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -105,7 +105,7 @@ development_status:
   7-3-ci-and-enterprise-automation-integration: done
   7-4-process-governance-coverage-report: done
   7-5-project-config-init-and-listing-commands: done
-  epic-7-retrospective: optional
+  epic-7-retrospective: done
 
   # Corrective planning Epic for CLI outcome-oriented human output.
   epic-8: in-progress
