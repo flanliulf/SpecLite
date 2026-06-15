@@ -4,6 +4,13 @@
 
 ## Run Command（运行命令）
 
+如果已经安装 CLI：
+
+```sh
+speclite governance-report /path/to/target-project
+speclite governance-report /path/to/target-project --json
+```
+
 在 SpecLite tool repo 中运行：
 
 ```sh
@@ -16,6 +23,8 @@ npm run dev -- governance-report /path/to/target-project
 npm run dev -- governance-report /path/to/target-project --json
 ```
 
+`governance-report` 是只读命令，不需要 `--yes`。
+
 ## Metrics（指标）
 
 报告包含四个核心指标：
@@ -24,6 +33,8 @@ npm run dev -- governance-report /path/to/target-project --json
 - `artifactPresenceRate`：来自 `phaseCoverage.rows[].artifactContract` 的标准产物存在与 metadata contract 检查。
 - `validatePassRate`：基于 `speclite validate` 已检查 categories 和 `ValidationIssue` 聚合。
 - `openGapCount`：阶段缺口与 artifact contract issue 的数量。
+
+JSON 输出位于 `data.metrics`，完整 envelope 遵循 [`../reference/command-result-json.md`](../reference/command-result-json.md)。
 
 ## Scope Boundary（范围边界）
 

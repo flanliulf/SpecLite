@@ -89,6 +89,7 @@ npm run dev -- validate /path/to/project
 ```sh
 speclite status /path/to/project --json
 speclite validate /path/to/project --json
+speclite governance-report /path/to/project --json
 ```
 
 ## CLI Commands（命令）
@@ -96,14 +97,20 @@ speclite validate /path/to/project --json
 | Command | Purpose |
 |---|---|
 | `speclite install [target-directory]` | 执行安装 preflight，并在授权后写入 SpecLite runtime、skill mirrors、manifest/index 和输出目录。 |
+| `speclite init [target-directory]` | 创建或重建项目 config plan，在授权后写入非冲突配置文件，并保护 human-owned custom files。 |
+| `speclite list [target-directory]` | 列出 canonical modules、skills、IDE targets、版本和目标项目 installed-state 摘要。 |
 | `speclite status [target-directory]` | 查看本地 SpecLite installed-state summary。 |
 | `speclite validate [target-directory]` | 校验 installed-state、runtime path、manifest/index 和 IDE mirrors。 |
+| `speclite doctor [target-directory]` | 执行比 `validate` 更丰富的诊断；远程 freshness/provenance revalidation 需要显式授权。 |
 | `speclite update [target-directory]` | 生成或执行安全更新计划。 |
 | `speclite update --repair [target-directory]` | 显式修复可安全恢复的 installer-owned canonical 内容。 |
+| `speclite sync [target-directory]` | 对齐 installed source projections 和 IDE mirrors，不隐藏执行 repair 语义。 |
+| `speclite uninstall [target-directory]` | 移除 installer-owned SpecLite 文件，并保留 human-owned 与 workflow-owned 路径。 |
+| `speclite governance-report [target-directory]` | 基于 installed-state evidence 生成只读流程治理覆盖报告。 |
 | `speclite resolve config` | Runtime support command，用于解析项目 config。 |
 | `speclite resolve customization` | Runtime support command，用于解析 skill customization。 |
 
-`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。
+`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](docs/how-to/manage-installed-project.md)。
 
 `install` 的默认 human-readable output 使用 `zh-CN`。`speclite install /path/to/project --yes` 是默认无交互安装；需要自定义 modules、config 或 IDE targets 时使用 `--yes --interactive`。英文输出可用 `--locale en-US` 或 `SPECLITE_LOCALE=en-US`，JSON 输出不受 locale 影响。
 
@@ -114,9 +121,11 @@ SpecLite 的默认策略是保守写入、可审查变更：
 - `--dry-run` 只生成 plan，不写文件。
 - `install` 不带 `--yes` 只执行 target preflight，不进入后续 source/module/config/write 阶段。
 - `--yes` 只表示 command-level write authorization，不表示接受 unverified source 或 policy rejection。
+- `init`、`sync` 和 `uninstall` 在未授权时只生成 plan；带 `--yes` 才执行非冲突写入或移除。
+- `doctor --revalidate-source` 会记录 external access intent；未带 `--yes` 时不会执行远程 revalidation。
 - Human-owned custom files 和 workflow-owned artifacts 不会被静默覆盖。
 - Installer-owned files 更新前必须通过 ownership manifest 和 hash comparison。
-- `install`、`update`、`repair` 写入前必须获取 `_speclite/.lock` project operation lock。
+- `install`、`init`、`update`、`repair`、`sync` 和 `uninstall` 写入前必须获取 `_speclite/.lock` project operation lock。
 - Public report paths 使用 project-relative POSIX-style paths。
 
 ## Architecture Notes（设计说明）
@@ -131,6 +140,7 @@ SpecLite 是 CLI API + file-contract API，不是 REST、GraphQL 或 hosted serv
 - Runtime Boundaries：`_speclite` 是 control hub，IDE skill directories 是 execution plane，`_speclite-output` 是 artifact repository。
 - Validation Model：`status`、`validate`、JSON output 和 fixture assertions 共享 deterministic issue model。
 - Update Safety：写入前执行 ownership manifest + hash comparison。
+- Post-MVP Governance：`doctor`、`sync`、`uninstall`、`init`、`list` 和 `governance-report` 复用既有 runtime、ownership、source root、`CommandResult` 和 `ValidationIssue` contract。
 
 ## Developer Workflow（开发者工作流）
 

@@ -15,10 +15,16 @@ speclite <command> [options] [target-directory]
 | Command | Purpose |
 |---|---|
 | `speclite install [target-directory]` | 执行 fresh install preflight，并在 `--yes` 授权后写入 runtime、IDE mirrors、manifest/index 和 artifact root。 |
+| `speclite init [target-directory]` | 创建或重建 SpecLite project config plan，在授权后写入非冲突配置文件。 |
+| `speclite list [target-directory]` | 列出 canonical modules、skills、IDE targets、版本和目标项目 installed-state 摘要。 |
 | `speclite status [target-directory]` | 查看本地 SpecLite installed-state summary。 |
 | `speclite validate [target-directory]` | 校验 installed-state、runtime path、manifest/index、IDE mirrors 和相关安装健康度。 |
+| `speclite doctor [target-directory]` | 执行更丰富的诊断，不改变 `validate` 的 local-only contract。 |
 | `speclite update [target-directory]` | 生成或执行安全 update plan。 |
 | `speclite update --repair [target-directory]` | 显式修复可安全恢复的 installer-owned drift。 |
+| `speclite sync [target-directory]` | 对齐 installed source projections 和 IDE mirrors，不隐藏 repair 语义。 |
+| `speclite uninstall [target-directory]` | 移除 installer-owned SpecLite 文件，并保留 human-owned 与 workflow-owned 路径。 |
+| `speclite governance-report [target-directory]` | 从 installed-state evidence 生成只读流程治理覆盖报告。 |
 | `speclite resolve config` | 输出解析后的 runtime config JSON。 |
 | `speclite resolve customization` | 输出解析后的 skill customization JSON。 |
 
@@ -54,6 +60,32 @@ Human-readable install output 默认 locale 为 `zh-CN`。解析顺序是 `--loc
 
 Locale 只影响自然语言，不改变 `CommandResult` JSON、exit code、issue ordering、path normalization、manifest/index 内容或 fixture stable JSON comparison。
 
+## Init Options（初始化参数）
+
+```sh
+speclite init [options] [target-directory]
+```
+
+| Option | Description |
+|---|---|
+| `--json` | 输出 machine-readable `CommandResult` JSON。 |
+| `--dry-run` | 生成 unapplied init plan，不授权写入。 |
+| `--yes` | 授权非冲突 project config writes。 |
+
+`init` 用于创建或重建 `_speclite/config.toml`、`_speclite/config.user.toml`、`_speclite/custom/config.toml` 和 `_speclite/custom/config.user.toml` 的计划。它会读取现有 manifest/files index，并保护 human-owned custom files，不会静默覆盖。
+
+## List Options（列表参数）
+
+```sh
+speclite list [options] [target-directory]
+```
+
+| Option | Description |
+|---|---|
+| `--json` | 输出 machine-readable `CommandResult` JSON。 |
+
+`list` 同时返回 canonical package 侧的 modules、skills、IDE targets、版本，以及目标项目中可读取的 installed-state projection。
+
 ## Status Options（状态参数）
 
 ```sh
@@ -74,6 +106,20 @@ speclite validate [options] [target-directory]
 |---|---|
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
 
+## Doctor Options（诊断参数）
+
+```sh
+speclite doctor [options] [target-directory]
+```
+
+| Option | Description |
+|---|---|
+| `--json` | 输出 machine-readable `CommandResult` JSON。 |
+| `--revalidate-source` | 计划 remote source freshness/provenance revalidation。 |
+| `--yes` | 授权 `doctor` 明确计划的 external access。 |
+
+未带 `--revalidate-source` 时，`doctor` 只基于本地 validation evidence 产生诊断。带 `--revalidate-source` 但未带 `--yes` 时，命令会停止在 external access authorization gate。
+
 ## Update Options（更新参数）
 
 ```sh
@@ -86,6 +132,46 @@ speclite update [options] [target-directory]
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
 | `--dry-run` | 生成未应用的 update plan，不授权写入。 |
 | `--yes` | 授权 non-conflicting planned update writes。 |
+
+## Sync Options（同步参数）
+
+```sh
+speclite sync [options] [target-directory]
+```
+
+| Option | Description |
+|---|---|
+| `--json` | 输出 machine-readable `CommandResult` JSON。 |
+| `--dry-run` | 生成 unapplied sync plan，不授权写入。 |
+| `--yes` | 授权非冲突 installer-owned sync writes。 |
+
+`sync` 复用 update planning 的 source-to-mirror reconciliation 语义，但 command id 和 output data 为 `sync`。它不等价于 `update --repair`，也不会隐藏执行 repair。
+
+## Uninstall Options（卸载参数）
+
+```sh
+speclite uninstall [options] [target-directory]
+```
+
+| Option | Description |
+|---|---|
+| `--json` | 输出 machine-readable `CommandResult` JSON。 |
+| `--dry-run` | 生成 unapplied uninstall plan，不移除文件。 |
+| `--yes` | 授权移除 installer-owned files。 |
+
+`uninstall` 根据 files index 和 ownership model 移除 installer-owned paths，保留 human-owned 与 workflow-owned paths。移除后仍应人工检查 preserved paths。
+
+## Governance Report Options（治理报告参数）
+
+```sh
+speclite governance-report [options] [target-directory]
+```
+
+| Option | Description |
+|---|---|
+| `--json` | 输出 machine-readable `CommandResult` JSON。 |
+
+`governance-report` 是只读命令，基于 manifest、phase coverage、workflow artifact contract 和 validate evidence 计算流程治理覆盖指标。它不评价文档内容质量或人工 review 充分性。
 
 ## Resolve Options（解析参数）
 
@@ -138,12 +224,24 @@ speclite install /path/to/project --yes
 speclite install /path/to/project --yes --interactive
 speclite install /path/to/project --yes --locale en-US
 speclite install /path/to/project --json --yes
+speclite init /path/to/project --dry-run
+speclite init /path/to/project --yes
+speclite list /path/to/project
+speclite list /path/to/project --json
 speclite status /path/to/project
 speclite status /path/to/project --json
 speclite validate /path/to/project
 speclite validate /path/to/project --json
+speclite doctor /path/to/project
+speclite doctor /path/to/project --revalidate-source --yes
 speclite update /path/to/project --dry-run
 speclite update /path/to/project --yes
 speclite update /path/to/project --repair
 speclite update /path/to/project --repair --yes
+speclite sync /path/to/project --dry-run
+speclite sync /path/to/project --yes
+speclite uninstall /path/to/project --dry-run
+speclite uninstall /path/to/project --yes
+speclite governance-report /path/to/project
+speclite governance-report /path/to/project --json
 ```

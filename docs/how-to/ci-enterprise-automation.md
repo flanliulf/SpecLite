@@ -1,6 +1,6 @@
 # CI And Enterprise Automation（CI 与企业自动化）
 
-本文说明 CI 和企业自动化工具链如何安全消费 SpecLite 的 machine-readable output。适用范围是本地执行 `speclite status --json`、`speclite validate --json`、`speclite update --json` 和 `speclite update --repair --json` 后读取 `CommandResult` JSON。
+本文说明 CI 和企业自动化工具链如何安全消费 SpecLite 的 machine-readable output。核心适用范围是本地执行 `speclite status --json`、`speclite validate --json`、`speclite update --json` 和 `speclite update --repair --json` 后读取 `CommandResult` JSON。
 
 本文不定义 hosted service、enterprise dashboard、GitHub Action package 或 SaaS integration。自动化只能使用现有 public JSON contract；不要解析 human-readable output，不得定义企业私有 status semantics。
 
@@ -131,6 +131,19 @@ Conflict 示例：
 
 Path-level conflicts 属于 `update.data.conflicts` 或 `repair.data.conflicts`。不要把每个 path-level conflict 当成多个 command-level issues。
 
+## Post-MVP Governance Commands（Post-MVP 治理命令）
+
+Epic 7 新增的治理命令同样使用 `CommandResult` envelope，但不要把它们混同为 MVP local validation gate。
+
+| Command | Automation use | Boundary |
+|---|---|---|
+| `speclite doctor --json` | 读取 richer diagnostics 和 `externalAccesses`。 | 不替代 `validate --json` 的 local-only contract；remote revalidation 需要 `--revalidate-source --yes`。 |
+| `speclite sync --json` | 读取 `syncPlan.actions`、`changedPaths`、`conflicts` 和 write authorization。 | 不等价于 `update --repair`。 |
+| `speclite uninstall --json` | 读取 `uninstallPlan.actions`、`removedPaths`、`preservedPaths` 和 write authorization。 | 只移除 installer-owned paths。 |
+| `speclite init --json` | 读取 config init plan、conflicts 和 step lifecycle。 | 不静默覆盖 human-owned custom files。 |
+| `speclite list --json` | 读取 canonical modules、skills、IDE targets、versions 和 installed-state summary。 | 不作为安装健康 gate。 |
+| `speclite governance-report --json` | 读取 governance metrics、phase gaps、artifact checks 和 validate issue counts。 | 只证明本地 contract evidence，不证明人工执行质量。 |
+
 ## Exit Code Policy（Exit Code 策略）
 
 Exit code 跟随 `CommandResult.status`：
@@ -158,6 +171,7 @@ CI logs、reports 和 artifacts 可以记录 stable fields，但必须保持 red
 speclite status /path/to/project --json
 speclite validate /path/to/project --json
 speclite update /path/to/project --json
+speclite governance-report /path/to/project --json
 ```
 
 推荐策略：
@@ -165,4 +179,5 @@ speclite update /path/to/project --json
 1. 先运行 `status --json`，只用 `status.data.highLevelHealth` 做 lightweight gate。
 2. 对 `configured` 以外的状态运行 `validate --json`，读取 `validate.data.issueCounts` 和 coverage fields。
 3. 对 release 或 update preview 运行 `update --json`，读取 `update.data.updatePlan.actions`、`update.data.changedPaths`、`update.data.skippedPaths` 和 `update.data.conflicts`。
-4. 只有在人工或自动策略明确允许时，才运行带 `--yes` 的 write-capable command。
+4. 需要流程治理证据时运行 `governance-report --json`，读取 metrics 和 phase gaps，不解析 human-readable report。
+5. 只有在人工或自动策略明确允许时，才运行带 `--yes` 的 write-capable command。

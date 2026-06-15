@@ -27,7 +27,11 @@
 | 安装和首次使用 | [`tutorials/quick-start.md`](tutorials/quick-start.md) |
 | 安装验证 | [`how-to/validate-installation.md`](how-to/validate-installation.md) |
 | 更新与修复 | [`how-to/update-and-repair.md`](how-to/update-and-repair.md) |
+| 已安装项目治理命令 | [`how-to/manage-installed-project.md`](how-to/manage-installed-project.md) |
+| CI 和企业自动化 | [`how-to/ci-enterprise-automation.md`](how-to/ci-enterprise-automation.md) |
+| 流程治理覆盖报告 | [`how-to/process-governance-report.md`](how-to/process-governance-report.md) |
 | CLI 命令参考 | [`reference/cli.md`](reference/cli.md) |
+| CommandResult JSON | [`reference/command-result-json.md`](reference/command-result-json.md) |
 | runtime layout | [`reference/runtime-layout.md`](reference/runtime-layout.md) |
 | canonical source layout | [`reference/canonical-source-layout.md`](reference/canonical-source-layout.md) |
 | local-first control plane | [`explanation/local-first-control-plane.md`](explanation/local-first-control-plane.md) |

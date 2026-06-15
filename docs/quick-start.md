@@ -306,6 +306,7 @@ speclite install /path/to/project --yes --source local --source-value /path/to/s
 speclite install /path/to/project --yes --json
 speclite status /path/to/project --json
 speclite validate /path/to/project --json
+speclite governance-report /path/to/project --json
 ```
 
 注意：
@@ -313,6 +314,7 @@ speclite validate /path/to/project --json
 - `--json` 会输出 machine-readable CommandResult JSON。
 - 自动化不要依赖 spinner、颜色、emoji 或 human-readable 文本。
 - 写入类命令仍然需要显式 `--yes`。
+- 安装后的治理和维护命令见 [`how-to/manage-installed-project.md`](how-to/manage-installed-project.md)。
 
 ## Next Steps（下一步）
 
