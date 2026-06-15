@@ -16,7 +16,17 @@ Status: ready-for-dev
    **前提** 用户运行 `speclite status`；
    **当** 系统读取 installed-state summary；
    **则** 输出 outcome 必须来自 `installed`、`not-installed`、`stale`、`partial`、`failed` 或 `unknown`；
-   **并且** Summary 应优先展示 high-level health、source/version、IDE target summary 和下一步建议。
+   **并且** Summary 应优先展示 high-level health、source/version、IDE target summary 和下一步建议；
+   **并且** status human outcome 必须按以下 deterministic mapping 从 `status.data.highLevelHealth` 推导：
+
+   | `status.data.highLevelHealth` | status human outcome |
+   | --- | --- |
+   | `configured` | `installed` |
+   | `not-configured` | `not-installed` |
+   | `partial` | `partial` |
+   | `failed` | `failed` |
+
+   **并且** `stale` 和 `unknown` 只能是 human-derived label，其证据必须来自 manifest、source descriptor、version/evidence insufficiency 或 installed-state summary 不足；不得新增 public JSON enum，除非先更新 `01-command-result-json-contract.md`。
 
 2. **Status command success is not installation health success（Status 命令成功不等于安装健康通过）**
    **前提** `status.data.highLevelHealth` 为 `not-configured`、`partial` 或 `failed`；
@@ -40,6 +50,8 @@ Status: ready-for-dev
 
 - [ ] Task 1: Implement status outcome mapping（AC: 1, 2）
   - [ ] 从 `StatusCommandData.highLevelHealth`、manifest presence、IDE target status、source descriptor 推导 status human outcome。
+  - [ ] 按 AC1 mapping table 实现 `configured -> installed`、`not-configured -> not-installed`、`partial -> partial`、`failed -> failed`。
+  - [ ] 若输出 `stale` 或 `unknown`，必须作为 human-derived label，并在 Evidence 中说明 manifest、source descriptor、version/evidence insufficiency 或 installed-state summary 不足；不得扩展 `status.data.highLevelHealth` public JSON enum，除非先更新 SPEC。
   - [ ] 对 `not-configured`、`partial`、`failed` 明确说明 command 成功只是读取成功，不代表安装健康通过。
   - [ ] 不让 `status` 执行 full validation、remote source access、implicit update check 或 repair planning。
 
@@ -55,6 +67,7 @@ Status: ready-for-dev
 
 - [ ] Task 4: Tests（AC: 1-4）
   - [ ] 覆盖 status `not-configured`、`configured`、`partial`、`failed` human output。
+  - [ ] 覆盖 `highLevelHealth` 到 human outcome 的 deterministic mapping，并证明 `stale` / `unknown` 不会作为新的 public JSON enum 输出。
   - [ ] 覆盖 validate no issues、warning only、error/critical、manifest unreadable/cannot-validate。
   - [ ] 验证 JSON output 不变，status 不增加 issues 来表达 health。
 

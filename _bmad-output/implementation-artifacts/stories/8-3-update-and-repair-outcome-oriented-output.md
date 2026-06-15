@@ -44,25 +44,36 @@ Status: ready-for-dev
    **则** outcome 为 `applied`；
    **并且** changed、skipped、conflicts、protected boundaries 和 next validation action 必须可见。
 
+6. **Partial or failed write shows partial-or-failed（部分执行或写入失败显示 partial-or-failed）**
+   **前提** update 或 repair 已进入、准备进入或部分完成写入阶段；
+   **当** apply、safe-write、operation-lock 或 partial execution failure 阻止完整完成；
+   **则** outcome 为 `partial-or-failed`；
+   **并且** Summary 必须说明是写入/repair 执行未完整完成，而不是普通 conflict 或 no-op；
+   **并且** Evidence 必须列出已完成写入、失败步骤或 blocker、未执行项和受保护边界；
+   **并且** Issues 必须保留 command-level blocker 或 failure reason，不能把 path-level conflicts 复制成多个 command-level `issues[]`；
+   **并且** Next Actions 必须给出人工恢复、重新运行或验证动作，并明确哪些步骤尚未执行。
+
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Derive update/repair outcomes without changing data schema（AC: 1-5）
+- [ ] Task 1: Derive update/repair outcomes without changing data schema（AC: 1-6）
   - [ ] 从 `UpdateCommandData` / `RepairCommandData` 的 `updatePlan`、`repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` 推导 human outcome。
+  - [ ] 当 apply、safe-write、operation-lock 或 partial execution failure 发生时，推导 `partial-or-failed`，并区分已完成写入、失败步骤、未执行项和保护边界。
   - [ ] 保持 `update.conflicts` command-level issue 只汇总 conflictCount，不把 path-level conflicts 复制成多个 `issues[]`。
   - [ ] Outcome label 不写入 JSON，除非先更新 SPEC。
 
-- [ ] Task 2: Update renderer and catalog（AC: 1-5）
+- [ ] Task 2: Update renderer and catalog（AC: 1-6）
   - [ ] 扩展 `renderUpdateHumanOutput()`，支持 `plan-ready`、`repair-plan-ready`、`no-op`、`blocked-by-conflict`、`applied`、`partial-or-failed`。
   - [ ] 使用 shared output frame：Summary、Scope、State、Evidence、Issues、Next Actions。
   - [ ] Empty states 明确显示 `无 planned writes`、`无 conflict`、`未写入项目文件`。
+  - [ ] `partial-or-failed` 的 Summary、Evidence、Issues、Next Actions 必须覆盖已完成写入、失败步骤或 blocker、未执行项、protected boundaries 和恢复/验证动作。
 
-- [ ] Task 3: Preserve update safety semantics（AC: 3-5）
+- [ ] Task 3: Preserve update safety semantics（AC: 3-6）
   - [ ] 不修改 `src/update/update-plan.ts` 的 ownership/hash/conflict 规则，除非 Story 明确需要修复 renderer 无法表达的数据缺口。
   - [ ] `--yes` 只能授权无 conflict planned writes；不能把 conflict 转为 repair。
   - [ ] `update --repair` 必须保持 explicit repair，不作为普通 update 隐藏模式。
 
-- [ ] Task 4: Tests（AC: 1-5）
-  - [ ] 覆盖 unapplied plan、repair plan、no-op、conflict、applied、operation-lock failure。
+- [ ] Task 4: Tests（AC: 1-6）
+  - [ ] 覆盖 unapplied plan、repair plan、no-op、conflict、applied、operation-lock failure、safe-write failure 和 partial execution failure。
   - [ ] 覆盖 human-readable 不提示用普通 `--yes` 绕过 conflict。
   - [ ] 覆盖 JSON output 不新增字段、sorting 不变。
 

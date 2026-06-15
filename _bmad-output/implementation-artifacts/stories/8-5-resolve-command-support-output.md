@@ -36,12 +36,21 @@ Status: ready-for-dev
    **则** outcome 为 `invalid-input`；
    **并且** Next Actions 必须说明合法命令形态。
 
+### Resolve Output Mode Decision（Resolve 输出模式裁决）
+
+- 默认 `speclite resolve config` 和 `speclite resolve customization` 必须继续保持 machine contract：stdout 只输出 resolved JSON object，stderr 只输出 JSON Lines diagnostics，不得混入 human-readable prose。
+- 默认 missing key behavior 不变：stdout 为 `{}`，exit code 为 0，stderr 为空。Missing key 在默认 JSON mode 下不是 failure。
+- Human-readable resolve support 必须通过显式 `--human` opt-in 入口触发；未传入 `--human` 时，不得改变 stdout/stderr/exit code 的既有 automation contract。
+- `unresolved` 只适用于显式 human mode 中的 missing key、empty result 或 failure 说明；它不得改变 default JSON mode 的 `{}` / exit 0 / empty stderr 行为。
+- Dev 阶段必须把 `--human` 入口同步记录到 `06-resolve-command-contract.md`、commander registration、docs、tests 和 fixtures；本 SR fixer 不修改 SPEC，除非后续确认 Story 无法在上述保守裁决下自洽。
+
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [ ] Task 1: Resolve contract decision before changing stdout behavior（AC: 1-4）
-  - [ ] 读取并更新 `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md`，明确 resolve 默认 stdout 是否继续 pure JSON，以及 human-readable output 如何触发。
-  - [ ] 推荐保护现有 runtime support：默认 `resolve config/customization` stdout 继续 pure JSON；human-readable support 通过显式 flag、profile 或 future command mode 暴露，除非 SPEC 明确变更默认行为。
-  - [ ] 更新 `src/config/resolve-output-schema.ts` 和 fixtures，确保 installed skills 不被破坏。
+  - [ ] 读取并更新 `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md`，记录默认 stdout/stderr/exit code machine contract 继续不变，并新增显式 `--human` opt-in human-readable output 入口。
+  - [ ] 保护现有 runtime support：默认 `resolve config/customization` stdout 继续 pure JSON；默认 missing key 保持 stdout `{}`、exit code 0、stderr empty。
+  - [ ] 在 commander registration、docs、tests 和 fixtures 中记录 `--human`，并证明未传入 `--human` 时 installed skills 的 automation contract 不被破坏。
+  - [ ] 更新 `src/config/resolve-output-schema.ts` 或等价 schema/parser anchor 时，只允许补充 human mode 所需解析/fixture 支撑，不得把默认 JSON mode 改成 `CommandResult`。
 
 - [ ] Task 2: Add resolve human output mode（AC: 1-4）
   - [ ] 在 `src/commands/resolve.ts` 中新增 explicit human output path 或等价 presentation hook。
@@ -50,7 +59,7 @@ Status: ready-for-dev
 
 - [ ] Task 3: Preserve JSON Lines diagnostics and parity（AC: 2-4）
   - [ ] Optional layer warning 仍可作为 `ValidationIssue` shape 输出；human mode 可以渲染，但 JSON mode 必须保持 schema。
-  - [ ] Missing key 的现有默认 `{}` / exit 0 语义如需改变，必须先改 SPEC；否则 human mode 只能解释 empty result，不改变 automation contract。
+  - [ ] Missing key 的现有默认 `{}` / exit 0 / empty stderr 语义不得改变；human mode 可以把 missing key 或 empty result 解释为 `unresolved`，但只能在显式 `--human` 下发生。
   - [ ] Invalid input 使用 existing `runtime-path.missing-entry` 或 SPEC 指定 issue id。
 
 - [ ] Task 4: Tests（AC: 1-4）
