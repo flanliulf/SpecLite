@@ -122,7 +122,10 @@ function hasAbsoluteOrHomePath(value: string): boolean {
 }
 
 function hasCredentialBearingUrl(value: string): boolean {
-  return /[A-Za-z][A-Za-z0-9+.-]*:\/\/[^/\s]*@/.test(value);
+  return (
+    /[A-Za-z][A-Za-z0-9+.-]*:\/\/[^/\s]*@/.test(value) ||
+    /[?&](?:token|secret|password|credential|auth|key)=/i.test(value)
+  );
 }
 
 function hasStackTraceShape(value: string): boolean {

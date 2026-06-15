@@ -10,6 +10,7 @@ import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
 import { CANONICAL_TARGET_ORDER, type IdeTargetId } from "../ide/adapter-registry.js";
 import { writeIdeMirrors } from "../ide/target-writer.js";
 import type { ConfigInitializationResult } from "./config-initialization.js";
+import { detectFlowGateHookConfigConflict, writeFlowGateHookArtifacts } from "./hook-artifacts.js";
 import type { InstallPlan } from "./install-plan-schema.js";
 
 export type ApplyInstallPlanResult =
@@ -78,6 +79,17 @@ export async function applyInstallPlan(input: {
     };
   }
 
+  const selectedTargetIds = CANONICAL_TARGET_ORDER.filter((targetId) =>
+    input.installPlan.targetAdapters.some((adapter) => adapter.targetId === targetId),
+  );
+  const hookConfigConflict = await detectFlowGateHookConfigConflict({
+    projectRoot: input.targetRoot,
+    targetIds: selectedTargetIds,
+  });
+  if (hookConfigConflict !== undefined) {
+    return createApplyFailure(hookConfigConflict, [], []);
+  }
+
   const lock = await acquireProjectOperationLock({
     projectRoot: input.targetRoot,
     operation: "install",
@@ -87,9 +99,6 @@ export async function applyInstallPlan(input: {
   const fileEntries: FilesIndexEntry[] = [];
   const completedSteps: string[] = [];
   const changedPaths: string[] = [];
-  const selectedTargetIds = CANONICAL_TARGET_ORDER.filter((targetId) =>
-    input.installPlan.targetAdapters.some((adapter) => adapter.targetId === targetId),
-  );
   const paths = {
     projectRoot: "." as const,
     specliteRoot: "_speclite" as const,
@@ -201,6 +210,19 @@ export async function applyInstallPlan(input: {
 
     fileEntries.push(...mirror.files);
     completedSteps.push("ide-mirror-creation");
+
+    const canonicalSourceRoot =
+      input.sourceRoot ?? `${input.packageRoot}/assets/source/speclite`;
+    const canonicalSourceRefRoot = input.sourceRefRoot ?? "assets/source/speclite";
+    const hookArtifacts = await writeFlowGateHookArtifacts({
+      projectRoot: input.targetRoot,
+      canonicalSourceRoot,
+      canonicalSourceRefRoot,
+      targetIds: selectedTargetIds,
+    });
+    changedPaths.push(...hookArtifacts.changedPaths);
+    if (!hookArtifacts.ok) return createApplyFailure(hookArtifacts.issue, completedSteps, changedPaths);
+    fileEntries.push(...hookArtifacts.files);
 
     const manifest = createInstalledManifest({
       sourceDescriptor: input.sourceDescriptor,

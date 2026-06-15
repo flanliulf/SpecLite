@@ -1,4 +1,14 @@
 ```markdown
+---
+schemaVersion: "speclite.flow-gate-report.v1"
+mode: "{{mode}}"
+target: "{{target}}"
+storyKey: "{{story_key}}"
+result: "{{result}}"
+generatedAt: "{{generated_at}}"
+sourceSkill: "speclite-flow-gate"
+---
+
 # Flow Gate Report: {{target}}
 
 ## Summary（摘要）

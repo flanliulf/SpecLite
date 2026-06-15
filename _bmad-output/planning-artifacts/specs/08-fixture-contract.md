@@ -42,6 +42,8 @@ Packaging acceptance 是 release checklist gate，不是 fixture project case。
 
 `skill-artifact-loop` 的 MVP release gate 只校验 installed IDE entry discovery、activation protocol、resolver access 和 artifact metadata 值域。多 skill 场景、复杂 workflow 叙事质量、人工评审结论和 richer documentation examples 仍属于 regression assets 或 Post-MVP validation，不阻塞 MVP release。
 
+Post-MVP Flow Gate hook enforcement 必须拥有 regression coverage，证明独立 hook source、installed runtime hook runner、platform hook config、files-index metadata、Codex `/hooks` trust 提示、existing config protection 和 runner block/allow behavior。该 coverage 可以通过 focused tests、fresh install expected installed-state snapshots、validation issue fixtures 或专用 hook artifact install tests 组合完成；不得只依赖 human-readable docs。
+
 MVP release 前，release gate fixture runs 必须包含 macOS 和 Windows 的 path-portability coverage。Local developer runs 可以缩小 matrix，但 release evidence 必须包含两个 supported OS families 和两个 supported Node baselines。
 
 ## Release Gate Ownership Matrix（发布门禁所有权矩阵）
@@ -126,6 +128,8 @@ File content 应通过 normalized expected tree 加 hash 比较，其中 install
 Stable snapshot comparison 只能忽略 SPEC 明确声明为 non-stable 的字段，例如允许的 generated metadata timestamps。
 
 Artifact metadata 必须包含 `generatedAt`。Fixture 必须只做 semantic assertion：value 符合 canonical UTC ISO string / JavaScript `Date.toISOString()` form。Stable snapshots 必须 normalize、omit 或单独标记该字段为 non-stable，不得比较具体 timestamp value。
+
+Flow Gate report metadata 必须作为 YAML frontmatter 或 sidecar JSON 被 fixture/test 读取。Stable fixture comparison 可以 normalize `generatedAt`，但必须断言 `schemaVersion`、`mode`、`target`、`storyKey`、`result` 和 `sourceSkill` 的值域。Hook runner fixtures 必须覆盖 no-op、missing gate、non-pass gate、stale gate、wrong story、`PASS`、`PASS_EQUIVALENT` 和 ambiguous Story intent。
 
 Duration、elapsed time、p95 measurement、profiling sample 和阶段耗时默认不得进入 stable command JSON snapshots。若某个 command JSON schema 显式引入这类字段，该字段必须被标记为 non-stable，并在 fixture comparison 中 normalize 或 exclude。
 

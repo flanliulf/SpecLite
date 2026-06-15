@@ -3,12 +3,24 @@ import path from "node:path";
 import { parseConfigToml } from "../config/config-reader.js";
 import type {
   CommandPathSummary,
+  DoctorCommandData,
+  DoctorCommandResult,
   CommandId,
+  GovernanceReportCommandResult,
+  GovernanceReportData,
   IdeTargetStatus,
+  InitCommandData,
+  InitCommandResult,
   InstallCommandData,
   InstallCommandResult,
+  ListCommandData,
+  ListCommandResult,
   RepairCommandData,
   RepairCommandResult,
+  SyncCommandData,
+  SyncCommandResult,
+  UninstallCommandData,
+  UninstallCommandResult,
   UpdateCommandData,
   UpdateCommandResult,
   ValidateCommandData,
@@ -162,6 +174,112 @@ export function createValidateCommandResult(input: {
   };
 }
 
+export function createInitCommandResult(input: {
+  targetProject: string;
+  summary: string;
+  data: InitCommandData;
+  issues?: ValidationIssue[];
+  nextActions: string[];
+  commandCompleted?: boolean;
+}): {
+  result: InitCommandResult;
+  exitCode: 0 | 1;
+} {
+  const data = sortInitCommandData(input.data);
+  const issues = sortValidationIssues(input.issues ?? []);
+  const status = deriveCommandStatus({
+    issues,
+    commandCompleted: input.commandCompleted ?? true,
+    hasBlockingConflicts: data.conflicts.length > 0,
+  });
+
+  return {
+    result: {
+      schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
+      status,
+      command: "init",
+      targetProject: input.targetProject,
+      summary: input.summary,
+      issues,
+      nextActions: input.nextActions,
+      data,
+    },
+    exitCode: getExitCodeForStatus(status),
+  };
+}
+
+export function createListCommandResult(input: {
+  targetProject: string;
+  summary: string;
+  data: ListCommandData;
+  issues?: ValidationIssue[];
+  nextActions: string[];
+  commandCompleted?: boolean;
+}): {
+  result: ListCommandResult;
+  exitCode: 0 | 1;
+} {
+  const issues = sortValidationIssues(input.issues ?? []);
+  const status = deriveCommandStatus({
+    issues,
+    commandCompleted: input.commandCompleted ?? true,
+  });
+
+  return {
+    result: {
+      schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
+      status,
+      command: "list",
+      targetProject: input.targetProject,
+      summary: input.summary,
+      issues,
+      nextActions: input.nextActions,
+      data: sortListCommandData(input.data),
+    },
+    exitCode: getExitCodeForStatus(status),
+  };
+}
+
+export function createDoctorCommandResult(input: {
+  targetProject: string;
+  issues: ValidationIssue[];
+  data: DoctorCommandData;
+  summary?: string;
+  nextActions?: string[];
+  commandCompleted?: boolean;
+}): {
+  result: DoctorCommandResult;
+  exitCode: 0 | 1;
+} {
+  const issues = sortValidationIssues(input.issues);
+  const status = deriveCommandStatus({
+    issues,
+    commandCompleted: input.commandCompleted ?? true,
+  });
+
+  return {
+    result: {
+      schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
+      status,
+      command: "doctor",
+      targetProject: input.targetProject,
+      summary:
+        input.summary ??
+        (issues.length === 0
+          ? "SpecLite doctor completed richer diagnostics for checked categories."
+          : "SpecLite doctor found issues in checked diagnostics."),
+      issues,
+      nextActions:
+        input.nextActions ??
+        (issues.length === 0
+          ? ["Continue with local workflow operations that depend on installed-state metadata."]
+          : ["Inspect reported diagnostic issues before running write-capable commands."]),
+      data: input.data,
+    },
+    exitCode: getExitCodeForStatus(status),
+  };
+}
+
 export function createUpdateCommandResult(input: {
   command: "update";
   targetProject: string;
@@ -239,6 +357,109 @@ export function createRepairCommandResult(input: {
   };
 }
 
+export function createSyncCommandResult(input: {
+  targetProject: string;
+  summary: string;
+  data: SyncCommandData;
+  issues?: ValidationIssue[];
+  nextActions: string[];
+  commandCompleted?: boolean;
+}): {
+  result: SyncCommandResult;
+  exitCode: 0 | 1;
+} {
+  const data = sortSyncCommandData(input.data);
+  const issues = projectUpdateCommandIssues({
+    issues: input.issues ?? [],
+    conflictCount: data.conflicts.length,
+    updateLifecycleState: getSyncLifecycleState(data),
+  });
+  const status = deriveCommandStatus({
+    issues,
+    commandCompleted: input.commandCompleted ?? true,
+    hasBlockingConflicts: data.conflicts.length > 0,
+  });
+
+  return {
+    result: {
+      schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
+      status,
+      command: "sync",
+      targetProject: input.targetProject,
+      summary: input.summary,
+      issues,
+      nextActions: input.nextActions,
+      data,
+    },
+    exitCode: getExitCodeForStatus(status),
+  };
+}
+
+export function createUninstallCommandResult(input: {
+  targetProject: string;
+  summary: string;
+  data: UninstallCommandData;
+  issues?: ValidationIssue[];
+  nextActions: string[];
+  commandCompleted?: boolean;
+}): {
+  result: UninstallCommandResult;
+  exitCode: 0 | 1;
+} {
+  const data = sortUninstallCommandData(input.data);
+  const issues = sortValidationIssues(input.issues ?? []);
+  const status = deriveCommandStatus({
+    issues,
+    commandCompleted: input.commandCompleted ?? true,
+  });
+
+  return {
+    result: {
+      schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
+      status,
+      command: "uninstall",
+      targetProject: input.targetProject,
+      summary: input.summary,
+      issues,
+      nextActions: input.nextActions,
+      data,
+    },
+    exitCode: getExitCodeForStatus(status),
+  };
+}
+
+export function createGovernanceReportCommandResult(input: {
+  targetProject: string;
+  summary: string;
+  data: GovernanceReportData;
+  issues?: ValidationIssue[];
+  nextActions: string[];
+  commandCompleted?: boolean;
+}): {
+  result: GovernanceReportCommandResult;
+  exitCode: 0 | 1;
+} {
+  const issues = sortValidationIssues(input.issues ?? []);
+  const status = deriveCommandStatus({
+    issues,
+    commandCompleted: input.commandCompleted ?? true,
+  });
+
+  return {
+    result: {
+      schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
+      status,
+      command: "governance-report",
+      targetProject: input.targetProject,
+      summary: input.summary,
+      issues,
+      nextActions: input.nextActions,
+      data: input.data,
+    },
+    exitCode: getExitCodeForStatus(status),
+  };
+}
+
 export function deriveCommandStatus(input: {
   issues: ValidationIssue[];
   commandCompleted?: boolean;
@@ -257,7 +478,17 @@ export function getExitCodeForStatus(status: InstallCommandResult["status"]): 0 
 }
 
 export function normalizeCommandId(input: {
-  command: "install" | "status" | "validate" | "update";
+  command:
+    | "install"
+    | "init"
+    | "list"
+    | "status"
+    | "validate"
+    | "update"
+    | "doctor"
+    | "sync"
+    | "uninstall"
+    | "governance-report";
   repair?: boolean;
 }): CommandId {
   if (input.command === "update" && input.repair === true) return "update.repair";
@@ -374,6 +605,92 @@ function sortRepairCommandData(data: RepairCommandData): RepairCommandData {
   };
 }
 
+function sortSyncCommandData(data: SyncCommandData): SyncCommandData {
+  return {
+    ...data,
+    syncPlan: {
+      actions: [...data.syncPlan.actions].sort(compareUpdatePlanActions),
+    },
+    changedPaths: sortPaths(data.changedPaths),
+    skippedPaths: sortPaths(data.skippedPaths),
+    conflicts: [...data.conflicts].sort(compareUpdateConflicts),
+  };
+}
+
+function getSyncLifecycleState(data: SyncCommandData):
+  | {
+    completedSteps: string[];
+    failedStep?: string;
+    pendingSteps: string[];
+  }
+  | undefined {
+  if (data.completedSteps === undefined && data.failedStep === undefined && data.pendingSteps === undefined) {
+    return undefined;
+  }
+
+  return {
+    completedSteps: data.completedSteps ?? [],
+    ...(data.failedStep === undefined ? {} : { failedStep: data.failedStep }),
+    pendingSteps: data.pendingSteps ?? [],
+  };
+}
+
+function sortUninstallCommandData(data: UninstallCommandData): UninstallCommandData {
+  return {
+    ...data,
+    uninstallPlan: {
+      actions: [...data.uninstallPlan.actions].sort(compareUninstallPlanActions),
+    },
+    removedPaths: sortPaths(data.removedPaths),
+    preservedPaths: sortPaths(data.preservedPaths),
+  };
+}
+
+function sortInitCommandData(data: InitCommandData): InitCommandData {
+  return {
+    ...data,
+    initPlan: {
+      actions: [...data.initPlan.actions].sort(compareInitPlanActions),
+    },
+    changedPaths: sortPaths(data.changedPaths),
+    skippedPaths: sortPaths(data.skippedPaths),
+    conflicts: [...data.conflicts].sort(compareUpdateConflicts),
+    installedState: {
+      ...data.installedState,
+      configLayersRead: sortPaths(data.installedState.configLayersRead),
+      installedModules: sortPaths(data.installedState.installedModules),
+      ideTargets: sortPaths(data.installedState.ideTargets),
+    },
+  };
+}
+
+function sortListCommandData(data: ListCommandData): ListCommandData {
+  return {
+    modules: [...data.modules].sort((left, right) => compareLexicographic(left.moduleId, right.moduleId)),
+    skills: [...data.skills].sort((left, right) =>
+      compareLexicographic(left.canonicalSkillId, right.canonicalSkillId),
+    ),
+    ideTargets: [...data.ideTargets].sort((left, right) => left.targetOrder - right.targetOrder),
+    versions: [...data.versions].sort((left, right) => compareLexicographic(left.name, right.name)),
+    installedState: {
+      ...data.installedState,
+      installedModules: sortPaths(data.installedState.installedModules),
+    },
+  };
+}
+
+function compareInitPlanActions(
+  left: InitCommandData["initPlan"]["actions"][number],
+  right: InitCommandData["initPlan"]["actions"][number],
+): number {
+  return (
+    compareLexicographic(left.affectedPath, right.affectedPath) ||
+    compareLexicographic(left.action, right.action) ||
+    compareLexicographic(left.ownership, right.ownership) ||
+    compareLexicographic(left.reason ?? "", right.reason ?? "")
+  );
+}
+
 function compareUpdatePlanActions(
   left: UpdateCommandData["updatePlan"]["actions"][number],
   right: UpdateCommandData["updatePlan"]["actions"][number],
@@ -405,6 +722,18 @@ function compareUpdateConflicts(
     compareLexicographic(left.affectedPath, right.affectedPath) ||
     compareLexicographic(left.ownership, right.ownership) ||
     compareLexicographic(left.reason, right.reason)
+  );
+}
+
+function compareUninstallPlanActions(
+  left: UninstallCommandData["uninstallPlan"]["actions"][number],
+  right: UninstallCommandData["uninstallPlan"]["actions"][number],
+): number {
+  return (
+    compareLexicographic(left.affectedPath, right.affectedPath) ||
+    compareLexicographic(left.action, right.action) ||
+    compareLexicographic(left.ownership, right.ownership) ||
+    compareLexicographic(left.reason ?? "", right.reason ?? "")
   );
 }
 

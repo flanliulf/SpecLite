@@ -8,7 +8,7 @@ import {
   RepairCommandResultSchema,
   UpdateCommandResultSchema,
 } from "../src/diagnostics/command-result-schema.js";
-import { createUpdateCommandResult } from "../src/diagnostics/command-result.js";
+import { createRepairCommandResult, createUpdateCommandResult } from "../src/diagnostics/command-result.js";
 import { hashBytes } from "../src/manifest/hash.js";
 
 describe("update command ownership planning", () => {
@@ -284,6 +284,153 @@ describe("update command ownership planning", () => {
     });
 
     expect(parsed.data.conflicts[0]?.reason).toBe("future-repair-reason");
+  });
+
+  it("gives CI consumers stable update and repair lifecycle states without private status semantics", () => {
+    const planReady = createUpdateCommandResult({
+      command: "update",
+      targetProject: "ci-plan-ready",
+      summary: "SpecLite update prepared an unapplied plan.",
+      data: {
+        updatePlan: {
+          actions: [
+            {
+              affectedPath: "_speclite/config.toml",
+              ownership: "installer-owned",
+              action: "update",
+              currentHash: "sha256:old",
+              expectedHash: "sha256:new",
+            },
+          ],
+        },
+        changedPaths: [],
+        skippedPaths: [],
+        conflicts: [],
+        requiresConfirmation: true,
+        writeAuthorized: false,
+      },
+      nextActions: ["Review the update plan before authorizing writes."],
+    });
+    const applied = createUpdateCommandResult({
+      command: "update",
+      targetProject: "ci-applied",
+      summary: "SpecLite update applied installer-owned changes.",
+      data: {
+        updatePlan: {
+          actions: [
+            {
+              affectedPath: "_speclite/config.toml",
+              ownership: "installer-owned",
+              action: "update",
+              currentHash: "sha256:old",
+              expectedHash: "sha256:new",
+            },
+          ],
+        },
+        changedPaths: ["_speclite/config.toml"],
+        skippedPaths: [],
+        conflicts: [],
+        requiresConfirmation: false,
+        writeAuthorized: true,
+      },
+      nextActions: ["Run speclite validate after applying updates."],
+    });
+    const conflict = createUpdateCommandResult({
+      command: "update",
+      targetProject: "ci-conflict",
+      summary: "SpecLite update found conflicts before apply.",
+      data: {
+        updatePlan: {
+          actions: [
+            {
+              affectedPath: "_speclite/config.toml",
+              ownership: "installer-owned",
+              action: "conflict",
+              currentHash: "sha256:drift",
+              expectedHash: "sha256:expected",
+            },
+          ],
+        },
+        changedPaths: [],
+        skippedPaths: [],
+        conflicts: [
+          {
+            affectedPath: "_speclite/config.toml",
+            ownership: "installer-owned",
+            currentHash: "sha256:drift",
+            expectedHash: "sha256:expected",
+            reason: "installer-owned-drift",
+          },
+          {
+            affectedPath: ".agents/skills/speclite-help/SKILL.md",
+            ownership: "human-owned",
+            reason: "human-owned",
+          },
+        ],
+        requiresConfirmation: true,
+        writeAuthorized: false,
+      },
+      nextActions: ["Resolve conflicts before authorizing writes."],
+    });
+    const noOpRepair = createRepairCommandResult({
+      command: "update.repair",
+      targetProject: "ci-repair-no-op",
+      summary: "SpecLite repair found no writeable drift.",
+      data: {
+        repairPlan: {
+          actions: [
+            {
+              affectedPath: "_speclite/config.toml",
+              ownership: "installer-owned",
+              currentHash: "sha256:same",
+              expectedHash: "sha256:same",
+              action: "skip",
+              reason: "unchanged",
+            },
+          ],
+        },
+        changedPaths: [],
+        skippedPaths: [],
+        conflicts: [],
+        requiresConfirmation: false,
+        writeAuthorized: false,
+      },
+      nextActions: ["Continue with validation if needed."],
+    });
+
+    expect(planReady.exitCode).toBe(0);
+    expect(planReady.result.status).toBe("success");
+    expect(planReady.result.data.writeAuthorized).toBe(false);
+    expect(planReady.result.data.changedPaths).toEqual([]);
+    expect(planReady.result.data.updatePlan.actions.map((action) => action.action)).toEqual(["update"]);
+
+    expect(applied.exitCode).toBe(0);
+    expect(applied.result.status).toBe("success");
+    expect(applied.result.data.writeAuthorized).toBe(true);
+    expect(applied.result.data.changedPaths).toEqual(["_speclite/config.toml"]);
+
+    expect(conflict.exitCode).toBe(1);
+    expect(conflict.result.status).toBe("failure");
+    expect(conflict.result.issues).toEqual([
+      expect.objectContaining({
+        issueId: "update.conflicts",
+        category: "update",
+        severity: "error",
+        details: { conflictCount: 2 },
+      }),
+    ]);
+    expect(conflict.result.data.conflicts.map((item) => item.affectedPath)).toEqual([
+      ".agents/skills/speclite-help/SKILL.md",
+      "_speclite/config.toml",
+    ]);
+
+    expect(noOpRepair.exitCode).toBe(0);
+    expect(noOpRepair.result.status).toBe("success");
+    expect(noOpRepair.result.command).toBe("update.repair");
+    expect(noOpRepair.result.data.repairPlan.actions[0]).toMatchObject({
+      action: "skip",
+      reason: "unchanged",
+    });
   });
 
   it("renders update Evidence profile with authorization, planned effects, protected boundaries, and --yes guidance", async () => {

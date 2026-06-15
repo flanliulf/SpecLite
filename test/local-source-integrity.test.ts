@@ -709,6 +709,7 @@ async function readJsonFixture(relativePath: string): Promise<unknown> {
 
 async function writeLocalCanonicalSource(sourceRoot: string, marker: string): Promise<void> {
   await mkdir(path.join(sourceRoot, "core-skills/speclite-local-marker"), { recursive: true });
+  await mkdir(path.join(sourceRoot, "hooks/flow-gate-enforcement"), { recursive: true });
   await writeFile(
     path.join(sourceRoot, "core-skills/module.yaml"),
     [
@@ -735,6 +736,24 @@ async function writeLocalCanonicalSource(sourceRoot: string, marker: string): Pr
   await writeFile(
     path.join(sourceRoot, "core-skills/speclite-local-marker/SKILL.md"),
     `# Local Marker\n${marker}\n`,
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceRoot, "hooks/flow-gate-enforcement/runner.mjs"),
+    "#!/usr/bin/env node\nconsole.log(JSON.stringify({ decision: 'allow' }));\n",
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceRoot, "hooks/flow-gate-enforcement/hook-manifest.json"),
+    JSON.stringify(
+      {
+        schemaVersion: "speclite.hook-source.v1",
+        hookId: "flow-gate-enforcement",
+        runner: "runner.mjs",
+      },
+      null,
+      2,
+    ),
     "utf8",
   );
 }

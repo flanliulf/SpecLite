@@ -770,6 +770,7 @@ export async function runInstallCommand(input: {
     }),
     nextActions: [
       "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
+      "For Codex, review and trust project-local hooks with /hooks before relying on Flow Gate enforcement.",
       "Run speclite status to inspect the installed-state summary.",
       "Run speclite validate for deeper local validation when needed.",
     ],
@@ -1087,6 +1088,7 @@ async function continueInstallWithSourceDescriptor(input: {
     }),
     nextActions: [
       "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
+      "For Codex, review and trust project-local hooks with /hooks before relying on Flow Gate enforcement.",
       "Run speclite status to inspect the installed-state summary.",
       "Run speclite validate for deeper local validation when needed.",
     ],

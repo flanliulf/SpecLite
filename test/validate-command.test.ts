@@ -718,6 +718,79 @@ describe("validate command manifest/index schema validation", () => {
     ]);
   });
 
+  it("gives CI consumers stable validation coverage and blocking issue counts without reading human output", () => {
+    const warningOnly = createValidateCommandResult({
+      targetProject: "ci-warning-fixture",
+      issues: [
+        issue({
+          severity: "warning",
+          category: "file-integrity",
+          issueId: "file-integrity.stale-temp-file",
+          affectedPath: "_speclite/.speclite-tmp-leftover",
+        }),
+      ],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["manifest-schema", "file-integrity"],
+        checkedTargets: ["agents", "claude"],
+        validatedPaths: [
+          ".agents/skills",
+          ".claude/skills",
+          "_speclite/_config/manifest.yaml",
+        ],
+      },
+    }).result;
+    const blocking = createValidateCommandResult({
+      targetProject: "ci-blocking-fixture",
+      issues: [
+        issue({
+          severity: "error",
+          category: "ide-mirror",
+          issueId: "ide-mirror.missing-entry",
+          affectedPath: ".agents/skills/speclite-dev-story",
+        }),
+        issue({
+          severity: "critical",
+          category: "manifest-schema",
+          issueId: "manifest-schema.schema-corruption",
+          affectedPath: "_speclite/_config/skill-index.json",
+        }),
+      ],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["manifest-schema", "ide-mirror"],
+        checkedTargets: ["agents", "claude"],
+        validatedPaths: [
+          ".agents/skills",
+          ".claude/skills",
+          "_speclite/_config/skill-index.json",
+        ],
+      },
+    }).result;
+
+    const decideFromJsonFields = (result: ValidateCommandResult): boolean =>
+      result.data.issueCounts.error === 0 &&
+      result.data.issueCounts.critical === 0 &&
+      result.data.checkedCategories.includes("manifest-schema") &&
+      result.data.checkedTargets.includes("agents") &&
+      result.data.checkedTargets.includes("claude") &&
+      result.data.validatedPaths.includes("_speclite/_config/manifest.yaml");
+
+    expect(warningOnly.status).toBe("warning");
+    expect(warningOnly.data.issueCounts).toEqual({ info: 0, warning: 1, error: 0, critical: 0 });
+    expect(decideFromJsonFields(warningOnly)).toBe(true);
+    expect(JSON.stringify(warningOnly.data)).not.toContain("SpecLite validate");
+
+    expect(blocking.status).toBe("failure");
+    expect(blocking.data.issueCounts).toEqual({ info: 0, warning: 0, error: 1, critical: 1 });
+    expect(decideFromJsonFields(blocking)).toBe(false);
+    expect(blocking.data.validatedPaths).toEqual([
+      ".agents/skills",
+      ".claude/skills",
+      "_speclite/_config/skill-index.json",
+    ]);
+  });
+
   it("rejects redaction-unsafe issue paths before validation issue sorting", () => {
     const unsafePaths = [
       "/tmp/speclite-leak",

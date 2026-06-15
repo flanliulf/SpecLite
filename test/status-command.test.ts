@@ -381,6 +381,75 @@ describe("status command lightweight installed-state summary", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("gives CI consumers a health decision field that is independent from command status and issues", async () => {
+    const notConfiguredRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-ci-empty-"));
+    const partialRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-ci-partial-"));
+    const failedRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-ci-failed-"));
+    const configuredRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-status-ci-configured-"));
+
+    try {
+      await writeInstalledFixture(partialRoot, {
+        targetIds: ["claude", "agents"],
+        skillTargets: ["claude"],
+      });
+      await writeInstalledFixture(failedRoot, {
+        targetIds: ["claude"],
+        skillTargets: ["claude"],
+      });
+      await writeInstalledManifest(failedRoot, {
+        specliteRoot: "/tmp/speclite-private-root",
+        artifactRoot: "_speclite-output",
+        manifestPath: "_speclite/_config/manifest.yaml",
+      });
+      await writeInstalledFixture(configuredRoot, {
+        targetIds: ["claude", "agents"],
+        skillTargets: ["claude", "agents"],
+      });
+
+      const cases = [
+        {
+          root: notConfiguredRoot,
+          expectedHealth: "not-configured",
+          expectedCiPass: false,
+        },
+        {
+          root: partialRoot,
+          expectedHealth: "partial",
+          expectedCiPass: false,
+        },
+        {
+          root: failedRoot,
+          expectedHealth: "failed",
+          expectedCiPass: false,
+        },
+        {
+          root: configuredRoot,
+          expectedHealth: "configured",
+          expectedCiPass: true,
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const outcome = await runStatusCommand({ runtime: { cwd: testCase.root } });
+        const parsed = StatusCommandResultSchema.parse(outcome.result);
+        const ciPass =
+          parsed.status === "success" &&
+          parsed.data.highLevelHealth === "configured";
+
+        expect(outcome.exitCode).toBe(0);
+        expect(parsed.status).toBe("success");
+        expect(parsed.issues).toEqual([]);
+        expect(parsed.data.highLevelHealth).toBe(testCase.expectedHealth);
+        expect(ciPass).toBe(testCase.expectedCiPass);
+      }
+    } finally {
+      await rm(notConfiguredRoot, { recursive: true, force: true });
+      await rm(partialRoot, { recursive: true, force: true });
+      await rm(failedRoot, { recursive: true, force: true });
+      await rm(configuredRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 async function writeInstalledFixture(

@@ -5,7 +5,7 @@ import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import { hashBytes } from "../manifest/hash.js";
 import { resolveProjectRelativePath } from "./path-normalizer.js";
 
-export type ProjectOperation = "install" | "update" | "update.repair";
+export type ProjectOperation = "install" | "init" | "update" | "update.repair" | "doctor" | "sync" | "uninstall";
 
 export type OperationLockFile = {
   schemaVersion: "speclite.operation-lock.v1";
@@ -187,8 +187,12 @@ function isOperationLockFile(value: unknown): value is OperationLockFile {
   return (
     candidate.schemaVersion === "speclite.operation-lock.v1" &&
     (candidate.operation === "install" ||
+      candidate.operation === "init" ||
       candidate.operation === "update" ||
-      candidate.operation === "update.repair") &&
+      candidate.operation === "update.repair" ||
+      candidate.operation === "doctor" ||
+      candidate.operation === "sync" ||
+      candidate.operation === "uninstall") &&
     typeof candidate.createdAt === "string" &&
     typeof candidate.projectRootHash === "string" &&
     candidate.projectRootHash.startsWith("sha256:") &&

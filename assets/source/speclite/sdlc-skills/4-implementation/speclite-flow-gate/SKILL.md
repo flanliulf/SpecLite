@@ -30,6 +30,7 @@ metadata:
     - 固定文件名只有在 owning SPEC 明确指定时才是 hard gate；否则必须先检查等价 functional implementation 和测试证据。
     - 本 Skill 只生成 gate report，不修改源码、不推进 Story/Epic 状态、不替代 CR。
     - 报告必须写入 `{implementation_artifacts}/flow-gates/`，文件名按 mode 和目标对象稳定生成。
+    - 报告开头的 YAML frontmatter 是 downstream hook、dev-story、CR 和 finalizer 的 machine-readable source；不得要求消费者解析 Markdown prose 判断 gate result。
     - `Guidance Anchor` mismatch 不能直接判定 blocked；只能在确认 contract/function/evidence 缺失后输出失败。
     - 中英文入口必须同步更新；新增 mode 或结果枚举时同步更新 `references/workflow-details.md`。
 

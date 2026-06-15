@@ -79,6 +79,16 @@ MVP self-contained skill entry 必须使用 canonical skill id 作为 target dir
 
 Installed entry 不得读取 source checkout 中的 skill files 作为运行时依赖。Fixture reverse validation 必须证明 installed entry 在离开 source checkout 后仍能被目标 IDE discovery path 发现，并能通过 `speclite resolve` 读取项目级 config/customization。
 
+## Hook Projection Boundary（Hook 投射边界）
+
+Project-level hook config 是 adapter artifact，不是 self-contained skill package content。Adapter 可以为 selected execution targets 生成 hook projection，但不得把 hook runner、hook manifest 或 platform hook config 放进 `.claude/skills/<canonicalSkillId>/` 或 `.agents/skills/<canonicalSkillId>/`，也不得让这些文件参与 canonical skill package hash。
+
+Hook projection 的 source truth 必须来自独立 canonical hook source root，例如 `assets/source/speclite/hooks/flow-gate-enforcement/`。`speclite-dev-story` 只能声明自己受 Flow Gate hook 保护，不能携带 hook source 或重新定义 hook identity。
+
+Claude project hook config 使用 `.claude/settings.json`。Codex project hook config 使用 `.codex/hooks.json` 或未来契约化的 `.codex/config.toml` `[hooks]` 形式。Codex project-local hooks 受 `/hooks` review/trust 边界约束；install summary 或文档必须明确提醒用户 review/trust 后才可依赖 enforcement。
+
+已有 `.claude` 或 `.codex` config 必须被视为 protected project configuration。Installer 可以 safe merge，也可以输出 manual action；不得静默覆盖用户已有 hooks、rules、settings 或 trust decisions。
+
 ## Status Semantics（状态语义）
 
 Target status vocabulary 按 layer 区分：

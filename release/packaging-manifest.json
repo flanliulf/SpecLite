@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:b2c73a95fa48d0b81656714304af0a2b82d1a42c96e78d286a07b719d2d329af",
+  "packageHash": "sha256:8926fff835a8bc68e6bc6738aee6abff86b3bf2f5611ae3d22445f893a40a4b0",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/BMAD_SPECLITE_SKILL_MAPPING.md",
@@ -83,6 +83,11 @@
     "assets/source/speclite/custom/speclite-create-story.user.toml",
     "assets/source/speclite/docs/examples/fixture-derived-examples.md",
     "assets/source/speclite/HANDOFF.md",
+    "assets/source/speclite/hooks/flow-gate-enforcement/claude-settings.fragment.json",
+    "assets/source/speclite/hooks/flow-gate-enforcement/codex-hooks.fragment.json",
+    "assets/source/speclite/hooks/flow-gate-enforcement/hook-manifest.json",
+    "assets/source/speclite/hooks/flow-gate-enforcement/README.md",
+    "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs",
     "assets/source/speclite/README.en.md",
     "assets/source/speclite/README.md",
     "assets/source/speclite/scripts/resolve_config.py",
@@ -631,6 +636,11 @@
     "assets/source/speclite/custom/speclite-create-story.user.toml",
     "assets/source/speclite/docs/examples/fixture-derived-examples.md",
     "assets/source/speclite/HANDOFF.md",
+    "assets/source/speclite/hooks/flow-gate-enforcement/claude-settings.fragment.json",
+    "assets/source/speclite/hooks/flow-gate-enforcement/codex-hooks.fragment.json",
+    "assets/source/speclite/hooks/flow-gate-enforcement/hook-manifest.json",
+    "assets/source/speclite/hooks/flow-gate-enforcement/README.md",
+    "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs",
     "assets/source/speclite/README.en.md",
     "assets/source/speclite/README.md",
     "assets/source/speclite/scripts/resolve_config.py",

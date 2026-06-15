@@ -60,10 +60,15 @@ Executable schema module 必须先于 JSON reporters、fixture assertions 或 co
 Covered commands：
 
 - `speclite install --json`
+- `speclite init --json`
+- `speclite list --json`
 - `speclite status --json`
 - `speclite validate --json`
 - `speclite update --json`
 - `speclite update --repair --json`
+- `speclite doctor --json`
+- `speclite sync --json`
+- `speclite uninstall --json`
 
 Explicit exception：
 
@@ -74,10 +79,16 @@ Explicit exception：
 | Command（命令） | MVP flags（MVP flags） | JSON behavior（JSON 行为） | Write behavior（写入行为） |
 | --- | --- | --- | --- |
 | `speclite install` | `--json`、`--yes` | `--json` 输出 `CommandResult<InstallCommandData>`。 | Write-capable；必须先通过 runtime/platform guard、source resolution plan、install plan、operation lock 和 explicit confirmation / `--yes`。 |
+| `speclite init` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<InitCommandData>`。 | Post-MVP write-capable；读取现有 manifest、config layers 和 ownership index 后生成 config plan；缺少 `--yes` 或 dry-run 时不得写入。 |
+| `speclite list` | `--json` | `--json` 输出 `CommandResult<ListCommandData>`。 | Post-MVP read-only；只消费 manifest/index、source metadata 和 IDE adapter registry，不生成或修改 project files。 |
 | `speclite status` | `--json` | `--json` 输出 `CommandResult<StatusCommandData>`。 | Read-only；默认不检查 project operation lock，不执行 full validation。 |
 | `speclite validate` | `--json` | `--json` 输出 `CommandResult<ValidateCommandData>`。 | Read-only；可以报告 stale lock warning，但不得自动删除 lock。 |
 | `speclite update` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<UpdateCommandData>`。 | Write-capable；普通 dry-run、交互确认前或脚本模式缺少 `--yes` 时必须保留 unapplied plan，并保持 `writeAuthorized: false`。 |
 | `speclite update --repair` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<RepairCommandData>`，且 `command` 为 `update.repair`。 | Write-capable；只修复可安全恢复或重建的 installer-owned drift。 |
+| `speclite doctor` | `--json`、`--revalidate-source`、`--yes` | `--json` 输出 `CommandResult<DoctorCommandData>`。 | 默认 read-only 并复用 `validate` 的本地 issue model；remote freshness / provenance revalidation 必须先输出 external access intent，且需要显式授权。 |
+| `speclite sync` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<SyncCommandData>`。 | Write-capable；只做 source-to-mirror / control-state reconciliation，不把 ordinary update conflicts 转成 hidden repair。 |
+| `speclite uninstall` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<UninstallCommandData>`。 | Write-capable；只移除 installer-owned files，human-owned custom files、workflow-owned artifacts 和 unknown ownership 必须保留或提示 manual action。 |
+| `speclite governance-report` | `--json` | `--json` 输出 `CommandResult<GovernanceReportData>`，payload 由 `10-process-governance-report-contract.md` 负责。 | Read-only；只消费 manifest/index、phase coverage、artifact contract 和 validate output，不改变 install/status/validate/update 核心契约。 |
 | `speclite resolve config` | `--project-root`、`--key` | 不使用 `CommandResult`；stdout 只输出 resolve-result JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command。 |
 | `speclite resolve customization` | `--project-root`、`--skill`、`--key` | 不使用 `CommandResult`；stdout 只输出 resolve-result JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command。 |
 
@@ -90,10 +101,16 @@ Explicit exception：
 ```ts
 type CommandId =
   | "install"
+  | "init"
+  | "list"
   | "status"
   | "validate"
   | "update"
-  | "update.repair";
+  | "update.repair"
+  | "doctor"
+  | "sync"
+  | "uninstall"
+  | "governance-report";
 
 type CommandResult<TData> = {
   schemaVersion: "speclite.command-result.v1";
@@ -316,6 +333,83 @@ type InstallCommandData = {
   pendingSteps: string[];
 };
 
+type InitPlanAction = {
+  affectedPath: string;
+  ownership: "installer-owned" | "human-owned" | "workflow-owned" | "unknown";
+  action: "create" | "update" | "skip" | "conflict";
+  currentHash?: string;
+  expectedHash?: string;
+  reason?: string;
+};
+
+type InitInstalledStateSummary = {
+  manifestPresent: boolean;
+  ownershipIndexPresent: boolean;
+  configLayersRead: string[];
+  installedModules: string[];
+  ideTargets: string[];
+};
+
+type InitCommandData = {
+  initPlan: {
+    actions: InitPlanAction[];
+  };
+  installedState: InitInstalledStateSummary;
+  changedPaths: string[];
+  skippedPaths: string[];
+  conflicts: UpdateConflict[];
+  completedSteps: string[];
+  failedStep?: string;
+  pendingSteps: string[];
+  requiresConfirmation: boolean;
+  writeAuthorized: boolean;
+};
+
+type ListModuleProjection = {
+  moduleId: string;
+  name: string;
+  description: string;
+  version: string;
+  sourceDirectory: string;
+  required: boolean;
+  defaultSelected: boolean;
+  skillCount: number;
+};
+
+type ListSkillProjection = {
+  canonicalSkillId: string;
+  moduleId: string;
+  displayName: string;
+  phaseIds: string[];
+  sourcePackagePath?: string;
+  installedTargets?: string[];
+};
+
+type ListIdeTargetProjection = {
+  id: "claude" | "agents";
+  targetDirectory: string;
+  targetOrder: number;
+};
+
+type ListVersionProjection = {
+  name: string;
+  version: string;
+};
+
+type ListInstalledStateSummary = {
+  manifestPresent: boolean;
+  installedModules: string[];
+  installedSkillCount: number;
+};
+
+type ListCommandData = {
+  modules: ListModuleProjection[];
+  skills: ListSkillProjection[];
+  ideTargets: ListIdeTargetProjection[];
+  versions: ListVersionProjection[];
+  installedState: ListInstalledStateSummary;
+};
+
 type StatusCommandData = {
   sourceDescriptor?: SourceDescriptor;
   manifestPresent: boolean;
@@ -353,6 +447,10 @@ type ValidateCommandData = {
   validatedPaths: string[];
 };
 
+type DoctorCommandData = ValidateCommandData & {
+  externalAccesses: ExternalAccess[];
+};
+
 type UpdateCommandData = {
   updatePlan: UpdatePlan;
   changedPaths: string[];
@@ -370,6 +468,29 @@ type RepairCommandData = {
   requiresConfirmation: boolean;
   writeAuthorized: boolean;
 };
+
+type SyncCommandData = {
+  syncPlan: SyncPlan;
+  changedPaths: string[];
+  skippedPaths: string[];
+  conflicts: UpdateConflict[];
+  completedSteps?: string[];
+  failedStep?: string;
+  pendingSteps?: string[];
+  requiresConfirmation: boolean;
+  writeAuthorized: boolean;
+};
+
+type UninstallCommandData = {
+  uninstallPlan: UninstallPlan;
+  removedPaths: string[];
+  preservedPaths: string[];
+  completedSteps?: string[];
+  failedStep?: string;
+  pendingSteps?: string[];
+  requiresConfirmation: boolean;
+  writeAuthorized: boolean;
+};
 ```
 
 Per-command data contract：
@@ -377,10 +498,16 @@ Per-command data contract：
 | Command（命令） | Data type（Data 类型） | Required fields（必填字段） | Optional fields（可选字段） | Non-goals（非目标） |
 | --- | --- | --- | --- | --- |
 | `install` | `InstallCommandData` | `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths`、`completedSteps`、`pendingSteps` | 无；新增 optional fields 必须先更新本 SPEC。 | 不输出未契约化 `readySummary` blob，不输出 timing。 |
+| `init` | `InitCommandData` | `initPlan`、`installedState`、`changedPaths`、`skippedPaths`、`conflicts`、`completedSteps`、`pendingSteps`、`requiresConfirmation`、`writeAuthorized` | `failedStep` | 不执行 install runtime structure、IDE mirror、manifest/index generation 或 release gate；不覆盖 human-owned custom files。 |
+| `list` | `ListCommandData` | `modules`、`skills`、`ideTargets`、`versions`、`installedState` | 无；新增 optional fields 必须先更新本 SPEC。 | 不定义第二套 skill identity、module identity 或 IDE target identity；不把 `module-help.csv` 当成唯一 canonical inventory。 |
 | `status` | `StatusCommandData` | `manifestPresent`、`installedModules`、`ideTargets`、`highLevelHealth`、`paths` | `sourceDescriptor`、`manifestVersion` | 不输出 `issueCounts`，不执行 full validation。 |
 | `validate` | `ValidateCommandData` | `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths` | 无；新增 optional fields 必须先更新本 SPEC。 | 不访问 remote source，不做 repair。 |
 | `update` | `UpdateCommandData` | `updatePlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` | 无；新增 optional fields 必须先更新本 SPEC。 | 不把 conflicts 复制成多个 command-level issues，不修复 drift。 |
 | `update.repair` | `RepairCommandData` | `repairPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` | 无；新增 optional fields 必须先更新本 SPEC。 | 不修复 human-owned 或 workflow-owned paths，不生成 standalone report artifact。 |
+| `doctor` | `DoctorCommandData` | `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths`、`externalAccesses` | 无；新增 optional fields 必须先更新本 SPEC。 | 不改变 `validate` local-only contract，不在 pending authorization 时访问 remote source。 |
+| `sync` | `SyncCommandData` | `syncPlan`、`changedPaths`、`skippedPaths`、`conflicts`、`requiresConfirmation`、`writeAuthorized` | `completedSteps`、`failedStep`、`pendingSteps` | 不执行 hidden repair，不修改 human-owned custom files 或 workflow-owned artifacts。 |
+| `uninstall` | `UninstallCommandData` | `uninstallPlan`、`removedPaths`、`preservedPaths`、`requiresConfirmation`、`writeAuthorized` | `completedSteps`、`failedStep`、`pendingSteps` | 不删除 human-owned custom files、workflow-owned artifacts 或 unknown ownership paths。 |
+| `governance-report` | `GovernanceReportData` | `metrics`、`phaseGaps`、`artifactChecks`、`validateIssueCounts`、`checkedCategories`、`validatedPaths`、`scope` | 无；payload fields 由 `10-process-governance-report-contract.md` 管理。 | 不判断文档内容质量、人工 review 是否充分或团队真实执行质量；不新增 dashboard、daemon 或 hosted registry UI。 |
 
 Command data 引用的 nested types 是 public projections。它们是 consumers 可以依赖的唯一字段；internal resolver、installer、validation 和 update models 可以携带额外 private fields，但 reporters 不得把 private fields 泄露到 public JSON。
 
@@ -482,6 +609,27 @@ type RepairPlan = {
     reason?: string;
   }>;
 };
+
+type SyncPlan = {
+  actions: Array<{
+    affectedPath: string;
+    ownership: "installer-owned" | "human-owned" | "workflow-owned";
+    action: "create" | "update" | "skip" | "conflict";
+    currentHash?: string;
+    expectedHash?: string;
+    reason?: string;
+  }>;
+};
+
+type UninstallPlan = {
+  actions: Array<{
+    affectedPath: string;
+    ownership: "installer-owned" | "human-owned" | "workflow-owned" | "unknown";
+    action: "remove" | "preserve" | "manual-action" | "skip";
+    currentHash?: string;
+    reason?: string;
+  }>;
+};
 ```
 
 `SourceDescriptor.contentHash` 只对 content-addressable source artifacts required，例如 local tarballs、offline bundles 和 local source snapshots。Registry 和 Git sources 不得虚构 `contentHash`。
@@ -492,6 +640,12 @@ Public projection types 中的每个 path 都必须遵循本 SPEC 的 Path Polic
 
 `UpdatePlan` 和 `RepairPlan` 描述 planned effects，不是 execution logs。`RepairPlan` 只能包含 installer-owned actions；human-owned custom files 和 workflow-owned artifacts 不得作为 repairable actions 出现。
 
+`DoctorCommandData.externalAccesses` 必须复用 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 的 `ExternalAccess` shape。`doctor` 默认不访问 remote source；当用户请求 freshness / provenance revalidation 时，必须先输出 pending 或 confirmed external access intent。`confirmationState: "pending"` 时 command 不得执行 external access，且必须产生 blocking `source-integrity` issue。
+
+`SyncPlan` 描述 source-to-mirror / installer control-state reconciliation 的 planned effects。它复用 files index、ownership/hash、adapter registry 和 update conflict semantics，但 command id 仍为 `sync`。`sync` 不得把 `installer-owned-drift` 自动转成 `restore-canonical` 或 `regenerate`；这类 repair semantics 只属于 explicit `update.repair`。
+
+`UninstallPlan` 描述 installer-owned removal plan。`remove` 只能用于 installer-owned paths；`preserve` 用于 human-owned custom paths；`manual-action` 用于 workflow-owned artifacts 或 unknown ownership。`removedPaths` 只包含当前 command 实际完成的 removals；`preservedPaths` 必须列出保留或需要人工处理的 protected paths。
+
 Planning model boundaries：
 
 | Model（模型） | Owner（所有者） | Visibility（可见性） | Meaning（含义） |
@@ -499,6 +653,8 @@ Planning model boundaries：
 | `InstallPlan` | `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` | Internal planning contract | Pre-write source resolution、external access declaration、target adapter planning、planned writes、confirmation 和 write authorization。 |
 | `UpdatePlan` | 本 SPEC | Public `update --json` projection | 对 automation 可见的 planned update effects；不是 execution log。 |
 | `RepairPlan` | 本 SPEC | Public `update --repair --json` projection | 对 automation 可见的 planned installer-owned repair effects；不是 execution log。 |
+| `SyncPlan` | 本 SPEC | Public `sync --json` projection | 对 automation 可见的 planned source-to-mirror reconciliation effects；不是 repair plan。 |
+| `UninstallPlan` | 本 SPEC | Public `uninstall --json` projection | 对 automation 可见的 installer-owned removal plan；protected paths 不删除。 |
 | `changedPaths` / `skippedPaths` | 本 SPEC | Public command result fields | 仅表示当前 command 的 actual apply result。当 `writeAuthorized === false` 时为空。 |
 
 Normal `update` 必须将 installer-owned drift 视为 conflict；普通 `update` 的 interactive confirmation 或 `--yes` 只授权无 conflict 的 planned update writes，不得把 drift conflict 转成 repair action。只有 command 为 `update --repair`，且 repair writes 通过 interactive confirmation 或 `--yes` 显式授权时，才可以修复 drift。在 `update --repair` 中，可以从 resolved canonical source 和 installer templates 安全 restore 或 regenerate 的 installer-owned drift 应成为 `repairPlan.actions[]` entry，而不是 `conflicts[]` entry。Repair output 中的 `conflicts[]` 保留给无法安全 repair 的 blockers，例如 human-owned 或 workflow-owned paths、unknown ownership、missing source evidence 或 unsupported repair。
@@ -508,6 +664,8 @@ Normal `update` 必须将 installer-owned drift 视为 conflict；普通 `update
 `UpdateCommandData` 和 `RepairCommandData` 中的 `changedPaths` 与 `skippedPaths` 描述当前 command 的 actual execution results，而不是 planned effects。当 `writeAuthorized === false` 时，即使 plan 包含 `update`、`restore-canonical`、`regenerate` 或 `skip` actions，这两个 arrays 也必须为空。Consumers 必须从 `updatePlan.actions` 或 `repairPlan.actions` 派生 planned changes 和 planned skips，而不是从 `changedPaths` 或 `skippedPaths` 派生。
 
 `UpdateCommandData.requiresConfirmation`、`UpdateCommandData.writeAuthorized`、`RepairCommandData.requiresConfirmation` 和 `RepairCommandData.writeAuthorized` 描述 command-level write authorization。Normal dry-run、pending interactive confirmation，或没有 `--yes` 的 script mode 必须在 `UpdatePlan` / `RepairPlan` 中保留真实 planned action；不得将该 action 改写为带 `reason: "not-authorized"` 的 `skip`。
+
+`SyncCommandData.requiresConfirmation` / `writeAuthorized` 与 update 语义一致。`UninstallCommandData.requiresConfirmation` / `writeAuthorized` 只授权 installer-owned removal，不授权 protected path deletion。Dry-run 或缺少 `--yes` 时，`removedPaths` 必须为空。
 
 每个 repair action 都 required `RepairPlan.actions[].expectedHash`。`regenerate` 必须先 dry-run candidate content，计算其 expected hash，然后才能进入 repair plan。没有 expected hash 的 repair action 不可审计、不是 snapshot-stable，且不得写入。
 
@@ -555,9 +713,13 @@ Special orders：
 - `sourceDescriptor.integrityEvidence`：source-specific stable order：registry integrity / version lock -> content hash -> git commit；同 kind 的多个 entries 按 normalized stable key 排序。
 - `updatePlan.actions`：normalized affected path -> action -> ownership -> reason（如存在）。
 - `repairPlan.actions`：normalized affected path -> action -> reason（如存在）。
+- `syncPlan.actions`：normalized affected path -> action -> ownership -> reason（如存在）。
+- `uninstallPlan.actions`：normalized affected path -> action -> ownership -> reason（如存在）。
 - `conflicts`：normalized affected path -> ownership -> reason。
 - `changedPaths`：normalized project-relative POSIX path。
 - `skippedPaths`：normalized project-relative POSIX path。
+- `removedPaths`：normalized project-relative POSIX path。
+- `preservedPaths`：normalized project-relative POSIX path。
 - `completedSteps`：command-defined stable lifecycle step order，不是 execution timing。
 - `pendingSteps`：command-defined stable lifecycle step order，不是 execution timing。
 - `installedModules`：来自 manifest/source projection 的 installed-state module order；pre-write fresh install output 使用 `[]`，除非正在报告 existing valid installed state。该数组不得承载 selected/pending/config state。
@@ -579,6 +741,8 @@ Covered examples（覆盖示例）：
 - `issues[].affectedPath`
 - `updatePlan.actions[].affectedPath`
 - `repairPlan.actions[].affectedPath`
+- `syncPlan.actions[].affectedPath`
+- `uninstallPlan.actions[].affectedPath`
 
 `data.paths.projectRoot` 必须是 `"."`。
 

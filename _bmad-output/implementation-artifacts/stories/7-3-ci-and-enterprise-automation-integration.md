@@ -1,6 +1,6 @@
 # Story 7.3: CI And Enterprise Automation Integration（CI 与企业自动化集成）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Post-MVP Story: 不属于 MVP implementation readiness gate。实现前必须先通过 Epic 7 kickoff / Story kickoff gate。 -->
 
@@ -50,28 +50,28 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Define CI integration contract examples without new private semantics（AC: 1-5）
-  - [ ] 在 docs 或 planning artifact 中新增 CI integration guide，明确 `status.data.highLevelHealth`、`validate.data.issueCounts`、`update.data.conflicts` 的判断规则。
-  - [ ] 说明 `CommandResult.status` 与 `status.data.highLevelHealth` 是不同层级，不能把 `issues: []` 等价为安装健康。
-  - [ ] 若需要新增 data 字段，先更新 owning SPEC 和 schema。
+- [x] Task 1: Define CI integration contract examples without new private semantics（AC: 1-5）
+  - [x] 在 docs 或 planning artifact 中新增 CI integration guide，明确 `status.data.highLevelHealth`、`validate.data.issueCounts`、`update.data.conflicts` 的判断规则。
+  - [x] 说明 `CommandResult.status` 与 `status.data.highLevelHealth` 是不同层级，不能把 `issues: []` 等价为安装健康。
+  - [x] 若需要新增 data 字段，先更新 owning SPEC 和 schema。
 
-- [ ] Task 2: Provide machine-readable examples and regression tests（AC: 1-4）
-  - [ ] 为 `status --json` 的 `not-configured`、`partial`、`failed`、`configured` 增加 CI-consumer assertions。
-  - [ ] 为 `validate --json` 的 issueCounts、checkedCategories、checkedTargets、validatedPaths 增加 stable snapshot 或 semantic assertions。
-  - [ ] 为 `update --json` / `update --repair --json` 增加 plan-ready、applied、conflict、no-op scenario assertions。
+- [x] Task 2: Provide machine-readable examples and regression tests（AC: 1-4）
+  - [x] 为 `status --json` 的 `not-configured`、`partial`、`failed`、`configured` 增加 CI-consumer assertions。
+  - [x] 为 `validate --json` 的 issueCounts、checkedCategories、checkedTargets、validatedPaths 增加 stable snapshot 或 semantic assertions。
+  - [x] 为 `update --json` / `update --repair --json` 增加 plan-ready、applied、conflict、no-op scenario assertions。
 
-- [ ] Task 3: Add redaction and path-safety checks for automation artifacts（AC: 6）
-  - [ ] 复核 `src/validation/issue-model.ts` 的 unsafe value detection 是否覆盖 CI artifact 需要。
-  - [ ] 对 docs/example output 执行 fixture-stable 检查，确保不包含 home directory、absolute checkout root、cache path、temporary path 或 credential-bearing URL。
+- [x] Task 3: Add redaction and path-safety checks for automation artifacts（AC: 6）
+  - [x] 复核 `src/validation/issue-model.ts` 的 unsafe value detection 是否覆盖 CI artifact 需要。
+  - [x] 对 docs/example output 执行 fixture-stable 检查，确保不包含 home directory、absolute checkout root、cache path、temporary path 或 credential-bearing URL。
 
-- [ ] Task 4: Documentation matrix（AC: 1-6）
-  - [ ] 在 `docs/` 或 planning output 中新增 CI / enterprise automation example，清楚区分 local command、exit code、JSON field、失败策略。
-  - [ ] 文档示例不得要求解析 human-readable output。
-  - [ ] 文档示例使用无 ANSI、无图标、稳定排序的输出片段。
+- [x] Task 4: Documentation matrix（AC: 1-6）
+  - [x] 在 `docs/` 或 planning output 中新增 CI / enterprise automation example，清楚区分 local command、exit code、JSON field、失败策略。
+  - [x] 文档示例不得要求解析 human-readable output。
+  - [x] 文档示例使用无 ANSI、无图标、稳定排序的输出片段。
 
-- [ ] Task 5: Verification（AC: 1-6）
-  - [ ] 运行 focused tests：`test/status-command.test.ts`、`test/validate-command.test.ts`、`test/update-command.test.ts`、新增 CI examples tests。
-  - [ ] 运行 `npm run build`、`npm test` 或记录阻塞、`git diff --check`。
+- [x] Task 5: Verification（AC: 1-6）
+  - [x] 运行 focused tests：`test/status-command.test.ts`、`test/validate-command.test.ts`、`test/update-command.test.ts`、新增 CI examples tests。
+  - [x] 运行 `npm run build`、`npm test` 或记录阻塞、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -139,22 +139,44 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 (Codex)
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：失败，`/usr/bin/python3` 为 3.9.6 且缺少 `tomllib`。
+- `python3.12 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：通过，workflow 无 prepend/append，persistent facts 指向 `project-context.md`。
+- `npm test -- test/ci-enterprise-automation-doc.test.ts`：先失败，暴露 CI artifact credential-bearing query string redaction 覆盖缺口；补充 `src/validation/issue-model.ts` 后通过。
+- `npm test -- test/status-command.test.ts test/validate-command.test.ts test/update-command.test.ts test/ci-enterprise-automation-doc.test.ts`：通过，4 files / 40 tests。
+- `npm run build`：通过。
+- `npm test`：第一次最终复跑出现 `test/install-progress-ready-summary.test.ts` 单测 timeout；该文件不在 Story 7-3 touch scope 内。
+- `npm test -- test/install-progress-ready-summary.test.ts`：通过，1 file / 10 tests，确认上述 timeout 不是稳定复现失败。
+- `npm test`：第二次复跑通过，44 files / 321 tests。
+- `git diff --check`：通过。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 新增 `docs/how-to/ci-enterprise-automation.md`，把 CI / enterprise automation contract 限定在现有 `CommandResult` JSON envelope、command-specific `data` fields、exit code policy 和 redaction-safe artifact rules 内，不新增 enterprise dashboard、hosted service、GitHub Action package、SaaS integration 或私有 status semantics。
+- 采用推荐默认决策：不新增任何 command data field，因此无需修改 owning SPEC 或 `speclite.command-result.v1` schema；文档只消费既有字段。
+- 为 `status --json` 增加 CI consumer semantic assertions，覆盖 `not-configured`、`partial`、`failed`、`configured`，证明 `issues: []` 和 `CommandResult.status: "success"` 不等价于安装健康。
+- 为 `validate --json` 增加基于 `issueCounts`、`checkedCategories`、`checkedTargets`、`validatedPaths` 的 automation gate assertions，不依赖 human-readable output。
+- 为 `update --json` / `update --repair --json` 增加 plan-ready、applied、conflict、no-op semantic assertions，继续保持 path-level conflicts 只汇总成单个 command-level `update.conflicts` issue。
+- 复核并增强 `src/validation/issue-model.ts` 的 unsafe value detection，补充 credential-bearing query string 检测，覆盖 CI artifacts 中的 token / secret / password / credential / auth / key query 参数。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `docs/how-to/ci-enterprise-automation.md`
+- `docs/how-to/index.md`
+- `src/validation/issue-model.ts`
+- `test/ci-enterprise-automation-doc.test.ts`
+- `test/status-command.test.ts`
+- `test/validate-command.test.ts`
+- `test/update-command.test.ts`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/7-3-ci-and-enterprise-automation-integration.md`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 7.3 ready-for-dev Story，上下文覆盖 CI/enterprise automation 对 MVP JSON output 的安全消费。 | Amelia |
+| 2026-06-15 | 0.2 | 完成 CI / enterprise automation JSON contract guide、consumer assertions、artifact redaction guard 和验证收口。 | GPT-5 (Codex) |

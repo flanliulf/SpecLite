@@ -1,6 +1,6 @@
 # Story 7.5: Project Config Init And Listing Commands（项目配置初始化与列表命令）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Post-MVP Story: 不属于 MVP implementation readiness gate。实现前必须先通过 Epic 7 kickoff / Story kickoff gate。 -->
 
@@ -44,27 +44,27 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Contract-first planning for `init` / `list`（AC: 4, 5）
-  - [ ] 扩展 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`，明确 `init` / `list` command id、data payload、exit code 和 compatibility rule。
-  - [ ] 更新 `src/diagnostics/command-result-schema.ts`，不得添加未在 SPEC 中声明的 public fields。
-  - [ ] 如新增 issue id、category 或 data 子字段，同步 fixture expected outputs 或 contract tests。
+- [x] Task 1: Contract-first planning for `init` / `list`（AC: 4, 5）
+  - [x] 扩展 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`，明确 `init` / `list` command id、data payload、exit code 和 compatibility rule。
+  - [x] 更新 `src/diagnostics/command-result-schema.ts`，不得添加未在 SPEC 中声明的 public fields。
+  - [x] 如新增 issue id、category 或 data 子字段，同步 fixture expected outputs 或 contract tests。
 
-- [ ] Task 2: Implement `speclite init` planning and safe write path（AC: 1, 2）
-  - [ ] 在 `src/bin/speclite.ts` 注册 `init` command，并把 orchestration 放入新的 `src/commands/init.ts` 或等价 command module。
-  - [ ] 复用 `src/config/config-reader.ts`、`src/config/config-writer.ts`、`src/config/config-schema.ts` 与 `src/installer/config-initialization.ts`，不得另建配置解析模型。
-  - [ ] 对已存在 `_speclite` 的项目读取 manifest、files index、ownership/hash 和 config layers 后生成 plan。
-  - [ ] 写入阶段必须使用 `src/fs/operation-lock.ts` 和 `src/fs/safe-write.ts`；失败时输出 completed steps、failed step、pending steps 和 manual action。
-  - [ ] 对 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml` 只读保护，不覆盖、不重排、不格式化。
+- [x] Task 2: Implement `speclite init` planning and safe write path（AC: 1, 2）
+  - [x] 在 `src/bin/speclite.ts` 注册 `init` command，并把 orchestration 放入新的 `src/commands/init.ts` 或等价 command module。
+  - [x] 复用 `src/config/config-reader.ts`、`src/config/config-writer.ts`、`src/config/config-schema.ts` 与 `src/installer/config-initialization.ts`，不得另建配置解析模型。
+  - [x] 对已存在 `_speclite` 的项目读取 manifest、files index、ownership/hash 和 config layers 后生成 plan。
+  - [x] 写入阶段必须使用 `src/fs/operation-lock.ts` 和 `src/fs/safe-write.ts`；失败时输出 completed steps、failed step、pending steps 和 manual action。
+  - [x] 对 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml` 只读保护，不覆盖、不重排、不格式化。
 
-- [ ] Task 3: Implement `speclite list` from canonical indexes（AC: 3, 4）
-  - [ ] 从 `assets/source/speclite/**/module.yaml`、`module-help.csv`、manifest/index、`src/ide/adapter-registry.ts` 读取可列信息。
-  - [ ] `list` 输出可按 modules、skills、IDE targets 或 versions 分组，但 identity 必须复用 `canonicalSkillId`、module id 和 canonical target order。
-  - [ ] `--json` 输出只使用已契约 data payload；human-readable output 不能成为 automation 的唯一信息来源。
+- [x] Task 3: Implement `speclite list` from canonical indexes（AC: 3, 4）
+  - [x] 从 `assets/source/speclite/**/module.yaml`、`module-help.csv`、manifest/index、`src/ide/adapter-registry.ts` 读取可列信息。
+  - [x] `list` 输出可按 modules、skills、IDE targets 或 versions 分组，但 identity 必须复用 `canonicalSkillId`、module id 和 canonical target order。
+  - [x] `--json` 输出只使用已契约 data payload；human-readable output 不能成为 automation 的唯一信息来源。
 
-- [ ] Task 4: Tests and fixtures（AC: 1-5）
-  - [ ] 新增 focused tests 覆盖 fresh init、existing init plan、human-owned custom protection、list canonical identity、`--json` schema parse。
-  - [ ] 更新或新增 fixture expected outputs，确保 stable sorting、project-relative POSIX paths 和 redaction。
-  - [ ] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞原因、`git diff --check`。
+- [x] Task 4: Tests and fixtures（AC: 1-5）
+  - [x] 新增 focused tests 覆盖 fresh init、existing init plan、human-owned custom protection、list canonical identity、`--json` schema parse。
+  - [x] 更新或新增 fixture expected outputs，确保 stable sorting、project-relative POSIX paths 和 redaction。
+  - [x] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞原因、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -138,19 +138,38 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5（Codex fresh sub-agent）
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow`：失败，当前 `/usr/bin/python3` 为 3.9.6 且缺少 `tomllib`；已按 fallback 手工读取 `customize.toml`。
+- `npm test -- test/init-command.test.ts test/list-command.test.ts`：RED 失败，缺少 `src/commands/init.js` 和 `src/commands/list.js`。
+- `npm run build`：首次 DTS 失败于 `src/commands/init.ts` 的 `PlannedWrite` 类型收窄与 optional `filesIndex`；修正后第二次失败于 `src/commands/list.ts` optional `manifest` / `skillIndex`；最终通过。
+- `npm test -- test/init-command.test.ts test/list-command.test.ts`：通过，2 个 test files、7 个 tests。
+- `npm test`：通过，47 个 test files、331 个 tests。
+- `git diff --check`：通过。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 采用推荐默认决策：`init` / `list` 作为 Post-MVP commands 实现，但不纳入 MVP release gate；`init` 缺少 `--yes` 或处于 `--dry-run` 时只返回 unapplied plan。
+- `init` 复用既有 config initialization、TOML writer、safe write 和 operation lock；fresh init 可创建 project config，existing init 会读取 manifest、files index、config layers 后规划 installer-owned config update；existing human-owned custom config 只返回 `skip`，不覆盖、不重排、不格式化。
+- `list` 作为 read-only command，从 `discoverOfficialModules`、installed manifest / skill-index 和 `adapter-registry` 生成 canonical modules、skills、IDE targets、versions projection；没有把 `module-help.csv` 当成唯一 canonical inventory。
+- `CommandResult` SPEC、executable schema、result factory 和 renderer 已加入 `init` / `list`，新增 public fields 均有 focused contract tests 覆盖。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/7-5-project-config-init-and-listing-commands.md`
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`
+- `src/bin/speclite.ts`
+- `src/commands/init.ts`
+- `src/commands/list.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/fs/operation-lock.ts`
+- `test/init-command.test.ts`
+- `test/list-command.test.ts`
 
 ## Change Log（变更记录）
 
@@ -158,3 +177,4 @@ Status: ready-for-dev
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.2 | 重编号为 Epic 7.5，并补充对 Story 7.1 hook metadata 的 forward compatibility 边界。 | Amelia |
 | 2026-06-15 | 0.1 | 创建 Epic 7.1 ready-for-dev Story，上下文覆盖 `init` / `list` contract-first 实现边界。 | Amelia |
+| 2026-06-15 | 0.3 | 实现 Post-MVP `init` / `list` command、CommandResult 契约和 focused tests，Story 状态推进到 review。 | Codex |

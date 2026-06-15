@@ -216,6 +216,21 @@ Volatile operation-control files，例如 `_speclite/.lock` 和 safe-write tempo
 
 Human-owned 和 workflow-owned files 可以为了 protection 被列出，但 automatic update 和 repair 不得 mutate 它们。
 
+### Hook Artifact Entries（Hook 产物条目）
+
+Post-MVP hook projection 继续使用 `speclite.files-index.v1`，不得新增第二套 hook index 作为 installed-state 真源。Hook files 必须作为 files index entries 记录 file-level hash、ownership、`executable` intent、`artifactKind` 和 `sourceRef`。
+
+Hook artifact `artifactKind` 最小 vocabulary：
+
+- `hook-runner`：installer-owned executable runner，例如 `_speclite/hooks/flow-gate-enforcement/runner.mjs`。
+- `hook-source-metadata`：installer-owned hook source metadata，例如 `_speclite/hooks/flow-gate-enforcement/hook-manifest.json`。
+- `platform-hook-config`：project execution-plane hook config，例如 `.claude/settings.json` 或 `.codex/hooks.json`。
+- `safe-merged-platform-hook-config`：当未来实现 safe merge 且整文件包含 human-owned 配置时，用于表达 merged config protection 语义。
+
+Hook runner 必须记录 `executable: true`。Platform hook config 若由 installer 新建，可以记录 `ownership: "installer-owned"`；若整文件已有 human-owned 内容且 implementation 选择 safe merge，则必须记录 protected ownership/merge 语义，不得把整文件伪装成完全 installer-owned。若无法安全 merge，installer 必须输出 manual action，不得静默覆盖。
+
+Hook source files 的 `sourceRef` 必须指向 `assets/source/speclite/hooks/<hook-id>/...`。Generated platform config 可以使用 stable local reference token，例如 `generated:claude-flow-gate-hook-config` 或 `generated:codex-flow-gate-hook-config`。
+
 ## Fixture Policy（Fixture 策略）
 
 Manifest/index fixtures 是 contract tests，不是 documentation examples。本 SPEC 只拥有 manifest/index 字段和 projection 语义；fixture directory names、release gate classification、expected output classes、snapshot comparison rules、release checklist gates 和 regression asset policy 由 `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 管理。

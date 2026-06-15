@@ -119,6 +119,10 @@ MVP 支持 plan-before-write semantics。
 
 MVP 不得在显式 source resolution、install 或 update planning 之外执行 hidden source downloads 或 remote freshness checks。
 
+Post-MVP `speclite doctor --revalidate-source` 使用同一个 `ExternalAccess` shape 表达 remote freshness / provenance revalidation intent。它不得发明第二套 authorization model。`confirmationState: "pending"` 时，doctor 必须停在 external access 前并输出 blocking `source-integrity` issue；只有在 explicit authorization 后才可继续执行 remote check。
+
+`speclite validate` 保持 local-only contract。Doctor 的 external access intent 不得被反向套用到 validate，也不得让 validate 隐式访问 network、registry、remote Git、tarball 或 bundle source。
+
 ## Project Operation Lock（项目操作锁）
 
 Install、update 和 repair 在 planning 可以写入或应用变更之前，必须获取 project-level operation lock。MVP lock path 是 `_speclite/.lock`。
@@ -127,6 +131,8 @@ Fresh install 中如果 `_speclite/` 尚不存在，install 可以在 target con
 
 MVP project operation lock 是 non-reentrant。即使同一 process 已持有 lock，也不得通过再次执行 public write-capable command 绕过 lock acquisition。若内部 orchestration 需要复用同一次写入流程，必须传递 private lock handle，而不是重新进入 public command path。
 
+Post-MVP write-capable commands `sync` 和 `uninstall` 也必须在写入或移除 installer-owned state 前获取同一个 project operation lock。若未来 `doctor` 增加写入能力，也必须先获取该 lock；当前 doctor 的 default diagnostics 和 pending external access intent 不写入项目，因此不获取 lock。
+
 如果由于另一个 SpecLite operation 正在运行而无法获取 lock，命令不得写入文件。对 write-capable commands，它必须输出 `operation-lock.project-locked` issue 和 non-zero failure status。由于 safe planning 尚未开始，此 failure 的 public JSON 不得包含 planned writes、update plans、repair plans、changed paths、skipped paths 或 conflicts。
 
 MVP lock file shape：
@@ -134,7 +140,7 @@ MVP lock file shape：
 ```ts
 type OperationLockFile = {
   schemaVersion: "speclite.operation-lock.v1";
-  operation: "install" | "update" | "update.repair";
+  operation: "install" | "update" | "update.repair" | "doctor" | "sync" | "uninstall";
   pid?: number;
   createdAt: string;
   projectRootHash: string;

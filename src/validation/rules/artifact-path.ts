@@ -20,6 +20,7 @@ export type ArtifactPathIssueId =
 
 type ArtifactPathRole = "configuredRoot" | "defaultOutputPath" | "actualArtifactPath";
 type MetadataLocation = "frontmatter" | "sidecar" | "directory";
+type MetadataParseFailureReason = "malformed-frontmatter";
 
 export async function validateArtifactPathContract(input: {
   projectRoot: string;
@@ -28,6 +29,7 @@ export async function validateArtifactPathContract(input: {
   actualArtifactPath?: string;
   artifactType: string;
   metadata?: Partial<WorkflowArtifactMetadata> | Record<string, unknown>;
+  metadataParseFailureReason?: MetadataParseFailureReason;
   metadataLocation: MetadataLocation;
   expectedSourceSkill?: string;
 }): Promise<ValidationIssue[]> {
@@ -229,9 +231,27 @@ function isSameOrDescendantPath(candidatePath: string, containerPath: string): b
 function validateRequiredMetadata(input: {
   artifactType: string;
   metadata?: Partial<WorkflowArtifactMetadata> | Record<string, unknown>;
+  metadataParseFailureReason?: MetadataParseFailureReason;
   metadataLocation: MetadataLocation;
   expectedSourceSkill?: string;
 }): ValidationIssue[] {
+  if (input.metadataParseFailureReason !== undefined) {
+    return [
+      createArtifactPathIssue({
+        issueId: "artifact-path.invalid-required-metadata",
+        affectedPath: "artifact:metadata",
+        details: {
+          artifactType: input.artifactType,
+          metadataKeys: ["frontmatter"],
+          metadataLocation: input.metadataLocation,
+          reason: input.metadataParseFailureReason,
+        },
+        impact: "Workflow artifact metadata frontmatter is malformed and cannot be parsed.",
+        suggestedNextStep: "Regenerate artifact metadata with valid YAML frontmatter before validation.",
+      }),
+    ];
+  }
+
   const metadata = isRecord(input.metadata) ? input.metadata : {};
   const requiredKeys = ["workflowType", "sourceSkill", "generatedAt"] as const;
   const missingKeys = requiredKeys.filter((key) => !(key in metadata)).sort();

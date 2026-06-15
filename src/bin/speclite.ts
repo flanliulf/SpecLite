@@ -8,11 +8,20 @@ import type { ConfigInputValues, ProjectConfigField } from "../config/config-sch
 import { resolveCliLocale, type CliLocale } from "../cli/messages.js";
 import {
   renderCommandResultJson,
+  renderDoctorHumanOutput,
+  renderGovernanceReportHumanOutput,
+  renderInitHumanOutput,
   renderInstallHumanOutput,
+  renderListHumanOutput,
   renderStatusHumanOutput,
+  renderSyncHumanOutput,
+  renderUninstallHumanOutput,
   renderUpdateHumanOutput,
   renderValidateHumanOutput,
 } from "../diagnostics/output.js";
+import { runDoctorCommand, type DoctorCommandRuntime } from "../commands/doctor.js";
+import { runGovernanceReportCommand, type GovernanceReportCommandRuntime } from "../commands/governance-report.js";
+import { runInitCommand, type InitCommandRuntime } from "../commands/init.js";
 import {
   runInstallCommand,
   type ConfigInitializationPromptInput,
@@ -22,8 +31,11 @@ import {
   type SourceAccessConfirmationInput,
   type PrewriteInstallScopeConfirmationInput,
 } from "../commands/install.js";
+import { runListCommand, type ListCommandRuntime } from "../commands/list.js";
 import { registerResolveCommand } from "../commands/resolve.js";
 import { runStatusCommand, type StatusCommandRuntime } from "../commands/status.js";
+import { runSyncCommand, type SyncCommandRuntime } from "../commands/sync.js";
+import { runUninstallCommand, type UninstallCommandRuntime } from "../commands/uninstall.js";
 import { runUpdateCommand, type UpdateCommandRuntime } from "../commands/update.js";
 import { runValidateCommand, type ValidateCommandRuntime } from "../commands/validate.js";
 
@@ -36,7 +48,16 @@ export type CliIo = {
 
 export type CreateCliOptions = {
   io?: Partial<CliIo>;
-  runtime?: InstallCommandRuntime & StatusCommandRuntime & ValidateCommandRuntime & UpdateCommandRuntime;
+  runtime?: InstallCommandRuntime &
+    StatusCommandRuntime &
+    InitCommandRuntime &
+    ListCommandRuntime &
+    ValidateCommandRuntime &
+    UpdateCommandRuntime &
+    DoctorCommandRuntime &
+    SyncCommandRuntime &
+    UninstallCommandRuntime &
+    GovernanceReportCommandRuntime;
 };
 
 export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
@@ -54,6 +75,176 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
   program.exitOverride();
 
   registerResolveCommand(program, io);
+
+  program
+    .command("init")
+    .description("Create or rebuild SpecLite project config without silently overwriting custom files.")
+    .argument("[target-directory]", "Project directory to initialize.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .option("--dry-run", "Generate an unapplied init plan without authorizing writes.")
+    .option("--yes", "Authorize non-conflicting project config writes.")
+    .action(
+      async (
+        targetDirectory: string | undefined,
+        commandOptions: { dryRun?: boolean; json?: boolean; yes?: boolean },
+      ) => {
+        const outcome = await runInitCommand({
+          options: {
+            dryRun: commandOptions.dryRun ?? false,
+            json: commandOptions.json ?? false,
+            yes: commandOptions.yes ?? false,
+          },
+          ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+          ...(targetDirectory === undefined ? {} : { targetDirectory }),
+        });
+
+        if (commandOptions.json) {
+          io.stdout(renderCommandResultJson(outcome.result));
+        } else {
+          io.stdout(renderInitHumanOutput(outcome.result));
+        }
+
+        io.setExitCode(outcome.exitCode);
+      },
+    );
+
+  program
+    .command("list")
+    .description("List canonical SpecLite modules, skills, IDE targets and versions.")
+    .argument("[target-directory]", "Project directory whose installed-state projection should be included.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean }) => {
+      const outcome = await runListCommand({
+        options: { json: commandOptions.json ?? false },
+        ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+        ...(targetDirectory === undefined ? {} : { targetDirectory }),
+      });
+
+      if (commandOptions.json) {
+        io.stdout(renderCommandResultJson(outcome.result));
+      } else {
+        io.stdout(renderListHumanOutput(outcome.result));
+      }
+
+      io.setExitCode(outcome.exitCode);
+    });
+
+  program
+    .command("governance-report")
+    .description("Generate a read-only process governance coverage report from installed SpecLite evidence.")
+    .argument("[target-directory]", "Project directory to report on.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .action(async (targetDirectory: string | undefined, commandOptions: { json?: boolean }) => {
+      const outcome = await runGovernanceReportCommand({
+        options: { json: commandOptions.json ?? false },
+        ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+        ...(targetDirectory === undefined ? {} : { targetDirectory }),
+      });
+
+      if (commandOptions.json) {
+        io.stdout(renderCommandResultJson(outcome.result));
+      } else {
+        io.stdout(renderGovernanceReportHumanOutput(outcome.result));
+      }
+
+      io.setExitCode(outcome.exitCode);
+    });
+
+  program
+    .command("doctor")
+    .description("Run richer SpecLite diagnostics without changing validate local-only behavior.")
+    .argument("[target-directory]", "Project directory to diagnose.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .option("--revalidate-source", "Plan remote source freshness/provenance revalidation.")
+    .option("--yes", "Authorize explicitly planned external access for doctor checks.")
+    .action(
+      async (
+        targetDirectory: string | undefined,
+        commandOptions: { json?: boolean; revalidateSource?: boolean; yes?: boolean },
+      ) => {
+        const outcome = await runDoctorCommand({
+          options: {
+            json: commandOptions.json ?? false,
+            revalidateSource: commandOptions.revalidateSource ?? false,
+            yes: commandOptions.yes ?? false,
+          },
+          ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+          ...(targetDirectory === undefined ? {} : { targetDirectory }),
+        });
+
+        if (commandOptions.json) {
+          io.stdout(renderCommandResultJson(outcome.result));
+        } else {
+          io.stdout(renderDoctorHumanOutput(outcome.result));
+        }
+
+        io.setExitCode(outcome.exitCode);
+      },
+    );
+
+  program
+    .command("sync")
+    .description("Reconcile installed source projections and IDE mirrors without hidden repair semantics.")
+    .argument("[target-directory]", "Project directory to synchronize.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .option("--dry-run", "Generate an unapplied sync plan without authorizing writes.")
+    .option("--yes", "Authorize non-conflicting installer-owned sync writes.")
+    .action(
+      async (
+        targetDirectory: string | undefined,
+        commandOptions: { dryRun?: boolean; json?: boolean; yes?: boolean },
+      ) => {
+        const outcome = await runSyncCommand({
+          options: {
+            dryRun: commandOptions.dryRun ?? false,
+            json: commandOptions.json ?? false,
+            yes: commandOptions.yes ?? false,
+          },
+          ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+          ...(targetDirectory === undefined ? {} : { targetDirectory }),
+        });
+
+        if (commandOptions.json) {
+          io.stdout(renderCommandResultJson(outcome.result));
+        } else {
+          io.stdout(renderSyncHumanOutput(outcome.result));
+        }
+
+        io.setExitCode(outcome.exitCode);
+      },
+    );
+
+  program
+    .command("uninstall")
+    .description("Remove SpecLite installer-owned files while preserving human and workflow-owned paths.")
+    .argument("[target-directory]", "Project directory to uninstall from.")
+    .option("--json", "Emit machine-readable CommandResult JSON.")
+    .option("--dry-run", "Generate an unapplied uninstall plan without removing files.")
+    .option("--yes", "Authorize removal of installer-owned files.")
+    .action(
+      async (
+        targetDirectory: string | undefined,
+        commandOptions: { dryRun?: boolean; json?: boolean; yes?: boolean },
+      ) => {
+        const outcome = await runUninstallCommand({
+          options: {
+            dryRun: commandOptions.dryRun ?? false,
+            json: commandOptions.json ?? false,
+            yes: commandOptions.yes ?? false,
+          },
+          ...(options.runtime === undefined ? {} : { runtime: options.runtime }),
+          ...(targetDirectory === undefined ? {} : { targetDirectory }),
+        });
+
+        if (commandOptions.json) {
+          io.stdout(renderCommandResultJson(outcome.result));
+        } else {
+          io.stdout(renderUninstallHumanOutput(outcome.result));
+        }
+
+        io.setExitCode(outcome.exitCode);
+      },
+    );
 
   program
     .command("update")

@@ -129,12 +129,84 @@ describe("file integrity ownership diagnostics", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("validates installed flow gate hook runner presence and drift through files-index", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-file-integrity-hook-"));
+
+    try {
+      const runnerPath = "_speclite/hooks/flow-gate-enforcement/runner.mjs";
+      await mkdir(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement"), { recursive: true });
+      await writeFile(path.join(tempRoot, runnerPath), "#!/usr/bin/env node\nconsole.log('ok');\n", "utf8");
+      const originalHash = await hashFile(path.join(tempRoot, runnerPath));
+      await writeFile(path.join(tempRoot, runnerPath), "#!/usr/bin/env node\nconsole.log('drift');\n", "utf8");
+
+      const driftResult = await validateFileIntegrity({
+        projectRoot: tempRoot,
+        filesIndex: {
+          schemaVersion: "speclite.files-index.v1",
+          entries: [
+            entry({
+              path: runnerPath,
+              hash: originalHash,
+              artifactKind: "hook-runner",
+              sourceRef: "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs",
+              executable: true,
+            }),
+          ],
+        },
+      });
+
+      expect(driftResult.issues).toEqual([
+        expect.objectContaining({
+          issueId: "file-integrity.hash-mismatch",
+          affectedPath: runnerPath,
+          details: expect.objectContaining({
+            artifactKind: "hook-runner",
+            reason: "hash-mismatch",
+          }),
+        }),
+      ]);
+
+      await rm(path.join(tempRoot, runnerPath));
+      const missingResult = await validateFileIntegrity({
+        projectRoot: tempRoot,
+        filesIndex: {
+          schemaVersion: "speclite.files-index.v1",
+          entries: [
+            entry({
+              path: runnerPath,
+              hash: originalHash,
+              artifactKind: "hook-runner",
+              sourceRef: "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs",
+              executable: true,
+            }),
+          ],
+        },
+      });
+
+      expect(missingResult.issues).toEqual([
+        expect.objectContaining({
+          issueId: "file-integrity.missing-installer-owned-file",
+          affectedPath: runnerPath,
+          details: expect.objectContaining({
+            artifactKind: "hook-runner",
+            reason: "missing-installer-owned-file",
+          }),
+        }),
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 function entry(input: {
   path: string;
   hash: string;
   ownership?: "installer-owned" | "human-owned" | "workflow-owned";
+  executable?: boolean;
+  artifactKind?: string;
+  sourceRef?: string;
 }): FilesIndex["entries"][number] {
   return {
     schemaVersion: "speclite.files-index.v1",
@@ -142,8 +214,8 @@ function entry(input: {
     ownership: input.ownership ?? "installer-owned",
     hash: input.hash,
     hashAlgorithm: "sha256",
-    executable: false,
-    artifactKind: "runtime-config",
-    sourceRef: "installed-state:runtime-config",
+    executable: input.executable ?? false,
+    artifactKind: input.artifactKind ?? "runtime-config",
+    sourceRef: input.sourceRef ?? "installed-state:runtime-config",
   };
 }

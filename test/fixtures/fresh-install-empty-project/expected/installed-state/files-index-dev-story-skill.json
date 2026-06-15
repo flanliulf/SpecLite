@@ -2,7 +2,7 @@
   "schemaVersion": "speclite.files-index.v1",
   "path": ".claude/skills/speclite-dev-story/SKILL.md",
   "ownership": "installer-owned",
-  "hash": "sha256:04656c19c822c9e8128039662025365359b7d195769490891d5a5b24ec4fd3ee",
+  "hash": "sha256:a98c748779340463ccbe6256d3dd660e666bd14c6a9d9713e2e496e3e7bb8260",
   "hashAlgorithm": "sha256",
   "executable": false,
   "artifactKind": "ide-skill-package",

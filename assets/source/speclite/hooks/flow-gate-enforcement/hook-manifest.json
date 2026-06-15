@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "speclite.hook-source.v1",
+  "hookId": "flow-gate-enforcement",
+  "sourceSkill": "speclite-flow-gate",
+  "protectedSkill": "speclite-dev-story",
+  "runner": "runner.mjs",
+  "events": ["UserPromptSubmit"],
+  "artifactKind": "hook-runner",
+  "installedRuntimeRoot": "_speclite/hooks/flow-gate-enforcement"
+}

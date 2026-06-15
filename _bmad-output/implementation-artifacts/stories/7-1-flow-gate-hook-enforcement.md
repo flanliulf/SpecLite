@@ -1,6 +1,6 @@
 # Story 7.1: Flow Gate Hook Enforcement（Flow Gate Hook 强制执行）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Post-MVP Story: 不属于 MVP implementation readiness gate。实现前必须先通过 Epic 7 kickoff / Story kickoff gate。 -->
 
@@ -62,46 +62,46 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Define hook artifact contracts before implementation（AC: 1-3, 6）
-  - [ ] 扩展 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`，定义 Flow Gate hook source root、installed hook artifact、hook runner、platform config projection 和 `flow_gate_report_metadata`。
-  - [ ] 扩展 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`，明确 files index 如何表达 hook runner、platform hook config、safe-merged config、executable intent、`artifactKind` 和 `sourceRef`。
-  - [ ] 扩展 `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md`，明确 hook projection 是 adapter artifact，不得混入 canonical skill package hash。
-  - [ ] 如新增 validation issue id 或 fixture behavior，先更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 与 `_bmad-output/planning-artifacts/specs/08-fixture-contract.md`。
+- [x] Task 1: Define hook artifact contracts before implementation（AC: 1-3, 6）
+  - [x] 扩展 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`，定义 Flow Gate hook source root、installed hook artifact、hook runner、platform config projection 和 `flow_gate_report_metadata`。
+  - [x] 扩展 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`，明确 files index 如何表达 hook runner、platform hook config、safe-merged config、executable intent、`artifactKind` 和 `sourceRef`。
+  - [x] 扩展 `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md`，明确 hook projection 是 adapter artifact，不得混入 canonical skill package hash。
+  - [x] 如新增 validation issue id 或 fixture behavior，先更新 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 与 `_bmad-output/planning-artifacts/specs/08-fixture-contract.md`。
 
-- [ ] Task 2: Add independent canonical hook source package（AC: 1）
-  - [ ] 新增独立 source root，推荐 `assets/source/speclite/hooks/flow-gate-enforcement/`。
-  - [ ] 在该 root 下定义 hook manifest/source metadata、runner source、Claude projection fragment、Codex projection fragment 和 README/contract notes。
-  - [ ] hook source 不得放入 `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/`；`speclite-dev-story` 只能引用 hook protection relationship。
-  - [ ] 如果采用不同目录名，必须仍位于 `assets/source/speclite/` 下的独立 hooks source boundary，并在 Story 的 Anchor Evidence Summary 记录理由。
+- [x] Task 2: Add independent canonical hook source package（AC: 1）
+  - [x] 新增独立 source root，推荐 `assets/source/speclite/hooks/flow-gate-enforcement/`。
+  - [x] 在该 root 下定义 hook manifest/source metadata、runner source、Claude projection fragment、Codex projection fragment 和 README/contract notes。
+  - [x] hook source 不得放入 `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/`；`speclite-dev-story` 只能引用 hook protection relationship。
+  - [x] 如果采用不同目录名，必须仍位于 `assets/source/speclite/` 下的独立 hooks source boundary，并在 Story 的 Anchor Evidence Summary 记录理由。
 
-- [ ] Task 3: Implement installer projection and safe merge（AC: 2, 3, 7）
-  - [ ] 扩展 installer source traversal，使 hook artifacts 与 skill packages 分离安装；不得让 `copyCanonicalPackage` 把 hook 当作 skill package 内容复制。
-  - [ ] 为 Claude 投射 project-level hook 配置，优先使用 `.claude/settings.json` 中可阻断 prompt/command expansion 的 hook event；existing settings 必须 safe merge 或输出 conflict/manual action。
-  - [ ] 为 Codex 投射 project-level hook 配置，优先使用 `.codex/hooks.json` 或已契约化的 `.codex/config.toml` `[hooks]` 形式；install summary 必须提示项目 `.codex` trust 与 `/hooks` review/trust。
-  - [ ] 生成 hook runner 到 installer-owned runtime path（例如 `_speclite/hooks/flow-gate-enforcement/` 或契约化等价路径），并记录 executable intent。
-  - [ ] files index 必须记录 hook config/runner/source metadata；若整文件是 human-owned merged config，必须按 contract 记录保护语义，不能伪装成完整 installer-owned 文件。
+- [x] Task 3: Implement installer projection and safe merge（AC: 2, 3, 7）
+  - [x] 扩展 installer source traversal，使 hook artifacts 与 skill packages 分离安装；不得让 `copyCanonicalPackage` 把 hook 当作 skill package 内容复制。
+  - [x] 为 Claude 投射 project-level hook 配置，优先使用 `.claude/settings.json` 中可阻断 prompt/command expansion 的 hook event；existing settings 必须 safe merge 或输出 conflict/manual action。
+  - [x] 为 Codex 投射 project-level hook 配置，优先使用 `.codex/hooks.json` 或已契约化的 `.codex/config.toml` `[hooks]` 形式；install summary 必须提示项目 `.codex` trust 与 `/hooks` review/trust。
+  - [x] 生成 hook runner 到 installer-owned runtime path（例如 `_speclite/hooks/flow-gate-enforcement/` 或契约化等价路径），并记录 executable intent。
+  - [x] files index 必须记录 hook config/runner/source metadata；若整文件是 human-owned merged config，必须按 contract 记录保护语义，不能伪装成完整 installer-owned 文件。
 
-- [ ] Task 4: Implement hook runner behavior（AC: 4, 5）
-  - [ ] Runner 从 stdin 读取 Claude/Codex hook event JSON；平台差异只进入 adapter/normalizer，不进入 gate business rule。
-  - [ ] Runner 对非 `speclite-dev-story` intent 快速 no-op，输出平台允许的 continue/no-decision 结果。
-  - [ ] Runner 识别 `speclite-dev-story` intent 后解析 story key/path；无法唯一解析时阻断并要求用户指定 Story。
-  - [ ] Runner 通过 installed runtime config 或 `speclite resolve config --project-root <project>` 解析 `{implementation_artifacts}`，不得从 source checkout 反推路径。
-  - [ ] Runner 读取 hook-readable Flow Gate metadata，校验 `mode`、`storyKey`、`target`、`result`、`generatedAt` 与 freshness policy。
-  - [ ] Runner 对 missing/non-pass/mismatch/stale metadata 返回平台支持的 block shape 或 exit code `2`，并给出下一步命令。
-  - [ ] Runner 不运行 `speclite-flow-gate`、不写 report、不改 sprint-status、不改 Story 文件。
+- [x] Task 4: Implement hook runner behavior（AC: 4, 5）
+  - [x] Runner 从 stdin 读取 Claude/Codex hook event JSON；平台差异只进入 adapter/normalizer，不进入 gate business rule。
+  - [x] Runner 对非 `speclite-dev-story` intent 快速 no-op，输出平台允许的 continue/no-decision 结果。
+  - [x] Runner 识别 `speclite-dev-story` intent 后解析 story key/path；无法唯一解析时阻断并要求用户指定 Story。
+  - [x] Runner 通过 installed runtime config 或 `speclite resolve config --project-root <project>` 解析 `{implementation_artifacts}`，不得从 source checkout 反推路径。
+  - [x] Runner 读取 hook-readable Flow Gate metadata，校验 `mode`、`storyKey`、`target`、`result`、`generatedAt` 与 freshness policy。
+  - [x] Runner 对 missing/non-pass/mismatch/stale metadata 返回平台支持的 block shape 或 exit code `2`，并给出下一步命令。
+  - [x] Runner 不运行 `speclite-flow-gate`、不写 report、不改 sprint-status、不改 Story 文件。
 
-- [ ] Task 5: Add Flow Gate report metadata and related skill updates（AC: 4, 6, 7）
-  - [ ] 更新 `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/assets/report-template.md`，新增 YAML frontmatter 或 sidecar JSON contract。
-  - [ ] 更新 `speclite-flow-gate/SKILL.md`、`SKILL.en.md` 和 `references/workflow-details.md`，明确 report metadata 是 downstream hook/finalizer 的 machine-readable source。
-  - [ ] 更新 `speclite-dev-story/SKILL.md`、`SKILL.en.md` 和 `references/workflow-steps.md`，说明 Step 4 仍必须执行，hook 是外层 deterministic guard，不替代 skill 内部 Flow Gate。
-  - [ ] 如更新 `module-help.csv` 或 discovery metadata，只能引用既有 canonical skill ids，不得定义第二套 hook inventory。
+- [x] Task 5: Add Flow Gate report metadata and related skill updates（AC: 4, 6, 7）
+  - [x] 更新 `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/assets/report-template.md`，新增 YAML frontmatter 或 sidecar JSON contract。
+  - [x] 更新 `speclite-flow-gate/SKILL.md`、`SKILL.en.md` 和 `references/workflow-details.md`，明确 report metadata 是 downstream hook/finalizer 的 machine-readable source。
+  - [x] 更新 `speclite-dev-story/SKILL.md`、`SKILL.en.md` 和 `references/workflow-steps.md`，说明 Step 4 仍必须执行，hook 是外层 deterministic guard，不替代 skill 内部 Flow Gate。
+  - [x] 如更新 `module-help.csv` 或 discovery metadata，只能引用既有 canonical skill ids，不得定义第二套 hook inventory。
 
-- [ ] Task 6: Tests, fixtures and validation（AC: 2-8）
-  - [ ] 新增 hook runner focused tests，覆盖 no-op、missing gate、non-pass gate、stale gate、wrong story、PASS、PASS_EQUIVALENT、ambiguous story intent。
-  - [ ] 新增 installer tests，覆盖 hook source projection、safe merge、existing config conflict、files index ownership/hash/executable intent。
-  - [ ] 更新 `fresh-install-empty-project` expected installed-state fixtures，包括 `files-index-full.json`、`skill-index-full.json` 或新 hook index fixture。
-  - [ ] 更新 validation tests，覆盖 hook runner missing/drift、config merge protection、Codex trust documentation presence。
-  - [ ] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞原因、`git diff --check`。
+- [x] Task 6: Tests, fixtures and validation（AC: 2-8）
+  - [x] 新增 hook runner focused tests，覆盖 no-op、missing gate、non-pass gate、stale gate、wrong story、PASS、PASS_EQUIVALENT、ambiguous story intent。
+  - [x] 新增 installer tests，覆盖 hook source projection、safe merge、existing config conflict、files index ownership/hash/executable intent。
+  - [x] 更新 `fresh-install-empty-project` expected installed-state fixtures，包括 `files-index-full.json`、`skill-index-full.json` 或新 hook index fixture。
+  - [x] 更新 validation tests，覆盖 hook runner missing/drift、config merge protection、Codex trust documentation presence。
+  - [x] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞原因、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -188,28 +188,76 @@ Status: ready-for-dev
 
 ## Anchor Evidence Summary（锚点证据摘要）
 
-待实现后填写。实现完成前不得把本 Story 标记为 `review` 或 `done`。
+已完成。Story `7-1` 采用推荐独立 source root `assets/source/speclite/hooks/flow-gate-enforcement/`，未使用等价替代路径。Hook source、installer projection、runtime runner、Flow Gate report metadata、related skill guidance、fixture snapshots 和 validation tests 均有对应实现与证据。
+
+Story completion gate 已生成：`_bmad-output/implementation-artifacts/flow-gates/7-1-flow-gate-hook-enforcement-story-completion-gate.md`，结果为 `PASS`。
 
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5（Codex）
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- 2026-06-15 12:50 CST：`sprint-status.yaml` 从 `ready-for-dev` 推进到 `in-progress`。
+- 2026-06-15 12:53 CST：新增 hook runner 与 installer projection 红灯测试，确认缺失实现导致 focused tests 失败。
+- 2026-06-15 12:56 CST：hook runner 与 installer projection focused tests 通过。
+- 2026-06-15 13:00 CST：runtime/fixture snapshot、validation missing/drift coverage 通过 focused tests。
+- 2026-06-15 13:01 CST：完整 `npm test` 首次暴露 local source fixture 与 skill-index snapshot 未同步；已按 root cause 修复。
+- 2026-06-15 13:01 CST：完整 `npm test` 通过。
+- 2026-06-15 13:03 CST：Story completion gate 结果 `PASS`，`sprint-status.yaml` 推进到 `review`。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 定义了 Flow Gate hook source、installed artifacts、Flow Gate report metadata、files-index projection、adapter boundary、validation issue 和 fixture behavior 的 owning SPEC。
+- 新增独立 canonical hook source package，未放入 `speclite-dev-story` skill package。
+- Installer 现在单独投射 Flow Gate hook runner/source metadata、Claude `.claude/settings.json`、Codex `.codex/hooks.json`，并在 files-index 中记录 hook artifacts 的 ownership、hash、`artifactKind`、`sourceRef` 和 executable intent。
+- Hook runner 支持 stdin hook event、非 dev-story no-op、Story key/path 解析、installed config lookup、Flow Gate YAML frontmatter metadata 校验、PASS/PASS_EQUIVALENT allow，以及 missing/non-pass/mismatch/stale/ambiguous block。
+- 更新 Flow Gate report template 与 related skill guidance，明确 hook 是外层 deterministic guard，不替代 `speclite-dev-story` Step 4 内部 Flow Gate。
+- 更新 fresh install fixtures、local source fixture helper、release packaging inventory、focused tests 和 full regression evidence。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `_bmad-output/implementation-artifacts/flow-gates/7-1-flow-gate-hook-enforcement-story-completion-gate.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/7-1-flow-gate-hook-enforcement.md`
+- `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`
+- `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md`
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`
+- `_bmad-output/planning-artifacts/specs/08-fixture-contract.md`
+- `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`
+- `assets/source/speclite/hooks/flow-gate-enforcement/README.md`
+- `assets/source/speclite/hooks/flow-gate-enforcement/claude-settings.fragment.json`
+- `assets/source/speclite/hooks/flow-gate-enforcement/codex-hooks.fragment.json`
+- `assets/source/speclite/hooks/flow-gate-enforcement/hook-manifest.json`
+- `assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/SKILL.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/assets/report-template.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md`
+- `release/packaging-manifest.json`
+- `src/commands/install.ts`
+- `src/hooks/flow-gate-enforcement.ts`
+- `src/installer/hook-artifacts.ts`
+- `src/installer/runtime-structure.ts`
+- `test/file-integrity-ownership.test.ts`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-dev-story-skill.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-speclite-dev-story.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-tree.txt`
+- `test/flow-gate-hook-runner.test.ts`
+- `test/hook-artifact-install.test.ts`
+- `test/local-source-integrity.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 7.1 ready-for-dev Story，上下文覆盖 Flow Gate Hook Enforcement、installer projection、report metadata 与 fixtures。 | Amelia |
+| 2026-06-15 | 1.0 | 实现 Flow Gate hook enforcement、installer projection、report metadata、tests/fixtures，并推进 Story 至 review。 | Codex |

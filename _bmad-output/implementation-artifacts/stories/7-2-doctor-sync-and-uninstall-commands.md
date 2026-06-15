@@ -1,6 +1,6 @@
 # Story 7.2: Doctor, Sync And Uninstall Commands（Doctor、Sync 与 Uninstall 命令）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Post-MVP Story: 不属于 MVP implementation readiness gate。实现前必须先通过 Epic 7 kickoff / Story kickoff gate。 -->
 
@@ -53,29 +53,29 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Add command contracts before implementation（AC: 1, 2, 6）
-  - [ ] 扩展 `01-command-result-json-contract.md`，定义 `doctor`、`sync`、`uninstall` command ids、data payloads、exit code 和 issue projection。
-  - [ ] 如 `doctor` 增加 external access intent，先扩展 `03-install-plan-contract.md` 的 `SourceResolutionPlan.externalAccesses` / `ExternalAccess` 语义。
-  - [ ] 更新 `src/diagnostics/command-result-schema.ts` 与 contract tests。
+- [x] Task 1: Add command contracts before implementation（AC: 1, 2, 6）
+  - [x] 扩展 `01-command-result-json-contract.md`，定义 `doctor`、`sync`、`uninstall` command ids、data payloads、exit code 和 issue projection。
+  - [x] 如 `doctor` 增加 external access intent，先扩展 `03-install-plan-contract.md` 的 `SourceResolutionPlan.externalAccesses` / `ExternalAccess` 语义。
+  - [x] 更新 `src/diagnostics/command-result-schema.ts` 与 contract tests。
 
-- [ ] Task 2: Implement `speclite doctor` as richer diagnostics（AC: 1, 2）
-  - [ ] 在 `src/bin/speclite.ts` 注册 command，把实现放入 `src/commands/doctor.ts` 或等价模块。
-  - [ ] 复用 `src/validation/validate-project.ts`、`src/validation/issue-model.ts`、`src/validation/validation-order.ts`，不得创建第二套 issue category / severity。
-  - [ ] 保持 `speclite validate` local-only；doctor 的 remote freshness/provenance check 必须显式授权。
+- [x] Task 2: Implement `speclite doctor` as richer diagnostics（AC: 1, 2）
+  - [x] 在 `src/bin/speclite.ts` 注册 command，把实现放入 `src/commands/doctor.ts` 或等价模块。
+  - [x] 复用 `src/validation/validate-project.ts`、`src/validation/issue-model.ts`、`src/validation/validation-order.ts`，不得创建第二套 issue category / severity。
+  - [x] 保持 `speclite validate` local-only；doctor 的 remote freshness/provenance check 必须显式授权。
 
-- [ ] Task 3: Implement `speclite sync` as source-to-mirror reconciliation（AC: 3, 5, 6）
-  - [ ] 复用 `src/update/update-plan.ts`、`src/update/conflict-detector.ts`、`src/update/ownership-model.ts` 与 `src/ide/adapter-registry.ts`。
-  - [ ] 明确 `sync` 与 `update` / `update --repair` 的不同：同步 source 与 IDE mirrors，不改变普通 update conflict / repair eligibility。
-  - [ ] 写入只允许 installer-owned mirror/control state；human-owned custom 与 workflow-owned artifacts 必须 skip/conflict。
+- [x] Task 3: Implement `speclite sync` as source-to-mirror reconciliation（AC: 3, 5, 6）
+  - [x] 复用 `src/update/update-plan.ts`、`src/update/conflict-detector.ts`、`src/update/ownership-model.ts` 与 `src/ide/adapter-registry.ts`。
+  - [x] 明确 `sync` 与 `update` / `update --repair` 的不同：同步 source 与 IDE mirrors，不改变普通 update conflict / repair eligibility。
+  - [x] 写入只允许 installer-owned mirror/control state；human-owned custom 与 workflow-owned artifacts 必须 skip/conflict。
 
-- [ ] Task 4: Implement `speclite uninstall` safely（AC: 4, 5, 6）
-  - [ ] 读取 files index、manifest、skill index 和 ownership classification，生成 uninstall plan。
-  - [ ] 只能移除 installer-owned paths；对 human-owned custom 与 workflow-owned artifact 输出保留/人工处理动作。
-  - [ ] 删除或更新 manifest/index 相关 control files 时必须保留 project-relative POSIX path 和 redaction。
+- [x] Task 4: Implement `speclite uninstall` safely（AC: 4, 5, 6）
+  - [x] 读取 files index、manifest、skill index 和 ownership classification，生成 uninstall plan。
+  - [x] 只能移除 installer-owned paths；对 human-owned custom 与 workflow-owned artifact 输出保留/人工处理动作。
+  - [x] 删除或更新 manifest/index 相关 control files 时必须保留 project-relative POSIX path 和 redaction。
 
-- [ ] Task 5: Verification（AC: 1-6）
-  - [ ] 新增 focused command tests 和 fixture cases，覆盖 external access intent、conflicts、safe write failure、uninstall protected paths。
-  - [ ] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞、`git diff --check`。
+- [x] Task 5: Verification（AC: 1-6）
+  - [x] 新增 focused command tests 和 fixture cases，覆盖 external access intent、conflicts、safe write failure、uninstall protected paths。
+  - [x] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -144,22 +144,47 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 (Codex)
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：失败，当前 `/usr/bin/python3` 为 Python 3.9.6 且缺少 `tomllib`；已按 skill fallback 手工读取 workflow。
+- `npm run build`：通过。
+- `npx vitest run test/contract-anchors.test.ts test/doctor-command.test.ts test/sync-command.test.ts test/uninstall-command.test.ts`：通过，4 files / 12 tests。
+- `npm test`：通过，43 files / 316 tests。
+- `git diff --check`：通过。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+- 完成 `doctor`、`sync`、`uninstall` 的 CommandResult contract、schema、CLI 注册和 focused tests。
+- `doctor` 默认复用 `validateProject` 的本地诊断模型；`--revalidate-source` 只输出 `ExternalAccess` intent，未授权时阻塞，不改变 `validate` local-only contract。
+- `sync` 复用 update planner 的 files index、ownership/hash、IDE mirror conflict 和 safe-write 基座，保持普通 conflict / repair eligibility 语义，不做 hidden repair。
+- `uninstall` 读取 files index 与 manifest artifact root，按 ownership 生成 removal plan，只删除 installer-owned paths，保留 human-owned custom 与 workflow-owned artifact paths。
+- Story 7.1 hook config、hook runner 和 hook source metadata 通过 `_speclite/hooks/` ownership classification 与 files-index entries 纳入 `sync` / `uninstall` 的 installer-owned artifact 范围。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/7-2-doctor-sync-and-uninstall-commands.md`
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`
+- `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md`
+- `src/bin/speclite.ts`
+- `src/commands/doctor.ts`
+- `src/commands/sync.ts`
+- `src/commands/uninstall.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/fs/operation-lock.ts`
+- `src/update/ownership-model.ts`
+- `test/contract-anchors.test.ts`
+- `test/doctor-command.test.ts`
+- `test/sync-command.test.ts`
+- `test/uninstall-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 7.2 ready-for-dev Story，上下文覆盖 `doctor` / `sync` / `uninstall` 的 Post-MVP 安全边界。 | Amelia |
+| 2026-06-15 | 0.2 | 实现 `doctor`、`sync`、`uninstall` contract-first command flow，并补充 focused verification。 | Codex |

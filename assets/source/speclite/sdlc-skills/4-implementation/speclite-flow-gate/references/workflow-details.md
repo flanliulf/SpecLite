@@ -92,6 +92,7 @@ Classify every dependency in the Story/Epic into one of four types:
 
 Every report must include:
 
+- YAML frontmatter at the start of the file with `schemaVersion`, `mode`, `target`, `storyKey` for Story modes, `result`, `generatedAt`, and `sourceSkill`.
 - Mode, target, date, result, and reviewer model.
 - Contract anchors checked.
 - Functional anchors checked.
@@ -99,6 +100,8 @@ Every report must include:
 - Guidance mismatches and equivalent implementation rationale.
 - Missing or ambiguous items.
 - Recommended next action.
+
+Downstream hooks and finalizers must read the frontmatter or sidecar metadata. They must not parse the human-readable Markdown sections to determine the gate result.
 
 Append:
 

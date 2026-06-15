@@ -3,8 +3,11 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  DoctorCommandResultSchema,
   InstallCommandResultSchema,
   RepairCommandResultSchema,
+  SyncCommandResultSchema,
+  UninstallCommandResultSchema,
   UpdateCommandResultSchema,
   ValidationIssueSchema,
 } from "../src/diagnostics/command-result-schema.js";
@@ -101,6 +104,65 @@ describe("owning SPEC executable anchors", () => {
         },
       }).success,
     ).toBe(false);
+  });
+
+  it("accepts doctor, sync and uninstall command payloads through the shared CommandResult schema", () => {
+    const doctorResult = {
+      schemaVersion: "speclite.command-result.v1",
+      status: "success",
+      command: "doctor",
+      targetProject: "fixture",
+      summary: "Doctor diagnostics completed.",
+      issues: [],
+      nextActions: [],
+      data: {
+        issueCounts: { info: 0, warning: 0, error: 0, critical: 0 },
+        checkedCategories: ["manifest-schema"],
+        checkedTargets: [],
+        validatedPaths: ["_speclite/_config/manifest.yaml"],
+        externalAccesses: [],
+      },
+    };
+    const syncResult = {
+      schemaVersion: "speclite.command-result.v1",
+      status: "success",
+      command: "sync",
+      targetProject: "fixture",
+      summary: "Sync planning completed.",
+      issues: [],
+      nextActions: [],
+      data: {
+        syncPlan: { actions: [] },
+        changedPaths: [],
+        skippedPaths: [],
+        conflicts: [],
+        requiresConfirmation: false,
+        writeAuthorized: false,
+      },
+    };
+    const uninstallResult = {
+      schemaVersion: "speclite.command-result.v1",
+      status: "success",
+      command: "uninstall",
+      targetProject: "fixture",
+      summary: "Uninstall planning completed.",
+      issues: [],
+      nextActions: [],
+      data: {
+        uninstallPlan: { actions: [] },
+        removedPaths: [],
+        preservedPaths: [],
+        requiresConfirmation: false,
+        writeAuthorized: false,
+      },
+    };
+
+    expect(DoctorCommandResultSchema.parse(doctorResult)).toEqual(doctorResult);
+    expect(SyncCommandResultSchema.parse(syncResult)).toEqual(syncResult);
+    expect(UninstallCommandResultSchema.parse(uninstallResult)).toEqual(uninstallResult);
+    expect(parseExpectedCommandJson(doctorResult)).toEqual(doctorResult);
+    expect(parseExpectedCommandJson(syncResult)).toEqual(syncResult);
+    expect(parseExpectedCommandJson(uninstallResult)).toEqual(uninstallResult);
   });
 
   it("rejects non-contract top-level fields and redaction-unsafe issue prose", () => {

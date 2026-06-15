@@ -1,7 +1,13 @@
 import type {
   InstallCommandResult,
+  InitCommandResult,
+  GovernanceReportCommandResult,
+  ListCommandResult,
   RepairCommandResult,
   StatusCommandResult,
+  DoctorCommandResult,
+  SyncCommandResult,
+  UninstallCommandResult,
   UpdateCommandResult,
   ValidateCommandResult,
   ValidationIssue,
@@ -33,12 +39,106 @@ export type ArtifactEvidence = {
 export function renderCommandResultJson(
   result:
     | InstallCommandResult
+    | InitCommandResult
+    | ListCommandResult
     | StatusCommandResult
     | ValidateCommandResult
+    | DoctorCommandResult
     | UpdateCommandResult
-    | RepairCommandResult,
+    | RepairCommandResult
+    | SyncCommandResult
+    | UninstallCommandResult
+    | GovernanceReportCommandResult,
 ): string {
   return `${JSON.stringify(result, null, 2)}\n`;
+}
+
+export function renderInitHumanOutput(result: InitCommandResult): string {
+  const lines = [
+    "SpecLite init",
+    `Status: ${result.status}`,
+    result.summary,
+    `Write authorized: ${String(result.data.writeAuthorized)}`,
+    `Requires confirmation: ${String(result.data.requiresConfirmation)}`,
+    `Changed paths: ${formatList(result.data.changedPaths)}`,
+    `Skipped paths: ${formatList(result.data.skippedPaths)}`,
+    "Plan:",
+  ];
+
+  for (const action of result.data.initPlan.actions) {
+    const reason = action.reason === undefined ? "" : `, reason=${action.reason}`;
+    lines.push(`- ${action.affectedPath}: ${action.action}, ownership=${action.ownership}${reason}`);
+  }
+
+  if (result.issues.length > 0) {
+    lines.push("Issues:");
+    for (const issue of result.issues) lines.push(formatIssue(issue));
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) lines.push(`- ${action}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderListHumanOutput(result: ListCommandResult): string {
+  const lines = [
+    "SpecLite list",
+    `Status: ${result.status}`,
+    result.summary,
+    "Modules:",
+    ...result.data.modules.map((module) => `- ${module.moduleId}: ${module.version}; skills=${module.skillCount}`),
+    "IDE targets:",
+    ...result.data.ideTargets.map((target) => `- ${target.id}: ${target.targetDirectory}`),
+    `Skills: ${result.data.skills.length}`,
+    "Versions:",
+    ...result.data.versions.map((version) => `- ${version.name}: ${version.version}`),
+  ];
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) lines.push(`- ${action}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderDoctorHumanOutput(result: DoctorCommandResult): string {
+  const lines = [
+    "SpecLite doctor",
+    `Status: ${result.status}`,
+    "Summary",
+    result.summary,
+    `Checked categories: ${formatList(result.data.checkedCategories)}`,
+    `Checked targets: ${formatList(result.data.checkedTargets)}`,
+    `Validated paths: ${formatList(result.data.validatedPaths)}`,
+    `Issue counts: critical=${result.data.issueCounts.critical}, error=${result.data.issueCounts.error}, warning=${result.data.issueCounts.warning}, info=${result.data.issueCounts.info}`,
+    "External Access",
+  ];
+
+  if (result.data.externalAccesses.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const access of result.data.externalAccesses) {
+      lines.push(
+        `- sourceType=${access.sourceType}; sourceValue=${access.sourceValue}; confirmationState=${access.confirmationState}; reason=${access.reason}`,
+      );
+    }
+  }
+
+  if (result.issues.length > 0) {
+    lines.push("Issues:");
+    for (const issue of result.issues) lines.push(formatIssue(issue));
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) lines.push(`- ${action}`);
+  }
+
+  return `${lines.join("\n")}\n`;
 }
 
 export function renderInstallHumanOutput(
@@ -360,6 +460,160 @@ export function renderUpdateHumanOutput(
   return `${lines.join("\n")}\n`;
 }
 
+export function renderSyncHumanOutput(result: SyncCommandResult): string {
+  const lines = [
+    "SpecLite sync",
+    `Status: ${result.status}`,
+    "Summary",
+    result.summary,
+    "Sync Plan / Planned Effects",
+  ];
+
+  if (result.data.syncPlan.actions.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const action of result.data.syncPlan.actions) lines.push(formatPlanAction(action));
+  }
+
+  lines.push(
+    "Authorization",
+    `requiresConfirmation=${result.data.requiresConfirmation}`,
+    `writeAuthorized=${result.data.writeAuthorized}`,
+    "Changed Paths",
+    ...formatPathLines(result.data.changedPaths, "No paths changed yet."),
+    "Skipped Paths",
+    ...formatPathLines(result.data.skippedPaths, "No paths skipped during apply."),
+  );
+
+  if (result.data.conflicts.length > 0) {
+    lines.push("Conflicts:");
+    for (const conflict of result.data.conflicts) {
+      lines.push(
+        `- affectedPath=${conflict.affectedPath}; ownership=${conflict.ownership}; action=conflict; reason=${conflict.reason}`,
+      );
+    }
+  }
+
+  if (result.issues.length > 0) {
+    lines.push("Issues:");
+    for (const issue of result.issues) lines.push(formatIssue(issue));
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) lines.push(`- ${action}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderUninstallHumanOutput(result: UninstallCommandResult): string {
+  const lines = [
+    "SpecLite uninstall",
+    `Status: ${result.status}`,
+    "Summary",
+    result.summary,
+    "Uninstall Plan / Planned Effects",
+  ];
+
+  if (result.data.uninstallPlan.actions.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const action of result.data.uninstallPlan.actions) {
+      lines.push(
+        `- affectedPath=${action.affectedPath}; ownership=${action.ownership}; action=${action.action}${action.reason === undefined ? "" : `; reason=${action.reason}`}`,
+      );
+    }
+  }
+
+  lines.push(
+    "Authorization",
+    `requiresConfirmation=${result.data.requiresConfirmation}`,
+    `writeAuthorized=${result.data.writeAuthorized}`,
+    "Removed Paths",
+    ...formatPathLines(result.data.removedPaths, "No paths removed yet."),
+    "Preserved Paths",
+    ...formatPathLines(result.data.preservedPaths, "No protected paths found."),
+  );
+
+  if (result.issues.length > 0) {
+    lines.push("Issues:");
+    for (const issue of result.issues) lines.push(formatIssue(issue));
+  }
+
+  if (result.nextActions.length > 0) {
+    lines.push("Next actions");
+    for (const action of result.nextActions) lines.push(`- ${action}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function renderGovernanceReportHumanOutput(result: GovernanceReportCommandResult): string {
+  const lines = [
+    "SpecLite governance report",
+    `Status: ${result.status}`,
+    "Summary",
+    result.summary,
+    "Scope",
+    `- manifestPath=${result.data.scope.manifestPath}`,
+    `- phaseCoveragePath=${result.data.scope.phaseCoveragePath}`,
+    `- artifactRoot=${result.data.scope.artifactRoot}`,
+    "Metrics",
+    `- phaseEntryCoverage=${formatRatioMetric(result.data.metrics.phaseEntryCoverage)}`,
+    `- artifactPresenceRate=${formatRatioMetric(result.data.metrics.artifactPresenceRate)}`,
+    `- validatePassRate=${formatRatioMetric(result.data.metrics.validatePassRate)}`,
+    `- openGapCount=${result.data.metrics.openGapCount}`,
+    "Gaps",
+  ];
+
+  if (result.data.phaseGaps.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const gap of result.data.phaseGaps) {
+      lines.push(
+        `- phaseId=${gap.phaseId}; phaseLabel=${gap.phaseLabel}; moduleId=${gap.moduleId}; canonicalSkillId=${gap.canonicalSkillId}; targetId=${gap.targetId}; reason=${gap.missingReason}`,
+      );
+    }
+  }
+
+  lines.push("Artifacts");
+  if (result.data.artifactChecks.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const check of result.data.artifactChecks) {
+      lines.push(
+        `- artifactType=${check.artifactType}; defaultOutputPath=${check.defaultOutputPath}; present=${check.present}; valid=${check.valid}; issueIds=${formatList(check.issueIds)}`,
+      );
+    }
+  }
+
+  lines.push("Issues");
+  if (result.issues.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const issue of result.issues) lines.push(formatIssue(issue));
+  }
+
+  lines.push("Next Actions");
+  if (result.nextActions.length === 0) {
+    lines.push("- none");
+  } else {
+    for (const action of result.nextActions) lines.push(`- ${action}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+function formatPathLines(paths: string[], emptyText: string): string[] {
+  if (paths.length === 0) return [emptyText];
+  return paths.map((value) => `- ${value}`);
+}
+
+function formatRatioMetric(metric: { covered: number; total: number; rate: number }): string {
+  return `${metric.covered}/${metric.total} (${metric.rate})`;
+}
+
 export function renderPhaseCoverageEvidence(phaseCoverage: PhaseCoverage): string {
   const lines = ["Phase coverage evidence"];
 
@@ -622,7 +876,8 @@ function formatIssueDetails(details: ValidationIssue["details"]): string {
 function formatPlanAction(
   action:
     | UpdateCommandResult["data"]["updatePlan"]["actions"][number]
-    | RepairCommandResult["data"]["repairPlan"]["actions"][number],
+    | RepairCommandResult["data"]["repairPlan"]["actions"][number]
+    | SyncCommandResult["data"]["syncPlan"]["actions"][number],
 ): string {
   const fields = [
     `affectedPath=${action.affectedPath}`,

@@ -21,7 +21,7 @@ metadata:
     - **三层 customize 解析与配置激活**：执行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow` 解析 `workflow` 块，失败时按 base→team→user 合并 `customize.toml` / `{skill-name}.toml` / `{skill-name}.user.toml`；加载 `persistent_facts`（支持 `file:` 前缀）；执行 `speclite resolve config --project-root {project-root}` 解析四层合并后的 config，并从 resolved JSON 读取 `project_name` / `user_name` / `communication_language` / `document_output_language` / `user_skill_level` / `output_folder` / `implementation_artifacts`；`date` 使用系统当前日期时间。详见 `references/activation.md`
     - **Story 自动发现与评审延续检测**：支持显式 `{story_path}`；否则按 `sprint-status.yaml` 的 `story_location` 或 `{implementation_artifacts}/stories` 查找第一条 `ready-for-dev` Story；检测 "Senior Developer Review (AI)" 与 "Review Follow-ups (AI)" 段并提取结论、未完成项、严重度
     - **测试驱动实现与质量门**：严格按红-绿-重构循环（先写失败测试 → 最小代码使其通过 → 在测试保持绿色下重构）；编写单元/集成/端到端测试；运行已有测试集杜绝回归、运行新测试、运行 lint/静态检查；按 Acceptance Criteria 显式量化校验
-    - **HALT、Flow Gate 与 DoD 校验**：在状态推进前执行 `story-kickoff` gate，在 `review` 前执行 `story-completion` gate；HALT 触发器为依赖越界、连续 3 次实现失败、必要配置缺失或 gate 失败；测试未真实存在并通过时**绝不**标记 `[x]`
+    - **HALT、Flow Gate 与 DoD 校验**：在状态推进前执行 `story-kickoff` gate，在 `review` 前执行 `story-completion` gate；项目级 Flow Gate hook 是外层 deterministic guard，不替代 Step 4 内部 gate；HALT 触发器为依赖越界、连续 3 次实现失败、必要配置缺失或 gate 失败；测试未真实存在并通过时**绝不**标记 `[x]`
     - **Sprint 状态同步**：开始时 `ready-for-dev → in-progress`；完成时 `in-progress → review`；**保留 sprint-status.yaml 全部注释与结构**（含 STATUS DEFINITIONS）；评审跟进任务 `[AI-Review]` 必须在 Review Follow-ups 段与 Senior Developer Review → Action Items 段**双向勾选**
     - **on_complete 终止指令**：完成沟通后解析并执行 `workflow.on_complete`，作为退出前的最终终端指令
 
@@ -72,6 +72,7 @@ metadata:
     - File List 必须包含**所有**新建/修改/删除文件，使用相对仓库根的路径
     - `sprint-status.yaml` 更新必须**保留所有注释与结构**（含 STATUS DEFINITIONS），禁止覆写为缩略版
     - Definition of Done 和 Flow Gate 校验依据 `references/checklist.md` 与 `speclite-flow-gate`；任意 DoD 或 gate 失败即 HALT
+    - 若 installed project 配置了 Flow Gate hook，它只能作为进入本 workflow 前的 execution-plane guard；本 Skill 仍必须读取并验证 `story-kickoff` report metadata
     - 收尾必须执行 `workflow.on_complete` 解析并按返回值执行最终指令
     - Skill 目录中的 `config.toml.example` 仅作为目标项目 `_speclite/config.toml` 字段结构参考，不得作为运行时 fallback
     - Step / 输出话术 / 分支 / 错误处理 的所有细节以 `references/workflow-steps.md` 与 `references/activation.md` 为准

@@ -30,6 +30,7 @@ metadata:
     - A fixed file name is a hard gate only when an owning SPEC explicitly requires it; otherwise check equivalent functional implementation and test evidence first.
     - This Skill only generates gate reports. It does not modify source code, advance Story/Epic status, or replace CR.
     - Reports must be written to `{implementation_artifacts}/flow-gates/` with stable file names by mode and target.
+    - YAML frontmatter at the start of each report is the machine-readable source for downstream hooks, dev-story, CR, and finalizer workflows; consumers must not parse Markdown prose to determine the gate result.
     - `Guidance Anchor` mismatch cannot directly block the workflow; fail only after contract, function, or evidence is truly missing.
     - Update SKILL.md, SKILL.en.md, and `references/workflow-details.md` together when adding modes or result values.
 

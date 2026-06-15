@@ -105,6 +105,7 @@ function isInstallerOwnedPath(relativePath: string): boolean {
     relativePath === "_speclite/config.toml" ||
     relativePath === "_speclite/config.user.toml" ||
     relativePath.startsWith("_speclite/_config/") ||
+    relativePath.startsWith("_speclite/hooks/") ||
     relativePath.startsWith("_speclite/scripts/") ||
     relativePath.startsWith(".claude/skills/") ||
     relativePath.startsWith(".agents/skills/")

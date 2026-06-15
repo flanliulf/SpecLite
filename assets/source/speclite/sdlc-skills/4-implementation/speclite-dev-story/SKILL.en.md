@@ -20,7 +20,7 @@ metadata:
     - **Activation**: resolve three-tier customization, persistent facts, runtime config, and `workflow.on_complete`; see `references/activation.md`.
     - **Story auto-discovery and review-continuation detection**: support explicit `{story_path}`; otherwise use `sprint-status.yaml` `story_location` or `{implementation_artifacts}/stories` to find the first `ready-for-dev` Story; detect "Senior Developer Review (AI)" and "Review Follow-ups (AI)" sections and extract verdict, unchecked items, and severity counts
     - **Test-driven implementation and quality gates**: enforce red-green-refactor, focused tests, regression checks, lint/static checks, and explicit AC validation.
-    - **HALT, Flow Gate, and DoD validation**: run `story-kickoff` gate before state advancement and `story-completion` gate before `review`; HALT on out-of-scope dependencies, 3 consecutive failures, missing required config, or gate failure; NEVER mark a task `[x]` unless tests truly exist and pass
+    - **HALT, Flow Gate, and DoD validation**: run `story-kickoff` gate before state advancement and `story-completion` gate before `review`; a project-level Flow Gate hook is an outer deterministic guard and does not replace the internal Step 4 gate; HALT on out-of-scope dependencies, 3 consecutive failures, missing required config, or gate failure; NEVER mark a task `[x]` unless tests truly exist and pass
     - **Sprint-status synchronization**: flip `ready-for-dev -> in-progress` and `in-progress -> review` while preserving sprint-status comments and structure.
     - **on_complete terminal directive**: resolve and execute `workflow.on_complete` before exit.
 
@@ -47,6 +47,7 @@ metadata:
     - Never mark `[x]` unless tests truly exist and pass.
     - File List must include all changed files using repo-relative paths.
     - DoD and Flow Gate failures HALT immediately.
+    - If an installed project configures the Flow Gate hook, it is only an execution-plane guard before this workflow starts; this Skill must still read and validate `story-kickoff` report metadata.
     - `config.toml.example` is only a field-structure reference, never a runtime fallback.
 
 [Generation Metadata]

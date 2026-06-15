@@ -1,6 +1,6 @@
 # Story 7.4: Process Governance Coverage Report（流程治理覆盖报告）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Post-MVP Story: 不属于 MVP implementation readiness gate。实现前必须先通过 Epic 7 kickoff / Story kickoff gate。 -->
 
@@ -50,30 +50,30 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Define governance report contract（AC: 1, 5）
-  - [ ] 决定报告是 CLI command、workflow artifact，还是两者都有；只要 CLI `--json` 或 machine-readable report artifact 定义新的 machine-readable fields，必须先新增或扩展对应 owning SPEC。
-  - [ ] 同步更新 executable schema/parser 与 fixture-stable assertions，确保 metrics/report fields 的机器可读契约先于实现落地。
-  - [ ] 定义 metric fields：phaseEntryCoverage、artifactPresenceRate、validatePassRate、openGapCount。
-  - [ ] 复用 `CommandResult` / `ValidationIssue` / manifest/index identity，不创建第二套 skill/artifact identity。
+- [x] Task 1: Define governance report contract（AC: 1, 5）
+  - [x] 决定报告是 CLI command、workflow artifact，还是两者都有；只要 CLI `--json` 或 machine-readable report artifact 定义新的 machine-readable fields，必须先新增或扩展对应 owning SPEC。
+  - [x] 同步更新 executable schema/parser 与 fixture-stable assertions，确保 metrics/report fields 的机器可读契约先于实现落地。
+  - [x] 定义 metric fields：phaseEntryCoverage、artifactPresenceRate、validatePassRate、openGapCount。
+  - [x] 复用 `CommandResult` / `ValidationIssue` / manifest/index identity，不创建第二套 skill/artifact identity。
 
-- [ ] Task 2: Implement phase coverage and gap calculation（AC: 1, 2）
-  - [ ] 从 `_speclite/_config/phase-coverage.json` 或 manifest/index projection 读取 phase rows。
-  - [ ] 对 missing/unsupported/failed target 生成 gap entries，包含 phaseId、phaseLabel、moduleId、canonicalSkillId 或 missing reason。
-  - [ ] 排序必须 deterministic，复用 canonical target order。
+- [x] Task 2: Implement phase coverage and gap calculation（AC: 1, 2）
+  - [x] 从 `_speclite/_config/phase-coverage.json` 或 manifest/index projection 读取 phase rows。
+  - [x] 对 missing/unsupported/failed target 生成 gap entries，包含 phaseId、phaseLabel、moduleId、canonicalSkillId 或 missing reason。
+  - [x] 排序必须 deterministic，复用 canonical target order。
 
-- [ ] Task 3: Implement artifact existence and metadata checks（AC: 1, 3）
-  - [ ] 复用 `src/validation/validate-project.ts` 中 artifact-path validation 或拆出可复用 helper。
-  - [ ] 只检查 artifact existence、metadata、configured root、default output path；不得评分 prose quality 或人工 review 结论。
-  - [ ] 报告引用 validation issue 和 artifact path，保持 project-relative POSIX。
+- [x] Task 3: Implement artifact existence and metadata checks（AC: 1, 3）
+  - [x] 复用 `src/validation/validate-project.ts` 中 artifact-path validation 或拆出可复用 helper。
+  - [x] 只检查 artifact existence、metadata、configured root、default output path；不得评分 prose quality 或人工 review 结论。
+  - [x] 报告引用 validation issue 和 artifact path，保持 project-relative POSIX。
 
-- [ ] Task 4: Implement output and documentation examples（AC: 4-6）
-  - [ ] Human-readable report 使用 Summary、Scope、Metrics、Gaps、Issues、Next Actions。
-  - [ ] `--json` 或 artifact output 必须 schema-first，并有 fixture-stable comparison。
-  - [ ] 文档说明趋势/导出/多项目只能扩展在 MVP matrix 与 validate output 之上。
+- [x] Task 4: Implement output and documentation examples（AC: 4-6）
+  - [x] Human-readable report 使用 Summary、Scope、Metrics、Gaps、Issues、Next Actions。
+  - [x] `--json` 或 artifact output 必须 schema-first，并有 fixture-stable comparison。
+  - [x] 文档说明趋势/导出/多项目只能扩展在 MVP matrix 与 validate output 之上。
 
-- [ ] Task 5: Verification（AC: 1-6）
-  - [ ] 新增 focused tests 覆盖完整覆盖、缺失 phase、artifact metadata invalid、validate issue aggregation、redaction。
-  - [ ] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞、`git diff --check`。
+- [x] Task 5: Verification（AC: 1-6）
+  - [x] 新增 focused tests 覆盖完整覆盖、缺失 phase、artifact metadata invalid、validate issue aggregation、redaction。
+  - [x] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞、`git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -139,22 +139,50 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现时填写。
+GPT-5 (Codex)
 
 ### Debug Log References（调试日志引用）
 
-待实现时填写。
+- 2026-06-15: `python3 _bmad/scripts/resolve_customization.py --skill .agents/skills/bmad-dev-story --key workflow` 因 `/usr/bin/python3` 3.9.6 缺少 `tomllib` 失败；按 fallback 手工读取 workflow defaults，未修改 Python 环境。
+- 2026-06-15: `npm test -- test/governance-report-command.test.ts` 先红后绿；red 为 unknown command，green 为 2 tests passed。
+- 2026-06-15: `npm test -- test/artifact-metadata.test.ts test/artifact-path-validation.test.ts test/skill-artifact-loop.test.ts test/governance-report-command.test.ts` 通过，4 files / 20 tests passed。
+- 2026-06-15: `npm run build` 通过，ESM 与 DTS build success。
+- 2026-06-15: `npm test` 通过，45 files / 323 tests passed。
+- 2026-06-15: `git diff --check` 通过，无 whitespace error。
 
 ### Completion Notes（完成说明）
 
-待实现时填写。
+默认决策：实现只读 CLI command `speclite governance-report`，同时提供 `--json` 与 human-readable output；本 Story 不生成 workflow artifact writer，以避免新增写入面和 artifact lifecycle 复杂度。
+
+新增 owning SPEC `10-process-governance-report-contract.md`，并在 `01-command-result-json-contract.md` 登记 `governance-report` command id 与 payload 归属。机器可读输出复用 `CommandResult` envelope、`ValidationIssue` issue model、manifest/index phase identity 与 artifact contract identity。
+
+实现 `GovernanceReportData.metrics.phaseEntryCoverage`、`artifactPresenceRate`、`validatePassRate`、`openGapCount`；phase gap 使用 `_speclite/_config/phase-coverage.json` 与 canonical target order，missing/unsupported/failed target 输出 `phaseGaps[]` 并映射为 `menu-target.phase-entry-gap`。
+
+将 artifact path discovery 与 metadata validation 从 `validateProject` 内部拆为可复用 helper；报告只检查 artifact existence、metadata、configured root、default output path，并保持 project-relative POSIX path/redaction，不判断 prose quality、人工 review 或团队执行质量。
+
+Human output 固定包含 `Summary`、`Scope`、`Metrics`、`Gaps`、`Issues`、`Next Actions`；how-to 文档明确趋势、导出、多项目只能扩展在 MVP matrix 与 validate output 之上。
 
 ### File List（文件清单）
 
-待实现时填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/7-4-process-governance-coverage-report.md`
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`
+- `_bmad-output/planning-artifacts/specs/10-process-governance-report-contract.md`
+- `docs/how-to/index.md`
+- `docs/how-to/process-governance-report.md`
+- `src/bin/speclite.ts`
+- `src/commands/governance-report.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/command-result.ts`
+- `src/diagnostics/output.ts`
+- `src/validation/artifact-paths.ts`
+- `src/validation/validate-project.ts`
+- `test/governance-report-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 7.4 ready-for-dev Story，上下文覆盖 Post-MVP 流程治理覆盖报告边界。 | Amelia |
+| 2026-06-15 | 1.0 | 实现只读 `governance-report` CLI、机器可读契约、human output、文档示例和 focused tests，Story 状态推进到 review。 | Codex |

@@ -146,8 +146,9 @@
 ## Step 4：把 Story 标记为 in-progress（sprint-status 同步）
 
 ### 4.0 Flow Gate 前置检查
+- 项目级 Flow Gate hook 若已安装，只是进入本 workflow 前的 execution-plane guard；它不替代本 Step。
 - 在任何状态写入之前，执行 `speclite-flow-gate` 的 `story-kickoff` mode，目标为 `{story_key}` 或当前 Story 文件路径。
-- 读取 gate report，确认结果为 `PASS` 或 `PASS_EQUIVALENT`。
+- 读取 gate report YAML frontmatter metadata，确认 `mode=story-kickoff` 且结果为 `PASS` 或 `PASS_EQUIVALENT`。
 - 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。
 - 若缺少 gate report，先运行 `speclite-flow-gate mode=story-kickoff` 并等待结果；不得以“文件名存在”代替 gate 结果。
 

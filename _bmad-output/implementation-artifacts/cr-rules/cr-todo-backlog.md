@@ -7,7 +7,7 @@
 
 | 状态 | 数量 |
 |------|------|
-| 🔴 open | 1 |
+| 🔴 open | 3 |
 | 🟡 in-progress | 0 |
 | ✅ resolved | 8 |
 
@@ -25,6 +25,28 @@
 - **描述**: Story 1-7 round 1/2 reviewer 与 evaluator 均确认全量 `npm test` 的唯一失败为 `test/fixture-release-gates.test.ts` 中 `speclite-npm-publisher` deterministic fixture hash mismatch，差异集中在 `_speclite/_config/skill-index.json`、`.agents/.claude` 下 `speclite-npm-publisher` 的 `CHANGELOG.md`、`references/speclite-npm-publisher-workflow.md`、`SKILL.md` hash 以及 `canonicalPackageHash`。该问题真实存在并影响全量测试红绿状态，但当前 Story 1-7 diff 未修改 `speclite-npm-publisher` asset package、fresh-install expected fixture 或 release gate test，因此不应混入 Story 1-7 fixer 范围。
 - **涉及文件**: `test/fixture-release-gates.test.ts`, `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher`, `test/fixtures/fresh-install-empty-project`, `_speclite/_config/skill-index.json`
 - **建议时机**: 下次触及 `speclite-npm-publisher` canonical skill package、fresh-install expected fixture 或 release gate fixture hash 维护时处理；需由具备 release gate / fixture 维护上下文的专项步骤同步 canonical package hash 与 expected fixture。
+- **状态**: open
+- **解决记录**:
+
+### TODO-010: Runner 缺失 `_speclite/config.toml` 时返回 actionable block
+
+- **来源**: 7-1 CR round 1-2 (2026-06-15 ~ 2026-06-15)
+- **优先级**: P2
+- **类别**: test-gap
+- **描述**: Story 7-1 Round 1 Finding #2 指出 installed runner 在缺失 `_speclite/config.toml` 的 damaged/partial install 场景下会抛出 `ENOENT` stack trace 并以 `exitCode=1` 结束，而不是返回 platform 支持的 `decision=block` 与可执行修复建议。Round 2 evaluator 确认 `src/hooks/flow-gate-enforcement.ts:101-111` 和 `assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs:64-66` 仍直接读取 config，`test/flow-gate-hook-runner.test.ts:145-160` 的 helper 总是预先创建 `_speclite/config.toml`，因此缺失 config 的韧性路径没有回归覆盖；该问题真实存在但属于 damaged/partial install resilience，不阻塞 Story 7-1 主路径交付。
+- **涉及文件**: `assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs`, `src/hooks/flow-gate-enforcement.ts`, `test/flow-gate-hook-runner.test.ts`
+- **建议时机**: Epic 7 内下次触及 flow gate hook runner、installed hook damaged-state handling 或 runner regression tests 时处理；捕获 missing/unreadable/invalid `_speclite/config.toml`，返回 actionable block 决策并补充直接执行 installed `runner.mjs` 的回归测试。
+- **状态**: open
+- **解决记录**:
+
+### TODO-011: `sync` / `uninstall` 失败 human output 展示 `Step State`
+
+- **来源**: 7-2 CR round 1-2 (2026-06-15 ~ 2026-06-15)
+- **优先级**: P2
+- **类别**: test-gap
+- **描述**: Story 7-2 Round 1 Finding #2 指出 `sync` / `uninstall` human output 在失败时未展示 `Step State`，Round 2 evaluator 确认该项有效但非阻塞。当前数据层已携带 `completedSteps`、`failedStep`、`pendingSteps` lifecycle fields，但 `src/diagnostics/output.ts` 中 `renderSyncHumanOutput` 与 `renderUninstallHumanOutput` 仍未输出与 update renderer 等价的 `Step State` block，导致非 JSON 用户看不到完整失败步骤状态；应补齐 renderer 行为并增加 human output focused tests。
+- **涉及文件**: `src/diagnostics/output.ts`, `test/sync-command.test.ts`, `test/uninstall-command.test.ts`
+- **建议时机**: Epic 7 内下次触及 `sync` / `uninstall` human output renderer、失败诊断展示或相关 human output regression tests 时处理；为失败场景输出 `Completed steps`、`Failed step`、`Pending steps`，并覆盖 `sync` safe-write failure 与 `uninstall` remove failure。
 - **状态**: open
 - **解决记录**:
 

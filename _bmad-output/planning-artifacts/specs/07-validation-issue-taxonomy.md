@@ -154,6 +154,7 @@ Examples（示例）：
 - target mirror content hash differs from canonical package hash
 - duplicate target entry for one canonical skill
 - target directory cannot represent required self-contained skill entry
+- existing project-level hook config requires manual merge before installer can add SpecLite Flow Gate enforcement
 
 Default severity（默认严重级别）：
 
@@ -169,6 +170,9 @@ Reserved MVP issue ids：
 - `ide-mirror.duplicate-entry`
 - `ide-mirror.unsupported-target`
 - `ide-mirror.target-write-failed`
+- `ide-mirror.hook-config-conflict`
+
+`ide-mirror.hook-config-conflict` 用于 `.claude/settings.json`、`.codex/hooks.json` 或 future contracted hook config 已存在且 installer 不能证明 safe merge 的场景。Producer 必须保留既有文件，输出 deterministic `manualAction`，并不得把用户已有 hook、rule、setting 或 trust decision 静默覆盖。
 
 ### `runtime-path`（runtime-path 类别）
 
@@ -217,6 +221,7 @@ Reserved MVP issue ids：
 - `menu-target.ambiguous-target`
 - `menu-target.unknown-skill`
 - `menu-target.no-mapped-target`
+- `menu-target.phase-entry-gap`
 
 ### `legacy-namespace`（legacy-namespace 类别）
 
@@ -263,6 +268,7 @@ Reserved MVP issue ids：
 - `artifact-path.missing-required-directory`
 - `artifact-path.unwritable-directory`
 - `artifact-path.fixture-write-failed`
+- `artifact-path.missing-required-artifact`
 - `artifact-path.missing-required-metadata`
 - `artifact-path.invalid-required-metadata`
 

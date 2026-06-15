@@ -124,6 +124,43 @@ Flow Gate result 是状态推进和 review/finalizer 的 gate input。结果枚�
 
 Finalizer 在标记 `done` 前必须看到 `story-completion` gate 的 `PASS` 或 `PASS_EQUIVALENT`，或看到由人工记录的等价批准证据。
 
+## Flow Gate Report Metadata（Flow Gate 报告元数据）
+
+Flow Gate report 是 downstream hook、dev-story、CR 和 finalizer 的 machine-readable gate input。Markdown report 必须在文件开头使用 YAML frontmatter；human-readable Markdown prose 只能作为解释材料，不能作为 gate result 的 parser source。
+
+`flow_gate_report_metadata` 的最小字段为：
+
+```ts
+type FlowGateReportMetadata = {
+  schemaVersion: "speclite.flow-gate-report.v1";
+  mode: "story-kickoff" | "story-completion" | "epic-completion" | "epic-kickoff";
+  target: string;
+  storyKey?: string;
+  result: "PASS" | "PASS_EQUIVALENT" | "FAIL_CONTRACT" | "FAIL_FUNCTION" | "FAIL_EVIDENCE" | "DECISION_NEEDED";
+  generatedAt: string;
+  sourceSkill: "speclite-flow-gate";
+};
+```
+
+`generatedAt` 必须是 JavaScript `Date.toISOString()` 产生的 canonical UTC ISO string。`story-kickoff` 和 `story-completion` report 必须包含 `storyKey`，且 `target` 必须等于完整 Story key。Hook、finalizer 或 validation 不得通过扫描 Summary prose、标题或人工说明来判断 gate result。
+
+## Flow Gate Hook Enforcement Artifacts（Flow Gate Hook 强制执行产物）
+
+Flow Gate kickoff enforcement hook 是独立 canonical source，不属于 `speclite-dev-story` skill package。默认 source root 是 `assets/source/speclite/hooks/flow-gate-enforcement/`；等价路径必须同时满足：
+
+- 位于 `assets/source/speclite/` canonical source tree。
+- 独立于 `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/`。
+- Installer 可投射到项目级 Claude/Codex execution-plane hook config。
+- tests/fixtures 证明 installed runtime 可阻断 `speclite-dev-story`。
+
+Installed hook artifact 至少包含：
+
+- hook source metadata，例如 `hook-manifest.json`。
+- executable hook runner，例如 `_speclite/hooks/flow-gate-enforcement/runner.mjs`。
+- per-platform project hook config，例如 `.claude/settings.json` 和 `.codex/hooks.json`。
+
+Hook runner 必须从 stdin 读取 hook event JSON，识别 `speclite-dev-story` intent，解析唯一 Story key，通过 installed runtime config 解析 `{implementation_artifacts}`，读取 `{implementation_artifacts}/flow-gates/{story-key}-story-kickoff-gate.md` frontmatter，并且只允许 `mode=story-kickoff` 且 `result=PASS` 或 `PASS_EQUIVALENT`。缺失、非通过、目标不匹配、无法唯一解析或过期 metadata 必须阻断并给出下一步命令。Runner 不得运行 `speclite-flow-gate`、写 report、修改 Story 或推进 `sprint-status.yaml`。
+
 ## Anchor Contract Map（Anchor Contract Map）
 
 Story、Flow Gate report 和 review output 使用 `anchor_contract_map` 记录依赖判断。每个依赖必须按以下类型分类：
