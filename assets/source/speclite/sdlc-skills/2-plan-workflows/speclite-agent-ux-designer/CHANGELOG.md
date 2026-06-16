@@ -12,7 +12,7 @@
 
 ### 新增
 
-- 从 `vault/bmad-skills-src/bmm-skills/2-plan-workflows/bmad-agent-ux-designer` 迁移 Sally / UX Designer Agent 定义。
+- 从 `vault/bmad-skills-src/bmm-skills/2-plan-workflows/bmad-agent-ux-designer` 迁移 Uma / UX Designer Agent 定义。
 - 转换 Agent 激活流程、custom fallback、项目配置读取和菜单目标到 Speclite 运行模型。
 - 将 UX 创建菜单项映射到已存在的 `speclite-create-ux-design`。
 

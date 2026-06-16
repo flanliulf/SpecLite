@@ -20,7 +20,7 @@
       "canonicalSkillId": "speclite-agent-analyst",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-analyst",
-      "canonicalPackageHash": "sha256:fed8b8c00b999e6f361728db0c37b69e609c4688382a24b9e4fa07d1f1cce8c5",
+      "canonicalPackageHash": "sha256:39a6e3a8bab65d100caf606e53f2a595a1b7e2cfcb86fca4db7e2eef0e5cb4c2",
       "installedTargets": [
         "claude",
         "agents"
@@ -34,7 +34,7 @@
       "canonicalSkillId": "speclite-agent-architect",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect",
-      "canonicalPackageHash": "sha256:728b3cb1437cde141bc2b53126a7c7d8fb7128a97adc6f03268de43e117c2733",
+      "canonicalPackageHash": "sha256:851fbb3176aceb90d16f86be3f8c8a40ac3d6b6e0759984f581e7e0041097b18",
       "installedTargets": [
         "claude",
         "agents"
@@ -48,7 +48,7 @@
       "canonicalSkillId": "speclite-agent-dev",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-agent-dev",
-      "canonicalPackageHash": "sha256:82e8936ddeb58b19dde327c25f4d3664e0662ce5c8214f3dead6199a9850af0b",
+      "canonicalPackageHash": "sha256:0545bf6106a16df09a9f8c290fa6a20e80bd038a7485ad02efacabf943dd40a6",
       "installedTargets": [
         "claude",
         "agents"
@@ -62,7 +62,7 @@
       "canonicalSkillId": "speclite-agent-docs-steward",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-docs-steward",
-      "canonicalPackageHash": "sha256:77d41e3770d25b25b92170325a90a43df28508009a79ce6a289b24a93f99aba5",
+      "canonicalPackageHash": "sha256:14780df5178cce74a1886638ebd36bdfc50cf70555307e3fe6faa221dd2645ea",
       "installedTargets": [
         "claude",
         "agents"
@@ -76,7 +76,7 @@
       "canonicalSkillId": "speclite-agent-pm",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-agent-pm",
-      "canonicalPackageHash": "sha256:4fe3adb1ec0e3ade5591fef9a64c603cc8f4cef2476d5b28b2af5a7faa64b6f0",
+      "canonicalPackageHash": "sha256:e9af4064a60bf020ea00ae61a8009243173e4c998b4ac48756310e530383a401",
       "installedTargets": [
         "claude",
         "agents"
@@ -90,7 +90,7 @@
       "canonicalSkillId": "speclite-agent-tech-writer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer",
-      "canonicalPackageHash": "sha256:2169d140d3f1795d77600ad04c4f44366a1d9340484ace19e2ba7bf6928e2fd6",
+      "canonicalPackageHash": "sha256:95cd93ec5f20bfd1cfe76b7d4b4eada6d598211bcc7c656c32f050abf52832d2",
       "installedTargets": [
         "claude",
         "agents"
@@ -104,7 +104,7 @@
       "canonicalSkillId": "speclite-agent-ux-designer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-agent-ux-designer",
-      "canonicalPackageHash": "sha256:8cb4790c1ce65cc90e3e6d0c85b1df1efdd17c91f1647255abe029aa61256dd1",
+      "canonicalPackageHash": "sha256:26c30a4b3d34307b3692d0c3f29ab6dc807387e23b0ac573b5fa7ec139605f2e",
       "installedTargets": [
         "claude",
         "agents"
@@ -622,7 +622,7 @@
       "canonicalSkillId": "speclite-retrospective",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-retrospective",
-      "canonicalPackageHash": "sha256:3cc1ca4b3235ec6b7b28c0259ed72588da1bde4b8d2a6fa5a53b2aa18359e7b4",
+      "canonicalPackageHash": "sha256:d30a94f5a04cf86b88940234e28492153c504fe28c9cfb7811be9f4b50a6a4ac",
       "installedTargets": [
         "claude",
         "agents"

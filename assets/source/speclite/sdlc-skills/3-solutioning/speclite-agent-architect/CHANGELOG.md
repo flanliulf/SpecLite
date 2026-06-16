@@ -12,7 +12,7 @@
 
 ### 新增
 
-- 从 `vault/bmad-skills-src/bmm-skills/3-solutioning/bmad-agent-architect` 迁移 Winston / System Architect Agent 定义。
+- 从 `vault/bmad-skills-src/bmm-skills/3-solutioning/bmad-agent-architect` 迁移 Adam / System Architect Agent 定义。
 - 转换 Agent 激活流程、custom fallback、项目配置读取和菜单目标到 Speclite 运行模型。
 - 将架构创建和实现就绪检查菜单项映射到已存在的 Speclite Skill。
 
