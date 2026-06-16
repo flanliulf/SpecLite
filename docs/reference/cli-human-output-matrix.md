@@ -22,6 +22,37 @@ docs 示例不是 contract source；`CommandResult` JSON contract、issue model�
 | timestamps | human fixture 不记录 wall-clock timestamp；需要时间时使用固定 fixture 值或删除字段。 |
 | platform path | docs 和 fixture 使用 project-relative POSIX paths、`<project-root>` 或 `targetProject=example-project`，不得包含本机绝对路径。 |
 
+## Presentation Profiles（展示 Profile）
+
+Human output 先按 command intent 选择 presentation profile，再按 outcome 填充 section 内容。Profile 只影响 human-readable section order、empty state 归属和标题选择；不得改变 `CommandResult` public JSON contract。
+
+| Profile | Commands | Section strategy |
+|---|---|---|
+| Operation | `install`、`init`、`update`、`update --repair`、`sync`、`uninstall` | 优先展示 `Summary`、`Scope`、`State / Authorization`、`Plan / Evidence`、`Issues / Conflicts`、`Next Actions`，适合会写入或准备写入的命令。 |
+| Diagnostic | `status`、`validate`、`doctor` | `Issues` 靠近关键 state；存在 error/critical issue 时，不得把问题列表深埋在长 evidence 后。 |
+| Report / Support | `list`、`governance-report`、`resolve config --human`、`resolve customization --human` | 使用 `Results`、`Metrics`、`Gaps`、`Artifacts` 或 `Evidence` 中最贴近任务的主体 section，不强制输出空洞 `State`。 |
+
+## Install Migration Sample（Install 迁移样例）
+
+当用户从非 target cwd 执行 `speclite install <absolute-target-path>` 时，human output 必须同时展示目标项目、目标绝对路径和命令执行目录。`Next Actions` 必须可以从原执行目录复制执行：
+
+```text
+Scope（范围）
+目标项目：noi
+目标路径：<absolute-target-path>
+命令执行目录：<command-cwd>
+项目根目录：.
+
+Issues（问题）
+- 无问题
+
+Next Actions（下一步）
+- 运行 `speclite install <absolute-target-path> --yes` 使用默认配置完成安装。
+- 运行 `speclite install <absolute-target-path> --yes --interactive` 进入交互模式自定义安装。
+```
+
+该 absolute target context 仅属于 human presentation；JSON output 不得因此新增 human-only field，也不得暴露本机绝对 target path。
+
 ## Coverage Matrix（覆盖矩阵）
 
 | Command | Outcome | Focused test | JSON parity assertion | Docs example | Fixture or semantic assertion |

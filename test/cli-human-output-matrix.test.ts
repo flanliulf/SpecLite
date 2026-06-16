@@ -78,6 +78,12 @@ describe("CLI human output coverage matrix", () => {
       "docs 示例不是 contract source",
       "SPEC、schema 和 focused tests",
       "normalization: ANSI color, terminal width, timestamps, platform path",
+      "Presentation Profiles（展示 Profile）",
+      "Operation",
+      "Diagnostic",
+      "Report / Support",
+      "Install Migration Sample（Install 迁移样例）",
+      "speclite install <absolute-target-path> --yes --interactive",
     ]) {
       expect(matrix).toContain(requiredReference);
     }
@@ -239,7 +245,7 @@ function createPrewriteInstall(): InstallCommandResult {
     summary: "SpecLite install preview completed before project writes.",
     nextActions: [
       "Run speclite install fixture-project --yes to install with defaults.",
-      "Run speclite install fixture-project --interactive to customize installation.",
+      "Run speclite install fixture-project --yes --interactive to customize installation.",
     ],
   });
 }

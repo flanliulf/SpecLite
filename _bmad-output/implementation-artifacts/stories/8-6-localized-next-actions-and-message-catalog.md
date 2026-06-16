@@ -24,10 +24,11 @@ Status: done
    **则** 使用 `en-US` fallback catalog；
    **并且** 不改变 `CommandResult` JSON、exit code、issue ordering 或 path normalization。
 
-3. **Command suggestions include target/display path and safety order（命令建议包含目标路径并按安全优先级排序）**
+3. **Command suggestions include path-safe targets and safety order（命令建议包含路径安全目标并按安全优先级排序）**
    **前提** Next Actions 需要展示命令；
    **当** 生成命令建议；
-   **则** 命令必须包含目标路径占位或实际 display path；
+   **则** 命令必须包含目标路径占位或对当前执行目录路径安全的 actual target；
+   **并且** 跨目录执行时不得把绝对 target path 降级为可能被 cwd 误解析的 basename；
    **并且** 应按安全优先级排序：先修 blocker，再授权写入，再运行 validate/status。
 
 4. **Issue suggestedNextStep can localize without losing reason/path（Issue 建议动作可本地化且不丢 reason/path）**
@@ -44,7 +45,7 @@ Status: done
   - [x] 技术标识保持英文：command、flag、path、issue id、schema id、step id、target id、JSON field。
 
 - [x] Task 2: Localize Next Actions safely（AC: 1, 3, 4）
-  - [x] 建立 Next Actions builder，输入 command id、target display path、issues、write state、outcome。
+  - [x] 建立 Next Actions builder，输入 command id、path-safe target、issues、write state、outcome。Story 8.8 后，`display path` 只有在可证明不会被当前 cwd 误解析时才可直接用于命令建议。
   - [x] 默认中文 Next Actions 不直接透传英文内部 `nextActions`，但保留 reason code、affected path 和 technical command。
   - [x] 安全排序：blocker 修复优先，授权写入其次，validate/status 最后。
 
@@ -156,3 +157,4 @@ GPT-5 Codex
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.6 ready-for-dev Story，聚焦本地化 Next Actions 与 message catalog。 | Amelia |
 | 2026-06-16 | 1.0 | 实现默认 `zh-CN` human output catalog、localized Next Actions、locale propagation 与 focused regression tests。 | GPT-5 Codex |
+| 2026-06-16 | 1.1 | 按 Story 8.8 将 Next Actions 的 `display path` 要求收紧为 path-safe target，避免跨目录 basename 误解析。 | GPT-5 Codex |

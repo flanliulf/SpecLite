@@ -12,6 +12,10 @@ SpecLite 的核心体验不是单个命令是否执行成功，而是用户运�
 - `Next Actions（下一步）` 仍可能透传英文内部字符串，破坏默认中文输出和 i18n 体验。
 - `install` 的 Ready Summary 已开始区分 `default-no-prompt` 与 `explicit-interactive`，但普通 install result、blocked result 和 failure result 还没有同等的 outcome model。
 - `update`、`status`、`validate`、`resolve` 各自拼装输出，缺少共享的 title、summary、state、issues、next actions 和 empty-state 规范。
+- 绝对 target path 在 human output 中可能退化为 basename，导致跨目录执行时 `Next Actions` 生成路径不安全命令。
+- 默认 human output 可能同时展示本地化说明和 raw field，例如 `待处理 steps` 与 `pendingSteps`，让用户误以为两者是不同状态。
+- 空状态可能被放到独立 `Empty State` section，导致 `Issues（问题）` 看起来像漏输出。
+- TTY color、`NO_COLOR`、non-TTY、CI 和 docs fixture 的边界需要统一，否则颜色可能承担唯一语义或污染可复制示例。
 
 ## Product Thesis（产品主张）
 
@@ -37,37 +41,124 @@ SpecLite 的核心体验不是单个命令是否执行成功，而是用户运�
 
 本 Epic 不覆盖：
 
-- Post-MVP 新命令，如 `doctor`、`sync`、`uninstall`、`init`、`list`。
+- Post-MVP 新命令，如 `doctor`、`sync`、`uninstall`、`init`、`list`、`governance-report`。
 - `CommandResult` JSON public data shape 的非兼容变更。
 - 新增 browser / desktop UI。
 - 新增 spinner-only progress、interactive TUI framework 或 long-running daemon。
 - 自动修复范围外 fixture drift、source freshness 或远程 provenance。
 
+对于已存在但不在本 Epic 迁移范围内的 Post-MVP 命令，本 Epic 可以提供 presentation profile 分类和未来迁移约束，但不把这些命令的 renderer migration 纳入 Epic 8 的完成门禁。
+
 ## Shared Output Frame（共享输出框架）
 
-所有 human-readable command output 必须使用稳定结构。不同命令可裁剪栏目，但栏目语义必须一致。
+所有 human-readable command output 必须使用稳定结构。不同命令可裁剪栏目或使用 profile-specific section 名称，但栏目语义必须一致。共享原则不是固定死顺序，而是所有输出都必须先回答：
+
+1. 当前 outcome 是什么。
+2. 本次是否写入、准备写入或保持只读。
+3. 目标、路径、source、checked area 或 resolve key 的 scope 是什么。
+4. 判断 outcome 的关键 evidence 是什么。
+5. 有没有 issues、conflicts、gaps 或其他需要用户处理的状态。
+6. 下一步应该运行什么命令或人工检查什么路径。
+
+### Common Section Semantics（通用栏目语义）
+
+| Section | 语义 |
+|---|---|
+| Header | command name、mode 和 outcome label。 |
+| Summary | 1-3 行人类结论，先说是否完成、是否写入、是否需要动作。 |
+| Scope | target、projectRoot、source、checked area、resolve key、skill path 或 governance scope。 |
+| State / Authorization | command-specific health、plan state、write authorization、checked counts 或 resolver state。 |
+| Evidence / Results / Plan | paths、targets、planned effects、completed steps、checked items、metrics、gaps 或 resolved value summary。 |
+| Issues / Conflicts / Gaps | severity、category、issue id、affected path、impact、suggested next step；无内容时必须给出所属 section 内 empty state。 |
+| Next Actions | 本地化、按安全优先级排序、路径安全、可直接执行或可人工检查的动作。 |
+
+### Presentation Profiles（展示 Profile）
+
+#### Operation Profile（操作型）
+
+用于写入型或写入计划型命令，例如 `install`、`init`、`update`、`update --repair`、`sync` 和 `uninstall`。
 
 ```text
-<command>: <outcome label>（中文 outcome）
+<command>
+Outcome（结果）: <outcome>
 
 Summary（摘要）
-<1-3 行人类结论，先说有没有写入、是否完成、是否需要动作>
+<是否完成、是否写入、是否需要动作、当前 outcome 含义>
 
 Scope（范围）
-<target / projectRoot / source / checked area / resolve key 等>
+<目标项目、目标路径、命令执行目录、source 或 uninstall/update target>
 
 State（状态）
-<command-specific outcome、health、checked categories、plan state、write authorization>
+<write authorization、plan state、ready state、completed/pending state summary>
 
-Evidence（证据）
-<paths / targets / planned effects / completed steps / checked items>
+Plan / Evidence（计划 / 证据）
+<planned effects、changed/skipped/removed/preserved paths、source descriptor、IDE targets>
 
-Issues（问题）
-<severity、category、issue id、affected path、impact、suggested next step>
+Issues / Conflicts（问题 / 冲突）
+<issue/conflict list；无内容时直接写 `- 无问题` 或 `- 无 conflict`>
 
 Next Actions（下一步）
-<本地化、按优先级排序、可直接执行或可人工检查的动作>
+<路径安全命令；先修 blocker，再授权写入，再 validate/status>
 ```
+
+#### Diagnostic Profile（诊断型）
+
+用于只读诊断命令，例如 `status`、`validate` 和 `doctor`。`status` 应保持轻量方向感；`validate` 和 `doctor` 可以展示更完整 evidence。
+
+```text
+<command>
+Outcome（结果）: <outcome>
+
+Summary（摘要）
+<健康度、是否只读、是否需要用户动作>
+
+Scope（范围）
+<目标项目、目标路径、checked categories、checked targets、validated paths>
+
+State（状态）
+<high-level health、issue counts、external access state 或 output profile>
+
+Issues（问题）
+<按 severity / category 排序的问题；无内容时直接写 `- 无问题`>
+
+Evidence（证据）
+<source/version、key paths、checked items、validated paths、external access evidence>
+
+Next Actions（下一步）
+<修复动作、下一条诊断命令或继续使用建议>
+```
+
+#### Report / Support Profile（报告 / 支持型）
+
+用于 inventory、治理报告和 opt-in support output，例如 `list`、`governance-report`、`resolve config --human` 和 `resolve customization --human`。`resolve` 默认模式保持 pure JSON / stderr diagnostics，不进入 human profile。
+
+```text
+<command>
+Outcome（结果）: <outcome>
+
+Summary（摘要）
+<报告或解析是否完成、是否只读、是否需要动作>
+
+Scope（范围）
+<target、projectRoot、skill path、requested key、artifact root 或 governance scope>
+
+Results / Evidence（结果 / 证据）
+<modules、skills、versions、metrics、gaps、artifacts、resolved layer、source path、value summary>
+
+Issues（问题）
+<issues、warnings 或 invalid input；无内容时直接写 `- 无问题`>
+
+Next Actions（下一步）
+<人工排查路径、下一条命令或无动作提示>
+```
+
+### Cross-Profile Rules（跨 Profile 规则）
+
+- 默认 human output 不应同时输出本地化行和 raw field 行来表达同一事实；raw stable fields 属于 `--json`，或未来显式 `--verbose`。
+- Empty state 必须放在所属 section 内，例如 `Issues（问题）` 下输出 `- 无问题`，不得用空白 section 让用户猜测。
+- 涉及 target path 的 `Next Actions` 必须路径安全。跨目录执行时优先使用绝对路径或可证明不会被 cwd 误解析的 display path。
+- `install --interactive` 的写入授权必须由 `--yes` 表示；自定义安装建议命令应使用 `speclite install <target> --yes --interactive`。
+- 颜色只用于 TTY 扫描增强，不承担唯一语义。`NO_COLOR`、CI、non-TTY、docs 示例和 fixture 不得包含 ANSI escape，且无色输出必须完整可读。
 
 ## Outcome Taxonomy（Outcome 分类）
 
@@ -163,7 +254,7 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **当** 命令在写入前暂停
 **则** 输出 outcome 为 `prewrite-paused`
 **并且** Summary 明确说明“本次尚未执行安装，也没有写入任何项目文件”
-**并且** Next Actions 同时给出默认安装命令 `speclite install <target> --yes` 与自定义安装命令 `speclite install <target> --interactive`。
+**并且** Next Actions 同时给出默认安装命令 `speclite install <target> --yes` 与自定义安装命令 `speclite install <target> --yes --interactive`。
 
 **前提** source、target 或 package evidence 在写入前 blocked
 **当** `install` 停止
@@ -334,14 +425,65 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **则** 示例必须与 outcome vocabulary 和实际 renderer 一致
 **并且** 不得把只读命令、预览命令和写入命令混为同一步。
 
-## Implementation Order（实施顺序）
+## Story 8.8: CLI Human Output Presentation Profiles（CLI 人类输出展示 Profile）
+
+作为 CLI 用户和 SpecLite 维护者，
+我希望 human-readable output 使用按命令意图分类的 presentation profile，
+以便不同命令保持统一语义，同时不被强行套入不适合自身任务的固定 section 顺序。
+
+**验收标准：**
+
+**前提** 任一 human-readable renderer 被新增或修改
+**当** 该命令属于写入型或写入计划型命令
+**则** 必须使用 Operation Profile
+**并且** section 顺序应优先表达 `Summary`、`Scope`、`State / Authorization`、`Plan / Evidence`、`Issues / Conflicts`、`Next Actions`。
+
+**前提** 任一 human-readable renderer 被新增或修改
+**当** 该命令属于只读诊断命令
+**则** 必须使用 Diagnostic Profile
+**并且** `Issues（问题）` 应在关键 state 后可见；存在 error 或 critical issue 时，问题列表不得被深埋在长 evidence 之后。
+
+**前提** 任一 human-readable renderer 被新增或修改
+**当** 该命令属于 inventory、governance report 或 resolver support output
+**则** 必须使用 Report / Support Profile
+**并且** 主体内容应命名为 `Results`、`Metrics`、`Gaps`、`Artifacts` 或 `Evidence` 中最符合用户任务的 section，不得为了统一而强行使用空洞的 `State`。
+
+**前提** command 输出涉及 target、project root、source path、skill path 或 requested key
+**当** 渲染 `Scope（范围）` 或 `Next Actions（下一步）`
+**则** 必须展示足够的执行上下文，至少包括目标项目或目标路径
+**并且** 跨目录执行时不得把绝对 target path 降级为可能被 cwd 误解析的 basename 命令。
+
+**前提** human-readable output 需要展示 empty state
+**当** 无 issues、无 conflicts、无 gaps、无 planned writes 或无 checked items
+**则** empty state 必须放在所属 section 内，例如 `Issues（问题）` 下输出 `- 无问题`
+**并且** 不得用独立 `Empty State（空状态）` section 让用户跨段落拼语义。
+
+**前提** renderer 同时可输出本地化人类文本和 stable machine fields
+**当** 使用默认 human-readable mode
+**则** 不得同时输出同一事实的本地化行与 raw field 行，例如 `待处理 steps` 与 `pendingSteps=...`
+**并且** raw field 应留给 `--json` 或未来显式 `--verbose` profile。
+
+**前提** TTY 支持 ANSI color
+**当** human-readable output 使用颜色
+**则** 颜色只能增强扫描效率
+**并且** `NO_COLOR`、CI、non-TTY、docs 示例和 fixture 不得包含 ANSI escape，且无色输出必须保留完整状态、severity、issue id、path 和 next action 文本。
+
+**前提** `install` 使用 Presentation Profile 作为首个迁移样例
+**当** 用户从 `/Users/fancyliu/Repos/SpecLite` 或其他非 target cwd 执行 `speclite install /Users/fancyliu/Repos/noi`
+**则** human output 必须清楚展示 `targetProject=noi` 与目标绝对路径
+**并且** Next Actions 必须使用路径安全目标；自定义安装命令必须包含 `--yes --interactive`。
+
+## Logical Dependency / Corrective Addendum（逻辑依赖 / 纠偏补充）
+
+Story 8.8 是在 Story 8.1-8.7 完成后新增的 corrective addendum。下列顺序表达的是理想化的逻辑依赖和后续维护口径，不是当前 sprint 的历史执行顺序。当前 sprint 状态以 `_bmad-output/implementation-artifacts/sprint-status.yaml` 为准：Story 8.1-8.7 已完成，Story 8.8 为 `ready-for-dev`。
 
 1. 先实现 Story 8.1，共享 outcome/presentation contract 和本地化 Next Actions 基础设施。
-2. 再实现 Story 8.2，优先修正 `install` 的 prewrite pause / blocked / failure / ready 分支。
-3. 再实现 Story 8.3，统一 `update` 与 `update --repair` 的计划、授权、conflict 和 applied 输出。
-4. 再实现 Story 8.4，让 `status` 和 `validate` 保持职责分离。
-5. 再实现 Story 8.5，补齐 `resolve` 支持命令的人类输出。
-6. 最后实现 Story 8.6 / 8.7，收敛 message catalog、Next Actions、本地化测试、fixture 和文档示例。
+2. 再实现 Story 8.8，先固化 Operation / Diagnostic / Report-Support profiles，避免把 `install` 的 section 顺序误推广到所有命令。
+3. 再实现 Story 8.2，优先修正 `install` 的 prewrite pause / blocked / failure / ready 分支，并作为第一个 profile migration 样例。
+4. 再实现 Story 8.3，统一 `update` 与 `update --repair` 的计划、授权、conflict 和 applied 输出。
+5. 再实现 Story 8.4，让 `status` 和 `validate` 保持职责分离。
+6. 再实现 Story 8.5，补齐 `resolve` 支持命令的人类输出。
+7. 最后实现 Story 8.6 / 8.7，收敛 message catalog、Next Actions、本地化测试、fixture 和文档示例。
 
 ## Success Metrics（成功指标）
 
@@ -349,5 +491,6 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 - 每个写入型命令都能明确展示 `projectFilesWritten` 或等价写入状态。
 - 所有默认中文 human-readable output 的自然语言均来自 `zh-CN` catalog。
 - 所有 Next Actions 都是本地化、命令特定、按安全优先级排序的动作。
+- 所有 human-readable renderer 都明确归属 Operation、Diagnostic 或 Report / Support Profile，且不强行使用不适合命令任务的固定 section 顺序。
 - `--json` output、exit code、issue ordering、path normalization 和 fixture stable comparison 不因 human-readable 重构而改变。
 - 所有关键 outcome 都有 focused tests 或 fixture/docs 示例覆盖。

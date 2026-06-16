@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInstallSuccessResult, createUpdateCommandResult, createValidateCommandResult } from "../src/diagnostics/command-result.js";
 import type { StatusCommandResult, ValidationIssue } from "../src/diagnostics/command-result-schema.js";
 import {
+  HUMAN_OUTPUT_PRESENTATION_PROFILES,
   renderCommandResultJson,
   renderInstallHumanOutput,
   renderStatusHumanOutput,
@@ -10,6 +11,24 @@ import {
 } from "../src/diagnostics/output.js";
 
 describe("shared CLI outcome presentation", () => {
+  it("defines explicit presentation profiles for operation, diagnostic and report/support commands", () => {
+    expect(HUMAN_OUTPUT_PRESENTATION_PROFILES).toMatchObject({
+      install: "operation",
+      init: "operation",
+      update: "operation",
+      "update.repair": "operation",
+      sync: "operation",
+      uninstall: "operation",
+      status: "diagnostic",
+      validate: "diagnostic",
+      doctor: "diagnostic",
+      list: "report-support",
+      "governance-report": "report-support",
+      "resolve.config": "report-support",
+      "resolve.customization": "report-support",
+    });
+  });
+
   it("renders install human output with shared title, outcome, Summary and Next Actions", () => {
     const result = createInstallSuccessResult({
       targetProject: "fixture-project",
@@ -27,6 +46,40 @@ describe("shared CLI outcome presentation", () => {
     expect(output).toContain("Next Actions");
     expect(output).toMatch(/Summary\nCompleted: yes\nWrites: no project files changed\nUser action: required/);
     expect(output).toContain("- Run `speclite install fixture-project --yes` to install with defaults.");
+  });
+
+  it("orders sections by profile without rendering a standalone Empty State section", () => {
+    const install = createInstallSuccessResult({
+      targetProject: "fixture-project",
+      completedSteps: ["source-discovery"],
+      pendingSteps: ["module-selection"],
+      summary: "SpecLite install prepared the project plan.",
+      nextActions: ["Review planned writes before rerunning with --yes."],
+    });
+    const status = createStatusResult({ nextActions: [] });
+
+    const installOutput = renderInstallHumanOutput(install, { locale: "zh-CN" });
+    const statusOutput = renderStatusHumanOutput(status, { locale: "zh-CN" });
+
+    expect(sectionOrder(installOutput, [
+      "Summary（摘要）",
+      "Scope（范围）",
+      "State（状态）",
+      "Evidence（证据）",
+      "Issues（问题）",
+      "Next Actions（下一步）",
+    ])).toBe(true);
+    expect(sectionOrder(statusOutput, [
+      "Summary（摘要）",
+      "Scope（范围）",
+      "State（状态）",
+      "Issues（问题）",
+      "Evidence（证据）",
+      "Next Actions（下一步）",
+    ])).toBe(true);
+    expect(installOutput).not.toContain("Empty State（空状态）");
+    expect(statusOutput).not.toContain("Empty State（空状态）");
+    expect(statusOutput).toMatch(/Issues（问题）\n- 无问题/);
   });
 
   it("marks install ready summary as written while keeping prewrite install unwritten", () => {
@@ -178,6 +231,12 @@ describe("shared CLI outcome presentation", () => {
     expect(json).not.toHaveProperty("outcome");
   });
 });
+
+function sectionOrder(output: string, titles: string[]): boolean {
+  const indexes = titles.map((title) => output.indexOf(title));
+  return indexes.every((index) => index >= 0) &&
+    indexes.every((index, position) => position === 0 || index > indexes[position - 1]);
+}
 
 function createStatusResult(input: { nextActions: string[] }): StatusCommandResult {
   return {

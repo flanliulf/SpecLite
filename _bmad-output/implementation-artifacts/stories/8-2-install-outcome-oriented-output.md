@@ -17,7 +17,7 @@ Status: done
    **当** 命令在写入前暂停；
    **则** 输出 outcome 为 `prewrite-paused`；
    **并且** Summary 明确说明“本次尚未执行安装，也没有写入任何项目文件”；
-   **并且** Next Actions 同时给出默认安装命令 `speclite install <target> --yes` 与自定义安装命令 `speclite install <target> --interactive`。
+   **并且** Next Actions 同时给出默认安装命令 `speclite install <target> --yes` 与自定义安装命令 `speclite install <target> --yes --interactive`。
 
 2. **Prewrite blockers show blocked-before-write（写入前 blocker 显示 blocked-before-write）**
    **前提** source、target 或 package evidence 在写入前 blocked；
@@ -45,6 +45,13 @@ Status: done
    **则** outcome 为 `ready`；
    **并且** 默认 no-prompt 与 explicit interactive 的文案必须准确区分；
    **并且** 不得新增未契约化 public JSON 字段。
+
+### Story 8.8 Consistency Addendum（Story 8.8 一致性补充）
+
+- `install` 属于 Operation Profile；后续修改 install human renderer 时，应使用 `Summary`、`Scope`、`State / Authorization`、`Plan / Evidence`、`Issues / Conflicts`、`Next Actions` 的操作型语义，而不是把所有 command 强行套入同一固定 section 顺序。
+- 跨目录或绝对 target path 场景必须在 human output 中展示足够执行上下文，例如目标项目、目标绝对路径和命令执行目录；但不得把目标绝对路径写入 public `CommandResult` JSON。
+- 默认 human output 不应同时输出同一事实的本地化行与 raw field 行，例如 `待处理 steps` 与 `pendingSteps=...`。
+- Empty state 必须放入所属 section，例如 `Issues（问题）` 下输出 `- 无问题`；不应再使用独立 `Empty State（空状态）` 让用户跨段落拼语义。
 
 ## Tasks / Subtasks（任务 / 子任务）
 
@@ -164,5 +171,6 @@ Codex（GPT-5）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-06-16 | 1.1 | 按 Story 8.8 修正 prewrite 自定义安装命令为 `--yes --interactive`，补充 Operation Profile、路径安全、raw field 双写和 empty-state 一致性要求。 | GPT-5 Codex |
 | 2026-06-16 | 0.2 | 实现 install outcome-oriented human output，新增 focused tests，并推进 Story 到 review。 | Codex |
 | 2026-06-15 | 0.1 | 创建 Epic 8.2 ready-for-dev Story，聚焦 install outcome-oriented human output。 | Amelia |

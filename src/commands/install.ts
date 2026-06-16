@@ -14,6 +14,10 @@ import type {
   InstallCommandResult,
   ValidationIssue,
 } from "../diagnostics/command-result-schema.js";
+import {
+  annotateInstallTargetPresentation,
+  type InstallTargetPresentationContext,
+} from "../diagnostics/install-presentation-context.js";
 import { normalizeTargetDirectory } from "../fs/path-normalizer.js";
 import { getIdeAdapterRegistry } from "../ide/adapter-registry.js";
 import {
@@ -70,6 +74,34 @@ export type { ConfigInitializationPromptInput, ConfigInitializationSelection };
 
 const UNAVAILABLE_INSTALL_MANIFEST_VERSION = "unavailable" as const;
 const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+function createInstallTargetPresentation(input: {
+  cwd: string;
+  targetDirectory?: string;
+  targetRoot: string;
+  displayPath: string;
+}): InstallTargetPresentationContext {
+  const rawTarget = input.targetDirectory?.trim();
+  let pathSafeTarget = input.displayPath;
+  if (rawTarget !== undefined && rawTarget.length > 0) {
+    pathSafeTarget = path.isAbsolute(rawTarget) ? input.targetRoot : rawTarget;
+  }
+
+  return {
+    commandCwd: input.cwd,
+    displayPath: input.displayPath,
+    pathSafeTarget,
+    targetPath: input.targetRoot,
+  };
+}
+
+function withInstallTargetPresentation<T extends InstallCommandOutcome>(
+  outcome: T,
+  context: InstallTargetPresentationContext,
+): T {
+  annotateInstallTargetPresentation(outcome.result, context);
+  return outcome;
+}
 
 export type InstallCommandOptions = {
   json?: boolean;
@@ -137,6 +169,12 @@ export async function runInstallCommand(input: {
     cwd,
     ...(input.targetDirectory === undefined ? {} : { targetDirectory: input.targetDirectory }),
   });
+  const targetPresentation = createInstallTargetPresentation({
+    cwd,
+    targetRoot: normalizedTarget.targetRoot,
+    displayPath: normalizedTarget.displayPath,
+    ...(input.targetDirectory === undefined ? {} : { targetDirectory: input.targetDirectory }),
+  });
   const targetProject = await resolveTargetProjectDisplayName({
     targetRoot: normalizedTarget.targetRoot,
     ...(input.runtime?.targetProject === undefined ? {} : { explicitName: input.runtime.targetProject }),
@@ -152,7 +190,7 @@ export async function runInstallCommand(input: {
       nextActions: guardResult.nextActions,
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   const targetDirectoryState = await inspectTargetDirectory({
@@ -185,7 +223,7 @@ export async function runInstallCommand(input: {
       data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   if (shouldStopBeforeSourceSelection(targetDirectoryState, context.writeAuthorized)) {
@@ -202,7 +240,7 @@ export async function runInstallCommand(input: {
       data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
     });
 
-    return { result, exitCode: 0 };
+    return withInstallTargetPresentation({ result, exitCode: 0 }, targetPresentation);
   }
 
   const sourceSelection = normalizeSourceSelection(createSourceSelectionInput(input.options));
@@ -221,7 +259,7 @@ export async function runInstallCommand(input: {
       data: createTargetStateData(targetDirectoryState, normalizedTarget.paths),
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   let sourceResolutionPlan = createSourceResolutionPlan({
@@ -274,7 +312,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   if (isRegistrySource(sourceSelection.selection.sourceType)) {
@@ -312,7 +350,7 @@ export async function runInstallCommand(input: {
         },
       });
 
-      return { result, exitCode: 1 };
+      return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
     }
 
     const registryInstallOutcome = await continueInstallWithSourceDescriptor({
@@ -325,7 +363,7 @@ export async function runInstallCommand(input: {
       sourceResolutionPlan,
       sourceDescriptor: registryResolution.descriptor,
     });
-    return registryInstallOutcome;
+    return withInstallTargetPresentation(registryInstallOutcome, targetPresentation);
   }
 
   if (isLocalArtifactOrPathSource(sourceSelection.selection.sourceType)) {
@@ -361,7 +399,7 @@ export async function runInstallCommand(input: {
         },
       });
 
-      return { result, exitCode: 1 };
+      return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
     }
 
     if (localResolution.installSourceRoot === undefined) {
@@ -396,7 +434,7 @@ export async function runInstallCommand(input: {
         },
       });
 
-      return { result, exitCode: 1 };
+      return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
     }
 
     const localInstallOutcome = await continueInstallWithSourceDescriptor({
@@ -413,7 +451,7 @@ export async function runInstallCommand(input: {
         ? {}
         : { installSourceRefRoot: localResolution.descriptor.resolvedRoot }),
     });
-    return localInstallOutcome;
+    return withInstallTargetPresentation(localInstallOutcome, targetPresentation);
   }
 
   if (sourceSelection.selection.sourceType === "git") {
@@ -447,7 +485,7 @@ export async function runInstallCommand(input: {
         },
       });
 
-      return { result, exitCode: 1 };
+      return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
     }
 
     const gitInstallOutcome = await continueInstallWithSourceDescriptor({
@@ -460,7 +498,7 @@ export async function runInstallCommand(input: {
       sourceResolutionPlan,
       sourceDescriptor: gitResolution.descriptor,
     });
-    return gitInstallOutcome;
+    return withInstallTargetPresentation(gitInstallOutcome, targetPresentation);
   }
 
   if (sourceSelection.selection.sourceType !== "bundled") {
@@ -490,7 +528,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   const sourceDescriptor = await discoverBundledSourceDescriptor({ projectRoot });
@@ -512,7 +550,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   const modulesResult = await discoverModulesForInstall({ projectRoot });
@@ -531,7 +569,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   const defaultModuleSelection = createModuleSelection({ modules: modulesResult.modules });
@@ -579,7 +617,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   const configPromptInput = createConfigInitializationPromptInput({
@@ -620,7 +658,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
   const finalSelectedModuleIds = selectKnownIds({
     requestedIds: configSelection?.selectedModuleIds,
@@ -659,7 +697,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1 };
+    return withInstallTargetPresentation({ result, exitCode: 1 }, targetPresentation);
   }
 
   const configInitializationCompletedSteps = [...moduleSelectionCompletedSteps, "config-initialization"];
@@ -713,7 +751,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1, installPlan };
+    return withInstallTargetPresentation({ result, exitCode: 1, installPlan }, targetPresentation);
   }
 
   const readyCheck = await runReadyCheck({
@@ -751,7 +789,7 @@ export async function runInstallCommand(input: {
       },
     });
 
-    return { result, exitCode: 1, installPlan };
+    return withInstallTargetPresentation({ result, exitCode: 1, installPlan }, targetPresentation);
   }
 
   const result = createInstallSuccessResult({
@@ -791,7 +829,7 @@ export async function runInstallCommand(input: {
     configMode: configPlan.mode,
   });
 
-  return { result, exitCode: 0, installPlan };
+  return withInstallTargetPresentation({ result, exitCode: 0, installPlan }, targetPresentation);
 }
 
 async function continueInstallWithSourceDescriptor(input: {
@@ -1330,7 +1368,7 @@ function createTargetNextActions(
   if (!writeAuthorized) {
     return [
       `Run speclite install ${targetDisplayPath} --yes to install with defaults.`,
-      `Run speclite install ${targetDisplayPath} --interactive to customize installation.`,
+      `Run speclite install ${targetDisplayPath} --yes --interactive to customize installation.`,
     ];
   }
 

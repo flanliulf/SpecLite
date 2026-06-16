@@ -71,3 +71,4 @@
     - [Story 8.5: Resolve Command Support Output（Resolve 命令支持输出）](./11-epic-8-cli-outcome-oriented-human-output-systemcli-outcome-导向人类输出体系.md#story-85-resolve-command-support-outputresolve-命令支持输出)
     - [Story 8.6: Localized Next Actions And Message Catalog（本地化 Next Actions 与消息目录）](./11-epic-8-cli-outcome-oriented-human-output-systemcli-outcome-导向人类输出体系.md#story-86-localized-next-actions-and-message-catalog本地化-next-actions-与消息目录)
     - [Story 8.7: Human Output Fixture And Documentation Matrix（人类输出 Fixture 与文档矩阵）](./11-epic-8-cli-outcome-oriented-human-output-systemcli-outcome-导向人类输出体系.md#story-87-human-output-fixture-and-documentation-matrix人类输出-fixture-与文档矩阵)
+    - [Story 8.8: CLI Human Output Presentation Profiles（CLI 人类输出展示 Profile）](./11-epic-8-cli-outcome-oriented-human-output-systemcli-outcome-导向人类输出体系.md#story-88-cli-human-output-presentation-profilescli-人类输出展示-profile)

@@ -28,7 +28,8 @@ Status: done
    **前提** command 输出需要展示空状态；
    **当** 无 issues、无 conflicts、无 planned writes 或无 checked items；
    **则** 必须显示明确 empty state，例如 `无问题`、`无 conflict`、`未写入项目文件`；
-   **并且** 不得用空白区域让用户猜测。
+   **并且** 不得用空白区域让用户猜测；
+   **并且** 按 Story 8.8 的 profile 规则，empty state 是语义 primitive，不是默认独立 section；后续 renderer 应把 empty state 放入所属 section。
 
 4. **Human output and JSON share semantics without making prose contractual（人类输出与 JSON 共享语义但文案不成为契约）**
    **前提** human-readable output 与 `--json` 同时存在；
@@ -39,7 +40,7 @@ Status: done
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [x] Task 1: Define shared outcome presentation primitives（AC: 1-4）
-  - [x] 在 `src/diagnostics/output.ts` 或新增 `src/cli/presentation.ts` 中定义 command title、outcome label、Summary、Scope、State、Evidence、Issues、Next Actions、Empty State 的统一 renderer primitive。
+  - [x] 在 `src/diagnostics/output.ts` 或新增 `src/cli/presentation.ts` 中定义 command title、outcome label、Summary、Scope、State、Evidence、Issues、Next Actions、Empty State 的统一 renderer primitive。Story 8.8 之后，Empty State 应理解为语义 primitive，不应默认渲染为独立 section。
   - [x] 复用 `CommandResult.status`、command-specific data、`ValidationIssue`、canonical issue ordering 和 project-relative POSIX paths。
   - [x] 不新增 public JSON 字段；如确需新增，先更新 owning SPEC 和 executable schema。
 
@@ -156,5 +157,6 @@ GPT-5 Codex
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-06-16 | 1.1 | 按 Story 8.8 补充：Empty State 是语义 primitive，后续不应默认作为独立 section。 | GPT-5 Codex |
 | 2026-06-15 | 0.1 | 创建 Epic 8.1 ready-for-dev Story，定义共享 CLI outcome 与 presentation contract。 | Amelia |
 | 2026-06-16 | 1.0 | 实现共享 CLI outcome presentation primitive、locale catalog 扩展、renderer 迁移和 focused presentation tests，Story 进入 review。 | GPT-5 Codex |

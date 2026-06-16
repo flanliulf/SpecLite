@@ -29,7 +29,7 @@ describe("localized CLI message catalog", () => {
       summary: "SpecLite install preview completed before project writes.",
       nextActions: [
         "Run speclite install fixture-project --yes to install with defaults.",
-        "Run speclite install fixture-project --interactive to customize installation.",
+        "Run speclite install fixture-project --yes --interactive to customize installation.",
       ],
     });
 
@@ -38,9 +38,9 @@ describe("localized CLI message catalog", () => {
     expect(output).toContain("Summary（摘要）");
     expect(output).toContain("Next Actions（下一步）");
     expect(output).toContain("运行 `speclite install fixture-project --yes`");
-    expect(output).toContain("运行 `speclite install fixture-project --interactive`");
+    expect(output).toContain("运行 `speclite install fixture-project --yes --interactive`");
     expect(output).not.toContain("Run speclite install fixture-project --yes to install with defaults.");
-    expect(output).not.toContain("Run speclite install fixture-project --interactive to customize installation.");
+    expect(output).not.toContain("Run speclite install fixture-project --yes --interactive to customize installation.");
   });
 
   it("localizes default zh-CN install prose and labels while preserving technical identifiers", () => {
@@ -58,7 +58,7 @@ describe("localized CLI message catalog", () => {
         "Target: fixture-project. Directory state: missing. After confirmation, SpecLite will initialize the target directory.",
       nextActions: [
         "Run speclite install fixture-project --yes to install with defaults.",
-        "Run speclite install fixture-project --interactive to customize installation.",
+        "Run speclite install fixture-project --yes --interactive to customize installation.",
       ],
     });
     const ready = createInstallSuccessResult({
@@ -88,6 +88,7 @@ describe("localized CLI message catalog", () => {
     const output = `${renderInstallHumanOutput(prewrite)}\n${renderInstallHumanOutput(ready)}`;
 
     expect(output).toContain("目标项目：fixture-project");
+    expect(output).toContain("项目根目录：.");
     expect(output).toContain("安装位置：.");
     expect(output).toContain("关键路径");
     expect(output).toContain("已完成 steps");
@@ -98,11 +99,7 @@ describe("localized CLI message catalog", () => {
     expect(output).toContain("外部访问");
     expect(output).toContain("授权状态");
     expectAllowedTechnicalIdentifiers(output, [
-      "targetProject=fixture-project",
-      "projectRoot=.",
       "manifestVersion=speclite.manifest.v1",
-      "completedSteps=source-discovery, module-selection, config-initialization",
-      "pendingSteps=runtime-structure, ide-mirror-creation, manifest-generation, ready-check, ready-summary",
       "sourceType=bundled",
       "trustStatus=blocked",
       "ready-check",
@@ -110,6 +107,7 @@ describe("localized CLI message catalog", () => {
       "claude: configured",
       "agents: configured",
       "speclite install fixture-project --yes",
+      "speclite install fixture-project --yes --interactive",
     ]);
     expectNoKnownEnglishHumanProse(output, [
       "Target:",

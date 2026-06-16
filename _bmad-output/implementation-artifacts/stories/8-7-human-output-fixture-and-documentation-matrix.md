@@ -15,7 +15,7 @@ Status: done
 1. **Outcome renderer changes have focused tests（Outcome renderer 变更有 focused tests）**
    **前提** 实现任一 command outcome renderer；
    **当** 修改 human-readable output；
-   **则** 必须补充 focused test 覆盖对应 outcome、Summary、write state、Issues 和 Next Actions。
+   **则** 必须补充 focused test 覆盖对应 profile、outcome、Summary、write state、Issues 和 Next Actions。
 
 2. **Human output changes do not mutate JSON contract（人类输出变更不改变 JSON 契约）**
    **前提** 命令支持 `--json`；
@@ -38,7 +38,7 @@ Status: done
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [x] Task 1: Build outcome coverage matrix（AC: 1-4）
-  - [x] 建立 command/outcome/test/docs matrix，覆盖 install、update、update --repair、status、validate、resolve human mode。
+  - [x] 建立 command/profile/outcome/test/docs matrix，覆盖 install、update、update --repair、status、validate、resolve human mode。Story 8.8 后，matrix 必须显式记录 Operation、Diagnostic、Report / Support Profile。
   - [x] 标记每个 outcome 的 focused test、JSON parity assertion、docs example 或 fixture。
   - [x] 不把 docs 示例当成 contract source；contract source 仍是 SPEC 和 schema/tests。
 
@@ -50,7 +50,7 @@ Status: done
 - [x] Task 3: Update docs examples（AC: 4）
   - [x] 检查 `README.md`、`docs/quick-start.md`、`docs/index.md` 和相关 troubleshooting/reference docs。
   - [x] 更新示例，区分 read-only、prewrite preview、write-authorized、repair-authorized 和 validation flows。
-  - [x] 示例使用无颜色、稳定排序、可复制文本，不包含本机绝对路径或 private source。
+  - [x] 示例使用无颜色、稳定排序、可复制文本，不包含本机 private source。Story 8.8 的 absolute target regression 应使用受控 placeholder 或临时路径断言，不把个人本机路径写入 public docs 示例。
 
 - [x] Task 4: Fixture/stable comparison integration（AC: 1-3）
   - [x] 如新增 human-readable fixture，定义 normalization：颜色、terminal width、timestamps、platform path。
@@ -163,3 +163,4 @@ GPT-5 Codex
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 8.7 ready-for-dev Story，聚焦 CLI human output fixture 与 docs matrix。 | Amelia |
 | 2026-06-16 | 1.0 | 实现 human output coverage matrix、focused tests、docs flow 示例和 packaging boundary 验证，Story 推进到 review。 | GPT-5 Codex |
+| 2026-06-16 | 1.1 | 按 Story 8.8 补充 matrix 需显式记录 presentation profile，并收敛 absolute-target 示例的 docs/fixture 边界。 | GPT-5 Codex |

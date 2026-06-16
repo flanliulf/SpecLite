@@ -14,6 +14,7 @@ import type {
 } from "./command-result-schema.js";
 import { formatCliMessage, getCliMessage, type CliLocale } from "../cli/messages.js";
 import type { PhaseCoverage } from "../manifest/manifest-schema.js";
+import { getInstallTargetPresentation } from "./install-presentation-context.js";
 import {
   CANONICAL_ISSUE_CATEGORY_ORDER,
   sortCheckedTargets,
@@ -46,7 +47,40 @@ type CoveredHumanCommandResult =
 
 type PresentationSection = {
   title: string;
-  lines: string[];
+  lines?: string[];
+};
+
+export type HumanOutputPresentationProfile = "operation" | "diagnostic" | "report-support";
+
+export type HumanOutputCommand =
+  | "install"
+  | "init"
+  | "update"
+  | "update.repair"
+  | "sync"
+  | "uninstall"
+  | "status"
+  | "validate"
+  | "doctor"
+  | "list"
+  | "governance-report"
+  | "resolve.config"
+  | "resolve.customization";
+
+export const HUMAN_OUTPUT_PRESENTATION_PROFILES: Record<HumanOutputCommand, HumanOutputPresentationProfile> = {
+  install: "operation",
+  init: "operation",
+  update: "operation",
+  "update.repair": "operation",
+  sync: "operation",
+  uninstall: "operation",
+  status: "diagnostic",
+  validate: "diagnostic",
+  doctor: "diagnostic",
+  list: "report-support",
+  "governance-report": "report-support",
+  "resolve.config": "report-support",
+  "resolve.customization": "report-support",
 };
 
 type PresentationWriteState = "auto" | "changed" | "none";
@@ -89,6 +123,7 @@ type UpdateExecutionState = {
 type PresentationFrameInput = {
   title: string;
   result: CoveredHumanCommandResult;
+  profile: HumanOutputPresentationProfile;
   outcomeLabel: string;
   locale: CliLocale;
   writeState?: PresentationWriteState;
@@ -123,26 +158,80 @@ function renderPresentationFrame(input: PresentationFrameInput): string {
     ...(input.summaryLines ?? []),
   ];
 
-  appendSection(lines, getCliMessage(input.locale, "scope"), input.scopeLines);
-  appendSection(lines, getCliMessage(input.locale, "state"), input.stateLines);
-  appendSection(lines, getCliMessage(input.locale, "evidence"), input.evidenceLines);
-
-  const issueLines = input.issueLines ?? input.result.issues.map((issue) => formatIssue(issue, input.locale));
-  appendSection(lines, getCliMessage(input.locale, "issues"), issueLines);
-
-  appendSection(lines, getCliMessage(input.locale, "emptyState"), input.emptyStateLines);
-
-  for (const section of input.extraSections ?? []) {
-    appendSection(lines, section.title, section.lines);
-  }
-
-  appendSection(
-    lines,
-    getCliMessage(input.locale, "nextActions"),
-    formatPathLines(input.nextActions ?? input.result.nextActions, getCliMessage(input.locale, "actionNotRequired")),
-  );
+  const sections = createPresentationSections(input);
+  for (const section of sections) appendSection(lines, section.title, section.lines);
 
   return `${lines.join("\n")}\n`;
+}
+
+function createPresentationSections(input: PresentationFrameInput): PresentationSection[] {
+  const stateLines = combinePresentationLines(input.stateLines, formatContextualEmptyStateLines(input));
+  const sectionsByKey = {
+    scope: { title: getCliMessage(input.locale, "scope"), lines: input.scopeLines },
+    state: { title: getCliMessage(input.locale, "state"), lines: stateLines },
+    evidence: { title: getCliMessage(input.locale, "evidence"), lines: input.evidenceLines },
+    issues: { title: getCliMessage(input.locale, "issues"), lines: formatOwnedIssueLines(input) },
+    extra: input.extraSections ?? [],
+    nextActions: {
+      title: getCliMessage(input.locale, "nextActions"),
+      lines: formatPathLines(input.nextActions ?? input.result.nextActions, getCliMessage(input.locale, "actionNotRequired")),
+    },
+  };
+
+  if (input.profile === "diagnostic") {
+    return [
+      sectionsByKey.scope,
+      sectionsByKey.state,
+      sectionsByKey.issues,
+      sectionsByKey.evidence,
+      ...sectionsByKey.extra,
+      sectionsByKey.nextActions,
+    ];
+  }
+
+  if (input.profile === "report-support") {
+    return [
+      sectionsByKey.scope,
+      ...sectionsByKey.extra,
+      sectionsByKey.state,
+      sectionsByKey.evidence,
+      sectionsByKey.issues,
+      sectionsByKey.nextActions,
+    ];
+  }
+
+  return [
+    sectionsByKey.scope,
+    sectionsByKey.state,
+    sectionsByKey.evidence,
+    ...sectionsByKey.extra,
+    sectionsByKey.issues,
+    sectionsByKey.nextActions,
+  ];
+}
+
+function formatOwnedIssueLines(input: PresentationFrameInput): string[] {
+  const issueLines = input.issueLines ?? input.result.issues.map((issue) => formatIssue(issue, input.locale));
+  if (issueLines.length > 0) return issueLines;
+
+  return [`- ${getCliMessage(input.locale, "noIssues")}`];
+}
+
+function formatContextualEmptyStateLines(input: PresentationFrameInput): string[] {
+  const emptyStateLines = input.emptyStateLines ?? [];
+  if (emptyStateLines.length === 0) return [];
+
+  const issueEmptyState = getCliMessage(input.locale, "noIssues");
+  const writeEmptyState = getCliMessage(input.locale, "writeNone");
+  return dedupeLines(emptyStateLines.filter((line) => line !== issueEmptyState && line !== writeEmptyState));
+}
+
+function combinePresentationLines(
+  primaryLines: string[] | undefined,
+  appendedLines: string[],
+): string[] | undefined {
+  if (appendedLines.length === 0) return primaryLines;
+  return dedupeLines([...(primaryLines ?? []), ...appendedLines]);
 }
 
 function appendSection(lines: string[], title: string, sectionLines: string[] | undefined): void {
@@ -317,20 +406,16 @@ export function renderInstallHumanOutput(
   return renderPresentationFrame({
     title: "SpecLite install",
     result,
+    profile: HUMAN_OUTPUT_PRESENTATION_PROFILES.install,
     outcomeLabel: formatInstallHumanOutcome(locale, installOutcome),
     locale,
     writeState: getInstallPresentationWriteState(installOutcome),
     summaryLines: formatInstallSummaryLines(result, locale, installOutcome),
-    scopeLines: [
-      `targetProject=${result.targetProject}`,
-      `projectRoot=${result.data.paths.projectRoot}`,
-    ],
+    scopeLines: formatInstallScopeLines(result, locale),
     stateLines: [
       `manifestVersion=${result.data.manifestVersion}`,
       formatLabelValue(locale, "completedSteps", formatListForLocale(result.data.completedSteps, locale)),
-      `completedSteps=${formatList(result.data.completedSteps)}`,
       formatLabelValue(locale, "pendingSteps", formatListForLocale(result.data.pendingSteps, locale)),
-      `pendingSteps=${formatList(result.data.pendingSteps)}`,
       ...formatInstallOutcomeStepStateLines(result, installOutcome, locale),
       formatInstallIdeTargetStatusesHeading(locale),
       ...formatInstallIdeTargetStatusLines(result.data.ideTargets, locale),
@@ -366,6 +451,7 @@ export function renderStatusHumanOutput(
   return renderPresentationFrame({
     title: "SpecLite status",
     result,
+    profile: HUMAN_OUTPUT_PRESENTATION_PROFILES.status,
     outcomeLabel: statusOutcome,
     locale,
     summaryLines: [
@@ -437,6 +523,7 @@ export function renderValidateHumanOutput(
   return renderPresentationFrame({
     title: "SpecLite validate",
     result,
+    profile: HUMAN_OUTPUT_PRESENTATION_PROFILES.validate,
     outcomeLabel: validateOutcome,
     locale,
     summaryLines: [
@@ -493,6 +580,7 @@ export function renderUpdateHumanOutput(
   return renderPresentationFrame({
     title: "SpecLite update",
     result,
+    profile: HUMAN_OUTPUT_PRESENTATION_PROFILES[result.command],
     outcomeLabel: updateOutcome,
     locale,
     writeState: updateOutcome === "applied" ? "changed" : "auto",
@@ -762,6 +850,7 @@ function renderInstallReadySummary(result: InstallCommandResult, locale: CliLoca
   return renderPresentationFrame({
     title: locale === "zh-CN" ? "Step 4/4 Ready Summary（就绪摘要）" : "SpecLite ready summary",
     result,
+    profile: HUMAN_OUTPUT_PRESENTATION_PROFILES.install,
     outcomeLabel: formatInstallHumanOutcome(locale, "ready"),
     locale,
     writeState: "changed",
@@ -777,11 +866,7 @@ function renderInstallReadySummary(result: InstallCommandResult, locale: CliLoca
           `Target project: ${result.targetProject}`,
           `Install location: ${result.data.paths.projectRoot}`,
         ]),
-      `targetProject=${result.targetProject}`,
-      `projectRoot=${result.data.paths.projectRoot}`,
       formatLabelValue(locale, "manifestVersion", result.data.manifestVersion),
-      `manifestVersion=${result.data.manifestVersion}`,
-      `selectedModules=${formatList(result.data.installedModules)}`,
       ...(locale === "zh-CN"
         ? formatInstallReadyModeZh(result, presentation)
         : formatInstallReadyModeEn(result, presentation)),
@@ -791,11 +876,7 @@ function renderInstallReadySummary(result: InstallCommandResult, locale: CliLoca
     ],
     scopeLines: [
       ...formatInstallReadyKeyPathLines(result, locale),
-      `projectRoot=${result.data.paths.projectRoot}`,
-      `specliteRoot=${result.data.paths.specliteRoot ?? "_speclite"}`,
       "ideMirrors=.claude/skills,.agents/skills",
-      `artifactRoot=${result.data.paths.artifactRoot ?? "_speclite-output"}`,
-      `manifestPath=${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
     ],
     stateLines: [
       getCliMessage(locale, "completedSteps"),
@@ -1207,11 +1288,22 @@ function formatInstallSummaryLines(
     ];
   }
 
-  return [
-    getInstallOutcomeSummary(locale, outcome),
-    formatLabelValue(locale, "targetProject", result.targetProject),
-    formatLabelValue(locale, "projectRoot", result.data.paths.projectRoot),
-  ];
+  return [getInstallOutcomeSummary(locale, outcome)];
+}
+
+function formatInstallScopeLines(result: InstallCommandResult, locale: CliLocale): string[] {
+  const targetPresentation = getInstallTargetPresentation(result);
+  const lines = [formatLabelValue(locale, "targetProject", result.targetProject)];
+
+  if (targetPresentation !== undefined) {
+    lines.push(
+      formatLabelValue(locale, "targetPath", targetPresentation.targetPath),
+      formatLabelValue(locale, "commandCwd", targetPresentation.commandCwd),
+    );
+  }
+
+  lines.push(formatLabelValue(locale, "projectRoot", result.data.paths.projectRoot));
+  return lines;
 }
 
 function getInstallPresentationWriteState(outcome: InstallHumanOutcome): PresentationWriteState {
@@ -1293,7 +1385,7 @@ function formatInstallOutcomeNextActions(
       return [
         formatCliMessage(locale, "installActionRunYes", { command: `speclite install ${installTarget} --yes` }),
         formatCliMessage(locale, "installActionRunInteractive", {
-          command: `speclite install ${installTarget} --interactive`,
+          command: `speclite install ${installTarget} --yes --interactive`,
         }),
       ];
     }
@@ -1332,7 +1424,7 @@ function formatInstallOutcomeNextActions(
     return [
       formatCliMessage(locale, "installActionRunYes", { command: `speclite install ${installTarget} --yes` }),
       formatCliMessage(locale, "installActionRunInteractive", {
-        command: `speclite install ${installTarget} --interactive`,
+        command: `speclite install ${installTarget} --yes --interactive`,
       }),
     ];
   }
@@ -1380,8 +1472,14 @@ function getCompletedInstallWriteSteps(result: InstallCommandResult): string[] {
 }
 
 function formatInstallCommandTarget(result: InstallCommandResult): string {
-  const target = result.targetProject.trim();
-  return /^[A-Za-z0-9._/-]+$/.test(target) ? target : "<target>";
+  const targetPresentation = getInstallTargetPresentation(result);
+  const target = targetPresentation?.pathSafeTarget ?? result.targetProject.trim();
+  return formatCliCommandArgument(target);
+}
+
+function formatCliCommandArgument(value: string): string {
+  if (/^[A-Za-z0-9._:/-]+$/.test(value) && value.length > 0) return value;
+  return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
 function getCommonEmptyStateLines(

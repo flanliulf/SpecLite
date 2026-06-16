@@ -32,7 +32,7 @@ describe("install outcome-oriented human output", () => {
       expect(commandOutcome.exitCode).toBe(0);
       expect(commandOutcome.result.nextActions).toEqual([
         `Run speclite install ${targetDirectory} --yes to install with defaults.`,
-        `Run speclite install ${targetDirectory} --interactive to customize installation.`,
+        `Run speclite install ${targetDirectory} --yes --interactive to customize installation.`,
       ]);
 
       const program = createSpecliteProgram({
@@ -59,7 +59,79 @@ describe("install outcome-oriented human output", () => {
       expect(exitCodes).toEqual([0]);
       expect(output).toContain("Outcome: prewrite-paused");
       expect(output).toContain(`speclite install ${targetDirectory} --yes`);
-      expect(output).toContain(`speclite install ${targetDirectory} --interactive`);
+      expect(output).toContain(`speclite install ${targetDirectory} --yes --interactive`);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders absolute-target prewrite preview with path-safe actions and self-contained issues", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-prewrite-cwd-"));
+    const targetDirectory = path.join(tempRoot, "noi");
+
+    try {
+      const commandOutcome = await runInstallCommand({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: path.join(tempRoot, "SpecLite"),
+        },
+        targetDirectory,
+      });
+
+      const output = renderInstallHumanOutput(commandOutcome.result);
+
+      expect(commandOutcome.exitCode).toBe(0);
+      expect(output).toContain("Outcome（结果）: prewrite-paused");
+      expect(output).toContain("目标项目：noi");
+      expect(output).toContain(`目标路径：${targetDirectory}`);
+      expect(output).toContain(`命令执行目录：${path.join(tempRoot, "SpecLite")}`);
+      expect(output).toContain(`speclite install ${targetDirectory} --yes`);
+      expect(output).toContain(`speclite install ${targetDirectory} --yes --interactive`);
+      expect(output).not.toContain(`speclite install noi --yes`);
+      expect(output).not.toContain("completedSteps=");
+      expect(output).not.toContain("pendingSteps=");
+      expect(output).not.toContain("Empty State（空状态）");
+      expect(output).toMatch(/Issues（问题）\n- 无问题/);
+      expect(extractSection(output, "Issues（问题）", "Next Actions（下一步）").trim()).toBe(
+        "Issues（问题）\n- 无问题",
+      );
+      expect(renderCommandResultJson(commandOutcome.result)).not.toContain(targetDirectory);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("renders cross-directory relative targets as command-safe human actions without JSON absolute paths", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-prewrite-relative-"));
+    const commandCwd = path.join(tempRoot, "SpecLite");
+    const targetDirectory = "../noi";
+    const resolvedTargetDirectory = path.join(tempRoot, "noi");
+
+    try {
+      const commandOutcome = await runInstallCommand({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: commandCwd,
+        },
+        targetDirectory,
+      });
+
+      const output = renderInstallHumanOutput(commandOutcome.result);
+      const issuesSection = extractSection(output, "Issues（问题）", "Next Actions（下一步）");
+
+      expect(commandOutcome.exitCode).toBe(0);
+      expect(output).toContain(`目标路径：${resolvedTargetDirectory}`);
+      expect(output).toContain(`命令执行目录：${commandCwd}`);
+      expect(output).toContain(`speclite install ${targetDirectory} --yes`);
+      expect(output).toContain(`speclite install ${targetDirectory} --yes --interactive`);
+      expect(output).not.toContain("speclite install noi --yes");
+      expect(issuesSection.trim()).toBe("Issues（问题）\n- 无问题");
+      expect(issuesSection).not.toContain("未写入项目文件");
+      expect(renderCommandResultJson(commandOutcome.result)).not.toContain(resolvedTargetDirectory);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -79,7 +151,7 @@ describe("install outcome-oriented human output", () => {
       summary: "SpecLite install preview completed before project writes.",
       nextActions: [
         "Run speclite install fixture-project --yes to install with defaults.",
-        "Run speclite install fixture-project --interactive to customize installation.",
+        "Run speclite install fixture-project --yes --interactive to customize installation.",
       ],
     });
 
@@ -89,7 +161,7 @@ describe("install outcome-oriented human output", () => {
     expect(output).toContain("No installation was executed and no project files were written in this run.");
     expect(output).toContain("Ready state: not ready");
     expect(output).toContain("speclite install fixture-project --yes");
-    expect(output).toContain("speclite install fixture-project --interactive");
+    expect(output).toContain("speclite install fixture-project --yes --interactive");
     expect(renderCommandResultJson(result)).not.toContain("outcome");
   });
 
@@ -259,4 +331,12 @@ function createIssue(input: {
     impact: `${input.issueId} blocks install outcome.`,
     suggestedNextStep: input.suggestedNextStep,
   };
+}
+
+function extractSection(output: string, title: string, nextTitle: string): string {
+  const start = output.indexOf(title);
+  const end = output.indexOf(nextTitle, start);
+  expect(start).toBeGreaterThanOrEqual(0);
+  expect(end).toBeGreaterThan(start);
+  return output.slice(start, end);
 }

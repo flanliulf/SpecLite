@@ -98,6 +98,8 @@ export type CliMessageKey =
   | "commandStatusStatusNote"
   | "highLevelHealth"
   | "targetProject"
+  | "targetPath"
+  | "commandCwd"
   | "projectRoot"
   | "installLocation"
   | "manifestVersion"
@@ -303,6 +305,8 @@ const MESSAGE_CATALOG: Record<CliLocale, Record<CliMessageKey, string>> = {
     commandStatusStatusNote: "表示 status read 已完成；不代表安装健康检查通过。",
     highLevelHealth: "高层健康",
     targetProject: "目标项目",
+    targetPath: "目标路径",
+    commandCwd: "命令执行目录",
     projectRoot: "项目根目录",
     installLocation: "安装位置",
     manifestVersion: "manifest version",
@@ -500,6 +504,8 @@ const MESSAGE_CATALOG: Record<CliLocale, Record<CliMessageKey, string>> = {
     commandStatusStatusNote: "means status read completed; it does not certify installation health.",
     highLevelHealth: "High-level health",
     targetProject: "Target project",
+    targetPath: "Target path",
+    commandCwd: "Command cwd",
     projectRoot: "Project root",
     installLocation: "Install location",
     manifestVersion: "Manifest version",
