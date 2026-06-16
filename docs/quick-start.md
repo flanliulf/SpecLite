@@ -108,6 +108,8 @@ speclite install /path/to/project
 
 这一步不会写入项目文件。当前实现会在没有 `--yes` 时停在 target preflight 之后，不进入 source selection、module selection、config initialization 或 write phase。它适合确认 target project root 是否存在、是否是已有安装、是否存在不安全路径或明显阻塞。
 
+预览输出会在 `Scope（范围）` 中显示目标项目、目标路径和命令执行目录。`Next Actions（下一步）` 里的安装命令可以从原执行目录复制执行：如果你传入 `/path/to/project`，输出继续使用绝对路径；如果你传入 `../project`，输出不会把它降级成容易误解析的 basename。
+
 如果输出提示目标项目已经安装过 SpecLite，先运行 `speclite status /path/to/project` 或 `speclite validate /path/to/project` 了解现状，再决定是否进入 update 或 repair 流程。
 
 ## Choose Install Configuration（选择安装配置）
@@ -198,7 +200,7 @@ speclite validate /path/to/project --json
 
 `validate` 会检查 installed-state、runtime path、manifest/index、IDE mirrors、source integrity、file ownership 等安装健康度相关问题。
 
-human-readable output 的稳定骨架是 `Outcome`、`Summary`、`Issues` 和 `Next Actions`。下面是无颜色、可复制、不会暴露本机路径的示例形态：
+human-readable output 的稳定骨架是 `Outcome`、`Summary`、`Scope`、`Issues` 和 `Next Actions`。下面是无颜色、可复制、不会暴露本机路径的示例形态：
 
 ```text
 SpecLite status
@@ -210,7 +212,7 @@ Writes: no project files changed
 User action: required
 
 Issues:
-No issues
+- No issues
 
 Next Actions / Next actions:
 - Run `speclite install <target>` to configure this project.

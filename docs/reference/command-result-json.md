@@ -56,6 +56,7 @@ Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human re
 | `SPECLITE_LOCALE` | 只影响 human-readable output；`--json` 不读取它作为 schema 行为。 |
 | `NO_COLOR`、CI、non-TTY、terminal width | 只影响 human display profile；JSON 不含 ANSI、spinner 或 layout fallback。 |
 | `Outcome` label | 不作为 JSON 顶层字段。命令状态仍由 `status`、`issues` 和 command-specific `data` 表达。 |
+| install target presentation context | 可让 human output 展示目标绝对路径、命令执行目录和 path-safe `Next Actions`；不得作为 enumerable JSON field 输出。 |
 | `Next Actions` prose | 可帮助人和 agent 操作者，但不作为稳定状态机或 CI gate。 |
 | docs 示例 | 不是 contract source；contract source 是 SPEC、schema、focused tests 和 fixture policy。 |
 

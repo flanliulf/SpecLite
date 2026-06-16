@@ -35,10 +35,10 @@ Summary
 Completed: yes
 Writes: no project files changed
 User action: required
-Output profile: Evidence (key-value)
+Presentation profile: Operation (key-value)
 
 Issues:
-No issues
+- No issues
 
 Next Actions / Next actions:
 - Review the update plan, then run `speclite update <target> --yes`.

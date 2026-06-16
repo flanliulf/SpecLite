@@ -67,7 +67,7 @@ Writes: no project files changed
 User action: not required
 
 Issues:
-No issues
+- No issues
 
 Next Actions / Next actions:
 - No action required.

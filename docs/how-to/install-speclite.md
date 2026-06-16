@@ -43,6 +43,8 @@ speclite install /path/to/project
 
 这一步用于确认 target project root 是否存在、是否已安装、是否是安全目录。输出会说明当前没有写入项目文件，并给出下一步建议。
 
+`Scope` 会展示目标项目、目标路径和命令执行目录。即使命令从 SpecLite 仓库或其它非目标目录执行，`Next Actions` 也会使用可从原执行目录复制的 target：绝对 target 保持绝对路径，`../project` 这类相对跨目录 target 不会退化成 basename。
+
 ### Step 2: Run Default Install（执行默认安装）
 
 大多数新用户使用默认无交互 happy path：
@@ -151,18 +153,24 @@ speclite install "$PROJECT_ROOT" --json --yes
 
 ```text
 SpecLite install
-Outcome: prewrite-paused
+Outcome（结果）: prewrite-paused
 
-Summary
-Completed: yes
-Writes: no project files changed
-User action: required
+Summary（摘要）
+完成状态：已完成
+写入状态：未写入项目文件
+用户动作：需要
 
-Issues:
-No issues
+Scope（范围）
+目标项目：example-project
+目标路径：/path/to/project
+命令执行目录：/path/to/current-cwd
 
-Next Actions / Next actions:
-- Run `speclite install <target> --yes` to install with defaults.
+Issues（问题）
+- 无问题
+
+Next Actions（下一步）
+- 运行 `speclite install /path/to/project --yes` 使用默认配置完成安装。
+- 运行 `speclite install /path/to/project --yes --interactive` 进入交互模式自定义安装。
 ```
 
 如果出现 `blocked-before-write`、`write-failed` 或 `ready-check-failed`，先处理 `Issues` 和 `Next Actions`，不要为了修复错误而改变安装需求或跳过写入前 gates。
@@ -171,5 +179,6 @@ Next Actions / Next actions:
 
 - 首次安装优先使用 bundled source，不需要传 `--source`。
 - `--yes` 不代表接受 blocked source、existing install overwrite 或 policy rejection。
+- `Issues` 为空时会显示 `- 无问题`；`未写入项目文件` 属于 `Summary` / write state，不会混入问题列表。
 - `NO_COLOR`、non-TTY、CI 和窄终端输出不依赖 ANSI color、spinner 或动态覆盖行表达唯一语义。
 - 安装后不知道下一步时，先运行 `speclite status`，再运行 `speclite validate`。

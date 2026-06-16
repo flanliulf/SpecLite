@@ -53,6 +53,8 @@ Next Actions（下一步）
 
 该 absolute target context 仅属于 human presentation；JSON output 不得因此新增 human-only field，也不得暴露本机绝对 target path。
 
+相对跨目录 target 也必须保持可复制。例如用户从 SpecLite 仓库执行 `speclite install ../noi` 时，human `Next Actions` 应继续使用 `../noi --yes` 和 `../noi --yes --interactive`，不得把 target 降级为 `noi`。JSON 仍只保留 public display identifier 和 project-relative paths，不暴露 resolved absolute target。
+
 ## Coverage Matrix（覆盖矩阵）
 
 | Command | Outcome | Focused test | JSON parity assertion | Docs example | Fixture or semantic assertion |

@@ -219,6 +219,14 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 
 Human-readable output 可以包含分阶段 heading、key-value block、summary 和 next actions。JSON output 不应被 locale 影响。
 
+Human-readable output 会按 command intent 选择 presentation profile：
+
+| Profile | Commands | Notes |
+|---|---|---|
+| Operation | `install`、`init`、`update`、`update --repair`、`sync`、`uninstall` | 优先展示写入意图、scope、state / authorization、plan / evidence、issues / conflicts 和 next actions。 |
+| Diagnostic | `status`、`validate`、`doctor` | 让 issues 靠近关键 state；error / critical issue 不应被深埋在长 evidence 之后。 |
+| Report / Support | `list`、`governance-report`、`resolve ... --human` | 使用 results、metrics、gaps、artifacts 或 evidence 等更贴近任务的主体 section。 |
+
 ## Human Output Flows（人类输出流程）
 
 | Flow | Command example | Output contract |
@@ -230,6 +238,8 @@ Human-readable output 可以包含分阶段 heading、key-value block、summary 
 | write-authorized | `NO_COLOR=1 speclite install "$PROJECT_ROOT" --yes` | 只在 gates 通过后写入。 |
 | repair-authorized | `NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes` | 只执行显式 repair writes。 |
 | resolve human mode | `NO_COLOR=1 speclite resolve config --project-root "$PROJECT_ROOT" --key core.project_name --human` | 人工排查 support frame；默认 resolve stdout 仍是 pure JSON。 |
+
+`install` prewrite preview 的 `Scope` 会展示目标项目、目标路径和命令执行目录。`Next Actions` 使用从原执行目录可复制的 target：绝对 target 保持绝对路径，`../project` 这类相对跨目录 target 保留相对参数，不降级为 basename。没有 issue 时，`Issues` section 显示 `- 无问题`；写入状态由 `Summary` / state 表达。
 
 CLI human-readable output 的完整 command/outcome/test/docs matrix 见 [`cli-human-output-matrix.md`](cli-human-output-matrix.md)。docs 示例不是 contract source；`--json` contract 以 schema、SPEC 和 focused tests 为准。
 

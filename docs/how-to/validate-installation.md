@@ -21,7 +21,7 @@ Writes: no project files changed
 User action: not required
 
 Issues:
-No issues
+- No issues
 
 Next Actions / Next actions:
 - No action required.
@@ -45,7 +45,7 @@ Summary
 Completed: no
 Writes: no project files changed
 User action: required
-Output profile: Evidence (key-value)
+Presentation profile: Diagnostic (key-value)
 
 Issues:
 [error] severity=error category=runtime-path issueId=runtime-path.missing-entry affectedPath=_speclite/config.toml
