@@ -29,6 +29,27 @@ CI 判断必须遵守三层语义：
 
 新增 automation data field 时，必须先更新 owning SPEC，再更新 `src/diagnostics/command-result-schema.ts`、parser/schema tests 和 fixture expected outputs。不得直接从 reporter 或文档示例反推新字段。
 
+## Locale And Human Output（语言与人类输出）
+
+当前 CLI 中，`install`、`status`、`validate`、`update` 和 `resolve --human` 都有完整的 human-readable output。CI 仍然只读取 JSON。
+
+| Input | CI expectation |
+|---|---|
+| `--locale zh-CN` / `--locale en-US` | 不影响 `--json` contract；不要把 locale 当成 automation branch。 |
+| `SPECLITE_LOCALE=en-US` | 只影响 human renderer；CI 使用 `--json` 时不应依赖环境语言。 |
+| `NO_COLOR=1` | 可用于人工日志，但不是 JSON 稳定性的必要条件。 |
+| `Next Actions` | 可以放入人工报告摘要，不作为 gate 条件。 |
+| `Outcome` | 是 human-readable frame；automation 应读取 `status` 和 command-specific `data`。 |
+
+如果 CI 需要同时保存人工日志和机器结果，建议分开执行或分开保存 stdout：
+
+```sh
+speclite validate /path/to/project --json > speclite-validate.json
+NO_COLOR=1 speclite validate /path/to/project > speclite-validate-human.txt
+```
+
+gate 只读取 `speclite-validate.json`。`speclite-validate-human.txt` 仅用于人工排查。
+
 ## Status Health（Status 健康判断）
 
 `speclite status --json` 是 lightweight installed-state summary。它可以成功读取“未安装”或“不完整”状态，因此 `CommandResult.status: "success"` 和 `issues: []` 不等价于安装健康。

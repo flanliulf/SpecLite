@@ -46,6 +46,21 @@
 | `uninstall` | `speclite uninstall --json` | `uninstallPlan.actions`、removed/preserved paths、step lifecycle 和 write authorization。 |
 | `governance-report` | `speclite governance-report --json` | governance metrics、phase gaps、artifact checks、issue counts、checked categories、validated paths 和 report scope。 |
 
+## Human Output Boundary（人类输出边界）
+
+Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human renderer 可以根据 locale、terminal profile 和 command outcome 调整标题、empty state、evidence block 和 `Next Actions` prose，但这些变化不得改变 JSON。
+
+| Human-readable concern | JSON rule |
+|---|---|
+| `--locale zh-CN` / `--locale en-US` | 不改变 `schemaVersion`、`status`、`command`、`issues`、`data` 或 exit code。 |
+| `SPECLITE_LOCALE` | 只影响 human-readable output；`--json` 不读取它作为 schema 行为。 |
+| `NO_COLOR`、CI、non-TTY、terminal width | 只影响 human display profile；JSON 不含 ANSI、spinner 或 layout fallback。 |
+| `Outcome` label | 不作为 JSON 顶层字段。命令状态仍由 `status`、`issues` 和 command-specific `data` 表达。 |
+| `Next Actions` prose | 可帮助人和 agent 操作者，但不作为稳定状态机或 CI gate。 |
+| docs 示例 | 不是 contract source；contract source 是 SPEC、schema、focused tests 和 fixture policy。 |
+
+`resolve config` 和 `resolve customization` 是例外的 runtime support surface：默认 stdout 是 resolved JSON object，而不是 `CommandResult` envelope。只有显式传入 `--human` 时，`resolve` 才渲染 human-readable support frame；此时仍不得改变默认 machine output contract。
+
 ## Issue Model（Issue 模型）
 
 `issues` 使用统一 `ValidationIssue` 形态。工具应优先读取 `issueId`、`category`、`severity`、`affectedPath`、`details` 和 `suggestedNextStep`，不要解析 `summary` 或 human-readable output。
@@ -86,5 +101,6 @@
 - 只解析 `CommandResult` JSON，不解析 human-readable output。
 - 以 `schemaVersion` 和 `command` 识别 payload。
 - 用 `status`、`issues` 和 command-specific `data` 共同决定 gate 结果。
+- 不把 `summary`、`nextActions` 或 human renderer 的 `Outcome` 文案当作稳定状态机。
 - 对写入类命令，区分 plan、authorized apply、conflict 和 no-op。
 - 对 external access，读取 `externalAccesses[].confirmationState`，不要把 `--yes` 以外的信号当作授权。

@@ -9,7 +9,8 @@
 | 路径 | 说明 |
 |---|---|
 | [`_STYLE_GUIDE.md`](_STYLE_GUIDE.md) | SpecLite 文档写作、目录职责和目标校验规范。 |
-| [`quick-start.md`](quick-start.md) | 当前稳定的快速开始入口，后续会逐步迁移到 `tutorials/quick-start.md`。 |
+| [`tutorials/quick-start.md`](tutorials/quick-start.md) | 从零完成安装、验证和首次使用的完整教程。 |
+| [`quick-start.md`](quick-start.md) | npm package 携带的精简快速开始入口。 |
 
 ## Documentation Types（文档类型）
 
@@ -25,6 +26,7 @@
 | 主题 | 推荐入口 |
 |---|---|
 | 安装和首次使用 | [`tutorials/quick-start.md`](tutorials/quick-start.md) |
+| npm package 精简快速开始 | [`quick-start.md`](quick-start.md) |
 | 安装验证 | [`how-to/validate-installation.md`](how-to/validate-installation.md) |
 | 更新与修复 | [`how-to/update-and-repair.md`](how-to/update-and-repair.md) |
 | 已安装项目治理命令 | [`how-to/manage-installed-project.md`](how-to/manage-installed-project.md) |
@@ -42,7 +44,7 @@
 
 | 路径 | 状态 | 说明 |
 |---|---|---|
-| [`quick-start.md`](quick-start.md) | 保留 | 当前 README 和 npm package 使用的稳定入口。 |
+| [`quick-start.md`](quick-start.md) | 保留 | README 和 npm package 使用的精简入口；完整教程位于 `tutorials/quick-start.md`。 |
 | [`glossary/`](glossary/glossary.md) | 保留 | 旧 glossary 入口。后续可迁移到 `reference/glossary/` 并保留跳转。 |
 
 ## Migrated Material（已迁移材料）
