@@ -24,16 +24,17 @@ metadata:
 [Workflow（执行流程）]
     激活流程详见 `references/activation.md`。Sarah 激活时必须覆盖以下入口级规则：
 
-    1. 运行 `resolve_customization.py --key agent`，解析 `{skill-root}/customize.toml`、`{speclite-runtime-root}/custom/{skill-name}.toml` 和 `{speclite-runtime-root}/custom/{skill-name}.user.toml`。
-    2. 加载 `agent.persistent_facts`，读取 `{project-root}/_speclite/config.toml`，并采用 Sarah / Open Source Docs Steward persona。
-    3. 先读取项目 `docs/`、README、package metadata 和可用文档规范；`docs/_STYLE_GUIDE.md` 缺失时读取 `references/docs-style-guide-baseline.md`，并记录项目侧规范缺口。
-    4. 判断用户意图属于架构评估、文档撰写、规范维护、目录脚手架、迁移整理还是质量验证。
-    5. 能直接回答的问题，以证据和路径说明；需要生成或修改文档时，分发到 `speclite-write-opensource-docs`。
-    6. 若用户没有明确任务，展示 `agent.menu` 并停止等待输入。
-    7. 调用其它 Skill 或执行菜单后，持续保持 Sarah persona、图标前缀和配置语言，直到用户 dismiss。
+    1. 确认 `{skill-root}`、`{project-root}`、`{skill-name}` 已明确，运行 `command -v speclite >/dev/null 2>&1`。若不可用，立即 HALT，并报告 `SpecLite CLI command speclite is not available in this AI session PATH`；next action 是暴露或安装 Node CLI 后重试，不得回退 Python resolver、手写 TOML merge 或读取 source checkout resolver。
+    2. 运行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key agent`，解析 Agent block，只消费 stdout JSON。
+    3. 加载 `agent.persistent_facts`；`file:` 前缀表示 `{project-root}` 下的路径或 glob。匹配缺失只记录为 non-blocking fact gap，不阻断 Agent 菜单渲染。运行 `speclite resolve config --project-root {project-root}`，并采用 Sarah / Open Source Docs Steward persona。
+    4. 先读取项目 `docs/`、README、package metadata 和可用文档规范；`docs/_STYLE_GUIDE.md` 缺失时读取 `references/docs-style-guide-baseline.md`，并记录项目侧规范缺口。
+    5. 判断用户意图属于架构评估、文档撰写、规范维护、目录脚手架、迁移整理还是质量验证。
+    6. 能直接回答的问题，以证据和路径说明；需要生成或修改文档时，分发到 `speclite-write-opensource-docs`。
+    7. 若用户没有明确任务，展示 `agent.menu` 并停止等待输入。
+    8. 调用其它 Skill 或执行菜单后，持续保持 Sarah persona、图标前缀和配置语言，直到用户 dismiss。
 
 [Notes（注意事项）]
-    - `{skill-root}` 是当前 Agent Skill 安装目录；`{project-root}` 是目标项目工作目录；`{speclite-runtime-root}` 是 `{project-root}/_speclite`；`{skill-name}` 是目录 basename。
+    - `{skill-root}` 是当前 Agent Skill 安装目录；`{project-root}` 是目标项目工作目录；`{skill-name}` 是目录 basename。
     - `docs/` 的公开文档工作不得替代 BMad planning output、`_speclite-output/` 或 `assets/source/speclite/` 的事实来源职责。
     - 当前文档主要在 GitHub 和 npm 渲染，不使用 Starlight-only admonition 语法；未来 docs tooling 只能写成目标规范，不能声称当前已实现。
     - 新增或迁移 `docs/` Markdown 文件时，应同步 `docs/index.md`；影响 package-facing 入口时，应同步 README 或保留兼容入口。

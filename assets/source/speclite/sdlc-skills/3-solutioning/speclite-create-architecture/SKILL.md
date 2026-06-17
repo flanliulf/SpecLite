@@ -17,7 +17,7 @@ metadata:
 
 [核心能力]
     - **微文件工作流编排**：8 步微文件 + 续作处理器，每步自包含规则、A/P/C 菜单和 `stepsCompleted` 推进；详见 `references/workflow-steps.md`
-    - **Speclite 配置体系**：通过 `{speclite-runtime-root}/scripts/resolve_customization.py` 解析 `workflow`，按 base→team→user 合并 customize，并从 `{project-root}/_speclite/config.toml` 加载配置
+    - **Speclite 配置体系**：通过 `speclite resolve customization` 解析 `workflow`，按 base→team→user 合并 customize，并从 merged runtime config 加载配置
     - **断点续作检测**：识别既有 `*architecture*.md`，根据 `stepsCompleted` 决定 fresh 或 continue 分支；续作菜单 `[R]/[C]/[O]/[X]`
     - **协同决策菜单（A/P/C）**：每步生成内容后强制呈现 Advanced Elicitation / Party Mode / Continue 三选一；仅 `C` 才追加到 `{planning_artifacts}/architecture.md` 并推进 `stepsCompleted`；A/P 完成后必须返回菜单
     - **网络研究驱动技术选型**：所有技术版本通过 WebSearch 实时验证，禁止硬编码版本号；按用户技能等级调整解释深度
@@ -29,9 +29,9 @@ metadata:
     裸路径相对于 `{skill-root}` 解析；`{project-root}` 是项目工作目录；`{speclite-runtime-root}` 是 `{project-root}/_speclite`；`{skill-name}` 是目录 basename。
 
 [激活流程]
-    触发后先完成 6 步激活：解析 `workflow`、执行 prepend、加载 `persistent_facts`、读取 `{project-root}/_speclite/config.toml`、用配置语言问候用户、执行 append。配置文件缺失或关键字段为空时 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
+    触发后先完成 6 步激活：解析 `workflow`、执行 prepend、加载 `persistent_facts`、运行 `speclite resolve config --project-root {project-root}`、用配置语言问候用户、执行 append。配置文件缺失或关键字段为空时 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
 
-    customize fallback 顺序为 `{skill-root}/customize.toml`、`{speclite-runtime-root}/custom/{skill-name}.toml`、`{speclite-runtime-root}/custom/{skill-name}.user.toml`。缺失覆盖文件时跳过；标量覆盖，表深度合并，以 `code` 或 `id` 为键的表数组按键替换并追加，其他数组追加。`workflow.on_complete` 使用同一路径解析。
+    customization 必须通过 `speclite resolve customization --skill {skill-root} --project-root {project-root}` 读取 merged JSON；`workflow.on_complete` 使用 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete` 解析。默认 activation 不手写 TOML merge，不使用 `--human` 作为 machine input。
 
 [执行流程]
     激活完成后，**完整阅读并遵循** `references/steps/step-01-init.md` 开始工作流。所有输入文档发现与初始化协议都在 `step-01-init.md` 中处理。
@@ -40,7 +40,7 @@ metadata:
 
     输入产物、输出产物 `{planning_artifacts}/architecture.md` 与资源清单详见 `references/inputs-outputs.md`。
 
-    收尾必须执行 `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`；如解析出的值非空，作为退出前的最终终端指令执行。
+    收尾必须执行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`；如解析出的值非空，作为退出前的最终终端指令执行。
 
 [注意事项]
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-create-architecture`

@@ -11,9 +11,14 @@ export const CANONICAL_PACKAGING_MANIFEST_PATH = "release/packaging-manifest.jso
 const REQUIRED_BUILD_OUTPUTS = ["dist/bin/speclite.js", "dist/bin/speclite.d.ts"];
 const REQUIRED_RUNTIME_ASSETS = [
   "assets/source/speclite/scripts/resolve_config.py",
+  "assets/source/speclite/scripts/resolve_customization.py",
   "assets/source/speclite/core-skills/module.yaml",
   "assets/source/speclite/sdlc-skills/module.yaml",
   "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+];
+const PYTHON_RESOLVER_COMPAT_ASSETS = [
+  "assets/source/speclite/scripts/resolve_config.py",
+  "assets/source/speclite/scripts/resolve_customization.py",
 ];
 const BUILD_INPUT_ROOTS = ["src"];
 const BUILD_INPUT_FILES = ["package.json", "tsconfig.json", "tsup.config.ts"];
@@ -92,6 +97,11 @@ export function createPackagingManifest(packResult, packageJson) {
       isReleaseGateFixture: false,
     }));
   const docsExampleValidation = validatePackagedDocumentationExamples(packagedDocumentationExamples, fileSet);
+  const packagedCompatibilityAssets = PYTHON_RESOLVER_COMPAT_ASSETS.filter((file) => fileSet.has(file)).map((file) => ({
+    path: file,
+    classification: "runtime-compat-script",
+    defaultRuntimeDependency: false,
+  }));
   const assertions = [
     {
       id: "package-json-bin-mapping",
@@ -123,9 +133,18 @@ export function createPackagingManifest(packResult, packageJson) {
       passed:
         fileSet.has("dist/bin/speclite.js") &&
         files.some((file) => file === "assets/source/speclite/scripts/resolve_config.py") &&
+        files.some((file) => file === "assets/source/speclite/scripts/resolve_customization.py") &&
         files.some((file) => file === "assets/source/speclite/core-skills/module.yaml") &&
         files.some((file) => file === "assets/source/speclite/sdlc-skills/module.yaml") &&
         files.some((file) => file.endsWith("/SKILL.md")),
+    },
+    {
+      id: "python-resolver-compat-assets-classified",
+      passed:
+        packagedCompatibilityAssets.length === PYTHON_RESOLVER_COMPAT_ASSETS.length &&
+        packagedCompatibilityAssets.every(
+          (entry) => entry.classification === "runtime-compat-script" && entry.defaultRuntimeDependency === false,
+        ),
     },
     {
       id: "release-fixtures-excluded",
@@ -161,6 +180,7 @@ export function createPackagingManifest(packResult, packageJson) {
         file.startsWith("assets/source/speclite/") ||
         file === "package.json",
     ),
+    packagedCompatibilityAssets,
     excludedFixtureDirectories: ["test/fixtures/", "fixtures/"],
     packagedDocumentationExamples,
     assertions,

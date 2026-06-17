@@ -261,7 +261,7 @@ describe("Story 6.4 path-portability fixture", () => {
           path: "_speclite/core-skills/speclite-help/SKILL.md",
         }),
         expect.objectContaining({
-          artifactKind: "runtime-script",
+          artifactKind: "runtime-compat-script",
           executable: true,
           hashAlgorithm: "sha256",
           path: "_speclite/scripts/resolve_config.py",

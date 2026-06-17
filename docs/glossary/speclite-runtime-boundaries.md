@@ -43,6 +43,8 @@ IDE skills 目录不应成为新的权威来源，也不应承载 human-owned cu
 
 安装器可以管理 `_speclite` 中的 installer-owned 文件，但必须保护 human-owned custom 文件，例如 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml`。
 
+`_speclite/scripts/resolve_*.py` 是特殊的 installer-owned compatibility projection。它们只用于 legacy compatibility、migration aid 和 troubleshooting，并在 `files-index.json` 中以 `runtime-compat-script` 记录。唯一默认 installed Skill activation resolver 是 Node CLI 的 `speclite resolve config` 和 `speclite resolve customization`；Python scripts 不是默认 runtime dependency，也不是推荐的正常激活路径。
+
 ## Speclite Output Repository（Speclite 产物仓库）
 
 `_speclite-output` 是过程产物仓库，也就是 workflow artifact repository。

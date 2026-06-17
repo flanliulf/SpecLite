@@ -14,7 +14,7 @@ metadata:
 [Core Capabilities（核心能力）]
     - **Agent 对象识别**：识别以 persona、`[agent]`、menu dispatch 和 dismiss 前持续身份为核心的 Agent 定义包。
     - **Persona 语义保留**：保留角色名、title、icon、role、identity、communication_style、principles、persistent_facts、激活步骤和持续身份规则。
-    - **运行模型转换**：把 `_bmad/scripts`、`_bmad/custom`、`_bmad/bmm/config.yaml` 转换为 `{speclite-runtime-root}/scripts`、`{speclite-runtime-root}/custom` 和 `{project-root}/_speclite/config.toml`。
+    - **运行模型转换**：把 `_bmad/scripts`、`_bmad/custom`、`_bmad/bmm/config.yaml` 转换为 `{speclite-runtime-root}/scripts`、`{speclite-runtime-root}/custom` 和 merged runtime config。
     - **Agent 定制面生成**：保留 `customize.toml` 的 `[agent]` 命名空间和结构合并规则，不转换成 `[workflow]`。
     - **菜单映射与依赖规划**：将 `agent.menu` 中的 `skill = "bmad-*"` 映射为已存在的 `speclite-*` 目标，无法确认时列入风险清单。
     - **Prompt 文件归类**：把 Agent 根目录下的规约型 prompt Markdown 迁入 `references/` 或 `assets/`，同步更新 `{skill-root}` 引用。

@@ -66,7 +66,10 @@ export async function validateRuntimePaths(input: {
   for (const entry of runtimeEntries) {
     validatedPaths.add(entry.path);
     issues.push(...(await validateRuntimeEntryPath(input.projectRoot, entry.path, "installed-entry")));
-    if (isLegacyRuntimeReference(entry.path) || isLegacyRuntimeReference(entry.sourceRef)) {
+    if (
+      !isApprovedResolverCompatibilityAsset(entry) &&
+      (isLegacyRuntimeReference(entry.path) || isLegacyRuntimeReference(entry.sourceRef))
+    ) {
       issues.push(
         createRuntimePathIssue({
           issueId: "runtime-path.legacy-resolver-path",
@@ -100,6 +103,17 @@ function isRuntimeEntry(entry: FilesIndex["entries"][number]): boolean {
     entry.path.startsWith("_bmad/") ||
     entry.artifactKind.startsWith("runtime-") ||
     entry.artifactKind === "project-custom-stub"
+  );
+}
+
+function isApprovedResolverCompatibilityAsset(entry: FilesIndex["entries"][number]): boolean {
+  return (
+    entry.ownership === "installer-owned" &&
+    entry.artifactKind === "runtime-compat-script" &&
+    entry.executable === true &&
+    /^_speclite\/scripts\/resolve_(?:config|customization)\.py$/.test(entry.path) &&
+    (/^assets\/source\/speclite\/scripts\/resolve_(?:config|customization)\.py$/.test(entry.sourceRef) ||
+      /^bundled-runtime-compat:scripts\/resolve_(?:config|customization)\.py$/.test(entry.sourceRef))
   );
 }
 

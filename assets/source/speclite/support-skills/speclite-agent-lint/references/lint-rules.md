@@ -62,12 +62,13 @@
 
 入口或权威 `references/activation.md` 必须覆盖：
 
-- 解析 Agent block：`resolve_customization.py --key agent`。
-- fallback 三层：`{skill-root}/customize.toml`、`{speclite-runtime-root}/custom/{skill-name}.toml`、`{speclite-runtime-root}/custom/{skill-name}.user.toml`。
+- CLI availability preflight：`command -v speclite`，不可用时 HALT 并报告 `SpecLite CLI command speclite is not available in this AI session PATH`。
+- 解析 Agent block：`speclite resolve customization --skill {skill-root} --project-root {project-root} --key agent`。
+- customization merge 由 Node CLI resolver 负责；不得手写 fallback 三层 TOML merge。
 - 执行 `agent.activation_steps_prepend`。
 - 采用 persona，并叠加 `role`、`identity`、`communication_style`、`principles`。
 - 加载 `agent.persistent_facts`。
-- 读取 `{project-root}/_speclite/config.toml` 并解析核心字段。
+- 运行 `speclite resolve config --project-root {project-root}` 并解析核心字段。
 - 问候用户并使用 `agent.icon`。
 - 执行 `agent.activation_steps_append`。
 - 根据初始意图直接分发或渲染 `agent.menu`。
@@ -79,7 +80,6 @@
 
 - `{skill-root}`：安装后的单个 Agent Skill 目录。
 - `{project-root}`：目标项目工作目录。
-- `{speclite-runtime-root}`：`{project-root}/_speclite`。
 - `{skill-name}`：Agent Skill 目录 basename。
 
 禁止：
@@ -98,7 +98,7 @@
 
 若 Agent 读取项目配置，必须满足：
 
-- 运行配置来源是 `{project-root}/_speclite/config.toml`。
+- 运行配置来源是 merged runtime config。
 - `config.toml.example` 只用于字段结构参考，不作为 runtime fallback。
 - 缺失配置或关键字段为空时应 HALT 或清晰询问用户补充。
 - 字段应归入 `[core]` 与 `[modules.sdlc]`。

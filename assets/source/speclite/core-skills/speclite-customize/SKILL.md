@@ -21,13 +21,13 @@ metadata:
 
 [执行流程]
     1. 预检 `{project-root}/_speclite/`；缺失时说明 Speclite 未安装并停止。
-    2. 读取 `{project-root}/_speclite/config.toml` 和 `config.user.toml` 获取 user_name 和 communication_language。
+    2. 运行 `speclite resolve config --project-root {project-root}` 获取 merged runtime config 中的 user_name 和 communication_language。
     3. 分类用户意图：directed、exploratory、audit/iterate 或 cross-cutting。
     4. exploratory 或 audit 场景运行 `python3 {skill-root}/scripts/list_customizable_skills.py --project-root {project-root}`，必要时追加 `--extra-root`。
     5. 读取目标 Skill 的 `customize.toml` 和已存在覆盖文件，判断应修改 agent surface、workflow surface 或多个 workflow。
     6. 生成稀疏 TOML，先展示完整内容和 diff，等待用户明确确认。
     7. 写入 `{speclite-runtime-root}/custom/` 下 team 或 user 覆盖文件。
-    8. 运行 `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill <install-path> --key <agent-or-workflow>` 验证；失败时手动合并并解释。
+    8. 运行 `speclite resolve customization --skill <install-path> --project-root {project-root} --key <agent-or-workflow>` 验证；失败时手动合并并解释。
     9. 总结写入位置、变更字段和后续迭代方式。
 
 [注意事项]

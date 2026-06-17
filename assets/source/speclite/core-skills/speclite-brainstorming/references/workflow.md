@@ -32,7 +32,7 @@ This uses **micro-file architecture** for disciplined execution:
 
 ### Configuration Loading
 
-Load config from `{project-root}/_speclite/config.toml` and resolve:
+Run `speclite resolve config --project-root {project-root}` and resolve merged runtime config fields:
 
 - `project_name`, `output_folder`, `user_name`
 - `communication_language`, `document_output_language`, `user_skill_level`

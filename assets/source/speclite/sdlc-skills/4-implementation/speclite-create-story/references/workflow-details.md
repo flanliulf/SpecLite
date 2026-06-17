@@ -9,7 +9,7 @@
 - 以 `{project-root}` 为前缀的路径相对于项目工作目录解析。
 - `{speclite-runtime-root}` 解析为目标项目安装后的 SpecLite 运行目录，即 `{project-root}/_speclite`。
 - `{skill-name}` 解析为 skill 目录的 basename（即 `speclite-create-story`）。
-- `{project-root}/_speclite/config.toml` 是本 Skill 运行前由目标项目提供并维护的运行时配置文件；Skill 定义目录中的 `config.toml.example` 仅作字段结构参考，不参与运行时读取。
+- merged runtime config 是本 Skill 运行前由目标项目提供并维护的运行时配置文件；Skill 定义目录中的 `config.toml.example` 仅作字段结构参考，不参与运行时读取。
 
 ## 激活流程
 
@@ -17,7 +17,7 @@
 
 ### Activation Step 1：解析 Workflow 配置块
 
-- 执行：`python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow`
+- 执行：`speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`
 - 如脚本失败，按 base → team → user 顺序读取以下三个文件，并应用与解析器相同的结构化合并规则自行解析 `workflow` 块：
   1. `{skill-root}/customize.toml`（默认值）
   2. `{speclite-runtime-root}/custom/{skill-name}.toml`（团队覆盖）
@@ -41,7 +41,7 @@
 
 ### Activation Step 4：加载配置
 
-- 从目标项目根下的 `{project-root}/_speclite/config.toml` 加载并解析。该文件必须在本 Skill 运行前已由用户人工维护或安装/初始化工具生成；若不存在或关键字段为空，应提示用户先初始化/补全配置并 HALT，不得回退读取 Skill 定义目录中的 `config.toml.example`：
+- 从目标项目根下的 merged runtime config 加载并解析。该文件必须在本 Skill 运行前已由用户人工维护或安装/初始化工具生成；若不存在或关键字段为空，应提示用户先初始化/补全配置并 HALT，不得回退读取 Skill 定义目录中的 `config.toml.example`：
   - `[core]`：`project_name`、`user_name`
   - `[core]`：`communication_language`、`document_output_language`（实际值使用确定枚举，例如 `Chinese` 或 `English`，不要使用 `Chinese / English` 占位值）
   - `[core]`：`user_skill_level`、`output_folder`
@@ -67,7 +67,7 @@
 - `story_title` = ""（如果不能推断则向用户索取）
 - `story_root` = `{implementation_artifacts}/stories`
 - `default_output_file` = `{story_root}/{story_key}.md`
-- `project_knowledge` = `{project-root}/docs`（可由 `{project-root}/_speclite/config.toml` 覆盖）
+- `project_knowledge` = `{project-root}/docs`（可由 merged runtime config 覆盖）
 
 ## 输入文件
 
@@ -342,5 +342,5 @@
 
 #### 6.4 执行 on_complete 终止指令
 
-- 执行：`python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`。
+- 执行：`speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`。
 - 如果解析出的值非空，把它作为退出前的最终终端指令执行。

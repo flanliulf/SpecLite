@@ -22,7 +22,7 @@ metadata:
 [Workflow]
     1. Read `references/workflow-details.md` in full; it is the authoritative definition for modes, result enum, report format, and HALT rules. When equivalent implementation or fixed-path ambiguity appears, also read `references/regression-scenarios.md`.
     2. Resolve the target mode and target object: Story key, Story file path, Epic number, or next Epic number.
-    3. Load `{project-root}/_speclite/config.toml`, `sprint-status.yaml`, target Story/Epic, owning SPECs, related source files, and test evidence.
+    3. Load merged runtime config, `sprint-status.yaml`, target Story/Epic, owning SPECs, related source files, and test evidence.
     4. Evaluate in `Contract -> Functional -> Evidence -> Guidance` order, then generate the report using `assets/report-template.md`.
     5. Only `PASS` or `PASS_EQUIVALENT` allows downstream workflow continuation; any other result must be handled before proceeding.
 

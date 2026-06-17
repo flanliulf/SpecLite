@@ -908,6 +908,155 @@ describe("update ownership planning", () => {
     }
   });
 
+  it("repairs deleted and drifted fresh install runtime compatibility scripts from bundled package source", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-repair-compat-scripts-"));
+
+    try {
+      const configResolver = await readFile(
+        path.join(process.cwd(), "assets/source/speclite/scripts/resolve_config.py"),
+        "utf8",
+      );
+      const customizationResolver = await readFile(
+        path.join(process.cwd(), "assets/source/speclite/scripts/resolve_customization.py"),
+        "utf8",
+      );
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeInstalledState(tempRoot, [
+        await filesIndexEntry(tempRoot, "_speclite/scripts/resolve_config.py", configResolver, {
+          ownership: "installer-owned",
+          artifactKind: "runtime-compat-script",
+          executable: true,
+          sourceRef: "assets/source/speclite/scripts/resolve_config.py",
+        }),
+        await filesIndexEntry(tempRoot, "_speclite/scripts/resolve_customization.py", customizationResolver, {
+          ownership: "installer-owned",
+          artifactKind: "runtime-compat-script",
+          executable: true,
+          sourceRef: "assets/source/speclite/scripts/resolve_customization.py",
+        }),
+      ]);
+      await rm(path.join(tempRoot, "_speclite/scripts/resolve_config.py"), { force: true });
+      await writeProjectFile(tempRoot, "_speclite/scripts/resolve_customization.py", "# drift\n");
+
+      const outcome = await runUpdateCommand({
+        options: { repair: true, yes: true },
+        runtime: { cwd: tempRoot, targetProject: "repair-compat-scripts" },
+      });
+      const parsed = RepairCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.status).toBe("success");
+      expect(parsed.data.writeAuthorized).toBe(true);
+      expect(parsed.data.conflicts).toEqual([]);
+      expect(parsed.data.changedPaths).toEqual([
+        "_speclite/scripts/resolve_config.py",
+        "_speclite/scripts/resolve_customization.py",
+      ]);
+      await expect(readFile(path.join(tempRoot, "_speclite/scripts/resolve_config.py"), "utf8")).resolves.toBe(
+        configResolver,
+      );
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/scripts/resolve_customization.py"), "utf8"),
+      ).resolves.toBe(customizationResolver);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("repairs bundled-runtime-compat resolver sourceRefs from bundled package source", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-repair-compat-fallback-"));
+
+    try {
+      const configResolver = await readFile(
+        path.join(process.cwd(), "assets/source/speclite/scripts/resolve_config.py"),
+        "utf8",
+      );
+      const customizationResolver = await readFile(
+        path.join(process.cwd(), "assets/source/speclite/scripts/resolve_customization.py"),
+        "utf8",
+      );
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeInstalledState(tempRoot, [
+        await filesIndexEntry(tempRoot, "_speclite/scripts/resolve_config.py", configResolver, {
+          ownership: "installer-owned",
+          artifactKind: "runtime-compat-script",
+          executable: true,
+          sourceRef: "bundled-runtime-compat:scripts/resolve_config.py",
+        }),
+        await filesIndexEntry(tempRoot, "_speclite/scripts/resolve_customization.py", customizationResolver, {
+          ownership: "installer-owned",
+          artifactKind: "runtime-compat-script",
+          executable: true,
+          sourceRef: "bundled-runtime-compat:scripts/resolve_customization.py",
+        }),
+      ]);
+      await writeProjectFile(tempRoot, "_speclite/scripts/resolve_config.py", "# drift config\n");
+      await rm(path.join(tempRoot, "_speclite/scripts/resolve_customization.py"), { force: true });
+
+      const outcome = await runUpdateCommand({
+        options: { repair: true, yes: true },
+        runtime: { cwd: tempRoot, targetProject: "repair-compat-fallback" },
+      });
+      const parsed = RepairCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.status).toBe("success");
+      expect(parsed.data.conflicts).toEqual([]);
+      expect(parsed.data.changedPaths).toEqual([
+        "_speclite/scripts/resolve_config.py",
+        "_speclite/scripts/resolve_customization.py",
+      ]);
+      await expect(readFile(path.join(tempRoot, "_speclite/scripts/resolve_config.py"), "utf8")).resolves.toBe(
+        configResolver,
+      );
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/scripts/resolve_customization.py"), "utf8"),
+      ).resolves.toBe(customizationResolver);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps non-resolver runtime compatibility script targets blocked even with resolver sourceRefs", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-repair-compat-blocked-target-"));
+
+    try {
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeInstalledState(tempRoot, [
+        await filesIndexEntry(tempRoot, "_speclite/scripts/not_a_resolver.py", "# base\n", {
+          ownership: "installer-owned",
+          artifactKind: "runtime-compat-script",
+          executable: true,
+          sourceRef: "bundled-runtime-compat:scripts/resolve_config.py",
+        }),
+      ]);
+      await writeProjectFile(tempRoot, "_speclite/scripts/not_a_resolver.py", "# drift\n");
+
+      const outcome = await runUpdateCommand({
+        options: { repair: true, yes: true },
+        runtime: { cwd: tempRoot, targetProject: "repair-compat-blocked-target" },
+      });
+      const parsed = RepairCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(1);
+      expect(parsed.data.writeAuthorized).toBe(false);
+      expect(parsed.data.repairPlan.actions).toEqual([]);
+      expect(parsed.data.conflicts).toEqual([
+        expect.objectContaining({
+          affectedPath: "_speclite/scripts/not_a_resolver.py",
+          ownership: "installer-owned",
+          reason: "missing-source-evidence",
+        }),
+      ]);
+      expect(parsed.data.changedPaths).toEqual([]);
+      await expect(readFile(path.join(tempRoot, "_speclite/scripts/not_a_resolver.py"), "utf8")).resolves.toBe(
+        "# drift\n",
+      );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("repairs recoverable IDE mirror package drift from canonical source in adapter order", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-repair-ide-mirror-"));
 
@@ -1095,6 +1244,8 @@ async function filesIndexEntry(
   input: {
     ownership: "installer-owned" | "human-owned" | "workflow-owned";
     sourceRef: string;
+    artifactKind?: string;
+    executable?: boolean;
   },
 ): Promise<Record<string, unknown>> {
   const absolutePath = path.join(projectRoot, relativePath);
@@ -1106,8 +1257,8 @@ async function filesIndexEntry(
     ownership: input.ownership,
     hash: await hashFile(absolutePath),
     hashAlgorithm: "sha256",
-    executable: false,
-    artifactKind: input.ownership === "workflow-owned" ? "workflow-artifact" : "runtime-config",
+    executable: input.executable ?? false,
+    artifactKind: input.artifactKind ?? (input.ownership === "workflow-owned" ? "workflow-artifact" : "runtime-config"),
     sourceRef: input.sourceRef,
   };
 }

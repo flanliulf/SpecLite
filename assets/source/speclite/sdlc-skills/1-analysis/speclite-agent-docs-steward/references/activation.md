@@ -2,34 +2,22 @@
 
 ## Resolve Agent Block（解析 Agent Block）
 
-运行：
+确认 `{skill-root}`、`{project-root}`、`{skill-name}` 已明确，然后运行：
 
 ```sh
-python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key agent
+command -v speclite >/dev/null 2>&1
+speclite resolve customization --skill {skill-root} --project-root {project-root} --key agent
 ```
 
-如果脚本失败，按 base -> team -> user 顺序读取并手动合并：
-
-1. `{skill-root}/customize.toml`
-2. `{speclite-runtime-root}/custom/{skill-name}.toml`
-3. `{speclite-runtime-root}/custom/{skill-name}.user.toml`
-
-合并规则：
-
-| 类型 | 规则 |
-|---|---|
-| Scalar | 后一层覆盖前一层。 |
-| Table | 深度合并。 |
-| Array of tables with `code` or `id` | 替换匹配项并追加新项。 |
-| Other arrays | 追加。 |
+如果 `command -v speclite` 不可用，立即 HALT，并报告 `SpecLite CLI command speclite is not available in this AI session PATH`。next action 是暴露或安装 Node CLI 后重试；不得回退 Python resolver、手写 TOML merge 或读取 source checkout resolver。Agent block 只消费 `speclite resolve customization` 的 stdout JSON。
 
 ## Activation Steps（激活步骤）
 
 1. 执行每个 `agent.activation_steps_prepend`。
 2. 采用 Sarah / Open Source Docs Steward persona。
 3. 叠加 `agent.role`、`agent.identity`、`agent.communication_style` 和 `agent.principles`。
-4. 加载 `agent.persistent_facts`。`file:` 前缀表示 `{project-root}` 下的路径或 glob；文件缺失时记录为 gap，不中断激活。
-5. 读取 `{project-root}/_speclite/config.toml`，解析 `user_name`、`communication_language`、`document_output_language`、`project_knowledge` 等字段。
+4. 加载 `agent.persistent_facts`。`file:` 前缀表示 `{project-root}` 下的路径或 glob；文件缺失时记录为 non-blocking fact gap，不阻断菜单渲染。
+5. 运行 `speclite resolve config --project-root {project-root}` 解析 merged runtime config 中的 `user_name`、`communication_language`、`document_output_language`、`project_knowledge` 等字段。
 6. 用 `communication_language` 问候用户，消息前缀使用 `agent.icon`。
 7. 执行每个 `agent.activation_steps_append`。
 8. 若用户初始意图清晰匹配菜单，直接分发；否则渲染 `agent.menu` 为编号表格并停止等待输入。

@@ -31,7 +31,7 @@ metadata:
 [约定]
     裸路径相对于 `{skill-root}` 解析；`{project-root}` 是目标项目工作目录；`{speclite-runtime-root}` 是 `{project-root}/_speclite`；`{skill-name}` 是目录 basename。
 
-    运行配置必须读取 `{project-root}/_speclite/config.toml`。推荐解析字段：
+    运行配置必须运行 `speclite resolve config --project-root {project-root}`。推荐解析字段：
     - `{project_knowledge}` = `[modules.sdlc].project_knowledge`
     - `{planning_artifacts}` = `[modules.sdlc].planning_artifacts`
     - `{brownfield_output}` = `{project_knowledge}/brownfield`
@@ -41,7 +41,7 @@ metadata:
     本 Skill 采用 4 种运行模式和 6 个阶段，路由规则以 `references/workflow-router.md` 为准。
 
     1. 激活后解析三层 customize：`{skill-root}/customize.toml`、`{speclite-runtime-root}/custom/{skill-name}.toml`、`{speclite-runtime-root}/custom/{skill-name}.user.toml`。缺失覆盖文件时跳过；标量覆盖，表深度合并。
-    2. 读取 `{project-root}/_speclite/config.toml`。配置缺失或 `project_knowledge`、`planning_artifacts` 为空时 HALT。
+    2. 运行 `speclite resolve config --project-root {project-root}`。配置缺失或 `project_knowledge`、`planning_artifacts` 为空时 HALT。
     3. Phase 0：检查 `{brownfield_output}/project-scan-report.json`，按 `initial_scan` / `full_rescan` / `targeted_deep_dive` / `planning_generation` / resume 判定执行路径。初始化状态时运行：`python {skill-root}/scripts/update_state.py init --project-root {project-root} --output-dir {brownfield_output}`。
     4. Phase 1：运行 `python {skill-root}/scripts/scan_repo.py {project-root} --output-dir {brownfield_output}`，并按 `references/repository-classifier.md` 划分仓库结构。
     5. Phase 2：按 `references/evidence-extractor.md` 执行证据提取脚本，所有脚本必须显式传入 `--output-dir {brownfield_output}`；历史文档摄取额外传入 `--history-dir {history_sources}`。完成后运行 `validate_outputs.py --phase evidence`。

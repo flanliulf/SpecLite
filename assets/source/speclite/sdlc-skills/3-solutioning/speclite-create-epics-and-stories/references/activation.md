@@ -45,7 +45,7 @@ This workflow uses step-file architecture for disciplined execution.
 Run:
 
 ```bash
-python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow
+speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow
 ```
 
 If the script fails, resolve the `workflow` block yourself by reading these files in base → team → user order and applying the same structural merge rules:
@@ -66,7 +66,7 @@ Treat every entry in `{workflow.persistent_facts}` as foundational context for t
 
 ### Step 4: Load Config
 
-Load runtime config from `{project-root}/_speclite/config.toml` and resolve:
+Load runtime config from merged output of `speclite resolve config --project-root {project-root}` and resolve:
 
 - Use `{user_name}` for greeting.
 - Use `{communication_language}` for all communications.
@@ -74,7 +74,7 @@ Load runtime config from `{project-root}/_speclite/config.toml` and resolve:
 - Use `{planning_artifacts}` for output location and artifact scanning.
 - Use `{project_knowledge}` for additional context scanning.
 
-If the runtime config is missing or any required field is empty, HALT and ask the user to provide or fix `{project-root}/_speclite/config.toml`. Do not use this skill package's `config.toml.example` as fallback.
+If the runtime config is missing or any required field is empty, HALT and ask the user to provide or fix merged runtime config. Do not use this skill package's `config.toml.example` as fallback.
 
 ### Step 5: Greet the User
 

@@ -31,7 +31,7 @@ metadata:
 
 [Execution Flow]
     1. First read `references/workflow-details.md` in full; it is the complete operating specification and must not be skipped or summarized during execution.
-    2. During activation, resolve `workflow`, three-tier customize, `workflow.persistent_facts`, and the target project's runtime `{project-root}/_speclite/config.toml`; this Skill directory only keeps `config.toml.example` as a reference. Exact commands, fields, and merge rules are in the full specification.
+    2. During activation, resolve `workflow`, three-tier customize, `workflow.persistent_facts`, and the target project's runtime merged runtime config; this Skill directory only keeps `config.toml.example` as a reference. Exact commands, fields, and merge rules are in the full specification.
     3. Load all input artifacts via `references/discover-inputs.md`; read `sprint-status.yaml` from start to end to preserve Story order.
     4. When writing the Story, render the template-output sections in the exact order listed in the full specification and save the Story under `{implementation_artifacts}/stories/`.
     5. Before finalizing, validate and fix the Story with `references/checklist.md`, update sprint status, and run the `workflow.on_complete` terminal directive from the full specification.

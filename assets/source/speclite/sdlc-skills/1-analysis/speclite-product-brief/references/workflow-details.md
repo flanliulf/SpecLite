@@ -36,15 +36,9 @@ Check activation context immediately:
 
 ### Step 1: Resolve the Workflow Block
 
-Run: `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow`
+Confirm `{skill-root}`, `{project-root}`, and `{skill-name}`, then run `command -v speclite >/dev/null 2>&1`. If unavailable, HALT with `SpecLite CLI command speclite is not available in this AI session PATH`; next action is to expose or install the Node CLI and retry. Then run: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`
 
-**If the script fails**, resolve the `workflow` block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:
-
-1. `{skill-root}/customize.toml` — defaults
-2. `{speclite-runtime-root}/custom/{skill-name}.toml` — team overrides
-3. `{speclite-runtime-root}/custom/{skill-name}.user.toml` — personal overrides
-
-Any missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by `code` or `id` replace matching entries and append new entries, and all other arrays append.
+Before running it, execute `command -v speclite >/dev/null 2>&1`. If unavailable, HALT with `SpecLite CLI command speclite is not available in this AI session PATH`; next action is to expose or install the Node CLI and retry. Do not fall back to Python resolver or hand-written TOML merge.
 
 ### Step 2: Execute Prepend Steps
 
@@ -56,7 +50,7 @@ Treat every entry in `{workflow.persistent_facts}` as foundational context you c
 
 ### Step 4: Load Config
 
-Load config from `{project-root}/_speclite/config.toml` and resolve:
+Run `speclite resolve config --project-root {project-root}` and resolve merged runtime config fields:
 - Use `{user_name}` for greeting
 - Use `{communication_language}` for all communications
 - Use `{document_output_language}` for output documents
@@ -116,8 +110,8 @@ Activation is complete. Begin the workflow at Stage 1 below.
 
 ## Speclite Runtime Guardrails
 
-- Runtime config is read from `{project-root}/_speclite/config.toml`.
+- Runtime config is read from merged output of `speclite resolve config --project-root {project-root}`.
 - `config.toml.example` in this Skill package is a field-structure reference only and is not a runtime fallback.
-- Customization is resolved from `{skill-root}/customize.toml`, `{speclite-runtime-root}/custom/{skill-name}.toml`, and `{speclite-runtime-root}/custom/{skill-name}.user.toml`.
-- Resolve customization with `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow`.
+- Customization is resolved from merged JSON output of `speclite resolve customization --skill {skill-root} --project-root {project-root}`.
+- Resolve customization with `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`.
 - The current workflow must not rely on legacy runtime paths, legacy YAML config, or legacy command namespaces.

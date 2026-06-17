@@ -39,15 +39,30 @@ NEW_SECTION_TITLES = [
 ]
 OLD_SECTION_TITLES = ["[技能说明]", "[核心能力]", "[执行流程]", "[注意事项]"]
 ACTIVATION_MARKERS = [
-    "resolve_customization.py",
+    "command -v speclite",
+    "SpecLite CLI command speclite is not available in this AI session PATH",
+    "speclite resolve customization",
+    "speclite resolve config",
     "--key agent",
-    "{skill-root}/customize.toml",
-    "{speclite-runtime-root}/custom/{skill-name}.toml",
-    "{speclite-runtime-root}/custom/{skill-name}.user.toml",
     "agent.persistent_facts",
-    "_speclite/config.toml",
     "agent.menu",
     "dismiss",
+]
+LEGACY_ACTIVATION_PATTERN = re.compile(
+    r"resolve_customization\.py|resolve_config\.py|"
+    r"\{speclite-runtime-root\}/scripts/resolve_[a-z_]+\.py|"
+    r"python3\s+\S*resolve_[a-z_]+\.py|"
+    r"读取\s+`?\{project-root\}/_speclite/config\.toml`?|"
+    r"Load config from `\{project-root\}/_speclite/config\.toml`|"
+    r"Runtime config is read from `\{project-root\}/_speclite/config\.toml`"
+)
+LEGACY_ACTIVATION_SAMPLES = [
+    "resolve_customization.py --key agent",
+    "resolve_config.py",
+    "python3 scripts/resolve_config.py",
+    "读取 `{project-root}/_speclite/config.toml`",
+    "Load config from `{project-root}/_speclite/config.toml`",
+    "Runtime config is read from `{project-root}/_speclite/config.toml`",
 ]
 
 
@@ -419,6 +434,18 @@ def inspect_residue(skill_dir: Path, findings: list[dict]) -> None:
                 "RUNTIME-02",
                 "Current instructions appear to use source directories as runtime dependencies.",
             )
+        if LEGACY_ACTIVATION_PATTERN.search(text):
+            add_finding(
+                findings,
+                "Major",
+                path,
+                "RUNTIME-03",
+                "Current instructions contain legacy resolver or single-file runtime config activation.",
+            )
+
+
+def missed_legacy_activation_samples() -> list[str]:
+    return [sample for sample in LEGACY_ACTIVATION_SAMPLES if not LEGACY_ACTIVATION_PATTERN.search(sample)]
 
 
 def result_for(skill_dir: Path, findings: list[dict]) -> dict:
@@ -445,7 +472,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Check SpecLite Agent Skill packages.")
     parser.add_argument("targets", nargs="*", help="Agent Skill directories")
     parser.add_argument("--all", dest="all_root", help="Scan all speclite-agent-* directories under this root")
+    parser.add_argument(
+        "--self-test-legacy-activation",
+        action="store_true",
+        help="Verify RUNTIME-03 legacy activation samples are detected.",
+    )
     args = parser.parse_args()
+
+    if args.self_test_legacy_activation:
+        missed = missed_legacy_activation_samples()
+        if missed:
+            print(json.dumps({"status": "fail", "missed": missed}, ensure_ascii=False, indent=2))
+            return 1
+        print(json.dumps({"status": "pass", "checked": len(LEGACY_ACTIVATION_SAMPLES)}, ensure_ascii=False, indent=2))
+        return 0
 
     if bool(args.all_root) == bool(args.targets):
         print("error: provide either target directories or --all <root>", file=sys.stderr)

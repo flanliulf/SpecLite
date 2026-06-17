@@ -20,7 +20,7 @@ metadata:
     - **Agent roster 支持**：如需要 party mode 视角，可通过 Speclite runtime 解析 agents roster。
 
 [执行流程]
-    1. 读取 `references/methods.csv`；如需要 party mode 参与，运行 `python3 {speclite-runtime-root}/scripts/resolve_config.py --project-root {project-root} --key agents` 解析 agent roster。
+    1. 读取 `references/methods.csv`；如需要 party mode 参与，运行 `speclite resolve config --project-root {project-root} --key agents` 解析 agent roster。
     2. 分析当前内容和对话上下文，选择 5 个最匹配的 elicitation 方法。
     3. 展示选项：数字 `1-5`、`r` reshuffle、`a` list all、`x` proceed。
     4. 用户选择方法后，依据 CSV description 和 output_pattern 应用于当前内容，展示增强版本。

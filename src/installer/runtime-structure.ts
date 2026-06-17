@@ -1,6 +1,12 @@
+import { readFile } from "node:fs/promises";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
-import { serializeConfigToml } from "../config/config-writer.js";
+import {
+  PERSONAL_CUSTOM_CONFIG_TOML_HEADER,
+  TEAM_CUSTOM_CONFIG_TOML_HEADER,
+  serializeConfigToml,
+} from "../config/config-writer.js";
 import type { ProjectConfigModel } from "../config/config-schema.js";
+import { appendUserConfigGitignoreRules } from "../config/user-config-gitignore.js";
 import { ensureSafeDirectory, acquireProjectOperationLock, safeWriteFile } from "../fs/safe-write.js";
 import { createConfiguredIdeTargets, createFilesIndex, createHelpIndex, createInstalledManifest, createPhaseCoverage, createSkillIndex, type ArtifactRootContext } from "../manifest/manifest-generator.js";
 import { hashFile } from "../manifest/hash.js";
@@ -11,7 +17,12 @@ import { CANONICAL_TARGET_ORDER, type IdeTargetId } from "../ide/adapter-registr
 import { writeIdeMirrors } from "../ide/target-writer.js";
 import type { ConfigInitializationResult } from "./config-initialization.js";
 import { detectFlowGateHookConfigConflict, writeFlowGateHookArtifacts } from "./hook-artifacts.js";
-import type { InstallPlan } from "./install-plan-schema.js";
+import type { InstallPlan, PlannedWrite } from "./install-plan-schema.js";
+
+const COMPAT_RUNTIME_SCRIPTS = [
+  "resolve_config.py",
+  "resolve_customization.py",
+] as const;
 
 export type ApplyInstallPlanResult =
   | {
@@ -106,6 +117,9 @@ export async function applyInstallPlan(input: {
     manifestPath: "_speclite/_config/manifest.yaml" as const,
   };
   const artifactRoots = createArtifactRootContext(input.configPlan.model);
+  const canonicalSourceRoot =
+    input.sourceRoot ?? `${input.packageRoot}/assets/source/speclite`;
+  const canonicalSourceRefRoot = input.sourceRefRoot ?? "assets/source/speclite";
 
   try {
     for (const directory of [
@@ -124,13 +138,15 @@ export async function applyInstallPlan(input: {
     const configWrites = [
       {
         path: "_speclite/config.toml",
-        contents: serializeConfigToml(input.configPlan.configToml),
+        contents: serializeConfigToml(input.configPlan.configToml, { header: "installer-config" }),
         artifactKind: "runtime-config",
         sourceRef: "install-plan:project-config",
       },
       {
         path: "_speclite/config.user.toml",
-        contents: serializeConfigToml(input.configPlan.configUserToml),
+        contents: serializeConfigToml(input.configPlan.configUserToml, {
+          header: "installer-user-config",
+        }),
         artifactKind: "runtime-config",
         sourceRef: "install-plan:project-user-config",
       },
@@ -157,9 +173,52 @@ export async function applyInstallPlan(input: {
       });
     }
 
+    for (const scriptName of COMPAT_RUNTIME_SCRIPTS) {
+      const compatScript = await readCompatibilityScript({
+        packageRoot: input.packageRoot,
+        canonicalSourceRoot,
+        canonicalSourceRefRoot,
+        scriptName,
+      });
+      const result = await safeWriteFile({
+        projectRoot: input.targetRoot,
+        relativePath: `_speclite/scripts/${scriptName}`,
+        contents: compatScript.bytes,
+        executable: true,
+        component: "runtime-compat-script-writer",
+      });
+      if (!result.ok) return createApplyFailure(result.issue, completedSteps, changedPaths);
+      changedPaths.push(result.path);
+      fileEntries.push({
+        schemaVersion: "speclite.files-index.v1",
+        path: result.path,
+        ownership: "installer-owned",
+        hash: result.hash,
+        hashAlgorithm: "sha256",
+        executable: result.executable,
+        artifactKind: "runtime-compat-script",
+        sourceRef: compatScript.sourceRef,
+      });
+    }
+
     for (const plannedWrite of input.configPlan.plannedWrites.filter(
       (write) => write.ownership === "human-owned",
     )) {
+      if (plannedWrite.path === ".gitignore") {
+        const gitignoreResult = await applyGitignorePlan({
+          projectRoot: input.targetRoot,
+          plannedWrite,
+        });
+        if (!gitignoreResult.ok) {
+          return createApplyFailure(gitignoreResult.issue, completedSteps, changedPaths);
+        }
+        if (gitignoreResult.entry !== undefined) {
+          changedPaths.push(...gitignoreResult.changedPaths);
+          fileEntries.push(gitignoreResult.entry);
+        }
+        continue;
+      }
+
       if (plannedWrite.action === "create") {
         const result = await safeWriteFile({
           projectRoot: input.targetRoot,
@@ -211,9 +270,6 @@ export async function applyInstallPlan(input: {
     fileEntries.push(...mirror.files);
     completedSteps.push("ide-mirror-creation");
 
-    const canonicalSourceRoot =
-      input.sourceRoot ?? `${input.packageRoot}/assets/source/speclite`;
-    const canonicalSourceRefRoot = input.sourceRefRoot ?? "assets/source/speclite";
     const hookArtifacts = await writeFlowGateHookArtifacts({
       projectRoot: input.targetRoot,
       canonicalSourceRoot,
@@ -381,6 +437,31 @@ function createArtifactDirectories(model: ProjectConfigModel, modules: OfficialM
   return [...new Set(directories.map((directory) => interpolateDirectory(directory, values)))].sort();
 }
 
+async function readCompatibilityScript(input: {
+  packageRoot: string;
+  canonicalSourceRoot: string;
+  canonicalSourceRefRoot: string;
+  scriptName: string;
+}): Promise<{
+  bytes: Buffer;
+  sourceRef: string;
+}> {
+  const sourcePath = `${input.canonicalSourceRoot}/scripts/${input.scriptName}`;
+  try {
+    return {
+      bytes: await readFile(sourcePath),
+      sourceRef: `${input.canonicalSourceRefRoot}/scripts/${input.scriptName}`,
+    };
+  } catch (error) {
+    if (!isMissingPathError(error)) throw error;
+  }
+
+  return {
+    bytes: await readFile(`${input.packageRoot}/assets/source/speclite/scripts/${input.scriptName}`),
+    sourceRef: `bundled-runtime-compat:scripts/${input.scriptName}`,
+  };
+}
+
 function createArtifactRootContext(model: ProjectConfigModel): ArtifactRootContext {
   return {
     output_folder: model.core.output_folder,
@@ -414,8 +495,73 @@ function interpolateDirectory(
 
 function createHumanStubContents(relativePath: string): string {
   if (relativePath.endsWith("config.user.toml")) {
-    return "# Human-owned SpecLite user customization overrides.\n";
+    return `${PERSONAL_CUSTOM_CONFIG_TOML_HEADER}\n`;
   }
 
-  return "# Human-owned SpecLite project customization overrides.\n";
+  return `${TEAM_CUSTOM_CONFIG_TOML_HEADER}\n`;
+}
+
+function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
+async function applyGitignorePlan(input: {
+  projectRoot: string;
+  plannedWrite: PlannedWrite;
+}): Promise<
+  | {
+      ok: true;
+      entry?: FilesIndexEntry;
+      changedPaths: string[];
+    }
+  | {
+      ok: false;
+      issue: ValidationIssue;
+    }
+> {
+  const relativePath = input.plannedWrite.path;
+  if (input.plannedWrite.action === "skip") {
+    const existingHash = await hashFile(`${input.projectRoot}/${relativePath}`);
+    return {
+      ok: true,
+      changedPaths: [],
+      entry: {
+        schemaVersion: "speclite.files-index.v1",
+        path: relativePath,
+        ownership: "human-owned",
+        hash: existingHash,
+        hashAlgorithm: "sha256",
+        executable: false,
+        artifactKind: "gitignore",
+        sourceRef: "install-plan:user-config-gitignore",
+      },
+    };
+  }
+
+  const existing =
+    input.plannedWrite.action === "update"
+      ? await readFile(`${input.projectRoot}/${relativePath}`, "utf8")
+      : "";
+  const result = await safeWriteFile({
+    projectRoot: input.projectRoot,
+    relativePath,
+    contents: appendUserConfigGitignoreRules(existing),
+    component: "gitignore-writer",
+  });
+  if (!result.ok) return { ok: false, issue: result.issue };
+
+  return {
+    ok: true,
+    changedPaths: [result.path],
+    entry: {
+      schemaVersion: "speclite.files-index.v1",
+      path: result.path,
+      ownership: "human-owned",
+      hash: result.hash,
+      hashAlgorithm: "sha256",
+      executable: false,
+      artifactKind: "gitignore",
+      sourceRef: "install-plan:user-config-gitignore",
+    },
+  };
 }

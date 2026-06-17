@@ -62,10 +62,10 @@ assets/source/speclite/sdlc-skills/<phase>/<speclite-agent-name>/
 
 | BMAD 源语义 | Speclite 目标语义 |
 | --- | --- |
-| `{project-root}/_bmad/scripts/resolve_customization.py --key agent` | `{speclite-runtime-root}/scripts/resolve_customization.py --key agent` |
+| `{project-root}/_bmad/scripts/legacy Python customization resolver --key agent` | `speclite resolve customization --key agent` |
 | `{project-root}/_bmad/custom/{skill-name}.toml` | `{speclite-runtime-root}/custom/{skill-name}.toml` |
 | `{project-root}/_bmad/custom/{skill-name}.user.toml` | `{speclite-runtime-root}/custom/{skill-name}.user.toml` |
-| `{project-root}/_bmad/bmm/config.yaml` | `{project-root}/_speclite/config.toml` |
+| `{project-root}/_bmad/bmm/config.yaml` | merged runtime config |
 | `bmad-help` | `speclite-help` 或中性帮助入口，按目标项目实际存在情况确认 |
 
 必须定义：

@@ -4,7 +4,7 @@ This document spells out the 6 activation steps that must be executed before ent
 
 ## Activation Step 1: Resolve Workflow configuration block
 
-- Execute: `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow`
+- Execute: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`
 - On script failure, read the following three files in base → team → user order and apply the same structured merge rules as the resolver to parse the `workflow` block yourself:
     1. `{skill-root}/customize.toml` (defaults)
     2. `{speclite-runtime-root}/custom/{skill-name}.toml` (team override)
@@ -27,7 +27,7 @@ This document spells out the 6 activation steps that must be executed before ent
 
 ## Activation Step 4: Load configuration
 
-Load and parse from `{project-root}/_speclite/config.toml`:
+Load and parse from merged output of `speclite resolve config --project-root {project-root}`:
 
 - `[core].user_name` — for greeting
 - `[core].communication_language` — use this language for all communication
@@ -35,7 +35,7 @@ Load and parse from `{project-root}/_speclite/config.toml`:
 - `[modules.sdlc].planning_artifacts` — output location and artifact-scan root
 - `[modules.sdlc].project_knowledge` — additional context-scan root
 
-If the config file is missing or any required field is empty, HALT and ask the user to create or repair `{project-root}/_speclite/config.toml`. `config.toml.example` documents the expected structure only and must not be used as a runtime fallback.
+If the config file is missing or any required field is empty, HALT and ask the user to create or repair merged runtime config. `config.toml.example` documents the expected structure only and must not be used as a runtime fallback.
 
 ## Activation Step 5: Greet the user
 

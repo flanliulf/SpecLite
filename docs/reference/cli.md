@@ -196,18 +196,22 @@ speclite resolve config --project-root /path/to/project --key core.project_name 
 
 ```sh
 speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project
-speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --key agent.menu
+speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project --key agent.menu
 speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project --key agent.menu --human
 ```
 
 | Option | Description |
 |---|---|
 | `--skill <skillDir>` | 包含 `customize.toml` 的 installed skill 目录。 |
-| `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。可省略。 |
+| `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。Installed Skill activation 必须显式传入；省略只保留为 CLI compatibility fallback，不作为推荐运行契约。 |
 | `--key <dottedKey>` | 选择 merged customization 中的 dotted key。可重复。 |
 | `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
 
-默认 resolve output 是 runtime support machine contract：stdout 只包含 resolved JSON object，stderr 只包含 `ValidationIssue` JSON Lines diagnostics。Missing key 默认仍输出 `{}`、exit code 为 `0`、stderr 为空。`--human` 只用于人工排查，会把结果渲染为 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`；其中 `source path` 表示 selected dotted key 的 effective source，`unresolved` 只适用于显式 human mode。
+默认 resolve output 是 runtime support machine contract：stdout 只包含 resolved JSON object，stderr 只包含 `ValidationIssue` JSON Lines diagnostics。Missing key 默认仍输出 `{}`、exit code 为 `0`、stderr 为空。Installed Skill 激活前必须确认当前 AI 会话 `PATH` 中存在 `speclite`；不可用时应 HALT 并暴露或安装 Node CLI 后重试，不得回退 Python resolver 或单独读取 `_speclite/config.toml`。`--human` 只用于人工排查，会把结果渲染为 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`；其中 `source path` 表示 selected dotted key 的 effective source，`unresolved` 只适用于显式 human mode。
+
+## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
+
+`_speclite/scripts/resolve_*.py` 可能存在于已安装项目中，并以 `runtime-compat-script` 记录在 `files-index.json`。这些文件只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 activation resolver，也不是默认 CLI resolver runtime dependency。正常 installed Skill activation 的唯一默认 resolver 是 `speclite resolve config` 与 `speclite resolve customization`；文档和脚本不应建议用户在默认激活路径中运行 Python resolver。
 
 ## Output Modes（输出模式）
 

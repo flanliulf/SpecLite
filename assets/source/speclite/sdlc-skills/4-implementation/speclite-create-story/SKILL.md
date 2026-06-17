@@ -31,7 +31,7 @@ metadata:
 
 [执行流程]
     1. 先完整阅读 `references/workflow-details.md`；该文件是完整操作规约，不能跳过或缩写执行。
-    2. 激活时解析 `workflow`、三层 customize、`workflow.persistent_facts` 与运行项目根下的 `{project-root}/_speclite/config.toml`；本 Skill 目录仅保留 `config.toml.example` 作为参考，具体命令、字段和合并规则见完整规约。
+    2. 激活时解析 `workflow`、三层 customize、`workflow.persistent_facts` 与运行项目根下的 merged runtime config；本 Skill 目录仅保留 `config.toml.example` 作为参考，具体命令、字段和合并规则见完整规约。
     3. 按 `references/discover-inputs.md` 加载所有输入制品；对 `sprint-status.yaml` 必须从头到尾完整读取，以保留 Story 顺序。
     4. 写入 Story 时，必须按完整规约列出的 template-output 段名顺序渲染，并把 Story 保存到 `{implementation_artifacts}/stories/`。
     5. 收尾前用 `references/checklist.md` 校验并修复 Story，更新 sprint 状态，并执行完整规约中的 `workflow.on_complete` 终止指令。

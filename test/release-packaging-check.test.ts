@@ -101,11 +101,28 @@ describe("Story 6.7 release packaging gate", () => {
       const runtimeManifest = await readFile(path.join(tempRoot, "dist/packaging-manifest.json"), "utf8");
       const parsed = JSON.parse(canonicalManifest) as {
         files: string[];
+        packagedCompatibilityAssets: Array<{
+          path: string;
+          classification: string;
+          defaultRuntimeDependency: boolean;
+        }>;
       };
 
       expect(runtimeManifest).toBe(canonicalManifest);
       expect(parsed.files).toContain("dist/packaging-manifest.json");
       expect(parsed.files).not.toContain("release/packaging-manifest.json");
+      expect(parsed.packagedCompatibilityAssets).toEqual([
+        {
+          path: "assets/source/speclite/scripts/resolve_config.py",
+          classification: "runtime-compat-script",
+          defaultRuntimeDependency: false,
+        },
+        {
+          path: "assets/source/speclite/scripts/resolve_customization.py",
+          classification: "runtime-compat-script",
+          defaultRuntimeDependency: false,
+        },
+      ]);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -228,6 +245,7 @@ describe("Story 6.7 release packaging gate", () => {
 
 async function writeRequiredRuntimeAssets(root: string): Promise<void> {
   await writeFileAt(root, "assets/source/speclite/scripts/resolve_config.py", "# resolver\n");
+  await writeFileAt(root, "assets/source/speclite/scripts/resolve_customization.py", "# resolver\n");
   await writeFileAt(root, "assets/source/speclite/core-skills/module.yaml", "id: core\n");
   await writeFileAt(root, "assets/source/speclite/sdlc-skills/module.yaml", "id: sdlc\n");
   await writeFileAt(root, "assets/source/speclite/docs/examples/fixture-derived-examples.md", "# Example\n");

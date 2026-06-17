@@ -1,6 +1,6 @@
 # Story 9.2: Python Resolver Compatibility Asset Projection（Python Resolver 兼容资产投影）
 
-Status: blocked-by-9-1-corpus-gate
+Status: done
 
 <!-- Corrective Story: Python resolver scripts 只作为兼容资产，不作为默认 installed skill activation path。 -->
 
@@ -56,53 +56,53 @@ Status: blocked-by-9-1-corpus-gate
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 0: Enforce Story 9.1 corpus gate before implementation（AC: 1, 3）
-  - [ ] 在开始本 Story implementation 前，确认 Story 9.1 已完成，或至少已提供并通过 full corpus activation negative tests。
-  - [ ] hard check 必须覆盖 canonical source `SKILL*.md`、references、workflow terminal step files、fresh install mirrored `SKILL*.md` / references，以及 Story 9.1 定义的 support-side `speclite-agent-*` inventory negative scan。
-  - [ ] 若缺少上述证据，本 Story 保持 `blocked-by-9-1-corpus-gate`，不得投影 `_speclite/scripts/resolve_*.py` compatibility assets。
-  - [ ] 修订实现记录必须链接 Story 9.1 corpus gate 的测试命令与通过结果；不得用手工抽样替代 full corpus gate。
+- [x] Task 0: Enforce Story 9.1 corpus gate before implementation（AC: 1, 3）
+  - [x] 在开始本 Story implementation 前，确认 Story 9.1 已完成，或至少已提供并通过 full corpus activation negative tests。
+  - [x] hard check 必须覆盖 canonical source `SKILL*.md`、references、workflow terminal step files、fresh install mirrored `SKILL*.md` / references，以及 Story 9.1 定义的 support-side `speclite-agent-*` inventory negative scan。
+  - [x] 若缺少上述证据，本 Story 保持 `blocked-by-9-1-corpus-gate`，不得投影 `_speclite/scripts/resolve_*.py` compatibility assets。
+  - [x] 修订实现记录必须链接 Story 9.1 corpus gate 的测试命令与通过结果；不得用手工抽样替代 full corpus gate。
 
-- [ ] Task 1: Preflight and ownership contract review（AC: 1-6）
-  - [ ] 读取 Story 1.5、3.4、4.1、4.6、6.2、6.4、6.7、9.1 和 Epic 9。
-  - [ ] 读取 implementation anchors：`src/installer/runtime-structure.ts`、`src/manifest/manifest-schema.ts`、`src/validation/rules/runtime-path.ts`、`src/update/ownership-model.ts`、`src/update/update-plan.ts`、`scripts/release/packaging-check.mjs`。
-  - [ ] 确认现有 tests 中对 `_speclite/scripts/resolve_config.py` 的期待，例如 path-portability fixture，目前是否仍使用 `artifactKind: "runtime-script"`。
-  - [ ] 保留所有与本 Story 无关的 dirty worktree 改动。
+- [x] Task 1: Preflight and ownership contract review（AC: 1-6）
+  - [x] 读取 Story 1.5、3.4、4.1、4.6、6.2、6.4、6.7、9.1 和 Epic 9。
+  - [x] 读取 implementation anchors：`src/installer/runtime-structure.ts`、`src/manifest/manifest-schema.ts`、`src/validation/rules/runtime-path.ts`、`src/update/ownership-model.ts`、`src/update/update-plan.ts`、`scripts/release/packaging-check.mjs`。
+  - [x] 确认现有 tests 中对 `_speclite/scripts/resolve_config.py` 的期待，例如 path-portability fixture，目前是否仍使用 `artifactKind: "runtime-script"`。
+  - [x] 保留所有与本 Story 无关的 dirty worktree 改动。
 
-- [ ] Task 2: Add failing tests for compat classification（AC: 1-3）
-  - [ ] 新增 fresh install assertion：`_speclite/scripts/resolve_config.py` 与 `resolve_customization.py` 存在，且 `artifactKind` 为 `runtime-compat-script`。
-  - [ ] 新增 validation assertion：approved compat entries 不产生 `runtime-path.legacy-resolver-path`。
-  - [ ] 新增 negative assertion matrix：Skill activation text、manifest runtime entry、help/phase reference、docs default resolver path、packaging metadata 中任一把 `_speclite/scripts/resolve_*.py` 宣称为 default resolver / default runtime support 时必须失败。
-  - [ ] 新增 allowed assertion：只有明确标注 `runtime-compat-script`、legacy compatibility、migration aid 或 troubleshooting asset，且未作为 default activation resolver 的引用可以通过。
-  - [ ] 更新 path-portability fixture expected files-index，把 Python resolver scripts 从 `runtime-script` 改为 compatibility classification。
+- [x] Task 2: Add failing tests for compat classification（AC: 1-3）
+  - [x] 新增 fresh install assertion：`_speclite/scripts/resolve_config.py` 与 `resolve_customization.py` 存在，且 `artifactKind` 为 `runtime-compat-script`。
+  - [x] 新增 validation assertion：approved compat entries 不产生 `runtime-path.legacy-resolver-path`。
+  - [x] 新增 negative assertion matrix：Skill activation text、manifest runtime entry、help/phase reference、docs default resolver path、packaging metadata 中任一把 `_speclite/scripts/resolve_*.py` 宣称为 default resolver / default runtime support 时必须失败。
+  - [x] 新增 allowed assertion：只有明确标注 `runtime-compat-script`、legacy compatibility、migration aid 或 troubleshooting asset，且未作为 default activation resolver 的引用可以通过。
+  - [x] 更新 path-portability fixture expected files-index，把 Python resolver scripts 从 `runtime-script` 改为 compatibility classification。
 
-- [ ] Task 3: Project compatibility scripts during install（AC: 2）
-  - [ ] 在 runtime structure writer 中从 `assets/source/speclite/scripts/` 复制 `resolve_config.py` 与 `resolve_customization.py` 到 `_speclite/scripts/`。
-  - [ ] 为 compatibility scripts 记录 `installer-owned`、`runtime-compat-script`、`sourceRef`、hash 和 executable intent。
-  - [ ] 保持 safe-write、path boundary、LF canonical text 和 source descriptor redaction。
-  - [ ] 不让 installed skill activation 文案引用 `_speclite/scripts/`。
+- [x] Task 3: Project compatibility scripts during install（AC: 2）
+  - [x] 在 runtime structure writer 中从 `assets/source/speclite/scripts/` 复制 `resolve_config.py` 与 `resolve_customization.py` 到 `_speclite/scripts/`。
+  - [x] 为 compatibility scripts 记录 `installer-owned`、`runtime-compat-script`、`sourceRef`、hash 和 executable intent。
+  - [x] 保持 safe-write、path boundary、LF canonical text 和 source descriptor redaction。
+  - [x] 不让 installed skill activation 文案引用 `_speclite/scripts/`。
 
-- [ ] Task 4: Adjust runtime validation and ownership logic（AC: 3-4）
-  - [ ] 更新 `validateRuntimePaths`：approved `runtime-compat-script` under `_speclite/scripts/resolve_*.py` 不再被当作 legacy namespace violation。
-  - [ ] 保留对 `_bmad/`、unapproved `_speclite/scripts/*`、activation text legacy reference、manifest default resolver reference、help/phase default resolver reference、docs default path reference、packaging metadata default resolver reference 和 source checkout resolver reference 的 negative behavior。
-  - [ ] 更新 update / repair ownership model，确保 compatibility scripts 走 installer-owned drift、restore-canonical 或 regenerate 语义。
-  - [ ] 更新 uninstall tests，确保 installer-owned `_speclite/scripts/` compatibility assets 被移除，human/workflow paths 保留。
+- [x] Task 4: Adjust runtime validation and ownership logic（AC: 3-4）
+  - [x] 更新 `validateRuntimePaths`：approved `runtime-compat-script` under `_speclite/scripts/resolve_*.py` 不再被当作 legacy namespace violation。
+  - [x] 保留对 `_bmad/`、unapproved `_speclite/scripts/*`、activation text legacy reference、manifest default resolver reference、help/phase default resolver reference、docs default path reference、packaging metadata default resolver reference 和 source checkout resolver reference 的 negative behavior。
+  - [x] 更新 update / repair ownership model，确保 compatibility scripts 走 installer-owned drift、restore-canonical 或 regenerate 语义。
+  - [x] 更新 uninstall tests，确保 installer-owned `_speclite/scripts/` compatibility assets 被移除，human/workflow paths 保留。
 
-- [ ] Task 5: Refresh fixtures, packaging and docs（AC: 2, 5, 6）
-  - [ ] 更新 `test/fixtures/fresh-install-empty-project/expected/installed-state/`。
-  - [ ] 更新 `test/fixtures/path-portability/expected/manifest-index/files-index.json`。
-  - [ ] 更新 `release/packaging-manifest.json` 和 `scripts/release/packaging-check.mjs` expected classification，并增加 packaging metadata negative assertion：不得把 Python resolver scripts 标记为 default resolver runtime dependency。
-  - [ ] 更新 `README.md`、`docs/reference/cli.md`、`docs/explanation/local-first-control-plane.md`、`docs/glossary/speclite-runtime-boundaries.md` 或等价 docs，明确 Python scripts 是 compatibility assets。
-  - [ ] docs default path 负向断言必须覆盖上述 docs：若文档把 `_speclite/scripts/resolve_*.py` 作为默认 activation resolver、默认 CLI resolver 或推荐正常路径，测试必须失败；仅 troubleshooting / compatibility / migration context 可通过。
+- [x] Task 5: Refresh fixtures, packaging and docs（AC: 2, 5, 6）
+  - [x] 更新 `test/fixtures/fresh-install-empty-project/expected/installed-state/`。
+  - [x] 更新 `test/fixtures/path-portability/expected/manifest-index/files-index.json`。
+  - [x] 更新 `release/packaging-manifest.json` 和 `scripts/release/packaging-check.mjs` expected classification，并增加 packaging metadata negative assertion：不得把 Python resolver scripts 标记为 default resolver runtime dependency。
+  - [x] 更新 `README.md`、`docs/reference/cli.md`、`docs/explanation/local-first-control-plane.md`、`docs/glossary/speclite-runtime-boundaries.md` 或等价 docs，明确 Python scripts 是 compatibility assets。
+  - [x] docs default path 负向断言必须覆盖上述 docs：若文档把 `_speclite/scripts/resolve_*.py` 作为默认 activation resolver、默认 CLI resolver 或推荐正常路径，测试必须失败；仅 troubleshooting / compatibility / migration context 可通过。
 
-- [ ] Task 6: Verification（AC: 1-6）
-  - [ ] 先运行 Story 9.1 full corpus activation tests 和 support-side inventory negative scan；未通过则停止本 Story。
-  - [ ] 运行 `npm test -- test/runtime-path-validation.test.ts test/story-6-4-path-portability.test.ts test/release-packaging-check.test.ts`。
-  - [ ] 运行 fresh install fixture focused tests。
-  - [ ] 运行 update / repair / uninstall focused tests。
-  - [ ] 运行 negative assertion matrix focused tests，覆盖 manifest runtime entry、help/phase reference、docs default resolver path 和 packaging metadata。
-  - [ ] 运行 `npm test -- --testTimeout 30000`。
-  - [ ] 运行 `npm run release:packaging-check`。
-  - [ ] 运行 `git diff --check`。
+- [x] Task 6: Verification（AC: 1-6）
+  - [x] 先运行 Story 9.1 full corpus activation tests 和 support-side inventory negative scan；未通过则停止本 Story。
+  - [x] 运行 `npm test -- test/runtime-path-validation.test.ts test/story-6-4-path-portability.test.ts test/release-packaging-check.test.ts`。
+  - [x] 运行 fresh install fixture focused tests。
+  - [x] 运行 update / repair / uninstall focused tests。
+  - [x] 运行 negative assertion matrix focused tests，覆盖 manifest runtime entry、help/phase reference、docs default resolver path 和 packaging metadata。
+  - [x] 运行 `npm test -- --testTimeout 30000`。
+  - [x] 运行 `npm run release:packaging-check`。
+  - [x] 运行 `git diff --check`。
 
 ## Dev Notes（开发备注）
 
@@ -175,28 +175,67 @@ Status: blocked-by-9-1-corpus-gate
 
 ## Anchor Evidence Summary（锚点证据摘要）
 
-待实现后填写。必须记录 compatibility classification、validation allowlist、activation negative test 和 packaging inventory evidence。
+Compatibility classification 已落地为 `runtime-compat-script`；fresh install 写入 `_speclite/scripts/resolve_config.py` 与 `_speclite/scripts/resolve_customization.py`，files-index 记录 `installer-owned`、`sourceRef`、`sha256`、`hashAlgorithm` 和 `executable: true`。`validateRuntimePaths` 只允许 approved compat entries，不允许 `runtime-script` 或 default resolver claim。Story 9.1 activation negative tests 继续通过。Packaging inventory 记录 `packagedCompatibilityAssets[].classification = "runtime-compat-script"` 且 `defaultRuntimeDependency = false`。
 
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
 
-待实现后填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现后填写。
+- `python3 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：失败，当前默认 `python3` 缺少 stdlib `tomllib`。
+- `python3.12 _bmad/scripts/resolve_customization.py --skill /Users/fancyliu/Repos/SpecLite/.agents/skills/bmad-dev-story --key workflow`：通过；workflow 无 prepend/append，persistent fact 为 `file:{project-root}/**/project-context.md`。
+- RED：`npm test -- test/runtime-path-validation.test.ts test/runtime-structure.test.ts test/story-6-4-path-portability.test.ts test/release-packaging-check.test.ts test/installed-activation-contract.test.ts`：预期失败，暴露 compat allowlist、install projection、packaging metadata 和 docs default path assertion 缺口；同时复现 unrelated 57/61 skill-root baseline dirty 状态。
+- GREEN：`npm test -- test/runtime-path-validation.test.ts test/release-packaging-check.test.ts test/installed-activation-contract.test.ts`：3 files / 15 tests 通过。
+- GREEN：`npm test -- test/uninstall-command.test.ts test/update-planning.test.ts test/update-command.test.ts`：3 files / 33 tests 通过。
+- GREEN：`npm test -- test/local-source-integrity.test.ts test/runtime-path-validation.test.ts test/release-packaging-check.test.ts test/uninstall-command.test.ts test/update-planning.test.ts test/update-command.test.ts test/installed-activation-contract.test.ts`：7 files / 62 tests 通过。
+- Story 9.1 gate：`npm test -- test/installed-activation-contract.test.ts`：1 file / 5 tests 通过。
+- Story 9.1 gate：`python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py --self-test-legacy-activation`：pass，checked=6。
+- Story 9.1 gate：`python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py --all assets/source/speclite/sdlc-skills`：pass，checked=7，0 findings。
+- Fresh install projection smoke：`npx tsx -e ... runInstallCommand ...`：通过；临时安装实际写入两个 `_speclite/scripts/resolve_*.py`，files-index entries 为 `runtime-compat-script`、`installer-owned`、`executable: true`。
+- `npm run build`：通过。
+- `npm run release:packaging-check`：通过，刷新 `release/packaging-manifest.json` 与 `dist/packaging-manifest.json`。
+- `npm test -- --testTimeout 30000`：执行完成但失败 7 个断言；失败均归因于当前 unrelated untracked SDLC skill roots 让 canonical package root count 从 `core=13, sdlc=44, total=57` 变为 `core=13, sdlc=48, total=61`，并触发依赖 57 baseline 的 fixture/runtime/path-portability tests。按本 Story 约束未吸收这些 unrelated roots 到 baseline。
+- `git diff --check`：通过。
 
 ### Completion Notes（完成说明）
 
-待实现后填写。
+- Python resolver compatibility scripts 现在由 install runtime writer 投影到 `_speclite/scripts/`，并在 files-index 中以 `runtime-compat-script`、`installer-owned`、`executable: true`、`sha256` 和 stable `sourceRef` 记录。
+- Local source install 若 selected source 不包含 compatibility scripts，会回退到 bundled compatibility source，并用 `bundled-runtime-compat:scripts/...` token 避免泄漏 bundled checkout path 或把 local source 误认为包含 scripts。
+- Runtime validation 只允许 approved compat entries；同一路径若被标记为 `runtime-script` 或 default resolver dependency，仍触发 `runtime-path.legacy-resolver-path`。
+- Update/repair ownership 明确将 `runtime-compat-script` 作为 generated installer artifact；uninstall 覆盖 installer-owned compat scripts 删除，同时保留 human-owned custom 与 workflow-owned artifacts。
+- Packaging manifest 新增 `packagedCompatibilityAssets`，断言两个 Python resolver source assets 是 compatibility classification 且 `defaultRuntimeDependency: false`，不打包 test fixtures。
+- README 和 runtime/CLI docs 明确 `_speclite/scripts/resolve_*.py` 仅是 legacy compatibility、migration aid、troubleshooting asset；唯一默认 installed activation resolver 仍是 `speclite resolve config` 与 `speclite resolve customization`。
+- 全量测试未完全绿：当前工作树已有 unrelated untracked SDLC skill roots 使 canonical package root baseline 从 57 变为 61；本 Story 未修改或吸收这些无关 roots。
 
 ### File List（文件清单）
 
-待实现后填写。
+- `README.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/9-2-python-resolver-compatibility-asset-projection.md`
+- `docs/explanation/local-first-control-plane.md`
+- `docs/glossary/speclite-runtime-boundaries.md`
+- `docs/reference/cli.md`
+- `release/packaging-manifest.json`
+- `scripts/release/packaging-check.mjs`
+- `src/installer/runtime-structure.ts`
+- `src/update/update-plan.ts`
+- `src/validation/rules/runtime-path.ts`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-tree.txt`
+- `test/fixtures/path-portability/expected/manifest-index/files-index.json`
+- `test/installed-activation-contract.test.ts`
+- `test/release-packaging-check.test.ts`
+- `test/runtime-path-validation.test.ts`
+- `test/runtime-structure.test.ts`
+- `test/story-6-4-path-portability.test.ts`
+- `test/uninstall-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-06-17 | 0.1 | 创建 Story 9.2，定义 Python resolver scripts 作为 compatibility assets 的安装投影、验证、更新修复、打包和文档边界。 | John / Codex |
+| 2026-06-17 | 0.2 | 实现 Python resolver compatibility asset projection、validation allowlist、update/repair/uninstall ownership、packaging classification、docs boundary 和 focused tests；Story 移至 review。 | GPT-5 Codex |

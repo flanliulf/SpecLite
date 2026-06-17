@@ -11,7 +11,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_speclite/config.toml` and resolve:
+Run `speclite resolve config --project-root {project-root}` and resolve merged runtime config fields:
 
 - `project_knowledge`
 - `user_name`

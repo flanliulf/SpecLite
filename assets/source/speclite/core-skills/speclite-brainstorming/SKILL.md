@@ -23,7 +23,7 @@ metadata:
     1. 完整读取并遵循 `references/workflow.md`。
     2. 在 workflow 要求读取步骤文件时，从 `references/steps/` 读取对应文件。
     3. 在 workflow 要求复制模板时，使用 `assets/brainstorming-template.md` 作为源模板。
-    4. 运行时配置从 `{project-root}/_speclite/config.toml` 读取，输出目录按 `[core].output_folder` 或 `[modules.sdlc]` 中的字段解析。
+    4. 运行时配置通过 `speclite resolve config --project-root {project-root}` 读取 merged runtime config 中的，输出目录按 `[core].output_folder` 或 `[modules.sdlc]` 中的字段解析。
     5. 完成输出文档时，在文档末尾追加 `本文档由 speclite-brainstorming Skill 自动生成` 标注。
 
 [注意事项]

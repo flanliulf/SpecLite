@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:49861edab5d11db2aa964e65b56939d7e413a6966d7ad2dc7bc0bb60688c718b",
+  "packageHash": "sha256:36ae68057b13a8394c9cd13bc29913b68dd5da8c37cc852f2253f404f0dfd38d",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/BMAD_SPECLITE_SKILL_MAPPING.md",
@@ -149,6 +149,13 @@
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer/references/validate-doc.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer/references/write-document.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/assets/tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/references/tech-stack-digger-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/SKILL.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/assets/architecture-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/assets/brownfield-planning-brief-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/assets/epics-template.md",
@@ -190,6 +197,27 @@
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/scripts/update_state.py",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/scripts/validate_outputs.py",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/assets/java-springboot-tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/references/java-springboot-tech-stack-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/assets/nodejs-tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/references/nodejs-tech-stack-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/assets/python-tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/references/python-tech-stack-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/assets/deep-dive-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/assets/index-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/assets/project-overview-template.md",
@@ -703,6 +731,13 @@
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer/references/validate-doc.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer/references/write-document.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/assets/tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/references/tech-stack-digger-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/SKILL.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/assets/architecture-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/assets/brownfield-planning-brief-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/assets/epics-template.md",
@@ -744,6 +779,27 @@
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/scripts/update_state.py",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/scripts/validate_outputs.py",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/assets/java-springboot-tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/references/java-springboot-tech-stack-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/assets/nodejs-tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/references/nodejs-tech-stack-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/assets/python-tech-stack-report-template.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/CHANGELOG.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/config.toml.example",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/customize.toml",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/references/python-tech-stack-workflow.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/SKILL.en.md",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/assets/deep-dive-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/assets/index-template.md",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/assets/project-overview-template.md",
@@ -1126,6 +1182,18 @@
     "dist/packaging-manifest.json",
     "package.json"
   ],
+  "packagedCompatibilityAssets": [
+    {
+      "path": "assets/source/speclite/scripts/resolve_config.py",
+      "classification": "runtime-compat-script",
+      "defaultRuntimeDependency": false
+    },
+    {
+      "path": "assets/source/speclite/scripts/resolve_customization.py",
+      "classification": "runtime-compat-script",
+      "defaultRuntimeDependency": false
+    }
+  ],
   "excludedFixtureDirectories": [
     "test/fixtures/",
     "fixtures/"
@@ -1160,6 +1228,10 @@
     },
     {
       "id": "runtime-assets-included",
+      "passed": true
+    },
+    {
+      "id": "python-resolver-compat-assets-classified",
       "passed": true
     },
     {

@@ -14,7 +14,7 @@ metadata:
     源入口说明：Edit an existing PRD. Use when the user says "edit this PRD".
 
 [核心能力]
-    - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并从 `{project-root}/_speclite/config.toml` 加载运行配置。
+    - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并通过 `speclite resolve config --project-root {project-root}` 加载 merged runtime config。
     - **源制品发现与上下文加载**：按 workflow 规约读取项目制品、配置字段、历史上下文和必要数据文件，保持源流程的输入发现语义。
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。
     - **模板化输出生成**：使用 assets 中的模板或示例骨架生成文档、报告、规格或交付产物，输出语言服从 `document_output_language`。
@@ -25,9 +25,9 @@ metadata:
     裸路径相对于 `{skill-root}` 解析；`{project-root}` 是目标项目工作目录；`{speclite-runtime-root}` 是 `{project-root}/_speclite`；`{skill-name}` 是目录 basename。
 
 [激活流程]
-    触发后先解析 `workflow`，执行 `activation_steps_prepend`，加载 `persistent_facts`，读取 `{project-root}/_speclite/config.toml`，按 `communication_language` 与用户沟通，并执行 `activation_steps_append`。配置文件缺失或关键字段为空时必须 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
+    触发后先解析 `workflow`，执行 `activation_steps_prepend`，加载 `persistent_facts`，运行 `speclite resolve config --project-root {project-root}`，按 `communication_language` 与用户沟通，并执行 `activation_steps_append`。配置文件缺失或关键字段为空时必须 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
 
-    customize fallback 顺序为 `{skill-root}/customize.toml`、`{speclite-runtime-root}/custom/{skill-name}.toml`、`{speclite-runtime-root}/custom/{skill-name}.user.toml`。缺失覆盖文件时跳过；标量覆盖，表深度合并，以 `code` 或 `id` 为键的表数组按键替换并追加，其他数组追加。`workflow.on_complete` 使用同一路径解析。
+    customization 必须通过 `speclite resolve customization --skill {skill-root} --project-root {project-root}` 读取 merged JSON；`workflow.on_complete` 使用 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete` 解析。默认 activation 不手写 TOML merge，不使用 `--human` 作为 machine input。
 
 [执行流程]
     1. 先完整阅读 `references/workflow-details.md`；该文件是从源入口转换后的权威工作流规约。随后按需读取 `references/workflow-details.md`、`references/data/prd-purpose.md`、`references/steps/step-e-01-discovery.md`、`references/steps/step-e-01b-legacy-conversion.md`、`references/steps/step-e-02-review.md`、`references/steps/step-e-03-edit.md` 等 reference 文件。

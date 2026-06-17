@@ -99,6 +99,12 @@ describe("runtime structure and IDE mirror creation", () => {
       ).rejects.toMatchObject({
         code: "ENOENT",
       });
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/scripts/resolve_config.py"), "utf8"),
+      ).resolves.toContain("Resolve SpecLite's central config");
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/scripts/resolve_customization.py"), "utf8"),
+      ).resolves.toContain("Resolve customization for a SpecLite skill");
 
       const manifest = await readJson(path.join(tempRoot, "_speclite/_config/manifest.yaml"));
       const skillIndex = await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json"));
@@ -145,8 +151,29 @@ describe("runtime structure and IDE mirror creation", () => {
       );
       const claudeSkillFileIds = mirrorSkillFileIds(filesIndex, ".claude/skills");
       const agentsSkillFileIds = mirrorSkillFileIds(filesIndex, ".agents/skills");
+      const compatScriptEntries = filesIndex.entries.filter((entry: { path: string }) =>
+        entry.path.startsWith("_speclite/scripts/resolve_"),
+      );
 
       expect(manifest).toMatchObject(expectedManifest);
+      expect(compatScriptEntries).toEqual([
+        expect.objectContaining({
+          path: "_speclite/scripts/resolve_config.py",
+          ownership: "installer-owned",
+          hashAlgorithm: "sha256",
+          executable: true,
+          artifactKind: "runtime-compat-script",
+          sourceRef: "assets/source/speclite/scripts/resolve_config.py",
+        }),
+        expect.objectContaining({
+          path: "_speclite/scripts/resolve_customization.py",
+          ownership: "installer-owned",
+          hashAlgorithm: "sha256",
+          executable: true,
+          artifactKind: "runtime-compat-script",
+          sourceRef: "assets/source/speclite/scripts/resolve_customization.py",
+        }),
+      ]);
       expect(canonicalSkillIds).toHaveLength(EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT);
       expect(new Set(canonicalSkillIds).size).toBe(EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT);
       expect(canonicalSkillIds).toEqual([...canonicalSkillIds].sort());

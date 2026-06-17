@@ -21,8 +21,8 @@ metadata:
 
 [执行流程]
     1. 解析用户 invocation 中的 `--model` 和 `--solo`。
-    2. 读取 `{project-root}/_speclite/config.toml`，解析 user_name 和 communication_language。
-    3. 运行 `python3 {speclite-runtime-root}/scripts/resolve_config.py --project-root {project-root} --key agents` 获取 agent roster。
+    2. 运行 `speclite resolve config --project-root {project-root}` 解析 merged runtime config 中的 user_name 和 communication_language。
+    3. 运行 `speclite resolve config --project-root {project-root} --key agents` 获取 agent roster。
     4. 搜索并读取相关 `**/project-context.md` 作为背景。
     5. 欢迎用户，展示 roster，询问要讨论的问题。
     6. 每轮根据用户消息选择 2-4 个 agents；用户点名时必须包含点名 agent。

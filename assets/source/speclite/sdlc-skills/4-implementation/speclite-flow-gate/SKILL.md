@@ -22,7 +22,7 @@ metadata:
 [Workflow（执行流程）]
     1. 完整阅读 `references/workflow-details.md`；该文件是四种 gate mode、结果枚举、报告格式和 HALT 规则的权威定义。遇到等价实现或固定路径歧义时，同时读取 `references/regression-scenarios.md`。
     2. 解析目标 mode 与目标对象：Story key、Story 文件路径、Epic 编号或下一 Epic 编号。
-    3. 加载 `{project-root}/_speclite/config.toml`、`sprint-status.yaml`、目标 Story/Epic、owning SPECs、相关源码和测试证据。
+    3. 加载 merged runtime config、`sprint-status.yaml`、目标 Story/Epic、owning SPECs、相关源码和测试证据。
     4. 按 `Contract -> Functional -> Evidence -> Guidance` 顺序做门控判断，并生成 `assets/report-template.md` 规定的报告。
     5. 只有 `PASS` 或 `PASS_EQUIVALENT` 允许后续 workflow 继续；其他结果必须先修正文档、实现或证据。
 

@@ -29,14 +29,14 @@ metadata:
 
 [执行流程]
     1. 先完整阅读 `references/activation.md` 与 `references/workflow-steps.md`；二者是完整操作规约，不能跳过或缩写执行。
-    2. 激活时解析 `workflow`、三层 customize、`workflow.persistent_facts` 与运行项目根下的 `{project-root}/_speclite/config.toml`；本 Skill 目录中的 `config.toml.example` 仅作字段结构参考。
+    2. 激活时解析 `workflow`、三层 customize、`workflow.persistent_facts` 与运行项目根下的 merged runtime config；本 Skill 目录中的 `config.toml.example` 仅作字段结构参考。
     3. 使用 `assets/epics-template.md` 初始化输出文件，并严格按 `references/workflow-steps.md` 的 Step 1 → Step 4 顺序推进。
     4. 每个步骤必须完整读取、顺序执行、保存状态；遇到菜单必须 HALT，只有用户选择 `C` 才能进入下一步。
     5. 完成时保存 `{planning_artifacts}/epics.md`，执行 `workflow.on_complete`（若非空），并给出后续开发、Story 创建或评审建议。
 
 [注意事项]
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-create-epics-and-stories`。
-    - `{speclite-runtime-root}` 固定表示 `{project-root}/_speclite`；项目运行配置只从 `{project-root}/_speclite/config.toml` 读取。
+    - `{speclite-runtime-root}` 固定表示 `{project-root}/_speclite`；项目运行配置只通过 `speclite resolve config --project-root {project-root}` 读取 merged runtime config 中的。
     - `config.toml.example` 只是参考示例，禁止作为 runtime fallback。
     - `customize.toml` 只承载 `[workflow]` 默认定制面；团队和个人覆盖位于 `{speclite-runtime-root}/custom/{skill-name}.toml` 与 `{skill-name}.user.toml`。
     - 不得替用户凭空生成需求；必须基于已发现文档和用户确认推进。

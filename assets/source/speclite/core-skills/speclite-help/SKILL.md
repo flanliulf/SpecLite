@@ -21,7 +21,7 @@ metadata:
 
 [执行流程]
     1. 读取 `{speclite-runtime-root}/_config/speclite-help.csv`；如不存在，尝试读取 `{project-root}/_speclite/_config/speclite-help.csv`。
-    2. 读取 `{project-root}/_speclite/config.toml` 和 `{project-root}/_speclite/config.user.toml`，解析 output-location、communication_language 和 project_knowledge。
+    2. 运行 `speclite resolve config --project-root {project-root}` 解析 merged runtime config 中的 output-location、communication_language 和 project_knowledge。
     3. 按 catalog 的 `outputs` pattern 搜索已完成产物；必要时读取内容作为推荐依据。
     4. 如果 project_knowledge 指向存在路径，读取相关文件作为项目上下文。
     5. 对 `_meta` 行中的模块文档 URL 或路径，按需读取或抓取，用于回答一般问题。

@@ -14,7 +14,7 @@ metadata:
 [Core Capabilities]
     - **Agent object detection**: Identify Agent definition packages centered on persona, `[agent]`, menu dispatch, and persistent identity.
     - **Persona preservation**: Preserve role name, title, icon, role, identity, communication_style, principles, persistent_facts, activation steps, and persistent identity rules.
-    - **Runtime model conversion**: Convert `_bmad/scripts`, `_bmad/custom`, and `_bmad/bmm/config.yaml` to `{speclite-runtime-root}/scripts`, `{speclite-runtime-root}/custom`, and `{project-root}/_speclite/config.toml`.
+    - **Runtime model conversion**: Convert `_bmad/scripts`, `_bmad/custom`, and `_bmad/bmm/config.yaml` to `{speclite-runtime-root}/scripts`, `{speclite-runtime-root}/custom`, and merged runtime config.
     - **Agent customization generation**: Preserve the `[agent]` namespace and structural merge rules in `customize.toml`; never convert it into `[workflow]`.
     - **Menu mapping and dependency planning**: Map `skill = "bmad-*"` menu items only to existing `speclite-*` targets, and record unresolved targets as risks.
     - **Prompt file classification**: Move executable prompt Markdown files from the Agent root into `references/` or `assets/` and update `{skill-root}` references.

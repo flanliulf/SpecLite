@@ -47,6 +47,10 @@ SpecLite 的核心产物是本地项目中的方法论执行系统。local-first
 
 `resolve config` 和 `resolve customization` 属于 runtime support API surface，主要给 installed skills 和维护者排查使用。默认 `resolve` stdout 保持 pure JSON；只有显式 `--human` 时才渲染 support frame。
 
+## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
+
+安装后的 `_speclite/scripts/resolve_*.py` 是 legacy compatibility、migration aid 和 troubleshooting asset。它们属于 installer-owned compatibility projection，并通过 `files-index.json` 的 `runtime-compat-script` classification 管理。唯一默认 activation resolver 是 Node CLI 的 `speclite resolve config` 和 `speclite resolve customization`；这些 Python scripts 不构成默认 runtime dependency，也不应作为正常 workflow 激活入口。
+
 ## Human Output Layer（人类输出层）
 
 当前 CLI 的常用 human-readable output 使用 outcome-oriented frame。它的目标是让人快速回答三个问题：

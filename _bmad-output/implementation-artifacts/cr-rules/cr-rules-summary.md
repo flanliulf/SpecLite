@@ -56,11 +56,14 @@
 | CR-PROCESS-01 | 全仓 typecheck 既有债务必须用 Story touched surface 过滤裁决 | 5-5 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-TEST-03 | Semantic JSON fixture comparison 不得依赖对象字段插入顺序 | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-TEST-04 | Stable fixture normalization 只能覆盖 schema-declared timestamp fields | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-05 | Legacy activation negative pattern 必须用 canonical samples 自测 | 9-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-06 | Activation contract corpus discovery 必须结构化覆盖 canonical 与 installed mirror | 9-1 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-API-27 | Manifest 枚举字段必须绑定 executable registry schema | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-28 | Normal update apply 成功后必须同步 installed-state projection | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-29 | Conflict failure 输出必须同时保持 structured step state 与准确 summary | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-30 | 环境级 terminal profile 禁色必须优先于显式 false option | 8-9 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-03 | Companion SPEC mirror 必须同步契约收敛 wording | 6-6 | 5/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-16 | Compatibility script repair 必须绑定 artifact kind、target path 与 sourceRef | 9-2 | 8/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -1985,6 +1988,75 @@
 
 - **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
 
+### Story 9-2 / 2026-06-17
+
+- **Story**: 9-2
+- **分析来源**:
+  - `9-2-code-review-summary-20260617-round-1.md`
+  - `9-2-code-review-evaluation-20260617-round-1.md`
+  - `9-2-code-review-summary-20260617-round-2.md`
+  - `9-2-code-review-evaluation-20260617-round-2.md`
+  - `9-2-code-review-summary-20260617-round-3.md`
+  - `9-2-code-review-evaluation-20260617-round-3.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：fresh install 投影的 Python compatibility scripts 已记录为 installer-owned `runtime-compat-script`，但 `update --repair` 仍只能读取 project-relative `sourceRef`，无法从 package bundled source 恢复 canonical bytes。
+  - Round 1 fixer 已补充 bundled source repair resolution 和 focused tests；Round 2 reviewer/evaluator 随后确认核心场景关闭，但发现新 P1：allowlist 只绑定 `sourceRef`，未绑定 target path，可能把 resolver bytes 写入非 resolver `_speclite/scripts/*` path。
+  - Round 2 fixer 已将 `runtime-compat-script` repair source resolution 收紧为 target path 与 sourceRef 成对匹配；Round 3 reviewer/evaluator 确认 Round 1/2 findings 均关闭，新增 finding 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按外层 orchestrator 授权执行默认保守决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE、Story 文档、源码或 CR 进度文件。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Compatibility script repair 必须绑定 artifact kind、target path 与 sourceRef | 通过 | 8/12 | rules-summary | 用户本次授权默认保守决策：record-only |
+
+### 提炼规则
+
+#### CR-SEC-16：Compatibility script repair 必须绑定 artifact kind、target path 与 sourceRef
+
+- **来源问题**: Story 9.2 首轮实现把 Python resolver compatibility scripts 作为 installer-owned `runtime-compat-script` 投影到 fresh install，但 explicit repair 的 canonical bytes 读取只依赖 project-relative `sourceRef`，导致 canonical sourceRef 与 `bundled-runtime-compat:*` fallback sourceRef 均不可恢复。Round 1 修复后又暴露 allowlist 只绑定 `sourceRef` 而不绑定 target path，schema-valid 但语义错误的 files-index entry 可让 `update --repair --yes` 把 resolver bytes 写入非 resolver `_speclite/scripts/*` path。
+- **CR 证据**:
+  - `9-2-code-review-summary-20260617-round-1.md`: Finding #1 指出 `readRepairCandidateBytes` 只委托 `readSourceEvidence`，fresh install 目标项目通常不包含 `assets/source/speclite/scripts/resolve_*.py`，`bundled-runtime-compat:scripts/...` 也不是 project-relative path。
+  - `9-2-code-review-evaluation-20260617-round-1.md`: evaluator 确认该问题违反 AC4 repair ownership lifecycle，并要求覆盖 canonical sourceRef 与 `bundled-runtime-compat:*` fallback sourceRef repair。
+  - `9-2-code-review-summary-20260617-round-2.md`: Finding #1 指出 Round 1 修复只校验 allowlisted `sourceRef` / scriptName，未校验 `entry.path` / `action.affectedPath` 必须是 approved resolver target path。
+  - `9-2-code-review-evaluation-20260617-round-2.md`: evaluator 确认需要将 repair allowlist 同时绑定 `sourceRef` 与 target path，非 resolver `_speclite/scripts/*` target path 即使 sourceRef allowlisted 也不得写入。
+  - `9-2-code-review-evaluation-20260617-round-3.md`: evaluator 确认 `readRepairCandidateBytes` 已要求 `artifactKind === "runtime-compat-script"`、resolver `sourceRef` 与 `targetPath === "_speclite/scripts/${scriptName}"` 成对匹配；positive 与 negative focused tests 均已覆盖。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中连续两轮暴露 repair source resolution 边界问题：先缺 bundled source resolution，再缺 target/sourceRef 配对；Round 3 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 `speclite update --repair`、installer-owned runtime compatibility assets、files-index sourceRef 消费和 repair apply 写入边界。 |
+  | 风险等级 | 2 | source evidence 读取失败会破坏 AC4 explicit repair；sourceRef 未绑定 target path 又可能把 allowlisted bytes 写入错误 installer-owned path。 |
+  | 根因稳定性 | 1 | 将 persisted metadata 的 `artifactKind`、`sourceRef` 与实际 target path 分开校验，是 update/repair source resolution 中稳定易复现的实现习惯风险。 |
+  | 可执行性 | 2 | 可写成成对 allowlist 检查，并用 positive repair tests 与 malformed files-index negative test 自动验证。 |
+  | 文档缺口 | 1 | 既有 `CR-SEC-09` 覆盖 classifier 优先级，`CR-API-20` 覆盖 source trust fail closed，但尚未沉淀 compatibility repair 中 artifact kind、target path 与 sourceRef 三者成对校验。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: `runtime-compat-script`、installer-owned compatibility assets、`update --repair` source resolution、files-index repair planning/apply，以及后续任何从 package bundled source 恢复 canonical bytes 的 installer-owned asset。
+- **规避指南**:
+  - 不得只凭 allowlisted `sourceRef` 或 `artifactKind` 就读取 bundled canonical bytes 并写入 `action.affectedPath`。
+  - 不得让 malformed-but-schema-valid files-index entry 把 resolver bytes 恢复到非 approved resolver target path。
+- **最佳实践**:
+  - repair source resolution 必须同时证明 asset type、target path 与 sourceRef 成对匹配；positive tests 覆盖 approved target 的 deleted/drifted repair，negative tests 覆盖非 approved target 即使 sourceRef allowlisted 也保持 conflict / `missing-source-evidence` 且不写入。
+- **全局文档建议**:
+  - 暂不建议本次直接修改 `_bmad-output/project-context.md`、architecture、AGENTS 或 CLAUDE。该规则总分达到 8/12，但适用范围偏 update/repair compatibility asset 技术域，且已有全局/CR 规则覆盖更 broad 的 ownership、source evidence 和 path-safety 原则；后续若整理 update/repair 专章，可考虑把“installer-owned repair source 必须绑定 target path 与 source evidence”作为实现检查点补入。
+- **本次落地**:
+  - Round 1 fixer 已修复 bundled compatibility source repair；Round 2 fixer 已修复 target path/sourceRef 配对；Round 3 evaluator 确认关闭。
+  - focused verification 记录包括 `npm test -- --run test/update-planning.test.ts` 通过，`test/update-planning.test.ts` 覆盖 approved resolver repair、`bundled-runtime-compat:*` fallback sourceRef repair 和非 resolver target path negative case。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 3 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
 ### Story 6-6 / 2026-06-02
 
 - **Story**: 6-6
@@ -2881,6 +2953,110 @@
   - 不建议本次升格到 `_bmad-output/project-context.md`、`CONTEXT.md` 或 `AGENTS.md`。现有 `docs/reference/cli-human-output-matrix.md` 已覆盖 broad color policy 和 dependency/import boundary，本条是 Story 8.9 暴露出的实现检查点，评分 7/12，按阈值进入 rules-summary 即可。
 - **本次落地**:
   - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 9-1 / 2026-06-17
+
+- **Story**: 9-1
+- **分析来源**:
+  - `9-1-code-review-summary-20260617-round-1.md`
+  - `9-1-code-review-evaluation-20260617-round-1.md`
+  - `9-1-code-review-summary-20260617-round-2.md`
+  - `9-1-code-review-evaluation-20260617-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 P1 `patch` findings：`check_agent_skill.py` 的 legacy activation regex 双重转义导致 `RUNTIME-03` 漏报；`test/installed-activation-contract.test.ts` 的 fixed suffix corpus 未覆盖全量 `references/**/*.md` 与 installed mirror。
+  - Fixer 已修复 `LEGACY_ACTIVATION_PATTERN` 并新增 `--self-test-legacy-activation`；同时将 activation contract test 改为结构化扫描 canonical `SKILL*.md`、`references/**/*.md`，并在临时 install 后扫描 `.agents/skills` 与 `.claude/skills` mirror。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户授权执行默认保守决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE、Story 文档、源码或 CR 进度文件。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Legacy activation negative pattern 必须用 canonical samples 自测 | 通过 | 7/12 | rules-summary | 用户本次授权默认保守决策：record-only |
+| Activation contract corpus discovery 必须结构化覆盖 canonical 与 installed mirror | 通过 | 8/12 | rules-summary | 用户本次授权默认保守决策：record-only |
+
+### 提炼规则
+
+#### CR-TEST-05：Legacy activation negative pattern 必须用 canonical samples 自测
+
+- **来源问题**: Story 9.1 首轮实现中，`check_agent_skill.py` 的 `LEGACY_ACTIVATION_PATTERN` 使用 Python raw string 但写入双重转义，导致 `resolve_customization.py`、`resolve_config.py`、`python3 scripts/resolve_config.py` 和 `{project-root}/_speclite/config.toml` 等 legacy activation 文案无法被 `RUNTIME-03` 命中，agent lint 产生假绿。
+- **CR 证据**:
+  - `9-1-code-review-summary-20260617-round-1.md`: Finding #1 指出 legacy activation regex 对目标字符串全部返回 `False`，导致 AC5 lint gate 漏报。
+  - `9-1-code-review-evaluation-20260617-round-1.md`: evaluator 确认该问题为 P1，要求修复 raw regex 转义并增加最小负向验证。
+  - `9-1-code-review-evaluation-20260617-round-2.md`: evaluator 确认当前 pattern、sample 列表与 `RUNTIME-03` 调用链完整，`--self-test-legacy-activation` 通过。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 1 | 影响 agent lint 的 `RUNTIME-03` negative gate、canonical persona Agent activation 迁移和 release packaging 前置检查。 |
+  | 风险等级 | 2 | lint 假绿会允许 legacy Python resolver 或单文件 config activation 文案重新进入 installed skills，导致安装后 runtime 失败或 contract 退化。 |
+  | 根因稳定性 | 1 | regex 转义与 negative gate 样例脱节是 lint rule 扩展中可复现的实现习惯风险。 |
+  | 可执行性 | 2 | 可要求每个 legacy negative pattern 配套 canonical bad samples 和脚本级 self-test，并在 CR/release gate 中运行。 |
+  | 文档缺口 | 0 | 既有 `CR-API-14` 已沉淀 installed activation 必须走 `speclite resolve` runtime entry；本条是 lint gate 实现检查点，不重复升格。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: `speclite-agent-lint`、activation protocol negative gate、legacy resolver / single-file config 文案扫描，以及后续新增 lint regex 的 self-test 设计。
+- **规避指南**:
+  - 不得只凭 lint rule 存在就认为 negative gate 生效；legacy activation pattern 必须用真实 canonical bad samples 证明会命中。
+  - 不得在 Python raw regex 中使用会匹配字面反斜杠的双重转义来表达 `.`、`\s` 等 regex 语义。
+- **最佳实践**:
+  - 为每个 runtime activation negative pattern 维护最小 canonical sample set；提供可单独运行的 self-test，并让 focused CR 验证同时覆盖 sample 命中和正常 corpus 0 findings。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；全局文档已有 activation runtime 总原则，本条作为 Story 9.1 暴露出的 lint implementation checkpoint 沉淀。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；`--self-test-legacy-activation` 通过 6 条 legacy activation samples。
+- **同步状态**: 已写入规则总结
+
+#### CR-TEST-06：Activation contract corpus discovery 必须结构化覆盖 canonical 与 installed mirror
+
+- **来源问题**: Story 9.1 首轮实现中，`test/installed-activation-contract.test.ts` 使用固定 suffix 白名单定义 full corpus，仅覆盖少量 `SKILL*.md` 与特定 reference 文件，遗漏大量 canonical `references/**/*.md`，且没有对临时安装后的 `.agents/skills` / `.claude/skills` mirror 使用同一 negative scan。
+- **CR 证据**:
+  - `9-1-code-review-summary-20260617-round-1.md`: Finding #2 指出当前 corpus 只覆盖 29/226 个 canonical `references/**/*.md`，197 个 reference markdown 未被扫描。
+  - `9-1-code-review-evaluation-20260617-round-1.md`: evaluator 确认该问题违反 Story AC5 / Task 2 / Task 5，要求结构化扫描 canonical `SKILL*.md`、全量 `references/**/*.md` 和 installed mirror。
+  - `9-1-code-review-summary-20260617-round-2.md`: reviewer 确认 discovery 覆盖 326 个 contract files，missed references 为 0，并扫描临时 install 后的 `.agents/skills` 与 `.claude/skills` mirror。
+  - `9-1-code-review-evaluation-20260617-round-2.md`: evaluator 确认 focused Vitest 通过，Round 1 finding 已关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭。 |
+  | 影响范围 | 2 | 同时影响 canonical source skills、workflow references、fresh install mirror、`.agents/skills` 与 `.claude/skills` activation contract。 |
+  | 风险等级 | 2 | suffix 白名单遗漏会让 legacy resolver 文案绕过 release gate，造成 installed skill runtime contract 回退。 |
+  | 根因稳定性 | 1 | 手工 suffix 白名单容易随新增 reference / terminal step 文件漂移，是 corpus gate 中稳定可复现的流程缺口。 |
+  | 可执行性 | 2 | 可写成结构化 discovery 规则，并用 missed-reference 统计、temporary install mirror scan 和 negative regex assertion 自动检查。 |
+  | 文档缺口 | 0 | Epic 9 / Story 9.1 已有 full corpus release gate 要求，本条是测试实现方式的 CR 检查点，不重复写入全局文档。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: installed activation contract tests、canonical skill corpus release gate、fresh install mirror verification、workflow terminal step/reference 文件 negative scan。
+- **规避指南**:
+  - 不得用固定 suffix 白名单冒充 full corpus；新增 reference markdown、localized `SKILL*.md` 或 terminal step 文件时不得依赖人工同步测试白名单。
+  - 不得只扫描 canonical source 而跳过临时 install 后的 `.agents/skills` / `.claude/skills` mirrored activation surface。
+- **最佳实践**:
+  - 使用结构化 file discovery 覆盖 canonical `SKILL*.md`、所有 `references/**/*.md` 和 installed mirror 中对应文件；测试中保留 missed-reference 统计或等价 guard，并对 canonical 与 mirror 复用同一 legacy activation negative assertion。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；虽然总分为 8/12，但文档缺口为 0，且规则适用范围偏测试 gate 实现。本次按阈值与用户授权仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；focused `npm test -- test/installed-activation-contract.test.ts` 通过。
 - **同步状态**: 已写入规则总结
 
 #### 05 TODO Tracker 交接

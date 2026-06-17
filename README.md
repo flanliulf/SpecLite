@@ -132,7 +132,11 @@ NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
 | `speclite resolve config` | Runtime support command，用于解析项目 config；默认 stdout 保持 pure JSON，可显式加 `--human` 查看排查用 support output。 |
 | `speclite resolve customization` | Runtime support command，用于解析 skill customization；默认 stdout 保持 pure JSON，可显式加 `--human` 查看排查用 support output。 |
 
-`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。未传 `--human` 时，missing key 仍输出 `{}`、exit code 为 `0`、stderr 为空，确保自动化和 installed skills 依赖的 contract 不变。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](docs/how-to/manage-installed-project.md)。
+`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。未传 `--human` 时，missing key 仍输出 `{}`、exit code 为 `0`、stderr 为空，确保自动化和 installed skills 依赖的 contract 不变。已安装 Skill 激活前必须能在当前 AI 会话 `PATH` 中执行 `speclite`；不可用时应暴露或安装 Node CLI 后重试，不回退 Python resolver 或单独读取 `_speclite/config.toml`。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](docs/how-to/manage-installed-project.md)。
+
+## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
+
+Fresh install 会把 `_speclite/scripts/resolve_*.py` 写入目标项目，并在 `files-index.json` 中标记为 `runtime-compat-script`。这些 Python scripts 只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 Skill activation path，也不是默认 CLI resolver runtime dependency。已安装 skills 的唯一默认 resolver 是 Node CLI：`speclite resolve config` 和 `speclite resolve customization`。
 
 `install` 的默认 human-readable output 使用 `zh-CN`。`speclite install /path/to/project --yes` 是默认无交互安装；需要自定义 modules、config 或 IDE targets 时使用 `--yes --interactive`。安全预览会展示 target project、目标路径和命令执行目录，并让 `Next Actions` 使用可从原执行目录复制的 target。英文输出可用 `--locale en-US` 或 `SPECLITE_LOCALE=en-US`，JSON 输出不受 locale 影响，也不包含 human-only 的目标绝对路径上下文。
 

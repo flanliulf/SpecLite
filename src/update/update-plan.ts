@@ -1,5 +1,6 @@
 import { readFile, unlink } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { resolveProjectConfig } from "../config/config-reader.js";
 import { resolveSkillCustomization } from "../config/customization-reader.js";
@@ -28,6 +29,11 @@ import {
 import { classifyOwnership } from "./ownership-model.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry } from "../ide/adapter-registry.js";
 import { isCanonicalPackageHashFile } from "../validation/rules/ide-mirror.js";
+
+const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const BUNDLED_SOURCE_DISPLAY_ROOT = "assets/source/speclite";
+const COMPAT_RUNTIME_SCRIPTS = new Set(["resolve_config.py", "resolve_customization.py"]);
+const BUNDLED_RUNTIME_COMPAT_SOURCE_PREFIX = "bundled-runtime-compat:scripts/";
 
 export type UpdatePlanningResult<TData extends UpdateCommandData | RepairCommandData> = {
   data: TData;
@@ -218,7 +224,9 @@ export async function planRepair(input: {
       if (conflict.ownership === "installer-owned" && conflict.reason === "installer-owned-drift") {
         const sourceBytes = await readRepairCandidateBytes({
           projectRoot: input.projectRoot,
+          targetPath: entry.path,
           sourceRef: entry.sourceRef,
+          artifactKind: entry.artifactKind,
         });
         if (sourceBytes === undefined) {
           conflicts.push(createMissingSourceEvidenceConflict({ entry, currentHash }));
@@ -556,9 +564,35 @@ async function readSourceEvidence(input: {
 
 async function readRepairCandidateBytes(input: {
   projectRoot: string;
+  targetPath: string;
   sourceRef: string;
+  artifactKind: string;
 }): Promise<Buffer | undefined> {
+  if (input.artifactKind === "runtime-compat-script") {
+    const scriptName = compatRuntimeScriptName(input.sourceRef);
+    if (scriptName === undefined || input.targetPath !== `_speclite/scripts/${scriptName}`) {
+      return undefined;
+    }
+
+    try {
+      return await readFile(path.join(PACKAGE_ROOT, BUNDLED_SOURCE_DISPLAY_ROOT, "scripts", scriptName));
+    } catch {
+      return undefined;
+    }
+  }
+
   return readSourceEvidence(input);
+}
+
+function compatRuntimeScriptName(sourceRef: string): string | undefined {
+  const canonicalPrefix = `${BUNDLED_SOURCE_DISPLAY_ROOT}/scripts/`;
+  const scriptName = sourceRef.startsWith(canonicalPrefix)
+    ? sourceRef.slice(canonicalPrefix.length)
+    : sourceRef.startsWith(BUNDLED_RUNTIME_COMPAT_SOURCE_PREFIX)
+      ? sourceRef.slice(BUNDLED_RUNTIME_COMPAT_SOURCE_PREFIX.length)
+      : undefined;
+
+  return scriptName !== undefined && COMPAT_RUNTIME_SCRIPTS.has(scriptName) ? scriptName : undefined;
 }
 
 function shouldRequireSourceEvidence(sourceRef: string): boolean {
@@ -887,6 +921,7 @@ function isGeneratedInstallerArtifact(entry: FilesIndex["entries"][number]): boo
     entry.artifactKind === "phase-coverage" ||
     entry.artifactKind === "runtime-config" ||
     entry.artifactKind === "runtime-script" ||
+    entry.artifactKind === "runtime-compat-script" ||
     entry.artifactKind === "project-custom-stub" ||
     entry.artifactKind === "generated-control"
   ) {
@@ -960,7 +995,9 @@ async function applyRepairActions(input: {
 
     const sourceBytes = await readRepairCandidateBytes({
       projectRoot: input.projectRoot,
+      targetPath: action.affectedPath,
       sourceRef: entry.sourceRef,
+      artifactKind: entry.artifactKind,
     });
     if (sourceBytes === undefined) {
       return {

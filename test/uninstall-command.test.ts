@@ -15,10 +15,17 @@ describe("uninstall command safety", () => {
       await mkdir(path.join(tempRoot, "_speclite/custom"), { recursive: true });
       await mkdir(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement"), { recursive: true });
       await mkdir(path.join(tempRoot, "_speclite/scripts/tool"), { recursive: true });
+      await mkdir(path.join(tempRoot, "_speclite/scripts"), { recursive: true });
       await mkdir(path.join(tempRoot, "_speclite-output/reports"), { recursive: true });
       await writeFile(path.join(tempRoot, "_speclite/config.toml"), "installer config\n", "utf8");
       await writeFile(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement/runner.mjs"), "runner\n", "utf8");
       await writeFile(path.join(tempRoot, "_speclite/scripts/tool/run.mjs"), "tool runner\n", "utf8");
+      await writeFile(path.join(tempRoot, "_speclite/scripts/resolve_config.py"), "compat config\n", "utf8");
+      await writeFile(
+        path.join(tempRoot, "_speclite/scripts/resolve_customization.py"),
+        "compat customization\n",
+        "utf8",
+      );
       await writeFile(path.join(tempRoot, "_speclite/custom/config.toml"), "human custom\n", "utf8");
       await writeFile(path.join(tempRoot, "_speclite-output/reports/review.md"), "workflow artifact\n", "utf8");
       await writeFilesIndex(tempRoot);
@@ -33,6 +40,8 @@ describe("uninstall command safety", () => {
       expect(parsed.data.removedPaths).toEqual([
         "_speclite/config.toml",
         "_speclite/hooks/flow-gate-enforcement/runner.mjs",
+        "_speclite/scripts/resolve_config.py",
+        "_speclite/scripts/resolve_customization.py",
         "_speclite/scripts/tool",
       ]);
       expect(parsed.data.preservedPaths).toEqual([
@@ -41,6 +50,12 @@ describe("uninstall command safety", () => {
       ]);
       await expect(stat(path.join(tempRoot, "_speclite/config.toml"))).rejects.toMatchObject({ code: "ENOENT" });
       await expect(stat(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement/runner.mjs"))).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+      await expect(stat(path.join(tempRoot, "_speclite/scripts/resolve_config.py"))).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+      await expect(stat(path.join(tempRoot, "_speclite/scripts/resolve_customization.py"))).rejects.toMatchObject({
         code: "ENOENT",
       });
       await expect(stat(path.join(tempRoot, "_speclite/scripts/tool"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -90,6 +105,26 @@ async function writeFilesIndex(projectRoot: string): Promise<void> {
             executable: false,
             artifactKind: "installer-directory",
             sourceRef: "generated:installer-directory",
+          },
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: "_speclite/scripts/resolve_config.py",
+            ownership: "installer-owned",
+            hash: hashBytes("compat config\n"),
+            hashAlgorithm: "sha256",
+            executable: true,
+            artifactKind: "runtime-compat-script",
+            sourceRef: "assets/source/speclite/scripts/resolve_config.py",
+          },
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: "_speclite/scripts/resolve_customization.py",
+            ownership: "installer-owned",
+            hash: hashBytes("compat customization\n"),
+            hashAlgorithm: "sha256",
+            executable: true,
+            artifactKind: "runtime-compat-script",
+            sourceRef: "assets/source/speclite/scripts/resolve_customization.py",
           },
           {
             schemaVersion: "speclite.files-index.v1",

@@ -63,6 +63,26 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/scripts/resolve_config.py",
+      "ownership": "installer-owned",
+      "hash": "sha256:2cc2aa22a8ca42ab4ccc3e2610bfbbe6cb501f3e5cee01263454be254005f2ca",
+      "hashAlgorithm": "sha256",
+      "executable": true,
+      "artifactKind": "runtime-compat-script",
+      "sourceRef": "assets/source/speclite/scripts/resolve_config.py"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": "_speclite/scripts/resolve_customization.py",
+      "ownership": "installer-owned",
+      "hash": "sha256:07c7d862629a89f4bad890a016de8e38362884e7d454cd4a0e3dda82d80ec6fd",
+      "hashAlgorithm": "sha256",
+      "executable": true,
+      "artifactKind": "runtime-compat-script",
+      "sourceRef": "assets/source/speclite/scripts/resolve_customization.py"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/custom/config.toml",
       "ownership": "human-owned",
       "hash": "sha256:b7a7ab64db2ec4ee697d9d03aeedf285f1b964cf73750092066c66e378ce4107",

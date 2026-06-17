@@ -14,6 +14,9 @@ _speclite/hooks/
 _speclite/hooks/flow-gate-enforcement/
 _speclite/hooks/flow-gate-enforcement/hook-manifest.json
 _speclite/hooks/flow-gate-enforcement/runner.mjs
+_speclite/scripts/
+_speclite/scripts/resolve_config.py
+_speclite/scripts/resolve_customization.py
 _speclite-output/
 _speclite-output/devops-artifacts/
 _speclite-output/devops-artifacts/ci-cd/

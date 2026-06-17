@@ -29,14 +29,14 @@ metadata:
 
 [Execution Flow]
     1. First read `references/activation.md` and `references/workflow-steps.md` in full; together they are the complete operating specification and must not be skipped or summarized during execution.
-    2. During activation, resolve `workflow`, three-tier customize, `workflow.persistent_facts`, and the target project's runtime `{project-root}/_speclite/config.toml`; this Skill directory only keeps `config.toml.example` as a field reference.
+    2. During activation, resolve `workflow`, three-tier customize, `workflow.persistent_facts`, and the target project's runtime merged runtime config; this Skill directory only keeps `config.toml.example` as a field reference.
     3. Initialize the output file from `assets/epics-template.md`, then proceed strictly through Step 1 → Step 4 in `references/workflow-steps.md`.
     4. Each step must be read completely, followed in order, and saved with state; at menus, HALT and proceed only when the user chooses `C`.
     5. On completion, save `{planning_artifacts}/epics.md`, run `workflow.on_complete` if non-empty, and provide next-step guidance for development, Story creation, or review.
 
 [Notes]
     - Directory name and YAML `name` must stay aligned in kebab-case: `speclite-create-epics-and-stories`.
-    - `{speclite-runtime-root}` always means `{project-root}/_speclite`; runtime project configuration is read only from `{project-root}/_speclite/config.toml`.
+    - `{speclite-runtime-root}` always means `{project-root}/_speclite`; runtime project configuration is read only from merged output of `speclite resolve config --project-root {project-root}`.
     - `config.toml.example` is a reference only and must not be used as runtime fallback.
     - `customize.toml` only carries the default `[workflow]` customization surface; team and personal overrides live at `{speclite-runtime-root}/custom/{skill-name}.toml` and `{skill-name}.user.toml`.
     - Do not invent requirements for the user; proceed from discovered documents and user confirmation.

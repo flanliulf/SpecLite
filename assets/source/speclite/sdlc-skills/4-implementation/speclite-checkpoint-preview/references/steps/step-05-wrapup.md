@@ -25,6 +25,6 @@ HALT — do not proceed until the user makes their choice.
 
 ## On Complete
 
-Run: `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`
+Run: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`
 
 If the resolved `workflow.on_complete` is non-empty, follow it as the final terminal instruction before exiting.

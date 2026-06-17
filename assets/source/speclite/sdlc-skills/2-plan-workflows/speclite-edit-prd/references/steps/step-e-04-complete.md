@@ -130,13 +130,13 @@ Display:
     - Before/after comparison (key improvements)
     - Recommendations for next steps
   - Display: "**Edit Workflow Complete**"
-  - Run: `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete` — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.
+  - Run: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete` — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.
   - Exit
 
 - **IF X (Exit):**
   - Display summary
   - Display: "**Edit Workflow Complete**"
-  - Run: `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete` — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.
+  - Run: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete` — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.
   - Exit
 
 - **IF Any other:** Help user, then redisplay menu

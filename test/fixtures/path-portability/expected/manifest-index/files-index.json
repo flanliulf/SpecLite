@@ -18,7 +18,7 @@
       "hash": "sha256:lf-runtime-script",
       "hashAlgorithm": "sha256",
       "executable": true,
-      "artifactKind": "runtime-script",
+      "artifactKind": "runtime-compat-script",
       "sourceRef": "assets/source/speclite/scripts/resolve_config.py"
     },
     {

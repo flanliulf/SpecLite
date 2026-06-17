@@ -116,7 +116,7 @@
   ```
 
 - Next Steps：提供中性的后续实施指引；提议回答有关架构文档的任何问题
-- 执行 `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`；如解析出的值非空，作为退出前的最终终端指令执行
+- 执行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`；如解析出的值非空，作为退出前的最终终端指令执行
 - 在 `{planning_artifacts}/architecture.md` 末尾追加生成标注：
 
   ```text

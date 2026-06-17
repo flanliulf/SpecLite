@@ -75,10 +75,10 @@ assets/
 
 | 检查项 | 源 | 目标 |
 | --- | --- | --- |
-| resolver | `{project-root}/_bmad/scripts/resolve_customization.py` | `{speclite-runtime-root}/scripts/resolve_customization.py` |
+| resolver | `{project-root}/_bmad/scripts/legacy Python customization resolver` | `speclite resolve customization` |
 | team customize | `{project-root}/_bmad/custom/{skill-name}.toml` | `{speclite-runtime-root}/custom/{skill-name}.toml` |
 | user customize | `{project-root}/_bmad/custom/{skill-name}.user.toml` | `{speclite-runtime-root}/custom/{skill-name}.user.toml` |
-| project config | `{project-root}/_bmad/bmm/config.yaml` | `{project-root}/_speclite/config.toml` |
+| project config | `{project-root}/_bmad/bmm/config.yaml` | merged runtime config |
 | help skill | `bmad-help` | `speclite-help` 或已确认的中性帮助入口 |
 
 ## 6. 菜单映射规则

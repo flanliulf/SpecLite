@@ -19,7 +19,7 @@ metadata:
 
 [Core Capabilities]
     - **Micro-file workflow orchestration**: 8 step files + continuation handler; each self-contains rules, A/P/C menu, and `stepsCompleted` advancement. See `references/workflow-steps.md`.
-    - **Three-tier configuration**: `resolve_customization.py` resolves the `workflow` block; on failure, merge `customize.toml` / `{skill-name}.toml` / `{skill-name}.user.toml` in base→team→user order. Load `workflow.persistent_facts` and `{project-root}/_speclite/config.toml`.
+    - **Three-tier configuration**: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow` resolves the `workflow` block. Load `workflow.persistent_facts` and merged runtime config.
     - **Continuation detection**: Auto-detect existing `*architecture*.md` and choose fresh vs continue by `stepsCompleted`; menu `[R]/[C]/[O]/[X]`.
     - **A/P/C collaboration menu**: After each content step, present Advanced Elicitation / Party Mode / Continue; only `C` persists and advances; A/P must return to the menu.
     - **Web-research-driven tech selection**: All versions verified live via WebSearch; **forbid** hard-coded versions; depth adapts to user skill level.
@@ -37,10 +37,10 @@ metadata:
 [Activation Flow]
     Once triggered, execute these 6 activation steps before [Execution Flow]. Exact procedure, lookup order, and merge rules in `references/activation-en.md` — read it in full.
 
-    1. Resolve `workflow` block via `resolve_customization.py` (or manual base→team→user merge on failure)
+    1. Confirm `speclite` is available, then resolve `workflow` via `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`
     2. Run `{workflow.activation_steps_prepend}` in order
     3. Load `{workflow.persistent_facts}` (`file:` entries loaded as path/glob under `{project-root}`)
-    4. Load `{project-root}/_speclite/config.toml` (`user_name`, `communication_language`, `document_output_language`, `planning_artifacts`, `project_knowledge`)
+    4. Load merged runtime config (`user_name`, `communication_language`, `document_output_language`, `planning_artifacts`, `project_knowledge`)
     5. Greet `{user_name}` in `{communication_language}`
     6. Run `{workflow.activation_steps_append}` in order
 
@@ -51,7 +51,7 @@ metadata:
 
     Input artifacts (PRD required, others optional), output (`{planning_artifacts}/architecture.md`), and the resource inventory (`references/steps/`, `data/`, `customize.toml`, `assets/architecture-decision-template.md`) are in `references/inputs-outputs.md`.
 
-    On completion, run `python3 {speclite-runtime-root}/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`; if non-empty, execute as the final terminal directive.
+    On completion, run `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`; if non-empty, execute as the final terminal directive.
 
 [Notes]
     Mandatory operational rules — including no-content-without-input, full step-file reading, A/P/C closure, time-estimation prohibition, WebSearch-verified versions, no-placeholder project tree, HALT on missing PRD, `on_complete` execution, and document footer — are all in `references/notes-en.md`. Read it in full and follow it.

@@ -126,6 +126,68 @@ describe("runtime path validation", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("allows approved Python resolver compatibility scripts without treating them as activation dependencies", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-path-compat-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/scripts"), { recursive: true });
+      await writeFile(path.join(tempRoot, "_speclite/config.toml"), "", "utf8");
+      await writeFile(path.join(tempRoot, "_speclite/config.user.toml"), "", "utf8");
+      await writeFile(path.join(tempRoot, "_speclite/scripts/resolve_config.py"), "# compat\n", "utf8");
+      await writeFile(path.join(tempRoot, "_speclite/scripts/resolve_customization.py"), "# compat\n", "utf8");
+
+      const approved = await validateRuntimePaths({
+        projectRoot: tempRoot,
+        manifest,
+        filesIndex: createFilesIndex([
+          { path: "_speclite/config.toml", artifactKind: "runtime-config" },
+          { path: "_speclite/config.user.toml", artifactKind: "runtime-config" },
+          {
+            path: "_speclite/scripts/resolve_config.py",
+            executable: true,
+            artifactKind: "runtime-compat-script",
+            sourceRef: "assets/source/speclite/scripts/resolve_config.py",
+          },
+          {
+            path: "_speclite/scripts/resolve_customization.py",
+            executable: true,
+            artifactKind: "runtime-compat-script",
+            sourceRef: "assets/source/speclite/scripts/resolve_customization.py",
+          },
+        ]),
+      });
+      const defaultRuntimeScript = await validateRuntimePaths({
+        projectRoot: tempRoot,
+        manifest,
+        filesIndex: createFilesIndex([
+          { path: "_speclite/config.toml", artifactKind: "runtime-config" },
+          { path: "_speclite/config.user.toml", artifactKind: "runtime-config" },
+          {
+            path: "_speclite/scripts/resolve_config.py",
+            executable: true,
+            artifactKind: "runtime-script",
+            sourceRef: "assets/source/speclite/scripts/resolve_config.py",
+          },
+        ]),
+      });
+
+      expect(approved.issues).toEqual([]);
+      expect(defaultRuntimeScript.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            issueId: "runtime-path.legacy-resolver-path",
+            affectedPath: "_speclite/scripts/resolve_config.py",
+            details: expect.objectContaining({
+              reason: "legacy-resolver-path",
+            }),
+          }),
+        ]),
+      );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 function createFilesIndex(
