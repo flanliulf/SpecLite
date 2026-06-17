@@ -34,7 +34,7 @@
 - [x] Step 5d: Round 2 fixer，保守策略 B 新增 SR gate artifact
 - [x] Step 5e: Round 3 reviewer，fresh sub-agent 执行 `bmenhance-sr-01-reviewer epic 9`
 - [x] Step 5f: Round 3 evaluator，fresh sub-agent 执行 `bmenhance-sr-02-evaluator 9`
-- [ ] Step 6: 最新 reviewer 与 evaluator 均通过后，执行本地中文 Conventional Commit，不 push
+- [x] Step 6: 最新 reviewer 与 evaluator 均通过后，执行本地中文 Conventional Commit，不 push
 
 ## Stop Conditions（终止条件）
 
@@ -145,3 +145,10 @@
 - 未暂存范围：`sprint-status.yaml` 与其他既有 dirty / untracked 文件保持未纳入。
 - 检查：`git diff --cached --check` 通过。
 - 提交消息计划：`docs(epic-9): 完成 Story Review 闭环`
+
+## Final Commit Result（最终提交结果）
+
+- 本地提交：`3a139bf docs(epic-9): 完成 Story Review 闭环`
+- push：未执行
+- 收口状态：Round 3 reviewer PASS，Round 3 evaluator PASS，Requires Fixer：否。
+- 说明：本文件后续仅补记最终提交结果，仍不纳入 `sprint-status.yaml` 或其他无关 dirty worktree 文件。
