@@ -37,23 +37,58 @@ Human output 先按 command intent 选择 presentation profile，再按 outcome 
 当用户从非 target cwd 执行 `speclite install <absolute-target-path>` 时，human output 必须同时展示目标项目、目标绝对路径和命令执行目录。`Next Actions` 必须可以从原执行目录复制执行：
 
 ```text
+Summary（摘要）
+- 完成状态：已完成
+- 写入状态：未写入项目文件
+- 用户动作：需要
+- ready 状态：not ready
+- 当前含义：安全预览已完成；尚未执行安装写入。
+
 Scope（范围）
-目标项目：noi
-目标路径：<absolute-target-path>
-命令执行目录：<command-cwd>
-项目根目录：.
+- 目标项目：noi
+- 目标路径：<absolute-target-path>
+- 项目根目录：.
+- 命令执行目录：<command-cwd>
+
+State（状态）
+- manifestVersion：speclite.manifest.v1
+- 已完成 steps：无
+- 待处理 steps：8 个
+  - source-discovery
+  - module-selection
+  - config-initialization
+  - runtime-structure
+  - ide-mirror-creation
+  - manifest-generation
+  - ready-check
+  - ready-summary
+- IDE 目标状态：无
+
+Evidence（证据）
+- 来源：bundled
+  - resolvedRoot：assets/source/speclite
+  - trustStatus：blocked
+  - evidence：none
+- 外部访问：未请求
+- 授权状态：source 在写入计划前已处于 blocked 状态。
 
 Issues（问题）
-- 无问题
+- 无问题：未发现 blocker、warning 或 info。
 
 Next Actions（下一步）
-- 运行 `speclite install <absolute-target-path> --yes` 使用默认配置完成安装。
-- 运行 `speclite install <absolute-target-path> --yes --interactive` 进入交互模式自定义安装。
+- 默认安装：运行 `speclite install <absolute-target-path> --yes` 使用默认配置完成安装。
+- 自定义安装：运行 `speclite install <absolute-target-path> --yes --interactive` 进入交互模式自定义安装。
 ```
 
 该 absolute target context 仅属于 human presentation；JSON output 不得因此新增 human-only field，也不得暴露本机绝对 target path。
 
 相对跨目录 target 也必须保持可复制。例如用户从 SpecLite 仓库执行 `speclite install ../noi` 时，human `Next Actions` 应继续使用 `../noi --yes` 和 `../noi --yes --interactive`，不得把 target 降级为 `noi`。JSON 仍只保留 public display identifier 和 project-relative paths，不暴露 resolved absolute target。
+
+## Color Policy（颜色策略）
+
+颜色只是扫描增强，不承担唯一语义。`NO_COLOR=1`、CI、non-TTY、docs 示例、fixture 和 `--json` 输出不得包含 ANSI escape；TTY positive path 只允许 section title 使用 bold，outcome 使用标准 8/16 色，Next Actions 中的 command 使用 cyan。去除 ANSI 后，输出文本必须仍然完整可读。
+
+颜色 runtime dependency 固定为 `picocolors@1.1.1`，且只有集中 helper 可以直接 import `picocolors`。不得在 renderer、message catalog、docs 示例或 test fixture 中直接调用 `picocolors` API，也不得新增 `chalk`、`colorette`、`strip-ansi` 或其他 terminal style dependency。
 
 ## Coverage Matrix（覆盖矩阵）
 

@@ -59,6 +59,7 @@
 | CR-API-27 | Manifest 枚举字段必须绑定 executable registry schema | 6-1 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-28 | Normal update apply 成功后必须同步 installed-state projection | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-29 | Conflict failure 输出必须同时保持 structured step state 与准确 summary | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-30 | 环境级 terminal profile 禁色必须优先于显式 false option | 8-9 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-03 | Companion SPEC mirror 必须同步契约收敛 wording | 6-6 | 5/12 | rules-summary | 已写入规则总结 |
 
 ---
@@ -2813,6 +2814,71 @@
   - public source label 进入 `CommandResult`、fixture snapshot、human-readable output 或 `ValidationIssue.details` 前，应先通过集中 sanitizer，校验 secret-like keys、query/fragment delimiter、local path 和 strict source-specific allowlist；focused tests 同时断言 JSON 与 human output 不包含 raw token/query。
 - **全局文档建议**:
   - 不建议本次升格；全局文档已覆盖 credentials/tokens/private query string 不得进入 public output 的原则，且修改全局文档超出本次 04/05/06 收尾授权。本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 8-9 / 2026-06-17
+
+- **Story**: 8-9
+- **分析来源**:
+  - `8-9-code-review-summary-20260617-round-1.md`
+  - `8-9-code-review-evaluation-20260617-round-1.md`
+  - `8-9-code-review-summary-20260617-round-2.md`
+  - `8-9-code-review-evaluation-20260617-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：`NO_COLOR=1` / `CI=true` 可被调用方通过 `options.noColor=false` / `options.ci=false` 绕过，违反 Story AC 7 / AC 11 的无 ANSI 硬性护栏。
+  - Fixer 已修复 `shouldUseAnsi()` 优先级，使真实 `process.env.NO_COLOR` 与真实 `process.env.CI` 先于 explicit false options 生效，并补充 `test/cli-human-output-matrix.test.ts` regression。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。full `npm test` 的 canonical skill count / fixture count 漂移被记录为非 8-9 外部边界，不纳入本规则。
+  - 本次 04 使用模型：GPT-5 Codex (codex)。本次按用户要求执行规则提取并采用默认推荐决策：record-only。仅更新本规则总结，不修改全局文档、architecture、AGENTS/CLAUDE 或源码。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 环境级 terminal profile 禁色必须优先于显式 false option | 通过 | 7/12 | rules-summary | 用户本次授权默认推荐决策：record-only |
+
+### 提炼规则
+
+#### CR-API-30：环境级 terminal profile 禁色必须优先于显式 false option
+
+- **来源问题**: Story 8.9 首轮实现中，`shouldUseAnsi()` 只有在 `options.noColor !== false` 时读取 `process.env.NO_COLOR`，只有在 `options.ci !== false` 时读取 `process.env.CI`。调用方传入 `{ noColor:false, isTty:true, ci:false }` 或 `{ isTty:true, ci:false }` 时，可让真实 `NO_COLOR=1` / `CI=true` 环境仍输出 ANSI，破坏无色环境、CI、docs/fixture 和 JSON 边界的 Story contract。
+- **CR 证据**:
+  - `8-9-code-review-summary-20260617-round-1.md`: Finding #1 指出 `NO_COLOR` / CI 禁色护栏可被 explicit false options 绕过，并给出定向复现。
+  - `8-9-code-review-evaluation-20260617-round-1.md`: evaluator 确认该问题为 P1，要求修复 guard 优先级并补充 `NO_COLOR=1 + noColor:false + ci:false`、`CI=true + ci:false` regression。
+  - `8-9-code-review-summary-20260617-round-2.md`: reviewer 确认 Round 1 P1 已修复，新增 regression 有效，TTY positive path 与 JSON 无 ANSI 未回归。
+  - `8-9-code-review-evaluation-20260617-round-2.md`: evaluator 确认 `src/diagnostics/ansi-style.ts:31-38` 已将真实环境级禁色条件放在 options 条件之前，Round 2 Approved。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审验证关闭；暂无跨 Story 复现。 |
+  | 影响范围 | 1 | 影响 human renderer terminal profile、public renderer options、docs/fixture 无 ANSI 边界和 focused color regression。 |
+  | 风险等级 | 1 | 会导致 CI 或无色环境输出 ANSI，破坏 AC 和日志可读性，但不涉及数据损坏或安全边界。 |
+  | 根因稳定性 | 1 | 属于 option override 与真实环境 guard 优先级的实现习惯问题，后续 terminal profile 选项扩展时可能复现。 |
+  | 可执行性 | 2 | 可写成集中 helper 规则，并用 `NO_COLOR=1`、`CI=true`、explicit false options、TTY positive path 和 JSON 无 ANSI tests 检查。 |
+  | 文档缺口 | 1 | `docs/reference/cli-human-output-matrix.md` 已有 broad color policy，但未沉淀 explicit false option 不得覆盖真实环境禁色的实现检查点。 |
+
+- **总分**: 7/12
+- **建议去向**: rules-summary
+- **适用范围**: human-readable CLI renderer、terminal profile helper、ANSI color dependency/import boundary、docs/fixture/JSON 无 ANSI contract，以及 future renderer options 扩展。
+- **规避指南**:
+  - 不得让 `options.noColor === false` 或 `options.ci === false` 覆盖真实 `process.env.NO_COLOR`、真实 `process.env.CI` 或 non-TTY 禁色护栏。
+  - 不得把 explicit false option 解释为“强制启用颜色”；它只能表示未通过该 option 主动禁色。
+- **最佳实践**:
+  - `shouldUseAnsi()` 类集中 helper 应先检查真实环境级禁色条件，再处理 option-level disable 与 TTY positive path；focused tests 同时覆盖禁色优先级、positive TTY、JSON 无 ANSI 和 dependency/import boundary。
+- **全局文档建议**:
+  - 不建议本次升格到 `_bmad-output/project-context.md`、`CONTEXT.md` 或 `AGENTS.md`。现有 `docs/reference/cli-human-output-matrix.md` 已覆盖 broad color policy 和 dependency/import boundary，本条是 Story 8.9 暴露出的实现检查点，评分 7/12，按阈值进入 rules-summary 即可。
 - **本次落地**:
   - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
 - **同步状态**: 已写入规则总结

@@ -198,6 +198,45 @@ describe("CLI smoke", () => {
       const output = stdout.join("");
       expect(exitCodes).toEqual([0]);
       expect(prompts).toHaveLength(3);
+      expect(output).toContain(
+        [
+          "Step 1/4 Select modules（选择模块）",
+          "",
+          "在写入任何项目文件前选择 SpecLite official modules。",
+          "",
+          "Available modules:",
+          "",
+          "- core: SpecLite Core Module 0.0.0; scope:",
+        ].join("\n"),
+      );
+      expect(output).toContain("- sdlc: SpecLite SDLC Module 0.0.0; scope:");
+      expect(output).toContain(
+        [
+          "Step 2/4 Configure project（配置项目）",
+          "",
+          "在写入任何文件前选择项目配置模式。",
+          "",
+          "Config mode options（配置模式选项）",
+          "",
+          "- quick:",
+        ].join("\n"),
+      );
+      expect(output).toContain("- detailed:");
+      expect(output.match(/Step 3\/4 Final pre-write review/g) ?? []).toHaveLength(1);
+      expect(output).toContain(
+        [
+          "Step 3/4 Final pre-write review（最终写入前复核）",
+          "",
+          "Review state（复核状态）",
+        ].join("\n"),
+      );
+      expect(output).toContain("Selected modules（已选模块）\ncore (SpecLite Core Module 0.0.0)");
+      expect(output).toContain("IDE targets（IDE 目标）\nclaude (.claude/skills), agents (.agents/skills)");
+      expect(output).toContain(
+        "Write boundary（写入边界）\nconfirmationWillWrite=_speclite/, _speclite-output/, IDE mirrors, manifest/index",
+      );
+      expect(output).not.toContain("Step 3/4 Final pre-write review（最终写入前复核）\nStep 3/4");
+      expect(output).not.toContain("\nSelected modules\n");
       expect(output).toContain("Step 4/4 Ready Summary（就绪摘要）");
       expect(output).toContain("install --yes --interactive 已按显式交互选择完成安装。");
       expect(output).toContain("已安装 modules\n- core");
@@ -322,11 +361,32 @@ describe("CLI smoke", () => {
 
       expect(exitCodes).toEqual([0]);
       expect(prompts).toHaveLength(3);
-      expect(stdout.join("")).toContain("Step 1/4 Select modules");
+      expect(stdout.join("")).toContain(
+        [
+          "Step 1/4 Select modules",
+          "",
+          "Select SpecLite official modules before any project files are written.",
+          "",
+          "Available modules:",
+          "",
+          "- core: SpecLite Core Module 0.0.0; scope:",
+        ].join("\n"),
+      );
       expect(stdout.join("")).toContain("core: SpecLite Core Module 0.0.0; scope:");
-      expect(stdout.join("")).toContain("sdlc: SpecLite SDLC 0.0.0; scope:");
+      expect(stdout.join("")).toContain("sdlc: SpecLite SDLC Module 0.0.0; scope:");
       expect(prompts[0]).toContain("Enter one or more module ids");
-      expect(stdout.join("")).toContain("Step 2/4 Configure project");
+      expect(stdout.join("")).toContain(
+        [
+          "Step 2/4 Configure project",
+          "",
+          "Choose project configuration mode before any files are written.",
+          "",
+          "Config mode options",
+          "",
+          "- quick:",
+        ].join("\n"),
+      );
+      expect(stdout.join("")).toContain("- detailed:");
       expect(prompts[1]).toContain("quick or detailed");
       expect(stdout.join("")).toContain("Step 3/4 Final pre-write review");
       expect(stdout.join("")).toContain("canonicalPackageRoots=core=13, total=13");

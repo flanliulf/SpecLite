@@ -421,8 +421,8 @@ describe("git source resolver boundary", () => {
         resolvedRoot: "redacted-git-remote",
         trustStatus: "blocked",
       });
-      expect(output).toContain("sourceType=git");
-      expect(output).toContain("confirmationState=pending");
+      expect(output).toContain("- 来源：git");
+      expect(output).toContain("  - confirmationState：pending");
       expect(output).not.toContain("token");
       expect(output).not.toContain("secret");
       expect(output).not.toContain("git.example.test");
@@ -475,7 +475,7 @@ describe("git source resolver boundary", () => {
         ],
         trustStatus: "unverified",
       });
-      expect(output).toContain(`version=${commitSha}`);
+      expect(output).toContain(`"version": "${commitSha}"`);
       expect(output).toContain("trustStatus=unverified");
       expect(output).toContain("confirmationState=confirmed");
       expect(output).not.toContain("token");

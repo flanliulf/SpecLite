@@ -14,6 +14,7 @@ import type {
 } from "./command-result-schema.js";
 import { formatCliMessage, getCliMessage, type CliLocale } from "../cli/messages.js";
 import type { PhaseCoverage } from "../manifest/manifest-schema.js";
+import { createHumanOutputStyle, type HumanOutputStyle } from "./ansi-style.js";
 import { getInstallTargetPresentation } from "./install-presentation-context.js";
 import {
   CANONICAL_ISSUE_CATEGORY_ORDER,
@@ -135,6 +136,7 @@ type PresentationFrameInput = {
   emptyStateLines?: string[];
   nextActions?: string[];
   extraSections?: PresentationSection[];
+  options?: HumanOutputOptions;
 };
 
 export type ArtifactEvidence = {
@@ -149,17 +151,19 @@ export type ArtifactEvidence = {
 };
 
 function renderPresentationFrame(input: PresentationFrameInput): string {
+  const style = createHumanOutputStyle(input.options);
+  const outcomeText = `${getCliMessage(input.locale, "outcome")}: ${style.outcome(input.outcomeLabel)}`;
   const lines = [
     input.title,
-    `${getCliMessage(input.locale, "outcome")}: ${input.outcomeLabel}`,
+    outcomeText,
     "",
-    getCliMessage(input.locale, "summary"),
+    style.sectionTitle(getCliMessage(input.locale, "summary")),
     ...formatOutcomeSummary(input.result, input.locale, input.writeState),
     ...(input.summaryLines ?? []),
   ];
 
   const sections = createPresentationSections(input);
-  for (const section of sections) appendSection(lines, section.title, section.lines);
+  for (const section of sections) appendSection(lines, section.title, section.lines, style);
 
   return `${lines.join("\n")}\n`;
 }
@@ -174,7 +178,11 @@ function createPresentationSections(input: PresentationFrameInput): Presentation
     extra: input.extraSections ?? [],
     nextActions: {
       title: getCliMessage(input.locale, "nextActions"),
-      lines: formatPathLines(input.nextActions ?? input.result.nextActions, getCliMessage(input.locale, "actionNotRequired")),
+      lines: formatPathLines(
+        input.nextActions ?? input.result.nextActions,
+        getCliMessage(input.locale, "actionNotRequired"),
+        styleCommandText(createHumanOutputStyle(input.options)),
+      ),
     },
   };
 
@@ -214,6 +222,14 @@ function formatOwnedIssueLines(input: PresentationFrameInput): string[] {
   const issueLines = input.issueLines ?? input.result.issues.map((issue) => formatIssue(issue, input.locale));
   if (issueLines.length > 0) return issueLines;
 
+  if (input.result.command === "install") {
+    return [
+      input.locale === "zh-CN"
+        ? "- 无问题：未发现 blocker、warning 或 info。"
+        : "- No issues: no blockers, warnings or info were found.",
+    ];
+  }
+
   return [`- ${getCliMessage(input.locale, "noIssues")}`];
 }
 
@@ -234,9 +250,14 @@ function combinePresentationLines(
   return dedupeLines([...(primaryLines ?? []), ...appendedLines]);
 }
 
-function appendSection(lines: string[], title: string, sectionLines: string[] | undefined): void {
+function appendSection(
+  lines: string[],
+  title: string,
+  sectionLines: string[] | undefined,
+  style: HumanOutputStyle,
+): void {
   if (sectionLines === undefined) return;
-  lines.push("", title, ...sectionLines);
+  lines.push("", style.sectionTitle(title), ...sectionLines);
 }
 
 function formatOutcomeSummary(
@@ -254,25 +275,27 @@ function formatOutcomeSummary(
   const installReadiness =
     result.command === "install"
       ? [
-        locale === "zh-CN"
-          ? `${getCliMessage(locale, "readyState")}：${getInstallHumanOutcome(result) === "ready" ? getCliMessage(locale, "readyYes") : getCliMessage(locale, "readyNo")}`
-          : `${getCliMessage(locale, "readyState")}: ${getInstallHumanOutcome(result) === "ready" ? getCliMessage(locale, "readyYes") : getCliMessage(locale, "readyNo")}`,
+        labelValueBullet(
+          locale,
+          getCliMessage(locale, "readyState"),
+          getInstallHumanOutcome(result) === "ready" ? getCliMessage(locale, "readyYes") : getCliMessage(locale, "readyNo"),
+        ),
       ]
       : [];
 
   if (locale === "zh-CN") {
     return [
-      `${getCliMessage(locale, "completed")}：${completed}`,
-      `${getCliMessage(locale, "writes")}：${writes}`,
-      `${getCliMessage(locale, "userAction")}：${action}`,
+      labelValueBullet(locale, getCliMessage(locale, "completed"), completed),
+      labelValueBullet(locale, getCliMessage(locale, "writes"), writes),
+      labelValueBullet(locale, getCliMessage(locale, "userAction"), action),
       ...installReadiness,
     ];
   }
 
   return [
-    `${getCliMessage(locale, "completed")}: ${completed}`,
-    `${getCliMessage(locale, "writes")}: ${writes}`,
-    `${getCliMessage(locale, "userAction")}: ${action}`,
+    labelValueBullet(locale, getCliMessage(locale, "completed"), completed),
+    labelValueBullet(locale, getCliMessage(locale, "writes"), writes),
+    labelValueBullet(locale, getCliMessage(locale, "userAction"), action),
     ...installReadiness,
   ];
 }
@@ -409,34 +432,12 @@ export function renderInstallHumanOutput(
     profile: HUMAN_OUTPUT_PRESENTATION_PROFILES.install,
     outcomeLabel: formatInstallHumanOutcome(locale, installOutcome),
     locale,
+    options,
     writeState: getInstallPresentationWriteState(installOutcome),
     summaryLines: formatInstallSummaryLines(result, locale, installOutcome),
     scopeLines: formatInstallScopeLines(result, locale),
-    stateLines: [
-      `manifestVersion=${result.data.manifestVersion}`,
-      formatLabelValue(locale, "completedSteps", formatListForLocale(result.data.completedSteps, locale)),
-      formatLabelValue(locale, "pendingSteps", formatListForLocale(result.data.pendingSteps, locale)),
-      ...formatInstallOutcomeStepStateLines(result, installOutcome, locale),
-      formatInstallIdeTargetStatusesHeading(locale),
-      ...formatInstallIdeTargetStatusLines(result.data.ideTargets, locale),
-    ],
-    evidenceLines: [
-      getCliMessage(locale, "source"),
-      `- ${formatSourceDescriptor(result.data.sourceDescriptor)}`,
-      getCliMessage(locale, "externalAccess"),
-      ...(locale === "zh-CN"
-        ? formatInstallExternalAccessZh(result.data.sourceDescriptor)
-        : formatInstallExternalAccess(result.data.sourceDescriptor)),
-      getCliMessage(locale, "authorization"),
-      result.data.sourceDescriptor.trustStatus === "blocked"
-        ? locale === "zh-CN"
-          ? "source 在写入计划前已处于 blocked 状态。"
-          : "Source is blocked before write planning."
-        : locale === "zh-CN"
-          ? "命令级写入授权与 source 选择分离。"
-          : "Command-level write authorization is separate from source selection.",
-      ...formatInstallOutcomeEvidenceLines(result, locale, installOutcome),
-    ],
+    stateLines: formatInstallStateLines(result, locale, installOutcome),
+    evidenceLines: formatInstallEvidenceLines(result, locale, installOutcome),
     emptyStateLines: getCommonEmptyStateLines(result, locale),
     nextActions: formatInstallOutcomeNextActions(result, locale, installOutcome),
   });
@@ -764,9 +765,9 @@ export function renderGovernanceReportHumanOutput(result: GovernanceReportComman
   return `${lines.join("\n")}\n`;
 }
 
-function formatPathLines(paths: string[], emptyText: string): string[] {
+function formatPathLines(paths: string[], emptyText: string, styleCommand: (value: string) => string = (value) => value): string[] {
   if (paths.length === 0) return [emptyText];
-  return paths.map((value) => `- ${value}`);
+  return paths.map((value) => `- ${styleCommand(value)}`);
 }
 
 function formatLabelValue(locale: CliLocale, key: CliMessageKeyForOutput, value: string): string {
@@ -780,6 +781,43 @@ type CliMessageKeyForOutput = Parameters<typeof getCliMessage>[1];
 function formatListForLocale(values: string[], locale: CliLocale): string {
   if (values.length > 0) return values.join(", ");
   return locale === "zh-CN" ? "无" : "none";
+}
+
+function bullet(value: string): string {
+  return `- ${value}`;
+}
+
+function nestedBullet(value: string): string {
+  return `  - ${value}`;
+}
+
+function labelValueBullet(locale: CliLocale, label: string, value: string): string {
+  return bullet(locale === "zh-CN" ? `${label}：${value}` : `${label}: ${value}`);
+}
+
+function countedList(locale: CliLocale, label: string, values: string[]): string[] {
+  if (values.length === 0) return [labelValueBullet(locale, label, formatListForLocale([], locale))];
+  const count = locale === "zh-CN" ? `${values.length} 个` : `${values.length}`;
+  return [
+    labelValueBullet(locale, label, count),
+    ...values.map(nestedBullet),
+  ];
+}
+
+function styleCommandText(style: HumanOutputStyle): (value: string) => string {
+  return (value) => value.replace(/`([^`]+)`/g, (_match, command: string) => `\`${style.command(command)}\``);
+}
+
+function labeledCommandAction(
+  locale: CliLocale,
+  label: string,
+  commandPrefix: string,
+  commandArgs: string,
+  description: string,
+): string {
+  const separator = labelSeparator(locale);
+  const command = `${commandPrefix} ${commandArgs}`.trim();
+  return `${label}${separator}${locale === "zh-CN" ? "运行" : "run"} \`${command}\` ${description}`;
 }
 
 function formatRatioMetric(metric: { covered: number; total: number; rate: number }): string {
@@ -1281,29 +1319,134 @@ function formatInstallSummaryLines(
   locale: CliLocale,
   outcome: InstallHumanOutcome,
 ): string[] {
+  const currentMeaning =
+    outcome === "prewrite-paused"
+      ? locale === "zh-CN"
+        ? "安全预览已完成；尚未执行安装写入。"
+        : "Safe preview completed; install writes have not run."
+      : getInstallOutcomeSummary(locale, outcome);
+
   if (locale === "en-US") {
     return [
-      getInstallOutcomeSummary(locale, outcome),
-      result.summary,
+      labelValueBullet(locale, "Current meaning", currentMeaning),
+      labelValueBullet(locale, "Command summary", result.summary),
     ];
   }
 
-  return [getInstallOutcomeSummary(locale, outcome)];
+  return [labelValueBullet(locale, "当前含义", currentMeaning)];
 }
 
 function formatInstallScopeLines(result: InstallCommandResult, locale: CliLocale): string[] {
   const targetPresentation = getInstallTargetPresentation(result);
-  const lines = [formatLabelValue(locale, "targetProject", result.targetProject)];
+  const lines = [labelValueBullet(locale, getCliMessage(locale, "targetProject"), result.targetProject)];
 
   if (targetPresentation !== undefined) {
     lines.push(
-      formatLabelValue(locale, "targetPath", targetPresentation.targetPath),
-      formatLabelValue(locale, "commandCwd", targetPresentation.commandCwd),
+      labelValueBullet(locale, getCliMessage(locale, "targetPath"), targetPresentation.targetPath),
+      labelValueBullet(locale, getCliMessage(locale, "projectRoot"), result.data.paths.projectRoot),
+      labelValueBullet(locale, getCliMessage(locale, "commandCwd"), targetPresentation.commandCwd),
     );
+    return lines;
   }
 
-  lines.push(formatLabelValue(locale, "projectRoot", result.data.paths.projectRoot));
+  lines.push(labelValueBullet(locale, getCliMessage(locale, "projectRoot"), result.data.paths.projectRoot));
   return lines;
+}
+
+function formatInstallStateLines(
+  result: InstallCommandResult,
+  locale: CliLocale,
+  outcome: InstallHumanOutcome,
+): string[] {
+  return [
+    labelValueBullet(locale, "manifestVersion", result.data.manifestVersion),
+    ...countedList(locale, getCliMessage(locale, "completedSteps"), result.data.completedSteps),
+    ...countedList(locale, getCliMessage(locale, "pendingSteps"), result.data.pendingSteps),
+    ...formatInstallOutcomeStepStateLines(result, outcome, locale),
+    ...formatInstallIdeTargetStatusBullets(result.data.ideTargets, locale),
+  ];
+}
+
+function formatInstallIdeTargetStatusBullets(
+  targets: InstallCommandResult["data"]["ideTargets"],
+  locale: CliLocale,
+): string[] {
+  if (targets.length === 0) {
+    return [labelValueBullet(locale, getCliMessage(locale, "ideTargetStatuses"), formatListForLocale([], locale))];
+  }
+  return [
+    labelValueBullet(locale, getCliMessage(locale, "ideTargetStatuses"), `${targets.length}`),
+    ...targets.map((target) => {
+      const pathSuffix = target.targetPath === undefined ? "" : ` (${target.targetPath})`;
+      const skillCountSuffix = target.skillCount === undefined ? "" : `, skills=${target.skillCount}`;
+      return nestedBullet(`${target.id}: ${target.status}${pathSuffix}${skillCountSuffix}`);
+    }),
+  ];
+}
+
+function formatInstallEvidenceLines(
+  result: InstallCommandResult,
+  locale: CliLocale,
+  outcome: InstallHumanOutcome,
+): string[] {
+  const source = result.data.sourceDescriptor;
+  return [
+    labelValueBullet(locale, getCliMessage(locale, "source"), source.sourceType),
+    nestedBullet(`resolvedRoot${labelSeparator(locale)}${source.resolvedRoot ?? "unknown"}`),
+    nestedBullet(`trustStatus${labelSeparator(locale)}${source.trustStatus}`),
+    nestedBullet(`evidence${labelSeparator(locale)}${formatEvidenceSummary(source.integrityEvidence)}`),
+    ...formatInstallExternalAccessBullets(source, locale),
+    labelValueBullet(locale, getCliMessage(locale, "authorization"), getInstallAuthorizationSummary(source.trustStatus, locale)),
+    ...formatInstallOutcomeEvidenceLines(result, locale, outcome),
+  ];
+}
+
+function formatInstallExternalAccessBullets(
+  sourceDescriptor: InstallCommandResult["data"]["sourceDescriptor"],
+  locale: CliLocale,
+): string[] {
+  if (sourceDescriptor.sourceType === "bundled") {
+    return [labelValueBullet(locale, getCliMessage(locale, "externalAccess"), locale === "zh-CN" ? "未请求" : "not requested")];
+  }
+
+  const sourceValue =
+    sourceDescriptor.resolvedRoot ?? sourceDescriptor.version ?? sourceDescriptor.requestedVersion ?? "redacted-source";
+  const confirmationState =
+    sourceDescriptor.integrityEvidence.length > 0 ||
+    sourceDescriptor.version !== undefined ||
+    sourceDescriptor.contentHash !== undefined
+      ? "confirmed"
+      : "pending";
+  return [
+    labelValueBullet(locale, getCliMessage(locale, "externalAccess"), sourceDescriptor.sourceType),
+    nestedBullet(`sourceValue${labelSeparator(locale)}${sourceValue}`),
+    nestedBullet(
+      `reason${labelSeparator(locale)}${
+        locale === "zh-CN"
+          ? getInstallExternalAccessReasonZh(sourceDescriptor.sourceType)
+          : getInstallExternalAccessReason(sourceDescriptor.sourceType)
+      }`,
+    ),
+    nestedBullet(`confirmationState${labelSeparator(locale)}${confirmationState}`),
+  ];
+}
+
+function getInstallAuthorizationSummary(
+  trustStatus: InstallCommandResult["data"]["sourceDescriptor"]["trustStatus"],
+  locale: CliLocale,
+): string {
+  if (trustStatus === "blocked") {
+    return locale === "zh-CN"
+      ? "source 在写入计划前已处于 blocked 状态。"
+      : "Source is blocked before write planning.";
+  }
+  return locale === "zh-CN"
+    ? "命令级写入授权与 source 选择分离。"
+    : "Command-level write authorization is separate from source selection.";
+}
+
+function labelSeparator(locale: CliLocale): string {
+  return locale === "zh-CN" ? "：" : ": ";
 }
 
 function getInstallPresentationWriteState(outcome: InstallHumanOutcome): PresentationWriteState {
@@ -1320,14 +1463,14 @@ function formatInstallOutcomeStepStateLines(
   const failedStep = outcome === "ready-check-failed" ? "ready-check" : getInstallFailedStep(result);
   if (locale === "en-US") {
     return [
-      `Failed step: ${failedStep}`,
-      `Completed write scope: ${formatList(getCompletedInstallWriteSteps(result))}`,
+      labelValueBullet(locale, "Failed step", failedStep),
+      labelValueBullet(locale, "Completed write scope", formatList(getCompletedInstallWriteSteps(result))),
     ];
   }
 
   return [
-    formatLabelValue(locale, "failedStep", failedStep),
-    formatLabelValue(locale, "completedWrites", formatListForLocale(getCompletedInstallWriteSteps(result), locale)),
+    labelValueBullet(locale, getCliMessage(locale, "failedStep"), failedStep),
+    labelValueBullet(locale, getCliMessage(locale, "completedWrites"), formatListForLocale(getCompletedInstallWriteSteps(result), locale)),
   ];
 }
 
@@ -1337,17 +1480,17 @@ function formatInstallOutcomeEvidenceLines(
   outcome: InstallHumanOutcome,
 ): string[] {
   if (outcome === "blocked-before-write") {
-    return [getCliMessage(locale, "installActionFixBlockerBeforeYes")];
+    return [bullet(getCliMessage(locale, "installActionFixBlockerBeforeYes"))];
   }
   if (outcome === "write-failed") {
     return [
-      getCliMessage(locale, "installActionInspectCompletedWrites"),
+      bullet(getCliMessage(locale, "installActionInspectCompletedWrites")),
       ...formatInstallExecutionEvidenceLines(result, locale, getInstallFailedStep(result)),
     ];
   }
   if (outcome === "ready-check-failed") {
     return [
-      getCliMessage(locale, "installActionFixReadyCheck"),
+      bullet(getCliMessage(locale, "installActionFixReadyCheck")),
       ...formatInstallExecutionEvidenceLines(result, locale, "ready-check"),
     ];
   }
@@ -1361,16 +1504,16 @@ function formatInstallExecutionEvidenceLines(
 ): string[] {
   if (locale === "en-US") {
     return [
-      `Failed step: ${failedStep}`,
-      `Completed write scope: ${formatList(getCompletedInstallWriteSteps(result))}`,
-      `Pending steps: ${formatList(result.data.pendingSteps)}`,
+      labelValueBullet(locale, "Failed step", failedStep),
+      labelValueBullet(locale, "Completed write scope", formatList(getCompletedInstallWriteSteps(result))),
+      labelValueBullet(locale, "Pending steps", formatList(result.data.pendingSteps)),
     ];
   }
 
   return [
-    formatLabelValue(locale, "failedStep", failedStep),
-    formatLabelValue(locale, "completedWrites", formatListForLocale(getCompletedInstallWriteSteps(result), locale)),
-    formatLabelValue(locale, "pendingSteps", formatListForLocale(result.data.pendingSteps, locale)),
+    labelValueBullet(locale, getCliMessage(locale, "failedStep"), failedStep),
+    labelValueBullet(locale, getCliMessage(locale, "completedWrites"), formatListForLocale(getCompletedInstallWriteSteps(result), locale)),
+    labelValueBullet(locale, getCliMessage(locale, "pendingSteps"), formatListForLocale(result.data.pendingSteps, locale)),
   ];
 }
 
@@ -1383,10 +1526,14 @@ function formatInstallOutcomeNextActions(
   if (locale === "en-US") {
     if (outcome === "prewrite-paused") {
       return [
-        formatCliMessage(locale, "installActionRunYes", { command: `speclite install ${installTarget} --yes` }),
-        formatCliMessage(locale, "installActionRunInteractive", {
-          command: `speclite install ${installTarget} --yes --interactive`,
-        }),
+        labeledCommandAction(locale, "Default install", "speclite install", `${installTarget} --yes`, "to install with defaults."),
+        labeledCommandAction(
+          locale,
+          "Custom install",
+          "speclite install",
+          `${installTarget} --yes --interactive`,
+          "to customize installation.",
+        ),
       ];
     }
     if (outcome === "blocked-before-write") {
@@ -1422,10 +1569,14 @@ function formatInstallOutcomeNextActions(
 
   if (outcome === "prewrite-paused") {
     return [
-      formatCliMessage(locale, "installActionRunYes", { command: `speclite install ${installTarget} --yes` }),
-      formatCliMessage(locale, "installActionRunInteractive", {
-        command: `speclite install ${installTarget} --yes --interactive`,
-      }),
+      labeledCommandAction(locale, "默认安装", "speclite install", `${installTarget} --yes`, "使用默认配置完成安装。"),
+      labeledCommandAction(
+        locale,
+        "自定义安装",
+        "speclite install",
+        `${installTarget} --yes --interactive`,
+        "进入交互模式自定义安装。",
+      ),
     ];
   }
   if (outcome === "blocked-before-write") {

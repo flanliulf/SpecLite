@@ -84,20 +84,34 @@ describe("install outcome-oriented human output", () => {
 
       expect(commandOutcome.exitCode).toBe(0);
       expect(output).toContain("Outcome（结果）: prewrite-paused");
-      expect(output).toContain("目标项目：noi");
-      expect(output).toContain(`目标路径：${targetDirectory}`);
-      expect(output).toContain(`命令执行目录：${path.join(tempRoot, "SpecLite")}`);
+      expect(output).toContain("- 当前含义：安全预览已完成；尚未执行安装写入。");
+      expect(output).toContain("- 目标项目：noi");
+      expect(output).toContain(`- 目标路径：${targetDirectory}`);
+      expect(output).toContain(`- 命令执行目录：${path.join(tempRoot, "SpecLite")}`);
+      expect(output).toContain("- manifestVersion：speclite.manifest.v1");
+      expect(output).toContain("- 已完成 steps：无");
+      expect(output).toContain("- 待处理 steps：8 个\n  - source-discovery\n  - module-selection\n  - config-initialization");
+      expect(output).toContain("- 来源：bundled\n  - resolvedRoot：assets/source/speclite\n  - trustStatus：blocked\n  - evidence：none");
+      expect(output).toContain("- 外部访问：未请求");
+      expect(output).toContain("- IDE 目标状态：无");
       expect(output).toContain(`speclite install ${targetDirectory} --yes`);
       expect(output).toContain(`speclite install ${targetDirectory} --yes --interactive`);
+      expect(output).toContain(`- 默认安装：运行 \`speclite install ${targetDirectory} --yes\` 使用默认配置完成安装。`);
+      expect(output).toContain(
+        `- 自定义安装：运行 \`speclite install ${targetDirectory} --yes --interactive\` 进入交互模式自定义安装。`,
+      );
       expect(output).not.toContain(`speclite install noi --yes`);
       expect(output).not.toContain("completedSteps=");
       expect(output).not.toContain("pendingSteps=");
+      expect(output).not.toContain("manifestVersion=");
+      expect(output).not.toContain("sourceType=");
       expect(output).not.toContain("Empty State（空状态）");
-      expect(output).toMatch(/Issues（问题）\n- 无问题/);
+      expect(output).toMatch(/Issues（问题）\n- 无问题：未发现 blocker、warning 或 info。/);
       expect(extractSection(output, "Issues（问题）", "Next Actions（下一步）").trim()).toBe(
-        "Issues（问题）\n- 无问题",
+        "Issues（问题）\n- 无问题：未发现 blocker、warning 或 info。",
       );
       expect(renderCommandResultJson(commandOutcome.result)).not.toContain(targetDirectory);
+      expect(renderCommandResultJson(commandOutcome.result)).not.toMatch(/\u001b\[[0-9;]*m/);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -124,12 +138,12 @@ describe("install outcome-oriented human output", () => {
       const issuesSection = extractSection(output, "Issues（问题）", "Next Actions（下一步）");
 
       expect(commandOutcome.exitCode).toBe(0);
-      expect(output).toContain(`目标路径：${resolvedTargetDirectory}`);
-      expect(output).toContain(`命令执行目录：${commandCwd}`);
+      expect(output).toContain(`- 目标路径：${resolvedTargetDirectory}`);
+      expect(output).toContain(`- 命令执行目录：${commandCwd}`);
       expect(output).toContain(`speclite install ${targetDirectory} --yes`);
       expect(output).toContain(`speclite install ${targetDirectory} --yes --interactive`);
       expect(output).not.toContain("speclite install noi --yes");
-      expect(issuesSection.trim()).toBe("Issues（问题）\n- 无问题");
+      expect(issuesSection.trim()).toBe("Issues（问题）\n- 无问题：未发现 blocker、warning 或 info。");
       expect(issuesSection).not.toContain("未写入项目文件");
       expect(renderCommandResultJson(commandOutcome.result)).not.toContain(resolvedTargetDirectory);
     } finally {
@@ -158,7 +172,7 @@ describe("install outcome-oriented human output", () => {
     const output = renderInstallHumanOutput(result, { locale: "en-US" });
 
     expect(output).toContain("Outcome: prewrite-paused");
-    expect(output).toContain("No installation was executed and no project files were written in this run.");
+    expect(output).toContain("- Current meaning: Safe preview completed; install writes have not run.");
     expect(output).toContain("Ready state: not ready");
     expect(output).toContain("speclite install fixture-project --yes");
     expect(output).toContain("speclite install fixture-project --yes --interactive");

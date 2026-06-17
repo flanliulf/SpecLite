@@ -44,8 +44,8 @@ describe("shared CLI outcome presentation", () => {
     expect(output).toContain("Outcome");
     expect(output).toContain("Summary");
     expect(output).toContain("Next Actions");
-    expect(output).toMatch(/Summary\nCompleted: yes\nWrites: no project files changed\nUser action: required/);
-    expect(output).toContain("- Run `speclite install fixture-project --yes` to install with defaults.");
+    expect(output).toMatch(/Summary\n- Completed: yes\n- Writes: no project files changed\n- User action: required/);
+    expect(output).toContain("- Default install: run `speclite install fixture-project --yes` to install with defaults.");
   });
 
   it("orders sections by profile without rendering a standalone Empty State section", () => {
@@ -115,10 +115,10 @@ describe("shared CLI outcome presentation", () => {
     });
 
     expect(renderInstallHumanOutput(prewrite, { locale: "zh-CN" })).toMatch(
-      /Summary（摘要）\n完成状态：已完成\n写入状态：未写入项目文件\n用户动作：需要/,
+      /Summary（摘要）\n- 完成状态：已完成\n- 写入状态：未写入项目文件\n- 用户动作：需要/,
     );
     expect(renderInstallHumanOutput(ready, { locale: "zh-CN" })).toMatch(
-      /Summary（摘要）\n完成状态：已完成\n写入状态：已写入项目文件\n用户动作：不需要/,
+      /Summary（摘要）\n- 完成状态：已完成\n- 写入状态：已写入项目文件\n- 用户动作：不需要/,
     );
     expect(renderInstallHumanOutput(ready, { locale: "zh-CN" })).not.toContain("写入状态：未写入项目文件");
   });
@@ -132,7 +132,7 @@ describe("shared CLI outcome presentation", () => {
 
     expect(output).toContain("SpecLite status");
     expect(output).toContain("Outcome（结果）");
-    expect(output).toMatch(/Summary（摘要）\n完成状态：已完成\n写入状态：未写入项目文件\n用户动作：需要/);
+    expect(output).toMatch(/Summary（摘要）\n- 完成状态：已完成\n- 写入状态：未写入项目文件\n- 用户动作：需要/);
     expect(output).toContain("targetProject=fixture-project");
     expect(output).toContain("highLevelHealth=not-configured");
     expect(output).toContain("manifestPath=_speclite/_config/manifest.yaml");

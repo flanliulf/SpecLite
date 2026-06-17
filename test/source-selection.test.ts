@@ -244,8 +244,8 @@ describe("install source selection boundary", () => {
       expect(parsed.data.completedSteps).toEqual(["source-discovery"]);
       expect(parsed.data.pendingSteps).toContain("module-selection");
       expect(output).toContain("外部访问");
-      expect(output).toContain("sourceType=private-registry");
-      expect(output).toContain("confirmationState=pending");
+      expect(output).toContain("- 来源：private-registry");
+      expect(output).toContain("  - confirmationState：pending");
       expect(output).not.toContain("token");
       expect(output).not.toContain("secret");
       expect(output).not.toContain("registry.example.test");
@@ -286,8 +286,8 @@ describe("install source selection boundary", () => {
         resolvedRoot: "redacted-npm-package",
         trustStatus: "blocked",
       });
-      expect(output).toContain("sourceType=npm");
-      expect(output).toContain("sourceValue=redacted-npm-package");
+      expect(output).toContain("- 来源：npm");
+      expect(output).toContain("  - sourceValue：redacted-npm-package");
       expect(output).not.toContain("@scope/pkg?token=secret");
       expect(output).not.toContain("?token=secret");
       expect(output).not.toContain("token");

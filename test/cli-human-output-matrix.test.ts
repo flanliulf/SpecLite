@@ -155,6 +155,48 @@ describe("CLI human output coverage matrix", () => {
     expect(cases.find((item) => item.label === "validate")?.output).toContain("Output profile: Evidence (key-value)");
   });
 
+  it("adds guarded ANSI only for TTY human output while stripped text remains complete", () => {
+    const install = createPrewriteInstall();
+    const previousNoColor = process.env.NO_COLOR;
+    const previousCi = process.env.CI;
+
+    try {
+      delete process.env.NO_COLOR;
+      delete process.env.CI;
+      const plain = renderInstallHumanOutput(install, { locale: "en-US", noColor: true, isTty: true, ci: false });
+      const colored = renderInstallHumanOutput(install, { locale: "en-US", isTty: true, ci: false });
+      const stripped = stripAnsi(colored);
+
+      expect(plain).not.toMatch(/\u001b\[[0-9;]*m/);
+      expect(renderInstallHumanOutput(install, { locale: "en-US", isTty: true, ci: true })).not.toMatch(
+        /\u001b\[[0-9;]*m/,
+      );
+      expect(renderInstallHumanOutput(install, { locale: "en-US", isTty: false, ci: false })).not.toMatch(
+        /\u001b\[[0-9;]*m/,
+      );
+      expect(colored).toMatch(/\u001b\[[0-9;]*m/);
+      expect(stripped).toContain("Outcome: prewrite-paused");
+      expect(stripped).toContain("Summary");
+      expect(stripped).toContain("- Default install: run `speclite install fixture-project --yes` to install with defaults.");
+      expect(stripped).toContain("- Source: bundled");
+      expect(renderCommandResultJson(install)).not.toMatch(/\u001b\[[0-9;]*m/);
+
+      process.env.NO_COLOR = "1";
+      expect(
+        renderInstallHumanOutput(install, { locale: "en-US", noColor: false, isTty: true, ci: false }),
+      ).not.toMatch(/\u001b\[[0-9;]*m/);
+
+      delete process.env.NO_COLOR;
+      process.env.CI = "true";
+      expect(renderInstallHumanOutput(install, { locale: "en-US", isTty: true, ci: false })).not.toMatch(
+        /\u001b\[[0-9;]*m/,
+      );
+    } finally {
+      restoreEnv("NO_COLOR", previousNoColor);
+      restoreEnv("CI", previousCi);
+    }
+  });
+
   it("keeps resolve human mode readable while default resolve output stays pure JSON under human terminal environment", async () => {
     const previousNoColor = process.env.NO_COLOR;
     const previousCi = process.env.CI;
@@ -391,6 +433,10 @@ function expectJsonOutputStableAcrossHumanEnvironment(
     restoreEnv("COLUMNS", previousColumns);
     restoreEnv("SPECLITE_LOCALE", previousLocale);
   }
+}
+
+function stripAnsi(value: string): string {
+  return value.replace(/\u001b\[[0-9;]*m/g, "");
 }
 
 type RunResolveResult = {

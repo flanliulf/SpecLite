@@ -106,6 +106,7 @@ describe("install official module selection orchestration", () => {
   it("shows canonical package root counts in the pre-write install scope prompt", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-prewrite-scope-"));
     let prewritePrompt = "";
+    let finalPrewritePrompt = "";
 
     try {
       await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
@@ -129,10 +130,19 @@ describe("install official module selection orchestration", () => {
 
           return { mode: "quick" };
         },
+        confirmPrewriteInstallScope: async (input) => {
+          finalPrewritePrompt = input.prompt;
+          expect(input.prompt).toContain("sdlc (SpecLite SDLC Module 0.0.0)");
+          expect(input.prompt).toContain("IDE targets\nclaude (.claude/skills), agents (.agents/skills)");
+          expect(input.prompt).toContain(
+            "Write boundary\nconfirmationWillWrite=_speclite/, _speclite-output/, IDE mirrors, manifest/index",
+          );
+        },
       });
 
       expect(outcome.exitCode).toBe(0);
       expect(prewritePrompt).toContain("Source: bundled assets/source/speclite.");
+      expect(finalPrewritePrompt).toContain("Selected modules");
       await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toContain("[core]");
     } finally {
       await rm(tempRoot, { recursive: true, force: true });

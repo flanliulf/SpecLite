@@ -131,6 +131,7 @@ export type InstallCommandOutcome = {
 
 export type PrewriteInstallScopeConfirmationInput = {
   prompt: string;
+  localizedPrompts?: Record<string, string>;
 };
 
 export type SourceAccessConfirmationInput = {
@@ -709,7 +710,19 @@ export async function runInstallCommand(input: {
     targetAdapters: finalTargetAdapters,
   });
   if (input.options?.json !== true && input.confirmPrewriteInstallScope !== undefined) {
-    await input.confirmPrewriteInstallScope({ prompt: finalPrewriteSummary });
+    await input.confirmPrewriteInstallScope({
+      prompt: finalPrewriteSummary,
+      localizedPrompts: {
+        "zh-CN": createFinalPrewriteInstallScopeSummary({
+          selectedModules: finalSelectedModules,
+          sourceDescriptor,
+          targetSummary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+          configPlan,
+          targetAdapters: finalTargetAdapters,
+          locale: "zh-CN",
+        }),
+      },
+    });
   }
   const installPlan = InstallPlanSchema.parse({
     sourceDescriptor,
@@ -1025,7 +1038,19 @@ async function continueInstallWithSourceDescriptor(input: {
     targetAdapters: finalTargetAdapters,
   });
   if (commandInput.options?.json !== true && commandInput.confirmPrewriteInstallScope !== undefined) {
-    await commandInput.confirmPrewriteInstallScope({ prompt: finalPrewriteSummary });
+    await commandInput.confirmPrewriteInstallScope({
+      prompt: finalPrewriteSummary,
+      localizedPrompts: {
+        "zh-CN": createFinalPrewriteInstallScopeSummary({
+          selectedModules: finalSelectedModules,
+          sourceDescriptor,
+          targetSummary: createTargetSummary(targetDirectoryState, normalizedTarget.displayPath),
+          configPlan,
+          targetAdapters: finalTargetAdapters,
+          locale: "zh-CN",
+        }),
+      },
+    });
   }
   const installPlan = InstallPlanSchema.parse({
     sourceDescriptor,
@@ -1245,7 +1270,9 @@ function createFinalPrewriteInstallScopeSummary(input: {
   targetSummary: string;
   configPlan: Extract<Awaited<ReturnType<typeof createConfigInitializationPlan>>, { ok: true }>;
   targetAdapters: InstallPlanTargetAdapter[];
+  locale?: "en-US" | "zh-CN";
 }): string {
+  const locale = input.locale ?? "en-US";
   const selectedModuleDetails = input.selectedModules
     .map((module) => `${module.code} (${module.name} ${module.version})`)
     .join(", ");
@@ -1255,42 +1282,70 @@ function createFinalPrewriteInstallScopeSummary(input: {
   const plannedConfigWrites = input.configPlan.plannedWrites
     .map((write) => `${write.path}=${write.action}`)
     .join(", ");
-  const targetIds = input.targetAdapters.map((adapter) => adapter.targetId).join(", ");
+  const targetIds = input.targetAdapters
+    .map((adapter) => `${adapter.targetId} (${adapter.targetDirectory})`)
+    .join(", ");
+  const heading = locale === "zh-CN"
+    ? "Step 3/4 Final pre-write review（最终写入前复核）"
+    : "Step 3/4 Final pre-write review";
+  const labels = locale === "zh-CN"
+    ? {
+      reviewState: "Review state（复核状态）",
+      target: "Target（目标）",
+      sourceDescriptor: "Source descriptor（来源描述）",
+      configMode: "Config mode（配置模式）",
+      selectedModules: "Selected modules（已选模块）",
+      ideTargets: "IDE targets（IDE 目标）",
+      plannedWrites: "Planned writes（计划写入）",
+      pendingPhases: "Pending phases（待处理阶段）",
+      writeBoundary: "Write boundary（写入边界）",
+    }
+    : {
+      reviewState: "Review state",
+      target: "Target",
+      sourceDescriptor: "Source descriptor",
+      configMode: "Config mode",
+      selectedModules: "Selected modules",
+      ideTargets: "IDE targets",
+      plannedWrites: "Planned writes",
+      pendingPhases: "Pending phases",
+      writeBoundary: "Write boundary",
+    };
 
   return [
-    "Step 3/4 Final pre-write review",
+    heading,
     "",
-    "Review state",
+    labels.reviewState,
     "projectFilesWritten=false",
     "writeStartsAfterConfirmation=true",
     "",
-    "Target",
+    labels.target,
     input.targetSummary,
     "",
-    "Source descriptor",
+    labels.sourceDescriptor,
     `sourceType=${input.sourceDescriptor.sourceType}`,
     `resolvedRoot=${input.sourceDescriptor.resolvedRoot ?? "unknown"}`,
     `trustStatus=${input.sourceDescriptor.trustStatus}`,
     "",
-    "Config mode",
+    labels.configMode,
     `mode=${input.configPlan.mode}`,
     "",
-    "Selected modules",
+    labels.selectedModules,
     selectedModuleDetails,
     `canonicalPackageRoots=${formatModulePackageRootCounts(input.selectedModules)}`,
     `capabilityScope=${capabilityScope}`,
     "",
-    "IDE targets",
+    labels.ideTargets,
     targetIds,
     "",
-    "Planned writes",
+    labels.plannedWrites,
     plannedConfigWrites,
     "",
-    "Pending phases",
+    labels.pendingPhases,
     "config-initialization, runtime-structure, artifact-directory, ide-mirror-creation, manifest-generation, ready-check, ready-summary",
     "",
-    "Write boundary",
-    "confirmationWillWrite=_speclite,_speclite-output,IDE mirrors,manifest/index",
+    labels.writeBoundary,
+    "confirmationWillWrite=_speclite/, _speclite-output/, IDE mirrors, manifest/index",
   ].join("\n");
 }
 

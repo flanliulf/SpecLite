@@ -99,8 +99,8 @@ describe("localized CLI message catalog", () => {
     expect(output).toContain("外部访问");
     expect(output).toContain("授权状态");
     expectAllowedTechnicalIdentifiers(output, [
-      "manifestVersion=speclite.manifest.v1",
-      "sourceType=bundled",
+      "manifestVersion：speclite.manifest.v1",
+      "来源：bundled",
       "trustStatus=blocked",
       "ready-check",
       "ready-summary",
