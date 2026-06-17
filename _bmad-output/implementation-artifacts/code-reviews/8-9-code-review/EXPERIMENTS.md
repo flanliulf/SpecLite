@@ -174,3 +174,23 @@
   - `sprint-status.yaml` YAML parse 通过。
   - `git diff --check -- <finalizer scoped files>`：通过。
 - **下一步判断**: 进入最终验证、白名单暂存、本地中文 Conventional Commit，不 push。
+
+## 2026-06-17 — Attempt 11
+
+- **Story**: `8-9-cli-human-output-scan-friendly-layout-and-color`
+- **方案**: 执行最终验证、白名单暂存和本地中文 Conventional Commit。
+- **选择原因**: Story 8.9 已完成开发、CR loop 和 closeout，按 orchestrator 最后必须本地提交且不 push。
+- **执行结果**: 已完成本地提交。
+- **Commit**: `9404065 feat(cli): 实现 Story 8.9 可扫描人类输出与颜色护栏`
+- **暂存策略**:
+  - 只暂存 Story 8.9 相关源码、测试、文档、CR 产物和状态文件。
+  - 未暂存 release manifest、untracked brownfield skill roots、docs explanation 新文件、非 8.9 Story/spec/hook/config/test 修改。
+- **验证结果**:
+  - `git diff --check`：通过。
+  - `sprint-status.yaml` YAML parse：通过。
+  - `npm ls picocolors chalk colorette strip-ansi --depth=0`：通过，仅 direct `picocolors@1.1.1`。
+  - Focused tests：通过，11 files / 122 tests。
+  - `npm run build`：通过。
+  - `npm run release:packaging-check`：通过；一次并行执行 build/check 触发过 dist 竞态，顺序重跑后通过。
+  - `npm test`：未通过，47 files / 366 tests passed，5 files / 7 tests failed；失败均为非 8.9 canonical skill count / fixture count `57/44 -> 61/48` 漂移。
+- **下一步判断**: 不 push；保留 mixed worktree 中非 8.9 改动给后续任务单独处理。

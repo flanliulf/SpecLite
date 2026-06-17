@@ -174,3 +174,20 @@ CR loop 已通过。下一步只能进入 `bmenhance-cr-04-rules-extractor`，�
 - 必须使用白名单和必要时 hunk staging，避免把非 8.9 变更带入提交。
 - 8.9 相关范围包括 Story 8.9 文件、8.9 code review dir、CR rules summary、sprint status、`picocolors` dependency、ANSI helper、install/output renderer、相关 focused tests 和 docs matrix。
 - full `npm test` 仍存在非 8.9 count drift；最终汇报必须说明。
+
+## 2026-06-17
+
+最终验证与本地提交已完成。
+
+结果：
+
+- Implementation commit: `9404065 feat(cli): 实现 Story 8.9 可扫描人类输出与颜色护栏`
+- 未 push。
+- 白名单暂存已隔离非 8.9 mixed worktree 改动。
+- Focused tests、build、packaging check、YAML parse、dependency boundary 和 diff check 均通过。
+- full `npm test` 仍失败，失败与非 8.9 canonical skill count / fixture count `57/44 -> 61/48` 漂移一致。
+
+说明：
+
+- 曾并行执行 `npm run build` 与 `npm run release:packaging-check`，导致 packaging check 在 `dist/` 清理/重建竞态中读取到不完整 package inventory，并失败于 `runtime-schemas-included`。
+- 根因确认后按脚本约定顺序重跑 `npm run release:packaging-check`，结果通过。

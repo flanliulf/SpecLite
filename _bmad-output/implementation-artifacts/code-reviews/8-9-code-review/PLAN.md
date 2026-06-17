@@ -42,11 +42,11 @@
 - [x] Step 7: 执行 05 todo tracker
 - [x] Step 8: 执行 06 finalizer
 - [x] Step 9: 更新本文件、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md` 为 Story 终态
-- [ ] Step 10: 最终验证与本地提交
+- [x] Step 10: 最终验证与本地提交
 
 ## Current State（当前状态）
 
-Story `8-9` 已完成开发、CR reviewer/evaluator/fixer 闭环、04 rules extractor、05 TODO tracker 和 06 finalizer。下一步进入最终验证与本地中文 Conventional Commit，不 push。
+Story `8-9` 已完成开发、CR reviewer/evaluator/fixer 闭环、04 rules extractor、05 TODO tracker、06 finalizer、最终验证和本地中文 Conventional Commit。未执行 push。
 
 ## Development Result（开发结果）
 
@@ -238,6 +238,24 @@ Evaluator 决定：
 - `git diff --check -- <finalizer scoped files>`：通过。
 
 下一步：最终验证、白名单暂存、本地中文 Conventional Commit，不 push。
+
+## Final Commit（最终提交）
+
+最终验证与本地提交已完成：
+
+- Implementation commit: `9404065 feat(cli): 实现 Story 8.9 可扫描人类输出与颜色护栏`
+- Push: 未执行。
+- Staging policy: 仅白名单暂存 Story 8.9 相关源码、测试、文档、CR 产物和状态文件；未暂存非 8.9 mixed worktree 改动。
+
+验证证据：
+
+- `git diff --check`：通过。
+- `ruby -e 'require "yaml"; YAML.load_file("_bmad-output/implementation-artifacts/sprint-status.yaml")'`：通过。
+- `npm ls picocolors chalk colorette strip-ansi --depth=0`：通过，仅 direct `picocolors@1.1.1`。
+- `npm test -- test/install-outcome-human-output.test.ts test/cli-output-presentation.test.ts test/cli-human-output-matrix.test.ts test/cli-smoke.test.ts test/status-command.test.ts test/validate-command.test.ts test/update-command.test.ts test/resolve-cli.test.ts test/source-selection.test.ts test/git-source-resolution.test.ts test/cli-message-catalog.test.ts`：通过，11 files / 122 tests。
+- `npm run build`：通过。
+- `npm run release:packaging-check`：通过。注意：一次并行运行 build 与 packaging check 曾触发 `runtime-schemas-included` 竞态失败；按脚本要求顺序重跑后通过。
+- `npm test`：未通过，47 files / 366 tests passed，5 files / 7 tests failed；失败均集中在非 8.9 的 canonical skill count / fixture count `57/44 -> 61/48` 漂移，未纳入本 Story 修复范围。
 
 ## Termination Criteria（终止条件）
 
