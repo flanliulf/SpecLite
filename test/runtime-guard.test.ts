@@ -9,62 +9,82 @@ const fixtureRoot = new URL("./fixtures/fresh-install-empty-project/", import.me
 
 describe("install runtime/platform guard", () => {
   it("projects unsupported Node through the CommandResult contract", async () => {
-    const outcome = await runInstallCommand({
-      options: { json: true },
-      runtime: {
-        nodeVersion: "v20.11.1",
-        platform: "darwin",
-        platformRelease: "23.0.0",
-        targetProject: "fresh-install-empty-project",
-      },
-    });
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-guard-node-"));
 
-    const expected = JSON.parse(
-      await readFile(new URL("expected/command-json/unsupported-node.json", fixtureRoot), "utf8"),
-    );
+    try {
+      const projectRoot = path.join(tempRoot, "fresh-install-empty-project");
+      await mkdir(projectRoot);
 
-    expect(outcome.exitCode).toBe(1);
-    expect(InstallCommandResultSchema.parse(outcome.result)).toEqual(expected);
-    expect(outcome.result.issues[0]).toMatchObject({
-      issueId: "environment.unsupported-node",
-      category: "environment",
-      severity: "error",
-      details: {
-        detectedVersion: "v20.11.1",
-        requiredRange: ">=22",
-      },
-    });
+      const outcome = await runInstallCommand({
+        options: { json: true },
+        runtime: {
+          cwd: projectRoot,
+          nodeVersion: "v20.11.1",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          targetProject: "fresh-install-empty-project",
+        },
+      });
+
+      const expected = JSON.parse(
+        await readFile(new URL("expected/command-json/unsupported-node.json", fixtureRoot), "utf8"),
+      );
+
+      expect(outcome.exitCode).toBe(1);
+      expect(InstallCommandResultSchema.parse(outcome.result)).toEqual(expected);
+      expect(outcome.result.issues[0]).toMatchObject({
+        issueId: "environment.unsupported-node",
+        category: "environment",
+        severity: "error",
+        details: {
+          detectedVersion: "v20.11.1",
+          requiredRange: ">=22",
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("projects unsupported platform through the CommandResult contract", async () => {
-    const outcome = await runInstallCommand({
-      options: { json: true },
-      runtime: {
-        nodeVersion: "v22.12.0",
-        platform: "linux",
-        platformRelease: "6.6.0",
-        targetProject: "fresh-install-empty-project",
-      },
-    });
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-guard-platform-"));
 
-    const expected = JSON.parse(
-      await readFile(
-        new URL("expected/command-json/unsupported-platform.json", fixtureRoot),
-        "utf8",
-      ),
-    );
+    try {
+      const projectRoot = path.join(tempRoot, "fresh-install-empty-project");
+      await mkdir(projectRoot);
 
-    expect(outcome.exitCode).toBe(1);
-    expect(InstallCommandResultSchema.parse(outcome.result)).toEqual(expected);
-    expect(outcome.result.issues[0]).toMatchObject({
-      issueId: "environment.unsupported-platform",
-      category: "environment",
-      severity: "error",
-      details: {
-        detectedPlatform: "linux",
-        supportedPlatforms: ["macos-13-or-newer", "windows-11"],
-      },
-    });
+      const outcome = await runInstallCommand({
+        options: { json: true },
+        runtime: {
+          cwd: projectRoot,
+          nodeVersion: "v22.12.0",
+          platform: "linux",
+          platformRelease: "6.6.0",
+          targetProject: "fresh-install-empty-project",
+        },
+      });
+
+      const expected = JSON.parse(
+        await readFile(
+          new URL("expected/command-json/unsupported-platform.json", fixtureRoot),
+          "utf8",
+        ),
+      );
+
+      expect(outcome.exitCode).toBe(1);
+      expect(InstallCommandResultSchema.parse(outcome.result)).toEqual(expected);
+      expect(outcome.result.issues[0]).toMatchObject({
+        issueId: "environment.unsupported-platform",
+        category: "environment",
+        severity: "error",
+        details: {
+          detectedPlatform: "linux",
+          supportedPlatforms: ["macos-13-or-newer", "windows-11"],
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("does not create project runtime directories when a guard fails", async () => {

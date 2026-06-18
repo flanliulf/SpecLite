@@ -20,7 +20,7 @@
         {
           "kind": "version-lock",
           "packageName": "@fancyliu/speclite",
-          "version": "0.2.0",
+          "version": "0.3.0",
           "lockPath": "package-lock.json",
           "verified": true
         }

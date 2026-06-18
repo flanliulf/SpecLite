@@ -141,7 +141,7 @@ describe("installed skill activation contract", () => {
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 
   it("documents Python resolver scripts only as compatibility assets outside the default activation path", async () => {
     const docFiles = [

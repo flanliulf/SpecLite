@@ -32,7 +32,7 @@ describe("bundled source descriptor discovery", () => {
       expect.objectContaining({
         kind: "version-lock",
         packageName: "@fancyliu/speclite",
-        version: "0.2.0",
+        version: "0.3.0",
         lockPath: "package-lock.json",
         verified: true,
       }),
@@ -76,7 +76,7 @@ describe("bundled source descriptor discovery", () => {
           schemaVersion: "speclite.packaging-manifest.v1",
           packageJson: {
             name: "@fancyliu/speclite",
-            version: "0.2.0",
+            version: "0.3.0",
           },
           packageHash: "sha256:packaged-source",
         }),
@@ -94,7 +94,7 @@ describe("bundled source descriptor discovery", () => {
         {
           kind: "version-lock",
           packageName: "@fancyliu/speclite",
-          version: "0.2.0",
+          version: "0.3.0",
           lockPath: "dist/packaging-manifest.json",
           verified: true,
         },
