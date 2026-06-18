@@ -1,0 +1,17 @@
+[speclite-brownfield-java-springboot-backend-tech-stack-digger]
+default_report_name = "java-springboot-backend-tech-stack.md"
+require_output_dir = true
+allow_overwrite = false
+prefer_effective_pom = true
+prefer_dependency_tree = true
+prefer_gradle_resolved_dependencies = true
+include_evidence_summary = true
+include_unconfirmed_section = true
+
+[speclite-brownfield-java-springboot-backend-tech-stack-digger.outputs]
+report_name = "java-springboot-backend-tech-stack.md"
+
+[speclite-brownfield-java-springboot-backend-tech-stack-digger.analysis]
+default_focus = "java-springboot-backend"
+external_server_versions_require_deploy_evidence = true
+document_sources_are_candidates_only = true

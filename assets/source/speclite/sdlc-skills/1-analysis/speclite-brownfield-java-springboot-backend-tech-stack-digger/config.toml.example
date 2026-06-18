@@ -1,0 +1,15 @@
+# Example only. Runtime configuration may be supplied by user request or {project-root}/_speclite/config.toml.
+
+[modules.sdlc]
+project_knowledge = "{project-root}/docs"
+planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
+
+[skills.speclite-brownfield-java-springboot-backend-tech-stack-digger]
+output_dir = "{project_knowledge}/analysis"
+report_name = "java-springboot-backend-tech-stack.md"
+module = ""
+allow_overwrite = false
+prefer_effective_pom = true
+prefer_dependency_tree = true
+include_evidence_summary = true
+include_unconfirmed_section = true

@@ -1,0 +1,16 @@
+[speclite-brownfield-nodejs-backend-tech-stack-digger]
+default_report_name = "nodejs-backend-tech-stack.md"
+require_output_dir = true
+allow_overwrite = false
+prefer_lockfile = true
+prefer_executable_package_resolution = true
+include_evidence_summary = true
+include_unconfirmed_section = true
+
+[speclite-brownfield-nodejs-backend-tech-stack-digger.outputs]
+report_name = "nodejs-backend-tech-stack.md"
+
+[speclite-brownfield-nodejs-backend-tech-stack-digger.analysis]
+default_focus = "nodejs-backend"
+external_server_versions_require_deploy_evidence = true
+document_sources_are_candidates_only = true
