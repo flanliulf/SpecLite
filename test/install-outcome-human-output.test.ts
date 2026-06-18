@@ -329,6 +329,43 @@ describe("install outcome-oriented human output", () => {
     expect(renderCommandResultJson(defaultResult)).not.toContain("outcome");
     expect(renderCommandResultJson(explicitResult)).not.toContain("outcome");
   });
+
+  it("returns post-install PATH prerequisite guidance for installed skill activation", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-path-guidance-"));
+
+    try {
+      await runInstallCommand({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        targetDirectory: "noi",
+      });
+
+      const commandOutcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        targetDirectory: "noi",
+      });
+      const output = renderInstallHumanOutput(commandOutcome.result, { locale: "en-US" });
+
+      expect(commandOutcome.exitCode).toBe(0);
+      expect(commandOutcome.result.nextActions).toContain(
+        "Before activating installed skills, run command -v speclite in the AI session; if it fails, expose a global or local development speclite CLI on PATH and retry activation.",
+      );
+      expect(output).toContain("command -v speclite");
+      expect(output).toContain("expose a global or local development speclite CLI on PATH");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 function createIssue(input: {
