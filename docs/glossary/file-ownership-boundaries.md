@@ -1,68 +1,70 @@
 # File Ownership Boundaries（文件所有权边界）
 
-`File Ownership Boundaries（文件所有权边界）` 是 SpecLite 用于区分 installer-owned、human-owned 和 workflow-owned 文件的更新保护模型。
+`File Ownership Boundaries（文件所有权边界）` 是 SpecLite 用来区分 `installer-owned`、`human-owned` 和 `workflow-owned` 路径的保护模型。它决定 `update`、`repair` 和 `uninstall` 能不能自动修改某个 project-relative path。
 
-根据 PRD，系统可以区分 installer-owned、human-owned 和 workflow-owned 文件。MVP 使用该能力支撑 `update --repair`、`validate` 和 update planning；Post-MVP 的 `uninstall` 可以复用同一模型，但不得被视为 MVP write flow。
+完整设计解释见 [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md)。本文作为 glossary 入口，提供快速定义和当前实现边界。
 
-## Installer-Owned Files（安装器所有文件）
+## Terms（术语）
 
-`installer-owned files` 是由 SpecLite installer 生成、管理、验证或修复的文件。
+| Term | Definition |
+|---|---|
+| **installer-owned** | 由 SpecLite installer 生成和管理的安装产物。它可以被 installer 更新、repair 或 uninstall，但写入前仍要经过 manifest、hash、source evidence、update plan 和授权判断。 |
+| **human-owned** | 由项目维护者人工维护的配置或定制内容。当前实现明确保护 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml`，允许读取用于配置解析，但不能作为 installer-owned 输出重新生成。 |
+| **workflow-owned** | Workflow 执行后产生的过程产物，默认位于 `artifactRoot` 下；默认 `artifactRoot` 是 `_speclite-output`。这些文件记录真实研发过程，不参与 install/update 覆盖。 |
 
-典型范围包括：
+## Installer-Owned（安装器所有）
 
-- IDE skill mirrors 中的 canonical skill package 投影
-- `_speclite` 中的 installer metadata
-- manifest/index
-- runtime scripts
-- files index/hash 记录
+`installer-owned` 路径属于 SpecLite 安装控制面。典型路径包括：
 
-installer-owned 不等于可以静默覆盖。若这类文件发生 drift，普通 `update` 应先输出 update plan、impact summary 或 conflict；只有在用户确认、显式 repair 或满足安全写入条件时，installer 才能恢复或重建这些文件。
+- `_speclite/config.toml`
+- `_speclite/config.user.toml`
+- `_speclite/_config/*`
+- `_speclite/hooks/*`
+- `_speclite/scripts/*`
+- `.claude/skills/*`
+- `.agents/skills/*`
 
-## Human-Owned Files（人工所有文件）
+这类路径不是“可以静默覆盖”的同义词。普通 `update` 会先生成 plan；只有 non-conflicting installer-owned action 在用户显式授权后才会写入。`update --repair` 也只修复可安全恢复的 installer-owned drift。
 
-`human-owned files` 是由项目维护者或团队人工维护的文件。
+## Human-Owned（人工所有）
 
-典型范围包括：
+`human-owned` 路径属于项目维护者或团队。当前代码明确匹配：
 
 - `_speclite/custom/*.toml`
 - `_speclite/custom/*.user.toml`
-- 用户维护的配置覆盖
-- 人工编辑的项目文档或定制内容
 
-MVP 默认不修改 human-owned TOML。Fresh install 可以在目标路径不存在时 create-if-absent 创建 stub；如果文件已存在，install、update 和 repair 不得覆盖、重写、重排或格式化。
+这类路径的 `protected` 状态为 `true`。`update` 遇到它们会 `skip`；`uninstall` 遇到它们会 `preserve`。SpecLite 可以读取这些文件来解析 project/user customization，但不能把它们当作 installer 产物重写、重排或格式化。
 
-human-owned 的核心边界是：安装器可以读取它们来解析配置，但不能把它们当成 installer-owned 输出重新生成。
+## Workflow-Owned（Workflow 所有）
 
-## Workflow-Owned Files（Workflow 所有文件）
+`workflow-owned` 路径属于已运行 workflow 的输出。当前分类逻辑是：路径位于 `artifactRoot` 之下时，归为 `workflow-owned`；默认 `artifactRoot` 是 `_speclite-output`。
 
-`workflow-owned files` 是已激活 workflow 运行后产生的过程产物。
+典型路径包括：
 
-典型范围包括：
+- `_speclite-output/planning-artifacts/*`
+- `_speclite-output/implementation-artifacts/*`
+- `_speclite-output/review-artifacts/*`
+- `_speclite-output/research-artifacts/*`
+- story、CR、SR、research 和 process record 等 workflow 记录
 
-- `_speclite-output` 下的 research 产物
-- planning 产物
-- implementation 记录
-- review 产物
-- 其他按配置输出的 workflow artifacts
+这类文件不属于 installer metadata，也不是 canonical source mirror。`update` 遇到它们会 `skip`；`uninstall` 不会自动删除，而是要求 manual action。
 
-workflow-owned artifacts 不参与 update 覆盖。它们记录团队的实际研发过程，不是安装器 metadata，也不是 canonical source mirror。
+## Command Behavior（命令行为）
 
-## Update Protection Rules（更新保护规则）
+| Command | Behavior |
+|---|---|
+| `speclite update` | 对 `human-owned` 和 `workflow-owned` action 生成 `skip`；对 installer-owned drift 生成 update action 或 conflict。 |
+| `speclite update --repair` | 只尝试恢复可由 source evidence 安全证明的 installer-owned drift。 |
+| `speclite uninstall` | 自动移除 installer-owned paths；保留 human-owned paths；对 workflow-owned 和其他 protected paths 使用 manual action。 |
+| `speclite validate` | 检查 files index 与 ownership 分类是否冲突，避免把 protected path 当成 installer-owned 写入目标。 |
 
-SpecLite 的 install、update 和 repair 必须遵守以下规则：
+## Source Of Truth（事实来源）
 
-- installer-owned 文件可以由 installer 管理，但写入前应通过 manifest、hash、ownership 或 update plan 判断安全性。
-- human-owned custom 文件不得被无提示覆盖。
-- workflow-owned artifacts 不得被 install 或 update 静默覆盖。
-- 无法确认安全时，更新流程应保守跳过或报告 conflict。
-- `update` 应输出 planned effects、changed paths、skipped paths 和 conflicts，帮助项目维护者理解影响范围。
+| Topic | Source |
+|---|---|
+| Ownership 分类 | [`../../src/update/ownership-model.ts`](../../src/update/ownership-model.ts) |
+| `update` / `repair` plan | [`../../src/update/update-plan.ts`](../../src/update/update-plan.ts) |
+| `uninstall` plan | [`../../src/commands/uninstall.ts`](../../src/commands/uninstall.ts) |
+| file integrity validation | [`../../src/validation/rules/file-integrity.ts`](../../src/validation/rules/file-integrity.ts) |
 
-## PRD Relationship（与 PRD 功能需求的关系）
-
-该术语对应 PRD 中的文件所有权能力：
-
-- FR37: 系统可以区分 installer-owned、human-owned 和 workflow-owned 文件。
-- FR39: 系统可以避免覆盖 human-owned custom 文件。
-- FR40: 系统可以避免覆盖 workflow-owned 过程产物。
-
-这组边界的目的不是增加目录复杂度，而是确保 SpecLite 作为安装控制面时，只管理它应管理的文件，并保护用户定制和 workflow 产物。
+本文档由 speclite-agent-docs-steward Skill 自动生成
