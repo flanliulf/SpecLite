@@ -74,6 +74,8 @@ export type { ConfigInitializationPromptInput, ConfigInitializationSelection };
 
 const UNAVAILABLE_INSTALL_MANIFEST_VERSION = "unavailable" as const;
 const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const INSTALLED_SKILL_CLI_PATH_NEXT_ACTION =
+  "Before activating installed skills, run command -v speclite in the AI session; if it fails, expose a global or local development speclite CLI on PATH and retry activation.";
 
 function createInstallTargetPresentation(input: {
   cwd: string;
@@ -824,6 +826,7 @@ export async function runInstallCommand(input: {
       ideTargets: readyCheck.ideTargets,
     }),
     nextActions: [
+      INSTALLED_SKILL_CLI_PATH_NEXT_ACTION,
       "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
       "For Codex, review and trust project-local hooks with /hooks before relying on Flow Gate enforcement and canonical source warnings.",
       "Run speclite status to inspect the installed-state summary.",
@@ -1154,6 +1157,7 @@ async function continueInstallWithSourceDescriptor(input: {
       ideTargets: readyCheck.ideTargets,
     }),
     nextActions: [
+      INSTALLED_SKILL_CLI_PATH_NEXT_ACTION,
       "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
       "For Codex, review and trust project-local hooks with /hooks before relying on Flow Gate enforcement and canonical source warnings.",
       "Run speclite status to inspect the installed-state summary.",

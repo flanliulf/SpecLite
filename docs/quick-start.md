@@ -41,6 +41,8 @@ speclite --version
 npx @fancyliu/speclite@latest --version
 ```
 
+注意：`npx` 只适合本次 shell 中一次性执行安装、状态或校验命令。安装完成后，已安装 Skill 激活仍要求当前 AI 会话的 `PATH` 中能直接找到裸命令 `speclite`。
+
 如果你正在使用本仓库开发版，请先进入 **SpecLite 仓库目录**，再安装依赖并构建：
 
 ```sh
@@ -54,6 +56,14 @@ npm run build
 ```sh
 npm run dev -- --version
 ```
+
+如果使用开发版安装到目标项目，安装完成后还需要把本地构建出的 `speclite` CLI 暴露给后续 AI 会话，例如通过 `npm link` 或团队认可的 PATH symlink。继续使用已安装 Skills 前先运行：
+
+```sh
+command -v speclite
+```
+
+如果该命令没有输出路径，先修复 PATH 后再激活 installed skills。
 
 ## Where to Run Commands（命令在哪个目录执行）
 
@@ -84,6 +94,8 @@ npm run dev -- install /path/to/project --yes
 | 推荐给新用户：全局安装后使用 | `speclite` | `speclite install /path/to/project --yes` |
 | 不全局安装：通过 npm 临时运行 | `npx @fancyliu/speclite@latest` | `npx @fancyliu/speclite@latest install /path/to/project --yes` |
 | 开发者：在 SpecLite 仓库内运行源码版 | `npm run dev --` | `npm run dev -- install /path/to/project --yes` |
+
+无论安装时使用哪种命令前缀，后续在 AI IDE 中激活已安装 Skills 前都要确认 `command -v speclite` 通过。`npx @fancyliu/speclite@latest` 和 `npm run dev --` 不会自动让新的 AI session 获得裸 `speclite` 命令。
 
 ## Choose Target Project（选择目标项目）
 

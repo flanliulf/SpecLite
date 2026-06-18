@@ -31,6 +31,8 @@ speclite validate /path/to/project
 - 已确认目标项目根目录，例如 `/path/to/project`。
 - 对 existing install、regular file target、unsafe symlink target 等异常状态，先按输出中的 next action 处理。
 
+`npx @fancyliu/speclite@latest` 可以完成一次安装命令，但不会为后续 AI 会话提供裸 `speclite` 命令。安装完成后如果要激活 `.agents/skills/` 或 `.claude/skills/` 中的 installed skills，当前 AI 会话必须能通过 `command -v speclite` 找到 Node CLI；使用本仓库开发版安装时也需要先通过 `npm link` 或团队认可的 PATH symlink 暴露本地构建出的 CLI。
+
 ## Steps（步骤）
 
 ### Step 1: Preview Target（预览目标）
@@ -64,6 +66,14 @@ speclite install /path/to/project --yes
 | Human-readable locale | `zh-CN` |
 
 安装成功后，中文 Ready Summary 会展示 selected modules、config mode、IDE targets、key paths 和 next actions。
+
+使用 installed skills 前，按 Ready Summary 中的 next action 在目标 AI 会话运行：
+
+```sh
+command -v speclite
+```
+
+如果没有输出路径，先把全局安装或本地开发版 `speclite` CLI 暴露到 `PATH`，再重试 Skill 激活。
 
 ### Step 3: Customize Install（自定义安装）
 

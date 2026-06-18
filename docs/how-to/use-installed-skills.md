@@ -8,6 +8,15 @@
 
 处理方式是把已安装或本地构建的 `speclite` Node CLI 暴露到当前会话 `PATH` 后重试。不要回退到 Python resolver、不要读取 source checkout resolver，也不要只读取 `_speclite/config.toml`。
 
+如果使用全局 npm 包，先确认：
+
+```sh
+npm install -g @fancyliu/speclite
+command -v speclite
+```
+
+如果使用 SpecLite 仓库开发版安装目标项目，`npm run dev -- install /path/to/project --yes` 只负责执行安装；它不会让后续 AI 会话自动拥有裸 `speclite` 命令。先在 SpecLite 仓库中构建并通过 `npm link` 或团队认可的 PATH symlink 暴露 CLI，再回到目标项目重试激活。
+
 需要 runtime config 或 customization 时，installed Skill 必须使用：
 
 ```sh
