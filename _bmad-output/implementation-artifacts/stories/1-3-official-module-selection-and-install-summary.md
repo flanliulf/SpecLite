@@ -233,7 +233,7 @@ Do not change source asset metadata casually. If module `version` is added, add 
 ### Official Module Metadata Notes（官方模块元数据备注）
 
 - `core-skills/module.yaml` currently has `code: core`, `name: "SpecLite Core Module"` and core config prompts.
-- `sdlc-skills/module.yaml` currently has `code: sdlc`, `name: "SpecLite SDLC"`, `default_selected: true`, artifact directory declarations and agent roster metadata.
+- `sdlc-skills/module.yaml` currently has `code: sdlc`, `name: "SpecLite SDLC Module"`, `default_selected: true`, artifact directory declarations and agent roster metadata. Human module lists and final review summaries must use this metadata name so `sdlc` is presented consistently with `core`, for example `sdlc: SpecLite SDLC Module 0.0.0`.
 - `module-help.csv` files map skills to display names, menu codes, phase, output location and outputs. They should feed capability/help summary and later manifest/help indexes, but they are not alternate module identity sources.
 - Default installable / mirrorable modules 必须具备 canonical self-contained skill packages；package 可按需包含 `SKILL.md`、`CHANGELOG.md`、optional `SKILL.en.md`、`customize.toml`、`config.toml.example`、`assets/`、`references/`、`data/` 和 `scripts/`。Module discovery 可以列出 metadata，但缺 canonical packages 必须阻断默认安装 / mirror，不得静默进入 installed state。
 - 当前 source facts 显示 `sdlc-skills/` 已具备 40 个 nested `SKILL.md` canonical package entries。`sdlc` 可以作为 default selected module 的前提是 discovery、install planning、mirror planning 和 manifest/help indexes 正确识别这些 nested package roots；任何 selected/default module 若实际缺少 required canonical package，仍不得合成 placeholder mirror、不得静默进入 installed state，也不得进入 ReadyCheck evidence。
@@ -372,3 +372,4 @@ GPT-5 Codex
 
 - 2026-05-26: 实现 Story 1.3 official bundled source discovery、module metadata parsing、module selection、pre-write install scope summary 和 focused regression tests；Story 状态推进至 review。
 - 2026-05-28: Corrective verification added full canonical package root count evidence (`core=13`, `sdlc=40`, `total=53`) and validated targeted/full regression; Story 状态重新推进至 review。
+- 2026-06-16: 同步 `sdlc` module display name 为 `SpecLite SDLC Module`，要求 module list 与 final review 使用一致 metadata name。

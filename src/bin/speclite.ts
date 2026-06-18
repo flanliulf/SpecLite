@@ -462,9 +462,13 @@ function createModuleSelectionQuestion(input: ModuleSelectionPromptInput, locale
     return {
       body: [
         "Step 1/4 Select modules",
+        "",
         "Select SpecLite official modules before any project files are written.",
+        "",
         "Available modules:",
+        "",
         ...moduleLines,
+        "",
         `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
         `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
       ].join("\n"),
@@ -475,9 +479,13 @@ function createModuleSelectionQuestion(input: ModuleSelectionPromptInput, locale
   return {
     body: [
       "Step 1/4 Select modules（选择模块）",
+      "",
       "在写入任何项目文件前选择 SpecLite official modules。",
+      "",
       "Available modules:",
+      "",
       ...moduleLines,
+      "",
       `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
       `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
     ].join("\n"),
@@ -620,10 +628,15 @@ function createConfigModePrompt(
     return {
       body: [
         "Step 2/4 Configure project",
+        "",
         "Choose project configuration mode before any files are written.",
-        "Quick config uses deterministic defaults for project/user/language/artifact paths.",
-        "Detailed config lets you adjust project fields, selected modules and IDE targets.",
-        "This stage does not write _speclite, _speclite-output, IDE mirror files, manifest/index files or operation locks.",
+        "",
+        "Config mode options",
+        "",
+        "- quick: Uses deterministic defaults for project/user/language/artifact paths; best when defaults are acceptable.",
+        "- detailed: Lets you adjust project fields, selected modules and IDE targets; best when paths, modules or IDE mirrors need customization.",
+        "",
+        "Write boundary: this stage does not write _speclite/, _speclite-output/, IDE mirror files, manifest/index files or operation locks.",
       ].join("\n"),
       prompt: "Enter quick or detailed. Press Enter to use quick: ",
     };
@@ -632,10 +645,15 @@ function createConfigModePrompt(
   return {
     body: [
       "Step 2/4 Configure project（配置项目）",
+      "",
       "在写入任何文件前选择项目配置模式。",
-      "quick 使用 project/user/language/artifact paths 的确定性默认值。",
-      "detailed 可调整 project fields、selected modules 和 IDE targets。",
-      "此阶段不会写入 _speclite、_speclite-output、IDE mirror files、manifest/index files 或 operation locks。",
+      "",
+      "Config mode options（配置模式选项）",
+      "",
+      "- quick: 使用 deterministic defaults 生成 project/user/language/artifact paths；适合接受默认值的快速安装。",
+      "- detailed: 逐项确认 project fields、selected modules 和 IDE targets；适合需要自定义路径、modules 或 IDE mirrors 的安装。",
+      "",
+      "Write boundary（写入边界）: 此阶段不会写入 _speclite/、_speclite-output/、IDE mirror files、manifest/index files 或 operation locks。",
       `Default mode: ${input.defaultMode}.`,
     ].join("\n"),
     prompt: "输入 quick 或 detailed。直接按 Enter 使用 quick: ",
@@ -654,7 +672,7 @@ function createPrewriteConfirmationPrompt(
   }
 
   return {
-    body: ["Step 3/4 Final pre-write review（最终写入前复核）", input.prompt].join("\n"),
+    body: input.localizedPrompts?.["zh-CN"] ?? input.prompt,
     prompt: "请在项目文件写入前复核最终安装范围。按 Enter 确认并继续: ",
   };
 }

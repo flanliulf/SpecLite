@@ -473,9 +473,64 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **则** human output 必须清楚展示 `targetProject=noi` 与目标绝对路径
 **并且** Next Actions 必须使用路径安全目标；自定义安装命令必须包含 `--yes --interactive`。
 
+## Story 8.9: CLI Human Output Scan-Friendly Layout And Color（CLI 人类输出可扫描布局与颜色）
+
+作为 CLI 用户和 SpecLite 维护者，
+我希望 human-readable output 在保留 outcome-oriented profile 的同时，使用 bullet、缩进分组、steps count、Evidence 层级、Next Actions 标签和受控 ANSI color，
+以便用户能在 3 秒内判断这是安全预览还是已写入、目标是谁、为什么停住、下一步该复制哪条命令。
+
+**验收标准：**
+
+**前提** 用户从 `/Users/fancyliu/Repos/SpecLite` 或其他非 target cwd 执行 `speclite install /Users/fancyliu/Repos/noi` 且未传入 `--yes`
+**当** 输出 `prewrite-paused` human result
+**则** section 顺序必须保持 `Summary（摘要）`、`Scope（范围）`、`State（状态）`、`Evidence（证据）`、`Issues（问题）`、`Next Actions（下一步）`
+**并且** section 之间保留空行，section 内所有用户可读事实必须用 `- ` bullet 或 `  - ` nested bullet 表达，不得继续输出无缩进正文行、孤立小标题或 key-value dump。
+
+**前提** 渲染 `Summary（摘要）` 与 `Scope（范围）`
+**当** 输出 install prewrite preview
+**则** `Summary` 必须以 bullet 展示完成状态、写入状态、用户动作、ready 状态和当前含义
+**并且** `Scope` 必须以 bullet 展示目标项目、目标路径、项目根目录和命令执行目录。
+
+**前提** `completedSteps` 或 `pendingSteps` 需要在 human output 中展示
+**当** 渲染 `State（状态）`
+**则** 必须先展示数量或 `无`
+**并且** 非空 step list 必须用 nested bullet 逐项列出 stable step id。
+
+**前提** `install` 输出 source descriptor、external access 和 authorization
+**当** 渲染 `Evidence（证据）`
+**则** 必须按所属语义分组：`来源：bundled` 下缩进展示 `resolvedRoot`、`trustStatus`、`evidence`，`外部访问` 与 `授权状态` 作为同级 bullet
+**并且** 不得要求用户跨多个孤立 heading 拼接含义。
+
+**前提** human output 无 blocker、warning、info 或其他 issues
+**当** 渲染 `Issues（问题）`
+**则** 必须输出 `- 无问题：未发现 blocker、warning 或 info。` 或等价中文友好提示
+**并且** 不得输出空 section、独立 `Empty State（空状态）` section，或把 `未写入项目文件` 放入 `Issues` 中。
+
+**前提** `install` 输出默认安装与自定义安装建议
+**当** target 为 `/Users/fancyliu/Repos/noi`
+**则** `Next Actions（下一步）` 必须使用 `默认安装` 与 `自定义安装` 标签
+**并且** 命令必须路径安全：默认安装包含 `/Users/fancyliu/Repos/noi --yes`，自定义安装包含 `/Users/fancyliu/Repos/noi --yes --interactive`。
+
+**前提** renderer 在 TTY 环境中输出 human-readable text
+**当** `NO_COLOR` 未设置、`CI` 未设置、`options.noColor !== true` 且 `options.isTty !== false`
+**则** 可以启用少量 ANSI style：section title 使用 bold，`Outcome` 按状态使用标准 8/16 色，`Next Actions` 命令使用 cyan 或 bold
+**并且** 颜色不得承担唯一语义，移除 ANSI 后文本必须完整可读。
+
+**前提** `NO_COLOR=1`、CI、non-TTY、docs 示例、fixture 或 `--json` 输出
+**当** 渲染相同 command
+**则** 不得包含 ANSI escape。
+
+**前提** 实现 ANSI color helper
+**当** 选择 outcome / severity / command color
+**则** 只能使用标准 ANSI 8/16 色与 bold，不得使用 truecolor、256 色、背景色、dim text、低对比灰色或依赖浅色/深色主题的色块。
+
+**前提** 实现 Story 8.9
+**当** 运行 focused tests
+**则** 必须断言 install absolute-target prewrite output 的 exact section fragments、bullet、nested step list、step count、Evidence hierarchy、labeled Next Actions、TTY color positive case、无色环境无 ANSI、`stripAnsi(output)` 语义完整性和 JSON 无 human-only absolute path / ANSI。
+
 ## Logical Dependency / Corrective Addendum（逻辑依赖 / 纠偏补充）
 
-Story 8.8 是在 Story 8.1-8.7 完成后新增的 corrective addendum。下列顺序表达的是理想化的逻辑依赖和后续维护口径，不是当前 sprint 的历史执行顺序。当前 sprint 状态以 `_bmad-output/implementation-artifacts/sprint-status.yaml` 为准：Story 8.1-8.7 已完成，Story 8.8 为 `ready-for-dev`。
+Story 8.8 和 Story 8.9 是在 Story 8.1-8.7 完成后新增的 corrective addendum。下列顺序表达的是理想化的逻辑依赖和后续维护口径，不是当前 sprint 的历史执行顺序。当前 sprint 状态以 `_bmad-output/implementation-artifacts/sprint-status.yaml` 为准：Story 8.1-8.8 已完成，Story 8.9 为 `ready-for-dev`。
 
 1. 先实现 Story 8.1，共享 outcome/presentation contract 和本地化 Next Actions 基础设施。
 2. 再实现 Story 8.8，先固化 Operation / Diagnostic / Report-Support profiles，避免把 `install` 的 section 顺序误推广到所有命令。
@@ -483,7 +538,8 @@ Story 8.8 是在 Story 8.1-8.7 完成后新增的 corrective addendum。下列�
 4. 再实现 Story 8.3，统一 `update` 与 `update --repair` 的计划、授权、conflict 和 applied 输出。
 5. 再实现 Story 8.4，让 `status` 和 `validate` 保持职责分离。
 6. 再实现 Story 8.5，补齐 `resolve` 支持命令的人类输出。
-7. 最后实现 Story 8.6 / 8.7，收敛 message catalog、Next Actions、本地化测试、fixture 和文档示例。
+7. 再实现 Story 8.6 / 8.7，收敛 message catalog、Next Actions、本地化测试、fixture 和文档示例。
+8. 最后实现 Story 8.9，把真实用户复测发现的 layout 缺口收敛为 bullet、缩进分组、steps count、Evidence 层级、Next Actions 标签和受控 ANSI color。
 
 ## Success Metrics（成功指标）
 

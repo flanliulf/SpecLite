@@ -77,6 +77,115 @@ type PlannedWrite = {
 
 Local source 在进入 `InstallPlan` 前必须完成 self-reference guard。Source resolution 不得把 target project 中的 installed-state、execution-plane、workflow-output、dependency、cache、temporary 或 build directories 当作 canonical source root；至少必须阻止 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary 和 build output。违反该规则时 source 必须被标记为 `blocked`，并产生 `source-integrity.local-source-self-reference`；不得继续进入 planned writes。
 
+## Runtime Config TOML Content（Runtime Config TOML 内容）
+
+Fresh install 和后续 regenerate/repair 生成 `_speclite/config.toml` 与 `_speclite/config.user.toml` 时，必须把这两个文件视为 installer-managed TOML。它们每次安装都会重新生成，用户不得把它们当作持久手写覆盖层。
+
+`_speclite/config.toml` 必须以以下注释块开头，注释块之后再写入 TOML tables：
+
+```toml
+# ─────────────────────────────────────────────────────────────────
+# 由安装程序管理。每次安装时都会重新生成，请视为只读文件。
+#
+# 该文件需要提交到代码仓库，适用于项目中的每位开发者。
+#
+# 直接编辑此文件的内容会在下次安装时被覆盖。
+#
+# 如需持久修改安装配置，请重新运行安装程序
+# （你之前填写的回答会作为默认值保留）。
+#
+# 如需固定某个值，使其不受安装时回答内容的影响，或添加自定义代理 / 覆盖描述符，请使用：
+#   _speclite/custom/config.toml       （团队配置，需提交）
+#   _speclite/custom/config.user.toml  （个人配置，已加入 gitignore）
+#
+# 安装程序绝不会修改这些文件。
+# ─────────────────────────────────────────────────────────────────
+```
+
+`_speclite/config.user.toml` 必须以以下注释块开头：
+
+```toml
+# ─────────────────────────────────────────────────────────────────
+# 由安装程序管理。每次安装时都会重新生成，请视为只读文件。
+#
+# 该文件不应提交到代码仓库（已加入 gitignore），仅适用于你的本地安装，
+# 用于保存与你个人相关的安装回答。
+#
+# 直接编辑此文件的内容会在下次安装时被覆盖。
+#
+# 如需持久修改某个回答，请重新运行安装程序
+# （你之前填写的回答会作为默认值保留）。
+#
+# 如需固定覆盖某个值，或添加安装程序未知的自定义配置段，请使用：
+#   _speclite/custom/config.user.toml
+#
+# 安装程序绝不会修改该文件。
+# ─────────────────────────────────────────────────────────────────
+```
+
+Runtime config 中所有表示 target project 内目录的 generated values 必须使用 literal `{project-root}` 前缀，而不是 bare project-relative path，也不得写入真实 absolute path。例如：
+
+```toml
+[core]
+output_folder = "{project-root}/_speclite-output"
+
+[modules.sdlc]
+planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
+implementation_artifacts = "{project-root}/_speclite-output/implementation-artifacts"
+devops_artifacts = "{project-root}/_speclite-output/devops-artifacts"
+project_knowledge = "{project-root}/docs"
+```
+
+`{project-root}` 是 portable runtime token。Resolver、hook runner、installed skills 和 workflow code 在执行 filesystem I/O 前必须把它解析为当前 target project root；public JSON、manifest/index 和 fixture snapshots 不得因此泄露真实 absolute path。
+
+## Runtime Config Descriptor Sections（Runtime Config 描述符段）
+
+`_speclite/config.toml` 必须投射 selected modules 中的 runtime-facing descriptors，至少包括 agent descriptors 和 hook descriptors。Descriptor tables 是 skill/agent 可读配置真源之一，但不替代 canonical source package、skill index、files index 或 platform hook config。
+
+Agent descriptor table 使用 `[agents.<canonicalSkillId>]`。最小字段为：
+
+```ts
+type RuntimeAgentDescriptor = {
+  module: string;
+  team: string;
+  name: string;
+  title: string;
+  icon: string;
+  description: string;
+};
+```
+
+默认 `sdlc` module 必须为每个 source module roster 中的 agent 生成一个 table。例如：
+
+```toml
+[agents.speclite-agent-analyst]
+module = "sdlc"
+team = "software-development"
+name = "Alice"
+title = "业务分析师"
+icon = "📊"
+description = "融合波特(Channels Porter)的战略严谨性与明托金字塔原则(Minto's Pyramid Principle)，将每一项发现都建立在可验证的证据之上，并代表所有利益相关者的声音。说话风格如同一位讲述发现过程的寻宝者：为每一条线索而兴奋，在模式浮现后又精准笃定。"
+```
+
+Agent descriptor 的 `title` 和 `description` 必须来自 source module metadata 中的 localized display descriptor；若 source metadata 缺少 localized descriptor，implementation 必须先补 source metadata contract 和 fixture，再生成 runtime config，不得在 writer 中硬编码自由翻译。
+
+Hook descriptor table 使用 `[hooks.<hookId>]`。Flow Gate hook 的最小字段为：
+
+```toml
+[hooks.flow-gate-enforcement]
+module = "sdlc"
+source_skill = "speclite-flow-gate"
+protected_skill = "speclite-dev-story"
+description = "在执行 speclite-dev-story 前检查 story-kickoff Flow Gate 通过证据。"
+runtime_root = "{project-root}/_speclite/hooks/flow-gate-enforcement"
+runner = "{project-root}/_speclite/hooks/flow-gate-enforcement/runner.mjs"
+events = ["UserPromptSubmit"]
+platform_configs = [".claude/settings.json", ".codex/hooks.json"]
+trust_note = "Codex 项目 hooks 需要通过 /hooks review/trust 后才会生效。"
+```
+
+Hook descriptor 只描述 installed runtime expectation 和 user-facing trust boundary。Hook runner、hook source metadata、platform hook config、hash、ownership 和 executable intent 的 integrity 真源仍是 files index。
+
 ## Planning Model Boundaries（规划模型边界）
 
 | Model（模型） | Owner（所有者） | Visibility（可见性） | Meaning（含义） |
@@ -198,6 +307,36 @@ Target status vocabulary 按 layer 区分：
 ## Human-Owned TOML Stubs（人工维护 TOML Stub）
 
 当 target path 不存在时，MVP 可以在 fresh install 期间创建 human-owned TOML stub files。这仅限 `create-if-absent`，且只适用于 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` project-level stubs。
+
+`_speclite/custom/config.toml` 创建时必须以以下注释块开头：
+
+```toml
+# ─────────────────────────────────────────────────────────────────
+# _speclite/config.toml 的团队 / 企业覆盖配置。
+#
+# 该文件需要提交到代码仓库，适用于项目中的每位开发者。
+#
+# 表结构会在基础配置之上进行深度合并；键值条目会按 key 合并。
+# 示例：覆盖某个 Agent 描述符，或添加一个新 Agent。
+#
+# [agents.speclite-agent-pm]
+# description = "相比叙述式草稿，更偏好简短的项目符号式 PRD。"
+# ─────────────────────────────────────────────────────────────────
+```
+
+`_speclite/custom/config.user.toml` 创建时必须以以下注释块开头：
+
+```toml
+# ─────────────────────────────────────────────────────────────────
+# _speclite/config.toml 的个人覆盖配置。
+#
+# 该文件不应提交到代码仓库（已加入 gitignore），仅适用于你的本地安装。
+#
+# 其优先级高于基础配置和团队覆盖配置。
+# ─────────────────────────────────────────────────────────────────
+```
+
+Installer 必须确保 user-scoped TOML 不进入版本控制默认路径：`_speclite/config.user.toml` 和 `_speclite/custom/config.user.toml` 都必须被 target project gitignore 覆盖，或在 install summary / validation 中产生明确 manual action。`_speclite/config.toml` 和 `_speclite/custom/config.toml` 是 team/project 配置，应该提交。
 
 Install、update 和 repair 不得 overwrite、rewrite、reformat 或 normalize 现有 human-owned TOML files，例如 `_speclite/custom/*.toml` 和 `_speclite/custom/*.user.toml`。Existing files 只为 resolver behavior 而读取，并由 ownership metadata 保护。
 

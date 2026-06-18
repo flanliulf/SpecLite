@@ -112,6 +112,8 @@ Fallback 是 compatibility behavior，不是推荐的 installed skill contract�
 
 `_speclite/config.toml` 是 required。除非未来 schema 明确标记为 required，否则 human-owned custom layers 是 optional。
 
+Runtime config values 可以包含 literal `{project-root}` portable token。`speclite resolve config` 的 machine stdout 必须返回 merged config 中的 portable token value，不得把 `{project-root}` 展开为真实 absolute path、home directory、drive letter、cache path 或 temporary path。需要执行 filesystem I/O 的 installed skills、hook runner 或 support commands 必须在 private runtime state 中解析 `{project-root}`，不得把解析后的 raw absolute path 写入 stdout、stderr diagnostics、CommandResult JSON 或 stable fixtures。
+
 ## Customization Merge（定制化合并）
 
 `speclite resolve customization` merge order：

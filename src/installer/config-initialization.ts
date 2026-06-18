@@ -1,24 +1,29 @@
-import { lstat } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   createArtifactPathIssue,
   interpolateConfigDefault,
   normalizeProjectRelativeConfigPath,
+  toPortableProjectPath,
   trimOrDefault,
   type ConfigCollectionMode,
   type ConfigInputValues,
   type ConfigTomlDocument,
   type ProjectConfigField,
   type ProjectConfigModel,
+  type RuntimeAgentDescriptor,
 } from "../config/config-schema.js";
+import { hasUserConfigGitignoreCoverage } from "../config/user-config-gitignore.js";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import type { OfficialModule } from "../modules/module-metadata.js";
+import { createFlowGateHookRuntimeDescriptor } from "./hook-artifacts.js";
 import type { InstallPlanTargetAdapter, PlannedWrite } from "./install-plan-schema.js";
 
 const INSTALLER_CONFIG_PATH = "_speclite/config.toml";
 const INSTALLER_USER_CONFIG_PATH = "_speclite/config.user.toml";
 const HUMAN_CUSTOM_CONFIG_PATH = "_speclite/custom/config.toml";
 const HUMAN_CUSTOM_USER_CONFIG_PATH = "_speclite/custom/config.user.toml";
+const GITIGNORE_PATH = ".gitignore";
 
 export type ConfigInitializationPromptInput = {
   defaultMode: ConfigCollectionMode;
@@ -136,7 +141,7 @@ export async function createConfigInitializationPlan(input: {
     return createConfigInitializationFailure([symlinkIssue]);
   }
 
-  const configToml = createInstallerConfigToml(model);
+  const configToml = createInstallerConfigToml(model, input.selectedModules);
   const configUserToml = createInstallerUserConfigToml(model);
   const plannedWrites = [
     {
@@ -152,6 +157,7 @@ export async function createConfigInitializationPlan(input: {
       reason: "install-time-user-config",
     },
     ...(await createHumanOwnedStubPlans(input.targetRoot)),
+    await createGitignorePlan(input.targetRoot),
   ] satisfies PlannedWrite[];
 
   return {
@@ -286,27 +292,54 @@ function createSdlcConfig(input: {
   };
 }
 
-function createInstallerConfigToml(model: ProjectConfigModel): ConfigTomlDocument {
+function createInstallerConfigToml(
+  model: ProjectConfigModel,
+  selectedModules: OfficialModule[],
+): ConfigTomlDocument {
   const document: ConfigTomlDocument = {
     core: {
       project_name: model.core.project_name,
       document_output_language: model.core.document_output_language,
-      output_folder: model.core.output_folder,
+      output_folder: toPortableProjectPath(model.core.output_folder),
     },
   };
 
   if (model.modules.sdlc !== undefined) {
     document.modules = {
       sdlc: {
-        planning_artifacts: model.modules.sdlc.planning_artifacts,
-        implementation_artifacts: model.modules.sdlc.implementation_artifacts,
-        devops_artifacts: model.modules.sdlc.devops_artifacts,
-        project_knowledge: model.modules.sdlc.project_knowledge,
+        planning_artifacts: toPortableProjectPath(model.modules.sdlc.planning_artifacts),
+        implementation_artifacts: toPortableProjectPath(model.modules.sdlc.implementation_artifacts),
+        devops_artifacts: toPortableProjectPath(model.modules.sdlc.devops_artifacts),
+        project_knowledge: toPortableProjectPath(model.modules.sdlc.project_knowledge),
       },
+    };
+    document.agents = createRuntimeAgentDescriptors(selectedModules);
+    document.hooks = {
+      "flow-gate-enforcement": createFlowGateHookRuntimeDescriptor(),
     };
   }
 
   return document;
+}
+
+function createRuntimeAgentDescriptors(
+  selectedModules: OfficialModule[],
+): Record<string, RuntimeAgentDescriptor> {
+  return Object.fromEntries(
+    selectedModules.flatMap((module) =>
+      module.agents.map((agent) => [
+        agent.code,
+        {
+          module: module.code,
+          team: agent.team,
+          name: agent.name,
+          title: agent.localizedTitle ?? agent.title,
+          icon: agent.icon,
+          description: agent.localizedDescription ?? agent.description,
+        } satisfies RuntimeAgentDescriptor,
+      ]),
+    ),
+  );
 }
 
 function createInstallerUserConfigToml(model: ProjectConfigModel): ConfigTomlDocument {
@@ -341,6 +374,35 @@ async function createHumanOwnedStubPlans(targetRoot: string): Promise<PlannedWri
       } satisfies PlannedWrite;
     }),
   );
+}
+
+async function createGitignorePlan(targetRoot: string): Promise<PlannedWrite> {
+  const gitignorePath = path.join(targetRoot, GITIGNORE_PATH);
+  if (!(await pathExists(gitignorePath))) {
+    return {
+      path: GITIGNORE_PATH,
+      ownership: "human-owned",
+      action: "create",
+      reason: "create-user-config-ignore-rules",
+    };
+  }
+
+  const contents = await readFile(gitignorePath, "utf8");
+  if (hasUserConfigGitignoreCoverage(contents)) {
+    return {
+      path: GITIGNORE_PATH,
+      ownership: "human-owned",
+      action: "skip",
+      reason: "user-config-ignore-rules-present",
+    };
+  }
+
+  return {
+    path: GITIGNORE_PATH,
+    ownership: "human-owned",
+    action: "update",
+    reason: "append-missing-user-config-ignore-rules",
+  };
 }
 
 function createFinalConfigSummary(input: {

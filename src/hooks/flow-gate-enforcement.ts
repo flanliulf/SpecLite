@@ -2,6 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { parse as parseToml } from "toml";
 import { parse as parseYaml } from "yaml";
+import { resolvePortableProjectPath } from "../config/config-schema.js";
 
 const ALLOWING_RESULTS = new Set(["PASS", "PASS_EQUIVALENT"]);
 const MAX_METADATA_AGE_DAYS = 30;
@@ -105,9 +106,9 @@ async function resolveImplementationArtifacts(projectRoot: string): Promise<stri
     modules?: { sdlc?: { implementation_artifacts?: string } };
   };
 
-  return (
+  return resolvePortableProjectPath(
     config.modules?.sdlc?.implementation_artifacts ??
-    `${config.core?.output_folder ?? "_speclite-output"}/implementation-artifacts`
+      `${config.core?.output_folder ?? "_speclite-output"}/implementation-artifacts`,
   );
 }
 

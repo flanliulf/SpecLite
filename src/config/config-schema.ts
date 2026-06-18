@@ -32,11 +32,34 @@ export type ProjectConfigModel = {
   };
 };
 
+export type RuntimeAgentDescriptor = {
+  module: string;
+  team: string;
+  name: string;
+  title: string;
+  icon: string;
+  description: string;
+};
+
+export type RuntimeHookDescriptor = {
+  module: string;
+  source_skill: string;
+  protected_skill: string;
+  description: string;
+  runtime_root: string;
+  runner: string;
+  events: string[];
+  platform_configs: string[];
+  trust_note: string;
+};
+
 export type ConfigTomlDocument = {
   core?: Partial<CoreProjectConfig>;
   modules?: {
     sdlc?: Partial<SdlcProjectConfig>;
   };
+  agents?: Record<string, RuntimeAgentDescriptor>;
+  hooks?: Record<string, RuntimeHookDescriptor>;
 };
 
 export type ConfigInputValues = Partial<Record<ProjectConfigField, string>>;
@@ -72,7 +95,7 @@ export function normalizeProjectRelativeConfigPath(input: {
   value: string;
   field: ProjectConfigField;
 }): ProjectRelativePathResult {
-  const normalizedSeparators = input.value.trim().replaceAll("\\", "/");
+  const normalizedSeparators = stripProjectRootToken(input.value).replaceAll("\\", "/");
   const normalized = path.posix.normalize(normalizedSeparators);
   const rejectedAffectedPath = createRejectedArtifactAffectedPath(input.field);
 
@@ -100,6 +123,26 @@ export function normalizeProjectRelativeConfigPath(input: {
     ok: true,
     path: normalized,
   };
+}
+
+export function toPortableProjectPath(value: string): string {
+  const projectRelative = stripProjectRootToken(value);
+  return `${PROJECT_ROOT_TOKEN}/${projectRelative}`;
+}
+
+export function resolvePortableProjectPath(value: string): string {
+  return stripProjectRootToken(value);
+}
+
+const PROJECT_ROOT_TOKEN = "{project-root}";
+
+function stripProjectRootToken(value: string): string {
+  const normalized = value.trim().replaceAll("\\", "/");
+  if (normalized === PROJECT_ROOT_TOKEN) return "";
+  if (normalized.startsWith(`${PROJECT_ROOT_TOKEN}/`)) {
+    return normalized.slice(PROJECT_ROOT_TOKEN.length + 1);
+  }
+  return normalized;
 }
 
 function createRejectedArtifactAffectedPath(field: ProjectConfigField): string {

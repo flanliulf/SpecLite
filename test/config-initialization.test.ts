@@ -51,6 +51,15 @@ describe("project config initialization", () => {
         devops_artifacts: "custom-output/devops-artifacts",
         project_knowledge: "docs",
       });
+      expect(result.configToml.core).toMatchObject({
+        output_folder: "{project-root}/custom-output",
+      });
+      expect(result.configToml.modules?.sdlc).toMatchObject({
+        planning_artifacts: "{project-root}/custom-output/planning-artifacts",
+        implementation_artifacts: "{project-root}/custom-output/implementation-artifacts",
+        devops_artifacts: "{project-root}/custom-output/devops-artifacts",
+        project_knowledge: "{project-root}/docs",
+      });
       expect(result.configToml.core).not.toHaveProperty("user_name");
       expect(result.configUserToml.core).toMatchObject({
         user_name: "Ada",
@@ -77,6 +86,11 @@ describe("project config initialization", () => {
         }),
         expect.objectContaining({
           path: "_speclite/custom/config.user.toml",
+          ownership: "human-owned",
+          action: "create",
+        }),
+        expect.objectContaining({
+          path: ".gitignore",
           ownership: "human-owned",
           action: "create",
         }),
@@ -111,14 +125,36 @@ describe("project config initialization", () => {
       core: {
         project_name: "round-trip",
         document_output_language: "Chinese",
-        output_folder: "_speclite-output",
+        output_folder: "{project-root}/_speclite-output",
       },
       modules: {
         sdlc: {
-          planning_artifacts: "_speclite-output/plans",
-          implementation_artifacts: "_speclite-output/implementation-artifacts",
-          devops_artifacts: "_speclite-output/devops-artifacts",
-          project_knowledge: "docs",
+          planning_artifacts: "{project-root}/_speclite-output/plans",
+          implementation_artifacts: "{project-root}/_speclite-output/implementation-artifacts",
+          devops_artifacts: "{project-root}/_speclite-output/devops-artifacts",
+          project_knowledge: "{project-root}/docs",
+        },
+      },
+      agents: {
+        "speclite-agent-analyst": {
+          module: "sdlc",
+          team: "software-development",
+          name: "Alice",
+          title: "业务分析师",
+          icon: "📊",
+          description:
+            "融合波特(Channels Porter)的战略严谨性与明托金字塔原则(Minto's Pyramid Principle)，将每一项发现都建立在可验证的证据之上，并代表所有利益相关者的声音。说话风格如同一位讲述发现过程的寻宝者：为每一条线索而兴奋，在模式浮现后又精准笃定。",
+        },
+      },
+      hooks: {
+        "flow-gate-enforcement": {
+          module: "sdlc",
+          source_skill: "speclite-flow-gate",
+          protected_skill: "speclite-dev-story",
+          runtime_root: "{project-root}/_speclite/hooks/flow-gate-enforcement",
+          runner: "{project-root}/_speclite/hooks/flow-gate-enforcement/runner.mjs",
+          events: ["UserPromptSubmit"],
+          platform_configs: [".claude/settings.json", ".codex/hooks.json"],
         },
       },
     });
@@ -148,6 +184,7 @@ describe("project config initialization", () => {
         customUserConfig,
         "utf8",
       );
+      await writeFile(path.join(tempRoot, ".gitignore"), "node_modules/\n_speclite/config.user.toml\n", "utf8");
 
       const selectedModules = await discoverOfficialModules({ projectRoot: process.cwd() });
       const result = await createConfigInitializationPlan({
@@ -172,6 +209,12 @@ describe("project config initialization", () => {
             ownership: "human-owned",
             action: "skip",
             reason: "protected-existing-human-owned-stub",
+          }),
+          expect.objectContaining({
+            path: ".gitignore",
+            ownership: "human-owned",
+            action: "update",
+            reason: "append-missing-user-config-ignore-rules",
           }),
         ]),
       );
@@ -397,6 +440,7 @@ describe("project config initialization", () => {
           expect.objectContaining({ path: "_speclite/config.user.toml", action: "create" }),
           expect.objectContaining({ path: "_speclite/custom/config.toml", action: "create" }),
           expect.objectContaining({ path: "_speclite/custom/config.user.toml", action: "create" }),
+          expect.objectContaining({ path: ".gitignore", action: "create" }),
         ],
         writeAuthorized: true,
       });
@@ -406,7 +450,28 @@ describe("project config initialization", () => {
       expect(JSON.stringify(outcome.result)).not.toContain("configPaths");
       expect(JSON.stringify(outcome.result)).not.toContain(tempRoot);
 
-      await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toContain("[core]");
+      const configToml = await readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8");
+      const configUserToml = await readFile(path.join(tempRoot, "_speclite/config.user.toml"), "utf8");
+      const customConfigToml = await readFile(path.join(tempRoot, "_speclite/custom/config.toml"), "utf8");
+      const customUserConfigToml = await readFile(
+        path.join(tempRoot, "_speclite/custom/config.user.toml"),
+        "utf8",
+      );
+      const gitignore = await readFile(path.join(tempRoot, ".gitignore"), "utf8");
+
+      expect(configToml).toContain("# 该文件需要提交到代码仓库，适用于项目中的每位开发者。");
+      expect(configToml).toContain('output_folder = "{project-root}/_speclite-output"');
+      expect(configToml).toContain('planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"');
+      expect(configToml).toContain("[agents.speclite-agent-analyst]");
+      expect(configToml).toContain('title = "业务分析师"');
+      expect(configToml).toContain("[hooks.flow-gate-enforcement]");
+      expect(configToml).toContain('runner = "{project-root}/_speclite/hooks/flow-gate-enforcement/runner.mjs"');
+      expect(configToml).not.toContain('output_folder = "_speclite-output"');
+      expect(configUserToml).toContain("# 该文件不应提交到代码仓库（已加入 gitignore），仅适用于你的本地安装，");
+      expect(customConfigToml).toContain("# _speclite/config.toml 的团队 / 企业覆盖配置。");
+      expect(customUserConfigToml).toContain("# _speclite/config.toml 的个人覆盖配置。");
+      expect(gitignore).toContain("_speclite/config.user.toml");
+      expect(gitignore).toContain("_speclite/custom/config.user.toml");
       await expect(
         readFile(path.join(tempRoot, "_speclite/_config/manifest.yaml"), "utf8"),
       ).resolves.toContain("speclite.manifest.v1");

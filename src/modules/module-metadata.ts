@@ -16,6 +16,7 @@ export type OfficialModule = {
   packageRoots: string[];
   capabilitySummary: string[];
   helpEntries: ModuleHelpEntry[];
+  agents: ModuleAgentDescriptor[];
   directories: string[];
   configTable?: string;
   configPrompts: ModuleConfigPrompt[];
@@ -43,6 +44,17 @@ export type ModuleConfigPrompt = {
 export type ModuleConfigChoice = {
   value: string;
   label: string;
+};
+
+export type ModuleAgentDescriptor = {
+  code: string;
+  name: string;
+  title: string;
+  localizedTitle?: string;
+  icon: string;
+  team: string;
+  description: string;
+  localizedDescription?: string;
 };
 
 export class ModuleMetadataError extends Error {
@@ -125,6 +137,7 @@ async function readOfficialModule(
     packageRoots,
     capabilitySummary,
     helpEntries,
+    agents: metadata.agents,
     directories: metadata.directories,
     ...(metadata.configTable === undefined ? {} : { configTable: metadata.configTable }),
     configPrompts: metadata.configPrompts,
@@ -144,6 +157,7 @@ async function readModuleYaml(
   requiredDependencies: string[];
   configTable?: string;
   configPrompts: ModuleConfigPrompt[];
+  agents: ModuleAgentDescriptor[];
   directories: string[];
 }> {
   let parsed: unknown;
@@ -180,8 +194,51 @@ async function readModuleYaml(
     requiredDependencies,
     ...(configTable === undefined ? {} : { configTable }),
     configPrompts: readConfigPrompts(parsed),
+    agents: readAgentDescriptors(parsed.agents, sourceDirectory, code),
     directories: readStringArray(parsed.directories, sourceDirectory).sort(),
   };
+}
+
+function readAgentDescriptors(
+  value: unknown,
+  sourceDirectory: string,
+  defaultTeam: string,
+): ModuleAgentDescriptor[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .flatMap((entry): ModuleAgentDescriptor[] => {
+      if (!isRecord(entry)) return [];
+
+      const code = readRequiredString(entry, "code", sourceDirectory);
+      const name = readRequiredString(entry, "name", sourceDirectory);
+      const title = readRequiredString(entry, "title", sourceDirectory);
+      const icon = readRequiredString(entry, "icon", sourceDirectory);
+      const description = readRequiredString(entry, "description", sourceDirectory);
+      const team = typeof entry.team === "string" && entry.team.length > 0 ? entry.team : defaultTeam;
+      const localizedTitle =
+        typeof entry.localized_title === "string" && entry.localized_title.length > 0
+          ? entry.localized_title
+          : undefined;
+      const localizedDescription =
+        typeof entry.localized_description === "string" && entry.localized_description.length > 0
+          ? entry.localized_description
+          : undefined;
+
+      return [
+        {
+          code,
+          name,
+          title,
+          ...(localizedTitle === undefined ? {} : { localizedTitle }),
+          icon,
+          team,
+          description,
+          ...(localizedDescription === undefined ? {} : { localizedDescription }),
+        },
+      ];
+    })
+    .sort((left, right) => left.code.localeCompare(right.code));
 }
 
 function readConfigPrompts(metadata: Record<string, unknown>): ModuleConfigPrompt[] {

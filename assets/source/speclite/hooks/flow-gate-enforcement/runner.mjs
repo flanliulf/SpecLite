@@ -63,7 +63,14 @@ function extractPrompt(event) {
 
 async function resolveImplementationArtifacts(projectRoot) {
   const config = parseSimpleToml(await readFile(path.join(projectRoot, "_speclite/config.toml"), "utf8"));
-  return config["modules.sdlc.implementation_artifacts"] ?? `${config["core.output_folder"] ?? "_speclite-output"}/implementation-artifacts`;
+  return resolvePortableProjectPath(
+    config["modules.sdlc.implementation_artifacts"] ?? `${config["core.output_folder"] ?? "_speclite-output"}/implementation-artifacts`,
+  );
+}
+
+function resolvePortableProjectPath(value) {
+  const token = "{project-root}/";
+  return value.startsWith(token) ? value.slice(token.length) : value;
 }
 
 async function resolveStoryKey(input) {

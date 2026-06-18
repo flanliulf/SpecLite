@@ -2,6 +2,8 @@
 
 Status: done
 
+Corrective Addendum Status（纠偏补充状态）: implementation partial，fixture/full-suite blocked by unrelated source inventory drift，记录日期 2026-06-17
+
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
 ## Story（故事）
@@ -79,6 +81,35 @@ Status: done
    **并且** user-provided display values 必须经过 trim 和 safety validation，空白值不得覆盖 deterministic defaults；  
    **并且** `ValidationIssue.details` 只允许 deterministic、redaction-safe、fixture-stable fields。
 
+10. **Installer-managed TOML files explain ownership at the top of the file.**
+    **前提** install 生成 `_speclite/config.toml` 或 `_speclite/config.user.toml`；
+    **当** TOML contents 被序列化并写入 installer-owned config files；
+    **则** 每个文件必须以 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md#Runtime Config TOML Content` 中定义的中文 ownership header 开头；
+    **并且** header 必须说明文件由安装程序管理、会在安装时重新生成、直接编辑会被覆盖、持久覆盖应写入 `_speclite/custom/config.toml` 或 `_speclite/custom/config.user.toml`；
+    **并且** header 之后才允许写入 TOML tables。
+
+11. **Generated runtime paths use `{project-root}` portable token.**
+    **前提** install 生成 `[core]`、`[modules.sdlc]` 或其他 runtime descriptor 中的 target-project directory values；
+    **当** value 表示 target project 内目录或 runner path；
+    **则** config file 中必须写入 literal `{project-root}/...` portable path，例如 `output_folder = "{project-root}/_speclite-output"` 和 `planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"`；
+    **并且** 不得写入裸 `_speclite-output/...`、真实 absolute path、home directory、drive letter、temporary path 或 cache path；
+    **并且** resolver、hook runner、installed skills 和 workflow code 在 filesystem I/O 前必须把 `{project-root}` 解析为当前 target project root。
+
+12. **Runtime config includes selected agent and hook descriptors.**
+    **前提** selected modules 包含 `sdlc`；
+    **当** install 生成 `_speclite/config.toml`；
+    **则** 必须为 source module roster 中每个 agent 生成 `[agents.<canonicalSkillId>]` table，字段至少包含 `module`、`team`、`name`、`title`、`icon` 和 `description`；
+    **并且** `title` 与 `description` 必须来自 source metadata 中的 localized display descriptor，不得在 writer 中硬编码自由翻译；
+    **并且** 必须生成 `[hooks.flow-gate-enforcement]` table，字段至少包含 `module`、`source_skill`、`protected_skill`、`description`、`runtime_root`、`runner`、`events`、`platform_configs` 和 `trust_note`；
+    **并且** descriptor tables 不得替代 `skill-index.json`、`files-index.json`、hook runner、hook manifest 或 platform hook config。
+
+13. **User-scoped TOML and human-owned custom stubs preserve commit boundaries.**
+    **前提** install 生成 `_speclite/config.user.toml`、`_speclite/custom/config.toml` 或 `_speclite/custom/config.user.toml`；
+    **当** target project 缺少对应文件或 gitignore 保护；
+    **则** `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` 在 create-if-absent 时必须使用 `03-install-plan-contract` 中定义的中文 stub header；
+    **并且** `_speclite/config.user.toml` 与 `_speclite/custom/config.user.toml` 必须被 target project gitignore 覆盖，或 install/validate 必须输出明确 manual action；
+    **并且** 已存在 human-owned custom files 仍不得被覆盖、重写、重排、格式化或 normalize。
+
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [x] Task 1: 验证 Story 1.1-1.3 前置实现与 no-write 边界（AC: 1, 4, 7）
@@ -132,6 +163,33 @@ Status: done
   - [x] 检查 diff，确认没有实现 Story 1.5 runtime writes / IDE mirror creation / manifest generation，也没有实现 Story 1.6 progress full sequence、ReadyCheck 或 ready summary。
   - [x] 检查 diff，确认没有新增 Post-MVP `init` / `list` / `doctor` / `sync` / `uninstall` 命令，也没有格式化、重写或同步 planning artifacts。
 
+## Corrective Addendum Tasks（纠偏补充任务）
+
+- [x] Task 8: 补齐 runtime config TOML ownership header（AC: 10, 13）
+  - [x] 更新 `src/config/config-writer.ts`，让 `_speclite/config.toml` 与 `_speclite/config.user.toml` 在序列化时写入各自中文 installer-managed header。
+  - [x] 更新 human-owned stub writer，使 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml` create-if-absent 时写入各自中文 header。
+  - [x] 保持现有 human-owned preservation：已存在 custom stub 时 action 仍为 `skip`，不得读取内容到 public output，也不得重排或格式化。
+
+- [x] Task 9: 将 generated runtime paths 改为 `{project-root}` portable token（AC: 11）
+  - [x] 更新 config initialization model，使 `output_folder`、`planning_artifacts`、`implementation_artifacts`、`devops_artifacts`、`project_knowledge` 和 hook runtime paths 写入 `{project-root}/...`。
+  - [x] 更新 runtime consumers、hook runner 和 path validation，确保 filesystem I/O 前解析 `{project-root}`，public JSON 与 manifest/index 不泄露真实 absolute path。
+  - [x] 更新 focused tests，断言 generated TOML 包含 `{project-root}`，且 rejected path diagnostics 仍 redaction-safe。
+
+- [x] Task 10: 投射 localized agent descriptors 到 `config.toml`（AC: 12）
+  - [x] 扩展 source module metadata contract，使 `assets/source/speclite/sdlc-skills/module.yaml` 为每个 agent 提供 localized `title` 和 `description`。
+  - [x] 扩展 `ConfigTomlDocument` schema/writer/parser，支持 `[agents.<canonicalSkillId>]` tables。
+  - [x] 写入 `speclite-agent-analyst` 等默认 `sdlc` agent descriptors，并保留 `skill-index.json` 作为 installed skill inventory 真源。
+
+- [x] Task 11: 投射 Flow Gate hook descriptor 到 `config.toml`（AC: 12）
+  - [x] 扩展 config schema/writer/parser，支持 `[hooks.flow-gate-enforcement]` table。
+  - [x] 从 hook source metadata 或 installer hook projection state 生成 hook descriptor，字段包含 `source_skill`、`protected_skill`、`runtime_root`、`runner`、`events`、`platform_configs` 和 `trust_note`。
+  - [x] 保持 files index 作为 hook integrity 真源；不要把 hook descriptor 当作 hash/ownership/sourceRef 替代品。
+
+- [ ] Task 12: 补齐 gitignore 与 fixture/release evidence（AC: 10-13）
+  - [x] 确保 install 对 `_speclite/config.user.toml` 和 `_speclite/custom/config.user.toml` 提供 gitignore 覆盖或明确 manual action。
+  - [ ] 更新 `test/config-initialization.test.ts`、`test/runtime-structure.test.ts`、`test/hook-artifact-install.test.ts` 和 fresh-install expected installed-state fixtures。
+  - [x] 运行 focused tests、`npm run build`、`npm test`、`npm run release:packaging-check` 和 `git diff --check`，或在 Dev Agent Record 中记录真实阻塞。
+
 ## Dev Notes（开发备注）
 
 ### Current Repository State（当前仓库状态）
@@ -174,24 +232,59 @@ Status: done
   - prompts for `user_skill_level`, `planning_artifacts`, `implementation_artifacts` and `project_knowledge`
   - declarative directories under configured artifact/project knowledge roots
 - `config.toml.example` files document expected fields only and explicitly say they must not be used as runtime fallback. Runtime config must be generated from the config schema / module metadata and parsed through `src/config/`.
-- Suggested initial TOML shape, adjusted to final schema names if needed:
+- Corrective contract TOML shape:
 
 ```toml
+# ─────────────────────────────────────────────────────────────────
+# 由安装程序管理。每次安装时都会重新生成，请视为只读文件。
+#
+# 该文件需要提交到代码仓库，适用于项目中的每位开发者。
+#
+# 直接编辑此文件的内容会在下次安装时被覆盖。
+#
+# 如需持久修改安装配置，请重新运行安装程序
+# （你之前填写的回答会作为默认值保留）。
+#
+# 如需固定某个值，使其不受安装时回答内容的影响，或添加自定义代理 / 覆盖描述符，请使用：
+#   _speclite/custom/config.toml       （团队配置，需提交）
+#   _speclite/custom/config.user.toml  （个人配置，已加入 gitignore）
+#
+# 安装程序绝不会修改这些文件。
+# ─────────────────────────────────────────────────────────────────
+
 [core]
 project_name = "SpecLite"
-user_name = "SpecLite"
-communication_language = "Chinese"
 document_output_language = "Chinese"
-output_folder = "_speclite-output"
-user_skill_level = "intermediate"
+output_folder = "{project-root}/_speclite-output"
 
 [modules.sdlc]
-planning_artifacts = "_speclite-output/planning-artifacts"
-implementation_artifacts = "_speclite-output/implementation-artifacts"
-project_knowledge = "docs"
+planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
+implementation_artifacts = "{project-root}/_speclite-output/implementation-artifacts"
+devops_artifacts = "{project-root}/_speclite-output/devops-artifacts"
+project_knowledge = "{project-root}/docs"
+
+[agents.speclite-agent-analyst]
+module = "sdlc"
+team = "software-development"
+name = "Alice"
+title = "业务分析师"
+icon = "📊"
+description = "融合波特(Channels Porter)的战略严谨性与明托金字塔原则(Minto's Pyramid Principle)，将每一项发现都建立在可验证的证据之上，并代表所有利益相关者的声音。说话风格如同一位讲述发现过程的寻宝者：为每一条线索而兴奋，在模式浮现后又精准笃定。"
+
+[hooks.flow-gate-enforcement]
+module = "sdlc"
+source_skill = "speclite-flow-gate"
+protected_skill = "speclite-dev-story"
+description = "在执行 speclite-dev-story 前检查 story-kickoff Flow Gate 通过证据。"
+runtime_root = "{project-root}/_speclite/hooks/flow-gate-enforcement"
+runner = "{project-root}/_speclite/hooks/flow-gate-enforcement/runner.mjs"
+events = ["UserPromptSubmit"]
+platform_configs = [".claude/settings.json", ".codex/hooks.json"]
+trust_note = "Codex 项目 hooks 需要通过 /hooks review/trust 后才会生效。"
 ```
 
 - If implementation persists selected modules or IDE targets in config, the field names and ordering must be defined in `src/config/config-schema.ts` and tests. Manifest/index remains the installed projection truth after Story 1.5; config must not replace manifest/index.
+- `_speclite/config.user.toml` 继续保存 `user_name`、`communication_language` 和 `user_skill_level` 等 user-scoped answers，但必须包含自己的 installer-managed 中文 header，并且必须被 gitignore 覆盖。
 
 ### Contract Requirements（契约要求）
 
@@ -318,6 +411,8 @@ project_knowledge = "docs"
 - [Source: `_bmad-output/planning-artifacts/specs/06-resolve-command-contract.md#Config Merge`]
 - [Source: `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md#Issue Id Policy`]
 - [Source: `_bmad-output/planning-artifacts/specs/08-fixture-contract.md#Ready Summary Gate`]
+- [Source: `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime Artifact Roots`]
+- [Source: `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Flow Gate Hook Enforcement Artifacts`]
 - [Source: `assets/source/speclite/core-skills/module.yaml`]
 - [Source: `assets/source/speclite/sdlc-skills/module.yaml`]
 - [Source: `assets/source/speclite/core-skills/speclite-help/config.toml.example`]
@@ -337,6 +432,9 @@ GPT-5 Codex
 - `npx vitest run test/config-initialization.test.ts` first failed because Story 1.4 config modules did not exist, then passed after implementation.
 - `npm test` passed: 8 test files, 44 tests.
 - `npm run build` passed: tsup ESM and DTS build succeeded.
+- 2026-06-17：`npx vitest run test/config-initialization.test.ts test/flow-gate-hook-runner.test.ts` 先红后绿，最终 2 files / 17 tests passed。
+- 2026-06-17：`npm run build` passed；`npx vitest run test/resolve-cli.test.ts test/resolve-readers.test.ts test/hook-artifact-install.test.ts` passed；`npm run release:packaging-check` passed；`git diff --check` passed。
+- 2026-06-17：完整 `npm test` 失败：当前工作树的未跟踪 brownfield skill source 使 SDLC package roots 从 44/total 57 变为 48/total 61，导致 source inventory、fresh install fixture、runtime structure 与 path portability snapshot 断言失败；另有既有 CLI zh interactive final review heading 本地化失败。未在本纠偏范围内更新这些无关 fixtures。
 
 ### Completion Notes List（完成备注）
 
@@ -348,6 +446,10 @@ GPT-5 Codex
 - Added human-owned project-level stub planning for `_speclite/custom/config.toml` and `_speclite/custom/config.user.toml`, with existing stubs protected by skip actions without content rewrites.
 - Preserved current `CommandResult<InstallCommandData>` shape: config state is expressed via lifecycle steps, summary, issues, next actions, and internal `InstallPlan`.
 - Confirmed no Story 1.5 runtime directory writes, IDE mirror creation, manifest/index generation, ReadyCheck, ready summary, or Post-MVP commands were implemented.
+- Corrective addendum implemented installer-managed Chinese TOML headers for `_speclite/config.toml` and `_speclite/config.user.toml`, and Chinese create-if-absent headers for `_speclite/custom/config.toml` and `_speclite/custom/config.user.toml`.
+- Corrective addendum now writes `{project-root}` portable paths into generated runtime config while keeping internal filesystem planning project-relative.
+- Corrective addendum projects localized `[agents.<canonicalSkillId>]` descriptors and `[hooks.flow-gate-enforcement]` into `_speclite/config.toml`.
+- Corrective addendum adds append-only `.gitignore` coverage for `_speclite/config.user.toml` and `_speclite/custom/config.user.toml`.
 
 ### File List（文件列表）
 
@@ -355,10 +457,18 @@ GPT-5 Codex
 - `src/commands/install.ts`
 - `src/config/config-reader.ts`
 - `src/config/config-schema.ts`
+- `src/config/user-config-gitignore.ts`
 - `src/config/config-writer.ts`
+- `src/hooks/flow-gate-enforcement.ts`
 - `src/installer/config-initialization.ts`
+- `src/installer/hook-artifacts.ts`
 - `src/installer/install-plan-schema.ts`
+- `src/installer/runtime-structure.ts`
 - `src/modules/module-metadata.ts`
+- `assets/source/speclite/hooks/flow-gate-enforcement/hook-manifest.json`
+- `assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs`
+- `assets/source/speclite/sdlc-skills/module.yaml`
+- `test/flow-gate-hook-runner.test.ts`
 - `test/cli-smoke.test.ts`
 - `test/config-initialization.test.ts`
 - `test/install-module-selection.test.ts`
@@ -368,3 +478,4 @@ GPT-5 Codex
 ### Change Log（变更日志）
 
 - 2026-05-26: Implemented Story 1.4 project config initialization and moved story to review.
+- 2026-06-17: Implemented corrective config TOML headers, portable `{project-root}` runtime config paths, agent/hook descriptors, hook token resolution, and user config gitignore coverage; full-suite fixture refresh remains blocked by unrelated source inventory drift.

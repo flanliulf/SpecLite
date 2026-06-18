@@ -44,6 +44,14 @@ Packaging acceptance 是 release checklist gate，不是 fixture project case。
 
 Post-MVP Flow Gate hook enforcement 必须拥有 regression coverage，证明独立 hook source、installed runtime hook runner、platform hook config、files-index metadata、Codex `/hooks` trust 提示、existing config protection 和 runner block/allow behavior。该 coverage 可以通过 focused tests、fresh install expected installed-state snapshots、validation issue fixtures 或专用 hook artifact install tests 组合完成；不得只依赖 human-readable docs。
 
+Fresh install fixture 必须覆盖 runtime config content contract：
+
+- `_speclite/config.toml` 和 `_speclite/config.user.toml` 包含 installer-managed 中文 header。
+- `_speclite/custom/config.toml` 和 `_speclite/custom/config.user.toml` 在 create-if-absent 时包含 human-owned 中文 header；已存在时仍按 preservation assertions 验证未被重写、重排或格式化。
+- `_speclite/config.toml` 中 target-project directory values 使用 literal `{project-root}` 前缀，而不是裸 `_speclite-output/...` 或真实 absolute path。
+- `_speclite/config.toml` 包含 selected module agent descriptors，例如 `[agents.speclite-agent-analyst]`，并包含 Flow Gate hook descriptor，例如 `[hooks.flow-gate-enforcement]`。
+- User-scoped TOML paths `_speclite/config.user.toml` 与 `_speclite/custom/config.user.toml` 被 target project gitignore 覆盖，或 fixture 中存在明确 validation/manual-action evidence。
+
 MVP release 前，release gate fixture runs 必须包含 macOS 和 Windows 的 path-portability coverage。Local developer runs 可以缩小 matrix，但 release evidence 必须包含两个 supported OS families 和两个 supported Node baselines。
 
 ## Release Gate Ownership Matrix（发布门禁所有权矩阵）

@@ -231,6 +231,10 @@ Hook runner 必须记录 `executable: true`。Platform hook config 若由 instal
 
 Hook source files 的 `sourceRef` 必须指向 `assets/source/speclite/hooks/<hook-id>/...`。Generated platform config 可以使用 stable local reference token，例如 `generated:claude-flow-gate-hook-config` 或 `generated:codex-flow-gate-hook-config`。
 
+`_speclite/config.toml` 中的 `[hooks.<hookId>]` table 是 runtime descriptor projection，只帮助 skills、support commands 和用户理解 hook identity、runner path、platform config path 与 trust boundary。它不得替代 files index 中的 hook artifact entries；validation、update、repair 和 drift detection 必须继续以 files index 的 file-level hash、ownership、`artifactKind`、`executable` 和 `sourceRef` 为 integrity 真源。
+
+同理，`_speclite/config.toml` 中的 `[agents.<canonicalSkillId>]` table 是 runtime-facing descriptor projection。Canonical skill inventory、installed target mapping、package hash 和 phase coverage 仍由 `skill-index.json`、`help-index.json`、`phase-coverage.json` 和 files index 管理；agent descriptors 不得创建第二套 installed skill inventory。
+
 ## Fixture Policy（Fixture 策略）
 
 Manifest/index fixtures 是 contract tests，不是 documentation examples。本 SPEC 只拥有 manifest/index 字段和 projection 语义；fixture directory names、release gate classification、expected output classes、snapshot comparison rules、release checklist gates 和 regression asset policy 由 `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 管理。

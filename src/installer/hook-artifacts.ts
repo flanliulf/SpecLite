@@ -5,10 +5,29 @@ import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import { ensureSafeDirectory, safeWriteFile } from "../fs/safe-write.js";
 import type { FilesIndexEntry } from "../manifest/manifest-schema.js";
 import type { IdeTargetId } from "../ide/adapter-registry.js";
+import type { RuntimeHookDescriptor } from "../config/config-schema.js";
 
 const HOOK_ID = "flow-gate-enforcement";
 const HOOK_SOURCE_ROOT = "hooks/flow-gate-enforcement";
 const HOOK_RUNTIME_ROOT = `_speclite/hooks/${HOOK_ID}`;
+const HOOK_EVENTS = ["UserPromptSubmit"] as const;
+const HOOK_PLATFORM_CONFIGS = [".claude/settings.json", ".codex/hooks.json"] as const;
+const HOOK_TRUST_NOTE = "Codex 项目 hooks 需要通过 /hooks review/trust 后才会生效。";
+const HOOK_DESCRIPTION = "在执行 speclite-dev-story 前检查 story-kickoff Flow Gate 通过证据。";
+
+export function createFlowGateHookRuntimeDescriptor(): RuntimeHookDescriptor {
+  return {
+    module: "sdlc",
+    source_skill: "speclite-flow-gate",
+    protected_skill: "speclite-dev-story",
+    description: HOOK_DESCRIPTION,
+    runtime_root: `{project-root}/${HOOK_RUNTIME_ROOT}`,
+    runner: `{project-root}/${HOOK_RUNTIME_ROOT}/runner.mjs`,
+    events: [...HOOK_EVENTS],
+    platform_configs: [...HOOK_PLATFORM_CONFIGS],
+    trust_note: HOOK_TRUST_NOTE,
+  };
+}
 
 export type HookArtifactProjectionResult =
   | {
@@ -137,7 +156,7 @@ function createPlatformHookConfig(
       contents: `${JSON.stringify(
         {
           hooks: {
-            UserPromptSubmit: [
+            [HOOK_EVENTS[0]]: [
               {
                 matcher: "",
                 hooks: [
@@ -164,7 +183,7 @@ function createPlatformHookConfig(
         {
           hooks: [
             {
-              event: "UserPromptSubmit",
+              event: HOOK_EVENTS[0],
               id: "speclite-flow-gate-enforcement",
               description: "Block speclite-dev-story until story-kickoff Flow Gate evidence passes.",
               command: `node ${HOOK_RUNTIME_ROOT}/runner.mjs --platform codex`,

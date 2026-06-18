@@ -150,10 +150,10 @@ async function createProjectWithConfig(): Promise<string> {
     [
       "[core]",
       'project_name = "hook-test"',
-      'output_folder = "_speclite-output"',
+      'output_folder = "{project-root}/_speclite-output"',
       "",
       "[modules.sdlc]",
-      'implementation_artifacts = "_speclite-output/implementation-artifacts"',
+      'implementation_artifacts = "{project-root}/_speclite-output/implementation-artifacts"',
       "",
     ].join("\n"),
     "utf8",

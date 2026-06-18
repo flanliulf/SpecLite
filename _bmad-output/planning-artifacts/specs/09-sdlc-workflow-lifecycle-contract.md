@@ -55,11 +55,11 @@ Runtime config 中的 `[modules.sdlc]` 定义 SDLC workflow 使用的项目级 a
 
 | Runtime key | Placeholder | Meaning | Contract |
 | --- | --- | --- | --- |
-| `modules.sdlc.planning_artifacts` | `{planning_artifacts}` | PRD、Architecture、Specs、Epics、readiness、workflow status 等 planning artifacts 的根目录。 | 必须解析为 target project 内 project-relative POSIX path。 |
-| `modules.sdlc.implementation_artifacts` | `{implementation_artifacts}` | sprint status、stories、flow-gates、story reviews、code reviews、retrospectives、implementation audits 等 implementation artifacts 的根目录。 | 必须解析为 target project 内 project-relative POSIX path。 |
-| `modules.sdlc.project_knowledge` | `{project_knowledge}` | 项目知识、背景文档和长期参考材料的根目录。 | Skill 可以读取；写入必须由具体 workflow 明确授权。 |
+| `modules.sdlc.planning_artifacts` | `{planning_artifacts}` | PRD、Architecture、Specs、Epics、readiness、workflow status 等 planning artifacts 的根目录。 | Runtime config 中必须写成 `{project-root}`-prefixed portable path；消费时必须解析到 target project 内。 |
+| `modules.sdlc.implementation_artifacts` | `{implementation_artifacts}` | sprint status、stories、flow-gates、story reviews、code reviews、retrospectives、implementation audits 等 implementation artifacts 的根目录。 | Runtime config 中必须写成 `{project-root}`-prefixed portable path；消费时必须解析到 target project 内。 |
+| `modules.sdlc.project_knowledge` | `{project_knowledge}` | 项目知识、背景文档和长期参考材料的根目录。 | Runtime config 中必须写成 `{project-root}`-prefixed portable path；Skill 可以读取；写入必须由具体 workflow 明确授权。 |
 
-`{planning_artifacts}`、`{implementation_artifacts}` 和 `{project_knowledge}` 是 logical placeholders。Public report、manifest projection、audit result 和 fixture snapshot 中持久化路径时，必须记录解析后的 project-relative POSIX path，不得记录 raw absolute path。
+`{project-root}` 是 runtime config 中允许持久化的 portable token，不是 raw absolute path。`{planning_artifacts}`、`{implementation_artifacts}` 和 `{project_knowledge}` 是 logical placeholders；它们可以在 runtime config 中展开为 `{project-root}/...`，但任何 filesystem I/O 前必须解析为当前 target project root 下的真实路径。Public report、manifest projection、audit result 和 fixture snapshot 中持久化路径时，必须记录 display-safe path，不得泄露真实 absolute path、home directory、drive letter 或 temporary/cache path。
 
 ## Story Lifecycle Artifact Paths（Story 生命周期产物路径）
 
@@ -158,8 +158,11 @@ Installed hook artifact 至少包含：
 - hook source metadata，例如 `hook-manifest.json`。
 - executable hook runner，例如 `_speclite/hooks/flow-gate-enforcement/runner.mjs`。
 - per-platform project hook config，例如 `.claude/settings.json` 和 `.codex/hooks.json`。
+- `_speclite/config.toml` 中的 `[hooks.flow-gate-enforcement]` runtime descriptor，供 skills、support commands 和用户理解 hook 安装状态与 trust boundary。
 
-Hook runner 必须从 stdin 读取 hook event JSON，识别 `speclite-dev-story` intent，解析唯一 Story key，通过 installed runtime config 解析 `{implementation_artifacts}`，读取 `{implementation_artifacts}/flow-gates/{story-key}-story-kickoff-gate.md` frontmatter，并且只允许 `mode=story-kickoff` 且 `result=PASS` 或 `PASS_EQUIVALENT`。缺失、非通过、目标不匹配、无法唯一解析或过期 metadata 必须阻断并给出下一步命令。Runner 不得运行 `speclite-flow-gate`、写 report、修改 Story 或推进 `sprint-status.yaml`。
+Hook descriptor 的最小 shape 由 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md#Runtime Config Descriptor Sections` 定义。它必须包含 `source_skill`、`protected_skill`、`runtime_root`、`runner`、`events`、`platform_configs` 和 Codex `/hooks` trust note。Descriptor 是 human/skill-facing runtime metadata；hook file hashes、ownership、executable intent 和 `sourceRef` 仍由 files index 负责。
+
+Hook runner 必须从 stdin 读取 hook event JSON，识别 `speclite-dev-story` intent，解析唯一 Story key，通过 installed runtime config 解析 `{implementation_artifacts}`。如果 config value 以 `{project-root}/` 开头，runner 必须先把 token 解析为当前 target project root，再读取 `{implementation_artifacts}/flow-gates/{story-key}-story-kickoff-gate.md` frontmatter。Hook 只允许 `mode=story-kickoff` 且 `result=PASS` 或 `PASS_EQUIVALENT`。缺失、非通过、目标不匹配、无法唯一解析或过期 metadata 必须阻断并给出下一步命令。Runner 不得运行 `speclite-flow-gate`、写 report、修改 Story 或推进 `sprint-status.yaml`。
 
 ## Anchor Contract Map（Anchor Contract Map）
 

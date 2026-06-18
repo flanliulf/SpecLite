@@ -130,7 +130,7 @@ describe("official module metadata parser", () => {
       }),
       expect.objectContaining({
         code: "sdlc",
-        name: "SpecLite SDLC",
+        name: "SpecLite SDLC Module",
         version: "0.0.0",
         defaultSelected: true,
         requiredDependencies: ["core"],

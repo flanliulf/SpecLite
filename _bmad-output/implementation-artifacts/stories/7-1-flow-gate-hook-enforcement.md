@@ -2,6 +2,8 @@
 
 Status: done
 
+Corrective Addendum Status（纠偏补充状态）: implementation partial，fresh-install fixture refresh blocked by unrelated source inventory drift，记录日期 2026-06-17
+
 <!-- Post-MVP Story: 不属于 MVP implementation readiness gate。实现前必须先通过 Epic 7 kickoff / Story kickoff gate。 -->
 
 ## Story（故事）
@@ -60,6 +62,14 @@ Status: done
    **则** 不实现通用 hook platform、enterprise policy engine、daemon/background watcher、hosted service、auto-run flow-gate 或 global user hook install；
    **并且** 不把 `story-completion`、CR、finalizer 或 governance report enforcement 混入本 Story。
 
+9. **Hook runtime descriptor is projected into config.toml（Hook Runtime Descriptor 投射进 config.toml）**
+   **前提** Flow Gate hook artifacts 已被 installer 投射到 target project；
+   **当** install 生成 `_speclite/config.toml`；
+   **则** 必须生成 `[hooks.flow-gate-enforcement]` table；
+   **并且** table 至少包含 `module`、`source_skill`、`protected_skill`、`description`、`runtime_root`、`runner`、`events`、`platform_configs` 和 `trust_note`；
+   **并且** `runtime_root` 和 `runner` 必须使用 `{project-root}` portable token；
+   **并且** 该 table 只作为 runtime-facing descriptor，不替代 `_speclite/hooks/flow-gate-enforcement/hook-manifest.json`、hook runner、platform hook config 或 files index integrity entries。
+
 ## Tasks / Subtasks（任务 / 子任务）
 
 - [x] Task 1: Define hook artifact contracts before implementation（AC: 1-3, 6）
@@ -103,11 +113,20 @@ Status: done
   - [x] 更新 validation tests，覆盖 hook runner missing/drift、config merge protection、Codex trust documentation presence。
   - [x] 运行 `npm run build`、focused tests、`npm test` 或记录阻塞原因、`git diff --check`。
 
+## Corrective Addendum Tasks（纠偏补充任务）
+
+- [ ] Task 7: Add hook runtime descriptor projection（AC: 9）
+  - [x] 扩展 config initialization / writer contract，使 install 在 `_speclite/config.toml` 中生成 `[hooks.flow-gate-enforcement]`。
+  - [x] descriptor 字段必须来自 hook source metadata 和 installer projection state，不得和 `src/installer/hook-artifacts.ts` 中的平台路径常量形成两套不可追踪真源。
+  - [x] `runtime_root` 与 `runner` 写入 `{project-root}/_speclite/hooks/flow-gate-enforcement` 和 `{project-root}/_speclite/hooks/flow-gate-enforcement/runner.mjs`。
+  - [ ] tests/fixtures 同时断言 descriptor 存在、platform hook config 仍存在、files index 仍记录 hook runner/source metadata/platform config 的 hash、ownership、`artifactKind` 和 `sourceRef`。
+
 ## Dev Notes（开发备注）
 
 ### Source Requirements（需求来源）
 
 - Epic source: `_bmad-output/planning-artifacts/epics/10-epic-7-post-mvp-governance-expansionpost-mvp-治理扩展.md`
+- Runtime config descriptor contract: `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md#Runtime Config Descriptor Sections`
 - SDLC lifecycle and Flow Gate contract: `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`
 - Manifest/files index contract: `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`
 - IDE adapter artifact boundary: `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md`
@@ -162,6 +181,7 @@ Status: done
 | Anchor Type | Anchor | Requirement |
 | --- | --- | --- |
 | Contract Anchor | `09-sdlc-workflow-lifecycle-contract.md` | 定义 hook source root、Flow Gate metadata、lifecycle enforcement boundary。 |
+| Contract Anchor | `03-install-plan-contract.md` | 定义 `[hooks.flow-gate-enforcement]` runtime config descriptor shape 与 `{project-root}` portable path。 |
 | Contract Anchor | `04-manifest-index-contract.md` | 定义 hook artifacts 在 files index 中的 ownership/hash/sourceRef/executable projection。 |
 | Contract Anchor | `05-ide-adapter-registry-contract.md` | 明确 hook config 是 adapter artifact，不混入 canonical skill package hash。 |
 | Contract Anchor | Claude/Codex official hook docs | 平台事件、block output、project config path、trust/review 语义必须可追溯。 |
@@ -207,6 +227,9 @@ GPT-5（Codex）
 - 2026-06-15 13:01 CST：完整 `npm test` 首次暴露 local source fixture 与 skill-index snapshot 未同步；已按 root cause 修复。
 - 2026-06-15 13:01 CST：完整 `npm test` 通过。
 - 2026-06-15 13:03 CST：Story completion gate 结果 `PASS`，`sprint-status.yaml` 推进到 `review`。
+- 2026-06-17：为 `_speclite/config.toml` 增加 `[hooks.flow-gate-enforcement]` runtime descriptor projection；`npx vitest run test/config-initialization.test.ts test/flow-gate-hook-runner.test.ts` passed。
+- 2026-06-17：`npx vitest run test/resolve-cli.test.ts test/resolve-readers.test.ts test/hook-artifact-install.test.ts` passed，证明 platform hook config 与 hook files-index projection 仍通过 focused tests。
+- 2026-06-17：完整 `npm test` 失败，主要阻塞为当前未跟踪 brownfield skill source 使 skill inventory 从 57 变为 61，fresh-install fixture 仍按 57 断言；未在本纠偏范围内刷新该无关 inventory snapshot。
 
 ### Completion Notes（完成说明）
 
@@ -216,6 +239,8 @@ GPT-5（Codex）
 - Hook runner 支持 stdin hook event、非 dev-story no-op、Story key/path 解析、installed config lookup、Flow Gate YAML frontmatter metadata 校验、PASS/PASS_EQUIVALENT allow，以及 missing/non-pass/mismatch/stale/ambiguous block。
 - 更新 Flow Gate report template 与 related skill guidance，明确 hook 是外层 deterministic guard，不替代 `speclite-dev-story` Step 4 内部 Flow Gate。
 - 更新 fresh install fixtures、local source fixture helper、release packaging inventory、focused tests 和 full regression evidence。
+- Corrective addendum 将 Flow Gate hook runtime descriptor 投射进 `_speclite/config.toml`，字段包括 `source_skill`、`protected_skill`、`runtime_root`、`runner`、`events`、`platform_configs` 和 `trust_note`。
+- Hook runner 现在能解析 config 中的 `{project-root}/...` portable token，再读取 implementation artifacts 下的 Flow Gate metadata。
 
 ### File List（文件清单）
 
@@ -232,6 +257,7 @@ GPT-5（Codex）
 - `assets/source/speclite/hooks/flow-gate-enforcement/codex-hooks.fragment.json`
 - `assets/source/speclite/hooks/flow-gate-enforcement/hook-manifest.json`
 - `assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs`
+- `assets/source/speclite/sdlc-skills/module.yaml`
 - `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.en.md`
 - `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.md`
 - `assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/references/workflow-steps.md`
@@ -241,9 +267,14 @@ GPT-5（Codex）
 - `assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate/references/workflow-details.md`
 - `release/packaging-manifest.json`
 - `src/commands/install.ts`
+- `src/config/config-schema.ts`
+- `src/config/config-writer.ts`
 - `src/hooks/flow-gate-enforcement.ts`
+- `src/installer/config-initialization.ts`
 - `src/installer/hook-artifacts.ts`
 - `src/installer/runtime-structure.ts`
+- `src/modules/module-metadata.ts`
+- `test/config-initialization.test.ts`
 - `test/file-integrity-ownership.test.ts`
 - `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
 - `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-dev-story-skill.json`
@@ -261,3 +292,4 @@ GPT-5（Codex）
 | --- | --- | --- | --- |
 | 2026-06-15 | 0.1 | 创建 Epic 7.1 ready-for-dev Story，上下文覆盖 Flow Gate Hook Enforcement、installer projection、report metadata 与 fixtures。 | Amelia |
 | 2026-06-15 | 1.0 | 实现 Flow Gate hook enforcement、installer projection、report metadata、tests/fixtures，并推进 Story 至 review。 | Codex |
+| 2026-06-17 | 1.1 | 增加 `[hooks.flow-gate-enforcement]` runtime config descriptor 与 `{project-root}` hook path 解析；fresh-install fixture 刷新仍受无关 source inventory drift 阻塞。 | Codex |
