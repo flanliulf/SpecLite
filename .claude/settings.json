@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node _speclite/hooks/flow-gate-enforcement/runner.mjs --platform claude"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node _speclite/hooks/canonical-source-change-check/runner.mjs --platform claude --mode warn"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node _speclite/hooks/canonical-source-change-check/runner.mjs --platform claude --mode warn --stop-summary"
+          }
+        ]
+      }
+    ]
+  }
+}

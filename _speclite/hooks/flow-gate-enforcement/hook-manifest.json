@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "speclite.hook-source.v1",
+  "hookId": "flow-gate-enforcement",
+  "sourceSkill": "speclite-flow-gate",
+  "protectedSkill": "speclite-dev-story",
+  "description": "在执行 speclite-dev-story 前检查 story-kickoff Flow Gate 通过证据。",
+  "runner": "runner.mjs",
+  "events": ["UserPromptSubmit"],
+  "platformConfigs": [".claude/settings.json", ".codex/hooks.json"],
+  "artifactKind": "hook-runner",
+  "installedRuntimeRoot": "_speclite/hooks/flow-gate-enforcement",
+  "trustNote": "Codex 项目 hooks 需要通过 /hooks review/trust 后才会生效。"
+}

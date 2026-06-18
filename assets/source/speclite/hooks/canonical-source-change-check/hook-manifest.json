@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "speclite.hook-source.v1",
+  "hookId": "canonical-source-change-check",
+  "sourceSkill": "speclite-check-canonical-source-change",
+  "protectedSurface": "assets/source/speclite",
+  "description": "在 canonical source 发生变更后 warning-only 提醒运行一致性检查。",
+  "runner": "runner.mjs",
+  "events": ["PostToolUse", "Stop"],
+  "platformConfigs": [".claude/settings.json", ".codex/hooks.json"],
+  "artifactKind": "hook-runner",
+  "installedRuntimeRoot": "_speclite/hooks/canonical-source-change-check",
+  "trustNote": "Codex 项目 hooks 需要通过 /hooks review/trust 后才会生效。"
+}
