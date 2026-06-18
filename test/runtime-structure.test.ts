@@ -15,7 +15,7 @@ const fixtureExpectedRoot = path.join(
   process.cwd(),
   "test/fixtures/fresh-install-empty-project/expected",
 );
-const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 57;
+const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 61;
 const REQUIRED_METHOD_LOOP_SKILL_IDS = [
   "speclite-advanced-elicitation",
   "speclite-review-acceptance-auditor",
@@ -361,6 +361,44 @@ describe("runtime structure and IDE mirror creation", () => {
 
       const skillIndex = await readJson(path.join(tempRoot, "_speclite/_config/skill-index.json"));
       expect(skillIndex.entries[0].installedTargets).toEqual(["agents"]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("appends missing user config rules to an existing gitignore during install", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-existing-gitignore-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+      await writeFile(path.join(tempRoot, ".gitignore"), ".DS_Store\n_speclite-output/\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { json: true, yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.result.status).toBe("success");
+      const gitignore = await readFile(path.join(tempRoot, ".gitignore"), "utf8");
+      expect(gitignore).toContain(".DS_Store");
+      expect(gitignore).toContain("_speclite-output/");
+      expect(gitignore).toContain("_speclite/config.user.toml");
+      expect(gitignore).toContain("_speclite/custom/config.user.toml");
+
+      const filesIndex = await readJson(path.join(tempRoot, "_speclite/_config/files-index.json"));
+      expect(filesIndex.entries).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ".gitignore",
+            ownership: "human-owned",
+            artifactKind: "gitignore",
+          }),
+        ]),
+      );
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

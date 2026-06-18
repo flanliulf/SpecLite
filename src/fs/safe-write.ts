@@ -58,6 +58,7 @@ export async function safeWriteFile(input: {
     hash: FileHash;
     artifactRoot?: string;
   };
+  allowHumanOwnedExistingFile?: boolean;
   component?: string;
   operationId?: string;
 }): Promise<SafeWriteResult> {
@@ -67,6 +68,7 @@ export async function safeWriteFile(input: {
     component: input.component ?? "safe-write",
     allowExistingFile: input.allowExisting === true,
     expectedExistingFile: input.expectedExistingFile,
+    allowHumanOwnedExistingFile: input.allowHumanOwnedExistingFile === true,
   });
   if (!safety.ok) return safety;
 
@@ -138,6 +140,7 @@ async function validateProjectPath(input: {
     hash: FileHash;
     artifactRoot?: string;
   };
+  allowHumanOwnedExistingFile: boolean;
 }): Promise<
   | {
       ok: true;
@@ -211,6 +214,7 @@ async function validateProjectPath(input: {
         absolutePath: resolved.absolutePath,
         component: input.component,
         expectedExistingFile: input.expectedExistingFile,
+        allowHumanOwnedExistingFile: input.allowHumanOwnedExistingFile,
       });
       if (baselineIssue !== undefined) return { ok: false, issue: baselineIssue };
     }
@@ -255,6 +259,7 @@ async function validateExistingFileBaseline(input: {
     hash: FileHash;
     artifactRoot?: string;
   };
+  allowHumanOwnedExistingFile: boolean;
 }): Promise<ValidationIssue | undefined> {
   if (input.expectedExistingFile === undefined) {
     return createFileIssue({
@@ -266,7 +271,9 @@ async function validateExistingFileBaseline(input: {
     });
   }
 
-  if (input.expectedExistingFile.ownership !== "installer-owned") {
+  const expectedOwnership = input.expectedExistingFile.ownership;
+  const allowedHumanOwnedUpdate = input.allowHumanOwnedExistingFile && expectedOwnership === "human-owned";
+  if (expectedOwnership !== "installer-owned" && !allowedHumanOwnedUpdate) {
     return createFileIssue({
       issueId: "file-integrity.unsafe-overwrite-risk",
       affectedPath: input.relativePath,
@@ -280,7 +287,7 @@ async function validateExistingFileBaseline(input: {
     relativePath: input.relativePath,
     artifactRoot: input.expectedExistingFile.artifactRoot,
   });
-  if (classification.ownership !== "installer-owned") {
+  if (classification.ownership !== expectedOwnership) {
     return createFileIssue({
       issueId: "file-integrity.unsafe-overwrite-risk",
       affectedPath: input.relativePath,

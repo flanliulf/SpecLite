@@ -17,6 +17,7 @@ SpecLite 提供的不是单个 prompt、单份 README 或零散 skill 文件，�
 - `core-skills/`：多个 workflow 共享的基础能力，例如帮助、头脑风暴、文档索引、文档拆分和评审辅助。
 - `sdlc-skills/`：按研发生命周期组织的方法论能力，覆盖分析、计划、方案设计、实现和 DevOps 发布阶段。
 - `support-skills/`：用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义。
+- `hooks/`：安装到 `_speclite/hooks/` 的 deterministic guardrails，例如 Flow Gate enforcement 和 canonical source change warnings。
 - `scripts/`：共享 runtime helper scripts，例如 config/customization resolver。
 - `custom/`：团队级和用户级 customization 示例。
 

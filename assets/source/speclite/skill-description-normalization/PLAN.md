@@ -25,7 +25,7 @@
 
 ## Result（结果）
 
-- 覆盖 84 个现有入口文件：`SKILL.md` 57 个，`SKILL.en.md` 27 个。
+- 覆盖 88 个现有入口文件：`SKILL.md` 61 个，`SKILL.en.md` 27 个。
 - 未创建缺失的 `SKILL.en.md`。
 - 复查结果：语言、长度、三段式结构均通过。
 - `git diff --check` 在本次相关路径上通过。

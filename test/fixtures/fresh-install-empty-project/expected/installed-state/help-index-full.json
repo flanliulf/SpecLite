@@ -15,9 +15,53 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "1-analysis",
+      "entryLabel": "Backend Tech Stack",
+      "canonicalSkillId": "speclite-brownfield-backend-tech-stack-digger",
+      "activationTarget": ".claude/skills/speclite-brownfield-backend-tech-stack-digger/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
       "entryLabel": "Brownfield Baseline",
       "canonicalSkillId": "speclite-brownfield-context-builder",
       "activationTarget": ".claude/skills/speclite-brownfield-context-builder/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Java Backend Tech Stack",
+      "canonicalSkillId": "speclite-brownfield-java-springboot-backend-tech-stack-digger",
+      "activationTarget": ".claude/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Node.js Backend Tech Stack",
+      "canonicalSkillId": "speclite-brownfield-nodejs-backend-tech-stack-digger",
+      "activationTarget": ".claude/skills/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "1-analysis",
+      "entryLabel": "Python Backend Tech Stack",
+      "canonicalSkillId": "speclite-brownfield-python-backend-tech-stack-digger",
+      "activationTarget": ".claude/skills/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md",
       "targetIds": [
         "claude",
         "agents"

@@ -16,7 +16,7 @@ import {
 import { hasUserConfigGitignoreCoverage } from "../config/user-config-gitignore.js";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import type { OfficialModule } from "../modules/module-metadata.js";
-import { createFlowGateHookRuntimeDescriptor } from "./hook-artifacts.js";
+import { createRuntimeHookDescriptors } from "./hook-artifacts.js";
 import type { InstallPlanTargetAdapter, PlannedWrite } from "./install-plan-schema.js";
 
 const INSTALLER_CONFIG_PATH = "_speclite/config.toml";
@@ -314,9 +314,7 @@ function createInstallerConfigToml(
       },
     };
     document.agents = createRuntimeAgentDescriptors(selectedModules);
-    document.hooks = {
-      "flow-gate-enforcement": createFlowGateHookRuntimeDescriptor(),
-    };
+    document.hooks = createRuntimeHookDescriptors();
   }
 
   return document;

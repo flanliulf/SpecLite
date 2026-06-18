@@ -38,6 +38,7 @@ describe("uninstall command safety", () => {
       expect(parsed.command).toBe("uninstall");
       expect(parsed.data.writeAuthorized).toBe(true);
       expect(parsed.data.removedPaths).toEqual([
+        "_speclite/_config/files-index.json",
         "_speclite/config.toml",
         "_speclite/hooks/flow-gate-enforcement/runner.mjs",
         "_speclite/scripts/resolve_config.py",
@@ -48,6 +49,9 @@ describe("uninstall command safety", () => {
         "_speclite-output/reports/review.md",
         "_speclite/custom/config.toml",
       ]);
+      await expect(stat(path.join(tempRoot, "_speclite/_config/files-index.json"))).rejects.toMatchObject({
+        code: "ENOENT",
+      });
       await expect(stat(path.join(tempRoot, "_speclite/config.toml"))).rejects.toMatchObject({ code: "ENOENT" });
       await expect(stat(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement/runner.mjs"))).rejects.toMatchObject({
         code: "ENOENT",
@@ -63,6 +67,81 @@ describe("uninstall command safety", () => {
       await expect(readFile(path.join(tempRoot, "_speclite-output/reports/review.md"), "utf8")).resolves.toBe(
         "workflow artifact\n",
       );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("removes installed-state markers so install can run again after uninstall", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-uninstall-rerun-install-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      await writeFile(path.join(tempRoot, "_speclite/config.toml"), "installer config\n", "utf8");
+      await writeFilesIndex(tempRoot);
+
+      const uninstallResult = await runCli(["uninstall", tempRoot, "--json", "--yes"]);
+      const uninstallParsed = UninstallCommandResultSchema.parse(JSON.parse(uninstallResult.stdout));
+
+      expect(uninstallResult.exitCodes).toEqual([0]);
+      expect(uninstallParsed.data.removedPaths).toContain("_speclite/config.toml");
+      await expect(stat(path.join(tempRoot, "_speclite/config.toml"))).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(stat(path.join(tempRoot, "_speclite/_config/files-index.json"))).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+      await expect(stat(path.join(tempRoot, "_speclite/_config"))).rejects.toMatchObject({ code: "ENOENT" });
+
+      const installResult = await runCli(["install", tempRoot, "--json", "--yes"]);
+      const installParsed = JSON.parse(installResult.stdout) as {
+        command: string;
+        status: string;
+        data: { completedSteps: string[]; pendingSteps: string[] };
+      };
+
+      expect(installResult.exitCodes).toEqual([0]);
+      expect(installParsed.command).toBe("install");
+      expect(installParsed.status).toBe("success");
+      expect(installParsed.data.completedSteps).toContain("ready-summary");
+      expect(installParsed.data.pendingSteps).toEqual([]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("removes installer-owned platform hook configs so install can run again after uninstall", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-uninstall-hook-configs-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      await mkdir(path.join(tempRoot, ".claude"), { recursive: true });
+      await mkdir(path.join(tempRoot, ".codex"), { recursive: true });
+      const claudeSettings = `${JSON.stringify({ hooks: { UserPromptSubmit: [{ command: "speclite" }] } }, null, 2)}\n`;
+      const codexHooks = `${JSON.stringify({ hooks: [{ id: "speclite", command: "speclite" }] }, null, 2)}\n`;
+      await writeFile(path.join(tempRoot, ".claude/settings.json"), claudeSettings, "utf8");
+      await writeFile(path.join(tempRoot, ".codex/hooks.json"), codexHooks, "utf8");
+      await writePlatformHookFilesIndex(tempRoot, { claudeSettings, codexHooks });
+
+      const uninstallResult = await runCli(["uninstall", tempRoot, "--json", "--yes"]);
+      const uninstallParsed = UninstallCommandResultSchema.parse(JSON.parse(uninstallResult.stdout));
+
+      expect(uninstallResult.exitCodes).toEqual([0]);
+      expect(uninstallParsed.data.removedPaths).toContain(".claude/settings.json");
+      expect(uninstallParsed.data.removedPaths).toContain(".codex/hooks.json");
+      await expect(stat(path.join(tempRoot, ".claude/settings.json"))).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(stat(path.join(tempRoot, ".codex/hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
+
+      const installResult = await runCli(["install", tempRoot, "--json", "--yes"]);
+      const installParsed = JSON.parse(installResult.stdout) as {
+        command: string;
+        status: string;
+        data: { completedSteps: string[]; pendingSteps: string[] };
+      };
+
+      expect(installResult.exitCodes).toEqual([0]);
+      expect(installParsed.command).toBe("install");
+      expect(installParsed.status).toBe("success");
+      expect(installParsed.data.completedSteps).toContain("ready-summary");
+      expect(installParsed.data.pendingSteps).toEqual([]);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -173,6 +252,45 @@ async function writeTrustedManifest(projectRoot: string): Promise<void> {
       "  artifactRoot: _speclite-output",
       "  manifestPath: _speclite/_config/manifest.yaml",
     ].join("\n"),
+    "utf8",
+  );
+}
+
+async function writePlatformHookFilesIndex(
+  projectRoot: string,
+  input: { claudeSettings: string; codexHooks: string },
+): Promise<void> {
+  await writeFile(
+    path.join(projectRoot, "_speclite/_config/files-index.json"),
+    `${JSON.stringify(
+      {
+        schemaVersion: "speclite.files-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: ".claude/settings.json",
+            ownership: "installer-owned",
+            hash: hashBytes(input.claudeSettings),
+            hashAlgorithm: "sha256",
+            executable: false,
+            artifactKind: "platform-hook-config",
+            sourceRef: "generated:claude-hook-registry-config",
+          },
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: ".codex/hooks.json",
+            ownership: "installer-owned",
+            hash: hashBytes(input.codexHooks),
+            hashAlgorithm: "sha256",
+            executable: false,
+            artifactKind: "platform-hook-config",
+            sourceRef: "generated:codex-hook-registry-config",
+          },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
     "utf8",
   );
 }

@@ -36,13 +36,13 @@
         "id": "claude",
         "status": "configured",
         "targetPath": ".claude/skills",
-        "skillCount": 57
+        "skillCount": 61
       },
       {
         "id": "agents",
         "status": "configured",
         "targetPath": ".agents/skills",
-        "skillCount": 57
+        "skillCount": 61
       }
     ],
     "highLevelHealth": "configured",

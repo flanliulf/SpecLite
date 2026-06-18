@@ -87,7 +87,7 @@ const ARTIFACTS = {
   },
 } as const;
 
-const CORE_SDLC_BASELINE_ENTRY_COUNT = 57;
+const CORE_SDLC_BASELINE_ENTRY_COUNT = 61;
 const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
   core: [
     "assets/source/speclite/core-skills/speclite-advanced-elicitation",
@@ -111,7 +111,11 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-analyst",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-docs-steward",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger",
+    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief",

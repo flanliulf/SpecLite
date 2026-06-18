@@ -1,4 +1,4 @@
-import { lstat, readFile, rm } from "node:fs/promises";
+import { lstat, readFile, rm, rmdir } from "node:fs/promises";
 import process from "node:process";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
@@ -32,6 +32,9 @@ export type UninstallCommandOutcome = {
   result: UninstallCommandResult;
   exitCode: 0 | 1;
 };
+
+const FILES_INDEX_PATH = "_speclite/_config/files-index.json";
+const INSTALLED_STATE_CONFIG_DIR = "_speclite/_config";
 
 export async function runUninstallCommand(input: {
   options?: UninstallCommandOptions;
@@ -146,6 +149,12 @@ async function planUninstall(input: { projectRoot: string }): Promise<{
     });
   }
 
+  await appendInstallerOwnedRemoveActionIfPresent({
+    actions,
+    projectRoot: input.projectRoot,
+    relativePath: FILES_INDEX_PATH,
+  });
+
   const preservedPaths = actions
     .filter((action) => action.action === "preserve" || action.action === "manual-action")
     .map((action) => action.affectedPath);
@@ -192,11 +201,74 @@ async function applyUninstallPlan(input: {
       };
     }
   }
+  const cleanup = await removeEmptyInstalledStateDirectory({
+    projectRoot: input.projectRoot,
+    relativePath: INSTALLED_STATE_CONFIG_DIR,
+    removedPaths,
+  });
+  if (!cleanup.ok) {
+    return {
+      removedPaths,
+      issues: [cleanup.issue],
+      blocked: true,
+    };
+  }
   return { removedPaths, issues: [], blocked: false };
 }
 
 function isMissingPathError(error: unknown): boolean {
   return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+}
+
+function isDirectoryNotEmptyError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error.code === "ENOTEMPTY" || error.code === "EEXIST")
+  );
+}
+
+async function appendInstallerOwnedRemoveActionIfPresent(input: {
+  actions: UninstallCommandData["uninstallPlan"]["actions"];
+  projectRoot: string;
+  relativePath: string;
+}): Promise<void> {
+  if (input.actions.some((action) => action.affectedPath === input.relativePath)) return;
+  const currentHash = await readCurrentHash(input.projectRoot, input.relativePath);
+  if (currentHash === undefined) return;
+  input.actions.push({
+    affectedPath: input.relativePath,
+    ownership: "installer-owned",
+    action: "remove",
+    currentHash,
+  });
+}
+
+async function removeEmptyInstalledStateDirectory(input: {
+  projectRoot: string;
+  relativePath: string;
+  removedPaths: string[];
+}): Promise<{ ok: true } | { ok: false; issue: ValidationIssue }> {
+  const target = resolveProjectRelativePath({
+    projectRoot: input.projectRoot,
+    relativePath: input.relativePath,
+  });
+
+  try {
+    await rmdir(target.absolutePath);
+    input.removedPaths.push(target.relativePath);
+    return { ok: true };
+  } catch (error) {
+    if (isMissingPathError(error) || isDirectoryNotEmptyError(error)) return { ok: true };
+    return {
+      ok: false,
+      issue: createUninstallRemoveIssue({
+        affectedPath: target.relativePath,
+        removedPaths: input.removedPaths,
+      }),
+    };
+  }
 }
 
 async function readFilesIndex(projectRoot: string):

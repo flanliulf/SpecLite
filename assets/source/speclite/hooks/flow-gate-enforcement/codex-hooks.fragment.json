@@ -1,10 +1,16 @@
 {
-  "hooks": [
-    {
-      "event": "UserPromptSubmit",
-      "id": "speclite-flow-gate-enforcement",
-      "description": "Block speclite-dev-story until story-kickoff Flow Gate evidence passes.",
-      "command": "node _speclite/hooks/flow-gate-enforcement/runner.mjs --platform codex"
-    }
-  ]
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node _speclite/hooks/flow-gate-enforcement/runner.mjs --platform codex",
+            "statusMessage": "Checking SpecLite Flow Gate"
+          }
+        ]
+      }
+    ]
+  }
 }

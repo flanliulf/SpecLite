@@ -11,6 +11,7 @@
 | `core-skills/` | 多个 SDLC 工作流共享的 Speclite 基础能力，例如启发、头脑风暴、帮助、文档索引、文档拆分和评审辅助能力。 |
 | `sdlc-skills/` | 按生命周期阶段组织的 Speclite SDLC 工作流 Skill，包括分析、计划、方案设计、实现和 DevOps 发布阶段。 |
 | `support-skills/` | 用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义的支撑 Skill。 |
+| `hooks/` | 独立 canonical hook packages，安装到目标项目 `_speclite/hooks/` 并合并生成 Claude/Codex hook config。 |
 | `scripts/` | 共享运行时辅助脚本的源码副本，例如配置解析和 customization 解析。目标项目运行时应安装到 `{project-root}/_speclite/scripts`。 |
 | `custom/` | 团队级和用户级 customization 覆盖示例。目标项目运行时应放在 `{project-root}/_speclite/custom`。 |
 
@@ -115,8 +116,18 @@ Review 产物目录约定如下：
 - `speclite-skill-lint`：验证通用 Skill 规则，以及 Speclite runtime 和迁移对齐规则。
 - `speclite-agent-creator`：创建或迁移 `speclite-agent-*` / `bmad-agent-*` 这类 role activation Agent 定义包。
 - `speclite-agent-lint`：验证 Agent 专属 `[agent]` 定制面、persona、菜单目标、prompt 引用和 runtime 残留。
+- `speclite-check-canonical-source-change`：在 canonical source 修改后检查 root counts、`module-help.csv`、hooks、fixtures、docs 和 packaging manifest 是否同步。
 
 维护 `assets/source/speclite/` 下的 canonical skill 源定义时，workflow 风格 Skill 默认使用 `speclite-skill-creator` 与 `speclite-skill-lint`；Agent 定义包默认使用 `speclite-agent-creator` 与 `speclite-agent-lint`。不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+
+### Hooks
+
+`hooks/` 当前包含两个 canonical hook packages：
+
+- `flow-gate-enforcement`：在执行 `speclite-dev-story` 前检查 story-kickoff Flow Gate 通过证据。
+- `canonical-source-change-check`：在 `assets/source/speclite/` 变更后 warning-only 提醒执行 canonical source 一致性检查。
+
+安装时，installer 会把每个 hook 的 `runner.mjs` 和 `hook-manifest.json` 投影到 `_speclite/hooks/<hook-id>/`，并合并生成 `.claude/settings.json` 与 `.codex/hooks.json`。Codex hook config 使用 event-keyed `{"hooks": {"Event": [...]}}` 形态。
 
 ## 验证建议
 
@@ -134,4 +145,10 @@ rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|assets/source/speclite/(src|scr
 ```sh
 python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py <agent-dir>
 python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py --all assets/source/speclite/sdlc-skills
+```
+
+修改 `assets/source/speclite/` 后，运行 canonical source 变更检查：
+
+```sh
+node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
 ```

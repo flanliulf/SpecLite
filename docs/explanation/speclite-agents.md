@@ -37,6 +37,7 @@ SpecLite Agent 是面向某个研发职责的 role activation Skill。它不只�
 | `agent.menu` | `[[agent.menu]]` 数组。 | 把菜单项映射到 Workflow Skill 或本地 prompt。 |
 | `persistent_facts` | 文件路径或 glob。 | 激活时读取稳定项目事实，例如 docs 规范、README、package metadata。 |
 | `module.yaml` roster | `agents:` 列表。 | 让 Module 公开 Agent 名称、title、本地化说明和团队归属。 |
+| Runtime descriptor | `_speclite/config.toml` 的 `[agents.<agent-id>]`。 | 安装时记录 Agent `module`、`team`、`name`、`title`、`icon` 和 description，供 runtime config 与 customization 使用。 |
 | 支撑检查 | `speclite-agent-lint`。 | 检查 `[agent]` block、菜单目标、persona 语义和 runtime 残留。 |
 
 ## Activation Model（激活模型）
@@ -101,6 +102,7 @@ SpecLite 里有一组名字也包含 `agent` 的支撑工具：
 | Agent roster、title、本地化说明和阶段 | `assets/source/speclite/sdlc-skills/module.yaml` |
 | Agent 菜单和 persona 默认配置 | `assets/source/speclite/sdlc-skills/*/speclite-agent-*/customize.toml` |
 | Agent 激活协议 | `assets/source/speclite/sdlc-skills/*/speclite-agent-*/SKILL.md` |
+| Runtime Agent descriptor | `_speclite/config.toml` 的 `[agents.<agent-id>]`，生成逻辑见 `src/installer/config-initialization.ts` |
 | Agent 支撑工具边界 | `assets/source/speclite/support-skills/speclite-agent-creator/` 和 `speclite-agent-lint/` |
 | Module help 中的菜单入口 | `assets/source/speclite/sdlc-skills/module-help.csv` |
 

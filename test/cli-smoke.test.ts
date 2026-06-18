@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -187,7 +187,10 @@ describe("CLI smoke", () => {
           stdout: (text) => stdout.push(text),
           prompt: async (question) => {
             prompts.push(question);
-            return "core";
+            if (question.includes("user_name")) return "Ada";
+            if (question.includes("module id")) return "core";
+            if (question.includes("quick") || question.includes("detailed")) return "quick";
+            return "";
           },
           setExitCode: (code) => exitCodes.push(code),
         },
@@ -196,8 +199,10 @@ describe("CLI smoke", () => {
       await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive"], { from: "node" });
 
       const output = stdout.join("");
+      const userConfig = await readFile(path.join(tempRoot, "_speclite/config.user.toml"), "utf8");
+
       expect(exitCodes).toEqual([0]);
-      expect(prompts).toHaveLength(3);
+      expect(prompts).toHaveLength(4);
       expect(output).toContain(
         [
           "Step 1/4 Select modules（选择模块）",
@@ -222,6 +227,9 @@ describe("CLI smoke", () => {
         ].join("\n"),
       );
       expect(output).toContain("- detailed:");
+      expect(prompts.some((prompt) => prompt.includes("Quick config user_name"))).toBe(true);
+      expect(userConfig).toContain('user_name = "Ada"');
+      expect(userConfig).not.toContain('user_name = "SpecLite"');
       expect(output.match(/Step 3\/4 Final pre-write review/g) ?? []).toHaveLength(1);
       expect(output).toContain(
         [
@@ -351,7 +359,10 @@ describe("CLI smoke", () => {
           stdout: (text) => stdout.push(text),
           prompt: async (question) => {
             prompts.push(question);
-            return "core";
+            if (question.includes("user_name")) return "Ada";
+            if (question.includes("module ids")) return "core";
+            if (question.includes("quick") || question.includes("detailed")) return "quick";
+            return "";
           },
           setExitCode: (code) => exitCodes.push(code),
         },
@@ -359,8 +370,10 @@ describe("CLI smoke", () => {
 
       await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
 
+      const userConfig = await readFile(path.join(tempRoot, "_speclite/config.user.toml"), "utf8");
+
       expect(exitCodes).toEqual([0]);
-      expect(prompts).toHaveLength(3);
+      expect(prompts).toHaveLength(4);
       expect(stdout.join("")).toContain(
         [
           "Step 1/4 Select modules",
@@ -388,13 +401,106 @@ describe("CLI smoke", () => {
       );
       expect(stdout.join("")).toContain("- detailed:");
       expect(prompts[1]).toContain("quick or detailed");
+      expect(prompts[2]).toContain("Quick config user_name");
       expect(stdout.join("")).toContain("Step 3/4 Final pre-write review");
       expect(stdout.join("")).toContain("canonicalPackageRoots=core=13, total=13");
       expect(stdout.join("")).toContain("projectFilesWritten=false");
-      expect(prompts[2]).not.toContain("canonicalPackageRoots");
-      expect(prompts[2]).not.toContain("projectFilesWritten=false");
+      expect(prompts[3]).not.toContain("canonicalPackageRoots");
+      expect(prompts[3]).not.toContain("projectFilesWritten=false");
+      expect(userConfig).toContain('user_name = "Ada"');
+      expect(userConfig).not.toContain('user_name = "SpecLite"');
       expect(stdout.join("")).toContain("Selected modules: core");
       expect(stdout.join("")).not.toContain("sdlc (");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("requires quick interactive user_name before writing config.user.toml", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-quick-user-name-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+    let userNameAttempts = 0;
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            if (question.includes("user_name")) {
+              userNameAttempts += 1;
+              return userNameAttempts === 1 ? "   " : "Ada";
+            }
+            if (question.includes("module ids")) return "core";
+            if (question.includes("quick") || question.includes("detailed")) return "quick";
+            return "";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
+
+      const userConfig = await readFile(path.join(tempRoot, "_speclite/config.user.toml"), "utf8");
+
+      expect(exitCodes).toEqual([0]);
+      expect(prompts.filter((prompt) => prompt.includes("Quick config user_name"))).toHaveLength(2);
+      expect(stdout.join("")).toContain("user_name is required");
+      expect(userConfig).toContain('user_name = "Ada"');
+      expect(userConfig).not.toContain('user_name = "SpecLite"');
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("requires detailed interactive user_name before writing config.user.toml", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-detailed-user-name-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+    let userNameAttempts = 0;
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            if (question.includes("user_name")) {
+              userNameAttempts += 1;
+              return userNameAttempts === 1 ? "   " : "Ada";
+            }
+            if (question.includes("module ids")) return "core";
+            if (question.includes("quick") || question.includes("detailed")) return "detailed";
+            return "";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
+
+      const userConfig = await readFile(path.join(tempRoot, "_speclite/config.user.toml"), "utf8");
+
+      expect(exitCodes).toEqual([0]);
+      expect(prompts.filter((prompt) => prompt.includes("Detailed config user_name"))).toHaveLength(2);
+      expect(stdout.join("")).toContain("user_name is required");
+      expect(userConfig).toContain('user_name = "Ada"');
+      expect(userConfig).not.toContain('user_name = "SpecLite"');
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

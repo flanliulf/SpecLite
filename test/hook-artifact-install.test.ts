@@ -10,8 +10,8 @@ const supportedRuntime = {
   platformRelease: "23.0.0",
 } as const;
 
-describe("flow gate hook artifact install", () => {
-  it("projects hook runner, platform configs and files-index metadata separately from skill packages", async () => {
+describe("canonical hook artifact install", () => {
+  it("projects hook runners, merged platform configs and files-index metadata separately from skill packages", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-hook-install-"));
 
     try {
@@ -32,11 +32,35 @@ describe("flow gate hook artifact install", () => {
       await expect(
         readFile(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement/hook-manifest.json"), "utf8"),
       ).resolves.toContain("flow-gate-enforcement");
-      await expect(readFile(path.join(tempRoot, ".claude/settings.json"), "utf8")).resolves.toContain(
-        "UserPromptSubmit",
-      );
-      await expect(readFile(path.join(tempRoot, ".codex/hooks.json"), "utf8")).resolves.toContain(
-        "flow-gate-enforcement",
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/hooks/canonical-source-change-check/runner.mjs"), "utf8"),
+      ).resolves.toContain("assets/source/speclite");
+      await expect(
+        readFile(path.join(tempRoot, "_speclite/hooks/canonical-source-change-check/hook-manifest.json"), "utf8"),
+      ).resolves.toContain("canonical-source-change-check");
+
+      const claudeSettings = JSON.parse(await readFile(path.join(tempRoot, ".claude/settings.json"), "utf8"));
+      expect(Object.keys(claudeSettings.hooks).sort()).toEqual(["PostToolUse", "Stop", "UserPromptSubmit"]);
+      expect(claudeSettings.hooks.UserPromptSubmit[0].hooks[0].command).toContain("flow-gate-enforcement");
+      expect(claudeSettings.hooks.PostToolUse[0].hooks[0].command).toContain("canonical-source-change-check");
+      expect(claudeSettings.hooks.Stop[0].hooks[0].command).toContain("canonical-source-change-check");
+
+      const codexHooks = JSON.parse(await readFile(path.join(tempRoot, ".codex/hooks.json"), "utf8"));
+      expect(Array.isArray(codexHooks.hooks)).toBe(false);
+      expect(Object.keys(codexHooks.hooks).sort()).toEqual(["PostToolUse", "Stop", "UserPromptSubmit"]);
+      expect(codexHooks.hooks.UserPromptSubmit[0].hooks[0].command).toContain("flow-gate-enforcement");
+      expect(codexHooks.hooks.PostToolUse[0].hooks[0].command).toContain("canonical-source-change-check");
+      expect(codexHooks.hooks.Stop[0].hooks[0].command).toContain("canonical-source-change-check");
+      expect(JSON.stringify(codexHooks)).not.toContain('"event"');
+      expect(JSON.stringify(codexHooks)).not.toContain('"decision":"block"');
+
+      const configToml = await readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8");
+      expect(configToml).toContain("[hooks.flow-gate-enforcement]");
+      expect(configToml).toContain("[hooks.canonical-source-change-check]");
+      expect(configToml).toContain('protected_surface = "assets/source/speclite"');
+      expect(configToml).toContain('protected_skill = "speclite-dev-story"');
+      expect(configToml).not.toContain(
+        '[hooks.canonical-source-change-check]\nprotected_skill = "assets/source/speclite"',
       );
 
       const filesIndex = JSON.parse(
@@ -52,21 +76,103 @@ describe("flow gate hook artifact install", () => {
             sourceRef: "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs",
           }),
           expect.objectContaining({
+            path: "_speclite/hooks/canonical-source-change-check/runner.mjs",
+            ownership: "installer-owned",
+            executable: true,
+            artifactKind: "hook-runner",
+            sourceRef: "assets/source/speclite/hooks/canonical-source-change-check/runner.mjs",
+          }),
+          expect.objectContaining({
+            path: "_speclite/hooks/canonical-source-change-check/hook-manifest.json",
+            ownership: "installer-owned",
+            executable: false,
+            artifactKind: "hook-source-metadata",
+            sourceRef: "assets/source/speclite/hooks/canonical-source-change-check/hook-manifest.json",
+          }),
+          expect.objectContaining({
             path: ".claude/settings.json",
             ownership: "installer-owned",
             artifactKind: "platform-hook-config",
-            sourceRef: "generated:claude-flow-gate-hook-config",
+            sourceRef: "generated:claude-hook-registry-config",
           }),
           expect.objectContaining({
             path: ".codex/hooks.json",
             ownership: "installer-owned",
             artifactKind: "platform-hook-config",
-            sourceRef: "generated:codex-flow-gate-hook-config",
+            sourceRef: "generated:codex-hook-registry-config",
           }),
         ]),
       );
       expect(JSON.stringify(filesIndex)).not.toContain(".claude/skills/speclite-dev-story/runner.mjs");
       expect(outcome.result.nextActions.join("\n")).toContain("/hooks");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("upgrades recognized legacy SpecLite hook configs when files-index is unavailable", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-hook-legacy-upgrade-"));
+
+    try {
+      await mkdir(path.join(tempRoot, ".claude"), { recursive: true });
+      await mkdir(path.join(tempRoot, ".codex"), { recursive: true });
+      await writeFile(
+        path.join(tempRoot, ".claude/settings.json"),
+        `${JSON.stringify(
+          {
+            hooks: {
+              UserPromptSubmit: [
+                {
+                  matcher: "",
+                  hooks: [
+                    {
+                      type: "command",
+                      command: "node _speclite/hooks/flow-gate-enforcement/runner.mjs --platform claude",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempRoot, ".codex/hooks.json"),
+        `${JSON.stringify(
+          {
+            hooks: [
+              {
+                event: "UserPromptSubmit",
+                id: "speclite-flow-gate-enforcement",
+                description: "Block speclite-dev-story until story-kickoff Flow Gate evidence passes.",
+                command: "node _speclite/hooks/flow-gate-enforcement/runner.mjs --platform codex",
+              },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const outcome = await runInstallCommand({
+        options: { json: true, yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      const claudeSettings = JSON.parse(await readFile(path.join(tempRoot, ".claude/settings.json"), "utf8"));
+      expect(claudeSettings.hooks.PostToolUse[0].hooks[0].command).toContain("canonical-source-change-check");
+      const codexHooks = JSON.parse(await readFile(path.join(tempRoot, ".codex/hooks.json"), "utf8"));
+      expect(Array.isArray(codexHooks.hooks)).toBe(false);
+      expect(codexHooks.hooks.PostToolUse[0].hooks[0].command).toContain("canonical-source-change-check");
+      expect(JSON.stringify(codexHooks)).not.toContain('"event"');
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -111,7 +217,7 @@ describe("flow gate hook artifact install", () => {
             severity: "error",
             affectedPath,
             details: expect.objectContaining({
-              manualAction: expect.stringContaining("merge the SpecLite Flow Gate hook manually"),
+              manualAction: expect.stringContaining("merge the SpecLite hook registry manually"),
             }),
           }),
         ]);

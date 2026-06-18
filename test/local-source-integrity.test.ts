@@ -710,6 +710,7 @@ async function readJsonFixture(relativePath: string): Promise<unknown> {
 async function writeLocalCanonicalSource(sourceRoot: string, marker: string): Promise<void> {
   await mkdir(path.join(sourceRoot, "core-skills/speclite-local-marker"), { recursive: true });
   await mkdir(path.join(sourceRoot, "hooks/flow-gate-enforcement"), { recursive: true });
+  await mkdir(path.join(sourceRoot, "hooks/canonical-source-change-check"), { recursive: true });
   await writeFile(
     path.join(sourceRoot, "core-skills/module.yaml"),
     [
@@ -749,6 +750,25 @@ async function writeLocalCanonicalSource(sourceRoot: string, marker: string): Pr
       {
         schemaVersion: "speclite.hook-source.v1",
         hookId: "flow-gate-enforcement",
+        runner: "runner.mjs",
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceRoot, "hooks/canonical-source-change-check/runner.mjs"),
+    "#!/usr/bin/env node\nconsole.log(JSON.stringify({ systemMessage: 'canonical check warning' }));\n",
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceRoot, "hooks/canonical-source-change-check/hook-manifest.json"),
+    JSON.stringify(
+      {
+        schemaVersion: "speclite.hook-source.v1",
+        hookId: "canonical-source-change-check",
+        protectedSurface: "assets/source/speclite",
         runner: "runner.mjs",
       },
       null,

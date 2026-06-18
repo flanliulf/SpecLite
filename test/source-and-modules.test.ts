@@ -14,8 +14,8 @@ import { createModuleSelection } from "../src/modules/module-selection.js";
 import { runInstallCommand } from "../src/commands/install.js";
 
 const EXPECTED_CORE_PACKAGE_ROOT_COUNT = 13;
-const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 44;
-const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 57;
+const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 48;
+const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 61;
 
 describe("bundled source descriptor discovery", () => {
   it("projects bundled official source through a display-safe SourceDescriptor", async () => {

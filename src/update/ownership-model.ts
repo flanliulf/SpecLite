@@ -97,7 +97,7 @@ export function normalizeFilesIndexOwnership(entry: FilesIndexEntry): FileOwners
 }
 
 function isHumanOwnedCustomPath(relativePath: string): boolean {
-  return /^_speclite\/custom\/[^/]+(?:\.user)?\.toml$/.test(relativePath);
+  return relativePath === ".gitignore" || /^_speclite\/custom\/[^/]+(?:\.user)?\.toml$/.test(relativePath);
 }
 
 function isInstallerOwnedPath(relativePath: string): boolean {
@@ -108,7 +108,9 @@ function isInstallerOwnedPath(relativePath: string): boolean {
     relativePath.startsWith("_speclite/hooks/") ||
     relativePath.startsWith("_speclite/scripts/") ||
     relativePath.startsWith(".claude/skills/") ||
-    relativePath.startsWith(".agents/skills/")
+    relativePath.startsWith(".agents/skills/") ||
+    relativePath === ".claude/settings.json" ||
+    relativePath === ".codex/hooks.json"
   );
 }
 

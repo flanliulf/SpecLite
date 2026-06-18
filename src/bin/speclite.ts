@@ -517,12 +517,14 @@ async function collectConfigInitializationSelection(
     await promptWithBlock(io, createConfigModePrompt(input, locale)),
   );
   if (modeSelection.mode !== "detailed") {
-    return modeSelection;
+    const values: ConfigInputValues = {};
+    await collectRequiredInteractiveConfigValue(io, values, "user_name", locale, "quick");
+    return { ...modeSelection, values };
   }
 
   const values: ConfigInputValues = {};
+  await collectRequiredInteractiveConfigValue(io, values, "user_name", locale, "detailed");
   for (const field of [
-    "user_name",
     "project_name",
     "communication_language",
     "document_output_language",
@@ -615,6 +617,37 @@ async function collectConfigValue(
   }
 }
 
+async function collectRequiredInteractiveConfigValue(
+  io: CliIo,
+  values: ConfigInputValues,
+  field: ProjectConfigField,
+  locale: CliLocale,
+  mode: "quick" | "detailed",
+): Promise<void> {
+  const promptLabel = mode === "quick" ? "Quick config" : "Detailed config";
+  const localizedMode = mode === "quick" ? "快速配置" : "详细配置";
+  while (true) {
+    const answer = await promptWithBlock(io, {
+      body: locale === "en-US" ? `${promptLabel} ${field}` : `${promptLabel} ${field}（${localizedMode}）`,
+      prompt:
+        locale === "en-US"
+          ? `${promptLabel} ${field}. Enter the user display name to write to _speclite/config.user.toml: `
+          : `${promptLabel} ${field}: 请输入写入 _speclite/config.user.toml 的用户显示名: `,
+    });
+    const trimmed = answer.trim();
+    if (trimmed.length > 0) {
+      values[field] = trimmed;
+      return;
+    }
+
+    io.stdout(
+      locale === "en-US"
+        ? `${field} is required for ${mode} interactive install.\n\n`
+        : `${field} 是 ${mode} interactive install 的必填项。\n\n`,
+    );
+  }
+}
+
 async function promptWithBlock(io: CliIo, block: PromptBlock): Promise<string> {
   io.stdout(`${block.body}\n\n`);
   return io.prompt(`${block.prompt}\n`);
@@ -633,7 +666,7 @@ function createConfigModePrompt(
         "",
         "Config mode options",
         "",
-        "- quick: Uses deterministic defaults for project/user/language/artifact paths; best when defaults are acceptable.",
+        "- quick: Asks for user_name, then uses deterministic defaults for project/language/artifact paths; best when the remaining defaults are acceptable.",
         "- detailed: Lets you adjust project fields, selected modules and IDE targets; best when paths, modules or IDE mirrors need customization.",
         "",
         "Write boundary: this stage does not write _speclite/, _speclite-output/, IDE mirror files, manifest/index files or operation locks.",
@@ -650,7 +683,7 @@ function createConfigModePrompt(
       "",
       "Config mode options（配置模式选项）",
       "",
-      "- quick: 使用 deterministic defaults 生成 project/user/language/artifact paths；适合接受默认值的快速安装。",
+      "- quick: 要求输入 user_name，并使用 deterministic defaults 生成 project/language/artifact paths；适合接受其余默认值的快速安装。",
       "- detailed: 逐项确认 project fields、selected modules 和 IDE targets；适合需要自定义路径、modules 或 IDE mirrors 的安装。",
       "",
       "Write boundary（写入边界）: 此阶段不会写入 _speclite/、_speclite-output/、IDE mirror files、manifest/index files 或 operation locks。",

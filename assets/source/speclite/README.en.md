@@ -9,6 +9,7 @@
 | `core-skills/` | Cross-workflow Speclite capabilities shared by multiple SDLC flows, such as elicitation, brainstorming, help, document indexing, sharding, and review helpers. |
 | `sdlc-skills/` | Speclite SDLC workflow skills grouped by lifecycle phase: analysis, planning, solutioning, implementation, and DevOps release operations. |
 | `support-skills/` | Creator, migration, and lint skills used to author or validate SpecLite canonical skill source definitions. |
+| `hooks/` | Standalone canonical hook packages installed under target-project `_speclite/hooks/` and merged into Claude/Codex hook config. |
 | `scripts/` | Source copies of shared runtime helper scripts, including config and customization resolution. Runtime projects should install these under `{project-root}/_speclite/scripts`. |
 | `custom/` | Source examples of team/user customization overlays. Runtime projects should place overlays under `{project-root}/_speclite/custom`. |
 
@@ -113,8 +114,18 @@ Review artifact directories are:
 - `speclite-skill-lint`: validates generic skill rules plus Speclite runtime and migration alignment.
 - `speclite-agent-creator`: creates or migrates `speclite-agent-*` / `bmad-agent-*` role activation Agent definition packages.
 - `speclite-agent-lint`: validates Agent-specific `[agent]` customization, persona, menu targets, prompt references, and runtime residue.
+- `speclite-check-canonical-source-change`: checks root counts, `module-help.csv`, hooks, fixtures, docs, and packaging manifest after canonical source changes.
 
 When maintaining canonical skill source definitions under `assets/source/speclite/`, use `speclite-skill-creator` and `speclite-skill-lint` for workflow-style Skills, and `speclite-agent-creator` and `speclite-agent-lint` for Agent definition packages. Do not fall back to the generic creator/lint skills from the external `skills-creator` repository.
+
+### Hooks
+
+`hooks/` currently contains two canonical hook packages:
+
+- `flow-gate-enforcement`: checks story-kickoff Flow Gate evidence before `speclite-dev-story`.
+- `canonical-source-change-check`: warning-only reminder to run canonical source consistency checks after `assets/source/speclite/` changes.
+
+During install, the installer projects each hook's `runner.mjs` and `hook-manifest.json` to `_speclite/hooks/<hook-id>/`, then merges `.claude/settings.json` and `.codex/hooks.json`. Codex hook config uses the event-keyed `{"hooks": {"Event": [...]}}` shape.
 
 ## Validation Guidance
 
@@ -132,4 +143,10 @@ For `speclite-agent-*` packages, use the Agent-specific checker:
 ```sh
 python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py <agent-dir>
 python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py --all assets/source/speclite/sdlc-skills
+```
+
+After changing `assets/source/speclite/`, run the canonical source change checker:
+
+```sh
+node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
 ```

@@ -56,7 +56,7 @@ describe("install official module selection orchestration", () => {
       expect(outcome.result.status).toBe("success");
       expect(outcome.result.summary).toContain("Selected modules: core");
       expect(outcome.result.summary).toContain("sdlc");
-      expect(outcome.result.summary).toContain("Canonical package roots: core=13, sdlc=44, total=57.");
+      expect(outcome.result.summary).toContain("Canonical package roots: core=13, sdlc=48, total=61.");
       expect(outcome.result.summary).toContain("Source: bundled assets/source/speclite");
       expect(outcome.result.summary).toContain("Final configuration summary");
       expect(outcome.result.data.sourceDescriptor).toMatchObject({
@@ -88,6 +88,7 @@ describe("install official module selection orchestration", () => {
           expect.objectContaining({ path: "_speclite/config.user.toml", action: "create" }),
           expect.objectContaining({ path: "_speclite/custom/config.toml", action: "create" }),
           expect.objectContaining({ path: "_speclite/custom/config.user.toml", action: "create" }),
+          expect.objectContaining({ path: ".gitignore", action: "create" }),
         ],
         requiresConfirmation: true,
         writeAuthorized: true,
@@ -123,7 +124,7 @@ describe("install official module selection orchestration", () => {
           expect(input.targetAdapters.map((adapter) => adapter.targetId)).toEqual(["claude", "agents"]);
           expect(input.prompt).toContain("Selected modules: core");
           expect(input.prompt).toContain("sdlc");
-          expect(input.prompt).toContain("Canonical package roots: core=13, sdlc=44, total=57.");
+          expect(input.prompt).toContain("Canonical package roots: core=13, sdlc=48, total=61.");
           expect(input.prompt).toContain("Pending: runtime structure creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary have not happened.");
           expect(input.prompt).toContain("No project files were changed.");
           await assertNoInstallWrites(tempRoot);
@@ -173,10 +174,15 @@ describe("install official module selection orchestration", () => {
           expect(input.prompt).toContain("resolvedRoot=assets/source/speclite");
           expect(input.prompt).toContain("trustStatus=trusted");
           expect(input.prompt).toContain("mode=detailed");
+          expect(input.prompt).toContain("Config values");
+          expect(input.prompt).toContain("Project name: speclite-install-final-prewrite-scope-");
+          expect(input.prompt).toContain("User display name: SpecLite");
+          expect(input.prompt).toContain("Languages: communication=Chinese, document=Chinese");
+          expect(input.prompt).toContain("Artifact root: _speclite-output");
           expect(input.prompt).toContain("core (SpecLite Core Module 0.0.0)");
           expect(input.prompt).not.toContain("Selected modules: core (SpecLite Core Module 0.0.0), sdlc");
           expect(input.prompt).toContain("canonicalPackageRoots=core=13, total=13");
-          expect(input.prompt).not.toContain("canonicalPackageRoots=core=13, sdlc=44, total=57");
+          expect(input.prompt).not.toContain("canonicalPackageRoots=core=13, sdlc=48, total=61");
           expect(input.prompt).toContain("capabilityScope=core:");
           expect(input.prompt).toContain("Planned writes");
           expect(input.prompt).toContain("_speclite/config.toml=create");

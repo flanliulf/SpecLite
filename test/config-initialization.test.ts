@@ -147,6 +147,15 @@ describe("project config initialization", () => {
         },
       },
       hooks: {
+        "canonical-source-change-check": {
+          module: "support",
+          source_skill: "speclite-check-canonical-source-change",
+          protected_surface: "assets/source/speclite",
+          runtime_root: "{project-root}/_speclite/hooks/canonical-source-change-check",
+          runner: "{project-root}/_speclite/hooks/canonical-source-change-check/runner.mjs",
+          events: ["PostToolUse", "Stop"],
+          platform_configs: [".claude/settings.json", ".codex/hooks.json"],
+        },
         "flow-gate-enforcement": {
           module: "sdlc",
           source_skill: "speclite-flow-gate",
@@ -464,6 +473,11 @@ describe("project config initialization", () => {
       expect(configToml).toContain('planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"');
       expect(configToml).toContain("[agents.speclite-agent-analyst]");
       expect(configToml).toContain('title = "业务分析师"');
+      expect(configToml).toContain("[hooks.canonical-source-change-check]");
+      expect(configToml).toContain('protected_surface = "assets/source/speclite"');
+      expect(configToml).toContain(
+        'runner = "{project-root}/_speclite/hooks/canonical-source-change-check/runner.mjs"',
+      );
       expect(configToml).toContain("[hooks.flow-gate-enforcement]");
       expect(configToml).toContain('runner = "{project-root}/_speclite/hooks/flow-gate-enforcement/runner.mjs"');
       expect(configToml).not.toContain('output_folder = "_speclite-output"');

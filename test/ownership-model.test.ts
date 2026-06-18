@@ -16,6 +16,8 @@ describe("ownership model path classifier", () => {
       "_speclite/scripts/resolve_customization.py",
       ".claude/skills/speclite-help/SKILL.md",
       ".agents/skills/speclite-help/SKILL.md",
+      ".claude/settings.json",
+      ".codex/hooks.json",
     ]) {
       expect(classifyOwnership({ relativePath })).toMatchObject({
         relativePath,
@@ -27,6 +29,7 @@ describe("ownership model path classifier", () => {
 
   it("classifies project-level and skill-specific custom TOML as protected human-owned files", () => {
     for (const relativePath of [
+      ".gitignore",
       "_speclite/custom/config.toml",
       "_speclite/custom/config.user.toml",
       "_speclite/custom/speclite-help.toml",

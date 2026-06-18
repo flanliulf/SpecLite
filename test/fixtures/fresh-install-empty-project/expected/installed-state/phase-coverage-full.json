@@ -27,6 +27,27 @@
       "phaseId": "1-analysis",
       "phaseLabel": "Analysis",
       "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-brownfield-backend-tech-stack-digger",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-brownfield-backend-tech-stack-digger",
+          "activationTarget": ".claude/skills/speclite-brownfield-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-brownfield-backend-tech-stack-digger",
+          "activationTarget": ".agents/skills/speclite-brownfield-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-brownfield-context-builder",
       "ideTargets": [
         {
@@ -39,6 +60,69 @@
           "targetId": "agents",
           "entryPath": ".agents/skills/speclite-brownfield-context-builder",
           "activationTarget": ".agents/skills/speclite-brownfield-context-builder/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-brownfield-java-springboot-backend-tech-stack-digger",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger",
+          "activationTarget": ".claude/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger",
+          "activationTarget": ".agents/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-brownfield-nodejs-backend-tech-stack-digger",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-brownfield-nodejs-backend-tech-stack-digger",
+          "activationTarget": ".claude/skills/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-brownfield-nodejs-backend-tech-stack-digger",
+          "activationTarget": ".agents/skills/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "1-analysis",
+      "phaseLabel": "Analysis",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-brownfield-python-backend-tech-stack-digger",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-brownfield-python-backend-tech-stack-digger",
+          "activationTarget": ".claude/skills/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-brownfield-python-backend-tech-stack-digger",
+          "activationTarget": ".agents/skills/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md",
           "status": "mapped"
         }
       ]

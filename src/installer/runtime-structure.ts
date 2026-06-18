@@ -9,7 +9,7 @@ import type { ProjectConfigModel } from "../config/config-schema.js";
 import { appendUserConfigGitignoreRules } from "../config/user-config-gitignore.js";
 import { ensureSafeDirectory, acquireProjectOperationLock, safeWriteFile } from "../fs/safe-write.js";
 import { createConfiguredIdeTargets, createFilesIndex, createHelpIndex, createInstalledManifest, createPhaseCoverage, createSkillIndex, type ArtifactRootContext } from "../manifest/manifest-generator.js";
-import { hashFile } from "../manifest/hash.js";
+import { hashBytes, hashFile } from "../manifest/hash.js";
 import type { FilesIndexEntry } from "../manifest/manifest-schema.js";
 import type { OfficialModule } from "../modules/module-metadata.js";
 import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
@@ -547,6 +547,16 @@ async function applyGitignorePlan(input: {
     relativePath,
     contents: appendUserConfigGitignoreRules(existing),
     component: "gitignore-writer",
+    allowExisting: input.plannedWrite.action === "update",
+    ...(input.plannedWrite.action === "update"
+      ? {
+          expectedExistingFile: {
+            ownership: "human-owned" as const,
+            hash: hashBytes(existing),
+          },
+          allowHumanOwnedExistingFile: true,
+        }
+      : {}),
   });
   if (!result.ok) return { ok: false, issue: result.issue };
 

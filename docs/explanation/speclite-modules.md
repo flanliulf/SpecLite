@@ -20,6 +20,7 @@ Module 解决的问题是“这一组能力如何被安装到目标项目，并�
 | Help catalog | `module-help.csv` | 为 Skill 提供 display name、menu code、阶段、前后置关系、输出位置和产物类型。 |
 | Skill package roots | `core-skills/<skill>/`、`sdlc-skills/<phase>/<skill>/` | Module 内实际安装的 Agent 和 Workflow Skill 包。 |
 | Runtime scripts | `scripts/` | 安装到 `_speclite/scripts` 的配置和 customization resolver。 |
+| Runtime hooks | `hooks/` | 安装到 `_speclite/hooks` 的 deterministic guardrails，例如 flow gate enforcement。 |
 | Custom examples | `custom/` | 团队级和用户级 customization 覆盖示例。 |
 
 ## Current Module Shape（当前模块形态）
@@ -64,9 +65,10 @@ CLI 的安装流程会基于 bundled source 发现 Module，计算 selected modu
 1. 从 canonical source root 读取带有 `module.yaml` 的 Module。
 2. 根据默认选择、用户选择和 `required_dependencies` 计算 selected module ids。
 3. 使用 Module metadata 初始化 `_speclite/config.toml`。
-4. 根据 package roots 生成 IDE skill mirrors。
-5. 写入 `_speclite/_config` 下的 manifest、skill index、help index、files index 和 phase coverage。
-6. 在 `status`、`validate` 和 `governance-report` 中读取 installed-state。
+4. 写入 runtime Agent descriptors 和 Hook descriptors。
+5. 根据 package roots 生成 IDE skill mirrors，并按 selected IDE targets 生成 hook config。
+6. 写入 `_speclite/_config` 下的 manifest、skill index、help index、files index 和 phase coverage。
+7. 在 `status`、`validate` 和 `governance-report` 中读取 installed-state。
 
 当前 baseline 校验明确关注 `core` 与 `sdlc` 同时出现时的 package root 完整性，这说明 Module 不只是 UI 选择项，也是可验证的安装契约。
 
@@ -89,6 +91,7 @@ CLI 的安装流程会基于 bundled source 发现 Module，计算 selected modu
 | 与这些 Workflow 配套的 Agent | 需要在菜单和 config 中公开角色入口。 |
 | 输出目录和配置 prompts | 安装时需要生成稳定 runtime contract。 |
 | help catalog 和阶段关系 | 用户、Agent 和 CLI 都需要发现入口。 |
+| hook descriptor 和 runtime projection | 流程门禁需要随 module 安装进入本地项目。 |
 
 不适合放入 Module 的内容：
 
@@ -122,5 +125,6 @@ CLI 的安装流程会基于 bundled source 发现 Module，计算 selected modu
 | Module selection 和依赖选择 | `src/modules/module-selection.ts` |
 | installed-state 和 baseline 校验 | `src/validation/rules/manifest-schema.ts` |
 | Runtime config 初始化 | `src/installer/config-initialization.ts` |
+| Hook runtime projection | `assets/source/speclite/hooks/` 和 `src/installer/hook-artifacts.ts` |
 
 本文档由 speclite-agent-docs-steward Skill 自动生成

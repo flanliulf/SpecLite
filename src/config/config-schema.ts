@@ -44,7 +44,8 @@ export type RuntimeAgentDescriptor = {
 export type RuntimeHookDescriptor = {
   module: string;
   source_skill: string;
-  protected_skill: string;
+  protected_skill?: string;
+  protected_surface?: string;
   description: string;
   runtime_root: string;
   runner: string;
