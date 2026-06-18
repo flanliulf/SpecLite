@@ -20,11 +20,11 @@ metadata:
     - **不过载输出**：只展示与当前上下文相关的项目和步骤。
 
 [执行流程]
-    1. 读取 `{speclite-runtime-root}/_config/speclite-help.csv`；如不存在，尝试读取 `{project-root}/_speclite/_config/speclite-help.csv`。
+    1. 读取 `{speclite-runtime-root}/_config/help-index.json`；如不存在，尝试读取 `{project-root}/_speclite/_config/help-index.json`。如需阶段或产物路由证据，读取同目录的 `phase-coverage.json`。
     2. 运行 `speclite resolve config --project-root {project-root}` 解析 merged runtime config 中的 output-location、communication_language 和 project_knowledge。
     3. 按 catalog 的 `outputs` pattern 搜索已完成产物；必要时读取内容作为推荐依据。
     4. 如果 project_knowledge 指向存在路径，读取相关文件作为项目上下文。
-    5. 对 `_meta` 行中的模块文档 URL 或路径，按需读取或抓取，用于回答一般问题。
+    5. 对相关 `docs/`、Skill `references/` 或项目知识文件，按需读取，用于回答一般问题。
     6. 根据 phase、sequencing 和 required gate 输出推荐项；可选项在前，下一个 required 项明确标注。
     7. 若用户问题已有明确目标，只回答该目标并给出如何调用。
 
@@ -34,4 +34,3 @@ metadata:
     - 推荐每个 Skill 在 fresh context window 中运行。
     - 不得制造项目特定事实；缺少证据时说明无法确认。
     - 当前运行规约不得依赖 BMAD catalog 或 YAML 配置。
-
