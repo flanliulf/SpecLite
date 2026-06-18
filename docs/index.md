@@ -37,8 +37,13 @@
 | CommandResult JSON | [`reference/command-result-json.md`](reference/command-result-json.md) |
 | runtime layout | [`reference/runtime-layout.md`](reference/runtime-layout.md) |
 | canonical source layout | [`reference/canonical-source-layout.md`](reference/canonical-source-layout.md) |
+| 文件所有权模型 | [`explanation/file-ownership-model.md`](explanation/file-ownership-model.md) |
+| 文件所有权边界术语 | [`glossary/file-ownership-boundaries.md`](glossary/file-ownership-boundaries.md) |
 | local-first control plane | [`explanation/local-first-control-plane.md`](explanation/local-first-control-plane.md) |
 | canonical methodology framework | [`explanation/canonical-methodology-framework.md`](explanation/canonical-methodology-framework.md) |
+| SpecLite Agent 体系 | [`explanation/speclite-agents.md`](explanation/speclite-agents.md) |
+| SpecLite Module 体系 | [`explanation/speclite-modules.md`](explanation/speclite-modules.md) |
+| SpecLite Workflow 体系 | [`explanation/speclite-workflows.md`](explanation/speclite-workflows.md) |
 
 ## Compatibility Entrypoints（兼容入口）
 

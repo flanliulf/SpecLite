@@ -12,3 +12,6 @@ Explanation 文档用于解释 SpecLite 的核心概念、架构、原理和设�
 | [`file-ownership-model.md`](file-ownership-model.md) | installer-owned、human-owned、workflow-owned 的保护模型。 |
 | [`skill-taxonomy-and-sdlc.md`](skill-taxonomy-and-sdlc.md) | SpecLite skill taxonomy 与 SDLC 分阶段组织。 |
 | [`review-chain-and-flow-gate.md`](review-chain-and-flow-gate.md) | review chain 与 flow gate 的设计意义。 |
+| [`speclite-agents.md`](speclite-agents.md) | SpecLite Agent 的 role activation、persona、菜单和 workflow 分发边界。 |
+| [`speclite-modules.md`](speclite-modules.md) | SpecLite Module 的安装组织、配置、依赖和 runtime contract。 |
+| [`speclite-workflows.md`](speclite-workflows.md) | SpecLite Workflow 的渐进式披露、SDLC 链路、产物和执行边界。 |
