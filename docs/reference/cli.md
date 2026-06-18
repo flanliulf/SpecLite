@@ -56,6 +56,8 @@ speclite install [options] [target-directory]
 | `speclite install /path/to/project --yes --interactive` | 显式交互安装，可自定义 module/config/IDE target 选择。 |
 | `speclite install /path/to/project --json --yes` | 自动化安装输出 JSON，不等待 stdin。 |
 
+在 interactive mode 中，`quick` 会要求输入 non-empty `user_name`，再对项目名、语言和路径使用 defaults；`detailed` 同样要求 `user_name`，并允许继续调整其他配置。`user_name` 会写入 `_speclite/config.user.toml`。非交互 `install --yes` 可以使用 `SpecLite` fallback。
+
 Human-readable install output 默认 locale 为 `zh-CN`。解析顺序是 `--locale`、`SPECLITE_LOCALE`、默认 `zh-CN`。不支持的 locale 会回退到 `zh-CN`。
 
 Locale 只影响自然语言，不改变 `CommandResult` JSON、exit code、issue ordering、path normalization、manifest/index 内容或 fixture stable JSON comparison。

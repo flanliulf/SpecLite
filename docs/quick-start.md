@@ -124,16 +124,18 @@ speclite install /path/to/project --yes --interactive
 
 安装过程中的配置阶段支持两种模式：
 
-- `quick`：使用 deterministic defaults，适合大多数新用户。
-- `detailed`：允许调整项目名、用户显示名、沟通语言、文档输出语言、输出目录、模块产物路径和 IDE targets。
+- `quick`：要求输入 `user_name`，其余项目名、语言和路径使用 deterministic defaults，适合大多数新用户。
+- `detailed`：同样要求输入 `user_name`，并允许调整项目名、沟通语言、文档输出语言、输出目录、模块产物路径和 IDE targets。
 
 如果你不确定选什么，使用默认 `quick`。默认 human-readable output 使用 `zh-CN`；如需英文输出，可以加 `--locale en-US`，或设置 `SPECLITE_LOCALE=en-US`。locale 只影响自然语言，不改变 JSON contract。
 
-常见默认值：
+在 interactive mode 中，`user_name` 是必填个人字段；空输入会重新提示。它写入 `_speclite/config.user.toml`，并影响安装后 Agent 对你的称呼。
 
-| Field | Default |
+常见默认值与交互规则：
+
+| Field | Default / Rule |
 |---|---|
-| `user_name` | `SpecLite` |
+| `user_name` | 非交互 `install --yes` 默认 `SpecLite`；interactive mode 必须输入 |
 | `project_name` | target project root 的目录名 |
 | `communication_language` | `Chinese` |
 | `document_output_language` | `Chinese` |
@@ -276,7 +278,7 @@ SpecLite skills 按能力分层：
 |---|---|
 | 不确定该运行哪个命令 | 首次安装用 `speclite install /path/to/project --yes`。不带 `--yes` 是安全预览；`status` 和 `validate` 是只读检查。 |
 | 安装没有写入文件 | 检查是否缺少 `--yes`。无 `--yes` 时 install 只执行 target preflight。 |
-| 想自定义 module、config 或 IDE targets | 使用 `speclite install /path/to/project --yes --interactive`。 |
+| 想自定义 module、config 或 IDE targets | 使用 `speclite install /path/to/project --yes --interactive`；interactive 会要求输入 `user_name`。 |
 | 想看英文安装输出 | 使用 `--locale en-US` 或设置 `SPECLITE_LOCALE=en-US`。 |
 | 目标项目已有安装 | 先运行 `speclite status /path/to/project` 或 `speclite validate /path/to/project`，确认 installed-state 后再决定 update 或 repair。 |
 | Validate 报 IDE mirror 问题 | 检查 `.claude/skills` 和 `.agents/skills` 是否被手工改动，再运行 `speclite update /path/to/project --repair` 查看 repair plan。 |

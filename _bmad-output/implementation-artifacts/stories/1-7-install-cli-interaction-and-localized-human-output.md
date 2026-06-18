@@ -45,14 +45,16 @@ Status: done
    **当** 用户进入自定义安装流程；
    **则** 必须通过显式 interactive mode 或显式 flags 进入；
    **并且** 配置模式选择必须把 `quick` 与 `detailed` 展示为可比较列表项，说明 deterministic defaults 与可调整字段/适用场景的差异；
+   **并且** interactive quick 与 detailed 都必须显式采集 non-empty `user_name`；quick 仅采集该必填个人字段并对其余项目字段使用 defaults，detailed 继续允许逐项调整；
    **并且** `--json --yes` 必须保持无交互，不得等待 stdin。
    **备注** MVP 可以选择先实现 `--interactive`，或先提供 `--modules`、`--config-mode`、`--ide-targets`、`--locale` 等显式 flags；但不得继续让 `--yes` 同时表示授权写入和继续询问默认问题。
 
 6. **Final pre-write review is concise and ordered.**
    **前提** 系统生成 final pre-write review；
    **当** 任何项目文件尚未写入；
-   **则** review 必须按稳定顺序展示 target、source descriptor、config mode、selected modules、IDE targets、planned writes 和 pending phases；
+   **则** review 必须按稳定顺序展示 target、source descriptor、config mode、config values、selected modules、IDE targets、planned writes 和 pending phases；
    **并且** review 只能输出一次 `Step 3/4 Final pre-write review（最终写入前复核）` heading，不得由 wrapper 与 localized prompt body 重复拼接同一 heading；
+   **并且** `Config values（配置值）` 必须展示 project name、user display name、communication/document languages 和 artifact root；
    **并且** selected modules section 必须本地化为 `Selected modules（已选模块）`，并使用 module metadata display name，例如 `sdlc (SpecLite SDLC Module 0.0.0)`；
    **并且** IDE targets section 必须本地化为 `IDE targets（IDE 目标）`，并在 target id 后展示对应安装目录，例如 `claude (.claude/skills), agents (.agents/skills)`；
    **并且** 明确说明当前状态为尚未写入项目文件；
@@ -170,6 +172,7 @@ git diff --check
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-06-18 | 0.4 | 补充 interactive `user_name` 必填语义和 Step 3 `Config values` 复核展示要求。 | John / Codex |
 | 2026-06-16 | 0.3 | 补充 interactive install prompt 可扫描间距、quick/detailed 对比列表、final pre-write review 去重、本地化 section、IDE 目录展示与写入边界 trailing slash 要求。 | John / Codex |
 | 2026-06-12 | 0.1 | 新增 corrective Story，覆盖安装 CLI 交互、本地化 human output 和 `--yes` no-prompt 语义。 | Sally / John |
 | 2026-06-12 | 0.2 | 实现 locale/prompt adapter、`--yes` no-prompt 语义、install human-readable block 输出与 focused tests。 | Dev Agent |
@@ -189,6 +192,7 @@ GPT-5 Codex
 - `npm run build`：通过，ESM 与 DTS build success。
 - `git diff --check`：通过，无 whitespace error。
 - `npm test`：未全量通过；唯一失败为 `test/fixture-release-gates.test.ts` 中 `speclite-npm-publisher` asset package hash 与 fixture expected hash 不一致。当前工作树没有对应 `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/` 改动，未在本 Story 范围内更新 fixture。
+- 2026-06-18：focused regression 覆盖 interactive `user_name` 必填与 Step 3 `Config values`；`npm test -- test/cli-smoke.test.ts test/install-module-selection.test.ts` passed，2 files / 23 tests passed。
 
 ### Completion Notes（完成说明）
 
@@ -198,6 +202,7 @@ GPT-5 Codex
 - install human-readable output 支持中文默认 Ready Summary / result block，英文 fallback 不改变 `CommandResult` JSON、exit code 或 schema。
 - final pre-write review 改为稳定 key-value block，按 target、source descriptor、config mode、selected modules、IDE targets、planned writes、pending phases 展示，并声明写入边界。
 - 2026-06-16 corrective refinement: interactive install stage blocks 必须在 heading、说明、section label 和列表之间保留空行；`quick` / `detailed` 必须以对比列表展示；final pre-write review 使用 localized body single source，避免重复 Step 3 heading，并展示 `Selected modules（已选模块）`、`IDE targets（IDE 目标）` 与带 trailing slash 的写入边界。
+- 2026-06-18 corrective refinement: interactive quick 与 detailed install 都必须提示并校验 non-empty `user_name`；Step 3 final pre-write review 增加 `Config values（配置值）`，确保写入 `_speclite/config.user.toml` 前可复核用户显示名。
 - 未新增 public JSON 字段，未修改 `CommandResult` schema、manifest/index schema 或 source/install plan contract。
 
 ### File List（文件清单）

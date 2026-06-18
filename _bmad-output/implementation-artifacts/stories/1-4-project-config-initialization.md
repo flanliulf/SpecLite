@@ -2,7 +2,7 @@
 
 Status: done
 
-Corrective Addendum Status（纠偏补充状态）: implementation partial，fixture/full-suite blocked by unrelated source inventory drift，记录日期 2026-06-17
+Corrective Addendum Status（纠偏补充状态）: implementation partial，fixture/full-suite blocked by unrelated source inventory drift，记录日期 2026-06-17；2026-06-18 追加 interactive `user_name` 必填与 Step 3 `Config values` 复核对齐记录
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -129,7 +129,9 @@ Corrective Addendum Status（纠偏补充状态）: implementation partial，fix
 - [x] Task 3: 实现 quick / detailed config collection（AC: 2, 3, 4, 7）
   - [x] 在 `src/installer/` 中新增或扩展 config initialization step，例如 `src/installer/config-initialization.ts`；`src/commands/install.ts` 只负责 orchestration。
   - [x] Quick config 使用最小 prompt set：`user_name`、`project_name`、`communication_language`、`document_output_language`、`output_folder`。
+  - [x] 2026-06-18 correction: interactive quick 只提示必需的 user-scoped identity `user_name`；`project_name`、`communication_language`、`document_output_language` 和 `output_folder` 继续来自 deterministic defaults，并在 final pre-write review 中展示。
   - [x] Detailed config 在 quick config 基础上允许确认或调整 `user_skill_level`、module artifact paths、selected modules 和 IDE targets；模块与 target 数据必须来自前序 install planning state。
+  - [x] 2026-06-18 correction: interactive detailed 同样要求 non-empty `user_name`；其余 detailed 字段仍可直接 Enter 接受 defaults。
   - [x] 交互 prompt 必须展示 default、resolved project-relative path、是否影响 installer-owned config 或 human-owned stub；不得依赖颜色或符号才能理解。
   - [x] Non-interactive / headless mode 若缺少必要输入且不能安全使用 deterministic defaults，必须返回 pending/no-write state；不得用隐式 prompt fallback 写入配置。
 
@@ -142,6 +144,7 @@ Corrective Addendum Status（纠偏补充状态）: implementation partial，fix
 
 - [x] Task 5: 生成 final configuration summary 与 no-write confirmation gate（AC: 1, 7, 8, 9）
   - [x] Human-readable summary 使用 Evidence profile：Summary、Config、Paths、Protected stubs、Pending steps、Next actions。
+  - [x] 2026-06-18 correction: final pre-write review 必须包含 `Config values`，展示 project name、user display name、communication/document languages 和 artifact root，再进入写入确认。
   - [x] Summary 必须明确哪些动作尚未发生：runtime structure creation、artifact directory creation、IDE mirror creation、manifest/index generation、ReadyCheck 和 ready summary。
   - [x] 在 final configuration summary confirmed 之前，`writeAuthorized` 必须为 false，且不得创建 operation lock、safe-write temp file、`_speclite` directory、`_speclite-output` directory 或 IDE target directory。
   - [x] `completedSteps` / `pendingSteps` 使用 command-defined stable lifecycle order；如果加入 `config-initialization` step，必须同步 tests 和 fixture expected outputs。
@@ -435,6 +438,10 @@ GPT-5 Codex
 - 2026-06-17：`npx vitest run test/config-initialization.test.ts test/flow-gate-hook-runner.test.ts` 先红后绿，最终 2 files / 17 tests passed。
 - 2026-06-17：`npm run build` passed；`npx vitest run test/resolve-cli.test.ts test/resolve-readers.test.ts test/hook-artifact-install.test.ts` passed；`npm run release:packaging-check` passed；`git diff --check` passed。
 - 2026-06-17：完整 `npm test` 失败：当前工作树的未跟踪 brownfield skill source 使 SDLC package roots 从 44/total 57 变为 48/total 61，导致 source inventory、fresh install fixture、runtime structure 与 path portability snapshot 断言失败；另有既有 CLI zh interactive final review heading 本地化失败。未在本纠偏范围内更新这些无关 fixtures。
+- 2026-06-18：`npm test -- test/cli-smoke.test.ts test/install-module-selection.test.ts -t "requires detailed interactive user_name|final pre-write install scope"` 先红后绿，覆盖 detailed interactive `user_name` 与 Step 3 `Config values`。
+- 2026-06-18：`npm test -- test/cli-smoke.test.ts test/install-module-selection.test.ts` passed，2 files / 23 tests passed。
+- 2026-06-18：`npm test -- test/cli-smoke.test.ts test/install-module-selection.test.ts test/config-initialization.test.ts test/install-progress-ready-summary.test.ts test/install-outcome-human-output.test.ts` passed，5 files / 50 tests passed。
+- 2026-06-18：`npm run build && npm run release:packaging-check` passed；`npm run release:check` 仍失败，剩余失败来自当前 full-suite/mixed-worktree install fixture pollution 与并发 timeout，未在本 correction 范围内处理。
 
 ### Completion Notes List（完成备注）
 
@@ -450,6 +457,8 @@ GPT-5 Codex
 - Corrective addendum now writes `{project-root}` portable paths into generated runtime config while keeping internal filesystem planning project-relative.
 - Corrective addendum projects localized `[agents.<canonicalSkillId>]` descriptors and `[hooks.flow-gate-enforcement]` into `_speclite/config.toml`.
 - Corrective addendum adds append-only `.gitignore` coverage for `_speclite/config.user.toml` and `_speclite/custom/config.user.toml`.
+- 2026-06-18 corrective alignment: interactive quick 与 detailed install 均要求 non-empty `user_name`，避免 `_speclite/config.user.toml` 在 interactive 安装中静默写入 `SpecLite`。
+- 2026-06-18 corrective alignment: Step 3 final pre-write review 展示 `Config values`，让用户在写入前复核 `project_name`、`user_name`、languages 和 artifact root。
 
 ### File List（文件列表）
 
@@ -465,6 +474,8 @@ GPT-5 Codex
 - `src/installer/install-plan-schema.ts`
 - `src/installer/runtime-structure.ts`
 - `src/modules/module-metadata.ts`
+- `test/cli-smoke.test.ts`
+- `test/install-module-selection.test.ts`
 - `assets/source/speclite/hooks/flow-gate-enforcement/hook-manifest.json`
 - `assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs`
 - `assets/source/speclite/sdlc-skills/module.yaml`

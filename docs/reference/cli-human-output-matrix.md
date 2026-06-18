@@ -84,6 +84,31 @@ Next Actions（下一步）
 
 相对跨目录 target 也必须保持可复制。例如用户从 SpecLite 仓库执行 `speclite install ../noi` 时，human `Next Actions` 应继续使用 `../noi --yes` 和 `../noi --yes --interactive`，不得把 target 降级为 `noi`。JSON 仍只保留 public display identifier 和 project-relative paths，不暴露 resolved absolute target。
 
+## Interactive Install Config Review（交互式安装配置复核）
+
+`install --yes --interactive` 的 `quick` 与 `detailed` 都必须采集 non-empty `user_name`。`quick` 只提示该必填个人字段，其他项目名、语言和路径使用 defaults；`detailed` 同样要求 `user_name`，并允许继续确认或调整其他配置。空输入必须重新提示，不得静默写入 `SpecLite`。
+
+Step 2 的模式说明应保持可扫描列表：
+
+```text
+Config mode options（配置模式选项）
+
+- quick: 要求输入 user_name，并使用 deterministic defaults 生成 project/language/artifact paths；适合接受其余默认值的快速安装。
+- detailed: 逐项确认 project fields、selected modules 和 IDE targets；适合需要自定义路径、modules 或 IDE mirrors 的安装。
+```
+
+Step 3 的 final pre-write review 必须在写入确认前展示配置值：
+
+```text
+Config values（配置值）
+Project name: noi
+User display name: Fancyliu
+Languages: communication=Chinese, document=Chinese
+Artifact root: _speclite-output
+```
+
+`user_name` 写入 `_speclite/config.user.toml`。非交互 `install --yes` 可以使用 `SpecLite` fallback，但 interactive flow 不能把这个 fallback 当作用户已确认的输入。
+
 ## Color Policy（颜色策略）
 
 颜色只是扫描增强，不承担唯一语义。`NO_COLOR=1`、CI、non-TTY、docs 示例、fixture 和 `--json` 输出不得包含 ANSI escape；TTY positive path 只允许 section title 使用 bold，outcome 使用标准 8/16 色，Next Actions 中的 command 使用 cyan。去除 ANSI 后，输出文本必须仍然完整可读。

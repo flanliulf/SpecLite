@@ -75,6 +75,8 @@ speclite install /path/to/project --yes --interactive
 
 `--interactive` 只控制 human prompts；写入授权仍由 `--yes` 表示。交互流程会把 summary block 和 prompt 分开显示，prompt 单独占行。
 
+在 interactive mode 中，`quick` 与 `detailed` 都会要求输入用户显示名 `user_name`。`quick` 只要求这个必填个人字段，其他项目名、语言和路径使用 defaults；`detailed` 继续允许逐项确认或调整其他配置。空 `user_name` 会重新提示，不会静默写入 `SpecLite`。
+
 > Note: `--json` 路径不会等待 stdin。`speclite install /path/to/project --json --yes` 适合脚本和自动化。
 
 ### Step 4: Choose Output Locale（选择输出语言）

@@ -115,7 +115,9 @@ Status: done
     **则** 每个 Step heading 后必须保留空行，section label 与列表项之间也必须保留空行；
     **并且** `Available modules:` 下 `sdlc` 必须展示为 `sdlc: SpecLite SDLC Module 0.0.0`，与 `core: SpecLite Core Module 0.0.0` 的命名模式一致；
     **并且** `Step 2/4 Configure project（配置项目）` 必须把 `quick` 与 `detailed` 展示为可比较列表项，说明适用场景与差异，而不是连续正文句；
+    **并且** interactive quick 与 detailed 都必须提示并校验 non-empty `user_name`，不得在 interactive 安装中静默使用 `SpecLite`；
     **并且** `Step 3/4 Final pre-write review（最终写入前复核）` heading 只能出现一次；
+    **并且** Step 3 内必须展示 `Config values（配置值）`，包含 project name、user display name、communication/document languages 和 artifact root；
     **并且** Step 3 内 `Selected modules`、`IDE targets`、`Write boundary` 等 section 必须使用默认中文 label，同时保留英文技术标识，例如 `Selected modules（已选模块）`、`IDE targets（IDE 目标）`、`Write boundary（写入边界）`；
     **并且** `Selected modules（已选模块）` 必须展示 `sdlc (SpecLite SDLC Module 0.0.0)`；
     **并且** `IDE targets（IDE 目标）` 必须在 target id 后展示安装目录，例如 `claude (.claude/skills), agents (.agents/skills)`；
@@ -195,16 +197,26 @@ Step 2/4 Configure project（配置项目）
 
 Config mode options（配置模式选项）
 
-- quick: 使用 deterministic defaults 生成 project/user/language/artifact paths；适合接受默认值的快速安装。
+- quick: 要求输入 user_name，并使用 deterministic defaults 生成 project/language/artifact paths；适合接受其余默认值的快速安装。
 - detailed: 逐项确认 project fields、selected modules 和 IDE targets；适合需要自定义路径、modules 或 IDE mirrors 的安装。
 
 Write boundary（写入边界）: 此阶段不会写入 _speclite/、_speclite-output/、IDE mirror files、manifest/index files 或 operation locks。
 Default mode: quick.
 
+Quick config user_name（快速配置用户显示名）
+
+Quick config user_name: 请输入写入 _speclite/config.user.toml 的用户显示名:
+
 Step 3/4 Final pre-write review（最终写入前复核）
 
 Review state（复核状态）
 ...
+
+Config values（配置值）
+Project name: noi
+User display name: Fancyliu
+Languages: communication=Chinese, document=Chinese
+Artifact root: _speclite-output
 
 Selected modules（已选模块）
 core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC Module 0.0.0)
@@ -406,12 +418,16 @@ GPT-5 Codex
 - 新增 `src/diagnostics/ansi-style.ts`，以 `picocolors@1.1.1` 实现受控 ANSI helper；默认 docs / fixture / CI / non-TTY / JSON 无 ANSI，TTY positive path 仅使用 bold、cyan/green/red/yellow 等标准 ANSI 能力。
 - 保持 `renderCommandResultJson()` public schema 不变；absolute target context 与 ANSI 均未进入 JSON。
 - 完成 `install --yes --interactive` Step 1/2/3 prompt 可扫描布局：module 名称、quick/detailed 列表、Step 3 localized section label、IDE target directory 和 trailing slash write boundary 均有测试覆盖。
+- 2026-06-18 docs alignment: interactive quick/detailed prompt layout 明确 `user_name` 必填，Step 3 增加 `Config values（配置值）` 复核段，避免用户显示名在写入前不可见。
 - 遗留阻塞：全量 `npm test` 仍受 mixed worktree 中非 8.9 新增 SDLC skill 目录影响，多个测试仍期望 57/44 skill count；本 Story 未调整这些非 8.9 fixture/count 合同。
 
 ### File List（文件清单）
 
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 - `_bmad-output/implementation-artifacts/stories/8-9-cli-human-output-scan-friendly-layout-and-color.md`
+- `docs/quick-start.md`
+- `docs/how-to/install-speclite.md`
+- `docs/reference/cli.md`
 - `docs/reference/cli-human-output-matrix.md`
 - `package.json`
 - `package-lock.json`
@@ -430,6 +446,7 @@ GPT-5 Codex
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-06-18 | 0.4 | 补充 interactive `user_name` 必填 prompt、Step 3 `Config values` 复核段和公开 install docs 对齐要求。 | John / Codex |
 | 2026-06-16 | 0.1 | 创建 Epic 8.9 ready-for-dev Story，完整覆盖 Sally 推荐的 CLI human output layout、bullet / nested grouping、steps count、Evidence hierarchy、Next Actions labels 和 guarded ANSI color design。 | GPT-5 Codex |
 | 2026-06-16 | 0.2 | 根据依赖技术决策补充 `picocolors@1.1.1` adoption、`chalk` / `colorette` 排除理由、集中 helper 边界和 packaging evidence。 | GPT-5 Codex |
 | 2026-06-16 | 0.3 | 补充 `install --yes --interactive` Step 1-3 prompt layout、module name consistency、quick/detailed 对比列表、Step 3 本地化与写入边界展示要求。 | John / Codex |
