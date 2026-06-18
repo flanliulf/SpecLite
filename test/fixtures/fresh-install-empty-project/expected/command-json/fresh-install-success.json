@@ -6,6 +6,7 @@
   "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=13, sdlc=48, total=61. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC Module 0.0.0). IDE targets: claude (61 skills at .claude/skills), agents (61 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
   "issues": [],
   "nextActions": [
+    "Before activating installed skills, run command -v speclite in the AI session; if it fails, expose a global or local development speclite CLI on PATH and retry activation.",
     "Open installed skills in .claude/skills or .agents/skills from your configured IDE.",
     "For Codex, review and trust project-local hooks with /hooks before relying on Flow Gate enforcement and canonical source warnings.",
     "Run speclite status to inspect the installed-state summary.",
