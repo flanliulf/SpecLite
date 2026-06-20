@@ -6,7 +6,7 @@ import { ensureSafeDirectory, safeWriteFile } from "./safe-write.js";
 
 const REQUIRED_CANONICAL_PACKAGE_FILE = "SKILL.md";
 const OPTIONAL_CANONICAL_PACKAGE_FILES = new Set(["CHANGELOG.md", "config.toml.example", "customize.toml"]);
-const OPTIONAL_CANONICAL_PACKAGE_DIRECTORIES = ["references/", "assets/", "scripts/"] as const;
+const OPTIONAL_CANONICAL_PACKAGE_DIRECTORIES = ["references/", "assets/", "data/", "scripts/"] as const;
 
 export async function copyCanonicalPackage(input: {
   projectRoot: string;
@@ -88,9 +88,10 @@ export async function copyCanonicalPackage(input: {
 }
 
 export function isInstallableCanonicalPackageFile(relativeFile: string): boolean {
-  if (relativeFile === REQUIRED_CANONICAL_PACKAGE_FILE) return true;
-  if (OPTIONAL_CANONICAL_PACKAGE_FILES.has(relativeFile)) return true;
+  const normalized = relativeFile.split(path.sep).join("/");
+  if (normalized === REQUIRED_CANONICAL_PACKAGE_FILE) return true;
+  if (OPTIONAL_CANONICAL_PACKAGE_FILES.has(normalized)) return true;
   return OPTIONAL_CANONICAL_PACKAGE_DIRECTORIES.some((directory) =>
-    relativeFile.startsWith(directory),
+    normalized.startsWith(directory),
   );
 }

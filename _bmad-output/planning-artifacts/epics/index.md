@@ -76,3 +76,4 @@
   - [Epic 9: Installed Runtime Activation Contract Hardening（已安装 Runtime 激活契约收口）](./12-epic-9-installed-runtime-activation-contract-hardening已安装-runtime-激活契约收口.md)
     - [Story 9.1: Installed Skill Activation Contract Hardening（已安装 Skill 激活契约收口）](./12-epic-9-installed-runtime-activation-contract-hardening已安装-runtime-激活契约收口.md#story-91-installed-skill-activation-contract-hardening已安装-skill-激活契约收口)
     - [Story 9.2: Python Resolver Compatibility Asset Projection（Python Resolver 兼容资产投影）](./12-epic-9-installed-runtime-activation-contract-hardening已安装-runtime-激活契约收口.md#story-92-python-resolver-compatibility-asset-projectionpython-resolver-兼容资产投影)
+    - [Story 9.3: Installed Skill Data Directory Projection（已安装 Skill data 目录投影）](./12-epic-9-installed-runtime-activation-contract-hardening已安装-runtime-激活契约收口.md#story-93-installed-skill-data-directory-projection已安装-skill-data-目录投影)

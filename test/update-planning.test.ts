@@ -1063,6 +1063,11 @@ describe("update ownership planning", () => {
     try {
       await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
       await writeProjectFile(tempRoot, "assets/source/speclite/core-skills/speclite-help/SKILL.md", "# Help\n");
+      await writeProjectFile(
+        tempRoot,
+        "assets/source/speclite/core-skills/speclite-help/data/project-types.csv",
+        "id,label\nsoftware,Software\n",
+      );
       const canonicalPackageHash = await hashPackageDirectory(
         path.join(tempRoot, "assets/source/speclite/core-skills/speclite-help"),
       );
@@ -1112,11 +1117,19 @@ describe("update ownership planning", () => {
       expect(applyOutcome.exitCode).toBe(0);
       expect(applyParsed.data.changedPaths).toEqual([
         ".agents/skills/speclite-help/SKILL.md",
+        ".agents/skills/speclite-help/data/project-types.csv",
         ".claude/skills/speclite-help/SKILL.md",
+        ".claude/skills/speclite-help/data/project-types.csv",
       ]);
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-help/data/project-types.csv"), "utf8"),
+      ).resolves.toBe("id,label\nsoftware,Software\n");
       await expect(readFile(path.join(tempRoot, ".agents/skills/speclite-help/SKILL.md"), "utf8")).resolves.toBe(
         "# Help\n",
       );
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-help/data/project-types.csv"), "utf8"),
+      ).resolves.toBe("id,label\nsoftware,Software\n");
       await expect(readFile(path.join(tempRoot, ".claude/skills/speclite-help/SKILL.md"), "utf8")).resolves.toBe(
         "# Help\n",
       );

@@ -1,6 +1,6 @@
 # Epic 9: Installed Runtime Activation Contract Hardening（已安装 Runtime 激活契约收口）
 
-SpecLite 已经具备 `speclite resolve config` 与 `speclite resolve customization` 的 Node CLI runtime support，但 canonical installed skill activation protocol 尚未全量收口。当前风险是：部分已安装 Agent / Workflow 仍直接读取 `_speclite/config.toml` 或调用 `_speclite/scripts/resolve_*.py`，导致目标项目中已存在于 merged runtime config 的字段被误判缺失，典型复现是 `/Users/fancyliu/Repos/noi` 中 `speclite-agent-analyst` 没有读取 `_speclite/config.user.toml` 的 `core.user_name` 与 `core.communication_language`。
+SpecLite 已经具备 `speclite resolve config` 与 `speclite resolve customization` 的 Node CLI runtime support，但 canonical installed skill activation protocol 尚未全量收口。当前风险是：部分已安装 Agent / Workflow 仍直接读取 `_speclite/config.toml` 或调用 `_speclite/scripts/resolve_*.py`，导致目标项目中已存在于 merged runtime config 的字段被误判缺失，典型复现是 `/Users/fancyliu/Repos/noi` 中 `speclite-agent-analyst` 没有读取 `_speclite/config.user.toml` 的 `core.user_name` 与 `core.communication_language`。后续排查还确认：部分 Workflow 的 installed self-contained skill entry 缺少 skill-local `data/` resources，导致已安装 Workflow 无法从 `{skill-root}/data/` 读取结构化查表数据。
 
 本 Epic 是 corrective planning Epic。它不改变 `speclite resolve` 的 merge semantics、stdout/stderr machine contract 或 `CommandResult` JSON contract。它只收口 installed skill activation contract、AI 会话中的 CLI availability preflight、full canonical skill corpus regression gate，以及 Python resolver scripts 的兼容资产边界。
 
@@ -25,6 +25,7 @@ Installed skill activation 必须只有一个默认 resolver entry：`speclite r
 - Alice / `speclite-agent-analyst` merged config regression。
 - full canonical skill corpus lint / fixture / release gate。
 - Python resolver scripts 作为 compatibility assets 的 install、files-index、validate、update、repair、uninstall、packaging 和 docs 边界。
+- skill-local `data/` resources 作为 installed self-contained skill package runtime surface 的 copy、hash、validate、fixture 和 update/repair 边界。
 
 本 Epic 不覆盖：
 
@@ -69,9 +70,13 @@ speclite resolve customization --skill "$SKILL_ROOT" --project-root "$PROJECT_RO
 
 把 legacy Python resolver scripts 明确定义为 compatibility assets：可安装、可索引、可验证、可 repair、可卸载、可打包，但不得作为默认 skill activation path。
 
+### Story 9.3: Installed Skill Data Directory Projection（已安装 Skill data 目录投影）
+
+把 canonical skill package 中的 root-level `data/` 目录纳入 installed self-contained skill entry surface，并同步 copy predicate、package hash、IDE mirror validation、fresh install fixtures、update/repair ownership 和 release gates，防止 `speclite-create-prd` 等 Workflow 在安装态缺少 `project-types.csv` / `domain-complexity.csv`。
+
 ## Dependency / Sequencing（依赖与顺序）
 
-Story 9.1 是 P0，优先执行。Story 9.2 是 P1，依赖 Story 9.1 对默认 activation path 的负向断言，避免兼容脚本被误引回默认路径。
+Story 9.1 是 P0，优先执行。Story 9.2 是 P1，依赖 Story 9.1 对默认 activation path 的负向断言，避免兼容脚本被误引回默认路径。Story 9.3 是 corrective follow-up，依赖 Story 9.1 的 Node-only activation contract 和 Story 9.2 的 compatibility asset 边界保持不变。
 
 ## Completion Gate（完成门禁）
 
@@ -81,4 +86,5 @@ Epic 9 完成时必须满足：
 - full canonical installed skill corpus 没有默认 Python resolver dependency。
 - `speclite` 不在 AI 会话 `PATH` 时，activation 明确报告 CLI unavailable。
 - Python scripts 即使安装，也只作为 `runtime-compat-script` 或等价兼容资产，不被 activation 文案引用。
+- 包含 root-level `data/` 的 canonical skill packages 在 `.claude/skills` 与 `.agents/skills` 中拥有相同 `data/` files，并进入 files-index、package hash、validate 和 fixture release gates。
 - `npm test`、`npm run release:packaging-check` 和 agent lint/corpus tests 覆盖该 contract。

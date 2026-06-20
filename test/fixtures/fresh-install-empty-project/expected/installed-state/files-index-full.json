@@ -35,7 +35,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/skill-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:a019f1ce323b16355f620bfd6c3170ab09c84b8354fa0b3d3157138519aeaaae",
+      "hash": "sha256:136b8714f3a813883c3907d0e6cd26d1594802b8a32fc56a24d749382f5f7256",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "skill-index",
@@ -1813,6 +1813,26 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-create-architecture/data/domain-complexity.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:3dc34ed39f1fc79a51f7b8fc92087edb7cd85c4393a891d220f2e8dd5a101c70",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/domain-complexity.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-create-architecture/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:12343635a2f11343edb1d46906981d6f5e12b9cad2f612e13b09460b5e5106e7",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/project-types.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".agents/skills/speclite-create-architecture/references/activation-en.md",
       "ownership": "installer-owned",
       "hash": "sha256:87e11d5603d78ba911b9a70b82c9b8d3aaa6c0759f21c37073a7eed24186d5ab",
@@ -2060,6 +2080,26 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-create-prd/data/domain-complexity.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:f775f09fb4dc1b9214ca22db4a3994ce53343d976d7f6e5384949835db6d2770",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/domain-complexity.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-create-prd/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/project-types.csv"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -2823,6 +2863,26 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-document-project/data/documentation-requirements.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:d1253b99e88250f2130516b56027ed706e643bfec3d99316727a4c6ec65c6c1d",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/data/documentation-requirements.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-document-project/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/data/project-types.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".agents/skills/speclite-document-project/references/checklist.md",
       "ownership": "installer-owned",
       "hash": "sha256:581b0b034c25de17ac3678db2dbafedaeb113de37ddf15a4df6584cf2324a7d7",
@@ -3050,6 +3110,16 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-edit-prd/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/data/project-types.csv"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -3603,6 +3673,16 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-prfaq/data/speclite-manifest.json",
+      "ownership": "installer-owned",
+      "hash": "sha256:7908cab6f0cd66f1f3427b4cc659975b4737bdc44f789b23c6a895fcd084c4bc",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq/data/speclite-manifest.json"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".agents/skills/speclite-prfaq/references/agents/artifact-analyzer.md",
       "ownership": "installer-owned",
       "hash": "sha256:7bdc44830f8d593346ec0ee15e36e1e431432fcc6c38b70bb861999315c9cfa4",
@@ -3720,6 +3800,16 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-product-brief/data/speclite-manifest.json",
+      "ownership": "installer-owned",
+      "hash": "sha256:549634fc3631cce3091d5e41538a3cbfe3c2b8ad2c55d385cfbf18ec461686c7",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief/data/speclite-manifest.json"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -4580,6 +4670,26 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-validate-prd/data/domain-complexity.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:f775f09fb4dc1b9214ca22db4a3994ce53343d976d7f6e5384949835db6d2770",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/domain-complexity.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-validate-prd/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/project-types.csv"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -6573,6 +6683,26 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-create-architecture/data/domain-complexity.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:3dc34ed39f1fc79a51f7b8fc92087edb7cd85c4393a891d220f2e8dd5a101c70",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/domain-complexity.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-create-architecture/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:12343635a2f11343edb1d46906981d6f5e12b9cad2f612e13b09460b5e5106e7",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/data/project-types.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".claude/skills/speclite-create-architecture/references/activation-en.md",
       "ownership": "installer-owned",
       "hash": "sha256:87e11d5603d78ba911b9a70b82c9b8d3aaa6c0759f21c37073a7eed24186d5ab",
@@ -6820,6 +6950,26 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-create-prd/data/domain-complexity.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:f775f09fb4dc1b9214ca22db4a3994ce53343d976d7f6e5384949835db6d2770",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/domain-complexity.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-create-prd/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/data/project-types.csv"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -7583,6 +7733,26 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-document-project/data/documentation-requirements.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:d1253b99e88250f2130516b56027ed706e643bfec3d99316727a4c6ec65c6c1d",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/data/documentation-requirements.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-document-project/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project/data/project-types.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".claude/skills/speclite-document-project/references/checklist.md",
       "ownership": "installer-owned",
       "hash": "sha256:581b0b034c25de17ac3678db2dbafedaeb113de37ddf15a4df6584cf2324a7d7",
@@ -7810,6 +7980,16 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-edit-prd/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/data/project-types.csv"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -8363,6 +8543,16 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-prfaq/data/speclite-manifest.json",
+      "ownership": "installer-owned",
+      "hash": "sha256:7908cab6f0cd66f1f3427b4cc659975b4737bdc44f789b23c6a895fcd084c4bc",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq/data/speclite-manifest.json"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".claude/skills/speclite-prfaq/references/agents/artifact-analyzer.md",
       "ownership": "installer-owned",
       "hash": "sha256:7bdc44830f8d593346ec0ee15e36e1e431432fcc6c38b70bb861999315c9cfa4",
@@ -8480,6 +8670,16 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-product-brief/data/speclite-manifest.json",
+      "ownership": "installer-owned",
+      "hash": "sha256:549634fc3631cce3091d5e41538a3cbfe3c2b8ad2c55d385cfbf18ec461686c7",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief/data/speclite-manifest.json"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -9340,6 +9540,26 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/customize.toml"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-validate-prd/data/domain-complexity.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:f775f09fb4dc1b9214ca22db4a3994ce53343d976d7f6e5384949835db6d2770",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/domain-complexity.csv"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-validate-prd/data/project-types.csv",
+      "ownership": "installer-owned",
+      "hash": "sha256:b3ea8f98912da758de11aa9a9c0a242d115f040d8aab5be0ad9afe44dcc4a80e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/data/project-types.csv"
     },
     {
       "schemaVersion": "speclite.files-index.v1",

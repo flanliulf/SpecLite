@@ -71,6 +71,7 @@ MVP self-contained skill entry 必须使用 canonical skill id 作为 target dir
 - `CHANGELOG.md`
 - `references/`
 - `assets/`
+- `data/`
 - `scripts/`
 - `config.toml.example`
 - `customize.toml`

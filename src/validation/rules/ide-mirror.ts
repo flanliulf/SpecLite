@@ -2,6 +2,7 @@ import { constants as fsConstants } from "node:fs";
 import { access, readdir } from "node:fs/promises";
 import path from "node:path";
 import type { ValidationIssue } from "../../diagnostics/command-result-schema.js";
+import { isInstallableCanonicalPackageFile } from "../../fs/copy-tree.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry, type IdeTargetId } from "../../ide/adapter-registry.js";
 import { hashPackageDirectory } from "../../manifest/hash.js";
 import type { SkillIndex } from "../../manifest/manifest-schema.js";
@@ -11,14 +12,6 @@ export type IdeMirrorValidationResult = {
   checkedTargets: IdeTargetId[];
   validatedPaths: string[];
 };
-
-const CANONICAL_PACKAGE_PATHS = new Set([
-  "SKILL.md",
-  "CHANGELOG.md",
-  "config.toml.example",
-  "customize.toml",
-]);
-const CANONICAL_PACKAGE_DIRECTORIES = ["references", "assets", "scripts"] as const;
 
 export async function validateIdeMirror(input: {
   projectRoot: string;
@@ -129,11 +122,7 @@ export async function validateIdeMirror(input: {
 }
 
 export function isCanonicalPackageHashFile(relativeFile: string): boolean {
-  const normalized = relativeFile.split(path.sep).join("/");
-  if (CANONICAL_PACKAGE_PATHS.has(normalized)) return true;
-  return CANONICAL_PACKAGE_DIRECTORIES.some(
-    (directory) => normalized === directory || normalized.startsWith(`${directory}/`),
-  );
+  return isInstallableCanonicalPackageFile(relativeFile);
 }
 
 async function readProjectedEntries(targetRoot: string): Promise<Array<{ name: string }>> {

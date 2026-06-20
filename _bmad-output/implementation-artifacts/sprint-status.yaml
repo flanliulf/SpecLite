@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-06-17 20:37 CST
+# last_updated: 2026-06-20 15:42 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-06-17 21:49 CST
+last_updated: 2026-06-20 15:42 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -121,7 +121,8 @@ development_status:
   epic-8-retrospective: optional
 
   # Corrective planning Epic for installed runtime activation contract hardening.
-  epic-9: done
+  epic-9: in-progress
   9-1-installed-skill-activation-contract-hardening: done
   9-2-python-resolver-compatibility-asset-projection: done
+  9-3-installed-skill-data-directory-projection: done
   epic-9-retrospective: optional

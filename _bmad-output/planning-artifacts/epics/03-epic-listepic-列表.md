@@ -68,9 +68,9 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 
 ## Epic 9: Installed Runtime Activation Contract Hardening（已安装 Runtime 激活契约收口）
 
-SpecLite 维护者和 AI IDE 使用者可以依赖统一的 Node CLI runtime activation contract：所有 installed skills 默认通过 `speclite resolve` 读取 merged config/customization，并在 `speclite` CLI 不可用时明确阻断；Python resolver scripts 最多作为兼容资产存在，不再作为默认 activation path。
+SpecLite 维护者和 AI IDE 使用者可以依赖统一的 Node CLI runtime activation contract：所有 installed skills 默认通过 `speclite resolve` 读取 merged config/customization，并在 `speclite` CLI 不可用时明确阻断；Python resolver scripts 最多作为兼容资产存在，不再作为默认 activation path；skill-local `data/` resources 必须作为 installed self-contained skill package 的相邻 runtime resources 被复制、索引、校验和修复。
 
-**实施范围：** Corrective planning Epic。覆盖 canonical Skill activation migration、CLI availability preflight、Alice / NOI merged config regression、full corpus activation release gate，以及 Python resolver compatibility asset projection。
+**实施范围：** Corrective planning Epic。覆盖 canonical Skill activation migration、CLI availability preflight、Alice / NOI merged config regression、full corpus activation release gate、Python resolver compatibility asset projection，以及 installed skill `data/` directory projection。
 
 **MVP guard：** 本 Epic 不改变 `speclite resolve` machine contract、merge order、missing key behavior、`CommandResult` JSON contract 或 workflow artifact contract。Python scripts 即使安装，也必须标记为 compatibility assets，并被 Story 9.1 的 activation corpus tests 排除在默认路径之外。
 
