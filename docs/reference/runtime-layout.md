@@ -36,6 +36,8 @@
 | `[agents.<agent-id>]` | `module.yaml` Agent roster | 安装时固化 Agent `module`、`team`、`name`、`title`、`icon` 和 description。 |
 | `[hooks.<hook-id>]` | hook runtime descriptor | 安装时固化 hook 来源、保护目标、runner、events、platform configs 和 trust note。 |
 
+只有 selected modules 会参与 `_speclite/config.toml`、Agent descriptors、Hook descriptors 和 `_speclite/_config/*` indexes 的投影。当前 default no-ecosystem install 会写入 `core` / `sdlc` 相关配置；selected ecosystem module 如果未来声明 config prompts，只能在该 module 被选择时写入对应配置。unselected ecosystem modules 不会因为 bundled source 存在而创建 config section、Agent descriptor、help row、phase row、files-index entry 或 IDE mirror。
+
 `_speclite/config.user.toml` 保存本地用户配置，不应提交。当前主要保存：
 
 - `[core].user_name`
@@ -99,7 +101,13 @@ SpecLite 会把 canonical Skill packages 投影到 selected IDE targets：
 | `claude` | `.claude/skills/<skill-id>/` | Claude Skill package mirror。 |
 | `agents` | `.agents/skills/<skill-id>/` | Agents/Codex Skill package mirror。 |
 
-当前 official source snapshot 包含 13 个 core package roots 和 51 个 SDLC package roots。默认同时选择 `core` 和 `sdlc` 时，每个 selected IDE target 会获得对应 skill mirrors。
+当前 default no-ecosystem install baseline 包含 13 个 core package roots 和 48 个 SDLC package roots。默认同时选择 `core` 和 `sdlc` 时，每个 selected IDE target 会获得 61 个 skill mirrors；这个数字只描述 default fixture，不是 selected ecosystem installs 的全局 truth。
+
+技术生态扩展位于 `assets/source/speclite/ecosystems/<category>/<id>/`，例如 `ecosystems/backend/java-springboot/`。这些 ecosystem modules 是可选模块，依赖 `sdlc`，但不会在 `--yes`、`--json` 或无交互默认路径中自动安装。用户显式选择 `ecosystem-backend-java-springboot` 时，installer 会安装 `core`、`sdlc` 和该 Java / Spring Boot ecosystem module；未选择的 `ecosystem-backend-nodejs`、`ecosystem-backend-python` 不会出现在 `.claude/skills/`、`.agents/skills/`、`skill-index.json`、`help-index.json`、`phase-coverage.json` 或 `files-index.json`。
+
+In short, selected module truth controls runtime projection: selected ecosystem modules enter IDE mirrors and indexes, while unselected ecosystem modules remain source-only.
+
+Installed-state validation 以 `_speclite/_config/manifest.yaml` 中的 `installedModules` 和已生成 index 为 selected module truth。`validate`、`status`、`update` 和 `repair` 不从 bundled source 中的未选 ecosystem packages 推导目标项目应安装的内容；如果 index 中出现未选 ecosystem 的 sourceRef、moduleId 或 activation target，应视为 installed-state drift。
 
 ## Artifact Root（产物根目录）
 

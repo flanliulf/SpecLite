@@ -387,7 +387,7 @@ describe("CLI smoke", () => {
       );
       expect(stdout.join("")).toContain("core: SpecLite Core Module 0.0.0; scope:");
       expect(stdout.join("")).toContain("sdlc: SpecLite SDLC Module 0.0.0; scope:");
-      expect(prompts[0]).toContain("Enter one or more module ids");
+      expect(prompts[0]).toContain("Enter one or more standard module ids");
       expect(stdout.join("")).toContain(
         [
           "Step 2/4 Configure project",
@@ -411,6 +411,172 @@ describe("CLI smoke", () => {
       expect(userConfig).not.toContain('user_name = "SpecLite"');
       expect(stdout.join("")).toContain("Selected modules: core");
       expect(stdout.join("")).not.toContain("sdlc (");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("skips ecosystem selection when interactive category answer is skip", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-ecosystem-skip-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            if (question.includes("ecosystem category")) return "skip";
+            if (question.includes("user_name")) return "Ada";
+            if (question.includes("quick") || question.includes("detailed")) return "quick";
+            return "";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([0]);
+      expect(prompts).toHaveLength(5);
+      expect(prompts[1]).toContain("Enter an ecosystem category, or skip");
+      expect(output).toContain("Step 1/4 Select ecosystem category");
+      expect(output).toContain("- backend");
+      expect(output).toContain("- skip");
+      expect(output).toContain("Selected modules: core");
+      expect(output).toContain("sdlc");
+      expect(output).not.toContain("ecosystem-backend-java-springboot");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("treats empty interactive ecosystem category as skip", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-ecosystem-empty-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            if (question.includes("user_name")) return "Ada";
+            if (question.includes("quick") || question.includes("detailed")) return "quick";
+            return "";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([0]);
+      expect(prompts).toHaveLength(5);
+      expect(prompts[1]).toContain("Enter an ecosystem category, or skip");
+      expect(output).toContain("Selected modules: core, sdlc");
+      expect(output).not.toContain("ecosystem-backend-java-springboot");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("maps interactive backend category and java-springboot id to the ecosystem module code", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-ecosystem-backend-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            if (question.includes("ecosystem category")) return "backend";
+            if (question.includes("backend ecosystem id")) return "java-springboot";
+            if (question.includes("user_name")) return "Ada";
+            if (question.includes("quick") || question.includes("detailed")) return "quick";
+            return "";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([0]);
+      expect(prompts).toHaveLength(6);
+      expect(prompts[1]).toContain("Enter an ecosystem category, or skip");
+      expect(prompts[2]).toContain("Enter one backend ecosystem id, or skip");
+      expect(output).toContain("Step 1/4 Select backend ecosystem");
+      expect(output).toContain("- java-springboot: Java Spring Boot Backend Ecosystem");
+      expect(output).toContain("Selected modules: core, ecosystem-backend-java-springboot, sdlc");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("returns the stable invalid module diagnostic for unknown interactive ecosystem ids", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-cli-ecosystem-unknown-"));
+    const stdout: string[] = [];
+    const prompts: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      const program = createSpecliteProgram({
+        runtime: {
+          nodeVersion: "v22.12.0",
+          platform: "darwin",
+          platformRelease: "23.0.0",
+          cwd: tempRoot,
+        },
+        io: {
+          stdout: (text) => stdout.push(text),
+          prompt: async (question) => {
+            prompts.push(question);
+            if (question.includes("ecosystem category")) return "backend";
+            if (question.includes("backend ecosystem id")) return "ruby";
+            return "";
+          },
+          setExitCode: (code) => exitCodes.push(code),
+        },
+      });
+
+      await program.parseAsync(["node", "speclite", "install", "--yes", "--interactive", "--locale", "en-US"], { from: "node" });
+
+      const output = stdout.join("");
+      expect(exitCodes).toEqual([1]);
+      expect(prompts).toHaveLength(3);
+      expect(output).toContain("unknown module ids");
+      await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

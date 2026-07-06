@@ -1,0 +1,7 @@
+{
+  "caseId": "fresh-install-selected-backend-ecosystem",
+  "releaseGate": true,
+  "purpose": "Selected backend ecosystem install projection and unselected ecosystem absence",
+  "expectedGate": "fixture-release-gates.test.ts selected ecosystem matrix",
+  "expectedOutputClass": "manifest-index-snapshot"
+}

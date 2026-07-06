@@ -1,0 +1,7 @@
+{
+  "caseId": "fresh-install-selected-frontend-ecosystem",
+  "releaseGate": true,
+  "purpose": "Selected frontend ecosystem install projection and cross-category absence",
+  "expectedGate": "fixture-release-gates.test.ts selected ecosystem matrix",
+  "expectedOutputClass": "manifest-index-snapshot"
+}

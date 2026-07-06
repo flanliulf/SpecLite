@@ -15,4 +15,5 @@ Reference 文档用于提供快速查阅的技术规格、命令、字段、目�
 | [`canonical-source-governance.md`](canonical-source-governance.md) | canonical source 变更分类、影响面矩阵和 hook + skill 治理机制。 |
 | [`validation-issues.md`](validation-issues.md) | validation issue model 参考。 |
 | [`skills/`](skills/index.md) | SpecLite skills catalog。 |
+| [`skills/ecosystem-skills.md`](skills/ecosystem-skills.md) | optional ecosystem extension skills catalog。 |
 | [`glossary/`](glossary/index.md) | 术语表。 |

@@ -60,6 +60,7 @@ speclite install /path/to/project --yes
 | Item | Default |
 |---|---|
 | Modules | `core`、`sdlc` |
+| Optional ecosystem modules | 不自动选择 |
 | Config mode | `quick` |
 | IDE targets | `claude`、`agents` |
 | Source type | `bundled` |
@@ -77,13 +78,17 @@ command -v speclite
 
 ### Step 3: Customize Install（自定义安装）
 
-需要自定义 modules、config mode 或 IDE targets 时，显式加入 `--interactive`：
+需要自定义 modules、config mode、IDE targets 或 optional ecosystem modules 时，显式加入 `--interactive`：
 
 ```sh
 speclite install /path/to/project --yes --interactive
 ```
 
 `--interactive` 只控制 human prompts；写入授权仍由 `--yes` 表示。交互流程会把 summary block 和 prompt 分开显示，prompt 单独占行。
+
+Ecosystem selection 使用 `ecosystem category -> id` 两级提示：先选择 `frontend`、`backend`、`other` 或 skip，再选择具体 id，例如 `react`、`vue`、`java-springboot`、`nodejs`、`python`、`npm-package`、`cli-tool` 或 `documentation-only`。选择 ecosystem modules 是推荐但非 mandatory，skip 是合法路径。
+
+`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies。被选择的 ecosystem module 只会把对应 SpecLite Skill package 投影到 selected IDE mirrors 和 `_speclite/_config/*` indexes，未选择的 ecosystem modules 保持 source-only。
 
 在 interactive mode 中，`quick` 与 `detailed` 都会要求输入用户显示名 `user_name`。`quick` 只要求这个必填个人字段，其他项目名、语言和路径使用 defaults；`detailed` 继续允许逐项确认或调整其他配置。空 `user_name` 会重新提示，不会静默写入 `SpecLite`。
 

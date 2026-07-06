@@ -1,0 +1,11 @@
+code: ecosystem-other-documentation-only
+name: "Documentation-only Project Ecosystem"
+version: "0.0.0"
+description: "Documentation-only project evidence and public-docs source extension for SpecLite SDLC workflows"
+module_kind: ecosystem
+ecosystem_category: other
+ecosystem_id: documentation-only
+default_selected: false
+required: false
+required_dependencies:
+  - sdlc

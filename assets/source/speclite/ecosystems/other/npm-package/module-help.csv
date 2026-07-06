@@ -1,0 +1,3 @@
+module,skill,display-name,menu-code,description,activation-target,metadata,phase,depends-on,optional-dependencies,required,output-location,outputs
+npm Package Ecosystem,_meta,,,,,,,,,,,
+npm Package Ecosystem,speclite-npm-package-project-auditor,Npm Package Project Auditor,NPA,"Audit npm package project facts, package surface, tarball/npx smoke evidence and release-gate readiness without publishing.",,,5-devops,speclite-npm-publisher,,false,{project_knowledge}/ecosystems/other|{devops_artifacts},npm package project audit

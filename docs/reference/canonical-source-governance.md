@@ -12,7 +12,7 @@
 2. 根据影响面矩阵列出必须同步、需要评估和不得改写的文件。
 3. 对 `D0` 问题执行确定性修复。
 4. 对 `D1` / `D2` 问题记录 `updated`、`skipped` 或 `historical snapshot` 决策。
-5. 使用 checker、lint、test、build 和 packaging check 收口。
+5. 使用 build-first、packaging-last 的验证顺序收口：先 build，再执行 lint / focused tests / fixtures / canonical source check，最后 packaging check。
 
 `assets/source/speclite/canonical-governance.json` 是机器可读的治理映射；本文是面向维护者的解释。
 
@@ -28,8 +28,8 @@
 
 | Class | Source | Determinism | Policy |
 |---|---|---:|---|
-| `canonical-source-truth` | `core-skills/`、`sdlc-skills/`、`support-skills/`、`hooks/`、`scripts/`、`custom/` | `D0` | authoritative source，先分类再同步 |
-| `module-discovery-contract` | `module.yaml`、`module-help.csv`、baseline constants | `D0` | 必须匹配真实 package roots |
+| `canonical-source-truth` | `core-skills/`、`sdlc-skills/`、`ecosystems/`、`support-skills/`、`hooks/`、`scripts/`、`custom/` | `D0` | authoritative source，先分类再同步 |
+| `module-discovery-contract` | core / SDLC / ecosystem 的 `module.yaml`、`module-help.csv`、baseline constants | `D0` | 必须匹配真实 package roots |
 | `hook-source-contract` | `hooks/<hook-id>/` | `D0` | manifest、runner、README、IDE fragments 必须完整 |
 | `current-public-docs` | `docs/`、root `README.md`、`assets/source/speclite/README*.md` | `D1` | 当前用户可见行为变化时同步 |
 | `living-legacy-reference` | 仍指导维护的 legacy mapping/context | `D2` | 可追加当前说明，不按历史结果全量重写 |
@@ -44,6 +44,7 @@
 | 修改现有 `core` / `sdlc` skill 内容 | packaging manifest、可能的 fixture hash | public docs 是否仍描述旧行为 | scoped lint、focused tests、canonical checker |
 | 新增或修改 support skill | support catalog、source README、packaging manifest | living legacy support policy | density/script tests、canonical checker |
 | 新增或修改 hook | hook manifest、runner、README、IDE fragments、runtime docs | blocking/warning 语义是否变化 | hook tests、canonical checker、packaging check |
+| 新增或修改 ecosystem module | `module.yaml`、`module-help.csv`、ecosystem catalog、selected ecosystem fixtures、packaging manifest | user docs 是否需要解释 install selection / selected-only projection | creator / skill lint、canonical checker、focused tests、selected ecosystem fixtures、build、packaging check |
 | 修改 governance map | governance docs、checker tests、packaging manifest | 是否改变 D1/D2 决策记录要求 | warn + strict checker |
 | current docs-only 变更 | docs index 或 cross-link | release docs 是否受影响 | `git diff --check`、packaging check |
 | historical record | 默认不改旧事实 | 是否需要 dated current-status note | 人工 decision record |
@@ -57,7 +58,21 @@
 - `speclite-canonical-source-governance-runner`：执行分类、影响面分析、修订和决策记录。
 - `speclite-check-canonical-source-change`：执行只读确定性检查，并可用 `--mode strict` 让 `D0` finding 变成阻断项。
 
-本地 hook 继续 `exit 0`。CI 或 release gate 可以运行 strict checker。
+本地 hook 继续 `exit 0`。它是 warning-only guardrail，不替代 release verification。CI 或 release gate 可以运行 strict checker，但发布前仍需要完整 build-first、packaging-last 流程。
+
+## Maintainer Sequence（维护者顺序）
+
+新增或迁移 ecosystem Skill 时，维护者应按顺序执行：
+
+1. 使用 creator / lint 创建或检查 Skill package。
+2. 同步 `module.yaml` / `module-help.csv`、`SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和 selected-only 文案。
+3. 运行 canonical source check，并记录 D1 / D2 docs 或 legacy decision。
+4. 更新 default no-ecosystem 与 selected ecosystem fixtures，保留 unselected negative assertions。
+5. 运行 `npm run build`。
+6. 运行 focused tests / fixture gates。
+7. 最后运行 `npm run release:packaging-check`。
+
+这条 release workflow 是 build-first、packaging-last；不要把 hook warning、docs grep 或 packaging manifest diff 单独当成发布验证。
 
 ## Decision Records（决策记录）
 

@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [2.8.0] - 2026-07-06
+
+### Added
+
+- 新增 Ecosystem Source 检查规则 ECO-01 ~ ECO-06，覆盖 ecosystem path classification、category enum、`ecosystem_id`、module code、`module-help.csv` row、version / changelog / mirror sync 和 runtime path boundary。
+- 将通用 workflow Skill 规则总数从 36 条扩展到 42 条，ecosystem package 仍继承 YAML、description、density、fixed path 和 `speclite-` 前缀规则。
+
 ## [2.7.0] - 2026-06-11
 
 ### Changed

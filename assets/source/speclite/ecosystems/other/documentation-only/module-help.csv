@@ -1,0 +1,3 @@
+module,skill,display-name,menu-code,description,activation-target,metadata,phase,depends-on,optional-dependencies,required,output-location,outputs
+Documentation-only Project Ecosystem,_meta,,,,,,,,,,,
+Documentation-only Project Ecosystem,speclite-documentation-only-project-auditor,Documentation-only Project Auditor,DOA,"Audit documentation-only project facts, docs source, README/package-facing docs, Diataxis boundaries, link integrity and public docs readiness.",,,1-analysis,speclite-write-opensource-docs,,false,{project_knowledge}/ecosystems/other|{planning_artifacts},documentation-only project audit

@@ -156,6 +156,20 @@ speclite install /path/to/project --yes --interactive
 | `implementation_artifacts` | `_speclite-output/implementation-artifacts` |
 | `project_knowledge` | `docs` |
 
+### Optional Ecosystem Selection（可选生态选择）
+
+默认安装仍只选择 `core` + `sdlc`，不自动安装 optional ecosystem modules。`speclite install /path/to/project --yes` 和 `speclite install /path/to/project --json --yes` 都属于 default no-prompt path；`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。
+
+需要技术生态或项目形态专属方法论能力时，使用 interactive mode：
+
+```sh
+speclite install /path/to/project --yes --interactive
+```
+
+交互会按 `ecosystem category -> id` 引导选择：先选 `frontend`、`backend`、`other` 或 skip，再选择具体 id，例如 `react`、`vue`、`java-springboot`、`nodejs`、`python`、`npm-package`、`cli-tool` 或 `documentation-only`。选择这些 optional ecosystem modules 是推荐但非 mandatory；skip 后仍会安装默认 `core` + `sdlc`。
+
+Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer。SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies；它只把被选择的 SpecLite Skill packages 投影到 `.claude/skills/`、`.agents/skills/` 和 `_speclite/_config/*` indexes。
+
 ## Install Into Project（安装到项目）
 
 确认 target project root 正确后，使用 `--yes` 授权默认无交互安装写入：
@@ -178,6 +192,7 @@ speclite install /path/to/project --json --yes
 |---|---|
 | Required module | `core` |
 | Default-selected module | `sdlc` |
+| Optional ecosystem modules | default no-prompt path 不选择；interactive 可按 category / id 选择 |
 | IDE targets | `claude`、`agents` |
 | Claude skill directory | `.claude/skills` |
 | Generic agent skill directory | `.agents/skills` |

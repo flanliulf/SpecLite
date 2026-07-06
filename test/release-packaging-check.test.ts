@@ -3,8 +3,11 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  collectExpectedEcosystemModuleRequirements,
   collectPackagingPrerequisiteIssues,
+  createPackagingManifest,
   runPackagingCheck,
+  validateGeneratedOutputsExcluded,
   validatePackagedDocumentationExamples,
 } from "../scripts/release/packaging-check.mjs";
 
@@ -106,11 +109,43 @@ describe("Story 6.7 release packaging gate", () => {
           classification: string;
           defaultRuntimeDependency: boolean;
         }>;
+        excludedGeneratedOutputPatterns: string[];
       };
 
       expect(runtimeManifest).toBe(canonicalManifest);
       expect(parsed.files).toContain("dist/packaging-manifest.json");
       expect(parsed.files).not.toContain("release/packaging-manifest.json");
+      expect(parsed.files).toEqual(
+        expect.arrayContaining([
+          "assets/source/speclite/ecosystems/backend/java-springboot/module.yaml",
+          "assets/source/speclite/ecosystems/backend/java-springboot/speclite-java-one/SKILL.md",
+          "assets/source/speclite/ecosystems/backend/nodejs/module.yaml",
+          "assets/source/speclite/ecosystems/backend/nodejs/speclite-node-one/SKILL.md",
+          "assets/source/speclite/ecosystems/backend/python/module.yaml",
+          "assets/source/speclite/ecosystems/backend/python/speclite-python-one/SKILL.md",
+          "assets/source/speclite/ecosystems/frontend/react/module.yaml",
+          "assets/source/speclite/ecosystems/frontend/react/speclite-react-one/SKILL.md",
+          "assets/source/speclite/ecosystems/frontend/vue/module.yaml",
+          "assets/source/speclite/ecosystems/frontend/vue/speclite-vue-one/SKILL.md",
+          "assets/source/speclite/ecosystems/other/cli-tool/module.yaml",
+          "assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-one/SKILL.md",
+          "assets/source/speclite/ecosystems/other/documentation-only/module.yaml",
+          "assets/source/speclite/ecosystems/other/documentation-only/speclite-docs-one/SKILL.md",
+          "assets/source/speclite/ecosystems/other/npm-package/module.yaml",
+          "assets/source/speclite/ecosystems/other/npm-package/speclite-npm-one/SKILL.md",
+        ]),
+      );
+      expect(
+        (parsed as { assertions: Array<{ id: string; passed: boolean }> }).assertions.find(
+          (assertion) => assertion.id === "ecosystem-source-included",
+        ),
+      ).toEqual({
+        id: "ecosystem-source-included",
+        passed: true,
+      });
+      expect(parsed.excludedGeneratedOutputPatterns).toEqual(
+        expect.arrayContaining([".cache/", "cache/", "tmp/", "temp/", "build/", "source-local dist/"]),
+      );
       expect(parsed.packagedCompatibilityAssets).toEqual([
         {
           path: "assets/source/speclite/scripts/resolve_config.py",
@@ -125,6 +160,64 @@ describe("Story 6.7 release packaging gate", () => {
       ]);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails ecosystem packaging assertion when a non-example nested module is missing from inventory", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-packaging-missing-ecosystem-"));
+
+    try {
+      await writeRequiredRuntimeAssets(tempRoot);
+      const expectedEcosystemSourceFiles = collectExpectedEcosystemModuleRequirements(tempRoot);
+      const packageFiles = createPackFiles([
+        "package.json",
+        "dist/bin/speclite.js",
+        "dist/bin/speclite.d.ts",
+        "assets/source/speclite/scripts/resolve_config.py",
+        "assets/source/speclite/scripts/resolve_customization.py",
+        "assets/source/speclite/core-skills/module.yaml",
+        "assets/source/speclite/sdlc-skills/module.yaml",
+        "assets/source/speclite/docs/examples/fixture-derived-examples.md",
+        ...expectedEcosystemSourceFiles.filter(
+          (file) => file !== "assets/source/speclite/ecosystems/backend/nodejs/module.yaml",
+        ),
+      ]);
+
+      const manifest = createPackagingManifest(
+        { files: packageFiles },
+        createPackageJson(),
+        { expectedEcosystemSourceFiles },
+      );
+
+      expect(manifest.assertions.find((assertion) => assertion.id === "ecosystem-source-included")).toMatchObject({
+        id: "ecosystem-source-included",
+        passed: false,
+        reason: "missing ecosystem source file: assets/source/speclite/ecosystems/backend/nodejs/module.yaml",
+        missingPaths: ["assets/source/speclite/ecosystems/backend/nodejs/module.yaml"],
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects generated cache, temp and build outputs while allowing package runtime dist output", () => {
+    expect(
+      validateGeneratedOutputsExcluded(
+        new Set(["package.json", "dist/bin/speclite.js", "dist/bin/speclite.d.ts", "dist/packaging-manifest.json"]),
+      ),
+    ).toEqual({ passed: true });
+
+    for (const forbiddenPath of [
+      "assets/source/speclite/ecosystems/backend/nodejs/.cache/generated.json",
+      "assets/source/speclite/ecosystems/frontend/vue/temp/rendered.md",
+      "assets/source/speclite/ecosystems/other/cli-tool/build/output.js",
+      "tmp/release-work.json",
+    ]) {
+      expect(validateGeneratedOutputsExcluded(new Set(["package.json", forbiddenPath]))).toMatchObject({
+        passed: false,
+        reason: `generated output path must not be packaged: ${forbiddenPath}`,
+        forbiddenPath,
+      });
     }
   });
 
@@ -248,8 +341,79 @@ async function writeRequiredRuntimeAssets(root: string): Promise<void> {
   await writeFileAt(root, "assets/source/speclite/scripts/resolve_customization.py", "# resolver\n");
   await writeFileAt(root, "assets/source/speclite/core-skills/module.yaml", "id: core\n");
   await writeFileAt(root, "assets/source/speclite/sdlc-skills/module.yaml", "id: sdlc\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/backend/java-springboot/module.yaml", "id: ecosystem-backend-java-springboot\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/backend/nodejs/module.yaml", "id: ecosystem-backend-nodejs\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/backend/python/module.yaml", "id: ecosystem-backend-python\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/frontend/react/module.yaml", "id: ecosystem-frontend-react\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/frontend/vue/module.yaml", "id: ecosystem-frontend-vue\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/other/cli-tool/module.yaml", "id: ecosystem-other-cli-tool\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/other/documentation-only/module.yaml", "id: ecosystem-other-documentation-only\n");
+  await writeFileAt(root, "assets/source/speclite/ecosystems/other/npm-package/module.yaml", "id: ecosystem-other-npm-package\n");
   await writeFileAt(root, "assets/source/speclite/docs/examples/fixture-derived-examples.md", "# Example\n");
   await writeFileAt(root, "assets/source/speclite/core-skills/example/SKILL.md", "# Skill\n");
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/backend/java-springboot/speclite-java-one/SKILL.md",
+    "# Java\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/backend/nodejs/speclite-node-one/SKILL.md",
+    "# Node\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/backend/python/speclite-python-one/SKILL.md",
+    "# Python\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/frontend/react/speclite-react-one/SKILL.md",
+    "# React\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/frontend/vue/speclite-vue-one/SKILL.md",
+    "# Vue\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-one/SKILL.md",
+    "# CLI\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/other/documentation-only/speclite-docs-one/SKILL.md",
+    "# Docs\n",
+  );
+  await writeFileAt(
+    root,
+    "assets/source/speclite/ecosystems/other/npm-package/speclite-npm-one/SKILL.md",
+    "# npm\n",
+  );
+}
+
+function createPackFiles(paths: string[]): Array<{ path: string; size: number }> {
+  return paths.map((filePath) => ({ path: filePath, size: 1 }));
+}
+
+function createPackageJson(): Record<string, unknown> {
+  return {
+    name: "@fancyliu/speclite",
+    version: "0.3.0",
+    license: "MIT",
+    bin: {
+      speclite: "dist/bin/speclite.js",
+    },
+    files: ["dist/", "assets/source/speclite/", "package.json"],
+    publishConfig: {
+      registry: "https://registry.npmjs.org/",
+      access: "public",
+    },
+    engines: {
+      node: ">=22",
+    },
+  };
 }
 
 async function writeFileWithMtime(root: string, relativePath: string, content: string, mtime: Date): Promise<void> {

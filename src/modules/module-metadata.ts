@@ -10,6 +10,9 @@ export type OfficialModule = {
   description: string;
   version: string;
   sourceDirectory: string;
+  moduleKind: "standard" | "ecosystem";
+  ecosystemCategory?: EcosystemCategory;
+  ecosystemId?: string;
   defaultSelected: boolean;
   required: boolean;
   requiredDependencies: string[];
@@ -21,6 +24,11 @@ export type OfficialModule = {
   configTable?: string;
   configPrompts: ModuleConfigPrompt[];
 };
+
+export type EcosystemCategory = "frontend" | "backend" | "other";
+
+const ECOSYSTEM_CATEGORIES = new Set<EcosystemCategory>(["frontend", "backend", "other"]);
+const BANNED_OTHER_ECOSYSTEM_IDS = new Set(["misc", "general", "tools"]);
 
 export type ModuleHelpEntry = {
   canonicalSkillId: string;
@@ -99,6 +107,25 @@ async function findModuleDirectories(sourceRoot: string): Promise<string[]> {
     }
   }
 
+  const ecosystemsRoot = path.join(sourceRoot, "ecosystems");
+  if (await directoryExists(ecosystemsRoot)) {
+    const categoryEntries = await readdir(ecosystemsRoot, { withFileTypes: true });
+    for (const categoryEntry of categoryEntries) {
+      if (!categoryEntry.isDirectory()) continue;
+
+      const categoryRoot = path.join(ecosystemsRoot, categoryEntry.name);
+      const ecosystemEntries = await readdir(categoryRoot, { withFileTypes: true });
+      for (const ecosystemEntry of ecosystemEntries) {
+        if (!ecosystemEntry.isDirectory()) continue;
+
+        const moduleDirectory = path.join(categoryRoot, ecosystemEntry.name);
+        if (await fileExists(path.join(moduleDirectory, "module.yaml"))) {
+          moduleDirectories.push(moduleDirectory);
+        }
+      }
+    }
+  }
+
   return moduleDirectories.sort();
 }
 
@@ -131,6 +158,9 @@ async function readOfficialModule(
     description: metadata.description,
     version: metadata.version,
     sourceDirectory,
+    moduleKind: metadata.moduleKind,
+    ...(metadata.ecosystemCategory === undefined ? {} : { ecosystemCategory: metadata.ecosystemCategory }),
+    ...(metadata.ecosystemId === undefined ? {} : { ecosystemId: metadata.ecosystemId }),
     defaultSelected: metadata.defaultSelected,
     required: metadata.required,
     requiredDependencies: metadata.requiredDependencies,
@@ -152,6 +182,9 @@ async function readModuleYaml(
   name: string;
   description: string;
   version: string;
+  moduleKind: "standard" | "ecosystem";
+  ecosystemCategory?: EcosystemCategory;
+  ecosystemId?: string;
   defaultSelected: boolean;
   required: boolean;
   requiredDependencies: string[];
@@ -183,12 +216,24 @@ async function readModuleYaml(
   const version = readRequiredString(parsed, "version", sourceDirectory);
   const requiredDependencies = readStringArray(parsed.required_dependencies, sourceDirectory);
   const configTable = typeof parsed.config_table === "string" ? parsed.config_table : undefined;
+  const moduleKind = readModuleKind(parsed, sourceDirectory);
+  const ecosystemMetadata = readEcosystemMetadata({
+    metadata: parsed,
+    sourceDirectory,
+    code,
+    moduleKind,
+    requiredDependencies,
+    defaultSelected: parsed.default_selected === true,
+    required: parsed.required === true,
+  });
 
   return {
     code,
     name,
     description,
     version,
+    moduleKind,
+    ...ecosystemMetadata,
     defaultSelected: parsed.default_selected === true,
     required: parsed.required === true,
     requiredDependencies,
@@ -196,6 +241,98 @@ async function readModuleYaml(
     configPrompts: readConfigPrompts(parsed),
     agents: readAgentDescriptors(parsed.agents, sourceDirectory, code),
     directories: readStringArray(parsed.directories, sourceDirectory).sort(),
+  };
+}
+
+function readModuleKind(
+  metadata: Record<string, unknown>,
+  sourceDirectory: string,
+): "standard" | "ecosystem" {
+  if (metadata.module_kind === undefined) {
+    return "standard";
+  }
+
+  if (metadata.module_kind === "standard" || metadata.module_kind === "ecosystem") {
+    return metadata.module_kind;
+  }
+
+  throw new ModuleMetadataError(
+    "module-metadata.invalid-module-kind",
+    `Module ${sourceDirectory} has invalid module_kind: ${String(metadata.module_kind)}`,
+  );
+}
+
+function readEcosystemMetadata(input: {
+  metadata: Record<string, unknown>;
+  sourceDirectory: string;
+  code: string;
+  moduleKind: "standard" | "ecosystem";
+  requiredDependencies: string[];
+  defaultSelected: boolean;
+  required: boolean;
+}): {
+  ecosystemCategory?: EcosystemCategory;
+  ecosystemId?: string;
+} {
+  if (input.moduleKind !== "ecosystem") {
+    return {};
+  }
+
+  const ecosystemCategory = readRequiredString(
+    input.metadata,
+    "ecosystem_category",
+    input.sourceDirectory,
+  );
+  if (!ECOSYSTEM_CATEGORIES.has(ecosystemCategory as EcosystemCategory)) {
+    throw new ModuleMetadataError(
+      "module-metadata.invalid-ecosystem-category",
+      `Ecosystem module ${input.code} has invalid ecosystem_category: ${ecosystemCategory}`,
+    );
+  }
+
+  const ecosystemId = readRequiredString(input.metadata, "ecosystem_id", input.sourceDirectory);
+  if (ecosystemCategory === "other" && BANNED_OTHER_ECOSYSTEM_IDS.has(ecosystemId)) {
+    throw new ModuleMetadataError(
+      "module-metadata.banned-other-ecosystem-id",
+      `Ecosystem module ${input.code} uses banned other ecosystem_id: ${ecosystemId}`,
+    );
+  }
+
+  const expectedCode = `ecosystem-${ecosystemCategory}-${ecosystemId}`;
+  if (input.code !== expectedCode) {
+    throw new ModuleMetadataError(
+      "module-metadata.invalid-ecosystem-code",
+      `Ecosystem module ${input.code} must use code ${expectedCode}`,
+    );
+  }
+
+  if (
+    input.requiredDependencies.length !== 1 ||
+    input.requiredDependencies[0] !== "sdlc"
+  ) {
+    throw new ModuleMetadataError(
+      "module-metadata.invalid-ecosystem-dependencies",
+      `Ecosystem module ${input.code} must declare required_dependencies: [sdlc]`,
+    );
+  }
+
+  if (input.defaultSelected) {
+    throw new ModuleMetadataError(
+      "module-metadata.invalid-ecosystem-default-selection",
+      `Ecosystem module ${input.code} must not be default_selected`,
+    );
+  }
+
+  if (input.required) {
+    throw new ModuleMetadataError(
+      "module-metadata.invalid-ecosystem-required",
+      `Ecosystem module ${input.code} must not be required`,
+    );
+  }
+
+  return {
+    ecosystemCategory: ecosystemCategory as EcosystemCategory,
+    ecosystemId,
   };
 }
 
@@ -492,6 +629,18 @@ async function fileExists(targetPath: string): Promise<boolean> {
   try {
     await readFile(targetPath, "utf8");
     return true;
+  } catch (error) {
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
+}
+
+async function directoryExists(targetPath: string): Promise<boolean> {
+  try {
+    const entries = await readdir(targetPath);
+    return Array.isArray(entries);
   } catch (error) {
     if (isNodeError(error) && error.code === "ENOENT") {
       return false;

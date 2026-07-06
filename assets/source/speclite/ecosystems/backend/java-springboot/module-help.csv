@@ -1,0 +1,3 @@
+module,skill,display-name,menu-code,description,activation-target,metadata,phase,depends-on,optional-dependencies,required,output-location,outputs
+Java Spring Boot Backend Ecosystem,_meta,,,,,,,,,,,
+Java Spring Boot Backend Ecosystem,speclite-brownfield-java-springboot-backend-tech-stack-digger,Java Backend Tech Stack,BJS,Analyze Java and Spring Boot backend projects from code facts and write an evidence-linked technology stack report.,,,1-analysis,speclite-brownfield-backend-tech-stack-digger,,false,{project_knowledge}/brownfield|{planning_artifacts},java backend tech stack report

@@ -15,6 +15,9 @@ import {
 
 export const RELEASE_GATE_FIXTURE_CASES = [
   "fresh-install-empty-project",
+  "fresh-install-selected-backend-ecosystem",
+  "fresh-install-selected-frontend-ecosystem",
+  "fresh-install-selected-other-ecosystem",
   "existing-install-update",
   "ide-drift",
   "source-integrity",
@@ -218,6 +221,18 @@ export const FIXTURE_GATE_REGISTRY = {
     "fresh-install-empty-project": {
       releaseGate: true,
       purpose: "fresh install generated tree, manifest/index, IDE mirrors and ready summary",
+    },
+    "fresh-install-selected-backend-ecosystem": {
+      releaseGate: true,
+      purpose: "fresh install selected backend ecosystem projection and unselected ecosystem absence",
+    },
+    "fresh-install-selected-frontend-ecosystem": {
+      releaseGate: true,
+      purpose: "fresh install selected frontend ecosystem projection and cross-category absence",
+    },
+    "fresh-install-selected-other-ecosystem": {
+      releaseGate: true,
+      purpose: "fresh install selected other ecosystem projection and unselected ecosystem absence",
     },
     "existing-install-update": {
       releaseGate: true,

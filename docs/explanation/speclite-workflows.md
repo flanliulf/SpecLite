@@ -56,7 +56,7 @@ SpecLite Workflow 的核心价值是渐进式披露：入口只提供足够启�
 
 | 阶段 | 目录 | 典型 Workflow |
 |---|---|---|
-| Analysis | `1-analysis/` | research、brownfield baseline、backend tech-stack analysis、Product Brief、PRFAQ、docs writing。 |
+| Analysis | `1-analysis/` | research、brownfield baseline、generic backend tech-stack analysis、Product Brief、PRFAQ、docs writing。 |
 | Planning | `2-plan-workflows/` | PRD create / validate / edit、UX design。 |
 | Solutioning | `3-solutioning/` | Architecture、Epics and Stories、Story Review、implementation readiness、IR grill。 |
 | Implementation | `4-implementation/` | Sprint Planning、Flow Gate、Create Story、Dev Story、Code Review、Epic 级 SR/CR 编排、QA、Retrospective。 |
@@ -81,7 +81,7 @@ flowchart LR
   Implementation --> DevOps
 ```
 
-实际使用时并不要求每个项目都走完整链路。Brownfield 项目可能先运行 `speclite-brownfield-context-builder` 或 backend tech-stack digger，再进入 PRD、Architecture 和 Story；小修复可能直接使用 `speclite-quick-dev`，再用 review 或 checkpoint 收口。
+实际使用时并不要求每个项目都走完整链路。Brownfield 项目可能先运行 `speclite-brownfield-context-builder` 或通用 backend tech-stack digger，再进入 PRD、Architecture 和 Story；如果项目选择了 backend ecosystem module，可使用对应 language / runtime specific tech-stack workflow。小修复可能直接使用 `speclite-quick-dev`，再用 review 或 checkpoint 收口。
 
 ## Workflow Types（Workflow 类型）
 
@@ -89,7 +89,7 @@ flowchart LR
 |---|---|---|
 | 发现与研究 | `speclite-market-research`、`speclite-domain-research`、`speclite-technical-research` | research documents。 |
 | Brownfield 基线 | `speclite-brownfield-context-builder` | evidence、baseline、deep-dives、planning handoff。 |
-| Brownfield 技术栈 | `speclite-brownfield-backend-tech-stack-digger`、`speclite-brownfield-java-springboot-backend-tech-stack-digger`、`speclite-brownfield-nodejs-backend-tech-stack-digger`、`speclite-brownfield-python-backend-tech-stack-digger` | code-fact based backend tech-stack reports。 |
+| Brownfield 技术栈 | `speclite-brownfield-backend-tech-stack-digger`；backend-specific ecosystem workflows 见 `docs/reference/skills/ecosystem-skills.md` | code-fact based backend tech-stack reports。 |
 | 产品与计划 | `speclite-product-brief`、`speclite-prfaq`、`speclite-create-prd` | brief、PRFAQ、PRD。 |
 | 方案设计 | `speclite-create-architecture`、`speclite-create-epics-and-stories` | architecture、epics、stories。 |
 | 质量检查 | `speclite-ir-grill-consistency-reviewer`、`speclite-story-review-*`、`speclite-flow-gate`、`speclite-code-review-*` | grill records、review summary、evaluation、fix summary、gate report。 |
@@ -155,7 +155,8 @@ Workflow 的可靠性来自边界：
 | 当前 Workflow skill 目录 | `assets/source/speclite/sdlc-skills/` |
 | Review 链路和产物目录 | `assets/source/speclite/README.md` 和 `module-help.csv` |
 | `docs/` 与 `_speclite-output/` 边界 | `docs/_STYLE_GUIDE.md` |
-| Backend tech-stack workflow roots | `assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-*tech-stack-digger/` |
+| Generic backend tech-stack workflow root | `assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger/` |
+| Backend-specific ecosystem workflow roots | `assets/source/speclite/ecosystems/backend/<id>/` |
 | Epic 级目标编排 workflow roots | `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-*` |
 
 本文档由 speclite-agent-docs-steward Skill 自动生成

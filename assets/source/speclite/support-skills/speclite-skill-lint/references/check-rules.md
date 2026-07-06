@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档定义了普通 workflow 风格 Agent Skill 规范检查的 36 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror 和文件分类合理性八个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
+本文档定义了普通 workflow 风格 Agent Skill 规范检查的 43 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror、文件分类合理性和 ecosystem source 规则九个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
 
 `speclite-agent-*` Agent 定义包不直接套用本规则集。若目标目录名匹配 `speclite-agent-*`，或 `customize.toml` 包含 `[agent]`，应改用 `speclite-agent-lint`；其 `SKILL.en.md` 是可选镜像，存在时才检查一致性。
 
@@ -229,6 +229,48 @@
 - 如果文件内容不包含任何 ` ```markdown` 代码块（即纯知识性说明文档，无模板骨架），则该文件属于"低频查阅的详细资料"
 - 根据渐进式披露架构，知识性文档应放在 `references/` 目录，而非 `assets/`
 
+## 9. Ecosystem Source 检查（7 条）
+
+本组仅在目标目录位于 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` 时执行。Ecosystem Skill 仍必须通过前 36 条通用规则；本组不降低 YAML、description、version、mirror、density、fixed path hard gate 或 `speclite-` 前缀要求。
+
+| 规则 ID | 检查项 | 严重级别 | 判断标准 |
+|:--------|:-------|:---------|:---------|
+| ECO-01 | Ecosystem path classification | Error | 路径必须匹配 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/`，且 `<category>` 只能是 `frontend`、`backend`、`other` |
+| ECO-02 | Module metadata consistency | Error | 上级 module root 必须存在 `module.yaml`，且 `module_kind: ecosystem`、`ecosystem_category`、`ecosystem_id` 与目录一致 |
+| ECO-03 | Module code consistency | Error | `module.yaml` 的 `code` 必须等于 `ecosystem-<category>-<id>`，并声明 `required_dependencies: [sdlc]`、`default_selected: false`、`required: false` |
+| ECO-04 | Help row coverage | Error | 上级 `module-help.csv` 必须存在，并至少包含一条非 `_meta` row，其 `skill` 等于当前 package id |
+| ECO-05 | Version and changelog sync | Error | `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和 `metadata.version` 必须同步；缺少 `CHANGELOG.md` 或 `SKILL.en.md` 对普通 workflow ecosystem Skill 为 Error |
+| ECO-06 | Runtime path boundary | Warning | 入口和 references 不得把 `assets/source/speclite/ecosystems/...` 写成目标项目 runtime dependency，应使用 `{project-root}`、`.claude/skills/<skill-name>`、`.agents/skills/<skill-name>` 和 `_speclite` |
+| ECO-07 | Other admission evidence | Warning | 当 `category` 为 `other` 时，module / docs / changelog / maintainer notes 必须记录 `why-not-frontend`、`why-not-backend`、目标项目事实、安装价值和 selected-only 验收；`misc`、`general`、`tools` 默认不允许 |
+
+### 详细说明
+
+**ECO-01 Ecosystem path classification**：
+- 识别 canonical source 中的 ecosystem package，避免把它误判为 external project path。
+- 如果 `category` 不是 `frontend`、`backend`、`other`，报告 Error。
+
+**ECO-02 / ECO-03 Module metadata consistency**：
+- `module.yaml` 是 ecosystem module 的事实源。
+- `ecosystem_id` 必须与 `<id>` 相同，module code 必须与目录派生值一致。
+- Ecosystem module 是 selected-only extension；不得设置成 `default_selected: true` 或 `required: true`。
+
+**ECO-04 Help row coverage**：
+- `module-help.csv` 必须能让菜单、phase、output location 和 artifact type 被发现。
+- duplicate row、unknown package root 和 missing package row 应与 canonical source checker 的 `module-help.*` findings 对齐。
+
+**ECO-05 Version and changelog sync**：
+- 普通 workflow ecosystem Skill 必须同步 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和 `metadata.version`。
+- 从 `sdlc-skills/` 迁移到 ecosystem module 时，CHANGELOG 或维护记录应说明 source path move、runtime behavior unchanged 和 package id 是否保持不变。
+
+**ECO-06 Runtime path boundary**：
+- Source path 可以出现在 authoring docs、migration notes 或维护说明中。
+- 当前执行规约不得要求目标项目运行时读取 `assets/source/speclite/ecosystems/...`。
+
+**ECO-07 Other admission evidence**：
+- `other` 只接受不能归入 `frontend` / `backend` 且具有稳定项目形态的 ecosystem id。
+- 初始允许 examples 是 `npm-package`、`cli-tool`、`documentation-only`；新增 id 必须说明 `why-not-frontend`、`why-not-backend`、目标项目事实、安装价值和 selected-only 验收。
+- `other/misc`、`other/general`、`other/tools` 这类无边界命名默认不允许。
+
 ## 严重级别说明
 
 | 级别 | 含义 | 处理要求 |
@@ -249,11 +291,13 @@
 | 2 | YML-02  | description 长度 | ✅ | 620/1024 字符 |
 | ...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-总结：X/36 项通过，Y 项警告，Z 项错误
+总结：X/42 项通过，Y 项警告，Z 项错误
 状态：🟢 全部通过 / 🟡 有警告 / 🔴 有错误
 ```
 
 ## 版本说明
+- v1.8 (2026-07-06): 增加 Other admission evidence（ECO-07），总计 43 条规则
+- v1.7 (2026-07-06): 增加 Ecosystem Source 检查（ECO-01 ~ ECO-06），总计 42 条规则
 - v1.6 (2026-06-05): 收紧 SpecLite canonical skill 命名，要求 `speclite-` 前缀，总计 36 条规则
 - v1.5 (2026-05-27): 增加 Config reference classification 检查，总计 36 条规则
 - v1.4 (2026-05-27): 增加 Fixed path hard gate 检查，总计 35 条规则

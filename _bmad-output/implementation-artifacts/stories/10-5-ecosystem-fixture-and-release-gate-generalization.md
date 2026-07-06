@@ -1,6 +1,6 @@
 # Story 10.5: Ecosystem Fixture And Release Gate Generalization（生态 Fixture 与发布门禁泛化）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Expansion Story: 将 fixture、release gate、packaging manifest、canonical source check 和 installed-state validation 从固定 core+sdlc baseline 泛化到 selected ecosystem matrix。 -->
 
@@ -66,47 +66,47 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Preflight and fixture inventory（AC: 1-7）
-  - [ ] 读取 Story 10.1 到 Story 10.4、Epic 10、`test/fixtures/`、`src/fixtures/fixture-contract.ts`、`test/fixture-release-gates.test.ts`。
-  - [ ] 读取 `src/validation/rules/manifest-schema.ts`，定位 `CORE_SDLC_BASELINE_ENTRY_COUNT` 和相关 count assertions。
-  - [ ] 读取 `scripts/release/packaging-check.mjs`、`test/release-packaging-check.test.ts`、`release/packaging-manifest.json`。
-  - [ ] 读取 `speclite-check-canonical-source-change` 脚本与 tests。
-  - [ ] 检查当前 worktree 是否已有 fixture / manifest / dist drift；只处理本 Story 范围内文件。
+- [x] Task 1: Preflight and fixture inventory（AC: 1-7）
+  - [x] 读取 Story 10.1 到 Story 10.4、Epic 10、`test/fixtures/`、`src/fixtures/fixture-contract.ts`、`test/fixture-release-gates.test.ts`。
+  - [x] 读取 `src/validation/rules/manifest-schema.ts`，定位 `CORE_SDLC_BASELINE_ENTRY_COUNT` 和相关 count assertions。
+  - [x] 读取 `scripts/release/packaging-check.mjs`、`test/release-packaging-check.test.ts`、`release/packaging-manifest.json`。
+  - [x] 读取 `speclite-check-canonical-source-change` 脚本与 tests。
+  - [x] 检查当前 worktree 是否已有 fixture / manifest / dist drift；只处理本 Story 范围内文件。
 
-- [ ] Task 2: Split default baseline from selected module expectations（AC: 1, 3）
-  - [ ] 将 manifest-schema validation 的 fixed count 改为基于 selected installed modules / manifest data 推导；保留 default no-ecosystem fixture 的 explicit expected count。
-  - [ ] 更新 ready summary / prewrite prompt count 文案，使 default baseline 与 selected ecosystem counts 可并存。
-  - [ ] 更新 tests，证明 default no-ecosystem 仍为 `core+sdlc`，selected ecosystem count 增加只影响对应 selected case。
+- [x] Task 2: Split default baseline from selected module expectations（AC: 1, 3）
+  - [x] 将 manifest-schema validation 的 fixed count 改为基于 selected installed modules / manifest data 推导；保留 default no-ecosystem fixture 的 explicit expected count。
+  - [x] 更新 ready summary / prewrite prompt count 文案，使 default baseline 与 selected ecosystem counts 可并存。
+  - [x] 更新 tests，证明 default no-ecosystem 仍为 `core+sdlc`，selected ecosystem count 增加只影响对应 selected case。
 
-- [ ] Task 3: Add selected ecosystem fixture cases（AC: 2-3）
-  - [ ] 新增或扩展 fixture cases：selected backend、selected frontend、selected other。
-  - [ ] 每个 fixture case 写入 expected command JSON、installed tree / indexes、human output semantic assertions。
-  - [ ] 对每个 selected case 添加 unselected negative assertions：同 category 未选 module absent、跨 category modules absent、support-skills absent。
-  - [ ] 将 fixture cases 注册到 `src/fixtures/fixture-contract.ts`，并更新 `test/fixture-contract.test.ts`。
+- [x] Task 3: Add selected ecosystem fixture cases（AC: 2-3）
+  - [x] 新增或扩展 fixture cases：selected backend、selected frontend、selected other。
+  - [x] 每个 fixture case 写入 expected command JSON、installed tree / indexes、human output semantic assertions。
+  - [x] 对每个 selected case 添加 unselected negative assertions：同 category 未选 module absent、跨 category modules absent、support-skills absent。
+  - [x] 将 fixture cases 注册到 `src/fixtures/fixture-contract.ts`，并更新 `test/fixture-contract.test.ts`。
 
-- [ ] Task 4: Generalize canonical source change check（AC: 4, 7）
-  - [ ] 扩展 counts：`core`、`sdlc`、`support`、`hooks`、`ecosystems.byCategory`、`ecosystems.totalPackageRoots`、`defaultInstall.total`。
-  - [ ] 对每个 ecosystem module 运行 `module-help.csv` coverage check。
-  - [ ] 更新 stale text scan，识别 docs / fixtures / source 中 outdated static counts 和 only core+sdlc wording。
-  - [ ] 更新 `test/canonical-source-change-check-script.test.ts`，加入 nested ecosystem fixture 和 expected findings。
+- [x] Task 4: Generalize canonical source change check（AC: 4, 7）
+  - [x] 扩展 counts：`core`、`sdlc`、`support`、`hooks`、`ecosystems.byCategory`、`ecosystems.totalPackageRoots`、`defaultInstall.total`。
+  - [x] 对每个 ecosystem module 运行 `module-help.csv` coverage check。
+  - [x] 更新 stale text scan，识别 docs / fixtures / source 中 outdated static counts 和 only core+sdlc wording。
+  - [x] 更新 `test/canonical-source-change-check-script.test.ts`，加入 nested ecosystem fixture 和 expected findings。
 
-- [ ] Task 5: Generalize packaging manifest assertions（AC: 5-6）
-  - [ ] 更新 `scripts/release/packaging-check.mjs`，确保 runtime assets / assertions 覆盖 nested ecosystem source files。
-  - [ ] 更新 `test/release-packaging-check.test.ts`，构造 temp package inventory 中的 `assets/source/speclite/ecosystems/.../SKILL.md` 与 `module.yaml`。
-  - [ ] 重新生成 `release/packaging-manifest.json` 和 `dist/packaging-manifest.json`，并确认 package hash 只反映真实 package inventory。
-  - [ ] 确认 `test/fixtures/`、`fixtures/`、cache/temp/build output 仍被排除。
+- [x] Task 5: Generalize packaging manifest assertions（AC: 5-6）
+  - [x] 更新 `scripts/release/packaging-check.mjs`，确保 runtime assets / assertions 覆盖 nested ecosystem source files。
+  - [x] 更新 `test/release-packaging-check.test.ts`，构造 temp package inventory 中的 `assets/source/speclite/ecosystems/.../SKILL.md` 与 `module.yaml`。
+  - [x] 重新生成 `release/packaging-manifest.json` 和 `dist/packaging-manifest.json`，并确认 package hash 只反映真实 package inventory。
+  - [x] 确认 `test/fixtures/`、`fixtures/`、cache/temp/build output 仍被排除。
 
-- [ ] Task 6: Update docs and maintainer guidance（AC: 7）
-  - [ ] 更新 `docs/reference/canonical-source-layout.md`、`docs/reference/runtime-layout.md`、`docs/reference/skills/support-skills.md`。
-  - [ ] 更新 fixture README / docs，说明 selected ecosystem matrix 和 negative assertions。
-  - [ ] 更新 release SOP 或 maintainer docs，明确 `npm run build` -> focused tests -> `npm run release:packaging-check` 的顺序。
+- [x] Task 6: Update docs and maintainer guidance（AC: 7）
+  - [x] 更新 `docs/reference/canonical-source-layout.md`、`docs/reference/runtime-layout.md`、`docs/reference/skills/support-skills.md`。
+  - [x] 更新 fixture README / docs，说明 selected ecosystem matrix 和 negative assertions。
+  - [x] 更新 release SOP 或 maintainer docs，明确 `npm run build` -> focused tests -> `npm run release:packaging-check` 的顺序。
 
-- [ ] Task 7: Verification（AC: 1-7）
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 focused tests：`npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts test/runtime-structure.test.ts test/fixture-release-gates.test.ts test/canonical-source-change-check-script.test.ts test/release-packaging-check.test.ts`。
-  - [ ] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
-  - [ ] 运行 `npm run release:packaging-check`。
-  - [ ] 运行 `git diff --check -- assets/source/speclite docs src test release dist _bmad-output/implementation-artifacts/stories/10-5-ecosystem-fixture-and-release-gate-generalization.md`。
+- [x] Task 7: Verification（AC: 1-7）
+  - [x] 运行 `npm run build`。
+  - [x] 运行 focused tests：`npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts test/runtime-structure.test.ts test/fixture-release-gates.test.ts test/canonical-source-change-check-script.test.ts test/release-packaging-check.test.ts`。
+  - [x] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
+  - [x] 运行 `npm run release:packaging-check`。
+  - [x] 运行 `git diff --check -- assets/source/speclite docs src test release dist _bmad-output/implementation-artifacts/stories/10-5-ecosystem-fixture-and-release-gate-generalization.md`。
 
 ## Dev Notes（开发备注）
 
@@ -163,22 +163,67 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现后填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现后填写。
+- `npm test -- test/install-module-selection.test.ts test/fixture-contract.test.ts`：RED 阶段先失败 3 项，证明 selected frontend/other validate 仍被旧 selected-root 表阻断，且 selected ecosystem fixture cases 尚未注册；GREEN 后通过 2 个 test files / 25 个 tests。
+- `npm test -- test/fixture-contract.test.ts test/fixture-release-gates.test.ts`：通过 2 个 test files / 19 个 tests，确认 selected backend/frontend/other fixture layout 与真实 install negative assertions。
+- `npm test -- test/release-packaging-check.test.ts`：通过 1 个 test file / 6 个 tests，确认 ecosystem source files 被 packaging assertion 覆盖。
+- `npm test -- test/validate-command.test.ts test/registry-source-resolution.test.ts test/local-source-integrity.test.ts test/governance-report-command.test.ts test/git-source-resolution.test.ts`：通过 5 个 test files / 64 个 tests，确认 selected-module validation 不破坏 source descriptor local-only boundary。
+- `npm run build`：通过。
+- `npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts test/runtime-structure.test.ts test/fixture-release-gates.test.ts test/canonical-source-change-check-script.test.ts test/release-packaging-check.test.ts`：通过 6 个 test files / 62 个 tests。
+- `node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`：通过，`status: "ok"`、`findings: []`，counts 为 `core=13`、`sdlc=48`、`ecosystems.totalPackageRoots=8`、`defaultInstall.total=61`。
+- `npm run release:packaging-check`：通过，并刷新 `release/packaging-manifest.json` / `dist/packaging-manifest.json`。
+- `git diff --check -- assets/source/speclite docs src test release dist _bmad-output/implementation-artifacts/stories/10-5-ecosystem-fixture-and-release-gate-generalization.md`：通过。
+- `npm test`：通过 56 个 test files / 418 个 tests。
 
 ### Completion Notes List（完成说明）
 
-待实现后填写。
+- 完成 preflight：读取 Epic 10、Story 10.1-10.4、fixture contract、release gate tests、manifest validation、packaging check、canonical source checker 和当前 mixed worktree；未回滚、删除、暂存或提交外部 drift。
+- 将 manifest-schema selected installed-state validation 从手写全局 package root 表改为基于 `manifest.installedModules` 与 installed indexes 的自洽校验；保留 default no-ecosystem fixture 的 explicit `core+sdlc` count。
+- 新增 selected backend / frontend / other fixture cases，并在 release gate test 中执行真实 install，断言 selected Skill 出现、同 category 未选 modules、跨 category modules 和 support packages 不出现，且不泄漏本机路径 / ANSI / nondeterministic generatedAt。
+- 扩展 canonical source checker 报告 `ecosystems.totalPackageRoots`，继续对每个 ecosystem module 执行 `module-help.csv` coverage、stale docs scan 和 packaging manifest drift 检查。
+- 扩展 packaging check 的 required runtime assets 与 assertion，明确证明 `assets/source/speclite/ecosystems/**` source files 进入 npm package inventory，并继续排除 fixture outputs。
+- 更新 maintainer docs、runtime docs、support skill docs、fixture README 和 README release workflow，明确 default baseline、selected ecosystem matrix、negative assertions、packaging boundary、canonical checker职责和 build-first 串行门禁。
+- Mixed worktree 边界：未触碰用户点名的 `speclite-docs-intro-ppt-creator/*`、`speclite-html-ppt-generator/**` 和 `.specskills/...html-ppt-generator-decision-record.md`；Story 10.1-10.4 已有变更保留。
 
 ### File List（文件清单）
 
-待实现后填写。
+- `README.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/10-5-ecosystem-fixture-and-release-gate-generalization.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs`
+- `docs/reference/canonical-source-layout.md`
+- `docs/reference/runtime-layout.md`
+- `docs/reference/skills/support-skills.md`
+- `release/packaging-manifest.json`
+- `scripts/release/packaging-check.mjs`
+- `src/fixtures/fixture-contract.ts`
+- `src/validation/rules/manifest-schema.ts`
+- `test/canonical-source-change-check-script.test.ts`
+- `test/fixture-contract.test.ts`
+- `test/fixture-release-gates.test.ts`
+- `test/fixtures/fresh-install-empty-project/README.md`
+- `test/fixtures/fresh-install-selected-backend-ecosystem/README.md`
+- `test/fixtures/fresh-install-selected-backend-ecosystem/fixture-case.json`
+- `test/fixtures/fresh-install-selected-backend-ecosystem/input/.gitkeep`
+- `test/fixtures/fresh-install-selected-backend-ecosystem/expected/semantic-assertions.json`
+- `test/fixtures/fresh-install-selected-frontend-ecosystem/README.md`
+- `test/fixtures/fresh-install-selected-frontend-ecosystem/fixture-case.json`
+- `test/fixtures/fresh-install-selected-frontend-ecosystem/input/.gitkeep`
+- `test/fixtures/fresh-install-selected-frontend-ecosystem/expected/semantic-assertions.json`
+- `test/fixtures/fresh-install-selected-other-ecosystem/README.md`
+- `test/fixtures/fresh-install-selected-other-ecosystem/fixture-case.json`
+- `test/fixtures/fresh-install-selected-other-ecosystem/input/.gitkeep`
+- `test/fixtures/fresh-install-selected-other-ecosystem/expected/semantic-assertions.json`
+- `test/install-module-selection.test.ts`
+- `test/release-packaging-check.test.ts`
+- `test/validate-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-07-06 | 0.1 | 创建 Story 10.5，定义 selected ecosystem fixture matrix、installed-state count 泛化、canonical source check、packaging manifest 和 release gate 验收。 | John / Codex |
+| 2026-07-07 | 1.0 | 实现 selected ecosystem fixture matrix、selected installed-state validation、canonical checker ecosystem totals、packaging ecosystem assertions、docs / maintainer guidance 和 build-first release verification，并将 Story 移至 review。 | Fancyliu / Codex |

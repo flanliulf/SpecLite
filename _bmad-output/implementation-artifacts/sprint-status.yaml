@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-07-06 20:08 CST
+# last_updated: 2026-07-07 01:54 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-07-06 20:08 CST
+last_updated: 2026-07-07 01:54 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -128,11 +128,11 @@ development_status:
   epic-9-retrospective: done
 
   # Expansion planning Epic for canonical source ecosystem modules.
-  epic-10: in-progress
-  10-1-ecosystem-module-taxonomy-and-guided-selected-install-closure: ready-for-dev
-  10-2-ecosystem-authoring-contract-and-creator-support: ready-for-dev
-  10-3-frontend-ecosystem-source-expansion: ready-for-dev
-  10-4-other-ecosystem-source-expansion: ready-for-dev
-  10-5-ecosystem-fixture-and-release-gate-generalization: ready-for-dev
-  10-6-public-docs-and-maintainer-workflow: ready-for-dev
+  epic-10: done
+  10-1-ecosystem-module-taxonomy-and-guided-selected-install-closure: done
+  10-2-ecosystem-authoring-contract-and-creator-support: done
+  10-3-frontend-ecosystem-source-expansion: done
+  10-4-other-ecosystem-source-expansion: done
+  10-5-ecosystem-fixture-and-release-gate-generalization: done
+  10-6-public-docs-and-maintainer-workflow: done
   epic-10-retrospective: optional

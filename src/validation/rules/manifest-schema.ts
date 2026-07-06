@@ -21,6 +21,7 @@ import {
   type PhaseCoverage,
   type SkillIndex,
 } from "../../manifest/manifest-schema.js";
+import { BUNDLED_SOURCE_DISPLAY_ROOT } from "../../source/source-discovery.js";
 
 export type ManifestSchemaValidationResult = {
   issues: ValidationIssue[];
@@ -48,6 +49,7 @@ type ArtifactDefinition<TValue> = {
   parseMode: "yaml" | "json";
   schema: { safeParse(value: unknown): { success: true; data: TValue } | { success: false; error: unknown } };
 };
+type ExpectedSelectedModulePackageRoots = Readonly<Record<string, readonly string[]>>;
 
 const ARTIFACTS = {
   manifest: {
@@ -87,8 +89,7 @@ const ARTIFACTS = {
   },
 } as const;
 
-const CORE_SDLC_BASELINE_ENTRY_COUNT = 64;
-const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
+const OFFICIAL_BUNDLED_SELECTED_MODULE_PACKAGE_ROOTS: ExpectedSelectedModulePackageRoots = {
   core: [
     "assets/source/speclite/core-skills/speclite-advanced-elicitation",
     "assets/source/speclite/core-skills/speclite-brainstorming",
@@ -113,9 +114,6 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder",
-    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger",
-    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger",
-    "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq",
     "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief",
@@ -157,6 +155,30 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status",
     "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher",
   ],
+  "ecosystem-backend-java-springboot": [
+    "assets/source/speclite/ecosystems/backend/java-springboot/speclite-brownfield-java-springboot-backend-tech-stack-digger",
+  ],
+  "ecosystem-backend-nodejs": [
+    "assets/source/speclite/ecosystems/backend/nodejs/speclite-brownfield-nodejs-backend-tech-stack-digger",
+  ],
+  "ecosystem-backend-python": [
+    "assets/source/speclite/ecosystems/backend/python/speclite-brownfield-python-backend-tech-stack-digger",
+  ],
+  "ecosystem-frontend-react": [
+    "assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review",
+  ],
+  "ecosystem-frontend-vue": [
+    "assets/source/speclite/ecosystems/frontend/vue/speclite-vue-project-context-and-review",
+  ],
+  "ecosystem-other-cli-tool": [
+    "assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-tool-contract-auditor",
+  ],
+  "ecosystem-other-documentation-only": [
+    "assets/source/speclite/ecosystems/other/documentation-only/speclite-documentation-only-project-auditor",
+  ],
+  "ecosystem-other-npm-package": [
+    "assets/source/speclite/ecosystems/other/npm-package/speclite-npm-package-project-auditor",
+  ],
 } as const;
 
 export async function validateManifestSchema(input: {
@@ -196,10 +218,20 @@ export async function validateManifestSchema(input: {
     }
   }
 
-  if (manifestResult.value !== undefined && skillIndexResult.value !== undefined) {
-    const completenessIssue = validateSelectedModuleCompleteness({
+  if (
+    manifestResult.value !== undefined &&
+    skillIndexResult.value !== undefined &&
+    helpIndexResult.value !== undefined &&
+    filesIndexResult.value !== undefined &&
+    phaseCoverageResult.value !== undefined
+  ) {
+    const completenessIssue = validateInstalledStateSelection({
       manifest: manifestResult.value,
       skillIndex: skillIndexResult.value,
+      helpIndex: helpIndexResult.value,
+      filesIndex: filesIndexResult.value,
+      phaseCoverage: phaseCoverageResult.value,
+      expectedSelectedModulePackageRoots: expectedSelectedModulePackageRootsForManifest(manifestResult.value),
     });
     if (completenessIssue !== undefined) issues.push(completenessIssue);
   }
@@ -304,108 +336,230 @@ async function readArtifact<TValue>(
   };
 }
 
-function validateSelectedModuleCompleteness(input: {
+function validateInstalledStateSelection(input: {
   manifest: Manifest;
   skillIndex: SkillIndex;
+  helpIndex: HelpIndex;
+  filesIndex: FilesIndex;
+  phaseCoverage: PhaseCoverage;
+  expectedSelectedModulePackageRoots?: ExpectedSelectedModulePackageRoots;
 }): ValidationIssue | undefined {
-  const selected = new Set(input.manifest.installedModules);
-  if (!selected.has("core") || !selected.has("sdlc")) {
-    return undefined;
-  }
-
-  if (input.skillIndex.entries.length !== CORE_SDLC_BASELINE_ENTRY_COUNT) {
-    return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
-      reason: "missing-required-field",
-      field: "entries",
-      expectedCount: CORE_SDLC_BASELINE_ENTRY_COUNT,
-      actualCount: input.skillIndex.entries.length,
-    });
-  }
-
-  const rootCoverageIssue = validateSelectedModuleRootCoverage(input.skillIndex);
-  if (rootCoverageIssue !== undefined) return rootCoverageIssue;
-
-  return undefined;
-}
-
-function validateSelectedModuleRootCoverage(skillIndex: SkillIndex): ValidationIssue | undefined {
+  const installedModules = new Set(input.manifest.installedModules);
   const uniqueRootsByModule = new Map<string, Set<string>>();
   const seenRoots = new Set<string>();
-  const actualRoots = new Set<string>();
 
-  for (const entry of skillIndex.entries) {
+  for (const entry of input.skillIndex.entries) {
+    if (!installedModules.has(entry.moduleId)) {
+      return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
+        reason: "invalid-field",
+        field: "entries.moduleId",
+        unexpectedModuleId: entry.moduleId,
+        installedModules: input.manifest.installedModules,
+      });
+    }
     const rootKey = `${entry.moduleId}:${entry.sourcePackagePath}`;
     if (seenRoots.has(rootKey)) {
       return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
         reason: "missing-required-field",
         field: "entries",
-        expectedCount: CORE_SDLC_BASELINE_ENTRY_COUNT,
-        actualCount: skillIndex.entries.length,
+        actualCount: input.skillIndex.entries.length,
         uniqueRootCount: seenRoots.size,
         duplicateRoot: rootKey,
       });
     }
     seenRoots.add(rootKey);
-    actualRoots.add(rootKey);
 
     const roots = uniqueRootsByModule.get(entry.moduleId) ?? new Set<string>();
     roots.add(entry.sourcePackagePath);
     uniqueRootsByModule.set(entry.moduleId, roots);
   }
 
-  const coreRootCount = uniqueRootsByModule.get("core")?.size ?? 0;
-  const sdlcRootCount = uniqueRootsByModule.get("sdlc")?.size ?? 0;
-  if (
-    coreRootCount !== EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS.core.length ||
-    sdlcRootCount !== EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS.sdlc.length
-  ) {
+  const missingModuleId = input.manifest.installedModules.find((moduleId) => !uniqueRootsByModule.has(moduleId));
+  if (missingModuleId !== undefined) {
     return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
       reason: "missing-required-field",
       field: "entries",
-      expectedCount: CORE_SDLC_BASELINE_ENTRY_COUNT,
-      actualCount: skillIndex.entries.length,
-      expectedModuleCounts: {
-        core: EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS.core.length,
-        sdlc: EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS.sdlc.length,
-      },
-      actualModuleCounts: {
-        core: coreRootCount,
-        sdlc: sdlcRootCount,
-      },
+      actualCount: input.skillIndex.entries.length,
+      missingModuleId,
     });
   }
 
-  const expectedRoots = createExpectedSelectedModuleRootKeys();
-  const missingRoot = [...expectedRoots].find((rootKey) => !actualRoots.has(rootKey));
-  const unexpectedRoot = [...actualRoots].find((rootKey) => !expectedRoots.has(rootKey));
-  if (missingRoot !== undefined || unexpectedRoot !== undefined) {
+  const sourcePathIssue = validateSelectedSourcePackagePaths({
+    installedModules,
+    skillIndex: input.skillIndex,
+  });
+  if (sourcePathIssue !== undefined) return sourcePathIssue;
+
+  const packageRootCompletenessIssue = validateSelectedPackageRootCompleteness({
+    installedModules: input.manifest.installedModules,
+    uniqueRootsByModule,
+    expectedSelectedModulePackageRoots: input.expectedSelectedModulePackageRoots,
+    actualCount: input.skillIndex.entries.length,
+  });
+  if (packageRootCompletenessIssue !== undefined) return packageRootCompletenessIssue;
+
+  const phaseModuleIssue = validatePhaseCoverageSelectedModules({
+    installedModules,
+    phaseCoverage: input.phaseCoverage,
+  });
+  if (phaseModuleIssue !== undefined) return phaseModuleIssue;
+
+  const filesIndexIssue = validateFilesIndexSelectedSourceRefs({
+    installedModules,
+    filesIndex: input.filesIndex,
+  });
+  if (filesIndexIssue !== undefined) return filesIndexIssue;
+
+  const helpIssue = validateHelpTargetsReferenceInstalledSkills({
+    helpIndex: input.helpIndex,
+    skillIndex: input.skillIndex,
+  });
+  if (helpIssue !== undefined) return helpIssue;
+
+  return undefined;
+}
+
+function validateSelectedPackageRootCompleteness(input: {
+  installedModules: readonly string[];
+  uniqueRootsByModule: Map<string, Set<string>>;
+  expectedSelectedModulePackageRoots?: ExpectedSelectedModulePackageRoots;
+  actualCount: number;
+}): ValidationIssue | undefined {
+  if (input.expectedSelectedModulePackageRoots === undefined) return undefined;
+
+  for (const moduleId of input.installedModules) {
+    const expectedRoots = input.expectedSelectedModulePackageRoots[moduleId];
+    if (expectedRoots === undefined) continue;
+
+    const actualRoots = input.uniqueRootsByModule.get(moduleId) ?? new Set<string>();
+    const missingSourcePackagePath = expectedRoots.find((expectedRoot) => !actualRoots.has(expectedRoot));
+    if (missingSourcePackagePath === undefined) continue;
+
     return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
       reason: "missing-required-field",
       field: "entries",
-      expectedCount: CORE_SDLC_BASELINE_ENTRY_COUNT,
-      actualCount: skillIndex.entries.length,
-      expectedModuleCounts: {
-        core: EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS.core.length,
-        sdlc: EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS.sdlc.length,
-      },
-      actualModuleCounts: {
-        core: coreRootCount,
-        sdlc: sdlcRootCount,
-      },
-      ...(missingRoot === undefined ? {} : { missingRoot }),
-      ...(unexpectedRoot === undefined ? {} : { unexpectedRoot }),
+      actualCount: input.actualCount,
+      actualRootCount: actualRoots.size,
+      expectedRootCount: expectedRoots.length,
+      missingModuleId: moduleId,
+      missingSourcePackagePath,
     });
   }
 
   return undefined;
 }
 
-function createExpectedSelectedModuleRootKeys(): Set<string> {
-  return new Set(
-    Object.entries(EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS).flatMap(([moduleId, roots]) =>
-      roots.map((root) => `${moduleId}:${root}`),
-    ),
-  );
+function validateSelectedSourcePackagePaths(input: {
+  installedModules: Set<string>;
+  skillIndex: SkillIndex;
+}): ValidationIssue | undefined {
+  for (const entry of input.skillIndex.entries) {
+    if (!sourcePackagePathMatchesModule(entry.sourcePackagePath, entry.moduleId)) {
+      return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
+        reason: "invalid-field",
+        field: "entries.sourcePackagePath",
+        moduleId: entry.moduleId,
+        sourcePackagePath: entry.sourcePackagePath,
+      });
+    }
+    const ecosystemModuleId = ecosystemModuleIdFromSourcePath(entry.sourcePackagePath);
+    if (ecosystemModuleId !== undefined && !input.installedModules.has(ecosystemModuleId)) {
+      return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
+        reason: "invalid-field",
+        field: "entries.sourcePackagePath",
+        unexpectedModuleId: ecosystemModuleId,
+        sourcePackagePath: entry.sourcePackagePath,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function validatePhaseCoverageSelectedModules(input: {
+  installedModules: Set<string>;
+  phaseCoverage: PhaseCoverage;
+}): ValidationIssue | undefined {
+  for (const row of input.phaseCoverage.rows) {
+    if (!input.installedModules.has(row.moduleId)) {
+      return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.phaseCoverage, {
+        reason: "invalid-field",
+        field: "rows.moduleId",
+        unexpectedModuleId: row.moduleId,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function validateFilesIndexSelectedSourceRefs(input: {
+  installedModules: Set<string>;
+  filesIndex: FilesIndex;
+}): ValidationIssue | undefined {
+  for (const entry of input.filesIndex.entries) {
+    const sourceModuleId = moduleIdFromSourcePath(entry.sourceRef);
+    if (sourceModuleId !== undefined && !input.installedModules.has(sourceModuleId)) {
+      return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.filesIndex, {
+        reason: "invalid-field",
+        field: "entries.sourceRef",
+        unexpectedModuleId: sourceModuleId,
+        sourceRef: entry.sourceRef,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function validateHelpTargetsReferenceInstalledSkills(input: {
+  helpIndex: HelpIndex;
+  skillIndex: SkillIndex;
+}): ValidationIssue | undefined {
+  const installedSkillIds = new Set(input.skillIndex.entries.map((entry) => entry.canonicalSkillId));
+  const unknownHelpEntry = input.helpIndex.entries.find((entry) => !installedSkillIds.has(entry.canonicalSkillId));
+  if (unknownHelpEntry !== undefined) {
+    return createManifestSchemaIssue("manifest-schema.malformed-field", ARTIFACTS.skillIndex, {
+      reason: "invalid-field",
+      field: "entries",
+      unknownHelpCanonicalSkillId: unknownHelpEntry.canonicalSkillId,
+    });
+  }
+
+  return undefined;
+}
+
+function sourcePackagePathMatchesModule(sourcePackagePath: string, moduleId: string): boolean {
+  return moduleIdFromSourcePath(sourcePackagePath) === moduleId;
+}
+
+function moduleIdFromSourcePath(sourcePath: string): string | undefined {
+  if (hasSourcePathSegment(sourcePath, "core-skills")) return "core";
+  if (hasSourcePathSegment(sourcePath, "sdlc-skills")) return "sdlc";
+  return ecosystemModuleIdFromSourcePath(sourcePath);
+}
+
+function ecosystemModuleIdFromSourcePath(sourcePath: string): string | undefined {
+  const match = /(?:^|\/)ecosystems\/([^/]+)\/([^/]+)\//.exec(sourcePath);
+  if (match === null || match[1] === undefined || match[2] === undefined) return undefined;
+  return `ecosystem-${match[1]}-${match[2]}`;
+}
+
+function hasSourcePathSegment(sourcePath: string, segment: "core-skills" | "sdlc-skills"): boolean {
+  return sourcePath === segment || sourcePath.startsWith(`${segment}/`) || sourcePath.includes(`/${segment}/`);
+}
+
+function expectedSelectedModulePackageRootsForManifest(
+  manifest: Manifest,
+): ExpectedSelectedModulePackageRoots | undefined {
+  if (
+    manifest.sourceDescriptor.sourceType !== "bundled" ||
+    manifest.sourceDescriptor.resolvedRoot !== BUNDLED_SOURCE_DISPLAY_ROOT
+  ) {
+    return undefined;
+  }
+
+  return OFFICIAL_BUNDLED_SELECTED_MODULE_PACKAGE_ROOTS;
 }
 
 function validateSkillIndexIdentity(skillIndex: SkillIndex): ValidationIssue | undefined {

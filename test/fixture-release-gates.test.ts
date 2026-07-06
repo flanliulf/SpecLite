@@ -86,12 +86,12 @@ describe("fresh-install-empty-project release gate fixture", () => {
         await readFile(path.join(firstRoot, "_speclite/_config/files-index.json"), "utf8"),
       ) as { entries: Array<{ path: string }> };
 
-      expect(skillIndex.entries).toHaveLength(64);
-      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(64);
-      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(64);
+      expect(skillIndex.entries).toHaveLength(61);
+      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(61);
+      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(61);
       expect(skillIndex.entries.every((entry) => entry.installedTargets.join(",") === "claude,agents")).toBe(true);
       expect(filesIndex.entries.some((entry) => entry.path === "_speclite/_config/manifest.yaml")).toBe(true);
-      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(128);
+      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(122);
       expect(filesIndex.entries.every((entry) => isProjectRelativePosixPath(entry.path))).toBe(true);
 
       expect(normalizeFreshInstallResult(first.result)).toEqual(normalizeFreshInstallResult(second.result));
@@ -135,6 +135,61 @@ describe("fresh-install-empty-project release gate fixture", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+});
+
+describe("selected ecosystem fresh install release gate fixtures", () => {
+  it.each([
+    "fresh-install-selected-backend-ecosystem",
+    "fresh-install-selected-frontend-ecosystem",
+    "fresh-install-selected-other-ecosystem",
+  ])("%s projects only the selected ecosystem module", async (fixtureId) => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), `${fixtureId}-`));
+
+    try {
+      const assertions = await readSelectedEcosystemAssertions(fixtureId);
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+          targetProject: fixtureId,
+        },
+        selectModuleIds: async () => [assertions.selectedModuleId],
+      });
+
+      const parsed = InstallCommandResultSchema.parse(outcome.result);
+      const humanOutput = renderInstallHumanOutput(parsed, { locale: "en-US" });
+      const stableInstalledState = await readStableInstalledState(tempRoot);
+      const serializedInstalledState = JSON.stringify(stableInstalledState);
+      const claudeSkillIds = await listInstalledSkillIds(tempRoot, ".claude/skills");
+      const agentsSkillIds = await listInstalledSkillIds(tempRoot, ".agents/skills");
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.data.installedModules).toEqual(assertions.expectedInstalledModules);
+      expect(parsed.summary).toContain(`Selected modules: ${assertions.expectedInstalledModules.join(", ")}`);
+      expect(parsed.summary).toContain(`${assertions.selectedModuleId}=1`);
+      expect(parsed.summary).not.toContain("total=61.");
+      expect(humanOutput).toContain("Canonical package roots");
+      expect(humanOutput).not.toContain(tempRoot);
+      expect(humanOutput).not.toMatch(/\u001b\[[0-9;]*m/);
+      expect(serializedInstalledState).not.toContain(tempRoot);
+      expect(serializedInstalledState).not.toContain('"generatedAt":');
+
+      for (const skillId of assertions.expectedPresentSkillIds) {
+        expect(claudeSkillIds).toContain(skillId);
+        expect(agentsSkillIds).toContain(skillId);
+        expect(serializedInstalledState).toContain(skillId);
+      }
+
+      for (const skillId of assertions.expectedAbsentSkillIds) {
+        expect(claudeSkillIds).not.toContain(skillId);
+        expect(agentsSkillIds).not.toContain(skillId);
+        expect(serializedInstalledState).not.toContain(skillId);
+      }
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  }, 20_000);
 });
 
 describe("existing-install-update normal update release gate fixture", () => {
@@ -419,6 +474,25 @@ async function readFreshFixtureInstalledState() {
   };
 }
 
+async function readSelectedEcosystemAssertions(fixtureId: string): Promise<{
+  selectedModuleId: string;
+  expectedInstalledModules: string[];
+  expectedPresentSkillIds: string[];
+  expectedAbsentSkillIds: string[];
+}> {
+  return JSON.parse(
+    await readFile(
+      path.join(
+        process.cwd(),
+        "test/fixtures",
+        fixtureId,
+        "expected/semantic-assertions.json",
+      ),
+      "utf8",
+    ),
+  );
+}
+
 function normalizeFreshInstallResult(result: unknown) {
   const parsed = InstallCommandResultSchema.parse(result);
   return {
@@ -596,15 +670,15 @@ async function writeIdeDriftInstalledState(projectRoot: string): Promise<void> {
     [
       'schemaVersion: "speclite.manifest.v1"',
       "sourceDescriptor:",
-      '  sourceType: "bundled"',
+      '  sourceType: "local"',
       '  channel: "stable"',
       '  version: "0.3.0"',
-      '  resolvedRoot: "assets/source/speclite"',
+      '  resolvedRoot: "fixture-source"',
+      '  contentHash: "sha256:fixture-source"',
       "  integrityEvidence:",
-      '    - kind: "version-lock"',
-      '      packageName: "@fancyliu/speclite"',
-      '      version: "0.3.0"',
-      '      lockPath: "package-lock.json"',
+      '    - kind: "content-hash"',
+      '      algorithm: "sha256"',
+      '      value: "sha256:fixture-source"',
       "      verified: true",
       '  trustStatus: "trusted"',
       "installedModules:",

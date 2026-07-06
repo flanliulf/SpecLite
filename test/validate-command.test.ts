@@ -499,8 +499,62 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          expectedCount: 64,
           actualCount: 1,
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("reports selected module package root incompleteness when every selected module has one entry", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-validate-incomplete-root-subset-"));
+
+    try {
+      await writeInstalledProjection(tempRoot);
+      await writeJson(tempRoot, "_speclite/_config/skill-index.json", {
+        schemaVersion: "speclite.skill-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: "speclite-help",
+            moduleId: "core",
+            sourcePackagePath: "assets/source/speclite/core-skills/speclite-help",
+            canonicalPackageHash: await hashPackageDirectory(path.join(tempRoot, ".claude/skills/speclite-help")),
+            installedTargets: ["claude", "agents"],
+            phaseIds: ["anytime"],
+          },
+          {
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: "speclite-dev-story",
+            moduleId: "sdlc",
+            sourcePackagePath: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
+            canonicalPackageHash: await hashPackageDirectory(path.join(tempRoot, ".claude/skills/speclite-dev-story")),
+            installedTargets: ["claude", "agents"],
+            phaseIds: ["anytime"],
+          },
+        ],
+      });
+
+      const outcome = await runValidateCommand({ runtime: { cwd: tempRoot } });
+      const parsed = ValidateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(1);
+      expect(parsed.issues).toHaveLength(1);
+      expect(parsed.issues[0]).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        affectedPath: "_speclite/_config/skill-index.json",
+        details: {
+          artifactKind: "skill-index",
+          reason: "missing-required-field",
+          field: "entries",
+          actualCount: 2,
+          actualRootCount: 1,
+          expectedRootCount: 13,
+          missingModuleId: "core",
+          missingSourcePackagePath:
+            "assets/source/speclite/core-skills/speclite-advanced-elicitation",
         },
       });
     } finally {
@@ -536,8 +590,7 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          expectedCount: 64,
-          actualCount: 64,
+          actualCount: 61,
           duplicateRoot: "core:assets/source/speclite/core-skills/speclite-brainstorming",
         },
       });
@@ -546,7 +599,7 @@ describe("validate command manifest/index schema validation", () => {
     }
   });
 
-  it("reports unexpected selected package roots even when counts and duplicates pass", async () => {
+  it("reports unselected ecosystem package roots even when counts and duplicates pass", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-validate-unexpected-root-same-count-"));
 
     try {
@@ -554,8 +607,9 @@ describe("validate command manifest/index schema validation", () => {
       const entries = createSkillIndexEntries();
       entries[0] = {
         ...entries[0],
-        canonicalSkillId: "speclite-unexpected-core-skill",
-        sourcePackagePath: "assets/source/speclite/core-skills/speclite-unexpected-core-skill",
+        canonicalSkillId: "speclite-react-project-context-and-review",
+        moduleId: "ecosystem-frontend-react",
+        sourcePackagePath: "assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review",
         canonicalPackageHash: "sha256:unexpected-package-root",
       };
       await writeJson(tempRoot, "_speclite/_config/skill-index.json", {
@@ -574,20 +628,167 @@ describe("validate command manifest/index schema validation", () => {
         affectedPath: "_speclite/_config/skill-index.json",
         details: {
           artifactKind: "skill-index",
-          reason: "missing-required-field",
-          field: "entries",
-          expectedCount: 64,
-          actualCount: 64,
-          expectedModuleCounts: {
-            core: 13,
-            sdlc: 51,
+          reason: "invalid-field",
+          field: "entries.moduleId",
+          unexpectedModuleId: "ecosystem-frontend-react",
+          installedModules: ["core", "sdlc"],
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects unselected ecosystem package roots for core-only installed state", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-validate-core-only-unselected-root-"));
+
+    try {
+      await writeInstalledProjection(tempRoot);
+      await writeFile(
+        path.join(tempRoot, "_speclite/_config/manifest.yaml"),
+        [
+          'schemaVersion: "speclite.manifest.v1"',
+          "sourceDescriptor:",
+          '  sourceType: "bundled"',
+          '  channel: "stable"',
+          '  version: "0.0.0"',
+          '  resolvedRoot: "assets/source/speclite"',
+          "  integrityEvidence:",
+          '    - kind: "version-lock"',
+          '      packageName: "speclite"',
+          '      version: "0.0.0"',
+          '      lockPath: "package-lock.json"',
+          "      verified: true",
+          '  trustStatus: "trusted"',
+          "installedModules:",
+          '  - "core"',
+          "targetIds:",
+          '  - "agents"',
+          '  - "claude"',
+          "paths:",
+          '  projectRoot: "."',
+          '  specliteRoot: "_speclite"',
+          '  artifactRoot: "_speclite-output"',
+          '  manifestPath: "_speclite/_config/manifest.yaml"',
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      const entries = createSkillIndexEntries().filter((entry) => entry.moduleId === "core");
+      entries.push({
+        schemaVersion: "speclite.skill-index.v1",
+        canonicalSkillId: "speclite-react-project-context-and-review",
+        moduleId: "ecosystem-frontend-react",
+        sourcePackagePath: "assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review",
+        canonicalPackageHash: "sha256:unexpected-package-root",
+        installedTargets: ["agents", "claude"],
+        phaseIds: ["anytime"],
+      });
+      await writeJson(tempRoot, "_speclite/_config/skill-index.json", {
+        schemaVersion: "speclite.skill-index.v1",
+        entries,
+      });
+
+      const outcome = await runValidateCommand({ runtime: { cwd: tempRoot } });
+      const parsed = ValidateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(1);
+      expect(parsed.issues).toHaveLength(1);
+      expect(parsed.issues[0]).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        affectedPath: "_speclite/_config/skill-index.json",
+        details: {
+          artifactKind: "skill-index",
+          reason: "invalid-field",
+          field: "entries.moduleId",
+          unexpectedModuleId: "ecosystem-frontend-react",
+          installedModules: ["core"],
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects unselected source refs in files index for core-only installed state", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-validate-core-only-files-index-"));
+
+    try {
+      await writeInstalledProjection(tempRoot);
+      await writeFile(
+        path.join(tempRoot, "_speclite/_config/manifest.yaml"),
+        [
+          'schemaVersion: "speclite.manifest.v1"',
+          "sourceDescriptor:",
+          '  sourceType: "bundled"',
+          '  channel: "stable"',
+          '  version: "0.0.0"',
+          '  resolvedRoot: "assets/source/speclite"',
+          "  integrityEvidence:",
+          '    - kind: "version-lock"',
+          '      packageName: "speclite"',
+          '      version: "0.0.0"',
+          '      lockPath: "package-lock.json"',
+          "      verified: true",
+          '  trustStatus: "trusted"',
+          "installedModules:",
+          '  - "core"',
+          "targetIds:",
+          '  - "agents"',
+          '  - "claude"',
+          "paths:",
+          '  projectRoot: "."',
+          '  specliteRoot: "_speclite"',
+          '  artifactRoot: "_speclite-output"',
+          '  manifestPath: "_speclite/_config/manifest.yaml"',
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      await writeJson(tempRoot, "_speclite/_config/skill-index.json", {
+        schemaVersion: "speclite.skill-index.v1",
+        entries: createSkillIndexEntries().filter((entry) => entry.moduleId === "core"),
+      });
+      await writeJson(tempRoot, "_speclite/_config/help-index.json", {
+        schemaVersion: "speclite.help-index.v1",
+        entries: [],
+      });
+      await writeJson(tempRoot, "_speclite/_config/phase-coverage.json", {
+        schemaVersion: "speclite.phase-coverage.v1",
+        rows: [],
+      });
+      await writeJson(tempRoot, "_speclite/_config/files-index.json", {
+        schemaVersion: "speclite.files-index.v1",
+        entries: [
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: ".claude/skills/speclite-dev-story/SKILL.md",
+            ownership: "installer-owned",
+            hash: "sha256:unexpected-sdlc-file",
+            hashAlgorithm: "sha256",
+            executable: false,
+            artifactKind: "skill",
+            sourceRef: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.md",
           },
-          actualModuleCounts: {
-            core: 13,
-            sdlc: 51,
-          },
-          missingRoot: "core:assets/source/speclite/core-skills/speclite-advanced-elicitation",
-          unexpectedRoot: "core:assets/source/speclite/core-skills/speclite-unexpected-core-skill",
+        ],
+      });
+
+      const outcome = await runValidateCommand({ runtime: { cwd: tempRoot } });
+      const parsed = ValidateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(1);
+      expect(parsed.issues).toHaveLength(1);
+      expect(parsed.issues[0]).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        affectedPath: "_speclite/_config/files-index.json",
+        details: {
+          artifactKind: "files-index",
+          reason: "invalid-field",
+          field: "entries.sourceRef",
+          unexpectedModuleId: "sdlc",
+          sourceRef: "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story/SKILL.md",
         },
       });
     } finally {
@@ -1461,9 +1662,6 @@ const SKILL_SOURCE_PACKAGE_PATHS = [
   "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-tech-writer",
   "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-backend-tech-stack-digger",
   "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-context-builder",
-  "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger",
-  "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger",
-  "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger",
   "assets/source/speclite/sdlc-skills/1-analysis/speclite-document-project",
   "assets/source/speclite/sdlc-skills/1-analysis/speclite-prfaq",
   "assets/source/speclite/sdlc-skills/1-analysis/speclite-product-brief",

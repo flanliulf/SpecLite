@@ -6,11 +6,11 @@
 
 ## Required Checks（必查项）
 
-- 统计 `core-skills`、`sdlc-skills`、`support-skills` 和 `hooks` 的当前 package roots。
-- 确认默认安装 baseline 只计算 `core+sdlc`，不把 `support-skills` 纳入普通目标项目 skill mirrors。
+- 统计 `core-skills`、`sdlc-skills`、`ecosystems/<category>/<id>`、`support-skills` 和 `hooks` 的当前 package roots。
+- 确认默认安装 baseline 只计算 selected `core+sdlc`，不把 `support-skills` 或未选择的 ecosystem packages 纳入普通目标项目 skill mirrors。
 - 读取 `assets/source/speclite/canonical-governance.json`，确认 governance classes、impact rules 和 `D0` / `D1` / `D2` determinism 定义有效。
 - 如果 checker 输出 `governance.decisionRecordRequired: true`，运行或遵循 `speclite-canonical-source-governance-runner`，记录 D1/D2 面向的 `updated`、`skipped` 或 `historical snapshot` 决策。
-- 检查 `core-skills/module-help.csv` 与 `sdlc-skills/module-help.csv`：
+- 检查 `core-skills/module-help.csv`、`sdlc-skills/module-help.csv` 与每个 `ecosystems/<category>/<id>/module-help.csv`：
   - 每个 canonical package root 都有一条非 `_meta` row。
   - 没有重复 `skill` row。
   - 没有指向不存在 package root 的 row。
@@ -23,7 +23,7 @@
   - `codex-hooks.fragment.json`
   - `hook-manifest.json` 的 `hookId` 与目录名一致。
 - 检查 `src/validation/rules/manifest-schema.ts` 中 `CORE_SDLC_BASELINE_ENTRY_COUNT` 是否等于当前 `core+sdlc`。
-- 扫描 `docs README.md assets/source/speclite test src release`，确认没有旧数字，例如 `sdlc=44,total=57`、`Support skill package roots | 4`，也没有旧 Codex hook array shape。
+- 扫描 `docs README.md assets/source/speclite test src release`，确认没有旧的 SDLC / total 固定数字、旧 support package root count，没有把 official source 写成“只包含 core 与 sdlc”，也没有旧 Codex hook array shape。
 - 刷新 fresh-install 和 path-portability fixtures，确认 `.claude/settings.json` 与 `.codex/hooks.json` 的 hook config 当前 contract 一致。
 - 更新 `release/packaging-manifest.json` 和生成的 `dist/packaging-manifest.json`。
 
@@ -39,3 +39,5 @@ npm test
 npm run release:packaging-check
 git diff --check
 ```
+
+Ecosystem source authoring 的推荐顺序是 creator / lint -> `module.yaml` / `module-help.csv` -> canonical source check -> fixtures -> build / tests / packaging check。Hook 只做 warning-only 提醒，不替代 release verification。

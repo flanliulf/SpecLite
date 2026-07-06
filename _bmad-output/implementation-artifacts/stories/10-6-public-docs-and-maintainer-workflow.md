@@ -1,6 +1,6 @@
 # Story 10.6: Public Docs And Maintainer Workflow（公开文档与维护者工作流）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Expansion Story: 在 ecosystem modules 的 source、fixtures 和 release gates 具备后，更新 public docs、runtime layout、maintainer guide 和 newcomer docs，形成 Epic 10 的用户可见闭环。 -->
 
@@ -66,53 +66,53 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Preflight and docs inventory（AC: 1-7）
-  - [ ] 读取 Story 10.1 到 Story 10.5、Epic 10、`README.md`、`docs/index.md`、`docs/quick-start.md`、`docs/tutorials/quick-start.md`。
-  - [ ] 读取 install docs：`docs/how-to/install-speclite.md`、`docs/how-to/validate-installation.md`、`docs/how-to/manage-installed-project.md`。
-  - [ ] 读取 reference docs：`docs/reference/runtime-layout.md`、`docs/reference/canonical-source-layout.md`、`docs/explanation/speclite-modules.md`、`docs/reference/skills/*.md`。
-  - [ ] 搜索 stale terms：`core=13`、`sdlc=51`、`total=64`、`only core+sdlc`、`default install baseline`、`support skill package roots`。
-  - [ ] 本 Task 可在 Story 10.3 / 10.4 / 10.5 完成前启动，但产物只能是 docs inventory、stale scan、gap list 和待更新 plan，不得发布最终 public docs / catalog / release workflow 更新。
+- [x] Task 1: Preflight and docs inventory（AC: 1-7）
+  - [x] 读取 Story 10.1 到 Story 10.5、Epic 10、`README.md`、`docs/index.md`、`docs/quick-start.md`、`docs/tutorials/quick-start.md`。
+  - [x] 读取 install docs：`docs/how-to/install-speclite.md`、`docs/how-to/validate-installation.md`、`docs/how-to/manage-installed-project.md`。
+  - [x] 读取 reference docs：`docs/reference/runtime-layout.md`、`docs/reference/canonical-source-layout.md`、`docs/explanation/speclite-modules.md`、`docs/reference/skills/*.md`。
+  - [x] 搜索 stale terms：`core=13`、`sdlc=51`、`total=64`、`only core+sdlc`、`default install baseline`、`support skill package roots`。
+  - [x] 本 Task 可在 Story 10.3 / 10.4 / 10.5 完成前启动，但产物只能是 docs inventory、stale scan、gap list 和待更新 plan，不得发布最终 public docs / catalog / release workflow 更新。
 
-- [ ] Task 2: Update user-facing install docs（AC: 1, 5）
-  - [ ] Final Publication Gate: 更新 README、quick start、install how-to 等用户可见文档前，必须读取 Story 10.3 / 10.4 / 10.5 completion evidence；若任一 Story 未完成，相关 ecosystem 能力必须标记为 deferred risk，不得写成已可用承诺。
-  - [ ] 更新 `README.md` 的 methodology package overview，加入 optional ecosystem modules，但保持默认 quick start 简洁。
-  - [ ] 更新 `docs/quick-start.md` 和 `docs/tutorials/quick-start.md`，说明默认安装、interactive ecosystem selection、skip、`--json` / `--yes` 默认行为。
-  - [ ] 更新 `docs/how-to/install-speclite.md`，加入 ecosystem selection examples 和 selected-only warnings。
-  - [ ] 明确 SpecLite 不安装项目 runtime dependencies；ecosystem modules 只安装 SpecLite Skill packages。
+- [x] Task 2: Update user-facing install docs（AC: 1, 5）
+  - [x] Final Publication Gate: 更新 README、quick start、install how-to 等用户可见文档前，必须读取 Story 10.3 / 10.4 / 10.5 completion evidence；若任一 Story 未完成，相关 ecosystem 能力必须标记为 deferred risk，不得写成已可用承诺。
+  - [x] 更新 `README.md` 的 methodology package overview，加入 optional ecosystem modules，但保持默认 quick start 简洁。
+  - [x] 更新 `docs/quick-start.md` 和 `docs/tutorials/quick-start.md`，说明默认安装、interactive ecosystem selection、skip、`--json` / `--yes` 默认行为。
+  - [x] 更新 `docs/how-to/install-speclite.md`，加入 ecosystem selection examples 和 selected-only warnings。
+  - [x] 明确 SpecLite 不安装项目 runtime dependencies；ecosystem modules 只安装 SpecLite Skill packages。
 
-- [ ] Task 3: Update runtime and module references（AC: 2-3）
-  - [ ] Final Publication Gate: runtime layout、canonical source layout、module explanation 或 glossary 中的 ecosystem selected-only 描述，必须以 Story 10.3 / 10.4 / 10.5 completion evidence 为依据；缺失证据时只能写 future/deferred scope。
-  - [ ] 更新 `docs/reference/runtime-layout.md`，把 IDE mirrors / indexes 改写为 selected module projections。
-  - [ ] 更新 `docs/reference/canonical-source-layout.md`，加入 `ecosystems/<category>/<id>/` source layout、module roots 和 support boundary。
-  - [ ] 更新 `docs/explanation/speclite-modules.md`，解释 ecosystem module 是 optional extension module，依赖 `sdlc`，并描述 selected-only runtime。
-  - [ ] 更新 `docs/glossary/speclite-runtime-boundaries.md` 或等价 glossary，说明 canonical source、ecosystem source 和 installed projection 的关系。
+- [x] Task 3: Update runtime and module references（AC: 2-3）
+  - [x] Final Publication Gate: runtime layout、canonical source layout、module explanation 或 glossary 中的 ecosystem selected-only 描述，必须以 Story 10.3 / 10.4 / 10.5 completion evidence 为依据；缺失证据时只能写 future/deferred scope。
+  - [x] 更新 `docs/reference/runtime-layout.md`，把 IDE mirrors / indexes 改写为 selected module projections。
+  - [x] 更新 `docs/reference/canonical-source-layout.md`，加入 `ecosystems/<category>/<id>/` source layout、module roots 和 support boundary。
+  - [x] 更新 `docs/explanation/speclite-modules.md`，解释 ecosystem module 是 optional extension module，依赖 `sdlc`，并描述 selected-only runtime。
+  - [x] 更新 `docs/glossary/speclite-runtime-boundaries.md` 或等价 glossary，说明 canonical source、ecosystem source 和 installed projection 的关系。
 
-- [ ] Task 4: Update maintainer and skill catalog docs（AC: 3-6）
-  - [ ] Final Publication Gate: skill catalog、ecosystem catalog 和 maintainer docs 必须引用已完成的 Story 10.3 / 10.4 source package evidence；未完成 category / id 只能作为 deferred risk 或 planned example。
-  - [ ] 更新 `docs/reference/skills/index.md`，加入 ecosystem skill catalog 入口。
-  - [ ] 新增或更新 `docs/reference/skills/ecosystem-skills.md`，列出 backend / frontend / other modules、example ids、default install boundary 和 authoring rule。
-  - [ ] 更新 `docs/reference/skills/support-skills.md`，说明 creator / lint / canonical source check 在 ecosystem authoring 中的顺序。
-  - [ ] 更新 `assets/source/speclite/README.md` 与 `README.en.md`，让 canonical source authoring docs 与 public docs 一致。
+- [x] Task 4: Update maintainer and skill catalog docs（AC: 3-6）
+  - [x] Final Publication Gate: skill catalog、ecosystem catalog 和 maintainer docs 必须引用已完成的 Story 10.3 / 10.4 source package evidence；未完成 category / id 只能作为 deferred risk 或 planned example。
+  - [x] 更新 `docs/reference/skills/index.md`，加入 ecosystem skill catalog 入口。
+  - [x] 新增或更新 `docs/reference/skills/ecosystem-skills.md`，列出 backend / frontend / other modules、example ids、default install boundary 和 authoring rule。
+  - [x] 更新 `docs/reference/skills/support-skills.md`，说明 creator / lint / canonical source check 在 ecosystem authoring 中的顺序。
+  - [x] 更新 `assets/source/speclite/README.md` 与 `README.en.md`，让 canonical source authoring docs 与 public docs 一致。
 
-- [ ] Task 5: Document release and verification workflow（AC: 4, 7）
-  - [ ] Final Publication Gate: release workflow 更新必须读取 Story 10.5 completion evidence，确认 selected ecosystem fixtures、canonical source check 和 packaging manifest 泛化已经完成；否则必须标记 deferred risk。
-  - [ ] 更新 maintainer / release docs，明确 ecosystem source change 后必须运行 canonical source check。
-  - [ ] 记录 build-first sequence：`npm run build` -> focused tests / fixture gates -> canonical source check -> `npm run release:packaging-check`。
-  - [ ] 说明 hook warning-only：hook 可以提醒，但不能替代 release gate。
-  - [ ] 记录 selected ecosystem fixtures 和 negative assertions 的维护规则。
+- [x] Task 5: Document release and verification workflow（AC: 4, 7）
+  - [x] Final Publication Gate: release workflow 更新必须读取 Story 10.5 completion evidence，确认 selected ecosystem fixtures、canonical source check 和 packaging manifest 泛化已经完成；否则必须标记 deferred risk。
+  - [x] 更新 maintainer / release docs，明确 ecosystem source change 后必须运行 canonical source check。
+  - [x] 记录 build-first sequence：`npm run build` -> focused tests / fixture gates -> canonical source check -> `npm run release:packaging-check`。
+  - [x] 说明 hook warning-only：hook 可以提醒，但不能替代 release gate。
+  - [x] 记录 selected ecosystem fixtures 和 negative assertions 的维护规则。
 
-- [ ] Task 6: Add docs checks and stale text coverage（AC: 6-7）
-  - [ ] 增加或更新 docs reference tests，例如 `test/docs-reference-cli-options.test.ts` 或等价 docs assertion。
-  - [ ] 扩展 canonical source change check stale text scan，覆盖 public docs 的 outdated count 和 only core+sdlc wording。
-  - [ ] 对 `docs/index.md`、`docs/reference/index.md`、`docs/reference/skills/index.md` 做 link / route coverage。
+- [x] Task 6: Add docs checks and stale text coverage（AC: 6-7）
+  - [x] 增加或更新 docs reference tests，例如 `test/docs-reference-cli-options.test.ts` 或等价 docs assertion。
+  - [x] 扩展 canonical source change check stale text scan，覆盖 public docs 的 outdated count 和 only core+sdlc wording。
+  - [x] 对 `docs/index.md`、`docs/reference/index.md`、`docs/reference/skills/index.md` 做 link / route coverage。
 
-- [ ] Task 7: Verification（AC: 1-7）
-  - [ ] 运行 docs-focused grep：`rg -n "core=13|sdlc=51|total=64|only core\\+sdlc|only core\\+SDLC" README.md docs assets/source/speclite test`，确认遗留表达只在版本快照或 fixture expected 中有明确限定。
-  - [ ] 运行 docs tests：`npm test -- test/docs-reference-cli-options.test.ts test/canonical-source-change-check-script.test.ts`。
-  - [ ] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm run release:packaging-check`。
-  - [ ] 运行 `git diff --check -- README.md docs assets/source/speclite test release _bmad-output/implementation-artifacts/stories/10-6-public-docs-and-maintainer-workflow.md`。
+- [x] Task 7: Verification（AC: 1-7）
+  - [x] 运行 docs-focused grep：`rg -n "core=13|sdlc=51|total=64|only core\\+sdlc|only core\\+SDLC" README.md docs assets/source/speclite test`，确认遗留表达只在版本快照或 fixture expected 中有明确限定。
+  - [x] 运行 docs tests：`npm test -- test/docs-reference-cli-options.test.ts test/canonical-source-change-check-script.test.ts`。
+  - [x] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm run release:packaging-check`。
+  - [x] 运行 `git diff --check -- README.md docs assets/source/speclite test release _bmad-output/implementation-artifacts/stories/10-6-public-docs-and-maintainer-workflow.md`。
 
 ## Dev Notes（开发备注）
 
@@ -168,22 +168,58 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现后填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现后填写。
+- `npm test -- test/docs-reference-cli-options.test.ts test/canonical-source-change-check-script.test.ts`：RED 阶段先失败 2 项，证明 ecosystem public docs boundary 和 only-core+sdlc stale wording scan 尚未闭环；GREEN 后通过 2 个 test files / 3 个 tests。
+- `rg -n "core=13|sdlc=51|total=64|only core\\+sdlc|only core\\+SDLC" README.md docs assets/source/speclite test`：通过；遗留 `core=13` 仅出现在 focused tests / fixture expected assertions，未在 public docs 或 source README 中保留旧 `sdlc=51`、`total=64` 或 exact only-core+sdlc 表达。
+- `node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`：通过，`status: "ok"`、`findings: []`；counts 为 `core=13`、`sdlc=48`、`ecosystems.totalPackageRoots=8`、`defaultInstall.total=61`。
+- `npm run build`：通过。
+- `npm run release:packaging-check`：通过，packaging acceptance passed。
+- `git diff --check -- README.md docs assets/source/speclite test release _bmad-output/implementation-artifacts/stories/10-6-public-docs-and-maintainer-workflow.md`：通过。
 
 ### Completion Notes List（完成说明）
 
-待实现后填写。
+- 完成 preflight：读取 Epic 10、Story 10.1-10.5 completion evidence、sprint status、project context、public docs、install docs、runtime / canonical / module / skill catalog docs；Story 10.1-10.5 均为 `done`，满足最终 publication gate。
+- 更新用户可见文档：README、`docs/quick-start.md`、tutorial quick start 和 install how-to 明确 default install 仍为 `core` + `sdlc`，interactive 可按 `ecosystem category -> id` 选择 optional ecosystem modules，`--yes` / `--json` / default no-prompt 不自动选择 ecosystem modules。
+- 更新 newcomer 边界：ecosystem modules 是 SpecLite Skill package selection，不是项目依赖安装器、package manager 或 UI framework installer；不会安装 React / Vue / Java / npm package runtime dependencies。
+- 更新 runtime / canonical / module references：selected module truth 控制 `_speclite/config.toml`、IDE mirrors、skill/help/phase/files indexes；unselected ecosystem modules 保持 source-only。
+- 更新 skill catalog 和 maintainer docs：ecosystem catalog 可从 docs index、reference index 和 skills index 发现；support skill docs、source README、canonical governance 和 checklist 明确 creator / lint -> `module.yaml` / `module-help.csv` -> canonical source check -> fixtures -> build / tests / packaging check。
+- 更新 release workflow guidance：hook 是 warning-only guardrail，不替代 release verification；release verification 保持 build-first、packaging-last。
+- 扩展 docs tests 和 canonical checker stale scan：新增 docs boundary assertions，并让 checker 捕获 official/canonical source 被写成 only core+sdlc 的 stale wording。
+- D1 / D2 决策记录：本轮对 current public docs 采取 `updated`；对 `assets/source/speclite/docs/legacy/HANDOFF.md` 采取 `historical snapshot`，只追加当前不可作为 package root truth 的说明，不重写历史过程事实。
+- Mixed worktree 边界：未回滚、删除、暂存、提交或推送其他 agent / 用户变更；未触碰用户禁止的 `speclite-docs-intro-ppt-creator/*`、`speclite-html-ppt-generator/**` 和 `.specskills/...html-ppt-generator-decision-record.md`。
 
 ### File List（文件清单）
 
-待实现后填写。
+- `README.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/10-6-public-docs-and-maintainer-workflow.md`
+- `assets/source/speclite/README.md`
+- `assets/source/speclite/README.en.md`
+- `assets/source/speclite/docs/legacy/HANDOFF.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/references/canonical-change-checklist.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs`
+- `docs/index.md`
+- `docs/quick-start.md`
+- `docs/tutorials/quick-start.md`
+- `docs/how-to/install-speclite.md`
+- `docs/reference/index.md`
+- `docs/reference/runtime-layout.md`
+- `docs/reference/canonical-source-layout.md`
+- `docs/reference/canonical-source-governance.md`
+- `docs/reference/skills/index.md`
+- `docs/reference/skills/ecosystem-skills.md`
+- `docs/reference/skills/support-skills.md`
+- `docs/explanation/speclite-modules.md`
+- `docs/glossary/speclite-runtime-boundaries.md`
+- `test/docs-reference-cli-options.test.ts`
+- `test/canonical-source-change-check-script.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-07-06 | 0.1 | 创建 Story 10.6，定义 ecosystem public docs、runtime layout、maintainer workflow、newcomer guidance、docs index 和 release verification 文档闭环。 | John / Codex |
+| 2026-07-07 | 1.0 | 完成 ecosystem public docs、selected-only runtime / canonical source references、skill catalog、maintainer authoring workflow、release verification guidance、docs tests 和 stale text scan，并将 Story 移至 review。 | Fancyliu / Codex |

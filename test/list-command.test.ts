@@ -19,7 +19,18 @@ describe("list command canonical identity projection", () => {
 
     expect(outcome.exitCode).toBe(0);
     expect(parsed.command).toBe("list");
-    expect(parsed.data.modules.map((module) => module.moduleId)).toEqual(["core", "sdlc"]);
+    expect(parsed.data.modules.map((module) => module.moduleId)).toEqual([
+      "core",
+      "ecosystem-backend-java-springboot",
+      "ecosystem-backend-nodejs",
+      "ecosystem-backend-python",
+      "ecosystem-frontend-react",
+      "ecosystem-frontend-vue",
+      "ecosystem-other-cli-tool",
+      "ecosystem-other-documentation-only",
+      "ecosystem-other-npm-package",
+      "sdlc",
+    ]);
     expect(parsed.data.ideTargets.map((target) => target.id)).toEqual(["claude", "agents"]);
     expect(parsed.data.skills.map((skill) => skill.canonicalSkillId)).toEqual(
       [...parsed.data.skills.map((skill) => skill.canonicalSkillId)].sort(),
@@ -41,6 +52,22 @@ describe("list command canonical identity projection", () => {
         }),
         expect.objectContaining({
           name: "module:sdlc",
+          version: expect.any(String),
+        }),
+        expect.objectContaining({
+          name: "module:ecosystem-backend-java-springboot",
+          version: expect.any(String),
+        }),
+        expect.objectContaining({
+          name: "module:ecosystem-frontend-react",
+          version: expect.any(String),
+        }),
+        expect.objectContaining({
+          name: "module:ecosystem-frontend-vue",
+          version: expect.any(String),
+        }),
+        expect.objectContaining({
+          name: "module:ecosystem-other-npm-package",
           version: expect.any(String),
         }),
       ]),

@@ -365,9 +365,7 @@ export function createSpecliteProgram(options: CreateCliOptions = {}): Command {
         ...(shouldPrompt
           ? {
               selectModuleIds: async (selectionInput: ModuleSelectionPromptInput) =>
-                parseModuleSelectionAnswer(
-                  await promptWithBlock(io, createModuleSelectionQuestion(selectionInput, locale)),
-                ),
+                collectInteractiveModuleSelection(io, selectionInput, locale),
               configureProject: async (configInput: ConfigInitializationPromptInput) =>
                 collectConfigInitializationSelection(io, configInput, locale),
               confirmSourceAccess: async (confirmationInput: SourceAccessConfirmationInput) =>
@@ -453,10 +451,12 @@ type PromptBlock = {
 };
 
 function createModuleSelectionQuestion(input: ModuleSelectionPromptInput, locale: CliLocale): PromptBlock {
-  const moduleLines = input.modules.map((module) => {
-    const scope = module.capabilitySummary.join(", ") || module.description;
-    return `- ${module.code}: ${module.name} ${module.version}; scope: ${scope}`;
-  });
+  const standardModuleLines = input.modules
+    .filter((module) => module.moduleKind !== "ecosystem")
+    .map((module) => {
+      const scope = module.capabilitySummary.join(", ") || module.description;
+      return `- ${module.code}: ${module.name} ${module.version}; scope: ${scope}`;
+    });
 
   if (locale === "en-US") {
     return {
@@ -467,12 +467,12 @@ function createModuleSelectionQuestion(input: ModuleSelectionPromptInput, locale
         "",
         "Available modules:",
         "",
-        ...moduleLines,
+        ...standardModuleLines,
         "",
         `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
         `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
       ].join("\n"),
-      prompt: "Enter one or more module ids separated by comma or whitespace. Press Enter to use defaults: ",
+      prompt: "Enter one or more standard module ids separated by comma or whitespace. Press Enter to use defaults: ",
     };
   }
 
@@ -484,12 +484,115 @@ function createModuleSelectionQuestion(input: ModuleSelectionPromptInput, locale
       "",
       "Available modules:",
       "",
-      ...moduleLines,
+      ...standardModuleLines,
       "",
       `Required modules: ${formatModuleIdList(input.requiredModuleIds)}.`,
       `Default selected modules: ${formatModuleIdList(input.defaultSelectedModuleIds)}.`,
     ].join("\n"),
-    prompt: "输入一个或多个 module id，可用逗号或空格分隔。直接按 Enter 使用默认值: ",
+    prompt: "输入一个或多个 standard module id，可用逗号或空格分隔；直接按 Enter 使用默认值: ",
+  };
+}
+
+async function collectInteractiveModuleSelection(
+  io: CliIo,
+  input: ModuleSelectionPromptInput,
+  locale: CliLocale,
+): Promise<string[]> {
+  const selectedModuleIds = parseModuleSelectionAnswer(
+    await promptWithBlock(io, createModuleSelectionQuestion(input, locale)),
+  );
+  const baseModuleIds = selectedModuleIds.length === 0 ? input.defaultSelectedModuleIds : selectedModuleIds;
+
+  if (!baseModuleIds.includes("sdlc") || input.ecosystemCategories.length === 0) {
+    return baseModuleIds;
+  }
+
+  const categoryAnswer = await promptWithBlock(io, createEcosystemCategoryQuestion(input, locale));
+  const category = categoryAnswer.trim().toLowerCase();
+  if (category.length === 0 || category === "skip") {
+    return baseModuleIds;
+  }
+
+  const categoryGroup = input.ecosystemCategories.find((group) => group.category === category);
+  if (categoryGroup === undefined) {
+    return [...baseModuleIds, category];
+  }
+
+  const ecosystemAnswer = await promptWithBlock(io, createEcosystemIdQuestion(categoryGroup, locale));
+  const ecosystemId = ecosystemAnswer.trim().toLowerCase();
+  if (ecosystemId.length === 0 || ecosystemId === "skip") {
+    return baseModuleIds;
+  }
+
+  const ecosystem = categoryGroup.ecosystemIds.find((candidate) => candidate.id === ecosystemId);
+  return [...baseModuleIds, ecosystem?.moduleCode ?? `ecosystem-${category}-${ecosystemId}`];
+}
+
+function createEcosystemCategoryQuestion(input: ModuleSelectionPromptInput, locale: CliLocale): PromptBlock {
+  const categories = input.ecosystemCategories.map((group) => group.category);
+  if (locale === "en-US") {
+    return {
+      body: [
+        "Step 1/4 Select ecosystem category",
+        "",
+        "Because sdlc is selected, optionally choose one ecosystem category before files are written.",
+        "",
+        "Ecosystem categories:",
+        ...categories.map((category) => `- ${category}`),
+        "- skip",
+      ].join("\n"),
+      prompt: "Enter an ecosystem category, or skip. Press Enter to skip ecosystem modules: ",
+    };
+  }
+
+  return {
+    body: [
+      "Step 1/4 Select ecosystem category（选择生态类别）",
+      "",
+      "因为已选择 sdlc，可在写入文件前选择一个 ecosystem category。",
+      "",
+      "Ecosystem categories:",
+      ...categories.map((category) => `- ${category}`),
+      "- skip",
+    ].join("\n"),
+    prompt: "输入 ecosystem category，或输入 skip。直接按 Enter 跳过 ecosystem modules: ",
+  };
+}
+
+function createEcosystemIdQuestion(
+  categoryGroup: ModuleSelectionPromptInput["ecosystemCategories"][number],
+  locale: CliLocale,
+): PromptBlock {
+  const ecosystemLines = categoryGroup.ecosystemIds.map(
+    (ecosystem) => `- ${ecosystem.id}: ${ecosystem.name}`,
+  );
+
+  if (locale === "en-US") {
+    return {
+      body: [
+        `Step 1/4 Select ${categoryGroup.category} ecosystem`,
+        "",
+        "Choose one ecosystem id from the selected category.",
+        "",
+        "Ecosystem ids:",
+        ...ecosystemLines,
+        "- skip",
+      ].join("\n"),
+      prompt: `Enter one ${categoryGroup.category} ecosystem id, or skip. Press Enter to skip ecosystem modules: `,
+    };
+  }
+
+  return {
+    body: [
+      `Step 1/4 Select ${categoryGroup.category} ecosystem（选择生态模块）`,
+      "",
+      "从所选 category 中选择一个 ecosystem id。",
+      "",
+      "Ecosystem ids:",
+      ...ecosystemLines,
+      "- skip",
+    ].join("\n"),
+    prompt: `输入一个 ${categoryGroup.category} ecosystem id，或输入 skip。直接按 Enter 跳过 ecosystem modules: `,
   };
 }
 

@@ -123,6 +123,16 @@ export type ModuleSelectionPromptInput = {
   modules: OfficialModule[];
   defaultSelectedModuleIds: string[];
   requiredModuleIds: string[];
+  ecosystemCategories: EcosystemCategorySelectionGroup[];
+};
+
+export type EcosystemCategorySelectionGroup = {
+  category: string;
+  ecosystemIds: Array<{
+    id: string;
+    moduleCode: string;
+    name: string;
+  }>;
 };
 
 export type InstallCommandOutcome = {
@@ -579,11 +589,11 @@ export async function runInstallCommand(input: {
   const userSelectedModuleIds =
     input.options?.json === true || input.selectModuleIds === undefined
       ? undefined
-      : await input.selectModuleIds({
+      : await input.selectModuleIds(createModuleSelectionPromptInput({
           modules: modulesResult.modules,
           defaultSelectedModuleIds: defaultModuleSelection.defaultSelectedModuleIds,
           requiredModuleIds: defaultModuleSelection.requiredModuleIds,
-        });
+        }));
   const moduleSelection = createModuleSelection({
     modules: modulesResult.modules,
     ...(userSelectedModuleIds === undefined ? {} : { userSelectedModuleIds }),
@@ -908,11 +918,11 @@ async function continueInstallWithSourceDescriptor(input: {
   const userSelectedModuleIds =
     commandInput.options?.json === true || commandInput.selectModuleIds === undefined
       ? undefined
-      : await commandInput.selectModuleIds({
+      : await commandInput.selectModuleIds(createModuleSelectionPromptInput({
           modules: modulesResult.modules,
           defaultSelectedModuleIds: defaultModuleSelection.defaultSelectedModuleIds,
           requiredModuleIds: defaultModuleSelection.requiredModuleIds,
-        });
+        }));
   const moduleSelection = createModuleSelection({
     modules: modulesResult.modules,
     ...(userSelectedModuleIds === undefined ? {} : { userSelectedModuleIds }),
@@ -1209,6 +1219,48 @@ function createSourceSelectionInput(
       : { requestedVersion: options.requestedVersion }),
     ...(options?.channel === undefined ? {} : { channel: options.channel }),
   };
+}
+
+function createModuleSelectionPromptInput(input: {
+  modules: OfficialModule[];
+  defaultSelectedModuleIds: string[];
+  requiredModuleIds: string[];
+}): ModuleSelectionPromptInput {
+  return {
+    modules: input.modules,
+    defaultSelectedModuleIds: input.defaultSelectedModuleIds,
+    requiredModuleIds: input.requiredModuleIds,
+    ecosystemCategories: groupEcosystemModules(input.modules),
+  };
+}
+
+function groupEcosystemModules(modules: OfficialModule[]): EcosystemCategorySelectionGroup[] {
+  const groups = new Map<string, EcosystemCategorySelectionGroup["ecosystemIds"]>();
+
+  for (const module of modules) {
+    if (
+      module.moduleKind !== "ecosystem" ||
+      module.ecosystemCategory === undefined ||
+      module.ecosystemId === undefined
+    ) {
+      continue;
+    }
+
+    const group = groups.get(module.ecosystemCategory) ?? [];
+    group.push({
+      id: module.ecosystemId,
+      moduleCode: module.code,
+      name: module.name,
+    });
+    groups.set(module.ecosystemCategory, group);
+  }
+
+  return [...groups.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([category, ecosystemIds]) => ({
+      category,
+      ecosystemIds: ecosystemIds.sort((left, right) => left.id.localeCompare(right.id)),
+    }));
 }
 
 function isRegistrySource(sourceType: string): sourceType is "npm" | "private-registry" {

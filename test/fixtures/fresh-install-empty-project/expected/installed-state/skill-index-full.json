@@ -157,48 +157,6 @@
     },
     {
       "schemaVersion": "speclite.skill-index.v1",
-      "canonicalSkillId": "speclite-brownfield-java-springboot-backend-tech-stack-digger",
-      "moduleId": "sdlc",
-      "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-java-springboot-backend-tech-stack-digger",
-      "canonicalPackageHash": "sha256:c89c0e0dd0d45fa3c07ae568441730b60ce7fadfc04f882b7f2fe34bdfd4ead5",
-      "installedTargets": [
-        "claude",
-        "agents"
-      ],
-      "phaseIds": [
-        "1-analysis"
-      ]
-    },
-    {
-      "schemaVersion": "speclite.skill-index.v1",
-      "canonicalSkillId": "speclite-brownfield-nodejs-backend-tech-stack-digger",
-      "moduleId": "sdlc",
-      "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-nodejs-backend-tech-stack-digger",
-      "canonicalPackageHash": "sha256:59b3554ee9212f8d73f296a6ff2ea3c383d45638c8afbb11b5bf23e0320ce032",
-      "installedTargets": [
-        "claude",
-        "agents"
-      ],
-      "phaseIds": [
-        "1-analysis"
-      ]
-    },
-    {
-      "schemaVersion": "speclite.skill-index.v1",
-      "canonicalSkillId": "speclite-brownfield-python-backend-tech-stack-digger",
-      "moduleId": "sdlc",
-      "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-python-backend-tech-stack-digger",
-      "canonicalPackageHash": "sha256:bb537c58525f8429006fb8fc69e13712fe5e030c4fa29096e65eba4b00f3d27c",
-      "installedTargets": [
-        "claude",
-        "agents"
-      ],
-      "phaseIds": [
-        "1-analysis"
-      ]
-    },
-    {
-      "schemaVersion": "speclite.skill-index.v1",
       "canonicalSkillId": "speclite-check-implementation-readiness",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness",

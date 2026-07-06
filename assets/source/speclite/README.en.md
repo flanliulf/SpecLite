@@ -8,6 +8,7 @@
 | ---- | ------- |
 | `core-skills/` | Cross-workflow Speclite capabilities shared by multiple SDLC flows, such as elicitation, brainstorming, help, document indexing, sharding, and review helpers. |
 | `sdlc-skills/` | Speclite SDLC workflow skills grouped by lifecycle phase: analysis, planning, solutioning, implementation, and DevOps release operations. |
+| `ecosystems/<category>/<id>/` | Optional technology ecosystem modules. Initial categories are `frontend`, `backend`, and `other`; each ecosystem directory owns `module.yaml`, `module-help.csv`, and an `ecosystem-<category>-<id>` module code. |
 | `support-skills/` | Creator, migration, and lint skills used to author or validate SpecLite canonical skill source definitions. |
 | `hooks/` | Standalone canonical hook packages installed under target-project `_speclite/hooks/` and merged into Claude/Codex hook config. |
 | `scripts/` | Source copies of shared runtime helper scripts, including config and customization resolution. Runtime projects should install these under `{project-root}/_speclite/scripts`. |
@@ -35,6 +36,22 @@ Within an individual skill package, use these conventions:
 - Put fillable templates and skeleton documents under `assets/`.
 - Put structured lookup/reference data under `data/` when it is not a template.
 - Put skill-local executable scripts under `scripts/`; shared runtime scripts belong in `assets/source/speclite/scripts/` and install to `_speclite/scripts/`.
+
+## Ecosystem Authoring Contract
+
+Ecosystem skill package canonical paths use `assets/source/speclite/ecosystems/<category>/<id>/<skill-name>/`. `category` is limited to `frontend`, `backend`, and `other`; `id` uses lowercase kebab-case and must match `module.yaml` `ecosystem_id`. Module code must be `ecosystem-<category>-<id>`.
+
+Each `ecosystems/<category>/<id>/` module root must contain:
+
+- `module.yaml`: declares `module_kind: ecosystem`, `ecosystem_category`, `ecosystem_id`, `required_dependencies: [sdlc]`, `default_selected: false`, and `required: false`.
+- `module-help.csv`: gives every canonical package root at least one non-`_meta` row with stable `skill`, display name, phase, menu code / action, output location, and artifact type.
+- One or more skill package roots: each package keeps `SKILL.md`, optional `SKILL.en.md`, `CHANGELOG.md`, `metadata.version`, and required references/assets/scripts in sync.
+
+Generic SDLC workflows stay under `sdlc-skills/`. Only skills tied to a specific language, framework, runtime, or toolchain belong in ecosystem modules. Moving a skill from `sdlc-skills/` to an ecosystem module must record source path movement, runtime behavior continuity, and whether the package id remains unchanged.
+
+Use this maintainer sequence for ecosystem source changes: creator / lint -> `module.yaml` / `module-help.csv` -> canonical source check -> fixtures -> build / tests / packaging check. First create or lint the skill package, then sync module metadata, help rows, version, and changelog; next run the canonical source check and refresh default no-ecosystem plus selected ecosystem fixtures; finally run build-first, packaging-last release verification.
+
+`support-skills/` is not a default install module. Use `speclite-skill-creator` / `speclite-skill-lint` for workflow-style skills and `speclite-agent-creator` / `speclite-agent-lint` for agent definition packages.
 
 ## Current Catalog Areas
 
@@ -70,6 +87,31 @@ Implementation-stage runtime artifacts default to `{project-root}/_speclite-outp
 DevOps-stage runtime artifacts default to `{project-root}/_speclite-output/devops-artifacts/`; npm release reports go under `npm-releases/`.
 
 Brownfield analysis lives under `sdlc-skills/1-analysis/speclite-brownfield-context-builder/`. It reconstructs existing repositories into evidence, baseline, deep-dive, and planning handoff layers, defaults outputs to `{project_knowledge}/brownfield/`, and hands the brownfield planning brief to downstream PRD, Architecture, and Epics/Stories workflows for refinement.
+
+### Ecosystem Skills
+
+`ecosystems/` contains optional extensions for a concrete technology ecosystem or project shape. Generic SDLC workflows stay in `sdlc-skills/`; only skills bound to a specific language, framework, runtime, or toolchain belong in an ecosystem module.
+
+Current backend ecosystem modules:
+
+- `ecosystems/backend/java-springboot/`: `ecosystem-backend-java-springboot`
+- `ecosystems/backend/nodejs/`: `ecosystem-backend-nodejs`
+- `ecosystems/backend/python/`: `ecosystem-backend-python`
+
+Current frontend ecosystem modules:
+
+- `ecosystems/frontend/react/`: `ecosystem-frontend-react`
+- `ecosystems/frontend/vue/`: `ecosystem-frontend-vue`
+
+Current other ecosystem modules:
+
+- `ecosystems/other/npm-package/`: `ecosystem-other-npm-package`
+- `ecosystems/other/cli-tool/`: `ecosystem-other-cli-tool`
+- `ecosystems/other/documentation-only/`: `ecosystem-other-documentation-only`
+
+These ecosystem modules depend on `sdlc`, but use `default_selected: false` and `required: false`. Default install still selects only `core` + `sdlc`; selecting one ecosystem module projects only that ecosystem skill package and does not install sibling ecosystem modules.
+
+Ecosystem modules are SpecLite optional skill package selection, not project dependency installers, package managers, or UI framework installers. A React / Vue / Java / npm package ecosystem selection does not install target-project runtime dependencies.
 
 ### Review Skills
 
@@ -124,7 +166,7 @@ Review artifact directories are:
 - `speclite-agent-creator`: creates or migrates `speclite-agent-*` / `bmad-agent-*` role activation Agent definition packages.
 - `speclite-agent-lint`: validates Agent-specific `[agent]` customization, persona, menu targets, prompt references, and runtime residue.
 - `speclite-canonical-source-governance-runner`: classifies impact, records D1/D2 decisions, guides targeted edits, and closes with strict checker verification after hooks report canonical source changes.
-- `speclite-check-canonical-source-change`: checks root counts, `module-help.csv`, hooks, fixtures, docs, and packaging manifest after canonical source changes.
+- `speclite-check-canonical-source-change`: checks root counts, ecosystem category/package totals, `module-help.csv`, hooks, fixtures, docs, and packaging manifest after canonical source changes.
 
 When maintaining canonical skill source definitions under `assets/source/speclite/`, use `speclite-skill-creator` and `speclite-skill-lint` for workflow-style Skills, `speclite-agent-creator` and `speclite-agent-lint` for Agent definition packages, and `speclite-canonical-source-governance-runner` plus `speclite-check-canonical-source-change` for canonical source change closure. Do not fall back to the generic creator/lint skills from the external `skills-creator` repository.
 
@@ -161,3 +203,5 @@ After changing `assets/source/speclite/`, run the canonical source change checke
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict
 ```
+
+The `canonical-source-change-check` hook is a warning-only guardrail and does not replace release verification. Changes touching ecosystem modules, fixtures, or packaging manifests still require `npm run build`, focused tests / fixture gates / canonical source check, and finally `npm run release:packaging-check`.

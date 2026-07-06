@@ -29,7 +29,7 @@
 - 新增 `assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/`，用于 PRD、UX、Architecture、Epics / Stories 的 implementation-readiness consistency grill。
 - 新增 `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/`，用于 Epic 粒度 SR reviewer / evaluator / fixer 严格串行闭环。
 - 新增 `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/`，用于 Epic 下 Story 开发、CR reviewer / evaluator / fixer / finalizer 严格串行闭环。
-- 默认安装 baseline 更新为 `core=13`、`sdlc=51`、`total=64`，并已同步 `module-help.csv`、manifest schema、fixtures、docs 和 packaging manifest。
+- 当时记录的默认安装 baseline 后续已被 Epic 10 ecosystem selected-only 迁移取代；本 handoff 是 historical snapshot，不作为当前 package root count truth。
 
 ## Speclite Catalog README
 

@@ -1,0 +1,3 @@
+module,skill,display-name,menu-code,description,activation-target,metadata,phase,depends-on,optional-dependencies,required,output-location,outputs
+React Frontend Ecosystem,_meta,,,,,,,,,,,
+React Frontend Ecosystem,speclite-react-project-context-and-review,React Project Context And Review,RFR,"Analyze React project facts and produce evidence-linked component architecture, state, routing, testing and migration review notes.",,,3-solutioning,speclite-create-architecture,,false,{project_knowledge}/frontend|{planning_artifacts},react project context and review

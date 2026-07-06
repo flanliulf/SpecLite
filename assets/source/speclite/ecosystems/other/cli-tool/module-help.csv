@@ -1,0 +1,3 @@
+module,skill,display-name,menu-code,description,activation-target,metadata,phase,depends-on,optional-dependencies,required,output-location,outputs
+CLI Tool Ecosystem,_meta,,,,,,,,,,,
+CLI Tool Ecosystem,speclite-cli-tool-contract-auditor,CLI Tool Contract Auditor,CTA,"Audit CLI tool command surface, bin entry, TTY/non-TTY behavior, exit codes, JSON contract, shell portability and install smoke evidence.",,,3-solutioning,speclite-create-architecture,,false,{project_knowledge}/ecosystems/other|{planning_artifacts},cli tool contract audit

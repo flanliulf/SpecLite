@@ -3,6 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { runInstallCommand } from "../src/commands/install.js";
+import { runStatusCommand } from "../src/commands/status.js";
+import { runValidateCommand } from "../src/commands/validate.js";
 
 const supportedRuntime = {
   nodeVersion: "v22.12.0",
@@ -56,7 +58,7 @@ describe("install official module selection orchestration", () => {
       expect(outcome.result.status).toBe("success");
       expect(outcome.result.summary).toContain("Selected modules: core");
       expect(outcome.result.summary).toContain("sdlc");
-      expect(outcome.result.summary).toContain("Canonical package roots: core=13, sdlc=51, total=64.");
+      expect(outcome.result.summary).toContain("Canonical package roots: core=13, sdlc=48, total=61.");
       expect(outcome.result.summary).toContain("Source: bundled assets/source/speclite");
       expect(outcome.result.summary).toContain("Final configuration summary");
       expect(outcome.result.data.sourceDescriptor).toMatchObject({
@@ -99,6 +101,27 @@ describe("install official module selection orchestration", () => {
       await expect(readFile(path.join(tempRoot, "_speclite/_config/manifest.yaml"), "utf8")).resolves.toContain(
         "speclite.manifest.v1",
       );
+      await expect(
+        readFile(
+          path.join(
+            tempRoot,
+            ".claude/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+          ),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".claude/skills/speclite-react-project-context-and-review/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".agents/skills/speclite-vue-project-context-and-review/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -124,7 +147,7 @@ describe("install official module selection orchestration", () => {
           expect(input.targetAdapters.map((adapter) => adapter.targetId)).toEqual(["claude", "agents"]);
           expect(input.prompt).toContain("Selected modules: core");
           expect(input.prompt).toContain("sdlc");
-          expect(input.prompt).toContain("Canonical package roots: core=13, sdlc=51, total=64.");
+          expect(input.prompt).toContain("Canonical package roots: core=13, sdlc=48, total=61.");
           expect(input.prompt).toContain("Pending: runtime structure creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary have not happened.");
           expect(input.prompt).toContain("No project files were changed.");
           await assertNoInstallWrites(tempRoot);
@@ -182,7 +205,7 @@ describe("install official module selection orchestration", () => {
           expect(input.prompt).toContain("core (SpecLite Core Module 0.0.0)");
           expect(input.prompt).not.toContain("Selected modules: core (SpecLite Core Module 0.0.0), sdlc");
           expect(input.prompt).toContain("canonicalPackageRoots=core=13, total=13");
-          expect(input.prompt).not.toContain("canonicalPackageRoots=core=13, sdlc=51, total=64");
+          expect(input.prompt).not.toContain("canonicalPackageRoots=core=13, sdlc=48, total=61");
           expect(input.prompt).toContain("capabilityScope=core:");
           expect(input.prompt).toContain("Planned writes");
           expect(input.prompt).toContain("_speclite/config.toml=create");
@@ -217,7 +240,66 @@ describe("install official module selection orchestration", () => {
           ...supportedRuntime,
           cwd: tempRoot,
         },
-        selectModuleIds: async () => ["sdlc", "core"],
+        selectModuleIds: async (input) => {
+          expect(input.ecosystemCategories).toEqual([
+            {
+              category: "backend",
+              ecosystemIds: [
+                {
+                  id: "java-springboot",
+                  moduleCode: "ecosystem-backend-java-springboot",
+                  name: "Java Spring Boot Backend Ecosystem",
+                },
+                {
+                  id: "nodejs",
+                  moduleCode: "ecosystem-backend-nodejs",
+                  name: "Node.js Backend Ecosystem",
+                },
+                {
+                  id: "python",
+                  moduleCode: "ecosystem-backend-python",
+                  name: "Python Backend Ecosystem",
+                },
+              ],
+            },
+            {
+              category: "frontend",
+              ecosystemIds: [
+                {
+                  id: "react",
+                  moduleCode: "ecosystem-frontend-react",
+                  name: "React Frontend Ecosystem",
+                },
+                {
+                  id: "vue",
+                  moduleCode: "ecosystem-frontend-vue",
+                  name: "Vue Frontend Ecosystem",
+                },
+              ],
+            },
+            {
+              category: "other",
+              ecosystemIds: [
+                {
+                  id: "cli-tool",
+                  moduleCode: "ecosystem-other-cli-tool",
+                  name: "CLI Tool Ecosystem",
+                },
+                {
+                  id: "documentation-only",
+                  moduleCode: "ecosystem-other-documentation-only",
+                  name: "Documentation-only Project Ecosystem",
+                },
+                {
+                  id: "npm-package",
+                  moduleCode: "ecosystem-other-npm-package",
+                  name: "npm Package Ecosystem",
+                },
+              ],
+            },
+          ]);
+          return ["sdlc", "core"];
+        },
       });
 
       expect(outcome.exitCode).toBe(0);
@@ -227,6 +309,384 @@ describe("install official module selection orchestration", () => {
       expect(JSON.stringify(outcome.result)).not.toContain("selectedModules");
 
       await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toContain("[core]");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("installs only the selected backend ecosystem module and its dependencies", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-selected-ecosystem-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+        selectModuleIds: async (input) => {
+          expect(input.ecosystemCategories[0]?.category).toBe("backend");
+          return ["ecosystem-backend-java-springboot"];
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.installPlan?.selectedModules).toEqual([
+        "core",
+        "ecosystem-backend-java-springboot",
+        "sdlc",
+      ]);
+      expect(outcome.result.data.installedModules).toEqual([
+        "core",
+        "ecosystem-backend-java-springboot",
+        "sdlc",
+      ]);
+      expect(outcome.result.summary).toContain(
+        "Canonical package roots: core=13, ecosystem-backend-java-springboot=1, sdlc=48, total=62.",
+      );
+
+      await expect(
+        readFile(
+          path.join(
+            tempRoot,
+            ".claude/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+          ),
+          "utf8",
+        ),
+      ).resolves.toContain("Java");
+      await expect(
+        readFile(
+          path.join(
+            tempRoot,
+            ".agents/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md",
+          ),
+          "utf8",
+        ),
+      ).resolves.toContain("Java");
+      await expect(
+        readFile(
+          path.join(tempRoot, ".claude/skills/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".agents/skills/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+
+      const skillIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
+      );
+      const filesIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/files-index.json"), "utf8"),
+      );
+      const helpIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/help-index.json"), "utf8"),
+      );
+      const phaseCoverage = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/phase-coverage.json"), "utf8"),
+      );
+      const serializedInstalledState = JSON.stringify({
+        skillIndex,
+        filesIndex,
+        helpIndex,
+        phaseCoverage,
+      });
+
+      expect(serializedInstalledState).toContain("speclite-brownfield-java-springboot-backend-tech-stack-digger");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-nodejs-backend-tech-stack-digger");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-python-backend-tech-stack-digger");
+      expect(serializedInstalledState).not.toContain("speclite-react-project-context-and-review");
+      expect(serializedInstalledState).not.toContain("speclite-vue-project-context-and-review");
+
+      const statusOutcome = await runStatusCommand({
+        runtime: { cwd: tempRoot, targetProject: "selected-ecosystem" },
+      });
+      const validateOutcome = await runValidateCommand({
+        runtime: { cwd: tempRoot, targetProject: "selected-ecosystem" },
+      });
+
+      expect(statusOutcome.exitCode).toBe(0);
+      expect(statusOutcome.result.data.installedModules).toEqual([
+        "core",
+        "ecosystem-backend-java-springboot",
+        "sdlc",
+      ]);
+      expect(JSON.stringify(statusOutcome.result)).not.toContain("ecosystem-backend-nodejs");
+      expect(validateOutcome.result.data.checkedCategories).toContain("manifest-schema");
+      expect(JSON.stringify(validateOutcome.result)).not.toContain(
+        "speclite-brownfield-python-backend-tech-stack-digger",
+      );
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("installs only the selected React frontend ecosystem module and its dependencies", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-selected-react-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+        selectModuleIds: async (input) => {
+          const frontend = input.ecosystemCategories.find((group) => group.category === "frontend");
+          expect(frontend?.ecosystemIds.map((entry) => entry.id)).toEqual(["react", "vue"]);
+          return ["ecosystem-frontend-react"];
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.installPlan?.selectedModules).toEqual([
+        "core",
+        "ecosystem-frontend-react",
+        "sdlc",
+      ]);
+      expect(outcome.result.data.installedModules).toEqual([
+        "core",
+        "ecosystem-frontend-react",
+        "sdlc",
+      ]);
+      expect(outcome.result.summary).toContain(
+        "Canonical package roots: core=13, ecosystem-frontend-react=1, sdlc=48, total=62.",
+      );
+
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-react-project-context-and-review/SKILL.md"), "utf8"),
+      ).resolves.toContain("React");
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-react-project-context-and-review/SKILL.md"), "utf8"),
+      ).resolves.toContain("React");
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-vue-project-context-and-review/SKILL.md"), "utf8"),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".agents/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+
+      const skillIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
+      );
+      const filesIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/files-index.json"), "utf8"),
+      );
+      const helpIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/help-index.json"), "utf8"),
+      );
+      const phaseCoverage = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/phase-coverage.json"), "utf8"),
+      );
+      const serializedInstalledState = JSON.stringify({
+        skillIndex,
+        filesIndex,
+        helpIndex,
+        phaseCoverage,
+      });
+
+      expect(serializedInstalledState).toContain("speclite-react-project-context-and-review");
+      expect(serializedInstalledState).not.toContain("speclite-vue-project-context-and-review");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-nodejs-backend-tech-stack-digger");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-python-backend-tech-stack-digger");
+
+      const validateOutcome = await runValidateCommand({
+        runtime: { cwd: tempRoot, targetProject: "selected-frontend-ecosystem" },
+      });
+
+      expect(validateOutcome.result.data.checkedCategories).toContain("manifest-schema");
+      expect(validateOutcome.result.issues.filter((issue) => issue.category === "manifest-schema")).toEqual([]);
+      expect(JSON.stringify(validateOutcome.result)).not.toContain("ecosystem-frontend-vue");
+      expect(JSON.stringify(validateOutcome.result)).not.toContain("ecosystem-backend-java-springboot");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("installs only the selected Vue frontend ecosystem module and its dependencies", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-selected-vue-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+        selectModuleIds: async (input) => {
+          const frontend = input.ecosystemCategories.find((group) => group.category === "frontend");
+          expect(frontend?.ecosystemIds.map((entry) => entry.id)).toEqual(["react", "vue"]);
+          return ["ecosystem-frontend-vue"];
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.installPlan?.selectedModules).toEqual([
+        "core",
+        "ecosystem-frontend-vue",
+        "sdlc",
+      ]);
+      expect(outcome.result.data.installedModules).toEqual([
+        "core",
+        "ecosystem-frontend-vue",
+        "sdlc",
+      ]);
+      expect(outcome.result.summary).toContain(
+        "Canonical package roots: core=13, ecosystem-frontend-vue=1, sdlc=48, total=62.",
+      );
+
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-vue-project-context-and-review/SKILL.md"), "utf8"),
+      ).resolves.toContain("Vue");
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-vue-project-context-and-review/SKILL.md"), "utf8"),
+      ).resolves.toContain("Vue");
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-react-project-context-and-review/SKILL.md"), "utf8"),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".claude/skills/speclite-brownfield-python-backend-tech-stack-digger/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+
+      const skillIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
+      );
+      const filesIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/files-index.json"), "utf8"),
+      );
+      const helpIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/help-index.json"), "utf8"),
+      );
+      const phaseCoverage = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/phase-coverage.json"), "utf8"),
+      );
+      const serializedInstalledState = JSON.stringify({
+        skillIndex,
+        filesIndex,
+        helpIndex,
+        phaseCoverage,
+      });
+
+      expect(serializedInstalledState).toContain("speclite-vue-project-context-and-review");
+      expect(serializedInstalledState).not.toContain("speclite-react-project-context-and-review");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-java-springboot-backend-tech-stack-digger");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-nodejs-backend-tech-stack-digger");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("installs only the selected npm package other ecosystem module and its dependencies", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-install-selected-npm-package-"));
+
+    try {
+      await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+      const outcome = await runInstallCommand({
+        options: { yes: true },
+        runtime: {
+          ...supportedRuntime,
+          cwd: tempRoot,
+        },
+        selectModuleIds: async (input) => {
+          const other = input.ecosystemCategories.find((group) => group.category === "other");
+          expect(other?.ecosystemIds.map((entry) => entry.id)).toEqual([
+            "cli-tool",
+            "documentation-only",
+            "npm-package",
+          ]);
+          return ["ecosystem-other-npm-package"];
+        },
+      });
+
+      expect(outcome.exitCode).toBe(0);
+      expect(outcome.installPlan?.selectedModules).toEqual([
+        "core",
+        "ecosystem-other-npm-package",
+        "sdlc",
+      ]);
+      expect(outcome.result.data.installedModules).toEqual([
+        "core",
+        "ecosystem-other-npm-package",
+        "sdlc",
+      ]);
+      expect(outcome.result.summary).toContain(
+        "Canonical package roots: core=13, ecosystem-other-npm-package=1, sdlc=48, total=62.",
+      );
+
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-npm-package-project-auditor/SKILL.md"), "utf8"),
+      ).resolves.toContain("package.json");
+      await expect(
+        readFile(path.join(tempRoot, ".agents/skills/speclite-npm-package-project-auditor/SKILL.md"), "utf8"),
+      ).resolves.toContain("tarball");
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-cli-tool-contract-auditor/SKILL.md"), "utf8"),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".agents/skills/speclite-documentation-only-project-auditor/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(path.join(tempRoot, ".claude/skills/speclite-react-project-context-and-review/SKILL.md"), "utf8"),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(
+        readFile(
+          path.join(tempRoot, ".agents/skills/speclite-brownfield-java-springboot-backend-tech-stack-digger/SKILL.md"),
+          "utf8",
+        ),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+
+      const skillIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
+      );
+      const filesIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/files-index.json"), "utf8"),
+      );
+      const helpIndex = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/help-index.json"), "utf8"),
+      );
+      const phaseCoverage = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/phase-coverage.json"), "utf8"),
+      );
+      const serializedInstalledState = JSON.stringify({
+        skillIndex,
+        filesIndex,
+        helpIndex,
+        phaseCoverage,
+      });
+
+      expect(serializedInstalledState).toContain("speclite-npm-package-project-auditor");
+      expect(serializedInstalledState).not.toContain("speclite-cli-tool-contract-auditor");
+      expect(serializedInstalledState).not.toContain("speclite-documentation-only-project-auditor");
+      expect(serializedInstalledState).not.toContain("speclite-react-project-context-and-review");
+      expect(serializedInstalledState).not.toContain("speclite-brownfield-nodejs-backend-tech-stack-digger");
+
+      const validateOutcome = await runValidateCommand({
+        runtime: { cwd: tempRoot, targetProject: "selected-other-ecosystem" },
+      });
+
+      expect(validateOutcome.result.data.checkedCategories).toContain("manifest-schema");
+      expect(validateOutcome.result.issues.filter((issue) => issue.category === "manifest-schema")).toEqual([]);
+      expect(JSON.stringify(validateOutcome.result)).not.toContain("ecosystem-other-cli-tool");
+      expect(JSON.stringify(validateOutcome.result)).not.toContain("ecosystem-frontend-react");
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

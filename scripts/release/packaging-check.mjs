@@ -23,6 +23,9 @@ const PYTHON_RESOLVER_COMPAT_ASSETS = [
 const BUILD_INPUT_ROOTS = ["src"];
 const BUILD_INPUT_FILES = ["package.json", "tsconfig.json", "tsup.config.ts"];
 const PACKAGED_DOCUMENTATION_EXAMPLE_PATH = /^assets\/source\/speclite\/docs\/examples\/[^/]+\.md$/;
+const ECOSYSTEM_SOURCE_ROOT = "assets/source/speclite/ecosystems";
+const ALLOWED_TOP_LEVEL_DIST_OUTPUTS = [RUNTIME_PACKAGING_MANIFEST_PATH];
+const GENERATED_OUTPUT_SEGMENTS = new Set([".cache", "cache", "tmp", "temp", "dist", "build"]);
 
 export function collectPackagingPrerequisiteIssues(projectRoot) {
   const issues = [];
@@ -32,6 +35,11 @@ export function collectPackagingPrerequisiteIssues(projectRoot) {
     }
   }
   for (const relativePath of REQUIRED_RUNTIME_ASSETS) {
+    if (!existsSync(path.join(projectRoot, relativePath))) {
+      issues.push(`missing runtime asset: ${relativePath}`);
+    }
+  }
+  for (const relativePath of collectExpectedEcosystemModuleRequirements(projectRoot)) {
     if (!existsSync(path.join(projectRoot, relativePath))) {
       issues.push(`missing runtime asset: ${relativePath}`);
     }
@@ -48,6 +56,26 @@ export function collectPackagingPrerequisiteIssues(projectRoot) {
   }
 
   return issues;
+}
+
+export function collectExpectedEcosystemModuleRequirements(projectRoot) {
+  const ecosystemRoot = path.join(projectRoot, ECOSYSTEM_SOURCE_ROOT);
+  if (!existsSync(ecosystemRoot)) return [];
+
+  const requiredPaths = [];
+  for (const categoryEntry of readdirSync(ecosystemRoot, { withFileTypes: true })) {
+    if (!categoryEntry.isDirectory()) continue;
+    const categoryPath = path.posix.join(ECOSYSTEM_SOURCE_ROOT, categoryEntry.name);
+    const absoluteCategoryPath = path.join(projectRoot, categoryPath);
+    for (const moduleEntry of readdirSync(absoluteCategoryPath, { withFileTypes: true })) {
+      if (!moduleEntry.isDirectory()) continue;
+      const modulePath = path.posix.join(categoryPath, moduleEntry.name);
+      requiredPaths.push(path.posix.join(modulePath, "module.yaml"));
+      collectSkillFiles(projectRoot, modulePath, requiredPaths);
+    }
+  }
+
+  return requiredPaths.sort((left, right) => left.localeCompare(right));
 }
 
 export function validatePackagedDocumentationExamples(entries, packageFiles) {
@@ -82,13 +110,49 @@ export function validatePackagedDocumentationExamples(entries, packageFiles) {
   return { passed: true };
 }
 
-export function createPackagingManifest(packResult, packageJson) {
+export function validateEcosystemSourceIncluded(packageFiles, expectedEcosystemSourceFiles) {
+  if (expectedEcosystemSourceFiles.length === 0) {
+    return {
+      passed: false,
+      reason: "expectedEcosystemSourceFiles must not be empty",
+    };
+  }
+
+  const missingPaths = expectedEcosystemSourceFiles.filter((file) => !packageFiles.has(file));
+  if (missingPaths.length > 0) {
+    return {
+      passed: false,
+      reason: `missing ecosystem source file: ${missingPaths[0]}`,
+      missingPaths,
+    };
+  }
+
+  return { passed: true };
+}
+
+export function validateGeneratedOutputsExcluded(packageFiles) {
+  const forbiddenPath = [...packageFiles].sort((left, right) => left.localeCompare(right)).find(isGeneratedOutputPath);
+  if (forbiddenPath !== undefined) {
+    return {
+      passed: false,
+      reason: `generated output path must not be packaged: ${forbiddenPath}`,
+      forbiddenPath,
+    };
+  }
+
+  return { passed: true };
+}
+
+export function createPackagingManifest(packResult, packageJson, options = {}) {
   const stablePackFiles = packResult.files.filter((entry) => entry.path !== RUNTIME_PACKAGING_MANIFEST_PATH);
   const files = Array.from(
     new Set([...stablePackFiles.map((entry) => entry.path), RUNTIME_PACKAGING_MANIFEST_PATH]),
   )
     .sort((left, right) => left.localeCompare(right));
   const fileSet = new Set(files);
+  const expectedEcosystemSourceFiles = options.expectedEcosystemSourceFiles ?? [];
+  const ecosystemSourceValidation = validateEcosystemSourceIncluded(fileSet, expectedEcosystemSourceFiles);
+  const generatedOutputValidation = validateGeneratedOutputsExcluded(fileSet);
   const packagedDocumentationExamples = files
     .filter((file) => PACKAGED_DOCUMENTATION_EXAMPLE_PATH.test(file))
     .map((file) => ({
@@ -125,6 +189,14 @@ export function createPackagingManifest(packResult, packageJson) {
       passed: files.some((file) => file.startsWith("assets/source/speclite/")),
     },
     {
+      id: "ecosystem-source-included",
+      passed: ecosystemSourceValidation.passed,
+      ...(ecosystemSourceValidation.reason === undefined ? {} : { reason: ecosystemSourceValidation.reason }),
+      ...(ecosystemSourceValidation.missingPaths === undefined
+        ? {}
+        : { missingPaths: ecosystemSourceValidation.missingPaths }),
+    },
+    {
       id: "runtime-schemas-included",
       passed: fileSet.has("dist/bin/speclite.js") && fileSet.has("dist/bin/speclite.d.ts"),
     },
@@ -149,6 +221,14 @@ export function createPackagingManifest(packResult, packageJson) {
     {
       id: "release-fixtures-excluded",
       passed: !files.some((file) => file.startsWith("test/fixtures/") || file.startsWith("fixtures/")),
+    },
+    {
+      id: "generated-output-excluded",
+      passed: generatedOutputValidation.passed,
+      ...(generatedOutputValidation.reason === undefined ? {} : { reason: generatedOutputValidation.reason }),
+      ...(generatedOutputValidation.forbiddenPath === undefined
+        ? {}
+        : { forbiddenPath: generatedOutputValidation.forbiddenPath }),
     },
     {
       id: "packaging-manifest-included-in-package-inventory",
@@ -182,6 +262,14 @@ export function createPackagingManifest(packResult, packageJson) {
     ),
     packagedCompatibilityAssets,
     excludedFixtureDirectories: ["test/fixtures/", "fixtures/"],
+    excludedGeneratedOutputPatterns: [
+      ".cache/",
+      "cache/",
+      "tmp/",
+      "temp/",
+      "build/",
+      "source-local dist/",
+    ],
     packagedDocumentationExamples,
     assertions,
   };
@@ -206,7 +294,9 @@ export function runPackagingCheck(projectRoot = process.cwd()) {
   }
 
   const packageJson = JSON.parse(readFileSync(path.join(projectRoot, "package.json"), "utf8"));
-  const manifest = createPackagingManifest(packResult, packageJson);
+  const manifest = createPackagingManifest(packResult, packageJson, {
+    expectedEcosystemSourceFiles: collectExpectedEcosystemModuleRequirements(projectRoot),
+  });
   const failed = manifest.assertions.filter((assertion) => !assertion.passed);
 
   writePackagingManifests(projectRoot, manifest);
@@ -264,6 +354,27 @@ function collectBuildInputs(projectRoot, relativeDirectory, candidates) {
       candidates.push({ relativePath, mtimeMs: statSync(absolutePath).mtimeMs });
     }
   }
+}
+
+function collectSkillFiles(projectRoot, relativeDirectory, files) {
+  const absoluteDirectory = path.join(projectRoot, relativeDirectory);
+  if (!existsSync(absoluteDirectory)) return;
+  for (const entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
+    const relativePath = path.posix.join(relativeDirectory, entry.name);
+    if (entry.isDirectory()) {
+      collectSkillFiles(projectRoot, relativePath, files);
+    } else if (entry.name === "SKILL.md") {
+      files.push(relativePath);
+    }
+  }
+}
+
+function isGeneratedOutputPath(file) {
+  if (file.startsWith("dist/")) {
+    return !file.startsWith("dist/bin/") && !ALLOWED_TOP_LEVEL_DIST_OUTPUTS.includes(file);
+  }
+
+  return file.split("/").some((segment) => GENERATED_OUTPUT_SEGMENTS.has(segment));
 }
 
 function isDirectRun() {

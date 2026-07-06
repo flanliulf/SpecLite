@@ -16,6 +16,7 @@ const REQUIRED_HOOK_FILES = [
   "claude-settings.fragment.json",
   "codex-hooks.fragment.json",
 ];
+const BANNED_OTHER_ECOSYSTEM_IDS = new Set(["misc", "general", "tools"]);
 const SCAN_DIRS = ["docs", "test", "src", "release"];
 const SCAN_FILES = ["README.md", "assets/source/speclite/README.md", "assets/source/speclite/README.en.md"];
 const execFileAsync = promisify(execFile);
@@ -40,6 +41,16 @@ try {
     counts: {
       core: 0,
       sdlc: 0,
+    ecosystems: {
+      total: 0,
+      packageRoots: 0,
+      totalPackageRoots: 0,
+      byCategory: {
+        frontend: 0,
+        backend: 0,
+          other: 0,
+        },
+      },
       support: 0,
       hooks: 0,
       defaultInstall: { total: 0 },
@@ -66,11 +77,13 @@ async function createReport(projectRoot) {
   const canonicalRoot = path.join(projectRoot, CANONICAL_ROOT);
   const coreRoots = await listSkillRoots(path.join(canonicalRoot, "core-skills"));
   const sdlcRoots = await listSkillRoots(path.join(canonicalRoot, "sdlc-skills"));
+  const ecosystemModules = await listEcosystemModules(path.join(canonicalRoot, "ecosystems"));
   const supportRoots = await listSkillRoots(path.join(canonicalRoot, "support-skills"));
   const hooks = await listHookRoots(path.join(canonicalRoot, "hooks"));
   const counts = {
     core: coreRoots.length,
     sdlc: sdlcRoots.length,
+    ecosystems: summarizeEcosystems(ecosystemModules),
     support: supportRoots.length,
     hooks: hooks.length,
     defaultInstall: {
@@ -83,6 +96,8 @@ async function createReport(projectRoot) {
       ...governance.findings,
       ...(await checkModuleHelp(projectRoot, "core-skills", coreRoots)),
       ...(await checkModuleHelp(projectRoot, "sdlc-skills", sdlcRoots)),
+      ...checkBannedOtherEcosystemIds(projectRoot, ecosystemModules),
+      ...(await checkEcosystemModuleHelp(projectRoot, ecosystemModules)),
       ...(await checkHookSources(projectRoot, hooks)),
       ...(await checkManifestBaseline(projectRoot, counts.defaultInstall.total)),
       ...(await scanStaleText(projectRoot, counts)),
@@ -288,7 +303,15 @@ function matchesPattern(filePath, pattern) {
     const prefix = normalizedPattern.slice(0, -3);
     return normalizedFilePath === prefix || normalizedFilePath.startsWith(`${prefix}/`);
   }
+  if (normalizedPattern.includes("*")) {
+    const expression = `^${normalizedPattern.split("*").map(escapeRegex).join("[^/]+")}$`;
+    return new RegExp(expression).test(normalizedFilePath);
+  }
   return normalizedFilePath === normalizedPattern;
+}
+
+function escapeRegex(value) {
+  return value.replace(/[|\\{}()[\]^$+?.]/g, "\\$&");
 }
 
 async function listChangedPaths(projectRoot) {
@@ -355,6 +378,76 @@ async function listHookRoots(root) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => path.join(root, entry.name))
     .sort((left, right) => relative(left).localeCompare(relative(right)));
+}
+
+async function listEcosystemModules(root) {
+  if (!(await exists(root))) return [];
+  const modules = [];
+  const categoryEntries = await readdir(root, { withFileTypes: true });
+  for (const categoryEntry of categoryEntries) {
+    if (!categoryEntry.isDirectory()) continue;
+    const category = categoryEntry.name;
+    const categoryRoot = path.join(root, category);
+    const ecosystemEntries = await readdir(categoryRoot, { withFileTypes: true });
+    for (const ecosystemEntry of ecosystemEntries) {
+      if (!ecosystemEntry.isDirectory()) continue;
+      const moduleRoot = path.join(categoryRoot, ecosystemEntry.name);
+      if (!(await exists(path.join(moduleRoot, "module.yaml")))) continue;
+      const skillRoots = await listSkillRoots(moduleRoot);
+      modules.push({
+        category,
+        ecosystemId: ecosystemEntry.name,
+        sourceDirectory: toProjectRelative(projectRoot, moduleRoot).replace(`${CANONICAL_ROOT}/`, ""),
+        root: moduleRoot,
+        skillRoots,
+      });
+    }
+  }
+  return modules.sort((left, right) => left.sourceDirectory.localeCompare(right.sourceDirectory));
+}
+
+function summarizeEcosystems(ecosystemModules) {
+  const byCategory = {
+    frontend: 0,
+    backend: 0,
+    other: 0,
+  };
+  let packageRoots = 0;
+  for (const module of ecosystemModules) {
+    if (Object.prototype.hasOwnProperty.call(byCategory, module.category)) {
+      byCategory[module.category] += 1;
+    }
+    packageRoots += module.skillRoots.length;
+  }
+  return {
+    total: ecosystemModules.length,
+    packageRoots,
+    totalPackageRoots: packageRoots,
+    byCategory,
+  };
+}
+
+async function checkEcosystemModuleHelp(projectRoot, ecosystemModules) {
+  const findings = [];
+  for (const module of ecosystemModules) {
+    findings.push(...(await checkModuleHelp(projectRoot, module.sourceDirectory, module.skillRoots)));
+  }
+  return findings;
+}
+
+function checkBannedOtherEcosystemIds(projectRoot, ecosystemModules) {
+  return ecosystemModules
+    .filter((module) => module.category === "other" && BANNED_OTHER_ECOSYSTEM_IDS.has(module.ecosystemId))
+    .map((module) => ({
+      id: "ecosystem-other.banned-id",
+      severity: "error",
+      path: toProjectRelative(projectRoot, path.join(module.root, "module.yaml")),
+      message: `other/${module.ecosystemId} is banned; use a stable project-shape ecosystem id instead.`,
+      details: {
+        category: module.category,
+        ecosystemId: module.ecosystemId,
+      },
+    }));
 }
 
 async function checkModuleHelp(projectRoot, group, skillRoots) {
@@ -536,6 +629,23 @@ async function scanStaleText(projectRoot, counts) {
         message: `Found stale core/sdlc count text; current counts are core=${counts.core}, sdlc=${counts.sdlc}, total=${counts.defaultInstall.total}.`,
       });
     }
+    if (/sdlc\s*=\s*51\s*,?\s*total\s*=\s*64|total\s*=\s*64|SDLC skill package roots\s*\|\s*51/i.test(contents)) {
+      findings.push({
+        id: "docs.stale-canonical-count",
+        severity: "warning",
+        path: relativePath,
+        message: `Found stale fixed core/sdlc count text; current default install counts are core=${counts.core}, sdlc=${counts.sdlc}, total=${counts.defaultInstall.total}; ecosystem package roots are selected-only (${counts.ecosystems.packageRoots}).`,
+      });
+    }
+    if (/(?:official|canonical|source)[^.\n]{0,100}\bonly\s+core\s*\+\s*sdlc\b/i.test(contents)) {
+      findings.push({
+        id: "docs.only-core-sdlc-wording",
+        severity: "warning",
+        path: relativePath,
+        message:
+          "Found wording that describes official/canonical source as limited to the core and sdlc modules. Ecosystem source exists but remains selected-only at install time.",
+      });
+    }
     const supportCountMatch = contents.match(/Support skill package roots\s*\|\s*(\d+)/);
     if (supportCountMatch !== null && Number.parseInt(supportCountMatch[1], 10) !== counts.support) {
       findings.push({
@@ -551,6 +661,15 @@ async function scanStaleText(projectRoot, counts) {
         severity: "warning",
         path: relativePath,
         message: "Codex hook fragment still uses legacy hooks array shape; expected event-keyed hooks object.",
+      });
+    }
+    if (/\bother\s+is\s+(?:a\s+)?catch-all\b|other[^.\n]{0,80}\bmiscellaneous tools\b/i.test(contents)) {
+      findings.push({
+        id: "docs.other-catch-all-drift",
+        severity: "warning",
+        path: relativePath,
+        message:
+          "Found wording that describes the other ecosystem category as a catch-all. Other modules must have stable project-shape admission evidence.",
       });
     }
   }
@@ -673,7 +792,7 @@ function createRecommendedCommands() {
 function renderText(report) {
   const lines = [
     `status: ${report.status}`,
-    `counts: core=${report.counts.core}, sdlc=${report.counts.sdlc}, support=${report.counts.support}, hooks=${report.counts.hooks}, total=${report.counts.defaultInstall.total}`,
+    `counts: core=${report.counts.core}, sdlc=${report.counts.sdlc}, ecosystems=${report.counts.ecosystems.total}/${report.counts.ecosystems.packageRoots}, support=${report.counts.support}, hooks=${report.counts.hooks}, default=${report.counts.defaultInstall.total}`,
   ];
   if (report.findings.length === 0) {
     lines.push("findings: none");

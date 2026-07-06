@@ -96,9 +96,18 @@ speclite install "$PROJECT_ROOT" --yes
 |---|---|
 | Source | `bundled` |
 | Modules | `core`、`sdlc` |
+| Optional ecosystem modules | 不自动选择 |
 | Config mode | `quick` |
 | IDE targets | `claude`、`agents` |
 | Human output locale | `zh-CN` |
+
+`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。需要 React、Vue、Java / Spring Boot、Node.js、Python、npm package、CLI tool 或 documentation-only project 等额外方法论能力时，使用：
+
+```sh
+speclite install "$PROJECT_ROOT" --yes --interactive
+```
+
+interactive mode 会按 `ecosystem category -> id` 引导选择。先选择 `frontend`、`backend`、`other` 或 skip，再选择具体 id。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies。
 
 安装完成后，目标项目会出现：
 

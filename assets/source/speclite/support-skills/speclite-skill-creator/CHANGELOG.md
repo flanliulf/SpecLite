@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.9.0] - 2026-07-06
+
+### Added
+
+- 新增 ecosystem target routing：普通 workflow Skill 可生成到 `assets/source/speclite/ecosystems/<category>/<id>/<skill-name>/`。
+- 新增 ecosystem 创建确认清单，覆盖 `ecosystem_id`、module code、`module-help.csv` row、版本、changelog、runtime path 和 selected-only 安装边界。
+
 ## [1.8.0] - 2026-06-11
 
 ### Changed

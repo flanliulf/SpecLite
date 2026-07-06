@@ -1,0 +1,18 @@
+{
+  "selectedModuleId": "ecosystem-other-npm-package",
+  "expectedInstalledModules": [
+    "core",
+    "ecosystem-other-npm-package",
+    "sdlc"
+  ],
+  "expectedPresentSkillIds": [
+    "speclite-npm-package-project-auditor"
+  ],
+  "expectedAbsentSkillIds": [
+    "speclite-cli-tool-contract-auditor",
+    "speclite-documentation-only-project-auditor",
+    "speclite-react-project-context-and-review",
+    "speclite-brownfield-java-springboot-backend-tech-stack-digger",
+    "speclite-check-canonical-source-change"
+  ]
+}

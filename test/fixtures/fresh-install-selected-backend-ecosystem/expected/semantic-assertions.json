@@ -1,0 +1,18 @@
+{
+  "selectedModuleId": "ecosystem-backend-java-springboot",
+  "expectedInstalledModules": [
+    "core",
+    "ecosystem-backend-java-springboot",
+    "sdlc"
+  ],
+  "expectedPresentSkillIds": [
+    "speclite-brownfield-java-springboot-backend-tech-stack-digger"
+  ],
+  "expectedAbsentSkillIds": [
+    "speclite-brownfield-nodejs-backend-tech-stack-digger",
+    "speclite-brownfield-python-backend-tech-stack-digger",
+    "speclite-react-project-context-and-review",
+    "speclite-npm-package-project-auditor",
+    "speclite-check-canonical-source-change"
+  ]
+}

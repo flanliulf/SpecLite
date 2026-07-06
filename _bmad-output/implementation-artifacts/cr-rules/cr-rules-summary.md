@@ -14,7 +14,7 @@
 | CR-DOC-01 | 写入确认前的 human output 必须展示可审计 target summary | 1-2 | 6/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-02 | Final pre-write install scope summary 必须绑定最终 selected module set | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-TEST-01 | No-write 回归断言必须覆盖全部禁止写入路径并支持既有路径排除 | 1-2 | 7/12 | rules-summary | 已写入规则总结 |
-| CR-API-03 | 用户可见交互能力必须接入 command path 而非停留在 pure model | 1-3, 1-4 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-API-03 | 用户可见交互能力必须接入 command path 而非停留在 pure model | 1-3, 1-4, 10-1 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-API-04 | Internal InstallPlan 必须记录 selectedModules 且不得泄露到 public CommandResult | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-05 | Module required_dependencies 必须在 metadata discovery 阶段确定性校验 | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-06 | `module-help.csv` 的 canonicalSkillId 必须引用已发现 package root | 1-5 | 7/12 | rules-summary | 已写入规则总结 |
@@ -62,8 +62,14 @@
 | CR-API-28 | Normal update apply 成功后必须同步 installed-state projection | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-29 | Conflict failure 输出必须同时保持 structured step state 与准确 summary | 6-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-30 | 环境级 terminal profile 禁色必须优先于显式 false option | 8-9 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-31 | 文档禁止的 module admission rule 必须绑定 executable gate | 10-4 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-03 | Companion SPEC mirror 必须同步契约收敛 wording | 6-6 | 5/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-04 | 已迁移 ecosystem package id 不得残留为 SDLC catalog/root/workflow | 10-6 | 9/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-16 | Compatibility script repair 必须绑定 artifact kind、target path 与 sourceRef | 9-2 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-API-32 | Installed-state selected-module validation 不得 core-only 或非 sdlc 短路 | 10-5 | 9/12 | rules-summary | 已写入规则总结 |
+| CR-API-33 | Canonical governance map 必须覆盖 ecosystem source classification 与 ecosystem-only impact rule | 10-6 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-07 | Release packaging source assertion 必须动态覆盖全部 nested ecosystem modules | 10-5 | 9/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-17 | Release package inventory gate 必须排除 cache/temp/build/source-local dist 输出 | 10-5 | 9/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -205,7 +211,7 @@
 
 #### CR-API-03：用户可见交互能力必须接入 command path 而非停留在 pure model
 
-- **来源问题**: Story 1.3 要求用户可选择一个或多个 official modules，但首轮实现只在 `createModuleSelection` pure model 层支持 `userSelectedModuleIds`，`speclite install` command path 没有 prompt、参数或其他用户选择入口，导致 AC6 未真正落地。Story 1.4 再次出现同类问题：detailed config 的内部 model 支持 `values`、`selectedModuleIds` 和 `ideTargetIds`，但真实 CLI adapter 只收集 mode，用户无法调整 AC4 要求的字段。
+- **来源问题**: Story 1.3 要求用户可选择一个或多个 official modules，但首轮实现只在 `createModuleSelection` pure model 层支持 `userSelectedModuleIds`，`speclite install` command path 没有 prompt、参数或其他用户选择入口，导致 AC6 未真正落地。Story 1.4 再次出现同类问题：detailed config 的内部 model 支持 `values`、`selectedModuleIds` 和 `ideTargetIds`，但真实 CLI adapter 只收集 mode，用户无法调整 AC4 要求的字段。Story 10.1 再次复现同类边界：internal/programmatic module selection 与 prompt 文案已能展示 ecosystem category/id 信息，但 explicit interactive install 仍是一次 exact module code 输入，未真正接入 AC5 要求的 category -> ecosystem id 两级 command path。
 - **CR 证据**:
   - `1-3-code-review-summary-20260526-round-1.md`: Finding #1 指出 CLI 只暴露 `[target-directory]`、`--json`、`--yes`，install orchestration 未传入 `userSelectedModuleIds`。
   - `1-3-code-review-evaluation-20260526-round-1.md`: evaluator 确认该问题为 P1，推荐不新增 public selection flag，而是在 human interactive path 增加受控多选入口。
@@ -213,6 +219,9 @@
   - `1-4-code-review-summary-20260526-round-1.md`: Finding #1 指出 detailed config prompt 声称可调整 project fields、module artifact paths、selected modules 和 IDE targets，但 CLI 只解析 `{ mode }`。
   - `1-4-code-review-evaluation-20260526-round-1.md`: evaluator 确认该问题为 P1，需要在真实 CLI path 补齐 detailed config collection。
   - `1-4-code-review-evaluation-20260526-round-2.md`: evaluator 确认 CLI detailed path 已收集 core fields、SDLC module fields、selected modules 和 IDE targets，Finding #1 已关闭。
+  - `10-1-code-review-summary-20260706-round-1.md`: Finding #1 指出 interactive install 仍是一次 exact module code 输入，没有实现 AC5 要求的 category -> ecosystem id 两级选择。
+  - `10-1-code-review-evaluation-20260706-round-1.md`: evaluator 确认该发现为 P1 阻塞项，并要求补齐真实 CLI 两级交互、保留 programmatic exact module code selection 与 invalid diagnostic。
+  - `10-1-code-review-evaluation-20260706-round-2.md`: evaluator 确认 `collectInteractiveModuleSelection(...)` 已接入 explicit interactive command path，两级 prompt、skip、backend -> java-springboot、unknown ecosystem id regression 均已覆盖，Round 1 P1 关闭。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -223,7 +232,7 @@
 
   | 维度 | 分数 | 理由 |
   |------|------|------|
-  | 复现频次 | 2 | Story 1.3 与 Story 1.4 均出现 pure model 支持但 command path 未暴露真实用户能力的问题，并均经 Round 2 验证关闭。 |
+  | 复现频次 | 2 | Story 1.3、Story 1.4 与 Story 10.1 均出现 pure/internal model 或 prompt display 支持但 command path 未暴露完整真实用户能力的问题，并均经后续复审验证关闭。 |
   | 影响范围 | 1 | 影响 install command orchestration、CLI prompt、module selection 和 project config initialization 交互边界。 |
   | 风险等级 | 1 | 会导致用户可见 AC 被 pure model 测试误判为已实现，但真实 command path 不可用。 |
   | 根因稳定性 | 1 | 属于 model 层和 command path 脱节的实现习惯，后续 CLI flow 容易复现。 |
@@ -237,10 +246,12 @@
   - 不得只因 pure model 支持用户输入参数，就把对应用户能力标记为 command path 已实现。
 - **最佳实践**:
   - 用户可见能力必须有 command orchestration 入口、human/headless 边界策略、stable diagnostic 和 command-level integration tests；若 public flag matrix 未授权扩展，应优先使用已契约化 interactive path 或 no-write pending state。
+  - 多阶段 interactive flow 必须用 command-level tests 覆盖真实 prompt 顺序、skip/empty answer、有效选择映射和 invalid diagnostic，不能只验证 pure helper 的数据结构或一次性 exact-code 输入。
 - **全局文档建议**:
   - 不建议本次升格；该规则虽已跨 Story 复现，但属于 command orchestration / interactive path 的实现流程规则，且直接修改全局文档会扩大本次 Story 收尾范围。本次按用户授权 record-only 更新规则总结。
 - **本次落地**:
   - Story 1.3 与 Story 1.4 的 Round 1 fixer 均已修复，Round 2 evaluator 均确认关闭。
+  - Story 10.1 的 Round 1 fixer 已修复 AC5 两级 interactive install，Round 2 evaluator 确认关闭；本次 04 仅更新既有规则证据，不新增规则编号。
 - **同步状态**: 已写入规则总结
 
 #### CR-API-04：Internal InstallPlan 必须记录 selectedModules 且不得泄露到 public CommandResult
@@ -3062,3 +3073,387 @@
 #### 05 TODO Tracker 交接
 
 - **无需新增 TODO backlog**: Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 10-1 / 2026-07-06
+
+- **Story**: 10-1
+- **分析来源**:
+  - `10-1-code-review-summary-20260706-round-1.md`
+  - `10-1-code-review-evaluation-20260706-round-1.md`
+  - `10-1-code-review-summary-20260706-round-2.md`
+  - `10-1-code-review-evaluation-20260706-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：interactive `speclite install` 仍是一次 exact module code 输入，没有实现 AC5 要求的 category -> ecosystem id 两级选择。
+  - Fixer 已修复 explicit interactive install 的两级 prompt 编排，保留 programmatic exact module code selection、默认/`--json` 不自动选择 ecosystem module、unknown module stable diagnostic，并补充 CLI smoke regression。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户指定的保守 record-only 策略，仅更新既有规则 `CR-API-03` 的复现证据和本 Story 记录；不修改全局文档、Story 文档、`sprint-status.yaml`、源码或 TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 用户可见交互能力必须接入 command path 而非停留在 pure model | 通过 | 8/12 | rules-summary | 用户本次授权保守 record-only：更新既有 CR-API-03 |
+
+### 提炼规则
+
+#### CR-API-03：用户可见交互能力必须接入 command path 而非停留在 pure model
+
+- **来源问题**: Story 10.1 的 AC5 要求 explicit interactive install 先展示 ecosystem category selection，再只展示该 category 下的 ecosystem ids；首轮实现只把 category/id 信息展示在一次性 prompt 中，并要求输入 exact module code，导致用户可见 AC 没有真正接入 command path。
+- **CR 证据**:
+  - `10-1-code-review-summary-20260706-round-1.md`: Finding #1 指出 interactive install 未实现 category -> ecosystem id 两级选择，来源为 `blind+auditor`，分类为 `patch`。
+  - `10-1-code-review-evaluation-20260706-round-1.md`: evaluator 确认该 finding 为 P1 阻塞项，并记录修复执行已补齐 `collectInteractiveModuleSelection(...)`、category prompt、ecosystem id prompt、skip/empty/unknown id regression。
+  - `10-1-code-review-evaluation-20260706-round-2.md`: evaluator 确认 Round 1 P1 已关闭，Round 2 reviewer 通过结论成立，无新增 finding、无 CR TODO。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是，作为既有 `CR-API-03` 的复现证据更新，不新增重复规则编号
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Story 1.3、Story 1.4 已沉淀同类问题，Story 10.1 再次复现 command path 未暴露完整用户能力的问题。 |
+  | 影响范围 | 1 | 影响 install command orchestration、interactive prompt、module selection 和 ecosystem module guided install。 |
+  | 风险等级 | 1 | 会导致用户可见 AC 被 helper 数据结构或 prompt 文案误判为已实现，但真实 interactive command path 不可用。 |
+  | 根因稳定性 | 1 | 属于 pure/internal model、prompt display 与 command path 脱节的实现习惯，后续 CLI flow 容易复现。 |
+  | 可执行性 | 2 | 可要求 command-level tests 覆盖真实 prompt 顺序、skip/empty answer、有效选择映射和 invalid diagnostic。 |
+  | 文档缺口 | 1 | 既有 `CR-API-03` 已覆盖总体规则，本次补充多阶段 interactive flow 的复现证据和检查点，不新增全局文档约束。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: CLI command path 中需要把 pure domain model、metadata grouping 或 prompt display 转化为真实用户可操作能力的 install、module selection、source selection、IDE selection 或 project config initialization 流程。
+- **规避指南**:
+  - 不得只因 helper 支持输入参数、prompt 展示分组信息或 programmatic exact code path 可用，就把对应 interactive 用户能力标记为已实现。
+- **最佳实践**:
+  - 对多阶段 interactive flow，必须在 command path 编排真实 prompt 顺序，并用 CLI/integration tests 覆盖 skip、empty answer、有效选择映射、过滤后的选项展示和 stable invalid diagnostic。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；该模式已由既有 `CR-API-03` 在规则总结中覆盖，且本次用户明确禁止修改全局项目文档。若后续要全局化，可只建议在 install/CLI command orchestration 指南中补充“multi-step interactive AC 必须有 command-level regression”的检查点。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅更新 `cr-rules-summary.md` 中既有 `CR-API-03` 证据和 Story 10-1 记录。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluation 未降级任何 CR TODO，Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 10-5 / 2026-07-07
+
+- **Story**: 10-5
+- **分析来源**:
+  - `10-5-code-review-summary-20260707-round-1.md`
+  - `10-5-code-review-evaluation-20260707-round-1.md`
+  - `10-5-code-review-summary-20260707-round-2.md`
+  - `10-5-code-review-evaluation-20260707-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 3 个 P1 `patch` findings：core-only installed state 绕过 selected-module validation、release packaging source assertion 只覆盖示例 ecosystem modules、release package exclusion gate 缺少 cache/temp/build/source-local dist 负向断言。
+  - Fixer 已修复 3 项：selected-module validation 覆盖所有 `manifest.installedModules`，packaging assertion 从 canonical source 动态枚举全部 8 个 nested ecosystem modules，release gate 新增 `generated-output-excluded` assertion 并排除 cache/temp/build/source-local dist 输出。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户指定的 record-only 策略，仅新增本规则总结记录；不修改全局文档、Story 文档、`sprint-status.yaml`、源码、测试或 TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Installed-state selected-module validation 不得 core-only 或非 sdlc 短路 | 通过 | 9/12 | rules-summary | 用户本次授权 record-only：新增 CR-API-32 |
+| Release packaging source assertion 必须动态覆盖全部 nested ecosystem modules | 通过 | 9/12 | rules-summary | 用户本次授权 record-only：新增 CR-TEST-07 |
+| Release package inventory gate 必须排除 cache/temp/build/source-local dist 输出 | 通过 | 9/12 | rules-summary | 用户本次授权 record-only：新增 CR-SEC-17 |
+
+### 提炼规则
+
+#### CR-API-32：Installed-state selected-module validation 不得 core-only 或非 sdlc 短路
+
+- **来源问题**: Story 10.5 Round 1 发现 `validateInstalledStateSelection` 在 `manifest.installedModules` 不包含 `sdlc` 时直接跳过整段 selected-module validation；core-only 是已支持的 selected install shape，因此混入 unselected ecosystem 的 `skill-index`、`files-index`、`phase-coverage` 或 `help-index` 条目时会漏报。
+- **CR 证据**:
+  - `10-5-code-review-summary-20260707-round-1.md`: Finding #1 指出 core-only installed state 会 bypass selected-module validation，来源为 `blind+edge+auditor`，分类为 `patch`。
+  - `10-5-code-review-evaluation-20260707-round-1.md`: evaluator 确认该 finding 为 P1，要求移除非 `sdlc` manifest 的整体验证短路，并补 core-only negative validation。
+  - `10-5-code-review-evaluation-20260707-round-1.md`: 修复执行记录确认已移除短路，并新增 core-only installed state 混入 unselected ecosystem package root 的负向 validation。
+  - `10-5-code-review-evaluation-20260707-round-2.md`: evaluator 确认 `validateInstalledStateSelection` 已对 `skillIndex`、`sourcePackagePath`、`phaseCoverage`、`filesIndex` 和 `helpIndex` 执行 selected module truth 校验，Round 1 P1 已关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是，既有 `CR-API-16` 覆盖 selected package root set equality，本条补充合法 selected-module 子集不得绕过 validation 的检查点
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认并由 Round 2 复审验证关闭；暂无跨 Story 复现。 |
+  | 影响范围 | 2 | 影响 validate、status、update、repair 等消费 installed-state truth 的 selected module projection 校验。 |
+  | 风险等级 | 2 | 合法 core-only 或其他 selected-module 子集若跳过校验，会让未选 ecosystem 条目进入 installed-state indexes 后仍通过 validate。 |
+  | 根因稳定性 | 2 | 旧 core+sdlc baseline 假设扩展到 ecosystem modules 后形成稳定流程缺口，后续新增 selected-module 组合时容易复现。 |
+  | 可执行性 | 2 | 可通过移除 module-combination early return、对所有 `manifest.installedModules` 做 subset/missing/source/path/help/phase/files 校验，并用 core-only negative regression 检查。 |
+  | 文档缺口 | 0 | 现有 runtime/docs 已声明 installed-state validation 以 selected modules 为 truth，本条作为实现检查点沉淀，不重复修改全局文档。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: installed-state manifest/index validation、selected module projection、validate/status/update/repair 读取目标项目 installed state 的流程。
+- **规避指南**:
+  - 不得因为 `manifest.installedModules` 未包含某个历史默认模块（例如 `sdlc`）就跳过 selected-module validation。
+  - 不得只覆盖默认 `core+sdlc` 或 selected ecosystem happy path，而漏掉 core-only、default-selected、optional ecosystem 等合法 selected-module 子集。
+- **最佳实践**:
+  - selected-module validation 应从 `manifest.installedModules` 构造 truth set，并对 `skill-index`、`files-index`、`phase-coverage`、`help-index` 等所有 installed projections 执行同一套 subset / unexpected / missing / sourceRef 对齐检查。
+  - 任何按 module combination 分支的 validation 都应至少有一个合法子集负例测试，证明 unselected ecosystem 条目会产生 stable `manifest-schema.*` issue。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；docs/reference runtime 与 manifest/index contract 已覆盖 selected module truth 的总体原则，本条属于 Story 10.5 暴露出的 implementation checkpoint。本次只写入 `cr-rules-summary.md`。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅新增 `CR-API-32` 和 Story 10-5 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-TEST-07：Release packaging source assertion 必须动态覆盖全部 nested ecosystem modules
+
+- **来源问题**: Story 10.5 Round 1 发现 release packaging assertion 只证明每个 category 至少有一个 `SKILL.md`，并硬编码检查 `java-springboot`、`react`、`npm-package` 三个示例 `module.yaml`；当前 canonical source 已有 8 个 ecosystem modules，示例化断言无法证明所有 nested ecosystem source files 都进入 npm package。
+- **CR 证据**:
+  - `10-5-code-review-summary-20260707-round-1.md`: Finding #2 指出 `ecosystem-source-included` 是 example-based，而不是覆盖全部 nested ecosystem modules，来源为 `blind+edge+auditor`，分类为 `patch`。
+  - `10-5-code-review-evaluation-20260707-round-1.md`: evaluator 确认该 finding 为 P1，要求从 canonical source 或 package inventory 动态枚举所有 `assets/source/speclite/ecosystems/<category>/<id>/module.yaml` 与对应 `SKILL.md` package roots。
+  - `10-5-code-review-evaluation-20260707-round-1.md`: 修复执行记录确认 release gate 已从 canonical source 动态枚举 ecosystem modules，并新增 backend/nodejs 非示例 module 缺失的负向测试。
+  - `10-5-code-review-evaluation-20260707-round-2.md`: evaluator 确认当前 canonical source 下 8 个 ecosystem module 和 8 个 `SKILL.md` package root 均被 packaging assertion 覆盖，Round 1 P1 已关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认并由 Round 2 复审验证关闭；暂无跨 Story 复现。 |
+  | 影响范围 | 2 | 影响 canonical source tree、release packaging manifest、npm package inventory 和 ecosystem module release confidence。 |
+  | 风险等级 | 2 | 示例化断言会让新增或非示例 ecosystem module 缺包时仍通过 release gate，导致发布包缺失真实 source files。 |
+  | 根因稳定性 | 2 | 用少量示例替代 canonical source 动态枚举，是 source tree 扩展后高概率复现的 release gate 漏洞。 |
+  | 可执行性 | 2 | 可从 canonical source 动态枚举 `module.yaml` 和递归 `SKILL.md` roots，与 package inventory 做 set coverage，并配套非示例缺失负例测试。 |
+  | 文档缺口 | 0 | 现有 canonical source layout 文档已声明 release packaging 必须包含 `assets/source/speclite/ecosystems/**`，本条沉淀为 assertion implementation checkpoint。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: release packaging check、packaging manifest 生成、npm package dry-run inventory、canonical source ecosystem module 扩展。
+- **规避指南**:
+  - 不得用固定示例 module 或“每个 category 至少一个文件”替代全部 nested ecosystem modules 的 package inventory 断言。
+  - 不得把当前 source tree 中的示例 id 硬编码为 release confidence 的完整证明。
+- **最佳实践**:
+  - release packaging assertion 应以 canonical source 为 truth，动态枚举每个 ecosystem `module.yaml` 与实际 package root source files，并用 set difference 报告 missing / unexpected。
+  - 测试必须至少包含一个同 category 非示例 module 缺失的 negative case，确保新增 ecosystem module 不会被示例化断言漏掉。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；全局/参考文档已覆盖 ecosystem source inclusion 的原则，本条属于 release gate 实现检查点。本次只写入 `cr-rules-summary.md`。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅新增 `CR-TEST-07` 和 Story 10-5 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-17：Release package inventory gate 必须排除 cache/temp/build/source-local dist 输出
+
+- **来源问题**: Story 10.5 Round 1 发现 release packaging exclusion gate 只排除 `test/fixtures/` 和 `fixtures/`，没有明确阻断 `.cache/`、`cache/`、`tmp/`、`temp/`、source-local `dist/`、`build/` 等 generated outputs；这些输出若误入 package inventory，当前 release gate 缺少失败条件。
+- **CR 证据**:
+  - `10-5-code-review-summary-20260707-round-1.md`: Finding #3 指出 release packaging exclusion gate 缺少 cache/temp/build output assertions，来源为 `blind+edge+auditor`，分类为 `patch`。
+  - `10-5-code-review-evaluation-20260707-round-1.md`: evaluator 确认该 finding 为 P1，要求新增 `generated-output-excluded` 或等价 assertion，并保留 top-level runtime `dist/bin/**` 与 `dist/packaging-manifest.json` allowlist。
+  - `10-5-code-review-evaluation-20260707-round-1.md`: 修复执行记录确认已新增 `generated-output-excluded` assertion，排除 `.cache`、`cache`、`tmp`、`temp`、`build` 与 source-local `dist`，并新增 cache/temp/build output 负向测试。
+  - `10-5-code-review-evaluation-20260707-round-2.md`: evaluator 确认 generated output exclusion gate 与负向测试已闭环，Round 1 P1 已关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认并由 Round 2 复审验证关闭；暂无跨 Story 复现。 |
+  | 影响范围 | 2 | 影响 release packaging manifest、npm package inventory、ecosystem source package roots 和 release artifact hygiene。 |
+  | 风险等级 | 2 | cache/temp/build/source-local dist 输出进入 npm package 可能泄露本地生成物或发布不可复现 artifact。 |
+  | 根因稳定性 | 2 | exclusion gate 只覆盖 fixture directories 而缺少 generated output taxonomy，是 release packaging 扩展后稳定流程缺口。 |
+  | 可执行性 | 2 | 可集中维护 forbidden generated-output patterns、显式 runtime dist allowlist，并用 package inventory 负向测试检查。 |
+  | 文档缺口 | 0 | 现有 canonical source layout 和 source descriptor 文档已声明 cache/temp/build output 不应进入 source/package truth，本条作为 release gate 实现检查点沉淀。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: release packaging check、npm package inventory、packaging manifest、canonical source / ecosystem source package root 发布流程。
+- **规避指南**:
+  - 不得只排除 fixture directories 就认为 release package 已排除 generated outputs。
+  - 不得用宽泛 `dist/**` 排除规则误伤 top-level runtime `dist/bin/**` 或 `dist/packaging-manifest.json`；必须区分 package runtime output 与 source-local generated output。
+- **最佳实践**:
+  - release gate 应集中维护 generated-output forbidden patterns，覆盖 `.cache`、`cache`、`tmp`、`temp`、`build` 和 source-local `dist` 等路径段，并用 allowlist 保留明确应发布的 top-level runtime artifacts。
+  - 测试应构造包含 forbidden generated output 的 package inventory，断言对应 assertion fail closed，并同时覆盖 allowed runtime dist artifacts 不被误杀。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；全局/参考文档已覆盖 generated output 排除原则，本条属于 release package inventory gate 的实现检查点。本次只写入 `cr-rules-summary.md`。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅新增 `CR-SEC-17` 和 Story 10-5 记录。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluation 未降级任何 CR TODO，Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 10-4 / 2026-07-06
+
+- **Story**: 10-4
+- **分析来源**:
+  - `10-4-code-review-summary-20260706-round-1.md`
+  - `10-4-code-review-evaluation-20260706-round-1.md`
+  - `10-4-code-review-summary-20260706-round-2.md`
+  - `10-4-code-review-evaluation-20260706-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：`other/misc`、`other/general`、`other/tools` 已在 docs、creator guidance 和 lint guidance 中禁止，但缺少 runtime metadata validation 或 canonical checker 的 executable gate。
+  - Fixer 已修复 runtime metadata validation 与 canonical checker 双 gate，并补充 `misc`、`general`、`tools` metadata rejection 负例和实际 `ecosystems/other/misc/module.yaml` canonical checker 负例。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户指定的保守 record-only 策略，仅新增本规则总结记录；不修改全局文档、architecture、CLAUDE、Story 文档、`sprint-status.yaml`、源码、测试或 TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 文档禁止的 module admission rule 必须绑定 executable gate | 通过 | 8/12 | rules-summary | 用户本次授权保守 record-only：新增 CR-API-31 |
+
+### 提炼规则
+
+#### CR-API-31：文档禁止的 module admission rule 必须绑定 executable gate
+
+- **来源问题**: Story 10.4 要求 `other` ecosystem 有 strict admission rules，并明确禁止 `other/misc`、`other/general`、`other/tools` 这类无边界 id。Round 1 发现这些 banned ids 只存在于 docs、creator guidance 和 lint guidance 文案中；runtime metadata validation 仍可能接受合法 metadata 形状的 `ecosystem_category: other` + banned `ecosystem_id`，canonical checker 也只扫描 catch-all 文案漂移，没有扫描实际 banned module root。
+- **CR 证据**:
+  - `10-4-code-review-summary-20260706-round-1.md`: Finding #1 指出 banned `other` ids 已文档化但缺少 executable gates，来源为 `edge+auditor`，分类为 `patch`。
+  - `10-4-code-review-evaluation-20260706-round-1.md`: evaluator 确认该 finding 为 P1，要求 fixer 增加 executable validation / canonical checker gate 和负例测试。
+  - `10-4-code-review-evaluation-20260706-round-1.md`: 修复执行记录确认已新增 `module-metadata.banned-other-ecosystem-id`、canonical checker `ecosystem-other.banned-id`、三个 metadata rejection 负例和实际 `other/misc/module.yaml` checker fixture。
+  - `10-4-code-review-evaluation-20260706-round-2.md`: evaluator 确认 runtime metadata validation、canonical checker 和负例测试均已闭环，Round 2 新发现 0，CR TODO 0，允许 closeout。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认并由 Round 2 复审验证关闭；暂无跨 Story 复现。 |
+  | 影响范围 | 1 | 影响 ecosystem module metadata validation、canonical source checker、release/source admission gate 和 selected-only module discovery。 |
+  | 风险等级 | 2 | 文档禁令若没有 executable gate，后续可引入无边界 `other` module root 并被 discovery/package/install 相关流程接受，破坏 strict admission 与 release gate。 |
+  | 根因稳定性 | 1 | 将 admission rule 停留在文档/guidance 而未绑定 parser/checker gate，是 module taxonomy 扩展时容易复现的实现习惯风险。 |
+  | 可执行性 | 2 | 可要求 runtime metadata validation、canonical checker 或 release gate 至少一处 fail closed，并配套 banned id / banned root 负例测试。 |
+  | 文档缺口 | 1 | 全局/参考文档已有 banned id 文案，但既有 CR 规则未沉淀“文档禁止的 admission rule 必须有 executable gate”的实现检查点。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: ecosystem module taxonomy、module metadata parser、canonical source checker、release gate、以及任何把文档/guidance 中的禁止性 admission rule 落到 source/package/install validation 的流程。
+- **规避指南**:
+  - 不得只在 README、reference docs、creator guidance 或 lint guidance 中声明 banned id / banned value，就认为 admission rule 已闭环。
+  - 不得只扫描文案漂移而不扫描实际 source tree / metadata root；对 banned id 的实际 module root 必须 fail closed。
+- **最佳实践**:
+  - 禁止性 admission rule 应至少接入一个运行时或 release-path executable gate；metadata parser 和 canonical checker 能双层覆盖时，应分别提供 stable issue code。
+  - 负例测试应同时覆盖字段级 metadata rejection 和实际 canonical source root rejection；对于枚举/命名约束，应断言 stable diagnostic id、path 和 offending value。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分为 8/12，但适用范围偏 module taxonomy / validation gate 实现域；且用户明确要求本轮仅执行 rules extractor，采用最保守推荐决策，不修改 project-context、architecture、CLAUDE 或其他全局文档。本次只写入 `cr-rules-summary.md`。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅新增 `cr-rules-summary.md` 中 `CR-API-31` 和 Story 10-4 记录。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluation 未降级任何 CR TODO，Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 10-6 / 2026-07-07
+
+- **Story**: 10-6
+- **分析来源**:
+  - `10-6-code-review-summary-20260707-round-1.md`
+  - `10-6-code-review-evaluation-20260707-round-1.md`
+  - `10-6-code-review-summary-20260707-round-2.md`
+  - `10-6-code-review-evaluation-20260707-round-2.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 2 个 P1 `patch` findings：已迁移 backend ecosystem package ids 仍残留在 SDLC catalog/layout/workflow docs；canonical governance map 未覆盖 `ecosystems/**` source classification、ecosystem `module.yaml` / `module-help.csv` discovery 和 ecosystem-only impact rule。
+  - Fixer 已修复 2 项：移除 SDLC 语境中的已迁移 backend package ids 并补 docs negative test；更新 `canonical-governance.json`、governance docs、checker glob 支持和 ecosystem-only checker regression。
+  - Round 2 reviewer/evaluator 均确认通过；新增 finding 0，需修复 0，CR TODO 0。
+  - 本次 04 使用模型：GPT-5 Codex (gpt-5-codex)。本次按用户指定的 record-only 策略，仅新增本规则总结记录；不修改全局文档、Story 文档、`sprint-status.yaml`、源码、测试或 TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 已迁移 ecosystem package id 不得残留为 SDLC catalog/root/workflow | 通过 | 9/12 | rules-summary | 用户本次授权 record-only：新增 CR-DOC-04 |
+| Canonical governance map 必须覆盖 ecosystem source classification 与 ecosystem-only impact rule | 通过 | 10/12 | rules-summary | 用户本次授权 record-only：新增 CR-API-33 |
+
+### 提炼规则
+
+#### CR-DOC-04：已迁移 ecosystem package id 不得残留为 SDLC catalog/root/workflow
+
+- **来源问题**: Story 10.6 Round 1 发现三条已迁移到 backend ecosystem modules 的 package ids 仍出现在 SDLC skill catalog、canonical source layout 和 workflow explanation 的 SDLC 语境中；同时 ecosystem catalog 已把它们列为 ecosystem modules，形成 public docs / catalog ownership 矛盾。
+- **CR 证据**:
+  - `10-6-code-review-summary-20260707-round-1.md`: Finding #1 指出 `docs/reference/skills/sdlc-workflows.md` 仍把 `speclite-brownfield-java-springboot-backend-tech-stack-digger`、`speclite-brownfield-nodejs-backend-tech-stack-digger`、`speclite-brownfield-python-backend-tech-stack-digger` 列为 SDLC workflows，来源为 `auditor+edge`，分类为 `patch`。
+  - `10-6-code-review-evaluation-20260707-round-1.md`: evaluator 确认该 finding 为 P1，并补充同类 drift 位于 `docs/reference/canonical-source-layout.md` 与 `docs/explanation/speclite-workflows.md`，要求同步修正文档并补 focused docs test。
+  - `10-6-code-review-evaluation-20260707-round-1.md`: 修复执行记录确认 SDLC catalog、canonical source layout、workflow explanation 已移除已迁移 backend-specific package ids 的 SDLC 表述，并新增负向断言。
+  - `10-6-code-review-evaluation-20260707-round-2.md`: evaluator 确认三条 backend-specific package ids 仅保留在 ecosystem catalog，SDLC catalog/layout/workflow explanation 不再残留，focused docs test 已覆盖。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，且同一根因同时出现在多个 public docs/catalog surface；Round 2 复审验证关闭。 |
+  | 影响范围 | 2 | 影响 SDLC catalog、ecosystem catalog、canonical source layout、workflow explanation 和 default vs selected-only ecosystem boundary。 |
+  | 风险等级 | 1 | 会误导用户或维护者把 optional ecosystem package roots 当成 default-selected SDLC workflows，但不直接造成 runtime crash。 |
+  | 根因稳定性 | 2 | source taxonomy 迁移后，下游 docs/catalog/layout 容易残留旧 package ids，是 ecosystem module 扩展中稳定可复现的 drift 模式。 |
+  | 可执行性 | 2 | 可用 focused docs negative tests 断言迁移 package ids 不出现在 SDLC catalog/layout/workflow docs，同时 positive 断言仍在 ecosystem catalog。 |
+  | 文档缺口 | 1 | 既有规则未具体覆盖“已迁移 package id 在旧分类 docs 中负向清理”的检查点，本条补充迁移闭环规则。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: ecosystem package migration、public skill catalog、canonical source layout、workflow explanation、README / docs index 中涉及 module taxonomy 和 selected-only boundary 的文档更新。
+- **规避指南**:
+  - 不得在 package root 已迁移到 `assets/source/speclite/ecosystems/<category>/<id>/` 后，继续把该 package id 列为 SDLC workflow、SDLC root 或 default-selected workflow 示例。
+  - 不得只新增 ecosystem catalog 正向条目而不清理旧分类文档中的同名 package id。
+- **最佳实践**:
+  - 每次迁移 package root 时，应同时做正向与负向文档验证：ecosystem catalog 必须列出新归属，旧 SDLC/support/core catalog、layout 和 workflow explanation 不得保留旧归属表述。
+  - focused docs tests 应枚举迁移 package ids，断言它们只出现在目标分类文档或明确的迁移说明中，不作为旧分类正文条目出现。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分为 9/12，但适用范围偏 ecosystem migration docs gate；用户本次明确只授权更新 CR rules 相关文件，不修改全局项目文档。本次只写入 `cr-rules-summary.md`。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅新增 `CR-DOC-04` 和 Story 10-6 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-33：Canonical governance map 必须覆盖 ecosystem source classification 与 ecosystem-only impact rule
+
+- **来源问题**: Story 10.6 Round 1 发现 `canonical-governance.json` 未把 `assets/source/speclite/ecosystems/**` 纳入 `canonical-source-truth`，未把 ecosystem `module.yaml` / `module-help.csv` 纳入 `module-discovery-contract`，也缺少 ecosystem-only impact rule；因此 ecosystem-only canonical source change 可能无法触发对应 governance followups。
+- **CR 证据**:
+  - `10-6-code-review-summary-20260707-round-1.md`: Finding #2 指出 governance map 缺少 ecosystem path globs、ecosystem module metadata discovery globs 和 ecosystem module change impact rule，来源为 `auditor+edge`，分类为 `patch`。
+  - `10-6-code-review-evaluation-20260707-round-1.md`: evaluator 确认该 finding 为 P1，指出 checker 以 governance map 的 `classes[].pathGlobs` 与 `impactRules[].whenChanged` 计算 `impactedClasses` / `triggeredRules`，ecosystem-only 变化会缺少治理分类和 followups。
+  - `10-6-code-review-evaluation-20260707-round-1.md`: 修复执行记录确认 governance map 已新增 ecosystem source classification、ecosystem metadata discovery globs、`ecosystem-module-change` impact rule，并同步 governance docs、checker `*` 单段 glob 支持和 ecosystem-only regression。
+  - `10-6-code-review-evaluation-20260707-round-2.md`: evaluator 确认 ecosystem-only changed path fixture 会触发 `canonical-source-truth`、`module-discovery-contract`、`ecosystem-module-change` 和 required followups。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 2 复审和 checker regression 验证关闭。 |
+  | 影响范围 | 2 | 影响 canonical source governance map、module discovery contract、canonical checker、governance docs、fixtures、packaging 和 maintainer workflow。 |
+  | 风险等级 | 2 | ecosystem-only canonical source change 若不触发治理分类和 followups，会让 docs、fixtures、packaging 或 selected-only validation 漏检，造成迁移/release 闭环失败。 |
+  | 根因稳定性 | 2 | source taxonomy 扩展后 machine-readable governance map 与 checker path glob 需要同步扩展，缺口会随新增 ecosystem modules 高概率复现。 |
+  | 可执行性 | 2 | 可要求 governance map path globs、impact rule、docs sync 和 checker fixture test 同步更新，并断言 `impactedClasses` / `triggeredRules` / followups。 |
+  | 文档缺口 | 1 | 既有规则覆盖 executable gate 和 packaging/validation 检查点，但未覆盖 governance map 必须显式分类 ecosystem-only source change。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: canonical source governance map、canonical source checker、ecosystem module metadata discovery、maintainer workflow、release verification 和 docs/governance 同步。
+- **规避指南**:
+  - 不得只在 docs 中说明 ecosystem maintainer workflow，而遗漏 machine-readable governance map 中的 `ecosystems/**` source classification、metadata globs 或 ecosystem-only impact rule。
+  - 不得把 mixed worktree 下其它 class/rule 被触发的 `status: "ok"` 误当成 ecosystem-only governance 已闭环。
+- **最佳实践**:
+  - 新增或迁移 canonical source taxonomy 时，应同步更新 governance map 的 `classes[].pathGlobs`、`impactRules[].whenChanged`、human docs 和 checker tests。
+  - checker regression 必须构造 ecosystem-only changed path，断言触发 `canonical-source-truth`、`module-discovery-contract`、`ecosystem-module-change` 以及 ecosystem catalog、fixtures、packaging、creator/lint 或 skill lint 等 required followups。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分为 10/12，但本次用户明确只授权更新 CR rules 相关文件，且 Round 1 fixer 已在 governance docs / machine-readable map 中完成同步；本轮仅沉淀为后续 CR 检查规则。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭；本次 04 仅新增 `CR-API-33` 和 Story 10-6 记录。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 evaluation 未降级任何 CR TODO，Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。

@@ -2,7 +2,7 @@
 
 ## Overview（概述）
 
-本文档承载 `speclite-skill-lint` 的详细扫描流程。入口 SKILL.md 只保留阶段路由；执行 36 条规则时按本文档逐组检查。若入口与本文档冲突，以本文档的执行细则为准。
+本文档承载 `speclite-skill-lint` 的详细扫描流程。入口 SKILL.md 只保留阶段路由；执行 42 条规则时按本文档逐组检查。若入口与本文档冲突，以本文档的执行细则为准。
 
 本 workflow 只适用于普通 workflow 风格 Skill。若目标名称匹配 `speclite-agent-*`，或目标目录包含 `customize.toml` 且其中有 `[agent]`，必须停止当前通用 lint 流程并改用 `speclite-agent-lint`。
 
@@ -59,6 +59,9 @@ python3 scripts/check_skill_density.py <skill-dir>
 
 8. Classification（CLASS-01 ~ CLASS-03）
    - 验证模板、脚本和知识文档是否放在正确目录。
+
+9. Ecosystem Source（ECO-01 ~ ECO-06）
+   - 当目标位于 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` 时，验证 category enum、`ecosystem_id`、module code、`module-help.csv` row、package id uniqueness、version / changelog / mirror sync 和 runtime path 边界。
 
 ## Metadata Contract（metadata 字段契约）
 
@@ -118,6 +121,17 @@ BODY-10 扫描 SKILL.md、SKILL.en.md 和 references/ 中的配置状引用：
 
 若以上均不匹配，报告 BODY-10 Warning，并给出来源文件、行号和建议修复方式：补充本地定义、修正 stale path、明确 external project sample，或补充 owning contract。
 
+## Ecosystem Source Rules（生态源规则）
+
+当目标目录位于 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/`：
+
+1. 将它分类为 SpecLite canonical ecosystem source，而不是 external project path 或 installed runtime dependency。
+2. 检查 `category` 只能是 `frontend`、`backend`、`other`。
+3. 读取上级 `module.yaml`，检查 `module_kind: ecosystem`、`ecosystem_category`、`ecosystem_id`、`code: ecosystem-<category>-<id>`、`required_dependencies: [sdlc]`、`default_selected: false` 和 `required: false`。
+4. 读取上级 `module-help.csv`，检查当前 package id 至少有一条非 `_meta` row，并继续报告 duplicate row、unknown package root 和 missing package row。
+5. 检查 `CHANGELOG.md`、`SKILL.md`、`SKILL.en.md` 和 `metadata.version` 同步；普通 workflow ecosystem Skill 缺少 `CHANGELOG.md` 或 `SKILL.en.md` 为 Error。
+6. 扫描入口和 references，若当前执行规约要求目标项目从 `assets/source/speclite/ecosystems/...` 读取 runtime 依赖，报告 runtime path boundary Warning。
+
 ## Report Phase（报告阶段）
 
 输出标准表格：
@@ -127,8 +141,8 @@ BODY-10 扫描 SKILL.md、SKILL.en.md 和 references/ 中的配置状引用：
 - `状态`
 - `详情`
 
-总结行使用 `X/36 项通过，Y 项警告，Z 项错误`。错误和警告必须附带具体修复建议。
+总结行使用 `X/42 项通过，Y 项警告，Z 项错误`。错误和警告必须附带具体修复建议。
 
 ## Rescan Phase（复查阶段）
 
-用户说"重新检查"、"re-lint"或"再查一次"时，重新执行读取、脚本统计和 36 条规则扫描。报告中标注已修复项和新增项。
+用户说"重新检查"、"re-lint"或"再查一次"时，重新执行读取、脚本统计和 42 条规则扫描。报告中标注已修复项和新增项。

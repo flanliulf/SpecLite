@@ -1,5 +1,19 @@
 {
   "schemaVersion": "speclite.manifest.v1",
+  "sourceDescriptor": {
+    "sourceType": "bundled",
+    "resolvedRoot": "assets/source/speclite",
+    "integrityEvidence": [
+      {
+        "kind": "version-lock",
+        "packageName": "@fancyliu/speclite",
+        "version": "0.3.0",
+        "lockPath": "package-lock.json",
+        "verified": true
+      }
+    ],
+    "trustStatus": "trusted"
+  },
   "installedModules": [
     "core",
     "sdlc"

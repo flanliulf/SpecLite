@@ -25,6 +25,9 @@ describe("fixture contract registry and layout", () => {
   it("defines release gate cases, source-integrity sub-cases and packaging boundary", () => {
     expect(Object.keys(FIXTURE_GATE_REGISTRY.fixtureProjectGates)).toEqual([
       "fresh-install-empty-project",
+      "fresh-install-selected-backend-ecosystem",
+      "fresh-install-selected-frontend-ecosystem",
+      "fresh-install-selected-other-ecosystem",
       "existing-install-update",
       "ide-drift",
       "source-integrity",
@@ -45,6 +48,9 @@ describe("fixture contract registry and layout", () => {
       "source-unreadable-blocked",
     ]);
     expect(getFixtureGateClassification("fresh-install-empty-project")).toBe("fixture-project-gate");
+    expect(getFixtureGateClassification("fresh-install-selected-backend-ecosystem")).toBe("fixture-project-gate");
+    expect(getFixtureGateClassification("fresh-install-selected-frontend-ecosystem")).toBe("fixture-project-gate");
+    expect(getFixtureGateClassification("fresh-install-selected-other-ecosystem")).toBe("fixture-project-gate");
     expect(getFixtureGateClassification("source-integrity/git-floating-blocked")).toBe(
       "fixture-group-sub-case",
     );
@@ -109,7 +115,13 @@ describe("fixture contract registry and layout", () => {
   });
 
   it("keeps Story 6.3 release gate fixture layouts complete on disk", async () => {
-    const projectCases = ["ide-drift", "resolve-parity"];
+    const projectCases = [
+      "fresh-install-selected-backend-ecosystem",
+      "fresh-install-selected-frontend-ecosystem",
+      "fresh-install-selected-other-ecosystem",
+      "ide-drift",
+      "resolve-parity",
+    ];
     for (const caseId of projectCases) {
       expect(
         validateFixtureCaseLayout({

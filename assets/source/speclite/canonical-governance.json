@@ -9,6 +9,7 @@
       "pathGlobs": [
         "assets/source/speclite/core-skills/**",
         "assets/source/speclite/sdlc-skills/**",
+        "assets/source/speclite/ecosystems/**",
         "assets/source/speclite/support-skills/**",
         "assets/source/speclite/hooks/**",
         "assets/source/speclite/scripts/**",
@@ -30,7 +31,9 @@
         "assets/source/speclite/core-skills/module.yaml",
         "assets/source/speclite/core-skills/module-help.csv",
         "assets/source/speclite/sdlc-skills/module.yaml",
-        "assets/source/speclite/sdlc-skills/module-help.csv"
+        "assets/source/speclite/sdlc-skills/module-help.csv",
+        "assets/source/speclite/ecosystems/*/*/module.yaml",
+        "assets/source/speclite/ecosystems/*/*/module-help.csv"
       ],
       "updatePolicy": "Module metadata and help rows must match discovered package roots.",
       "requiredFollowups": [
@@ -131,6 +134,25 @@
         "run skill or agent lint for changed packages",
         "review module-help.csv when package roots changed",
         "review docs/reference/skills"
+      ]
+    },
+    {
+      "id": "ecosystem-module-change",
+      "whenChanged": [
+        "assets/source/speclite/ecosystems/**"
+      ],
+      "impacts": [
+        "module-discovery-contract",
+        "current-public-docs",
+        "release-evidence"
+      ],
+      "requiredFollowups": [
+        "review docs/reference/skills/ecosystem-skills.md",
+        "run selected ecosystem fixture tests",
+        "verify release/packaging-manifest.json includes ecosystem source",
+        "run speclite-skill-creator or speclite-skill-lint followups for changed ecosystem packages",
+        "run canonical source checker",
+        "run npm run build and npm run release:packaging-check"
       ]
     },
     {

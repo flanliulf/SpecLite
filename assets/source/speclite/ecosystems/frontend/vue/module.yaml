@@ -1,0 +1,11 @@
+code: ecosystem-frontend-vue
+name: "Vue Frontend Ecosystem"
+version: "0.0.0"
+description: "Vue frontend project context and review extension for SpecLite SDLC workflows"
+module_kind: ecosystem
+ecosystem_category: frontend
+ecosystem_id: vue
+default_selected: false
+required: false
+required_dependencies:
+  - sdlc

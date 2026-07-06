@@ -38,6 +38,7 @@
 | runtime layout | [`reference/runtime-layout.md`](reference/runtime-layout.md) |
 | canonical source layout | [`reference/canonical-source-layout.md`](reference/canonical-source-layout.md) |
 | canonical source governance | [`reference/canonical-source-governance.md`](reference/canonical-source-governance.md) |
+| optional ecosystem skill catalog | [`reference/skills/ecosystem-skills.md`](reference/skills/ecosystem-skills.md) |
 | 文件所有权模型 | [`explanation/file-ownership-model.md`](explanation/file-ownership-model.md) |
 | 文件所有权边界术语 | [`glossary/file-ownership-boundaries.md`](glossary/file-ownership-boundaries.md) |
 | local-first control plane | [`explanation/local-first-control-plane.md`](explanation/local-first-control-plane.md) |

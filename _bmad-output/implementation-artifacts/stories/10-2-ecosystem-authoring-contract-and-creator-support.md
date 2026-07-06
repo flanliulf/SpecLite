@@ -1,6 +1,6 @@
 # Story 10.2: Ecosystem Authoring Contract And Creator Support（生态源定义创作契约与 Creator 支持）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Expansion Story: 基于 Story 10.1 的 ecosystem module foundation，把后续新增 ecosystem Skill 的创作、lint、帮助目录和版本纪律固化为可执行支撑契约。 -->
 
@@ -65,41 +65,41 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Preflight and source review（AC: 1-7）
-  - [ ] 读取 Story 10.1、Epic 10、`assets/source/speclite/README.md`、`docs/reference/canonical-source-layout.md`、`docs/explanation/speclite-modules.md`、`docs/reference/skills/support-skills.md`。
-  - [ ] 读取 `speclite-skill-creator`、`speclite-skill-lint`、`speclite-agent-creator`、`speclite-agent-lint`、`speclite-check-canonical-source-change` 的 `SKILL.md` 与关键 `references/`。
-  - [ ] 读取 implementation anchors：`src/modules/module-metadata.ts`、`src/modules/module-selection.ts`、`test/source-and-modules.test.ts`、`test/canonical-source-change-check-script.test.ts`。
-  - [ ] 检查 `git status --short -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-2-ecosystem-authoring-contract-and-creator-support.md`，识别用户已有 canonical source 变更。
+- [x] Task 1: Preflight and source review（AC: 1-7）
+  - [x] 读取 Story 10.1、Epic 10、`assets/source/speclite/README.md`、`docs/reference/canonical-source-layout.md`、`docs/explanation/speclite-modules.md`、`docs/reference/skills/support-skills.md`。
+  - [x] 读取 `speclite-skill-creator`、`speclite-skill-lint`、`speclite-agent-creator`、`speclite-agent-lint`、`speclite-check-canonical-source-change` 的 `SKILL.md` 与关键 `references/`。
+  - [x] 读取 implementation anchors：`src/modules/module-metadata.ts`、`src/modules/module-selection.ts`、`test/source-and-modules.test.ts`、`test/canonical-source-change-check-script.test.ts`。
+  - [x] 检查 `git status --short -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-2-ecosystem-authoring-contract-and-creator-support.md`，识别用户已有 canonical source 变更。
 
-- [ ] Task 2: Add authoring contract documentation（AC: 1, 4-7）
-  - [ ] 更新 `assets/source/speclite/README.md`，新增 `ecosystems/<category>/<id>/` authoring section，说明 category、id、module code、module yaml、module-help、Skill layout、support skill usage。
-  - [ ] 更新 `docs/reference/canonical-source-layout.md`，把 Module Roots 从 only top-level `core` / `sdlc` 扩展为 top-level modules + bounded nested ecosystem modules。
-  - [ ] 更新 `docs/explanation/speclite-modules.md`，解释 ecosystem module 是 optional extension module，依赖 `sdlc`，不改变 `core` / `sdlc` 默认行为。
-  - [ ] 更新 `docs/reference/skills/support-skills.md`，移除会失效的 hardcoded default baseline count，改为 selected module truth 与 maintainer-only support boundary。
+- [x] Task 2: Add authoring contract documentation（AC: 1, 4-7）
+  - [x] 更新 `assets/source/speclite/README.md`，新增 `ecosystems/<category>/<id>/` authoring section，说明 category、id、module code、module yaml、module-help、Skill layout、support skill usage。
+  - [x] 更新 `docs/reference/canonical-source-layout.md`，把 Module Roots 从 only top-level `core` / `sdlc` 扩展为 top-level modules + bounded nested ecosystem modules。
+  - [x] 更新 `docs/explanation/speclite-modules.md`，解释 ecosystem module 是 optional extension module，依赖 `sdlc`，不改变 `core` / `sdlc` 默认行为。
+  - [x] 更新 `docs/reference/skills/support-skills.md`，移除会失效的 hardcoded default baseline count，改为 selected module truth 与 maintainer-only support boundary。
 
-- [ ] Task 3: Extend `speclite-skill-creator` for ecosystem target routing（AC: 2, 5-6）
-  - [ ] 在 `speclite-skill-creator` 入口或 workflow reference 中加入 target group：`core-skills`、`sdlc-skills/<phase>`、`support-skills`、`ecosystems/<category>/<id>`。
-  - [ ] 为 ecosystem target 增加 category / ecosystem id / module code / module-help row / version sync / changelog sync 确认清单。
-  - [ ] 保持 Agent routing rule：`speclite-agent-*`、`bmad-agent-*` 或 `[agent]` package 仍转交 `speclite-agent-creator`。
-  - [ ] 增加 creator 触发测试或 golden example，证明 ecosystem path 不会生成到 `sdlc-skills/` 或 project runtime mirror。
+- [x] Task 3: Extend `speclite-skill-creator` for ecosystem target routing（AC: 2, 5-6）
+  - [x] 在 `speclite-skill-creator` 入口或 workflow reference 中加入 target group：`core-skills`、`sdlc-skills/<phase>`、`support-skills`、`ecosystems/<category>/<id>`。
+  - [x] 为 ecosystem target 增加 category / ecosystem id / module code / module-help row / version sync / changelog sync 确认清单。
+  - [x] 保持 Agent routing rule：`speclite-agent-*`、`bmad-agent-*` 或 `[agent]` package 仍转交 `speclite-agent-creator`。
+  - [x] 增加 creator 触发测试或 golden example，证明 ecosystem path 不会生成到 `sdlc-skills/` 或 project runtime mirror。
 
-- [ ] Task 4: Extend `speclite-skill-lint` for ecosystem validation（AC: 3-4, 6）
-  - [ ] 更新 lint rules reference，新增 ecosystem source path classification：`assets/source/speclite/ecosystems/<category>/<id>/<skill>/`。
-  - [ ] 增加 lint checks：category enum、`ecosystem_id` / module code / directory consistency、required `module-help.csv` row、package id uniqueness、version / changelog / mirror sync。
-  - [ ] 确保 existing YAML、description、body density、fixed path hard gate、runtime path、forbidden prefix 规则继续适用于 ecosystem packages。
-  - [ ] 增加 negative tests：invalid category、missing `CHANGELOG.md`、`SKILL.en.md` 版本不一致、unknown module-help row、ecosystem path 被误判为 external path。
+- [x] Task 4: Extend `speclite-skill-lint` for ecosystem validation（AC: 3-4, 6）
+  - [x] 更新 lint rules reference，新增 ecosystem source path classification：`assets/source/speclite/ecosystems/<category>/<id>/<skill>/`。
+  - [x] 增加 lint checks：category enum、`ecosystem_id` / module code / directory consistency、required `module-help.csv` row、package id uniqueness、version / changelog / mirror sync。
+  - [x] 确保 existing YAML、description、body density、fixed path hard gate、runtime path、forbidden prefix 规则继续适用于 ecosystem packages。
+  - [x] 增加 negative tests：invalid category、missing `CHANGELOG.md`、`SKILL.en.md` 版本不一致、unknown module-help row、ecosystem path 被误判为 external path。
 
-- [ ] Task 5: Update canonical source change check for ecosystem authoring drift（AC: 4, 7）
-  - [ ] 扩展 `check_canonical_source_change.mjs`，让 counts / module-help checks 包含 `ecosystems/<category>/<id>/` module roots。
-  - [ ] 报告中区分 default install baseline 与 selected ecosystem counts，避免把 ecosystem packages 算入 unconditional default install total。
-  - [ ] 增加 stale text scan coverage，捕获 docs 中 only core+sdlc、固定 root count、support count 和 package total 的过时表达。
-  - [ ] 更新 `test/canonical-source-change-check-script.test.ts`，加入 nested ecosystem fixture 与 module-help drift assertion。
+- [x] Task 5: Update canonical source change check for ecosystem authoring drift（AC: 4, 7）
+  - [x] 扩展 `check_canonical_source_change.mjs`，让 counts / module-help checks 包含 `ecosystems/<category>/<id>/` module roots。
+  - [x] 报告中区分 default install baseline 与 selected ecosystem counts，避免把 ecosystem packages 算入 unconditional default install total。
+  - [x] 增加 stale text scan coverage，捕获 docs 中 only core+sdlc、固定 root count、support count 和 package total 的过时表达。
+  - [x] 更新 `test/canonical-source-change-check-script.test.ts`，加入 nested ecosystem fixture 与 module-help drift assertion。
 
-- [ ] Task 6: Verification（AC: 1-7）
-  - [ ] 运行 focused creator / lint tests 或脚本：`python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py assets/source/speclite/support-skills/speclite-skill-creator`。
-  - [ ] 运行 canonical source change check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
-  - [ ] 运行 module metadata / source tests：`npm test -- test/source-and-modules.test.ts test/canonical-source-change-check-script.test.ts`。
-  - [ ] 运行 `git diff --check -- assets/source/speclite docs src test _bmad-output/implementation-artifacts/stories/10-2-ecosystem-authoring-contract-and-creator-support.md`。
+- [x] Task 6: Verification（AC: 1-7）
+  - [x] 运行 focused creator / lint tests 或脚本：`python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py assets/source/speclite/support-skills/speclite-skill-creator`。
+  - [x] 运行 canonical source change check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
+  - [x] 运行 module metadata / source tests：`npm test -- test/source-and-modules.test.ts test/canonical-source-change-check-script.test.ts`。
+  - [x] 运行 `git diff --check -- assets/source/speclite docs src test _bmad-output/implementation-artifacts/stories/10-2-ecosystem-authoring-contract-and-creator-support.md`。
 
 ## Dev Notes（开发备注）
 
@@ -155,22 +155,54 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现后填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现后填写。
+- `npm test -- test/source-and-modules.test.ts test/canonical-source-change-check-script.test.ts`：RED 阶段先失败 2 项，分别证明 authoring guidance 与 ecosystem checker counts/module-help drift 尚未实现。
+- `npm test -- test/source-and-modules.test.ts test/canonical-source-change-check-script.test.ts`：GREEN 后通过 2 个 test files / 20 个 tests。
+- `python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py assets/source/speclite/support-skills/speclite-skill-creator`：通过；`SKILL.md` 与 `SKILL.en.md` 均未触发 density warning。
+- `node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`：通过，`status: "ok"`，`findings: []`；counts 显示 `core=13`、`sdlc=48`、`ecosystems.total=3`、`ecosystems.packageRoots=3`、`defaultInstall.total=61`。
+- `git diff --check -- assets/source/speclite docs src test _bmad-output/implementation-artifacts/stories/10-2-ecosystem-authoring-contract-and-creator-support.md`：通过。
+- `npm test`：通过 56 个 test files / 409 个 tests。
 
 ### Completion Notes List（完成说明）
 
-待实现后填写。
+- 完成 ecosystem authoring contract 文档化：补齐 canonical source README、canonical source layout、module explanation 和 support skill reference，明确 `ecosystems/<category>/<id>/`、`module.yaml`、`module-help.csv`、Skill package layout、selected-only install 和 support maintainer-only 边界。
+- 扩展 `speclite-skill-creator`：新增 ecosystem target group、完整目标路径、category / `ecosystem_id` / module code / help row / version / changelog / runtime path 确认清单，并保留 Agent package 转交规则。
+- 扩展 `speclite-skill-lint`：新增 ECO-01 ~ ECO-06 规则，覆盖 ecosystem path classification、module metadata、module code、help row、version/changelog/mirror sync 和 runtime path boundary；普通 ecosystem workflow Skill 仍继承既有 YAML、description、density、fixed path 和 `speclite-` 前缀规则。
+- 扩展 `speclite-check-canonical-source-change`：新增 ecosystem counts、category breakdown、ecosystem module-help 校验和 stale fixed-count scan；default install baseline 继续只计算 selected `core+sdlc`。
+- 新增 deterministic tests：`test/source-and-modules.test.ts` 覆盖 authoring guidance golden assertions；`test/canonical-source-change-check-script.test.ts` 覆盖 nested ecosystem fixture、counts 和 module-help drift。
+- Mixed worktree 边界：未触碰用户列出的 `speclite-docs-intro-ppt-creator/*`、`speclite-html-ppt-generator/**`、`.specskills/docs/analysis/...html-ppt-generator-decision-record.md`；`docs/reference/canonical-source-layout.md` 属于 Story 10.2 范围，本轮只补 ecosystem contract、counts 和 selected-only 边界，保留既有结构。
 
 ### File List（文件清单）
 
-待实现后填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/10-2-ecosystem-authoring-contract-and-creator-support.md`
+- `assets/source/speclite/README.md`
+- `assets/source/speclite/support-skills/speclite-skill-creator/SKILL.md`
+- `assets/source/speclite/support-skills/speclite-skill-creator/SKILL.en.md`
+- `assets/source/speclite/support-skills/speclite-skill-creator/CHANGELOG.md`
+- `assets/source/speclite/support-skills/speclite-skill-creator/references/skill-creation-workflow.md`
+- `assets/source/speclite/support-skills/speclite-skill-lint/SKILL.md`
+- `assets/source/speclite/support-skills/speclite-skill-lint/SKILL.en.md`
+- `assets/source/speclite/support-skills/speclite-skill-lint/CHANGELOG.md`
+- `assets/source/speclite/support-skills/speclite-skill-lint/references/check-rules.md`
+- `assets/source/speclite/support-skills/speclite-skill-lint/references/lint-workflow.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/SKILL.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/SKILL.en.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/CHANGELOG.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/references/canonical-change-checklist.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs`
+- `docs/reference/canonical-source-layout.md`
+- `docs/explanation/speclite-modules.md`
+- `docs/reference/skills/support-skills.md`
+- `test/source-and-modules.test.ts`
+- `test/canonical-source-change-check-script.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-07-06 | 0.1 | 创建 Story 10.2，定义 ecosystem source authoring、creator routing、lint validation、module-help、support skill 和 canonical source check 维护契约。 | John / Codex |
+| 2026-07-06 | 1.0 | 实现 ecosystem authoring docs、creator ecosystem routing guidance、lint ECO 规则、canonical checker ecosystem counts / module-help drift 检查和 deterministic tests，并将 Story 移至 review。 | Fancyliu / Codex |

@@ -1,6 +1,6 @@
 # Story 10.3: Frontend Ecosystem Source Expansion（前端生态源定义扩展）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Expansion Story: 在 Story 10.1 的 ecosystem module foundation 与 Story 10.2 的 authoring contract 之后，建立首批 frontend ecosystem modules，并证明 frontend 选择不会污染 backend / other runtime。 -->
 
@@ -66,47 +66,47 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Preflight and contract review（AC: 1-7）
-  - [ ] 读取 Story 10.1、Story 10.2、Epic 10、`assets/source/speclite/README.md`、`docs/reference/canonical-source-layout.md`、`docs/explanation/speclite-modules.md`。
-  - [ ] 检查当前是否已有 `assets/source/speclite/ecosystems/frontend/`、React、Vue 或 frontend-specific canonical package roots；若存在，作为用户已有变更处理，不移动或删除。
-  - [ ] 读取 implementation anchors：`src/modules/module-metadata.ts`、`src/modules/module-selection.ts`、`src/commands/install.ts`、`src/ide/target-writer.ts`、`test/source-and-modules.test.ts`、`test/install-module-selection.test.ts`、`test/runtime-structure.test.ts`。
-  - [ ] 读取 docs anchors：`_bmad-output/planning-artifacts/ux-design-specification.md`，确认 SpecLite MVP 不新增 Web / GUI scope。
+- [x] Task 1: Preflight and contract review（AC: 1-7）
+  - [x] 读取 Story 10.1、Story 10.2、Epic 10、`assets/source/speclite/README.md`、`docs/reference/canonical-source-layout.md`、`docs/explanation/speclite-modules.md`。
+  - [x] 检查当前是否已有 `assets/source/speclite/ecosystems/frontend/`、React、Vue 或 frontend-specific canonical package roots；若存在，作为用户已有变更处理，不移动或删除。
+  - [x] 读取 implementation anchors：`src/modules/module-metadata.ts`、`src/modules/module-selection.ts`、`src/commands/install.ts`、`src/ide/target-writer.ts`、`test/source-and-modules.test.ts`、`test/install-module-selection.test.ts`、`test/runtime-structure.test.ts`。
+  - [x] 读取 docs anchors：`_bmad-output/planning-artifacts/ux-design-specification.md`，确认 SpecLite MVP 不新增 Web / GUI scope。
 
-- [ ] Task 2: Create React and Vue ecosystem module source roots（AC: 1, 5）
-  - [ ] Dependency Gate: 在创建任何 `assets/source/speclite/ecosystems/frontend/**` package root 前，必须读取 Story 10.2 completion evidence，确认 ecosystem authoring contract、creator / lint、module-help 和 changelog discipline 已完成。
-  - [ ] 如果 Story 10.2 尚未完成，本 Task 只能执行 discovery / preflight，不得创建 React / Vue module root；除非本 Story 明确采用等价策略，并把最小 creator / lint contract 写入本 Story，同时要求 Story 10.2 fixer 反向吸收该 contract。
-  - [ ] 创建 `assets/source/speclite/ecosystems/frontend/react/module.yaml`，module code 为 `ecosystem-frontend-react`。
-  - [ ] 创建 `assets/source/speclite/ecosystems/frontend/vue/module.yaml`，module code 为 `ecosystem-frontend-vue`。
-  - [ ] 为两个 modules 创建 `module-help.csv`，每个 package root 至少一条非 `_meta` row。
-  - [ ] 保持 `required_dependencies: [sdlc]`、`default_selected: false`、`required: false`。
+- [x] Task 2: Create React and Vue ecosystem module source roots（AC: 1, 5）
+  - [x] Dependency Gate: 在创建任何 `assets/source/speclite/ecosystems/frontend/**` package root 前，必须读取 Story 10.2 completion evidence，确认 ecosystem authoring contract、creator / lint、module-help 和 changelog discipline 已完成。
+  - [x] 如果 Story 10.2 尚未完成，本 Task 只能执行 discovery / preflight，不得创建 React / Vue module root；除非本 Story 明确采用等价策略，并把最小 creator / lint contract 写入本 Story，同时要求 Story 10.2 fixer 反向吸收该 contract。
+  - [x] 创建 `assets/source/speclite/ecosystems/frontend/react/module.yaml`，module code 为 `ecosystem-frontend-react`。
+  - [x] 创建 `assets/source/speclite/ecosystems/frontend/vue/module.yaml`，module code 为 `ecosystem-frontend-vue`。
+  - [x] 为两个 modules 创建 `module-help.csv`，每个 package root 至少一条非 `_meta` row。
+  - [x] 保持 `required_dependencies: [sdlc]`、`default_selected: false`、`required: false`。
 
-- [ ] Task 3: Add seed frontend ecosystem Skill packages（AC: 2, 5-6）
-  - [ ] Dependency Gate: 只有 Story 10.2 authoring contract 完成，或本 Story 已记录等价策略并可被 10.2 反向吸收时，才可创建 seed Skill package files。
-  - [ ] 使用 Story 10.2 的 creator / lint contract 创建 React seed Skill，例如 `speclite-react-project-context-and-review` 或同等 package id。
-  - [ ] 使用 Story 10.2 的 creator / lint contract 创建 Vue seed Skill，例如 `speclite-vue-project-context-and-review` 或同等 package id。
-  - [ ] 每个 seed Skill 必须包含 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`，并按需使用 `references/` 承载具体流程。
-  - [ ] Skill 内容必须以项目事实提取、版本证据、组件 / 状态 / 测试 / 构建策略审查为中心，不硬编码未验证的 framework 版本。
-  - [ ] 不迁移 `speclite-create-ux-design`、`speclite-create-architecture`、`speclite-check-implementation-readiness` 等 generic workflow。
+- [x] Task 3: Add seed frontend ecosystem Skill packages（AC: 2, 5-6）
+  - [x] Dependency Gate: 只有 Story 10.2 authoring contract 完成，或本 Story 已记录等价策略并可被 10.2 反向吸收时，才可创建 seed Skill package files。
+  - [x] 使用 Story 10.2 的 creator / lint contract 创建 React seed Skill，例如 `speclite-react-project-context-and-review` 或同等 package id。
+  - [x] 使用 Story 10.2 的 creator / lint contract 创建 Vue seed Skill，例如 `speclite-vue-project-context-and-review` 或同等 package id。
+  - [x] 每个 seed Skill 必须包含 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`，并按需使用 `references/` 承载具体流程。
+  - [x] Skill 内容必须以项目事实提取、版本证据、组件 / 状态 / 测试 / 构建策略审查为中心，不硬编码未验证的 framework 版本。
+  - [x] 不迁移 `speclite-create-ux-design`、`speclite-create-architecture`、`speclite-check-implementation-readiness` 等 generic workflow。
 
-- [ ] Task 4: Extend install selection and selected-only tests for frontend（AC: 3-4）
-  - [ ] 增加 module selection tests：交互式 category 选择包含 `frontend`，选择后只列 React / Vue。
-  - [ ] 增加 default install tests：`--yes` / JSON 默认路径仍只选择 `core` + `sdlc`，不安装 React / Vue。
-  - [ ] 增加 selected React install tests，断言 React Skill 出现在 `.claude/skills`、`.agents/skills`、indexes 和 ready summary，Vue / backend / other absent。
-  - [ ] 增加 selected Vue install tests，断言 Vue Skill 出现，React / backend / other absent。
+- [x] Task 4: Extend install selection and selected-only tests for frontend（AC: 3-4）
+  - [x] 增加 module selection tests：交互式 category 选择包含 `frontend`，选择后只列 React / Vue。
+  - [x] 增加 default install tests：`--yes` / JSON 默认路径仍只选择 `core` + `sdlc`，不安装 React / Vue。
+  - [x] 增加 selected React install tests，断言 React Skill 出现在 `.claude/skills`、`.agents/skills`、indexes 和 ready summary，Vue / backend / other absent。
+  - [x] 增加 selected Vue install tests，断言 Vue Skill 出现，React / backend / other absent。
 
-- [ ] Task 5: Update docs and source inventory（AC: 6-7）
-  - [ ] 更新 `assets/source/speclite/README.md`，列出 `ecosystems/frontend/react/` 与 `ecosystems/frontend/vue/` 的 role 和 authoring rule。
-  - [ ] 更新 `docs/reference/canonical-source-layout.md` 与 `docs/explanation/speclite-modules.md`，说明 frontend ecosystem modules optional、selected-only、依赖 `sdlc`。
-  - [ ] 更新 `docs/reference/skills/` 下相关 catalog，说明 React / Vue packages 的入口与 default install 边界。
-  - [ ] 更新 package / release docs 中的 static count 表达，避免 only core+sdlc 成为长期真相。
+- [x] Task 5: Update docs and source inventory（AC: 6-7）
+  - [x] 更新 `assets/source/speclite/README.md`，列出 `ecosystems/frontend/react/` 与 `ecosystems/frontend/vue/` 的 role 和 authoring rule。
+  - [x] 更新 `docs/reference/canonical-source-layout.md` 与 `docs/explanation/speclite-modules.md`，说明 frontend ecosystem modules optional、selected-only、依赖 `sdlc`。
+  - [x] 更新 `docs/reference/skills/` 下相关 catalog，说明 React / Vue packages 的入口与 default install 边界。
+  - [x] 更新 package / release docs 中的 static count 表达，避免 only core+sdlc 成为长期真相。
 
-- [ ] Task 6: Verification（AC: 1-7）
-  - [ ] 运行 focused source tests：`npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts`。
-  - [ ] 运行 selected projection tests：`npm test -- test/runtime-structure.test.ts test/install-command.test.ts` 或当前等价测试文件。
-  - [ ] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `npm run release:packaging-check`。
-  - [ ] 运行 `git diff --check -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-3-frontend-ecosystem-source-expansion.md`。
+- [x] Task 6: Verification（AC: 1-7）
+  - [x] 运行 focused source tests：`npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts`。
+  - [x] 运行 selected projection tests：`npm test -- test/runtime-structure.test.ts test/install-command.test.ts` 或当前等价测试文件。
+  - [x] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `npm run release:packaging-check`。
+  - [x] 运行 `git diff --check -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-3-frontend-ecosystem-source-expansion.md`。
 
 ## Dev Notes（开发备注）
 
@@ -161,22 +161,56 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现后填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现后填写。
+- `npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts`：RED 阶段先失败 4 项，证明 frontend modules 尚未被发现、interactive ecosystem grouping 还没有 frontend category、React / Vue selected-only tests 尚无 source 支撑；GREEN 后通过 2 个 test files / 32 个 tests。
+- `npm test -- test/runtime-structure.test.ts test/install-module-selection.test.ts`：通过 2 个 test files / 24 个 tests；`test/install-command.test.ts` 当前不存在，使用 `test/install-module-selection.test.ts` 作为 install selection / selected projection 等价覆盖。
+- `node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`：最终通过，`status: "ok"`，`findings: []`，counts 显示 `ecosystems.total=5`、`frontend=2`、`backend=3`、`defaultInstall.total=61`。
+- `npm run build`：通过。
+- `npm run release:packaging-check`：通过，并刷新 `release/packaging-manifest.json`。
+- `npm test`：通过 56 个 test files / 411 个 tests。
+- `git diff --check -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-3-frontend-ecosystem-source-expansion.md`：通过。
 
 ### Completion Notes List（完成说明）
 
-待实现后填写。
+- 完成 Story 10.3 preflight：确认 Story 10.1 / 10.2 已完成，`ecosystems/backend/**` 为前序 Story 既有变更，开始实现前不存在 `ecosystems/frontend/**`；未移动、删除或回滚 backend / support / PPT 相关外部 drift。
+- 新增 `ecosystem-frontend-react` 与 `ecosystem-frontend-vue` official ecosystem modules，均声明 `module_kind: ecosystem`、`ecosystem_category: frontend`、`required_dependencies: [sdlc]`、`default_selected: false`、`required: false`。
+- 新增 React / Vue seed Skill packages：`speclite-react-project-context-and-review` 与 `speclite-vue-project-context-and-review`，包含 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和 workflow reference；Skill 明确只基于目标项目文件、lockfile、官方 docs 或用户资料做版本/API 结论。
+- 扩展 tests：frontend category 出现在 two-level ecosystem selection；default `--yes` / JSON baseline 不安装 React / Vue；selected React / selected Vue 只投影对应 package，并对另一 frontend module 与 backend modules 做 negative assertions。
+- 更新 docs / source inventory：说明 React / Vue modules 是 optional frontend extensions、selected-only、依赖 `sdlc`；SpecLite 仍是 CLI + filesystem control plane，不新增 Web UI、dashboard、browser runtime 或 GUI product scope。
+- 更新 release packaging manifest，使新增 frontend ecosystem source files 进入 package inventory；canonical source checker 最终无 findings。
 
 ### File List（文件清单）
 
-待实现后填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/10-3-frontend-ecosystem-source-expansion.md`
+- `assets/source/speclite/README.md`
+- `assets/source/speclite/ecosystems/frontend/react/module.yaml`
+- `assets/source/speclite/ecosystems/frontend/react/module-help.csv`
+- `assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review/SKILL.md`
+- `assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review/SKILL.en.md`
+- `assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review/CHANGELOG.md`
+- `assets/source/speclite/ecosystems/frontend/react/speclite-react-project-context-and-review/references/react-project-context-and-review-workflow.md`
+- `assets/source/speclite/ecosystems/frontend/vue/module.yaml`
+- `assets/source/speclite/ecosystems/frontend/vue/module-help.csv`
+- `assets/source/speclite/ecosystems/frontend/vue/speclite-vue-project-context-and-review/SKILL.md`
+- `assets/source/speclite/ecosystems/frontend/vue/speclite-vue-project-context-and-review/SKILL.en.md`
+- `assets/source/speclite/ecosystems/frontend/vue/speclite-vue-project-context-and-review/CHANGELOG.md`
+- `assets/source/speclite/ecosystems/frontend/vue/speclite-vue-project-context-and-review/references/vue-project-context-and-review-workflow.md`
+- `docs/reference/canonical-source-layout.md`
+- `docs/explanation/speclite-modules.md`
+- `docs/reference/skills/index.md`
+- `docs/reference/skills/ecosystem-skills.md`
+- `release/packaging-manifest.json`
+- `test/source-and-modules.test.ts`
+- `test/install-module-selection.test.ts`
+- `test/list-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-07-06 | 0.1 | 创建 Story 10.3，定义 React / Vue frontend ecosystem modules、前端 seed Skill、两级选择、selected-only 投影、docs 与 release gate 验收。 | John / Codex |
+| 2026-07-06 | 1.0 | 实现 React / Vue frontend ecosystem modules、seed project context review Skills、frontend two-level selection tests、selected-only projection assertions、docs/catalog 更新、release manifest 和 canonical source 验证，并将 Story 移至 review。 | Fancyliu / Codex |

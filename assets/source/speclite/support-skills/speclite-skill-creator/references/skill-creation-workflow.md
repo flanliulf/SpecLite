@@ -20,13 +20,14 @@
 - 输出是什么：新文件、现有文件修改、分析结果或外部服务调用。
 - 是否有明确执行步骤。
 - 是否会推进 Story/Epic 状态、消费 Story 文件、检查 implementation anchor，或依赖前序 Epic 的实现证据。
-- 归属分区是什么。已有参考：`core-skills/`、`sdlc-skills/<phase>/`、`support-skills/`。
+- 归属分区是什么。已有参考：`core-skills/`、`sdlc-skills/<phase>/`、`support-skills/`、`ecosystems/<category>/<id>/`。
 - 是否需要 scripts/、references/ 或 assets/。
 
 确认清单必须包含：
 - Skill 名称和 `speclite-` kebab-case 目录名。
 - 核心功能、触发场景和触发关键词。
 - 输入、输出、SpecLite 分区或 SDLC phase。
+- Ecosystem target 时的 `category`、`ecosystem_id`、module code、module-help row 和 selected-only install 边界。
 - 工作流模式和推荐理由。
 - 是否需要 Flow Gate guidance，以及 owning SPEC / equivalent implementation policy 的表达方式。
 - 文件结构草案。
@@ -38,6 +39,17 @@
 - Core skill：`assets/source/speclite/core-skills/<skill-name>/`。
 - SDLC skill：`assets/source/speclite/sdlc-skills/<phase>/<skill-name>/`。
 - Support skill：`assets/source/speclite/support-skills/<skill-name>/`。
+- Ecosystem skill：`assets/source/speclite/ecosystems/<category>/<id>/<skill-name>/`。
+
+Ecosystem target 只允许 `frontend`、`backend`、`other` 三类 category。`ecosystem_id` 必须是 lowercase kebab-case，并与 module root 和 `module.yaml` 一致；module code 必须是 `ecosystem-<category>-<id>`。生成前必须确认：
+
+- `assets/source/speclite/ecosystems/<category>/<id>/module.yaml` 存在或本次会由维护者补齐，并声明 `module_kind: ecosystem`、`ecosystem_category`、`ecosystem_id`、`required_dependencies: [sdlc]`、`default_selected: false`、`required: false`。
+- `module-help.csv` 会新增至少一条非 `_meta` row，覆盖 stable `skill` id、display name、phase、menu code / action、output location 和 artifact type。
+- `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 与 `metadata.version` 同步。
+- 文档中的 runtime path 使用 `{project-root}`、`.claude/skills/<skill-name>`、`.agents/skills/<skill-name>` 和 `_speclite`，不得把 `assets/source/speclite/ecosystems/...` 写成目标项目 runtime dependency。
+- 从 `sdlc-skills/` 迁移到 ecosystem module 时，记录 source path move、runtime behavior unchanged 和 package id 是否保持不变。
+
+当 `category` 为 `other` 时，还必须确认 `ecosystem_id` 不是无边界命名。默认禁止 `misc`、`general`、`tools`；新增 id 必须记录 `why-not-frontend`、`why-not-backend`、目标项目事实、安装价值和 selected-only 验收。初始允许 examples 是 `npm-package`、`cli-tool`、`documentation-only`，对应 npm package、CLI tool、documentation-only project 三种稳定项目形态。
 
 运行产物路径：
 - 运行产物写入 `.specskills/output/<skill-name>/` 或更具体的 `.specskills/output/<domain>/<skill-name>/`。

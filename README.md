@@ -16,6 +16,7 @@ SpecLite 提供的不是单个 prompt、单份 README 或零散 skill 文件，�
 
 - `core-skills/`：多个 workflow 共享的基础能力，例如帮助、头脑风暴、文档索引、文档拆分和评审辅助。
 - `sdlc-skills/`：按研发生命周期组织的方法论能力，覆盖分析、计划、方案设计、实现和 DevOps 发布阶段。
+- `ecosystems/<category>/<id>/`：optional ecosystem modules，用于 React、Vue、Java / Spring Boot、Node.js、Python、npm package、CLI tool、documentation-only project 等具体技术生态或项目形态的 SpecLite Skill package selection。
 - `support-skills/`：用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义。
 - `hooks/`：安装到 `_speclite/hooks/` 的 deterministic guardrails，例如 Flow Gate enforcement 和 canonical source change warnings。
 - `scripts/`：共享 runtime helper scripts，例如 config/customization resolver。
@@ -115,6 +116,18 @@ NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
 
 这些 human-readable 示例用于帮助人工阅读和复制命令；`--json` 的 contract 以 schema、SPEC 和 focused tests 为准。
 
+## Ecosystem Modules（生态模块）
+
+默认安装仍只选择 `core` + `sdlc`。需要 React、Vue、Java / Spring Boot、Node.js、Python、npm package、CLI tool 或 documentation-only project 等额外方法论能力时，使用 interactive install：
+
+```sh
+speclite install /path/to/project --yes --interactive
+```
+
+interactive mode 会按 `ecosystem category -> id` 引导选择，例如先选 `frontend` / `backend` / `other`，再选 `react`、`java-springboot` 或 `npm-package`。选择 ecosystem modules 是推荐但非 mandatory；skip 是合法路径。
+
+`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies。
+
 ## CLI Commands（命令）
 
 | Command | Purpose |
@@ -186,6 +199,8 @@ npm run release:check
 | `npm run release:verify` | 构建并执行 packaging check，不运行测试。 |
 | `npm run release:check` | 构建、运行 Vitest 并执行 packaging check，作为 publish 前门禁。 |
 
+涉及 fixtures、canonical source、ecosystem modules、packaging manifest 或 release gates 的变更必须保持 build-first 串行验证：先运行 `npm run build`，再运行 focused tests / fixture gates / canonical source check，最后运行 `npm run release:packaging-check`。不要并行运行会读写 `dist/` 或 packaging manifests 的命令。
+
 ## Maintainer Notes（维护者说明）
 
 维护 SpecLite 时，请区分三类内容：
@@ -194,6 +209,6 @@ npm run release:check
 - CLI implementation：`src/`
 - Planning and implementation artifacts：`_bmad-output/`
 
-涉及 skill package、manifest、fixture、runtime path、validation issue model 或 release packaging 的变更，应同步检查对应 specs、fixtures 和 packaging verification。
+涉及 skill package、manifest、fixture、runtime path、validation issue model 或 release packaging 的变更，应同步检查对应 specs、fixtures 和 packaging verification。Optional ecosystem modules 不改变 default install guarantee；default fixture count 与 selected ecosystem fixture matrix 应分别维护。
 
 CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/cli-human-output-matrix.md](docs/reference/cli-human-output-matrix.md)。

@@ -1,0 +1,18 @@
+{
+  "selectedModuleId": "ecosystem-frontend-react",
+  "expectedInstalledModules": [
+    "core",
+    "ecosystem-frontend-react",
+    "sdlc"
+  ],
+  "expectedPresentSkillIds": [
+    "speclite-react-project-context-and-review"
+  ],
+  "expectedAbsentSkillIds": [
+    "speclite-vue-project-context-and-review",
+    "speclite-brownfield-java-springboot-backend-tech-stack-digger",
+    "speclite-npm-package-project-auditor",
+    "speclite-cli-tool-contract-auditor",
+    "speclite-check-canonical-source-change"
+  ]
+}

@@ -1,0 +1,11 @@
+code: ecosystem-backend-java-springboot
+name: "Java Spring Boot Backend Ecosystem"
+version: "0.0.0"
+description: "Java and Spring Boot backend technology stack analysis extension for SpecLite SDLC workflows"
+module_kind: ecosystem
+ecosystem_category: backend
+ecosystem_id: java-springboot
+default_selected: false
+required: false
+required_dependencies:
+  - sdlc

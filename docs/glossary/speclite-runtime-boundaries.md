@@ -55,6 +55,12 @@ IDE skills 目录不应成为新的权威来源，也不应承载 human-owned cu
 
 这些文件通常应视为 workflow-owned artifacts。更新流程必须保护它们，避免覆盖用户或 workflow 已生成的过程记录。
 
+## Ecosystem Source And Selected Projection（生态源与选择性投影）
+
+`assets/source/speclite/ecosystems/<category>/<id>/` 是 canonical source 的一部分，用来保存 optional ecosystem modules。它定义可选的 SpecLite Skill packages，而不是目标项目的 package manager dependency、UI framework installer 或 runtime dependency。
+
+目标项目只接收 selected modules 的 runtime projection。默认 no-prompt install 仍只投影 `core` + `sdlc`；被选择的 ecosystem module 会进入 `.claude/skills/`、`.agents/skills/`、`manifest.yaml`、skill/help/phase/files indexes。未选择的 ecosystem modules 仍停留在 canonical source，不进入 installed runtime。
+
 ## Comparison Table（对比表）
 
 | 概念 | 主要职责 | 是否权威来源 | 是否可再生成 | 典型所有权 |

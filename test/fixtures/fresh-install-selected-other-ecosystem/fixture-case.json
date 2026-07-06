@@ -1,0 +1,7 @@
+{
+  "caseId": "fresh-install-selected-other-ecosystem",
+  "releaseGate": true,
+  "purpose": "Selected other ecosystem install projection and unselected ecosystem absence",
+  "expectedGate": "fixture-release-gates.test.ts selected ecosystem matrix",
+  "expectedOutputClass": "manifest-index-snapshot"
+}

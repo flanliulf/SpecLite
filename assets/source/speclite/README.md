@@ -10,6 +10,7 @@
 | ---- | ---- |
 | `core-skills/` | 多个 SDLC 工作流共享的 Speclite 基础能力，例如启发、头脑风暴、帮助、文档索引、文档拆分和评审辅助能力。 |
 | `sdlc-skills/` | 按生命周期阶段组织的 Speclite SDLC 工作流 Skill，包括分析、计划、方案设计、实现和 DevOps 发布阶段。 |
+| `ecosystems/<category>/<id>/` | 可选技术生态模块。初始 `category` 仅允许 `frontend`、`backend`、`other`；每个生态目录必须有自己的 `module.yaml` 和 `module-help.csv`，并用 `ecosystem-<category>-<id>` 作为 module code。 |
 | `support-skills/` | 用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义的支撑 Skill。 |
 | `hooks/` | 独立 canonical hook packages，安装到目标项目 `_speclite/hooks/` 并合并生成 Claude/Codex hook config。 |
 | `scripts/` | 共享运行时辅助脚本的源码副本，例如配置解析和 customization 解析。目标项目运行时应安装到 `{project-root}/_speclite/scripts`。 |
@@ -37,6 +38,40 @@ Speclite Skill 文档应描述安装后的运行模型，而不是本仓库的�
 - 可填充模板和骨架文档放入 `assets/`。
 - 结构化查表数据如果不是模板，放入 `data/`。
 - Skill 本地可执行脚本放入 `scripts/`；共享运行时脚本放在 `assets/source/speclite/scripts/`，安装到 `_speclite/scripts/`。
+
+## Ecosystem Authoring Contract（生态创作契约）
+
+Ecosystem Skill package 的 canonical source path 是 `assets/source/speclite/ecosystems/<category>/<id>/<skill-name>/`。`category` 只允许 `frontend`、`backend`、`other`；`id` 使用 lowercase kebab-case，并与 `module.yaml` 的 `ecosystem_id` 一致。对应 module code 必须是 `ecosystem-<category>-<id>`。
+
+每个 `ecosystems/<category>/<id>/` module root 必须包含：
+
+- `module.yaml`：声明 `module_kind: ecosystem`、`ecosystem_category`、`ecosystem_id`、`required_dependencies: [sdlc]`、`default_selected: false` 和 `required: false`。
+- `module-help.csv`：每个 canonical package root 至少有一条非 `_meta` row，row 使用 stable `skill` id、display name、phase、menu code / action、output location 和 artifact type。
+- 一个或多个 Skill package roots：每个 package 至少同步 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`、`metadata.version` 和必要 references/assets/scripts。
+
+generic SDLC workflow（通用 SDLC workflow）仍归入 `sdlc-skills/`；只有具化到特定 language、framework、runtime 或 toolchain 的 Skill 才进入 `ecosystems/<category>/<id>/`。从 `sdlc-skills/` 迁移到 ecosystem module 时，必须在 `CHANGELOG.md` 或维护记录中说明 source path move、runtime behavior unchanged 和 package id 是否保持不变。
+
+`support-skills/` 不属于 default install module。创建或迁移普通 workflow Skill 时使用 `speclite-skill-creator`，检查时使用 `speclite-skill-lint`；Agent 定义包仍由 `speclite-agent-creator` 与 `speclite-agent-lint` 管理。
+
+维护 ecosystem source 时使用这个顺序：creator / lint -> `module.yaml` / `module-help.csv` -> canonical source check -> fixtures -> build / tests / packaging check。也就是先创建和 lint Skill package，再同步 module metadata、help row、版本和 changelog；随后运行 canonical source check，刷新 default no-ecosystem 与 selected ecosystem fixtures，最后执行 build-first、packaging-last release verification。
+
+## Other Category Admission（其他类别准入）
+
+`ecosystems/other/<id>/` 只接受不能归入 `frontend` / `backend` 且具有稳定项目形态的生态。初始允许的 `other` examples 是：
+
+- `other/npm-package`：面向 npm package 项目的 package surface、tarball / `npx` smoke、publish metadata 和 release gate readiness evidence。
+- `other/cli-tool`：面向 CLI tool 项目的 `bin` entry、command surface、TTY / non-TTY output、exit code、JSON contract、shell portability 和 install smoke evidence。
+- `other/documentation-only`：面向 documentation-only project 的 `docs/`、README、Diataxis、package-facing docs、link integrity、public docs source 和 project facts evidence。
+
+新增其它 `other` id 必须在 module docs、`module-help.csv`、creator/lint 规则或维护记录中说明：
+
+- `why-not-frontend`：为什么不能归入 frontend ecosystem。
+- `why-not-backend`：为什么不能归入 backend ecosystem。
+- 目标项目事实：该生态的稳定项目形态、文件证据和常见验证面。
+- 安装价值：为什么 selected-only 安装能降低目标项目噪音。
+- selected-only 验收：选择该 module 时只投影该 module，未选择的 frontend / backend / other modules 均不得出现在 runtime mirrors 或 indexes。
+
+禁止使用 `other/misc`、`other/general`、`other/tools` 这类无边界 id。generic publishing、public docs writing、CLI output、PRD、Architecture、Story creation 和 Code Review workflow 仍留在 `sdlc-skills/`；`other` seed Skill 只能提供项目形态特异的 companion guidance，不能复制或迁移既有 SDLC workflow。
 
 ## 当前目录分区
 
@@ -72,6 +107,33 @@ Speclite Skill 文档应描述安装后的运行模型，而不是本仓库的�
 DevOps 发布阶段运行产物默认位于 `{project-root}/_speclite-output/devops-artifacts/`，其中 npm 发布报告写入 `npm-releases/`。
 
 既有系统分析能力位于 `sdlc-skills/1-analysis/speclite-brownfield-context-builder/`。它将 brownfield 仓库恢复为 evidence、baseline、deep-dives、planning handoff 四层产物，默认写入 `{project_knowledge}/brownfield/`，并把 brownfield planning brief 交给后续 PRD、Architecture、Epics/Stories 工作流继续细化。
+
+### Ecosystem Skills
+
+`ecosystems/` 承载具化到某个技术生态的可选扩展。通用 SDLC workflow 继续留在 `sdlc-skills/`；只有绑定到特定语言、框架、runtime 或工具链的 Skill 才放入 ecosystem module。
+
+当前首批 backend ecosystem modules：
+
+- `ecosystems/backend/java-springboot/`：`ecosystem-backend-java-springboot`
+- `ecosystems/backend/nodejs/`：`ecosystem-backend-nodejs`
+- `ecosystems/backend/python/`：`ecosystem-backend-python`
+
+当前首批 frontend ecosystem modules：
+
+- `ecosystems/frontend/react/`：`ecosystem-frontend-react`
+- `ecosystems/frontend/vue/`：`ecosystem-frontend-vue`
+
+当前首批 other ecosystem modules：
+
+- `ecosystems/other/npm-package/`：`ecosystem-other-npm-package`
+- `ecosystems/other/cli-tool/`：`ecosystem-other-cli-tool`
+- `ecosystems/other/documentation-only/`：`ecosystem-other-documentation-only`
+
+这些 ecosystem modules 都依赖 `sdlc`，但 `default_selected: false` 且 `required: false`。默认安装仍只选择 `core` + `sdlc`；用户显式选择某个 ecosystem module 时，installer 只投影该 ecosystem 下的 Skill package，不会把同 category 的其它 ecosystem 全量安装。通用 `speclite-brownfield-backend-tech-stack-digger` 保持在 `sdlc-skills/1-analysis/`，作为跨后端技术栈分析能力。
+
+React / Vue modules 是 optional frontend extensions，只承载绑定到具体 framework evidence 的项目上下文、组件架构、状态、路由、测试、可访问性、构建和迁移审查。generic UX、PRD、Architecture、Story creation 和 Code Review workflow 仍留在 `sdlc`；除非分析绑定到具体 frontend framework ecosystem，不要把通用前端讨论迁入 React / Vue module。SpecLite 本身仍是 CLI + filesystem control plane，不因 frontend ecosystem module 而新增 Web UI、dashboard、browser runtime 或 GUI product scope。
+
+Other modules 是 optional project-shape extensions。`npm-package` 只做 package evidence audit，不执行 publish；真实发布仍由 `speclite-npm-publisher` 负责。`cli-tool` 只做 CLI command contract audit，不替代通用 implementation / output workflow。`documentation-only` 只判断 docs-only project shape 和 docs source readiness，不表示所有文档工作都属于 other；公开文档写作和治理仍由 `speclite-write-opensource-docs` 与 `speclite-agent-docs-steward` 负责。
 
 ### Review Skills
 
@@ -119,7 +181,7 @@ Review 产物目录约定如下：
 
 ### Support Skills
 
-`support-skills/` 包含 canonical skill 源定义的创作和验证工具：
+`support-skills/` 包含 canonical skill 源定义的创作、验证、治理和 docs presentation 支撑工具：
 
 - `speclite-skill-creator`：创建或迁移 workflow 风格的 Speclite Skill 包。
 - `speclite-skill-lint`：验证通用 Skill 规则，以及 Speclite runtime 和迁移对齐规则。
@@ -127,6 +189,8 @@ Review 产物目录约定如下：
 - `speclite-agent-lint`：验证 Agent 专属 `[agent]` 定制面、persona、菜单目标、prompt 引用和 runtime 残留。
 - `speclite-canonical-source-governance-runner`：在 hook 提醒 canonical source 变化后执行分类、影响面矩阵、D1/D2 决策记录、定点修订和 strict checker 收口。
 - `speclite-check-canonical-source-change`：在 canonical source 修改后检查 root counts、`module-help.csv`、hooks、fixtures、docs 和 packaging manifest 是否同步。
+- `speclite-docs-intro-ppt-creator`：把项目体系、系统设计、治理机制、理念或工作流生成到 `docs/` 下的介绍型 HTML PPT。
+- `speclite-html-ppt-generator`：提供 SpecLite-owned HTML PPT 模板、layout、theme、validator 和第三方授权说明，避免依赖外部个人 skill 路径。
 
 维护 `assets/source/speclite/` 下的 canonical skill 源定义时，workflow 风格 Skill 默认使用 `speclite-skill-creator` 与 `speclite-skill-lint`；Agent 定义包默认使用 `speclite-agent-creator` 与 `speclite-agent-lint`；canonical source 变更闭环默认使用 `speclite-canonical-source-governance-runner` 与 `speclite-check-canonical-source-change`。不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
@@ -163,3 +227,5 @@ python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict
 ```
+
+`canonical-source-change-check` hook 只是 warning-only guardrail，不能替代 release verification。涉及 ecosystem modules、fixtures 或 packaging manifest 的变更，发布前仍需先运行 `npm run build`，再运行 focused tests / fixture gates / canonical source check，最后运行 `npm run release:packaging-check`。

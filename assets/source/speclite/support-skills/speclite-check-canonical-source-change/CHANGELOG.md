@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0
+
+- 新增 ecosystem module root 统计，报告 `ecosystems.total`、`ecosystems.packageRoots` 和 category breakdown。
+- 扩展 `module-help.csv` 检查到 `assets/source/speclite/ecosystems/<category>/<id>/module-help.csv`。
+- 保持 default install baseline 只计算 `core+sdlc`，避免未选择 ecosystem packages 混入默认安装总数。
+- 扩展 stale count 扫描，识别 Story 10.1 前后的固定 core/sdlc baseline 文本。
+
 ## 1.1.0
 
 - 新增 `canonical-governance.json` 治理映射读取、impacted classes 和 required followups 输出。

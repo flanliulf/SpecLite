@@ -1,0 +1,3 @@
+module,skill,display-name,menu-code,description,activation-target,metadata,phase,depends-on,optional-dependencies,required,output-location,outputs
+Python Backend Ecosystem,_meta,,,,,,,,,,,
+Python Backend Ecosystem,speclite-brownfield-python-backend-tech-stack-digger,Python Backend Tech Stack,BPS,Analyze Python backend projects from code facts and write an evidence-linked technology stack report.,,,1-analysis,speclite-brownfield-backend-tech-stack-digger,,false,{project_knowledge}/brownfield|{planning_artifacts},python backend tech stack report

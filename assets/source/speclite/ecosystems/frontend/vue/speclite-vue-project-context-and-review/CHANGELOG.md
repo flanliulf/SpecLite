@@ -1,0 +1,12 @@
+# Changelog
+
+本文件记录 `speclite-vue-project-context-and-review` 技能的版本变更历史。
+
+## [1.0.0] - 2026-07-06
+
+### Added
+
+- 新增 Vue frontend ecosystem seed Skill。
+- 覆盖 Vue project evidence、SFC structure、Composition API、state、routing、testing、accessibility、build 和 migration review。
+- 明确 Vue / framework 版本与 API 结论必须来自目标项目文件、lockfile、官方 docs 或用户资料。
+- 明确 SpecLite 不因 Vue ecosystem module 新增 Web UI、dashboard、browser runtime 或 GUI product scope。

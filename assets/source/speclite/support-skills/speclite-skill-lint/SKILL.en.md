@@ -3,13 +3,13 @@ name: speclite-skill-lint
 description: "Validates Agent Skills against specification, including YAML, naming, description quality, version consistency, and content constraints. Use when the user asks for speclite-skill-lint, lint skill, validate skill, check skill, skill compliance, or audit an existing Skill. Capable of YAML violation detection, bilingual trigger coverage analysis, version mismatch checks, forbidden file scanning, and structured report generation."
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.7.0"
+  version: "2.8.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
 [Overview]
-    A read-only Skill compliance checker. It scans a target Skill directory against 36 rules and returns a structured report without modifying files. The rule list is in `references/check-rules.md`; the detailed scan flow is in `references/lint-workflow.md`.
+    A read-only Skill compliance checker. It scans a target Skill directory against 42 rules and returns a structured report without modifying files. The rule list is in `references/check-rules.md`; the detailed scan flow is in `references/lint-workflow.md`.
 
 [Core Capabilities]
     - **YAML frontmatter validation**: Check name, description, allowed-tools, the metadata field contract, and safety boundaries.
@@ -20,6 +20,7 @@ metadata:
     - **Body and Workflow density checks**: Count body length, Workflow length, and Workflow ratio to identify flows that should move into references/, and check whether fixed path hard gates cite an owning SPEC or equivalent implementation policy.
     - **Config reference classification checks**: Classify local definitions, local placeholders, runtime config, artifact paths, workflow variables, template placeholders, schema fields, and external project references so explainable references are not reported as missing config.
     - **Naming and file classification checks**: Check naming and responsibility boundaries for references/, scripts/, and assets/.
+    - **Ecosystem source validation**: Detect `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` and check category, `ecosystem_id`, module code, `module-help.csv`, version/changelog/mirror sync, and runtime path boundaries.
     - **Structured reporting**: Output rule tables, summaries, and concrete repair guidance separated by Error and Warning.
 
 [Workflow]
@@ -34,8 +35,8 @@ metadata:
         `python3 scripts/check_skill_density.py <skill-dir>`
         Use the script JSON result as the only source for BODY-07 and BODY-08 decisions.
 
-    Step 3: Run 36 checks
-        Follow the grouped flow in `references/lint-workflow.md` to check YAML, description, file structure, version, body, naming, mirror, classification, the `speclite-` prefix, and Workflow density. Do not modify target files.
+    Step 3: Run 42 checks
+        Follow the grouped flow in `references/lint-workflow.md` to check YAML, description, file structure, version, body, naming, mirror, classification, the `speclite-` prefix, Workflow density, and ecosystem source rules. Do not modify target files.
 
     Step 4: Report and rescan
         Output a table with rule id, item, status, details, and repair suggestions. When the user asks to re-check, rerun Step 2-4 and mark fixed and newly introduced issues.
@@ -47,6 +48,7 @@ metadata:
     - New or updated Skills must include canonical Chinese SKILL.md and English mirror SKILL.en.md.
     - Agent definition packages are the exception: `speclite-agent-*` package `SKILL.en.md` is optional and must be checked with Agent-specific rules in `speclite-agent-lint`.
     - SpecLite canonical and installed Skill copies must have name and directory values that start with `speclite-`.
+    - Skills under `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` still use YAML, description, version, mirror, density, fixed path, and `speclite-` prefix rules; do not classify them as external project paths or runtime dependencies.
     - Chinese SKILL.md must use English-Chinese section headings, Chinese body content, and English technical identifiers.
 
 [Generation Metadata]

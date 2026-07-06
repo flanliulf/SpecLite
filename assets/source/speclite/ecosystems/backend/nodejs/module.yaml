@@ -1,0 +1,11 @@
+code: ecosystem-backend-nodejs
+name: "Node.js Backend Ecosystem"
+version: "0.0.0"
+description: "Node.js backend technology stack analysis extension for SpecLite SDLC workflows"
+module_kind: ecosystem
+ecosystem_category: backend
+ecosystem_id: nodejs
+default_selected: false
+required: false
+required_dependencies:
+  - sdlc

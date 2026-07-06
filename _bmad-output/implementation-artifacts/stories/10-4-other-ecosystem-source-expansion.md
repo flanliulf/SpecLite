@@ -1,6 +1,6 @@
 # Story 10.4: Other Ecosystem Source Expansion（其他生态源定义扩展）
 
-Status: ready-for-dev
+Status: done
 
 <!-- Expansion Story: 为非 frontend / backend 的 ecosystem modules 建立受约束的 `other` 示例、分类门槛和验收规则，避免 `other` 成为无边界杂项目录。 -->
 
@@ -66,49 +66,49 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Preflight and existing capability classification（AC: 1-7）
-  - [ ] 读取 Story 10.1、Story 10.2、Story 10.3、Epic 10 和 current source tree。
-  - [ ] 检查是否存在 `assets/source/speclite/ecosystems/other/`；若存在，作为用户已有变更处理。
-  - [ ] 读取 existing candidate workflows：`assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/`、`assets/source/speclite/sdlc-skills/1-analysis/speclite-write-opensource-docs/`、`assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-docs-steward/`。
-  - [ ] 记录 classification decision：哪些保留在 `sdlc`，哪些可以作为 other companion Skill，哪些需要用户授权才可迁移。
+- [x] Task 1: Preflight and existing capability classification（AC: 1-7）
+  - [x] 读取 Story 10.1、Story 10.2、Story 10.3、Epic 10 和 current source tree。
+  - [x] 检查是否存在 `assets/source/speclite/ecosystems/other/`；若存在，作为用户已有变更处理。
+  - [x] 读取 existing candidate workflows：`assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/`、`assets/source/speclite/sdlc-skills/1-analysis/speclite-write-opensource-docs/`、`assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-docs-steward/`。
+  - [x] 记录 classification decision：哪些保留在 `sdlc`，哪些可以作为 other companion Skill，哪些需要用户授权才可迁移。
 
-- [ ] Task 2: Define `other` admission and anti-pattern contract（AC: 1, 6）
-  - [ ] Dependency Gate: Story 10.2 未完成时，本 Task 只能整理 `other` admission policy、anti-pattern、classification evidence 和待写入位置，不得落地新的 `ecosystems/other/**` package root。
-  - [ ] 更新 `assets/source/speclite/README.md`，新增 `other` 准入规则和 banned ids。
-  - [ ] 更新 `docs/reference/canonical-source-layout.md`，说明 `ecosystems/other/<id>/` 只接受稳定项目形态，不接受 `misc` / `general`。
-  - [ ] 更新 Story 10.2 的 authoring / lint references，要求新增 other id 时记录 why-not-frontend / why-not-backend。
+- [x] Task 2: Define `other` admission and anti-pattern contract（AC: 1, 6）
+  - [x] Dependency Gate: Story 10.2 未完成时，本 Task 只能整理 `other` admission policy、anti-pattern、classification evidence 和待写入位置，不得落地新的 `ecosystems/other/**` package root。
+  - [x] 更新 `assets/source/speclite/README.md`，新增 `other` 准入规则和 banned ids。
+  - [x] 更新 `docs/reference/canonical-source-layout.md`，说明 `ecosystems/other/<id>/` 只接受稳定项目形态，不接受 `misc` / `general`。
+  - [x] 更新 Story 10.2 的 authoring / lint references，要求新增 other id 时记录 why-not-frontend / why-not-backend。
 
-- [ ] Task 3: Create seed other ecosystem modules（AC: 2, 4-5）
-  - [ ] Dependency Gate: 在创建任何 `assets/source/speclite/ecosystems/other/**` module root 或 seed Skill package 前，必须读取 Story 10.2 completion evidence，确认 ecosystem authoring contract、creator / lint、module-help 和 changelog discipline 已完成。
-  - [ ] 如果 Story 10.2 尚未完成，本 Task 只能执行 discovery / preflight；除非本 Story 明确采用等价策略，并把最小 creator / lint contract 写入本 Story，同时要求 Story 10.2 fixer 反向吸收该 contract。
-  - [ ] 创建 `assets/source/speclite/ecosystems/other/npm-package/`，module code `ecosystem-other-npm-package`。
-  - [ ] 创建 `assets/source/speclite/ecosystems/other/cli-tool/`，module code `ecosystem-other-cli-tool`。
-  - [ ] 创建 `assets/source/speclite/ecosystems/other/documentation-only/`，module code `ecosystem-other-documentation-only`。
-  - [ ] 为每个 module 创建 `module.yaml`、`module-help.csv` 和至少一个 seed Skill。
-  - [ ] 使用 Story 10.2 的 creator / lint contract 生成 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和必要 `references/`。
+- [x] Task 3: Create seed other ecosystem modules（AC: 2, 4-5）
+  - [x] Dependency Gate: 在创建任何 `assets/source/speclite/ecosystems/other/**` module root 或 seed Skill package 前，必须读取 Story 10.2 completion evidence，确认 ecosystem authoring contract、creator / lint、module-help 和 changelog discipline 已完成。
+  - [x] 如果 Story 10.2 尚未完成，本 Task 只能执行 discovery / preflight；除非本 Story 明确采用等价策略，并把最小 creator / lint contract 写入本 Story，同时要求 Story 10.2 fixer 反向吸收该 contract。
+  - [x] 创建 `assets/source/speclite/ecosystems/other/npm-package/`，module code `ecosystem-other-npm-package`。
+  - [x] 创建 `assets/source/speclite/ecosystems/other/cli-tool/`，module code `ecosystem-other-cli-tool`。
+  - [x] 创建 `assets/source/speclite/ecosystems/other/documentation-only/`，module code `ecosystem-other-documentation-only`。
+  - [x] 为每个 module 创建 `module.yaml`、`module-help.csv` 和至少一个 seed Skill。
+  - [x] 使用 Story 10.2 的 creator / lint contract 生成 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和必要 `references/`。
 
-- [ ] Task 4: Preserve or explicitly migrate existing SDLC workflows（AC: 3-4）
-  - [ ] 默认保留 `speclite-npm-publisher` 在 `sdlc`，因为它是生命周期 DevOps 发布 workflow；如实现者认为要迁移，先新增 migration evidence section 和 tests。
-  - [ ] 默认保留 `speclite-write-opensource-docs` 与 `speclite-agent-docs-steward` 在 `sdlc`，因为它们服务公开文档治理；documentation-only ecosystem seed 应提供 project-shape-specific companion guidance。
-  - [ ] 如果创建 wrapper / companion Skill，必须明确它调用或引用 existing SDLC workflow 的边界，不复制大段 workflow 内容。
+- [x] Task 4: Preserve or explicitly migrate existing SDLC workflows（AC: 3-4）
+  - [x] 默认保留 `speclite-npm-publisher` 在 `sdlc`，因为它是生命周期 DevOps 发布 workflow；如实现者认为要迁移，先新增 migration evidence section 和 tests。
+  - [x] 默认保留 `speclite-write-opensource-docs` 与 `speclite-agent-docs-steward` 在 `sdlc`，因为它们服务公开文档治理；documentation-only ecosystem seed 应提供 project-shape-specific companion guidance。
+  - [x] 如果创建 wrapper / companion Skill，必须明确它调用或引用 existing SDLC workflow 的边界，不复制大段 workflow 内容。
 
-- [ ] Task 5: Extend selection, projection and docs tests（AC: 5-7）
-  - [ ] 增加 install selection tests：选择 `other` category 后只列 other ids。
-  - [ ] 增加 selected `ecosystem-other-npm-package` install tests，断言 npm package seed Skill 被安装，`cli-tool`、`documentation-only`、frontend、backend absent。
-  - [ ] 增加 selected `ecosystem-other-cli-tool` 或 `ecosystem-other-documentation-only` negative assertion，证明 other category 内部也 selected-only。
-  - [ ] 更新 docs tests / text assertions，防止 `other` 被描述为 catch-all。
+- [x] Task 5: Extend selection, projection and docs tests（AC: 5-7）
+  - [x] 增加 install selection tests：选择 `other` category 后只列 other ids。
+  - [x] 增加 selected `ecosystem-other-npm-package` install tests，断言 npm package seed Skill 被安装，`cli-tool`、`documentation-only`、frontend、backend absent。
+  - [x] 增加 selected `ecosystem-other-cli-tool` 或 `ecosystem-other-documentation-only` negative assertion，证明 other category 内部也 selected-only。
+  - [x] 更新 docs tests / text assertions，防止 `other` 被描述为 catch-all。
 
-- [ ] Task 6: Update release and canonical checks（AC: 7）
-  - [ ] 扩展 canonical source change check fixture，覆盖 `ecosystems/other/npm-package/` 等 nested module。
-  - [ ] 更新 packaging manifest / release check assertions，确保 other ecosystem source files 进入 npm package inventory。
-  - [ ] 更新 fixture release gates，覆盖 default no-ecosystem baseline 与 selected other ecosystem baseline。
+- [x] Task 6: Update release and canonical checks（AC: 7）
+  - [x] 扩展 canonical source change check fixture，覆盖 `ecosystems/other/npm-package/` 等 nested module。
+  - [x] 更新 packaging manifest / release check assertions，确保 other ecosystem source files 进入 npm package inventory。
+  - [x] 更新 fixture release gates，覆盖 default no-ecosystem baseline 与 selected other ecosystem baseline。
 
-- [ ] Task 7: Verification（AC: 1-7）
-  - [ ] 运行 `npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts test/canonical-source-change-check-script.test.ts`。
-  - [ ] 运行 selected projection / fixture tests：`npm test -- test/runtime-structure.test.ts test/fixture-release-gates.test.ts` 或当前等价测试文件。
-  - [ ] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
-  - [ ] 运行 `npm run build` 与 `npm run release:packaging-check`。
-  - [ ] 运行 `git diff --check -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-4-other-ecosystem-source-expansion.md`。
+- [x] Task 7: Verification（AC: 1-7）
+  - [x] 运行 `npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts test/canonical-source-change-check-script.test.ts`。
+  - [x] 运行 selected projection / fixture tests：`npm test -- test/runtime-structure.test.ts test/fixture-release-gates.test.ts` 或当前等价测试文件。
+  - [x] 运行 canonical source check：`node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`。
+  - [x] 运行 `npm run build` 与 `npm run release:packaging-check`。
+  - [x] 运行 `git diff --check -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-4-other-ecosystem-source-expansion.md`。
 
 ## Dev Notes（开发备注）
 
@@ -160,22 +160,66 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现后填写。
+GPT-5 Codex
 
 ### Debug Log References（调试日志引用）
 
-待实现后填写。
+- `npm test -- test/source-and-modules.test.ts test/install-module-selection.test.ts test/canonical-source-change-check-script.test.ts`：RED 阶段先失败 5 项，证明 other modules、other admission docs、selected-only install 和 checker catch-all drift 尚未实现；GREEN 后通过 3 个 test files / 34 个 tests。
+- `npm test -- test/runtime-structure.test.ts test/fixture-release-gates.test.ts`：通过 2 个 test files / 16 个 tests，确认 default no-ecosystem fixture baseline 和 selected projection 仍稳定。
+- `node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json`：最终通过，`status: "ok"`、`findings: []`，counts 为 `frontend=2`、`backend=3`、`other=3`、`defaultInstall.total=61`。
+- `npm run build`：通过。
+- `npm run release:packaging-check`：通过，并刷新 `release/packaging-manifest.json` / `dist/packaging-manifest.json`。
+- `npm test`：通过 56 个 test files / 412 个 tests。
+- `git diff --check -- assets/source/speclite docs src test release _bmad-output/implementation-artifacts/stories/10-4-other-ecosystem-source-expansion.md`：通过。
 
 ### Completion Notes List（完成说明）
 
-待实现后填写。
+- 完成 preflight：Story 10.1、10.2、10.3 均为 `done`，Story 10.2 authoring / lint contract 已完成；开始前不存在 `assets/source/speclite/ecosystems/other/`。
+- 明确 classification decision：`speclite-npm-publisher`、`speclite-write-opensource-docs`、`speclite-agent-docs-steward` 均保留在 `sdlc`，本 Story 仅新增 project-shape-specific companion Skills，不迁移既有 SDLC workflow。
+- 新增 `ecosystem-other-npm-package`、`ecosystem-other-cli-tool`、`ecosystem-other-documentation-only` 三个 other ecosystem modules，均声明 `module_kind: ecosystem`、`ecosystem_category: other`、`required_dependencies: [sdlc]`、`default_selected: false`、`required: false`。
+- 新增三个 seed Skill：`speclite-npm-package-project-auditor`、`speclite-cli-tool-contract-auditor`、`speclite-documentation-only-project-auditor`，分别围绕 npm package、CLI tool、documentation-only project 的稳定项目形态取证。
+- 更新 other admission docs、ecosystem skill catalog、creator / lint references 和 canonical checker stale-text scan，明确 `why-not-frontend`、`why-not-backend`、banned ids、selected-only 验收和 catch-all drift 检测。
+- 扩展 install selection / selected-only tests：other category 只展示 `cli-tool`、`documentation-only`、`npm-package`；选择 npm package 只安装 npm package seed Skill，不安装 other unselected、frontend 或 backend packages。
+- Mixed worktree 边界：未回滚、删除、暂存或提交任何用户 / 前序 Story drift；未触碰用户点名的 `speclite-docs-intro-ppt-creator/*`、`speclite-html-ppt-generator/**` 和 `.specskills/...html-ppt-generator-decision-record.md`。
 
 ### File List（文件清单）
 
-待实现后填写。
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/10-4-other-ecosystem-source-expansion.md`
+- `assets/source/speclite/README.md`
+- `assets/source/speclite/ecosystems/other/npm-package/module.yaml`
+- `assets/source/speclite/ecosystems/other/npm-package/module-help.csv`
+- `assets/source/speclite/ecosystems/other/npm-package/speclite-npm-package-project-auditor/CHANGELOG.md`
+- `assets/source/speclite/ecosystems/other/npm-package/speclite-npm-package-project-auditor/SKILL.md`
+- `assets/source/speclite/ecosystems/other/npm-package/speclite-npm-package-project-auditor/SKILL.en.md`
+- `assets/source/speclite/ecosystems/other/npm-package/speclite-npm-package-project-auditor/references/npm-package-project-audit-workflow.md`
+- `assets/source/speclite/ecosystems/other/cli-tool/module.yaml`
+- `assets/source/speclite/ecosystems/other/cli-tool/module-help.csv`
+- `assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-tool-contract-auditor/CHANGELOG.md`
+- `assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-tool-contract-auditor/SKILL.md`
+- `assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-tool-contract-auditor/SKILL.en.md`
+- `assets/source/speclite/ecosystems/other/cli-tool/speclite-cli-tool-contract-auditor/references/cli-tool-contract-audit-workflow.md`
+- `assets/source/speclite/ecosystems/other/documentation-only/module.yaml`
+- `assets/source/speclite/ecosystems/other/documentation-only/module-help.csv`
+- `assets/source/speclite/ecosystems/other/documentation-only/speclite-documentation-only-project-auditor/CHANGELOG.md`
+- `assets/source/speclite/ecosystems/other/documentation-only/speclite-documentation-only-project-auditor/SKILL.md`
+- `assets/source/speclite/ecosystems/other/documentation-only/speclite-documentation-only-project-auditor/SKILL.en.md`
+- `assets/source/speclite/ecosystems/other/documentation-only/speclite-documentation-only-project-auditor/references/documentation-only-project-audit-workflow.md`
+- `assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs`
+- `assets/source/speclite/support-skills/speclite-skill-creator/references/skill-creation-workflow.md`
+- `assets/source/speclite/support-skills/speclite-skill-lint/references/check-rules.md`
+- `docs/reference/canonical-source-layout.md`
+- `docs/explanation/speclite-modules.md`
+- `docs/reference/skills/ecosystem-skills.md`
+- `release/packaging-manifest.json`
+- `test/source-and-modules.test.ts`
+- `test/install-module-selection.test.ts`
+- `test/canonical-source-change-check-script.test.ts`
+- `test/list-command.test.ts`
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-07-06 | 0.1 | 创建 Story 10.4，定义 `other` category 准入规则、npm-package / cli-tool / documentation-only seed modules、迁移边界和 selected-only 验收。 | John / Codex |
+| 2026-07-06 | 1.0 | 实现 other category 准入规则、npm-package / cli-tool / documentation-only seed modules、creator / lint reference、selected-only tests、canonical checker drift scan、docs/catalog 和 release packaging 验证，并将 Story 移至 review。 | Fancyliu / Codex |

@@ -3,7 +3,7 @@ name: speclite-check-canonical-source-change
 description: "检查 SpecLite canonical source 变更后的派生一致性。用于用户要求 canonical source check、检查 assets/source/speclite、canonical 变更闭环、更新 skill/hook/agent 后验收或扫描 sdlc/core/total 数量。核心能力：对齐 root counts、module-help.csv、hook source、治理映射、baseline 常量、fixtures、docs 和 packaging manifest。"
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.2.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -12,8 +12,8 @@ metadata:
     只读检查 `assets/source/speclite/` 作为 SpecLite canonical source 发生新增或修改后的闭环一致性。它把 canonical skill、hook、agent、fixture、docs 和 release packaging 的派生关系集中成一份可执行检查清单，避免 root counts、`module-help.csv`、hook descriptor、安装 fixture 或发布 manifest 漂移。
 
 [Core Capabilities（核心能力）]
-    - **Root counts 对齐**：统计 `core-skills`、`sdlc-skills`、`support-skills` 和 `hooks`，确认默认安装 baseline 仍是 `core+sdlc`。
-    - **`module-help.csv` 对齐**：检查 `core` / `sdlc` package roots 是否都有 help row，并报告重复、缺失或未知 row。
+    - **Root counts 对齐**：统计 `core-skills`、`sdlc-skills`、`ecosystems/<category>/<id>`、`support-skills` 和 `hooks`，确认默认安装 baseline 仍只计算 `core+sdlc`。
+    - **`module-help.csv` 对齐**：检查 `core` / `sdlc` / ecosystem package roots 是否都有 help row，并报告重复、缺失或未知 row。
     - **Hook source 完整性**：检查每个 canonical hook package 的 `README.md`、`hook-manifest.json`、`runner.mjs`、Claude/Codex fragment 和 manifest id。
     - **Agent lint 路由提醒**：识别 `speclite-agent-*` 变更时提醒使用 `speclite-agent-lint`，避免套用 workflow-only 规则。
     - **治理映射检查**：读取 `assets/source/speclite/canonical-governance.json`，输出 impacted governance classes、required followups 和 D1/D2 decision record 提醒。
@@ -37,7 +37,7 @@ metadata:
 
 [Notes（注意事项）]
     - 本 Skill 只读，不直接修改 canonical source 或派生产物；需要治理修订时使用 `speclite-canonical-source-governance-runner`。
-    - `support-skills` 不进入默认目标项目 skill mirrors；默认安装 baseline 只计算 `core+sdlc`。
+    - `support-skills` 不进入默认目标项目 skill mirrors；ecosystem packages 只在 selected module 时进入 runtime；默认安装 baseline 只计算 `core+sdlc`。
     - Hook guardrail 是 deterministic 保护层，不替代开发流程或人工 review。
     - `canonical-source-change-check` hook 是 warning-only：提醒运行治理 runner、本 Skill 和验证命令，不阻断 Claude/Codex 会话。
     - 检查报告必须用实际文件和脚本结果支撑，不凭记忆更新 `sdlc`、`core`、`support` 或 `total` 数字。

@@ -7,9 +7,9 @@
 | Item | Value |
 |---|---|
 | Canonical source root | `assets/source/speclite/sdlc-skills/` |
-| 当前 package roots | 51 个带 `SKILL.md` 的目录 |
+| 当前 package roots | 48 个带 `SKILL.md` 的目录 |
 | Agent roster | 7 个 `speclite-agent-*` role activation skills |
-| 新增 backend tech-stack skills | 4 个 `speclite-brownfield-*tech-stack-digger` skills |
+| Backend tech-stack boundary | 通用 backend tech-stack workflow 留在 SDLC；language / runtime specific backend workflows 已迁移到 ecosystem catalog |
 | Help catalog | `assets/source/speclite/sdlc-skills/module-help.csv` |
 | Module metadata | `assets/source/speclite/sdlc-skills/module.yaml` |
 
@@ -38,9 +38,6 @@
 | `speclite-agent-tech-writer` | Agent | `WD` / `US` / `MG` / `VD` / `EC` | `{project_knowledge}` 或 `{planning_artifacts}` | 激活 Taylor 做技术写作、Mermaid、概念解释和文档验证。 |
 | `speclite-brownfield-context-builder` | Workflow | `BB` | `{project_knowledge}/brownfield`、`{planning_artifacts}` | 把既有代码库恢复为证据化 baseline 和 planning handoff。 |
 | `speclite-brownfield-backend-tech-stack-digger` | Workflow | - | 用户指定 output dir | 通用后端技术栈分析，基于代码事实生成 Markdown 技术栈报告。 |
-| `speclite-brownfield-java-springboot-backend-tech-stack-digger` | Workflow | - | 用户指定 output dir | Java / Spring Boot 后端技术栈分析，处理 Maven / Gradle、BOM、Spring 生态和运行配置。 |
-| `speclite-brownfield-nodejs-backend-tech-stack-digger` | Workflow | - | 用户指定 output dir | Node.js 后端技术栈分析，处理 package manager、lockfile、runtime、框架和中间件证据。 |
-| `speclite-brownfield-python-backend-tech-stack-digger` | Workflow | - | 用户指定 output dir | Python 后端技术栈分析，处理 packaging、lockfile、ASGI / WSGI、框架和中间件证据。 |
 | `speclite-document-project` | Workflow | `DP` | `{project_knowledge}` | 为既有项目生成面向规划的项目文档。 |
 | `speclite-domain-research` | Workflow | `DR` | `{planning_artifacts}`、`{project_knowledge}` | 领域研究和术语上下文。 |
 | `speclite-market-research` | Workflow | `MR` | `{planning_artifacts}`、`{project_knowledge}` | 市场、竞品和客户信号研究。 |
@@ -49,7 +46,7 @@
 | `speclite-technical-research` | Workflow | `TR` | `{planning_artifacts}`、`{project_knowledge}` | 技术可行性、架构选项和实现风险研究。 |
 | `speclite-write-opensource-docs` | Workflow | `OSD` | `{project_knowledge}` | 编写、迁移、脚手架和校验开源项目 `docs/`。 |
 
-> Note: 4 个 `speclite-brownfield-*tech-stack-digger` 是 canonical package roots，并已在 `module-help.csv` 分配 menu code。后续新增 SDLC package root 时，必须同步至少一条 help/menu row。
+> Note: language / runtime specific backend tech-stack workflows 是 optional ecosystem modules，见 [`ecosystem-skills.md`](ecosystem-skills.md)。后续新增 SDLC package root 时，必须同步至少一条 help/menu row。
 
 ## Planning（计划阶段）
 
