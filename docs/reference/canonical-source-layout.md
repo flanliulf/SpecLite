@@ -7,8 +7,8 @@
 | Area | Current Count | Source |
 |---|---:|---|
 | Core skill package roots | 13 | `assets/source/speclite/core-skills/` |
-| SDLC skill package roots | 48 | `assets/source/speclite/sdlc-skills/` |
-| Support skill package roots | 5 | `assets/source/speclite/support-skills/` |
+| SDLC skill package roots | 51 | `assets/source/speclite/sdlc-skills/` |
+| Support skill package roots | 6 | `assets/source/speclite/support-skills/` |
 | Canonical hook packages | 2 | `assets/source/speclite/hooks/` |
 | Shared runtime scripts | 2 | `assets/source/speclite/scripts/` |
 
@@ -42,8 +42,8 @@ Module metadata 读取规则在 `src/modules/module-metadata.ts` 中实现。CLI
 |---|---|---|
 | `1-analysis/` | 研究、brownfield baseline、技术栈分析、产品发现和文档治理。 | `speclite-brownfield-backend-tech-stack-digger`、`speclite-brownfield-java-springboot-backend-tech-stack-digger`、`speclite-brownfield-nodejs-backend-tech-stack-digger`、`speclite-brownfield-python-backend-tech-stack-digger` |
 | `2-plan-workflows/` | PRD、UX 和产品规划 Agent。 | `speclite-agent-pm`、`speclite-agent-ux-designer` |
-| `3-solutioning/` | 架构、Epics/Stories、Story Review 和 readiness。 | `speclite-agent-architect`、`speclite-story-review-01-reviewer` |
-| `4-implementation/` | Sprint、Story、Flow Gate、Dev Story、Code Review、QA 和 Retrospective。 | `speclite-flow-gate`、`speclite-dev-story`、`speclite-code-review-01-reviewer` |
+| `3-solutioning/` | 架构、Epics/Stories、Story Review 和 readiness。 | `speclite-agent-architect`、`speclite-story-review-01-reviewer`、`speclite-ir-grill-consistency-reviewer` |
+| `4-implementation/` | Sprint、Story、Flow Gate、Dev Story、Code Review、QA 和 Retrospective。 | `speclite-flow-gate`、`speclite-dev-story`、`speclite-code-review-01-reviewer`、`speclite-goal-orchestrator-epic-story-review-runner`、`speclite-goal-orchestrator-epic-story-code-review-runner` |
 | `5-devops/` | 发布和运维流程。 | `speclite-npm-publisher` |
 
 ## Skill Package Layout（Skill 包布局）
@@ -68,7 +68,7 @@ Hooks 是独立 canonical package，不等同于 Skill package root。当前 hoo
 | Hook | Source | Runtime Projection | Purpose |
 |---|---|---|---|
 | `flow-gate-enforcement` | `assets/source/speclite/hooks/flow-gate-enforcement/` | `_speclite/hooks/flow-gate-enforcement/` | 在执行 `speclite-dev-story` 前检查 story-kickoff Flow Gate 通过证据。 |
-| `canonical-source-change-check` | `assets/source/speclite/hooks/canonical-source-change-check/` | `_speclite/hooks/canonical-source-change-check/` | 在 `assets/source/speclite/` 发生变更后 warning-only 提醒执行 canonical source 一致性检查。 |
+| `canonical-source-change-check` | `assets/source/speclite/hooks/canonical-source-change-check/` | `_speclite/hooks/canonical-source-change-check/` | 在 `assets/source/speclite/` 发生变更后 warning-only 提醒执行 governance runner 和 canonical source 一致性检查。 |
 
 该 hook source 包含：
 
@@ -99,6 +99,7 @@ Hooks 是独立 canonical package，不等同于 Skill package root。当前 hoo
 - 新增对用户可见的 workflow 时，应同步 `module-help.csv` 和 `docs/reference/skills/`。
 - 新增 Agent 时，应同步 `module.yaml` 的 `agents` roster，并使用 `speclite-agent-lint` 校验。
 - 新增 hook source 时，应同步 hook manifest、runtime projection 代码、`_speclite/config.toml` hook descriptor 和 `docs/reference/runtime-layout.md`。
+- 修改 canonical source 时，应先按 [`canonical-source-governance.md`](canonical-source-governance.md) 分类影响面；`D0` 用 checker / strict mode 收口，`D1` / `D2` 记录更新或跳过决策。
 - 不要把 `_speclite-output/` 过程产物回写到 canonical source。
 
 ## Related Docs（相关文档）
@@ -107,6 +108,7 @@ Hooks 是独立 canonical package，不等同于 Skill package root。当前 hoo
 |---|---|
 | SDLC skill catalog | [`skills/sdlc-workflows.md`](skills/sdlc-workflows.md) |
 | Runtime layout | [`runtime-layout.md`](runtime-layout.md) |
+| Canonical source governance | [`canonical-source-governance.md`](canonical-source-governance.md) |
 | File ownership model | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
 | Agent explanation | [`../explanation/speclite-agents.md`](../explanation/speclite-agents.md) |
 | Module explanation | [`../explanation/speclite-modules.md`](../explanation/speclite-modules.md) |

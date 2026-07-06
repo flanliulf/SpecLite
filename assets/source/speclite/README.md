@@ -63,8 +63,8 @@ Speclite Skill 文档应描述安装后的运行模型，而不是本仓库的�
 
 - `1-analysis/`：产品发现、既有系统基线分析、项目文档、PRFAQ、产品简报、分析师和技术写作 Agent。
 - `2-plan-workflows/`：PRD 创建、编辑、验证，UX 设计，PM 和 UX Agent 包。
-- `3-solutioning/`：架构、Epic 和 Story、项目上下文、实现就绪检查、Story Review 01-03、架构师 Agent。
-- `4-implementation/`：Story 创建和开发、快速开发、Sprint 状态和计划、Code Review 01-06、QA 测试生成、回顾、检查点预览、纠偏、开发者 Agent。
+- `3-solutioning/`：架构、Epic 和 Story、项目上下文、实现就绪检查、IR grill consistency review、Story Review 01-03、架构师 Agent。
+- `4-implementation/`：Story 创建和开发、快速开发、Sprint 状态和计划、Epic 级 SR/CR 编排、Code Review 01-06、QA 测试生成、回顾、检查点预览、纠偏、开发者 Agent。
 - `5-devops/`：研发完成后的 CI/CD、部署、发布和包分发工作流，例如开源 Node.js 项目发布到 npm。
 
 实现阶段运行产物默认位于 `{project-root}/_speclite-output/implementation-artifacts/`，其中 review 相关子目录包括：`stories/`、`code-reviews/`、`story-reviews/`、`cr-rules/`、`retrospectives/`。
@@ -98,6 +98,15 @@ Story Review 工作流位于 `sdlc-skills/3-solutioning/`，采用 01-03 编号�
 - `speclite-story-review-02-evaluator`：评估 SR findings 并生成评估文档。
 - `speclite-story-review-03-fixer`：按评估结论修订 Story 文档并记录修订摘要。
 
+IR grill consistency review 位于 `sdlc-skills/3-solutioning/`：
+
+- `speclite-ir-grill-consistency-reviewer`：对 PRD、UX、Architecture、Epics / Stories 做严格串行 implementation-readiness 一致性 grill，并把过程记录写入 `{planning_artifacts}/ir-grill`。
+
+Epic 级目标编排工作流位于 `sdlc-skills/4-implementation/`：
+
+- `speclite-goal-orchestrator-epic-story-review-runner`：按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环，并在 `story-reviews/.../goal-execute-records/` 下维护进度记录。
+- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环，并在 `code-reviews/.../goal-execute-records/` 下维护进度记录。
+
 非编号 `speclite-code-review` 已不再作为 canonical skill 源头入口；代码审查链路从 `speclite-code-review-01-reviewer` 开始，并由 CR2/CR3/CR6 等编号 skill 完成评估、修复与收尾。
 
 Review 产物目录约定如下：
@@ -116,9 +125,10 @@ Review 产物目录约定如下：
 - `speclite-skill-lint`：验证通用 Skill 规则，以及 Speclite runtime 和迁移对齐规则。
 - `speclite-agent-creator`：创建或迁移 `speclite-agent-*` / `bmad-agent-*` 这类 role activation Agent 定义包。
 - `speclite-agent-lint`：验证 Agent 专属 `[agent]` 定制面、persona、菜单目标、prompt 引用和 runtime 残留。
+- `speclite-canonical-source-governance-runner`：在 hook 提醒 canonical source 变化后执行分类、影响面矩阵、D1/D2 决策记录、定点修订和 strict checker 收口。
 - `speclite-check-canonical-source-change`：在 canonical source 修改后检查 root counts、`module-help.csv`、hooks、fixtures、docs 和 packaging manifest 是否同步。
 
-维护 `assets/source/speclite/` 下的 canonical skill 源定义时，workflow 风格 Skill 默认使用 `speclite-skill-creator` 与 `speclite-skill-lint`；Agent 定义包默认使用 `speclite-agent-creator` 与 `speclite-agent-lint`。不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+维护 `assets/source/speclite/` 下的 canonical skill 源定义时，workflow 风格 Skill 默认使用 `speclite-skill-creator` 与 `speclite-skill-lint`；Agent 定义包默认使用 `speclite-agent-creator` 与 `speclite-agent-lint`；canonical source 变更闭环默认使用 `speclite-canonical-source-governance-runner` 与 `speclite-check-canonical-source-change`。不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
 
 ### Hooks
 
@@ -151,4 +161,5 @@ python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_
 
 ```sh
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
+node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict
 ```

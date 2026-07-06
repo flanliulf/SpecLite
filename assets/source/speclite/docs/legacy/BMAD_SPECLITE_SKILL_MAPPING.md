@@ -71,6 +71,7 @@
 | BMAD Story Review pattern | `sdlc-skills/3-solutioning/speclite-story-review-01-reviewer` | SPLIT_CHAIN | SR 审查链路入口，执行结构、契约和一致性审查。 |
 | BMAD Story Review evaluation pattern | `sdlc-skills/3-solutioning/speclite-story-review-02-evaluator` | SPLIT_CHAIN | 评估 SR findings 的有效性和处置结论。 |
 | BMAD Story Review fix pattern | `sdlc-skills/3-solutioning/speclite-story-review-03-fixer` | SPLIT_CHAIN | 按 SR 评估结论修订 Story 文档。 |
+| BMAD no direct equivalent | `sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer` | SPECLITE_ONLY | 对 PRD、UX、Architecture、Epics / Stories 做严格串行 implementation-readiness consistency grill，补足普通 readiness gate 之外的跨文档追问和记录闭环。 |
 | `bmad-agent-dev` | `sdlc-skills/4-implementation/speclite-agent-dev` | DIRECT | 开发者 persona。 |
 | `bmad-create-story` | `sdlc-skills/4-implementation/speclite-create-story` | ADAPTED | Story 输出应位于 `{implementation_artifacts}/stories/`，并显式表达 dependency gate、anchor policy 和 evidence plan。 |
 | `bmad-dev-story` | `sdlc-skills/4-implementation/speclite-dev-story` | ADAPTED | Story 开发前后应调用 flow gate，避免推进状态后才发现 anchor drift。 |
@@ -78,6 +79,8 @@
 | `bmad-sprint-planning` | `sdlc-skills/4-implementation/speclite-sprint-planning` | ADAPTED | Sprint status 的 Story 位置应统一指向 `{implementation_artifacts}/stories`。 |
 | `bmad-sprint-status` | `sdlc-skills/4-implementation/speclite-sprint-status` | ADAPTED | 状态查询应提示缺失或过期的 flow gate，而不是只推荐进入 dev-story。 |
 | `bmad-code-review` | `sdlc-skills/4-implementation/speclite-code-review-01-reviewer` plus `02`-`06` | SPLIT_CHAIN | 非编号 `speclite-code-review` 不再是 canonical 入口；CR 从 `01-reviewer` 开始，并由 evaluator、fixer、rules、todo、finalizer 完成链路。 |
+| BMAD / BMEnhance Epic SR runbook pattern | `sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner` | ADAPTED | Epic 粒度严格串行编排 SR reviewer、evaluator、fixer 循环；不替代 SR 01-03，只维护目标拆解、循环 gate 和 `goal-execute-records/`。 |
+| BMAD / BMEnhance Epic Story CR runbook pattern | `sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner` | ADAPTED | Epic 下逐 Story 严格串行编排 `speclite-dev-story`、CR 01-06 和最终本地提交边界；不替代具体 dev / CR skill。 |
 | `bmad-correct-course` | `sdlc-skills/4-implementation/speclite-correct-course` | ADAPTED | Sprint 中重大调整应更新 SpecLite 状态和 artifact，而不是只生成讨论结论。 |
 | `bmad-checkpoint-preview` | `sdlc-skills/4-implementation/speclite-checkpoint-preview` | DIRECT | 人机协同 checkpoint review。 |
 | `bmad-qa-generate-e2e-tests` | `sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests` | ADAPTED | QA 生成应引用 SpecLite story、fixture 和 test evidence。 |
@@ -93,11 +96,12 @@
 | `support-skills/speclite-skill-lint` | SUPPORT_ONLY | 支持检查 canonical skill 源定义的结构、密度、runtime model 和 migration 对齐；不是目标项目运行时 SDLC 方法论的一部分。 |
 | `support-skills/speclite-agent-creator` | SUPPORT_ONLY | 支持创建和迁移 `speclite-agent-*` 这类 role activation Agent 定义包，保留 persona、`[agent]`、menu 和 prompt 语义。 |
 | `support-skills/speclite-agent-lint` | SUPPORT_ONLY | 支持检查 Agent 定义包的 `[agent]` 定制面、菜单目标、prompt 引用、runtime 残留和可选 mirror 一致性。 |
+| `support-skills/speclite-canonical-source-governance-runner` | SUPPORT_ONLY | 支持 hook 触发后的 canonical source 变更治理，负责分类影响面、记录 D1/D2 决策、指导定点修订并用 strict checker 收口。 |
 | `support-skills/speclite-check-canonical-source-change` | SUPPORT_ONLY | 支持 canonical source 修改后的 root counts、`module-help.csv`、hooks、fixtures、docs 和 packaging manifest 派生一致性检查。 |
 
 `support-skills/` 的问题反馈对象是 skill 源定义本身。除非某个目标项目明确选择安装这些 authoring support 工具，否则不应把它们写入目标项目的默认 AI IDE runtime install set。
 
-在 SpecLite canonical skill 源体系建设中，support skill 按对象模型分工：`speclite-skill-creator/lint` 负责 workflow 风格 Skill，`speclite-agent-creator/lint` 负责 role activation Agent 定义包，`speclite-check-canonical-source-change` 负责 canonical source 变更后的派生产物闭环检查。这些工具共同负责把 BMAD 参考定义体系化改造成 SpecLite skill 源包，并检查改造后的包是否符合 SpecLite 的结构、语义、runtime 约束和发布派生契约。
+在 SpecLite canonical skill 源体系建设中，support skill 按对象模型分工：`speclite-skill-creator/lint` 负责 workflow 风格 Skill，`speclite-agent-creator/lint` 负责 role activation Agent 定义包，`speclite-canonical-source-governance-runner` 负责 hook 触发后的治理执行和 D1/D2 决策记录，`speclite-check-canonical-source-change` 负责 canonical source 变更后的派生产物闭环检查。这些工具共同负责把 BMAD 参考定义体系化改造成 SpecLite skill 源包，并检查改造后的包是否符合 SpecLite 的结构、语义、runtime 约束和发布派生契约。
 
 ## Feedback Workflow（反馈流程）
 
@@ -117,3 +121,4 @@
 - BMAD workflow 的失败案例不能直接等同于 SpecLite 设计缺陷；必须通过映射和证据判断是否存在对应风险。
 - SpecLite-only skill 出现后，应明确它解决的是 BMAD 缺口、SpecLite 运行模型需求，还是本项目研发经验沉淀。
 - Split chain 不允许被简化回已删除的聚合入口。例如 CR 链路应指向 `speclite-code-review-01-reviewer` 到 `06-finalizer`，不应恢复非编号 `speclite-code-review`。
+- Goal orchestration runner 是 long-run runbook / outer loop，不是新的 reviewer 或 fixer；映射中必须保留它与底层 SR、Dev Story、CR 编号链路的职责边界。

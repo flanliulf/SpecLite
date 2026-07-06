@@ -6,7 +6,9 @@ SpecLite 当前一边使用 BMAD 框架推进自身研发，一边建设类似 B
 
 因此，BMAD 在本项目开发过程中暴露的问题，应被视为 SpecLite canonical skill 迭代的高价值反馈来源。尤其是 `create-story`、`dev-story`、SR、CR、finalizer 等阶段中出现的 late HALT、anchor drift、path drift 和 evidence drift，不能只作为单个 Story 个案处理，而应抽象成可复用的 skill、template、lint 和 gate 改进。
 
-当前所有直接映射或拆链映射自 BMAD 的 SpecLite canonical skill，均通过 support skill 体系参考 BMAD skill 定义进行体系化和自定义创建。workflow 风格 Skill 使用 `support-skills/speclite-skill-creator` 与 `support-skills/speclite-skill-lint`；`speclite-agent-*` 这类 role activation Agent 定义包使用 `support-skills/speclite-agent-creator` 与 `support-skills/speclite-agent-lint`；`assets/source/speclite/` 发生新增或修改后使用 `support-skills/speclite-check-canonical-source-change` 检查派生产物闭环。后续新增或调整 canonical skill 源定义时，默认使用本项目内 support skill，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+当前所有直接映射或拆链映射自 BMAD 的 SpecLite canonical skill，均通过 support skill 体系参考 BMAD skill 定义进行体系化和自定义创建。workflow 风格 Skill 使用 `support-skills/speclite-skill-creator` 与 `support-skills/speclite-skill-lint`；`speclite-agent-*` 这类 role activation Agent 定义包使用 `support-skills/speclite-agent-creator` 与 `support-skills/speclite-agent-lint`；`assets/source/speclite/` 发生新增或修改后，先使用 `support-skills/speclite-canonical-source-governance-runner` 执行分类、影响面矩阵和 D1/D2 决策记录，再使用 `support-skills/speclite-check-canonical-source-change` 检查派生产物闭环。后续新增或调整 canonical skill 源定义时，默认使用本项目内 support skill，不再回退到外部 `skills-creator` 仓库的通用 creator/lint skill。
+
+2026-07-06 后，SpecLite 还沉淀了三类长流程反馈形态：`speclite-ir-grill-consistency-reviewer` 用于 readiness 之前或之后的跨文档 grill；`speclite-goal-orchestrator-epic-story-review-runner` 用于 Epic 粒度 SR 闭环；`speclite-goal-orchestrator-epic-story-code-review-runner` 用于 Epic 下 Story 开发与 CR 闭环。这些 Skill 是外层 runbook / orchestration，不替代底层 reviewer、evaluator、fixer、finalizer 或 dev-story。
 
 ## Development Context（开发背景）
 
@@ -29,7 +31,7 @@ SpecLite 的目标不是复制 BMAD 的路径、文件名或运行时细节，�
 | `scripts/` | 共享运行时辅助脚本源码副本。 | 安装后作为 `_speclite/scripts` 被 runtime 使用。 |
 | `custom/` | customization 示例和默认覆盖。 | 安装后作为 `_speclite/custom` 的参考或初始配置。 |
 
-`support-skills/` 的定位需要特别保持清晰。`speclite-skill-creator`、`speclite-skill-lint`、`speclite-agent-creator`、`speclite-agent-lint` 与 `speclite-check-canonical-source-change` 是为了支持 SpecLite canonical skill 源定义本身的创建、检查和派生闭环，不应被当作目标项目日常开发中必须安装到 AI IDE 的 SDLC workflow skill。
+`support-skills/` 的定位需要特别保持清晰。`speclite-skill-creator`、`speclite-skill-lint`、`speclite-agent-creator`、`speclite-agent-lint`、`speclite-canonical-source-governance-runner` 与 `speclite-check-canonical-source-change` 是为了支持 SpecLite canonical skill 源定义本身的创建、检查、治理和派生闭环，不应被当作目标项目日常开发中必须安装到 AI IDE 的 SDLC workflow skill。
 
 换言之，它们是 SpecLite 方法论生产线的一部分，而不是方法论运行时的一部分：workflow support skill 负责普通流程型 Skill 的创建和检查；agent support skill 负责 persona、`[agent]`、menu dispatch 和持续身份这类 Agent 定义包的创建和检查。
 
@@ -79,6 +81,8 @@ SpecLite canonical skill 应采用以下通用策略：
 - Checklists（检查清单）：要求所有前置依赖以 `Contract -> Functional -> Evidence` 形式表达。
 - Lint Rules（规范检查）：识别 `must exist` 加具体源码路径的 hard gate 表述，要求同时声明 owning SPEC 或 equivalent implementation policy。
 - Review Chains（审查链路）：SR/CR/finalizer 应读取 flow gate report 和 anchor evidence summary，避免 review 阶段继续传播错误的固定路径假设。
+- Goal Orchestration（目标编排）：跨 Epic 或多 Story 的长流程必须把 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md` 等过程文件放入对应 `goal-execute-records/` 子目录，并保持 strict serial、fresh sub-agent、循环 gate 和最终提交边界。
+- IR Grill（一致性追问）：readiness 之外的跨文档疑点应通过单题串行 grill 记录，不应把多项问题合并成不可追溯的批量总结。
 - Path Contracts（路径契约）：Story 输出路径、review 输出路径和 sprint status 中的 story location 必须保持一致，避免消费者各自硬编码旧路径。
 
 ## Support Skills Policy（Support Skills 策略）
@@ -91,6 +95,7 @@ SpecLite canonical skill 应采用以下通用策略：
 - `speclite-skill-lint` 应帮助发现 workflow skill 源定义中的路径漂移、runtime model 漂移、过密 SKILL 入口、缺失 mirror 或 hard gate 表述。
 - `speclite-agent-creator` 应帮助创建或迁移符合 SpecLite runtime model 的 Agent 定义包，并保留 persona、`[agent]`、menu dispatch、prompt 引用和持续身份语义。
 - `speclite-agent-lint` 应帮助发现 Agent 定义包中的 `[agent]` 漂移、菜单目标断链、prompt 文件缺失、runtime 残留和可选 mirror 不一致。
+- `speclite-canonical-source-governance-runner` 应在 hook 提醒 canonical source 变化后执行治理分类、影响面矩阵、D1/D2 决策记录、定点修订和 strict checker 收口。
 - `speclite-check-canonical-source-change` 应在 canonical source 修改后检查 root counts、`module-help.csv`、hook source、fixtures、docs、baseline 常量和 packaging manifest 是否同步。
 - 新增或调整 `assets/source/speclite/` 下的 skill 时，必须优先使用本项目内对应类型的 support skill；外部 `skills-creator` 仓库只保留 mirror 或历史参考角色。
 - support skill 的产物和规则可以影响 canonical skill 质量，但不应被写成目标项目普通开发者必须运行的 SDLC gate。
@@ -102,6 +107,7 @@ SpecLite canonical skill 应采用以下通用策略：
 - 新增 SDLC 阶段目录时，应同步更新 `module.yaml`、`module-help.csv`、README、映射文档、安装基线和相关 fixture。
 - 修改 BMAD-to-SpecLite 映射时，应同时检查是否影响 help、module metadata、templates、lint rules 或 flow gates。
 - 新增 split chain 时，应明确入口 skill、后续 skill、状态流转和产物目录，不应保留含混的聚合入口。
+- 新增 goal orchestration skill 时，应明确它只承担外层编排和记录职责，不得把底层 workflow 的判断合并为单体 prompt。
 - 删除 canonical skill 源头目录后，应同步清理映射、help 和引用，不应在新文档中重新恢复旧入口。
 - 新增或修改 skill-local `data/` 文件时，若同名文件或同名字段存在不同 schema，应优先判断它是公共基础数据、phase-specific variant，还是 skill-local capability manifest；已接受的变体必须记录到 `assets/source/speclite/canonical-data-variant-policy.json`。
 - 任何从具体 Story 得出的经验，都应先抽象为通用 failure pattern，再决定是否进入 canonical skill 源定义。

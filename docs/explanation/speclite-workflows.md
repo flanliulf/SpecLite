@@ -58,11 +58,11 @@ SpecLite Workflow 的核心价值是渐进式披露：入口只提供足够启�
 |---|---|---|
 | Analysis | `1-analysis/` | research、brownfield baseline、backend tech-stack analysis、Product Brief、PRFAQ、docs writing。 |
 | Planning | `2-plan-workflows/` | PRD create / validate / edit、UX design。 |
-| Solutioning | `3-solutioning/` | Architecture、Epics and Stories、Story Review、implementation readiness。 |
-| Implementation | `4-implementation/` | Sprint Planning、Flow Gate、Create Story、Dev Story、Code Review、QA、Retrospective。 |
+| Solutioning | `3-solutioning/` | Architecture、Epics and Stories、Story Review、implementation readiness、IR grill。 |
+| Implementation | `4-implementation/` | Sprint Planning、Flow Gate、Create Story、Dev Story、Code Review、Epic 级 SR/CR 编排、QA、Retrospective。 |
 | DevOps | `5-devops/` | npm package publish workflow。 |
 
-`module-help.csv` 进一步记录 menu code、前后置关系和输出位置。例如 `CP` 创建 PRD，`CA` 创建 Architecture，`CE` 创建 Epics and Stories，`SP` 启动 Sprint Planning，`CR1` 到 `CR6` 形成 Code Review 链路，`NP` 负责 npm 发布。
+`module-help.csv` 进一步记录 menu code、前后置关系和输出位置。例如 `CP` 创建 PRD，`CA` 创建 Architecture，`CE` 创建 Epics and Stories，`IRG` 执行 implementation-readiness consistency grill，`SP` 启动 Sprint Planning，`CR1` 到 `CR6` 形成 Code Review 链路，`ESR` / `ECR` 编排 Epic 级严格串行 SR/CR 闭环，`NP` 负责 npm 发布。
 
 ## Workflow Chains（工作流链）
 
@@ -92,7 +92,8 @@ flowchart LR
 | Brownfield 技术栈 | `speclite-brownfield-backend-tech-stack-digger`、`speclite-brownfield-java-springboot-backend-tech-stack-digger`、`speclite-brownfield-nodejs-backend-tech-stack-digger`、`speclite-brownfield-python-backend-tech-stack-digger` | code-fact based backend tech-stack reports。 |
 | 产品与计划 | `speclite-product-brief`、`speclite-prfaq`、`speclite-create-prd` | brief、PRFAQ、PRD。 |
 | 方案设计 | `speclite-create-architecture`、`speclite-create-epics-and-stories` | architecture、epics、stories。 |
-| 质量检查 | `speclite-story-review-*`、`speclite-flow-gate`、`speclite-code-review-*` | review summary、evaluation、fix summary、gate report。 |
+| 质量检查 | `speclite-ir-grill-consistency-reviewer`、`speclite-story-review-*`、`speclite-flow-gate`、`speclite-code-review-*` | grill records、review summary、evaluation、fix summary、gate report。 |
+| 目标编排 | `speclite-goal-orchestrator-epic-story-review-runner`、`speclite-goal-orchestrator-epic-story-code-review-runner` | `goal-execute-records/` 下的 PLAN、experiment 记录和闭环总结。 |
 | 实现执行 | `speclite-create-story`、`speclite-dev-story`、`speclite-quick-dev` | story、implementation、tests。 |
 | 发布运维 | `speclite-npm-publisher` | npm release report。 |
 | 文档治理 | `speclite-write-opensource-docs` | tutorials、how-to、explanation、reference、index、style guide。 |
@@ -155,5 +156,6 @@ Workflow 的可靠性来自边界：
 | Review 链路和产物目录 | `assets/source/speclite/README.md` 和 `module-help.csv` |
 | `docs/` 与 `_speclite-output/` 边界 | `docs/_STYLE_GUIDE.md` |
 | Backend tech-stack workflow roots | `assets/source/speclite/sdlc-skills/1-analysis/speclite-brownfield-*tech-stack-digger/` |
+| Epic 级目标编排 workflow roots | `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-*` |
 
 本文档由 speclite-agent-docs-steward Skill 自动生成

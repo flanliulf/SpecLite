@@ -24,6 +24,13 @@
 - 新增 `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/`，用于开源 Node.js 项目发布到 npm。
 - 后续维护 `assets/source/speclite/` 下的 canonical skill 源定义时，默认使用本项目 `support-skills/speclite-skill-creator` 和 `support-skills/speclite-skill-lint`；外部 `skills-creator` 仓库只保留 forge mirror 或历史参考角色。
 
+2026-07-06 后续更新：
+
+- 新增 `assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/`，用于 PRD、UX、Architecture、Epics / Stories 的 implementation-readiness consistency grill。
+- 新增 `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/`，用于 Epic 粒度 SR reviewer / evaluator / fixer 严格串行闭环。
+- 新增 `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/`，用于 Epic 下 Story 开发、CR reviewer / evaluator / fixer / finalizer 严格串行闭环。
+- 默认安装 baseline 更新为 `core=13`、`sdlc=51`、`total=64`，并已同步 `module-help.csv`、manifest schema、fixtures、docs 和 packaging manifest。
+
 ## Speclite Catalog README
 
 关键文件：
@@ -38,6 +45,7 @@ README 当前包含：
 - 安装后 runtime 模型：`.claude/skills/{skill-name}`、`_speclite/config.toml`、`_speclite/custom`、`_speclite/scripts`。
 - 单个 Skill 包布局规则：根目录入口/版本/配置，`references/` 放规约和步骤，`assets/` 放模板，`data/` 放结构化查表数据，`scripts/` 放本地脚本。
 - Review Skills 小节：支撑层、CR 01-06、SR 01-03、编号 CR 起始入口、review artifact 子目录。
+- IR grill 和 Epic 级 SR/CR goal orchestration 小节：`IRG`、`ESR`、`ECR` 入口、严格串行约束和 `goal-execute-records/` 记录目录。
 - DevOps Skills 阶段：`5-devops/` 用于 CI/CD、部署、发布和包分发工作流。
 - scoped validation 建议，避免全仓库大 diff。
 
@@ -66,10 +74,20 @@ Story Review 01-03，位于 `assets/source/speclite/sdlc-skills/3-solutioning/`�
 - `speclite-story-review-02-evaluator/`
 - `speclite-story-review-03-fixer/`
 
+IR Grill，位于 `assets/source/speclite/sdlc-skills/3-solutioning/`：
+
+- `speclite-ir-grill-consistency-reviewer/`
+
+Epic 级 Goal Orchestration，位于 `assets/source/speclite/sdlc-skills/4-implementation/`：
+
+- `speclite-goal-orchestrator-epic-story-review-runner/`
+- `speclite-goal-orchestrator-epic-story-code-review-runner/`
+
 保留关系：
 
 - 非编号 `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review/` 已不再作为 canonical skill 源头入口。
 - 编号 `speclite-code-review-01-reviewer` 是 CR 链路起始入口，并承接 BMEnhance CR-01 的跨轮产物链路语义。
+- Epic 级 goal orchestration runner 不替代 SR 01-03、CR 01-06 或 `speclite-dev-story`，只负责严格串行编排、进度记录和循环 gate 判断。
 
 ## Review Artifact 目录约定
 
@@ -87,6 +105,18 @@ Review 相关子目录：
 - `cr-rules/`：CR backlog、规则提炼和跨 Story TODO。
 - `retrospectives/`：Epic/Sprint 回顾总结。
 
+Goal orchestration 过程记录：
+
+- SR runner 使用 `{implementation_artifacts}/story-reviews/epic-{epic_id}-story-review/goal-execute-records/`。
+- CR runner 使用 `{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`。
+- `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md` 等进度文件统一放入对应 `goal-execute-records/` 子目录。
+
+IR grill 过程记录默认位于：
+
+```text
+{project-root}/_speclite-output/planning-artifacts/ir-grill/
+```
+
 配置文件：
 
 - `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/cr-config.md`
@@ -99,6 +129,7 @@ Review 相关子目录：
 - 只做 Speclite 对 BMAD 的路径、配置、命名和目录归属改造；不改变 BMEnhance 核心审查语义。
 - CR/SR 主链路 skill 名称必须保留阶段编号和角色后缀，例如 `speclite-code-review-01-reviewer`、`speclite-story-review-01-reviewer`。
 - 三层支撑 skill 独立存在，不内嵌到主调度 prompt。
+- Goal orchestration runner 必须保持编排层职责，不把 reviewer、evaluator、fixer、finalizer 的内部判断合并进单个大 prompt。
 - 根目录只保留 `SKILL.md`、可选 `SKILL.en.md`、`CHANGELOG.md`、配置示例和 customize；规约、流程、协议、检查清单放 `references/`；模板放 `assets/`。
 - 新增 review skill 当前统一为 `metadata.version = "1.0.0"`，`CHANGELOG.md` 最新版本也是 `1.0.0`。
 

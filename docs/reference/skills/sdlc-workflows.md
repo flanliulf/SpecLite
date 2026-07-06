@@ -7,7 +7,7 @@
 | Item | Value |
 |---|---|
 | Canonical source root | `assets/source/speclite/sdlc-skills/` |
-| 当前 package roots | 48 个带 `SKILL.md` 的目录 |
+| 当前 package roots | 51 个带 `SKILL.md` 的目录 |
 | Agent roster | 7 个 `speclite-agent-*` role activation skills |
 | 新增 backend tech-stack skills | 4 个 `speclite-brownfield-*tech-stack-digger` skills |
 | Help catalog | `assets/source/speclite/sdlc-skills/module-help.csv` |
@@ -71,6 +71,7 @@
 | `speclite-create-epics-and-stories` | Workflow | `CE` | `{planning_artifacts}` | 从 PRD / Architecture / UX 拆解 Epic 和 Story。 |
 | `speclite-generate-project-context` | Workflow | `GPC` | `{output_folder}` | 生成 AI agent 使用的项目上下文。 |
 | `speclite-check-implementation-readiness` | Workflow | `IR` | `{planning_artifacts}` | 检查 PRD、UX、Architecture、Epics 和 Stories 是否可进入实现。 |
+| `speclite-ir-grill-consistency-reviewer` | Workflow | `IRG` | `{planning_artifacts}/ir-grill` | 对 PRD、UX、Architecture、Epics 和 Stories 做严格串行 implementation-readiness 一致性 grill。 |
 | `speclite-story-review-01-reviewer` | Workflow | `SR` | `{implementation_artifacts}/story-reviews` | 执行 Story 设计审查。 |
 | `speclite-story-review-02-evaluator` | Workflow | `SRE` | `{implementation_artifacts}/story-reviews` | 评估 Story Review findings。 |
 | `speclite-story-review-03-fixer` | Workflow | `SRF` | `{implementation_artifacts}/story-reviews` | 按评估结论修订 Story 文档。 |
@@ -91,6 +92,8 @@
 | `speclite-code-review-04-rules-extractor` | Workflow | `CR4` | `{implementation_artifacts}/cr-rules` | 从历史 CR 中提炼可复用规则。 |
 | `speclite-code-review-05-todo-tracker` | Workflow | `CR5` | `{implementation_artifacts}/cr-rules` | 维护 CR TODO backlog。 |
 | `speclite-code-review-06-finalizer` | Workflow | `CR6` | `{implementation_artifacts}` | 在 CR 通过后同步 Story 和 workflow 状态。 |
+| `speclite-goal-orchestrator-epic-story-review-runner` | Workflow | `ESR` | `{implementation_artifacts}/story-reviews` | 按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环和 goal execute records。 |
+| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews` | 按 Epic Story 严格串行编排 Dev Story、CR 循环和 goal execute records。 |
 | `speclite-checkpoint-preview` | Workflow | `CK` | - | 帮助人工检查一次变更的目的、差异和风险。 |
 | `speclite-qa-generate-e2e-tests` | Workflow | `QA` | `{implementation_artifacts}` | 生成自动化 API / E2E 测试。 |
 | `speclite-qa-write-test-guide` | Workflow | `TG` | `{implementation_artifacts}` | 生成可执行 QA 测试指南。 |

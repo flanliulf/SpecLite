@@ -61,8 +61,8 @@ Within an individual skill package, use these conventions:
 
 - `1-analysis/`: product discovery, brownfield baseline analysis, project documentation, PRFAQ, product brief, analyst and technical writer agents.
 - `2-plan-workflows/`: PRD creation/editing/validation, UX design, PM and UX agent packages.
-- `3-solutioning/`: architecture, epics and stories, project context, implementation readiness, Story Review 01-03, architect agent.
-- `4-implementation/`: story creation/development, quick development, sprint status/planning, Code Review 01-06, QA test generation, retrospective, checkpoint preview, corrective course, developer agent.
+- `3-solutioning/`: architecture, epics and stories, project context, implementation readiness, IR grill consistency review, Story Review 01-03, architect agent.
+- `4-implementation/`: story creation/development, quick development, sprint status/planning, Epic-level SR/CR orchestration, Code Review 01-06, QA test generation, retrospective, checkpoint preview, corrective course, developer agent.
 - `5-devops/`: post-development CI/CD, deployment, release, and package publishing workflows, including open-source Node.js npm publishing.
 
 Implementation-stage runtime artifacts default to `{project-root}/_speclite-output/implementation-artifacts/`; review-related subdirectories include `stories/`, `code-reviews/`, `story-reviews/`, `cr-rules/`, and `retrospectives/`.
@@ -96,6 +96,15 @@ The Story Review workflow lives under `sdlc-skills/3-solutioning/` and uses the 
 - `speclite-story-review-02-evaluator`: evaluates SR findings and generates an evaluation document.
 - `speclite-story-review-03-fixer`: updates Story documents according to evaluation conclusions and records the revision summary.
 
+IR grill consistency review lives under `sdlc-skills/3-solutioning/`:
+
+- `speclite-ir-grill-consistency-reviewer`: runs strict-serial implementation-readiness consistency grill across PRD, UX, Architecture, and Epics / Stories, and writes process records under `{planning_artifacts}/ir-grill`.
+
+Epic-level goal orchestration workflows live under `sdlc-skills/4-implementation/`:
+
+- `speclite-goal-orchestrator-epic-story-review-runner`: orchestrates strict-serial SR reviewer / evaluator / fixer loops for an Epic and keeps progress records under `story-reviews/.../goal-execute-records/`.
+- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops for every Story in an Epic and keeps progress records under `code-reviews/.../goal-execute-records/`.
+
 The unnumbered `speclite-code-review` is no longer a canonical source skill entrypoint. Code review starts with `speclite-code-review-01-reviewer`, then continues through the numbered CR2/CR3/CR6 skills for evaluation, fixes, and finalization.
 
 Review artifact directories are:
@@ -114,9 +123,10 @@ Review artifact directories are:
 - `speclite-skill-lint`: validates generic skill rules plus Speclite runtime and migration alignment.
 - `speclite-agent-creator`: creates or migrates `speclite-agent-*` / `bmad-agent-*` role activation Agent definition packages.
 - `speclite-agent-lint`: validates Agent-specific `[agent]` customization, persona, menu targets, prompt references, and runtime residue.
+- `speclite-canonical-source-governance-runner`: classifies impact, records D1/D2 decisions, guides targeted edits, and closes with strict checker verification after hooks report canonical source changes.
 - `speclite-check-canonical-source-change`: checks root counts, `module-help.csv`, hooks, fixtures, docs, and packaging manifest after canonical source changes.
 
-When maintaining canonical skill source definitions under `assets/source/speclite/`, use `speclite-skill-creator` and `speclite-skill-lint` for workflow-style Skills, and `speclite-agent-creator` and `speclite-agent-lint` for Agent definition packages. Do not fall back to the generic creator/lint skills from the external `skills-creator` repository.
+When maintaining canonical skill source definitions under `assets/source/speclite/`, use `speclite-skill-creator` and `speclite-skill-lint` for workflow-style Skills, `speclite-agent-creator` and `speclite-agent-lint` for Agent definition packages, and `speclite-canonical-source-governance-runner` plus `speclite-check-canonical-source-change` for canonical source change closure. Do not fall back to the generic creator/lint skills from the external `skills-creator` repository.
 
 ### Hooks
 
@@ -149,4 +159,5 @@ After changing `assets/source/speclite/`, run the canonical source change checke
 
 ```sh
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
+node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict
 ```
