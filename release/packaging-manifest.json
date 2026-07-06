@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:aeeebde98ee5a459ad957d828780fb0373f02363eab482c0cc7f776b93fbc40d",
+  "packageHash": "sha256:b051f88b151f1bc4a038ca121b977a0ed72d5fc9b0d19b4691011a511bde3998",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",
@@ -610,6 +610,11 @@
     "assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs",
     "assets/source/speclite/support-skills/speclite-check-canonical-source-change/SKILL.en.md",
     "assets/source/speclite/support-skills/speclite-check-canonical-source-change/SKILL.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/CHANGELOG.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/references/docs-intro-ppt-workflow.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/scripts/validate_docs_intro_ppt.mjs",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/SKILL.en.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/SKILL.md",
     "assets/source/speclite/support-skills/speclite-skill-creator/CHANGELOG.md",
     "assets/source/speclite/support-skills/speclite-skill-creator/references/skill-creation-workflow.md",
     "assets/source/speclite/support-skills/speclite-skill-creator/references/spec-guide.md",
@@ -1222,6 +1227,11 @@
     "assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs",
     "assets/source/speclite/support-skills/speclite-check-canonical-source-change/SKILL.en.md",
     "assets/source/speclite/support-skills/speclite-check-canonical-source-change/SKILL.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/CHANGELOG.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/references/docs-intro-ppt-workflow.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/scripts/validate_docs_intro_ppt.mjs",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/SKILL.en.md",
+    "assets/source/speclite/support-skills/speclite-docs-intro-ppt-creator/SKILL.md",
     "assets/source/speclite/support-skills/speclite-skill-creator/CHANGELOG.md",
     "assets/source/speclite/support-skills/speclite-skill-creator/references/skill-creation-workflow.md",
     "assets/source/speclite/support-skills/speclite-skill-creator/references/spec-guide.md",
