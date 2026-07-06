@@ -46,7 +46,7 @@ const HOOK_REGISTRY: HookRegistryEntry[] = [
     module: "support",
     sourceSkill: "speclite-check-canonical-source-change",
     protectedSurface: "assets/source/speclite",
-    description: "在 canonical source 发生变更后 warning-only 提醒运行一致性检查。",
+    description: "在 canonical source 发生变更后 warning-only 提醒运行 governance runner 与一致性检查。",
     sourceRoot: "hooks/canonical-source-change-check",
     runtimeRoot: "_speclite/hooks/canonical-source-change-check",
     events: ["PostToolUse", "Stop"],

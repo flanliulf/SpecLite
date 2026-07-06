@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const PROTECTED_SURFACE = "assets/source/speclite";
 const CHECK_SCRIPT = "assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs";
+const GOVERNANCE_RUNNER = "speclite-canonical-source-governance-runner";
 
 const event = await readEvent();
 const projectRoot = resolveProjectRoot(event);
@@ -115,20 +116,26 @@ async function runCheckScript(projectRoot) {
 function createWarningOutput(input) {
   const findingIds = (input.report.findings ?? []).map((finding) => finding.id).filter(Boolean);
   const command = (input.report.recommendedCommands ?? recommendedCommands())[0];
+  const impactedClasses = (input.report.governance?.impactedClasses ?? [])
+    .map((entry) => `${entry.id}:${entry.determinism}`)
+    .filter(Boolean);
   const changedSummary =
     input.changedPaths.length === 0
       ? "canonical source change detection was inconclusive"
       : `${input.changedPaths.length} canonical source path(s) changed`;
   const findingSummary = findingIds.length === 0 ? "no findings yet" : findingIds.slice(0, 6).join(", ");
+  const impactSummary = impactedClasses.length === 0 ? "no impacted classes reported" : impactedClasses.slice(0, 8).join(", ");
   const additionalContext = [
     `SpecLite canonical source changed (${changedSummary}).`,
-    "Run speclite-check-canonical-source-change before finishing.",
+    `Run ${GOVERNANCE_RUNNER} to classify impact, make targeted fixes, and record D1/D2 decisions.`,
+    "Then run speclite-check-canonical-source-change before finishing.",
     `Current check status: ${input.report.status ?? "warning"}; findings: ${findingSummary}.`,
+    `Impacted governance classes: ${impactSummary}.`,
     `Suggested command: ${command}`,
     "This hook is warning-only and exits 0.",
   ].join("\n");
   return {
-    systemMessage: "SpecLite canonical source changed; run speclite-check-canonical-source-change.",
+    systemMessage: `SpecLite canonical source changed; run ${GOVERNANCE_RUNNER}.`,
     hookSpecificOutput: {
       hookEventName: input.eventName,
       additionalContext,

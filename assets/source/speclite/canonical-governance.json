@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "speclite.canonical-governance.v1",
+  "description": "Governance classes and impact rules for SpecLite canonical source iteration.",
+  "classes": [
+    {
+      "id": "canonical-source-truth",
+      "title": "Canonical Source Truth",
+      "determinism": "D0",
+      "pathGlobs": [
+        "assets/source/speclite/core-skills/**",
+        "assets/source/speclite/sdlc-skills/**",
+        "assets/source/speclite/support-skills/**",
+        "assets/source/speclite/hooks/**",
+        "assets/source/speclite/scripts/**",
+        "assets/source/speclite/custom/**",
+        "assets/source/speclite/canonical-governance.json"
+      ],
+      "updatePolicy": "Authoritative source changes must be classified before derived artifacts are updated.",
+      "requiredFollowups": [
+        "run canonical source checker",
+        "classify changed package roots",
+        "verify packaging manifest"
+      ]
+    },
+    {
+      "id": "module-discovery-contract",
+      "title": "Module and Discovery Contract",
+      "determinism": "D0",
+      "pathGlobs": [
+        "assets/source/speclite/core-skills/module.yaml",
+        "assets/source/speclite/core-skills/module-help.csv",
+        "assets/source/speclite/sdlc-skills/module.yaml",
+        "assets/source/speclite/sdlc-skills/module-help.csv"
+      ],
+      "updatePolicy": "Module metadata and help rows must match discovered package roots.",
+      "requiredFollowups": [
+        "check module-help coverage",
+        "check baseline constants"
+      ]
+    },
+    {
+      "id": "hook-source-contract",
+      "title": "Hook Source Contract",
+      "determinism": "D0",
+      "pathGlobs": [
+        "assets/source/speclite/hooks/**"
+      ],
+      "updatePolicy": "Hook packages must keep manifest, runner, README, and IDE fragments aligned.",
+      "requiredFollowups": [
+        "check hook source completeness",
+        "run hook tests",
+        "review runtime layout docs"
+      ]
+    },
+    {
+      "id": "current-public-docs",
+      "title": "Current Public Docs",
+      "determinism": "D1",
+      "pathGlobs": [
+        "docs/**",
+        "README.md",
+        "assets/source/speclite/README.md",
+        "assets/source/speclite/README.en.md"
+      ],
+      "updatePolicy": "Current user-facing docs must reflect changed runtime, install, module, hook, or workflow behavior.",
+      "requiredFollowups": [
+        "review docs/reference",
+        "review docs/explanation",
+        "record update or skip decision"
+      ]
+    },
+    {
+      "id": "living-legacy-reference",
+      "title": "Living Legacy Reference",
+      "determinism": "D2",
+      "pathGlobs": [
+        "assets/source/speclite/docs/legacy/BMAD_SPECLITE_SKILL_MAPPING.md",
+        "assets/source/speclite/docs/legacy/CANONICAL_SKILL_ITERATION_CONTEXT.md"
+      ],
+      "updatePolicy": "Legacy files that still guide mapping or maintenance decisions may receive current addenda.",
+      "requiredFollowups": [
+        "decide living reference versus historical snapshot",
+        "record update or skip decision"
+      ]
+    },
+    {
+      "id": "frozen-historical-record",
+      "title": "Frozen Historical Record",
+      "determinism": "D2",
+      "pathGlobs": [
+        "assets/source/speclite/docs/legacy/HANDOFF.md",
+        "assets/source/speclite/**/PLAN.md",
+        "assets/source/speclite/**/EXPERIMENTS.md",
+        "assets/source/speclite/**/EXPERIMENT_NOTES.md"
+      ],
+      "updatePolicy": "Historical execution records preserve past facts. Prefer a dated current-status note over rewriting old results.",
+      "requiredFollowups": [
+        "avoid rewriting historical facts",
+        "record historical snapshot decision"
+      ]
+    },
+    {
+      "id": "release-evidence",
+      "title": "Release Evidence",
+      "determinism": "D0",
+      "pathGlobs": [
+        "release/packaging-manifest.json",
+        "dist/packaging-manifest.json",
+        "scripts/release/**"
+      ],
+      "updatePolicy": "Release evidence must be regenerated from package inventory when packaged source content changes.",
+      "requiredFollowups": [
+        "run npm run build",
+        "run npm run release:packaging-check"
+      ]
+    }
+  ],
+  "impactRules": [
+    {
+      "id": "core-or-sdlc-package-change",
+      "whenChanged": [
+        "assets/source/speclite/core-skills/**",
+        "assets/source/speclite/sdlc-skills/**"
+      ],
+      "impacts": [
+        "module-discovery-contract",
+        "current-public-docs",
+        "release-evidence"
+      ],
+      "requiredFollowups": [
+        "run skill or agent lint for changed packages",
+        "review module-help.csv when package roots changed",
+        "review docs/reference/skills"
+      ]
+    },
+    {
+      "id": "support-skill-change",
+      "whenChanged": [
+        "assets/source/speclite/support-skills/**"
+      ],
+      "impacts": [
+        "current-public-docs",
+        "living-legacy-reference",
+        "release-evidence"
+      ],
+      "requiredFollowups": [
+        "review support skills catalog",
+        "run support skill density or script tests",
+        "review living legacy support policy"
+      ]
+    },
+    {
+      "id": "hook-source-change",
+      "whenChanged": [
+        "assets/source/speclite/hooks/**"
+      ],
+      "impacts": [
+        "hook-source-contract",
+        "current-public-docs",
+        "release-evidence"
+      ],
+      "requiredFollowups": [
+        "run hook tests",
+        "review runtime layout docs",
+        "verify warning versus blocking behavior"
+      ]
+    },
+    {
+      "id": "governance-map-change",
+      "whenChanged": [
+        "assets/source/speclite/canonical-governance.json"
+      ],
+      "impacts": [
+        "current-public-docs",
+        "release-evidence"
+      ],
+      "requiredFollowups": [
+        "review canonical source governance docs",
+        "run canonical checker in warn and strict modes"
+      ]
+    }
+  ]
+}

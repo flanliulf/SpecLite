@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 import { constants } from "node:fs";
 import { access, readFile, readdir, stat } from "node:fs/promises";
+import { execFile } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
+import { promisify } from "node:util";
 
 const CANONICAL_ROOT = "assets/source/speclite";
+const GOVERNANCE_MAP = "assets/source/speclite/canonical-governance.json";
+const GOVERNANCE_RUNNER = "speclite-canonical-source-governance-runner";
 const REQUIRED_HOOK_FILES = [
   "README.md",
   "hook-manifest.json",
@@ -14,10 +18,12 @@ const REQUIRED_HOOK_FILES = [
 ];
 const SCAN_DIRS = ["docs", "test", "src", "release"];
 const SCAN_FILES = ["README.md", "assets/source/speclite/README.md", "assets/source/speclite/README.en.md"];
+const execFileAsync = promisify(execFile);
 
 const args = parseArgs(process.argv.slice(2));
 const projectRoot = path.resolve(args.projectRoot ?? ".");
 const format = args.format ?? "text";
+const mode = args.mode ?? "warn";
 
 try {
   const report = await createReport(projectRoot);
@@ -47,6 +53,7 @@ try {
       },
     ],
     recommendedCommands: createRecommendedCommands(),
+    recommendedSkills: [GOVERNANCE_RUNNER, "speclite-check-canonical-source-change"],
   };
   if (format === "json") {
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
@@ -70,23 +77,265 @@ async function createReport(projectRoot) {
       total: coreRoots.length + sdlcRoots.length,
     },
   };
-  const findings = [
-    ...(await checkModuleHelp(projectRoot, "core-skills", coreRoots)),
-    ...(await checkModuleHelp(projectRoot, "sdlc-skills", sdlcRoots)),
-    ...(await checkHookSources(projectRoot, hooks)),
-    ...(await checkManifestBaseline(projectRoot, counts.defaultInstall.total)),
-    ...(await scanStaleText(projectRoot, counts)),
-    ...(await checkPackagingManifest(projectRoot)),
-  ];
+  const governance = await checkGovernanceMap(projectRoot, args.scope ?? "all");
+  const findings = applyMode(
+    [
+      ...governance.findings,
+      ...(await checkModuleHelp(projectRoot, "core-skills", coreRoots)),
+      ...(await checkModuleHelp(projectRoot, "sdlc-skills", sdlcRoots)),
+      ...(await checkHookSources(projectRoot, hooks)),
+      ...(await checkManifestBaseline(projectRoot, counts.defaultInstall.total)),
+      ...(await scanStaleText(projectRoot, counts)),
+      ...(await checkPackagingManifest(projectRoot)),
+    ],
+    mode,
+  );
   findings.sort((left, right) => `${left.severity}:${left.id}:${left.path}`.localeCompare(`${right.severity}:${right.id}:${right.path}`));
   return {
     schemaVersion: "speclite.canonical-source-change-check.v1",
-    status: findings.some((finding) => finding.severity === "error") ? "warning" : findings.length > 0 ? "warning" : "ok",
+    status: createStatus(findings, mode),
     projectRoot: displayPath(projectRoot),
+    mode,
     counts,
+    governance: governance.summary,
     findings,
     recommendedCommands: createRecommendedCommands(),
+    recommendedSkills: [GOVERNANCE_RUNNER, "speclite-check-canonical-source-change"],
   };
+}
+
+async function checkGovernanceMap(projectRoot, scope) {
+  const mapPath = path.join(projectRoot, GOVERNANCE_MAP);
+  const relativeMapPath = toProjectRelative(projectRoot, mapPath);
+  if (!(await exists(mapPath))) {
+    return {
+      summary: {
+        mapStatus: "missing",
+        mapPath: relativeMapPath,
+        changedPathCount: 0,
+        impactedClasses: [],
+        triggeredRules: [],
+        requiredFollowups: [],
+        decisionRecordRequired: false,
+      },
+      findings: [
+        {
+          id: "governance-map.missing-file",
+          severity: "warning",
+          determinism: "D0",
+          path: relativeMapPath,
+          message: `${GOVERNANCE_MAP} is missing; canonical source changes cannot be classified.`,
+        },
+      ],
+    };
+  }
+
+  let governanceMap;
+  try {
+    governanceMap = JSON.parse(await readFile(mapPath, "utf8"));
+  } catch (error) {
+    return {
+      summary: {
+        mapStatus: "invalid",
+        mapPath: relativeMapPath,
+        changedPathCount: 0,
+        impactedClasses: [],
+        triggeredRules: [],
+        requiredFollowups: [],
+        decisionRecordRequired: false,
+      },
+      findings: [
+        {
+          id: "governance-map.invalid-json",
+          severity: "error",
+          determinism: "D0",
+          path: relativeMapPath,
+          message: error instanceof Error ? error.message : String(error),
+        },
+      ],
+    };
+  }
+
+  const validationFinding = validateGovernanceMap(governanceMap, relativeMapPath);
+  if (validationFinding !== undefined) {
+    return {
+      summary: {
+        mapStatus: "invalid",
+        mapPath: relativeMapPath,
+        changedPathCount: 0,
+        impactedClasses: [],
+        triggeredRules: [],
+        requiredFollowups: [],
+        decisionRecordRequired: false,
+      },
+      findings: [validationFinding],
+    };
+  }
+
+  const changedPaths = await listChangedPaths(projectRoot);
+  const impactedClasses = selectImpactedClasses(governanceMap.classes, changedPaths);
+  const triggeredRules = selectTriggeredRules(governanceMap.impactRules, changedPaths);
+  const requiredFollowups = uniqueSorted([
+    ...impactedClasses.flatMap((entry) => entry.requiredFollowups ?? []),
+    ...triggeredRules.flatMap((entry) => entry.requiredFollowups ?? []),
+  ]);
+  const decisionRecordRequired = impactedClasses.some((entry) => entry.determinism === "D1" || entry.determinism === "D2");
+
+  return {
+    summary: {
+      mapStatus: "loaded",
+      mapPath: relativeMapPath,
+      scope,
+      changedPathCount: changedPaths.length,
+      impactedClasses: impactedClasses.map((entry) => ({
+        id: entry.id,
+        title: entry.title,
+        determinism: entry.determinism,
+      })),
+      triggeredRules: triggeredRules.map((entry) => entry.id),
+      requiredFollowups,
+      decisionRecordRequired,
+      governanceRunner: GOVERNANCE_RUNNER,
+      strictModeCommand:
+        "node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict",
+    },
+    findings: [],
+  };
+}
+
+function validateGovernanceMap(governanceMap, relativeMapPath) {
+  if (governanceMap === null || typeof governanceMap !== "object") {
+    return governanceMapFinding("governance-map.invalid-shape", relativeMapPath, "Governance map must be a JSON object.");
+  }
+  if (!Array.isArray(governanceMap.classes)) {
+    return governanceMapFinding("governance-map.missing-classes", relativeMapPath, "Governance map must define classes[].");
+  }
+  if (!Array.isArray(governanceMap.impactRules)) {
+    return governanceMapFinding("governance-map.missing-impact-rules", relativeMapPath, "Governance map must define impactRules[].");
+  }
+  const classIds = new Set();
+  for (const entry of governanceMap.classes) {
+    if (typeof entry.id !== "string" || entry.id.trim().length === 0) {
+      return governanceMapFinding("governance-map.invalid-class-id", relativeMapPath, "Every governance class must have an id.");
+    }
+    if (classIds.has(entry.id)) {
+      return governanceMapFinding("governance-map.duplicate-class-id", relativeMapPath, `Duplicate governance class id: ${entry.id}.`);
+    }
+    classIds.add(entry.id);
+    if (!["D0", "D1", "D2"].includes(entry.determinism)) {
+      return governanceMapFinding(
+        "governance-map.invalid-determinism",
+        relativeMapPath,
+        `Governance class ${entry.id} must use determinism D0, D1, or D2.`,
+      );
+    }
+    if (!Array.isArray(entry.pathGlobs) || entry.pathGlobs.length === 0) {
+      return governanceMapFinding("governance-map.missing-path-globs", relativeMapPath, `Governance class ${entry.id} has no pathGlobs.`);
+    }
+  }
+  for (const rule of governanceMap.impactRules) {
+    if (typeof rule.id !== "string" || rule.id.trim().length === 0) {
+      return governanceMapFinding("governance-map.invalid-rule-id", relativeMapPath, "Every impact rule must have an id.");
+    }
+    if (!Array.isArray(rule.whenChanged) || rule.whenChanged.length === 0) {
+      return governanceMapFinding("governance-map.missing-rule-globs", relativeMapPath, `Impact rule ${rule.id} has no whenChanged patterns.`);
+    }
+    for (const classId of rule.impacts ?? []) {
+      if (!classIds.has(classId)) {
+        return governanceMapFinding(
+          "governance-map.unknown-impact-class",
+          relativeMapPath,
+          `Impact rule ${rule.id} references unknown class ${classId}.`,
+        );
+      }
+    }
+  }
+  return undefined;
+}
+
+function governanceMapFinding(id, relativeMapPath, message) {
+  return {
+    id,
+    severity: "error",
+    determinism: "D0",
+    path: relativeMapPath,
+    message,
+  };
+}
+
+function selectImpactedClasses(classes, changedPaths) {
+  if (changedPaths.length === 0) return [];
+  return classes
+    .filter((entry) => changedPaths.some((changedPath) => matchesAny(changedPath, entry.pathGlobs)))
+    .sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function selectTriggeredRules(rules, changedPaths) {
+  if (changedPaths.length === 0) return [];
+  return rules
+    .filter((entry) => changedPaths.some((changedPath) => matchesAny(changedPath, entry.whenChanged)))
+    .sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function matchesAny(filePath, patterns) {
+  return (patterns ?? []).some((pattern) => matchesPattern(filePath, pattern));
+}
+
+function matchesPattern(filePath, pattern) {
+  const normalizedFilePath = normalizePath(filePath);
+  const normalizedPattern = normalizePath(pattern);
+  if (normalizedPattern.endsWith("/**")) {
+    const prefix = normalizedPattern.slice(0, -3);
+    return normalizedFilePath === prefix || normalizedFilePath.startsWith(`${prefix}/`);
+  }
+  return normalizedFilePath === normalizedPattern;
+}
+
+async function listChangedPaths(projectRoot) {
+  const argsList = [
+    ["diff", "--name-only"],
+    ["diff", "--cached", "--name-only"],
+    ["ls-files", "--others", "--exclude-standard"],
+  ];
+  const results = await Promise.all(argsList.map((gitArgs) => gitNames(projectRoot, gitArgs)));
+  return uniqueSorted(results.flat().filter((entry) => entry.startsWith(CANONICAL_ROOT) || entry === GOVERNANCE_MAP));
+}
+
+async function gitNames(projectRoot, gitArgs) {
+  try {
+    const { stdout } = await execFileAsync("git", ["-C", projectRoot, ...gitArgs], {
+      timeout: 5000,
+      maxBuffer: 1024 * 1024,
+    });
+    return stdout
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map(normalizePath);
+  } catch {
+    return [];
+  }
+}
+
+function applyMode(findings, mode) {
+  const normalizedFindings = findings.map((finding) => ({
+    determinism: "D0",
+    ...finding,
+  }));
+  if (mode !== "strict") return normalizedFindings;
+  return normalizedFindings.map((finding) => {
+    if (finding.determinism !== "D0" || finding.severity !== "warning") return finding;
+    return {
+      ...finding,
+      severity: "error",
+      message: `${finding.message} Strict mode treats D0 findings as blocking.`,
+    };
+  });
+}
+
+function createStatus(findings, mode) {
+  if (mode === "strict" && findings.some((finding) => finding.severity === "error")) return "error";
+  return findings.length > 0 ? "warning" : "ok";
 }
 
 async function listSkillRoots(root) {
@@ -410,6 +659,8 @@ function parseCsv(contents) {
 function createRecommendedCommands() {
   return [
     "node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json",
+    "node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict",
+    "python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py assets/source/speclite/support-skills/speclite-canonical-source-governance-runner",
     "python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py assets/source/speclite/support-skills/speclite-check-canonical-source-change",
     "npm test -- test/hook-artifact-install.test.ts test/config-initialization.test.ts test/runtime-structure.test.ts test/fixture-release-gates.test.ts test/story-6-4-path-portability.test.ts test/source-and-modules.test.ts",
     "npm run build",
@@ -487,4 +738,12 @@ function displayPath(filePath) {
 
 function relative(filePath) {
   return filePath.split(path.sep).join("/");
+}
+
+function normalizePath(filePath) {
+  return filePath.replaceAll("\\", "/").replace(/^\.\//, "");
+}
+
+function uniqueSorted(values) {
+  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }

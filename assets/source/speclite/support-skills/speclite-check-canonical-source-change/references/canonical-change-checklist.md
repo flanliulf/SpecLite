@@ -8,6 +8,8 @@
 
 - 统计 `core-skills`、`sdlc-skills`、`support-skills` 和 `hooks` 的当前 package roots。
 - 确认默认安装 baseline 只计算 `core+sdlc`，不把 `support-skills` 纳入普通目标项目 skill mirrors。
+- 读取 `assets/source/speclite/canonical-governance.json`，确认 governance classes、impact rules 和 `D0` / `D1` / `D2` determinism 定义有效。
+- 如果 checker 输出 `governance.decisionRecordRequired: true`，运行或遵循 `speclite-canonical-source-governance-runner`，记录 D1/D2 面向的 `updated`、`skipped` 或 `historical snapshot` 决策。
 - 检查 `core-skills/module-help.csv` 与 `sdlc-skills/module-help.csv`：
   - 每个 canonical package root 都有一条非 `_meta` row。
   - 没有重复 `skill` row。
@@ -29,6 +31,7 @@
 
 ```sh
 node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json
+node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict
 python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py assets/source/speclite/support-skills/speclite-check-canonical-source-change
 npm test -- test/hook-artifact-install.test.ts test/config-initialization.test.ts test/runtime-structure.test.ts test/fixture-release-gates.test.ts test/story-6-4-path-portability.test.ts test/source-and-modules.test.ts
 npm run build

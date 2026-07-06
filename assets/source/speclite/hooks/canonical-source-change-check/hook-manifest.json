@@ -3,7 +3,7 @@
   "hookId": "canonical-source-change-check",
   "sourceSkill": "speclite-check-canonical-source-change",
   "protectedSurface": "assets/source/speclite",
-  "description": "在 canonical source 发生变更后 warning-only 提醒运行一致性检查。",
+  "description": "在 canonical source 发生变更后 warning-only 提醒运行 governance runner 与一致性检查。",
   "runner": "runner.mjs",
   "events": ["PostToolUse", "Stop"],
   "platformConfigs": [".claude/settings.json", ".codex/hooks.json"],

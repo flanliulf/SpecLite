@@ -38,6 +38,17 @@ describe("canonical source change check script", () => {
           total: 2,
         },
       });
+      expect(parsed.governance).toMatchObject({
+        mapStatus: "loaded",
+        decisionRecordRequired: false,
+        governanceRunner: "speclite-canonical-source-governance-runner",
+      });
+      expect(parsed.recommendedSkills).toEqual(
+        expect.arrayContaining([
+          "speclite-canonical-source-governance-runner",
+          "speclite-check-canonical-source-change",
+        ]),
+      );
       expect(findingIds).toEqual(
         expect.arrayContaining([
           "module-help.missing-row",
@@ -51,6 +62,27 @@ describe("canonical source change check script", () => {
           expect.stringContaining("check_canonical_source_change.mjs --project-root . --scope all --format json"),
         ]),
       );
+
+      const strictResult = await runNode(CHECK_SCRIPT_PATH, [
+        "--project-root",
+        tempRoot,
+        "--scope",
+        "all",
+        "--format",
+        "json",
+        "--mode",
+        "strict",
+      ]);
+      const strictParsed = JSON.parse(strictResult.stdout);
+
+      expect(strictParsed.status).toBe("error");
+      expect(strictParsed.mode).toBe("strict");
+      expect(
+        strictParsed.findings.some(
+          (finding: { id: string; severity: string }) =>
+            finding.id === "module-help.missing-row" && finding.severity === "error",
+        ),
+      ).toBe(true);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -70,6 +102,41 @@ async function writeCanonicalFixture(projectRoot: string): Promise<void> {
   await mkdir(path.join(projectRoot, "assets/source/speclite/hooks/sample-hook"), { recursive: true });
   await mkdir(path.join(projectRoot, "src/validation/rules"), { recursive: true });
   await mkdir(path.join(projectRoot, "docs/reference"), { recursive: true });
+  await writeFile(
+    path.join(projectRoot, "assets/source/speclite/canonical-governance.json"),
+    JSON.stringify(
+      {
+        schemaVersion: "speclite.canonical-governance.v1",
+        classes: [
+          {
+            id: "canonical-source-truth",
+            title: "Canonical Source Truth",
+            determinism: "D0",
+            pathGlobs: ["assets/source/speclite/**"],
+            requiredFollowups: ["run checker"],
+          },
+          {
+            id: "current-public-docs",
+            title: "Current Public Docs",
+            determinism: "D1",
+            pathGlobs: ["docs/**"],
+            requiredFollowups: ["record decision"],
+          },
+        ],
+        impactRules: [
+          {
+            id: "support-skill-change",
+            whenChanged: ["assets/source/speclite/support-skills/**"],
+            impacts: ["current-public-docs"],
+            requiredFollowups: ["review support docs"],
+          },
+        ],
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
 
   await writeFile(
     path.join(projectRoot, "assets/source/speclite/core-skills/module-help.csv"),

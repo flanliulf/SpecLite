@@ -78,13 +78,13 @@ Agent 的完整 persona、菜单和 activation 协议仍来自 installed Skill p
 | Hook | Runtime Root | Protected Target | Events | Behavior |
 |---|---|---|---|---|
 | `flow-gate-enforcement` | `_speclite/hooks/flow-gate-enforcement` | `protected_skill = "speclite-dev-story"` | `UserPromptSubmit` | 在执行 `speclite-dev-story` 前检查 story-kickoff Flow Gate 通过证据，必要时阻断。 |
-| `canonical-source-change-check` | `_speclite/hooks/canonical-source-change-check` | `protected_surface = "assets/source/speclite"` | `PostToolUse`、`Stop` | 在 canonical source 变更后 warning-only 提醒运行 `speclite-check-canonical-source-change`，永远 exit `0`。 |
+| `canonical-source-change-check` | `_speclite/hooks/canonical-source-change-check` | `protected_surface = "assets/source/speclite"` | `PostToolUse`、`Stop` | 在 canonical source 变更后 warning-only 提醒运行 `speclite-canonical-source-governance-runner` 和 `speclite-check-canonical-source-change`，永远 exit `0`。 |
 
 每个 hook runtime root 都包含 `runner.mjs` 和 `hook-manifest.json`。`_speclite/config.toml` 的 `[hooks.<hook-id>]` descriptor 会记录 `module`、`source_skill`、保护目标、`runtime_root`、`runner`、`events`、`platform_configs` 和 `trust_note`。
 
 `flow-gate-enforcement` runner 只读取 hook event JSON、installed `_speclite/config.toml` 和 `{implementation_artifacts}/flow-gates/<story-key>-story-kickoff-gate.md` 的 frontmatter metadata。它不生成 Flow Gate report、不修改 Story，也不推进 `sprint-status.yaml`。
 
-`canonical-source-change-check` runner 只读取 git diff / staged diff / untracked files 是否触及 `assets/source/speclite/`。触及时调用 support skill 的只读检查脚本并输出 warning JSON，不返回 `decision: block`，不使用 exit code `2`。
+`canonical-source-change-check` runner 只读取 git diff / staged diff / untracked files 是否触及 `assets/source/speclite/`。触及时调用 support skill 的只读检查脚本并输出 warning JSON，提示先用 `speclite-canonical-source-governance-runner` 分类影响面和记录 D1/D2 决策，再用 `speclite-check-canonical-source-change` 收口；它不返回 `decision: block`，不使用 exit code `2`。
 
 Claude config 生成到 `.claude/settings.json`，包含 `UserPromptSubmit`、`PostToolUse` 和 `Stop`。Codex config 生成到 `.codex/hooks.json`，使用 event-keyed `{"hooks": {"Event": [...]}}` 形态。已有 project hook config 会触发 manual action，installer 不覆盖。
 
@@ -99,7 +99,7 @@ SpecLite 会把 canonical Skill packages 投影到 selected IDE targets：
 | `claude` | `.claude/skills/<skill-id>/` | Claude Skill package mirror。 |
 | `agents` | `.agents/skills/<skill-id>/` | Agents/Codex Skill package mirror。 |
 
-当前 official source snapshot 包含 13 个 core package roots 和 48 个 SDLC package roots。默认同时选择 `core` 和 `sdlc` 时，每个 selected IDE target 会获得对应 skill mirrors。
+当前 official source snapshot 包含 13 个 core package roots 和 51 个 SDLC package roots。默认同时选择 `core` 和 `sdlc` 时，每个 selected IDE target 会获得对应 skill mirrors。
 
 ## Artifact Root（产物根目录）
 
