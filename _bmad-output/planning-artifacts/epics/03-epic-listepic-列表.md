@@ -75,3 +75,13 @@ SpecLite 维护者和 AI IDE 使用者可以依赖统一的 Node CLI runtime act
 **MVP guard：** 本 Epic 不改变 `speclite resolve` machine contract、merge order、missing key behavior、`CommandResult` JSON contract 或 workflow artifact contract。Python scripts 即使安装，也必须标记为 compatibility assets，并被 Story 9.1 的 activation corpus tests 排除在默认路径之外。
 
 **覆盖 FR / NFR / UX：** FR52a, FR52b, FR63a, FR71, NFR local-only deterministic release gate, UX installed skill activation clarity
+
+## Epic 10: Canonical Source Ecosystem Module Governance（Canonical Source 生态模块治理）
+
+SpecLite 维护者可以把持续新增的技术生态源定义放入 `assets/source/speclite/ecosystems/<category>/<id>/`，并让 installer 通过“前端 / 后端 / 其他”到具体生态的两级选择只安装匹配的 ecosystem modules。Ecosystem modules 依赖 `sdlc`，在交互式安装中强烈推荐选择，但不是 mandatory modules；未选择的 ecosystem source 不进入目标项目的 IDE mirrors、index 或 runtime projection。
+
+**实施范围：** Canonical source expansion Epic。覆盖 ecosystem source taxonomy、nested official module discovery、ecosystem module metadata、two-level install selection、selected-only IDE projection、首批 backend 技术栈 Skill 迁移、fixtures、packaging、canonical source check 和 maintainer docs。
+
+**MVP guard：** 本 Epic 不改变 `core` required、`sdlc` default selected、`CommandResult` JSON contract、`speclite resolve` contract 或 workflow artifact contract。`--yes` / JSON 默认安装不得自动选择 ecosystem modules；任何 ecosystem module 被选择时必须通过 dependency 自动包含 `sdlc`，且未选择的 ecosystem modules 必须有 negative fixture assertions。
+
+**覆盖 FR / NFR / UX：** FR2, FR3, FR18, FR19, FR20, FR63a, FR66, FR67, FR71, NFR local-only deterministic release gate, UX install module selection clarity, canonical source governance
