@@ -35,13 +35,13 @@
         "id": "claude",
         "status": "configured",
         "targetPath": ".claude/skills",
-        "skillCount": 61
+        "skillCount": 64
       },
       {
         "id": "agents",
         "status": "configured",
         "targetPath": ".agents/skills",
-        "skillCount": 61
+        "skillCount": 64
       }
     ],
     "paths": {

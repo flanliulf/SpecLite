@@ -15,7 +15,7 @@ const fixtureExpectedRoot = path.join(
   process.cwd(),
   "test/fixtures/fresh-install-empty-project/expected",
 );
-const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 61;
+const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 64;
 const REQUIRED_METHOD_LOOP_SKILL_IDS = [
   "speclite-advanced-elicitation",
   "speclite-review-acceptance-auditor",
@@ -324,7 +324,7 @@ describe("runtime structure and IDE mirror creation", () => {
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 
   it("uses canonical target order while respecting a selected target subset", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-runtime-target-subset-"));

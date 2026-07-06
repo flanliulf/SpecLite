@@ -235,6 +235,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "3-solutioning",
+      "entryLabel": "IR Grill",
+      "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
+      "activationTarget": ".claude/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
       "entryLabel": "Story Review",
       "canonicalSkillId": "speclite-story-review-01-reviewer",
       "activationTarget": ".claude/skills/speclite-story-review-01-reviewer/SKILL.md",
@@ -392,6 +403,28 @@
       "entryLabel": "Flow Gate",
       "canonicalSkillId": "speclite-flow-gate",
       "activationTarget": ".claude/skills/speclite-flow-gate/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Epic Story Code Review Runner",
+      "canonicalSkillId": "speclite-goal-orchestrator-epic-story-code-review-runner",
+      "activationTarget": ".claude/skills/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
+      "entryLabel": "Epic Story Review Runner",
+      "canonicalSkillId": "speclite-goal-orchestrator-epic-story-review-runner",
+      "activationTarget": ".claude/skills/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md",
       "targetIds": [
         "claude",
         "agents"

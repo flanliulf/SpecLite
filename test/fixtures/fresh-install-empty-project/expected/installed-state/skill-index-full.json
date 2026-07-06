@@ -535,6 +535,34 @@
     },
     {
       "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-goal-orchestrator-epic-story-code-review-runner",
+      "moduleId": "sdlc",
+      "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner",
+      "canonicalPackageHash": "sha256:8b69a8e847eff84a2675e35a7d17a8a7401647bc1f294e9638281bda1106686f",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "4-implementation"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-goal-orchestrator-epic-story-review-runner",
+      "moduleId": "sdlc",
+      "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner",
+      "canonicalPackageHash": "sha256:f2547b843c4db82c31f6c3e3f88630e66c104e24f3cb0e3e926fe7916c1f1e17",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "4-implementation"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
       "canonicalSkillId": "speclite-help",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-help",
@@ -559,6 +587,20 @@
       ],
       "phaseIds": [
         "anytime"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
+      "moduleId": "sdlc",
+      "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer",
+      "canonicalPackageHash": "sha256:effe6bb347f7bceb09de8b96eeca60bdd280f08ce97ca644efaff09e6718f405",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "3-solutioning"
       ]
     },
     {

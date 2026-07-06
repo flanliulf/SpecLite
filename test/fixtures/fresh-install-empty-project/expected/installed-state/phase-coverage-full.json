@@ -528,6 +528,36 @@
       "phaseId": "3-solutioning",
       "phaseLabel": "Solutioning",
       "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-ir-grill-consistency-reviewer",
+          "activationTarget": ".claude/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-ir-grill-consistency-reviewer",
+          "activationTarget": ".agents/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "ir-grill-records",
+        "defaultOutputPath": "_speclite-output/planning-artifacts/ir-grill",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-story-review-01-reviewer",
       "ideTargets": [
         {
@@ -939,6 +969,66 @@
       "artifactContract": {
         "artifactType": "flow-gate-report",
         "defaultOutputPath": "_speclite-output/implementation-artifacts/flow-gates",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-goal-orchestrator-epic-story-code-review-runner",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-goal-orchestrator-epic-story-code-review-runner",
+          "activationTarget": ".claude/skills/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-goal-orchestrator-epic-story-code-review-runner",
+          "activationTarget": ".agents/skills/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "epic-story-code-review-goal-records",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-goal-orchestrator-epic-story-review-runner",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-goal-orchestrator-epic-story-review-runner",
+          "activationTarget": ".claude/skills/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-goal-orchestrator-epic-story-review-runner",
+          "activationTarget": ".agents/skills/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "epic-story-review-goal-records",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",

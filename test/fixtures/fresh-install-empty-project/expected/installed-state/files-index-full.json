@@ -5,7 +5,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/help-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:be14e05f14eac8d31114046087df7cd8ae1f8590fdd9a68a2fea141ff01606b4",
+      "hash": "sha256:f88f5cca580caee836ac340b837bcb24f4cb4fb0a8ac7b64da176cecee2d0462",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "help-index",
@@ -25,7 +25,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/phase-coverage.json",
       "ownership": "installer-owned",
-      "hash": "sha256:877442efe740d8a8b1b312dcc4c5fccb8c94f2ee06bade7b85a32f03fa3cc922",
+      "hash": "sha256:ac74249f2e4acea58f37d881ebb26ff9fa674cfc8150c91903781ee620040a82",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "phase-coverage",
@@ -35,7 +35,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/skill-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:136b8714f3a813883c3907d0e6cd26d1594802b8a32fc56a24d749382f5f7256",
+      "hash": "sha256:c62cee156ae80bf14256b97359b5ddefd71b96d6513bace16baf6245fdd8ea0a",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "skill-index",
@@ -45,7 +45,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/config.toml",
       "ownership": "installer-owned",
-      "hash": "sha256:7664183cc5e9c14192d8162419a1b9ea285269e2a1bcd3941c76ee2e7b51d7ef",
+      "hash": "sha256:0f6ce5963aeef70108aa6dbbbc7fde4c0ddb72d0877f541f13e68293e1cc8af2",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "runtime-config",
@@ -85,7 +85,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/hooks/canonical-source-change-check/hook-manifest.json",
       "ownership": "installer-owned",
-      "hash": "sha256:4358710e08da6c579a42c61de5106e3f31ba31644e362a80df9f2fc0b59c81ca",
+      "hash": "sha256:1c2cd6b8ead008147d1e0bf61c916cd8c273d899d44857539a6d5efabfcb9118",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "hook-source-metadata",
@@ -95,7 +95,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/hooks/canonical-source-change-check/runner.mjs",
       "ownership": "installer-owned",
-      "hash": "sha256:f0c74278c7a72191cc35b6d523fb4dbba9b482b39d6f3ba3906f4f53c9954da1",
+      "hash": "sha256:a9b5aa9eefcd1ec7b1668d7217c5e88679cfde7ac107e8562cc48ea932417f55",
       "hashAlgorithm": "sha256",
       "executable": true,
       "artifactKind": "hook-runner",
@@ -3403,6 +3403,46 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:133769e1739c4d934d4d60664ee1cc26ea224b295ae6e5440b90ea4352f0ecba",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b9ec954dc9cb51814e499069cf4f40cbea9d8148d4c7cc4943abd0e20e126c80",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-goal-orchestrator-epic-story-review-runner/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b004b78f78b6d429b54799542e289334eedfe545dfcb2803957faa86562a72f3",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:0c17081e6c2804aef2b69f9a5f8afd71233cfc0ea770d56ea2ae1d78055a8f5a",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".agents/skills/speclite-help/CHANGELOG.md",
       "ownership": "installer-owned",
       "hash": "sha256:43dde686b1388d8eba7fe9347ed6424706480ddaf66d52d9d16027aa5181f1ea",
@@ -3450,6 +3490,76 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/core-skills/speclite-index-docs/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:85adb5ae6656fe2e19607373a5f2d124b3d32a07c3d29b25d3860c70b6028341",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/references/prompt-library.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:7e5fb989183a3450f065aea45839e8b307ccdb016feae92b7954b05a23c968cc",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/prompt-library.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/references/record-output-spec.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:fda4a343cd8717bc76eb0115026fcc28748e66918f9eea778d6b13ff223e672b",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/record-output-spec.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/references/review-dimensions.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:060b3a5284afc7461a16e6f7001957d0c34783494fd359441e15a3ed6e7d13d0",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/review-dimensions.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/references/testing-scenarios.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:fc610e549a713f8f3d79b78b1b1624fda6fce3bf26eb3f814710ee61b9699a03",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/testing-scenarios.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/references/workflow.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:74f5e6da0dbfc5bfde69c8b78daf3390c5dfd2bca3db3d06196d7a562715f1f2",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/workflow.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:3f4a1672a47e8c16eb9e093008193aaa0d212ee557f64e21d649c5f3b148f651",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -8273,6 +8383,46 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:133769e1739c4d934d4d60664ee1cc26ea224b295ae6e5440b90ea4352f0ecba",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b9ec954dc9cb51814e499069cf4f40cbea9d8148d4c7cc4943abd0e20e126c80",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-goal-orchestrator-epic-story-review-runner/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b004b78f78b6d429b54799542e289334eedfe545dfcb2803957faa86562a72f3",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:0c17081e6c2804aef2b69f9a5f8afd71233cfc0ea770d56ea2ae1d78055a8f5a",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".claude/skills/speclite-help/CHANGELOG.md",
       "ownership": "installer-owned",
       "hash": "sha256:43dde686b1388d8eba7fe9347ed6424706480ddaf66d52d9d16027aa5181f1ea",
@@ -8320,6 +8470,76 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/core-skills/speclite-index-docs/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:85adb5ae6656fe2e19607373a5f2d124b3d32a07c3d29b25d3860c70b6028341",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/references/prompt-library.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:7e5fb989183a3450f065aea45839e8b307ccdb016feae92b7954b05a23c968cc",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/prompt-library.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/references/record-output-spec.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:fda4a343cd8717bc76eb0115026fcc28748e66918f9eea778d6b13ff223e672b",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/record-output-spec.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/references/review-dimensions.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:060b3a5284afc7461a16e6f7001957d0c34783494fd359441e15a3ed6e7d13d0",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/review-dimensions.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/references/testing-scenarios.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:fc610e549a713f8f3d79b78b1b1624fda6fce3bf26eb3f814710ee61b9699a03",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/testing-scenarios.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/references/workflow.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:74f5e6da0dbfc5bfde69c8b78daf3390c5dfd2bca3db3d06196d7a562715f1f2",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/workflow.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:3f4a1672a47e8c16eb9e093008193aaa0d212ee557f64e21d649c5f3b148f651",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",

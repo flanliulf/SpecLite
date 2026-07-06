@@ -87,7 +87,7 @@ const ARTIFACTS = {
   },
 } as const;
 
-const CORE_SDLC_BASELINE_ENTRY_COUNT = 61;
+const CORE_SDLC_BASELINE_ENTRY_COUNT = 64;
 const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
   core: [
     "assets/source/speclite/core-skills/speclite-advanced-elicitation",
@@ -131,6 +131,7 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture",
     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories",
     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context",
+    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer",
     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer",
     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-02-evaluator",
     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-03-fixer",
@@ -146,6 +147,8 @@ const EXPECTED_SELECTED_MODULE_PACKAGE_ROOTS = {
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner",
+    "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-generate-e2e-tests",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-qa-write-test-guide",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-quick-dev",
