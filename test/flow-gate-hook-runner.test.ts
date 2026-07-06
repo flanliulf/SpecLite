@@ -97,6 +97,36 @@ describe("flow gate hook runner", () => {
         }),
       expectedReason: "Flow Gate metadata is stale",
     },
+    {
+      name: "missing foundation prerequisite metadata",
+      setup: async (tempRoot: string) =>
+        writeGateMetadata(tempRoot, {
+          storyKey: "7-1-flow-gate-hook-enforcement",
+          result: "PASS",
+          includeFoundationMetadata: false,
+        }),
+      expectedReason: "Flow Gate foundation prerequisite metadata is missing",
+    },
+    {
+      name: "failed foundation prerequisite metadata",
+      setup: async (tempRoot: string) =>
+        writeGateMetadata(tempRoot, {
+          storyKey: "7-1-flow-gate-hook-enforcement",
+          result: "PASS",
+          foundationPrerequisiteStatus: "FAIL_CONTRACT",
+        }),
+      expectedReason: "Flow Gate foundationPrerequisiteStatus FAIL_CONTRACT does not allow development",
+    },
+    {
+      name: "failed closure owner check metadata",
+      setup: async (tempRoot: string) =>
+        writeGateMetadata(tempRoot, {
+          storyKey: "7-1-flow-gate-hook-enforcement",
+          result: "PASS",
+          closureOwnerCheckStatus: "FAIL_CONTRACT",
+        }),
+      expectedReason: "Flow Gate closureOwnerCheckStatus FAIL_CONTRACT does not allow development",
+    },
   ])("blocks speclite-dev-story for $name", async ({ setup, expectedReason }) => {
     const tempRoot = await createProjectWithConfig();
     await setup(tempRoot);
@@ -179,6 +209,9 @@ async function writeGateMetadata(
     target?: string;
     result: string;
     generatedAt?: string;
+    includeFoundationMetadata?: boolean;
+    foundationPrerequisiteStatus?: string;
+    closureOwnerCheckStatus?: string;
   },
 ): Promise<void> {
   const flowGateRoot = path.join(projectRoot, "_speclite-output/implementation-artifacts/flow-gates");
@@ -194,6 +227,12 @@ async function writeGateMetadata(
       `storyKey: "${input.storyKey}"`,
       `result: "${input.result}"`,
       `generatedAt: "${input.generatedAt ?? "2026-06-14T00:00:00.000Z"}"`,
+      ...(input.includeFoundationMetadata === false
+        ? []
+        : [
+            `foundationPrerequisiteStatus: "${input.foundationPrerequisiteStatus ?? "NOT_APPLICABLE"}"`,
+            `closureOwnerCheckStatus: "${input.closureOwnerCheckStatus ?? "NOT_APPLICABLE"}"`,
+          ]),
       'sourceSkill: "speclite-flow-gate"',
       "---",
       "",

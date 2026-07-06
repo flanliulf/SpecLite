@@ -25,4 +25,21 @@ describe("speclite-flow-gate canonical contract", () => {
     expect(regression).toContain("result is `FAIL_FUNCTION`");
     expect(regression).toContain("result is `FAIL_EVIDENCE`");
   });
+
+  it("requires story kickoff foundation handoff metadata for downstream consumers", async () => {
+    const workflow = await readFile(path.join(flowGateRoot, "references/workflow-details.md"), "utf8");
+    const template = await readFile(path.join(flowGateRoot, "assets/report-template.md"), "utf8");
+
+    for (const field of [
+      "foundationPrerequisiteStatus",
+      "foundationPrerequisiteRefs",
+      "closureOwnerCheckStatus",
+      "closureOwnerRefs",
+    ]) {
+      expect(workflow).toContain(field);
+      expect(template).toContain(field);
+    }
+    expect(workflow).toContain("future-closure owner");
+    expect(workflow).toContain("Downstream hooks and workflow runners treat missing status fields");
+  });
 });

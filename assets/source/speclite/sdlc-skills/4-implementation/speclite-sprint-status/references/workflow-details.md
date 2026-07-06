@@ -144,6 +144,7 @@ Enter corrections (e.g., "1=in-progress, 2=backlog") or "skip" to continue witho
 - IF any story has status "in-progress" AND no stories have status "ready-for-dev": recommend staying focused on active story
 - IF any story has status "ready-for-dev" AND `{flow_gate_root}/{story-key}-story-kickoff-gate.md` is missing: warn "story-kickoff gate missing; run speclite-flow-gate before dev-story"
 - IF any ready-for-dev story's latest kickoff gate result is not `PASS` or `PASS_EQUIVALENT`: warn "story-kickoff gate is not passing; do not start dev-story"
+- IF any ready-for-dev story's latest kickoff gate is missing `foundationPrerequisiteStatus` or `closureOwnerCheckStatus`, or either field is not `PASS` / `NOT_APPLICABLE`: warn "story-kickoff foundation handoff metadata is not passing; rerun speclite-flow-gate before dev-story"
 - IF a ready-for-dev Story file under `story_root` is newer than its kickoff gate report: warn "story-kickoff gate may be stale; rerun speclite-flow-gate"
 - IF all epics have status "backlog" AND no stories have status "ready-for-dev": prompt `/speclite:bmm:workflows:create-story`
 - IF `last_updated` timestamp is more than 7 days old (or `last_updated` is missing, fall back to `generated`): warn "sprint-status.yaml may be stale"
@@ -156,7 +157,7 @@ Enter corrections (e.g., "1=in-progress, 2=backlog") or "skip" to continue witho
   <note>When selecting "first" story: sort by epic number, then story number (e.g., 1-1 before 1-2 before 2-1)</note>
   1. If any story status == in-progress → recommend `dev-story` for the first in-progress story
   2. Else if any story status == review → recommend `code-review-01-reviewer` for the first review story
-  3. Else if any story status == ready-for-dev AND the first ready story has no current kickoff gate with result `PASS` or `PASS_EQUIVALENT` → recommend `flow-gate` for that story
+  3. Else if any story status == ready-for-dev AND the first ready story has no current kickoff gate with result `PASS` or `PASS_EQUIVALENT`, or its `foundationPrerequisiteStatus` / `closureOwnerCheckStatus` does not allow continuation → recommend `flow-gate` for that story
   4. Else if any story status == ready-for-dev → recommend `dev-story`
   5. Else if any story status == backlog → recommend `create-story`
   6. Else if any retrospective status == optional → recommend `retrospective`

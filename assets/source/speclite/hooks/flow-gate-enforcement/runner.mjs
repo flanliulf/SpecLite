@@ -4,6 +4,8 @@ import path from "node:path";
 import process from "node:process";
 
 const ALLOWING_RESULTS = new Set(["PASS", "PASS_EQUIVALENT"]);
+const ALLOWING_FOUNDATION_STATUSES = new Set(["PASS", "NOT_APPLICABLE"]);
+const FOUNDATION_GATE_STATUS_KEYS = ["foundationPrerequisiteStatus", "closureOwnerCheckStatus"];
 const MAX_METADATA_AGE_DAYS = 30;
 
 const stdin = await readStdin();
@@ -51,6 +53,13 @@ async function evaluate(input) {
   }
   if (isStaleGeneratedAt(metadata.generatedAt, input.now)) {
     return block(`Flow Gate metadata is stale for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  const foundationGateStatus = evaluateFoundationGateStatus(metadata);
+  if (foundationGateStatus.status === "missing") {
+    return block(`Flow Gate foundation prerequisite metadata is missing for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (foundationGateStatus.status === "blocked") {
+    return block(`Flow Gate ${foundationGateStatus.key} ${String(foundationGateStatus.value)} does not allow development for ${storyKey}. ${nextAction(storyKey)}`);
   }
 
   return allow(`Flow Gate story-kickoff evidence passed for ${storyKey}.`);
@@ -109,6 +118,15 @@ function isStaleGeneratedAt(value, now) {
   const generatedAt = new Date(value);
   if (!Number.isFinite(generatedAt.getTime())) return true;
   return now.getTime() - generatedAt.getTime() > MAX_METADATA_AGE_DAYS * 24 * 60 * 60 * 1000;
+}
+
+function evaluateFoundationGateStatus(metadata) {
+  for (const key of FOUNDATION_GATE_STATUS_KEYS) {
+    const value = metadata[key];
+    if (typeof value !== "string" || value.trim().length === 0) return { status: "missing" };
+    if (!ALLOWING_FOUNDATION_STATUSES.has(value)) return { status: "blocked", key, value };
+  }
+  return { status: "allowed" };
 }
 
 function nextAction(storyKey) {

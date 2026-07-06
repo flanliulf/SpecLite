@@ -370,7 +370,7 @@
       "canonicalSkillId": "speclite-dev-story",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-dev-story",
-      "canonicalPackageHash": "sha256:2506dc95ea2f93e2eeb342b2c6470e7471689a0eee802df056d50b8ae1729259",
+      "canonicalPackageHash": "sha256:0363985dc2ac04db90862b28e5004f00b6de8223aadbce1c039b21494d1e62c1",
       "installedTargets": [
         "claude",
         "agents"
@@ -468,7 +468,7 @@
       "canonicalSkillId": "speclite-flow-gate",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-flow-gate",
-      "canonicalPackageHash": "sha256:0c560b196310226cbee2002b1077f18e9efe23077ca63cc463c28c1f79ce37e8",
+      "canonicalPackageHash": "sha256:0efd10b2ee53a647d997734eb456d08e8275aeb522e3dc55e5c898436d58f51c",
       "installedTargets": [
         "claude",
         "agents"
@@ -496,7 +496,7 @@
       "canonicalSkillId": "speclite-goal-orchestrator-epic-story-code-review-runner",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner",
-      "canonicalPackageHash": "sha256:8b69a8e847eff84a2675e35a7d17a8a7401647bc1f294e9638281bda1106686f",
+      "canonicalPackageHash": "sha256:74a77684594962fd8999b49bbb8df03eb6a2632b4bff18d196ec0128b88f251c",
       "installedTargets": [
         "claude",
         "agents"
@@ -762,7 +762,7 @@
       "canonicalSkillId": "speclite-sprint-status",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-status",
-      "canonicalPackageHash": "sha256:4f8f49ecbf494ae51209e9e8cf8f74fc05fe51ed63db814215edc2d28d31a728",
+      "canonicalPackageHash": "sha256:de2399033696aca175b702f0056fd6fa608832055b1141e0b02b78f81ef3aca5",
       "installedTargets": [
         "claude",
         "agents"

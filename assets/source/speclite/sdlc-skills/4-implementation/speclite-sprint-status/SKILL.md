@@ -19,7 +19,7 @@ metadata:
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。
     - **模板化输出生成**：使用 assets 中的模板或示例骨架生成文档、报告、规格或交付产物，输出语言服从 `document_output_language`。
     - **质量校验与交接**：执行清单、报告、状态同步或 completion handoff，并在退出前解析和执行 `workflow.on_complete`。
-    - **Flow Gate 推荐**：在推荐 `speclite-dev-story` 前检查 ready-for-dev Story 的 story-kickoff gate，缺失、失败或过期时优先推荐 `speclite-flow-gate`。
+    - **Flow Gate 推荐**：在推荐 `speclite-dev-story` 前检查 ready-for-dev Story 的 story-kickoff gate，缺失、失败、过期、缺少 foundation prerequisite metadata 或 closure owner metadata 时优先推荐 `speclite-flow-gate`。
     - **迁移一致性约束**：当前运行规约只依赖 Speclite runtime，不读取旧运行目录、旧配置文件或旧命令命名空间。
 
 [约定]
@@ -34,7 +34,7 @@ metadata:
     1. 先完整阅读 `references/workflow-details.md`；该文件是从源入口转换后的权威工作流规约。随后按需读取 `references/workflow-details.md`。
     2. 执行工作流前，确认 `{skill-root}`、`{project-root}`、`{speclite-runtime-root}`、`{skill-name}` 四个路径变量均已明确。
     3. 若 workflow 指向 step 文件，必须一次只读取当前 step，完整执行后再进入下一步；遇到菜单或用户确认点时 HALT 等待。
-    4. 推荐进入 `speclite-dev-story` 前，按 `references/workflow-details.md` 检查目标 Story 的 story-kickoff gate 是否为 `PASS` 或 `PASS_EQUIVALENT`。
+    4. 推荐进入 `speclite-dev-story` 前，按 `references/workflow-details.md` 检查目标 Story 的 story-kickoff gate result 是否为 `PASS` 或 `PASS_EQUIVALENT`，且 `foundationPrerequisiteStatus`、`closureOwnerCheckStatus` 均允许继续。
     5. 生成或更新产物时，按源 workflow 的模板、清单、状态字段和输出位置要求执行，不得因为迁移而改变核心需求。
     6. 收尾前运行 checklist 或质量检查，解析 `workflow.on_complete`，并在输出文档末尾追加本 Skill 的生成标注。
 

@@ -6,6 +6,10 @@ target: "{{target}}"
 storyKey: "{{story_key}}"
 result: "{{result}}"
 generatedAt: "{{generated_at}}"
+foundationPrerequisiteStatus: "{{foundation_prerequisite_status}}"
+foundationPrerequisiteRefs: "{{foundation_prerequisite_refs}}"
+closureOwnerCheckStatus: "{{closure_owner_check_status}}"
+closureOwnerRefs: "{{closure_owner_refs}}"
 sourceSkill: "speclite-flow-gate"
 ---
 
@@ -34,6 +38,10 @@ sourceSkill: "speclite-flow-gate"
 ## Guidance Equivalence（指引等价性）
 
 {{guidance_equivalence_findings}}
+
+## Foundation Handoff（地基交接）
+
+{{foundation_handoff_findings}}
 
 ## Missing Or Ambiguous Items（缺失或歧义项）
 

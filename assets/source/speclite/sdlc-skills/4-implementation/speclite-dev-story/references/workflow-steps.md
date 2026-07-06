@@ -149,6 +149,8 @@
 - 项目级 Flow Gate hook 若已安装，只是进入本 workflow 前的 execution-plane guard；它不替代本 Step。
 - 在任何状态写入之前，执行 `speclite-flow-gate` 的 `story-kickoff` mode，目标为 `{story_key}` 或当前 Story 文件路径。
 - 读取 gate report YAML frontmatter metadata，确认 `mode=story-kickoff` 且结果为 `PASS` 或 `PASS_EQUIVALENT`。
+- 同时确认 `foundationPrerequisiteStatus` 与 `closureOwnerCheckStatus` 均为 `PASS` 或 `NOT_APPLICABLE`；任一字段缺失、为空或为阻断状态时，必须 HALT 并重新运行 `speclite-flow-gate mode=story-kickoff target={story_key}` 或修订 Story 的 foundation/closure-owner 引用。
+- 不得用 Markdown prose、人工摘要或历史记忆替代上述 frontmatter 字段；closure owner 是否正确以 `speclite-flow-gate` 读取项目 foundation handoff manifest 后写入的 metadata 为准。
 - 若结果为 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE` 或 `DECISION_NEEDED`，立即 HALT，不得把 Story 或 sprint-status 推进到 `in-progress`。
 - 若缺少 gate report，先运行 `speclite-flow-gate mode=story-kickoff` 并等待结果；不得以“文件名存在”代替 gate 结果。
 

@@ -15,6 +15,7 @@ metadata:
     - **Mode 驱动门控**：支持 `story-kickoff`、`story-completion`、`epic-completion`、`epic-kickoff` 四种检查模式。
     - **Anchor 分类**：区分 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor` 和 `Guidance Anchor`，禁止把未契约化文件名当成唯一 hard gate。
     - **等价实现裁决**：当实现形态偏离 Story guidance 但 owning SPEC、源码路径和测试证据成立时，输出 `PASS_EQUIVALENT`。
+    - **Foundation handoff 校验**：在 `story-kickoff` 中读取项目提供的 downstream prerequisite / future closure ledger，固化 `foundationPrerequisiteStatus` 与 `closureOwnerCheckStatus`，确保后续 Story 不引用错误 closure owner。
     - **失败类型定位**：用 `FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE`、`DECISION_NEEDED` 精确说明阻断原因。
     - **报告生成**：把 gate report 写入 `{implementation_artifacts}/flow-gates/`，供 `sprint-status`、`dev-story`、CR 和 finalizer 消费。
     - **流转建议**：给出下一步动作，例如继续 `dev-story`、修订 Story、补测试证据、或先运行 Epic completion gate。
@@ -30,7 +31,7 @@ metadata:
     - 固定文件名只有在 owning SPEC 明确指定时才是 hard gate；否则必须先检查等价 functional implementation 和测试证据。
     - 本 Skill 只生成 gate report，不修改源码、不推进 Story/Epic 状态、不替代 CR。
     - 报告必须写入 `{implementation_artifacts}/flow-gates/`，文件名按 mode 和目标对象稳定生成。
-    - 报告开头的 YAML frontmatter 是 downstream hook、dev-story、CR 和 finalizer 的 machine-readable source；不得要求消费者解析 Markdown prose 判断 gate result。
+    - 报告开头的 YAML frontmatter 是 downstream hook、dev-story、CR 和 finalizer 的 machine-readable source；不得要求消费者解析 Markdown prose 判断 gate result、foundation prerequisite 或 closure owner。
     - `Guidance Anchor` mismatch 不能直接判定 blocked；只能在确认 contract/function/evidence 缺失后输出失败。
     - 中英文入口必须同步更新；新增 mode 或结果枚举时同步更新 `references/workflow-details.md`。
 

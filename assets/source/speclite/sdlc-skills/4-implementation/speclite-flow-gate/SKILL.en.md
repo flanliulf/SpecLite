@@ -15,6 +15,7 @@ metadata:
     - **Mode-driven gates**: Supports `story-kickoff`, `story-completion`, `epic-completion`, and `epic-kickoff`.
     - **Anchor classification**: Separates `Contract Anchor`, `Functional Anchor`, `Evidence Anchor`, and `Guidance Anchor`, preventing non-contract file names from becoming the only hard gate.
     - **Equivalent implementation decisions**: Emits `PASS_EQUIVALENT` when implementation shape differs from Story guidance but owning SPEC, source path, and test evidence are valid.
+    - **Foundation handoff validation**: In `story-kickoff`, reads project-provided downstream prerequisite and future closure ledgers, then writes `foundationPrerequisiteStatus` and `closureOwnerCheckStatus` so later Stories cannot rely on the wrong closure owner.
     - **Failure typing**: Uses `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, and `DECISION_NEEDED` to explain blockers precisely.
     - **Report generation**: Writes gate reports under `{implementation_artifacts}/flow-gates/` for `sprint-status`, `dev-story`, CR, and finalizer workflows.
     - **Flow handoff guidance**: Recommends the next action, such as continuing `dev-story`, revising Story text, adding test evidence, or running an Epic completion gate.
@@ -30,7 +31,7 @@ metadata:
     - A fixed file name is a hard gate only when an owning SPEC explicitly requires it; otherwise check equivalent functional implementation and test evidence first.
     - This Skill only generates gate reports. It does not modify source code, advance Story/Epic status, or replace CR.
     - Reports must be written to `{implementation_artifacts}/flow-gates/` with stable file names by mode and target.
-    - YAML frontmatter at the start of each report is the machine-readable source for downstream hooks, dev-story, CR, and finalizer workflows; consumers must not parse Markdown prose to determine the gate result.
+    - YAML frontmatter at the start of each report is the machine-readable source for downstream hooks, dev-story, CR, and finalizer workflows; consumers must not parse Markdown prose to determine the gate result, foundation prerequisites, or closure owner.
     - `Guidance Anchor` mismatch cannot directly block the workflow; fail only after contract, function, or evidence is truly missing.
     - Update SKILL.md, SKILL.en.md, and `references/workflow-details.md` together when adding modes or result values.
 

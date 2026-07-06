@@ -89,6 +89,8 @@ The `flow-gate-enforcement` hook does not replace this runner's explicit gate st
 - `mode: "story-kickoff"`
 - `target` and `storyKey` both match the current `story_id`
 - `result` is `PASS` or `PASS_EQUIVALENT`
+- `foundationPrerequisiteStatus` is `PASS` or `NOT_APPLICABLE`
+- `closureOwnerCheckStatus` is `PASS` or `NOT_APPLICABLE`
 - `generatedAt` exists and is not older than the project's current hook freshness policy; if freshness cannot be judged, rerun the gate conservatively
 
 ## Workflow
@@ -134,9 +136,10 @@ Rules:
 
 - Use `GPT-5.5`; if unavailable, record the actual model.
 - If `{implementation_artifacts}/flow-gates/{story_id}-story-kickoff-gate.md` already exists, read YAML frontmatter metadata; do not infer the result from Markdown prose.
-- Only `PASS` or `PASS_EQUIVALENT` may enter Story development. `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, `DECISION_NEEDED`, or missing/mismatched/stale metadata must stop development.
+- Only `PASS` or `PASS_EQUIVALENT`, with `foundationPrerequisiteStatus` and `closureOwnerCheckStatus` both `PASS` or `NOT_APPLICABLE`, may enter Story development. `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, `DECISION_NEEDED`, or missing/mismatched/stale metadata must stop development.
+- Do not replace `foundationPrerequisiteStatus` / `closureOwnerCheckStatus` with Markdown prose or historical summaries; closure owner correctness comes from the frontmatter metadata written by `speclite-flow-gate`.
 - If the gate does not pass, record the recommended next action from the gate report. Do not modify files outside the current Story/Epic unless the user explicitly authorized it.
-- Record gate report path, result, any `PASS_EQUIVALENT` rationale, and the continue/stop decision in `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md`.
+- Record gate report path, result, foundation prerequisite status, closure owner status, any `PASS_EQUIVALENT` rationale, and the continue/stop decision in `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md`.
 - Do not rely on the `flow-gate-enforcement` hook as the only guard; this step is still required when the hook does not fire or is not enabled.
 
 ### Step 3: Story Development
@@ -216,7 +219,7 @@ Rules:
 
 Move to the next Story only when the current Story has:
 
-- `story-kickoff` Flow Gate result is `PASS` or `PASS_EQUIVALENT`, with metadata matching the current Story.
+- `story-kickoff` Flow Gate result is `PASS` or `PASS_EQUIVALENT`, foundation prerequisite status and closure owner status allow continuation, and metadata matches the current Story.
 - Development completed.
 - Latest CR reviewer pass.
 - Latest CR evaluator pass.
@@ -267,7 +270,7 @@ All log content must be Chinese.
 
 The Epic CR loop is complete only when:
 
-- Each target Story has a matching `story-kickoff` Flow Gate report with result `PASS` or `PASS_EQUIVALENT`.
+- Each target Story has a matching `story-kickoff` Flow Gate report with result, foundation prerequisite status, and closure owner status all allowing continuation.
 - Each target Story has completed development.
 - Each Story's latest `speclite-code-review-01-reviewer` conclusion passes.
 - Each Story's latest `speclite-code-review-02-evaluator` conclusion passes.

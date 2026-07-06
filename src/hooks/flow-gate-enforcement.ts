@@ -5,6 +5,8 @@ import { parse as parseYaml } from "yaml";
 import { resolvePortableProjectPath } from "../config/config-schema.js";
 
 const ALLOWING_RESULTS = new Set(["PASS", "PASS_EQUIVALENT"]);
+const ALLOWING_FOUNDATION_STATUSES = new Set(["PASS", "NOT_APPLICABLE"]);
+const FOUNDATION_GATE_STATUS_KEYS = ["foundationPrerequisiteStatus", "closureOwnerCheckStatus"] as const;
 const MAX_METADATA_AGE_DAYS = 30;
 
 export type FlowGateHookDecision = {
@@ -73,6 +75,17 @@ export async function evaluateFlowGateHookEvent(input: {
   if (isStaleGeneratedAt(metadata.generatedAt, input.now ?? new Date())) {
     return block(
       `Flow Gate metadata is stale for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
+    );
+  }
+  const foundationGateStatus = evaluateFoundationGateStatus(metadata);
+  if (foundationGateStatus.status === "missing") {
+    return block(
+      `Flow Gate foundation prerequisite metadata is missing for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
+    );
+  }
+  if (foundationGateStatus.status === "blocked") {
+    return block(
+      `Flow Gate ${foundationGateStatus.key} ${String(foundationGateStatus.value)} does not allow development for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
     );
   }
 
@@ -169,6 +182,24 @@ async function readFlowGateMetadata(filePath: string): Promise<Record<string, un
   if (end < 0) return undefined;
   const parsed = parseYaml(contents.slice(4, end));
   return isRecord(parsed) ? parsed : undefined;
+}
+
+function evaluateFoundationGateStatus(
+  metadata: Record<string, unknown>,
+):
+  | { status: "allowed" }
+  | { status: "missing" }
+  | { status: "blocked"; key: (typeof FOUNDATION_GATE_STATUS_KEYS)[number]; value: unknown } {
+  for (const key of FOUNDATION_GATE_STATUS_KEYS) {
+    const value = metadata[key];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      return { status: "missing" };
+    }
+    if (!ALLOWING_FOUNDATION_STATUSES.has(value)) {
+      return { status: "blocked", key, value };
+    }
+  }
+  return { status: "allowed" };
 }
 
 function isStaleGeneratedAt(value: unknown, now: Date): boolean {

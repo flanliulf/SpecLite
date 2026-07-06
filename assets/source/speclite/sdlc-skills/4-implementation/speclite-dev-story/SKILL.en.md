@@ -20,7 +20,7 @@ metadata:
     - **Activation**: resolve three-tier customization, persistent facts, runtime config, and `workflow.on_complete`; see `references/activation.md`.
     - **Story auto-discovery and review-continuation detection**: support explicit `{story_path}`; otherwise use `sprint-status.yaml` `story_location` or `{implementation_artifacts}/stories` to find the first `ready-for-dev` Story; detect "Senior Developer Review (AI)" and "Review Follow-ups (AI)" sections and extract verdict, unchecked items, and severity counts
     - **Test-driven implementation and quality gates**: enforce red-green-refactor, focused tests, regression checks, lint/static checks, and explicit AC validation.
-    - **HALT, Flow Gate, and DoD validation**: run `story-kickoff` gate before state advancement and `story-completion` gate before `review`; a project-level Flow Gate hook is an outer deterministic guard and does not replace the internal Step 4 gate; HALT on out-of-scope dependencies, 3 consecutive failures, missing required config, or gate failure; NEVER mark a task `[x]` unless tests truly exist and pass
+    - **HALT, Flow Gate, and DoD validation**: run `story-kickoff` gate before state advancement and `story-completion` gate before `review`; a project-level Flow Gate hook is an outer deterministic guard and does not replace the internal Step 4 gate; `story-kickoff` metadata must also allow foundation prerequisites and closure owner checks; HALT on out-of-scope dependencies, 3 consecutive failures, missing required config, or gate failure; NEVER mark a task `[x]` unless tests truly exist and pass
     - **Sprint-status synchronization**: flip `ready-for-dev -> in-progress` and `in-progress -> review` while preserving sprint-status comments and structure.
     - **on_complete terminal directive**: resolve and execute `workflow.on_complete` before exit.
 
@@ -35,7 +35,7 @@ metadata:
     1. Run the activation flow from `references/activation.md`.
     2. Locate and fully load the Story. Prefer explicit `story_path`; otherwise use `sprint-status.yaml` `story_location`, falling back to `{implementation_artifacts}/stories`.
     3. Load project context, Dev Notes, and review-continuation sections.
-    4. Run `speclite-flow-gate mode=story-kickoff`; only `PASS` or `PASS_EQUIVALENT` permits `ready-for-dev -> in-progress`.
+    4. Run `speclite-flow-gate mode=story-kickoff`; only `PASS` or `PASS_EQUIVALENT` plus allowing foundation/closure-owner metadata permits `ready-for-dev -> in-progress`.
     5. Implement each task with red-green-refactor, tests, regressions, lint/static checks, and AC validation.
     6. Update File List, Completion Notes, Change Log, and allowed checkboxes only after passing evidence exists.
     7. Fill `Anchor Evidence Summary`, run `speclite-flow-gate mode=story-completion`, then move sprint status to `review` only after DoD and gate success.
@@ -47,7 +47,7 @@ metadata:
     - Never mark `[x]` unless tests truly exist and pass.
     - File List must include all changed files using repo-relative paths.
     - DoD and Flow Gate failures HALT immediately.
-    - If an installed project configures the Flow Gate hook, it is only an execution-plane guard before this workflow starts; this Skill must still read and validate `story-kickoff` report metadata.
+    - If an installed project configures the Flow Gate hook, it is only an execution-plane guard before this workflow starts; this Skill must still read and validate `story-kickoff` report metadata, including `foundationPrerequisiteStatus` and `closureOwnerCheckStatus`.
     - `config.toml.example` is only a field-structure reference, never a runtime fallback.
 
 [Generation Metadata]
