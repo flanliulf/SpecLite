@@ -1,21 +1,21 @@
 ---
 name: speclite-docs-intro-ppt-creator
-description: "Generate introductory HTML PPT decks under SpecLite docs. Use when the user asks to turn a project system, system design, governance mechanism, concept, or workflow into a docs presentation, HTML PPT, web slides, or introduction deck. Core capabilities: constrain the output directory, plan an evidence-grounded narrative, invoke guizang-ppt-skill to create a single-file HTML deck, and close with deterministic checks plus browser sampling."
+description: "Generate introductory HTML PPT decks under SpecLite docs. Use when the user asks to turn a project system, system design, governance mechanism, concept, or workflow into a docs presentation, HTML PPT, web slides, or introduction deck. Core capabilities: constrain the output directory, plan an evidence-grounded narrative, invoke speclite-html-ppt-generator to create a single-file HTML deck, and close with deterministic checks plus browser sampling."
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
 [Overview]
-    Create a single-file HTML PPT under `docs/` for a SpecLite project system, system design, governance rule, product concept, or workflow. This is not a generic writing Skill. It is a presentation production wrapper: first constrain the output directory and source facts, then use `guizang-ppt-skill` templates, themes, layouts, and validators to produce an introductory deck.
+    Create a single-file HTML PPT under `docs/` for a SpecLite project system, system design, governance rule, product concept, or workflow. This is not a generic writing Skill. It is a presentation production wrapper: first constrain the output directory and source facts, then use `speclite-html-ppt-generator` SpecLite-owned templates, themes, layouts, and validators to produce an introductory deck.
 
 [Core Capabilities]
     - **Output directory governance**: Require the user to specify or confirm a target subdirectory under `docs/`; the default candidate is `docs/presentations/<topic-slug>/`.
     - **Evidence-grounded synthesis**: Read user-provided material, project docs, and necessary code evidence; distinguish current facts, historical records, and inference; never hard-code example content into a new deck.
     - **Narrative planning**: Plan an 8-15 slide deck from audience, introduction scenario, and duration, covering problem, system shape, runtime mechanism, decision matrix, operating path, and takeaway.
-    - **Guizang integration**: Select the magazine style or Swiss Style from `guizang-ppt-skill`, then read the matching template, theme, layout, and validator.
+    - **HTML PPT engine integration**: Select the magazine style or Swiss Style from `speclite-html-ppt-generator`, then read the matching template, theme, layout, and validator.
     - **Single HTML delivery**: Generate `index.html` in the target directory and create a sibling `images/` directory when needed; do not scatter process analysis into `docs/`.
     - **Deterministic verification**: Run this Skill's output contract checker, the guizang validator, placeholder scans, `git diff --check`, and browser sampling when available.
 
@@ -24,7 +24,7 @@ metadata:
 
     1. Confirm topic, audience, output directory, source material, visual style, and slide count range.
     2. Read source material and define the factual boundary; write necessary analysis to `.specskills/docs/analysis/speclite-docs-intro-ppt-creator/`.
-    3. Read and use `guizang-ppt-skill`, selecting the proper template, theme, and layouts.
+    3. Read and use `speclite-html-ppt-generator`, selecting the proper template, theme, and layouts.
     4. Generate `index.html` and necessary resource directories under the confirmed `docs/` subdirectory.
     5. Run this Skill's `scripts/validate_docs_intro_ppt.mjs`, the guizang validator, placeholder scans, and whitespace checks.
     6. If browser automation is available, sample first/last slides and check per-slide overflow; otherwise state that visual rendering verification was not performed.

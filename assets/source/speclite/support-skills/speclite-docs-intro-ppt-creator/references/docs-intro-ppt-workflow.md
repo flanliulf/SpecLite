@@ -57,9 +57,9 @@
 3. 技术、工程、治理、数据或矩阵内容默认推荐 `Swiss Style`；品牌、人文、行业观察或 narrative 内容可推荐杂志风。
 4. 8 页以上必须包含节奏变化：封面、问题页、结构页、机制页、数字或矩阵页、操作页、takeaway 页。
 
-### Step 4: Guizang Production（Guizang 生成）
+### Step 4: HTML PPT Production（HTML PPT 生成）
 
-1. 使用 `guizang-ppt-skill`：
+1. 使用 `speclite-html-ppt-generator`：
    - 读取其 `SKILL.md`。
    - 根据风格读取对应 template、theme、layout reference。
    - Swiss Style 优先读取 `assets/template-swiss.html`、`references/themes-swiss.md`、`references/layouts-swiss.md` 和可用 validator。
@@ -90,10 +90,10 @@ git diff --check -- <output_dir>/index.html
 如果使用 Swiss Style 且 validator 存在，运行：
 
 ```sh
-node /Users/fancyliu/.agents/skills/guizang-ppt-skill/scripts/validate-swiss-deck.mjs <output_dir>/index.html
+node assets/source/speclite/support-skills/speclite-html-ppt-generator/scripts/validate-swiss-deck.mjs <output_dir>/index.html
 ```
 
-如果使用其他 guizang validator，按该 Skill 的实际 script 路径运行。不要把 validator 不存在伪装为通过；只说明该项不可用。
+如果使用其他 validator，按 `speclite-html-ppt-generator` 的实际 script 路径运行。不要把 validator 不存在伪装为通过；只说明该项不可用。
 
 若浏览器自动化可用：
 
@@ -126,5 +126,5 @@ node assets/source/speclite/support-skills/speclite-check-canonical-source-chang
 - 未确认 `output_dir`，且无法安全推导。
 - 目标 `index.html` 已存在但用户没有授权覆盖。
 - 用户要求的内容涉及未提供的事实，且推断会影响项目口径。
-- `guizang-ppt-skill` 不可用，且用户明确要求使用其模板体系。
+- `speclite-html-ppt-generator` 不可用，且用户明确要求使用 HTML PPT 模板体系。
 - 验证脚本发现 deck 结构缺失、路径逃逸、占位符未清理或页数不合理。
