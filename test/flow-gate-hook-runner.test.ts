@@ -36,7 +36,7 @@ describe("flow gate hook runner", () => {
       name: "PASS_EQUIVALENT",
       result: "PASS_EQUIVALENT",
     },
-  ])("allows speclite-dev-story when story kickoff metadata is $name", async ({ result }) => {
+  ])("allows speclite-dev-story when story kickoff v2 metadata is $name", async ({ result }) => {
     const tempRoot = await createProjectWithConfig();
     await writeGateMetadata(tempRoot, {
       storyKey: "7-1-flow-gate-hook-enforcement",
@@ -98,14 +98,25 @@ describe("flow gate hook runner", () => {
       expectedReason: "Flow Gate metadata is stale",
     },
     {
-      name: "missing foundation prerequisite metadata",
+      name: "legacy v1 missing handoff metadata",
       setup: async (tempRoot: string) =>
         writeGateMetadata(tempRoot, {
           storyKey: "7-1-flow-gate-hook-enforcement",
           result: "PASS",
+          schemaVersion: "speclite.flow-gate-report.v1",
           includeFoundationMetadata: false,
         }),
-      expectedReason: "Flow Gate foundation prerequisite metadata is missing",
+      expectedReason: "Legacy Flow Gate report v1 must be regenerated",
+    },
+    {
+      name: "missing handoff contract version",
+      setup: async (tempRoot: string) =>
+        writeGateMetadata(tempRoot, {
+          storyKey: "7-1-flow-gate-hook-enforcement",
+          result: "PASS",
+          includeHandoffContractVersion: false,
+        }),
+      expectedReason: "Flow Gate handoff contract version is missing",
     },
     {
       name: "failed foundation prerequisite metadata",
@@ -208,7 +219,9 @@ async function writeGateMetadata(
     storyKey: string;
     target?: string;
     result: string;
+    schemaVersion?: string;
     generatedAt?: string;
+    includeHandoffContractVersion?: boolean;
     includeFoundationMetadata?: boolean;
     foundationPrerequisiteStatus?: string;
     closureOwnerCheckStatus?: string;
@@ -221,12 +234,15 @@ async function writeGateMetadata(
     path.join(flowGateRoot, `${target}-story-kickoff-gate.md`),
     [
       "---",
-      'schemaVersion: "speclite.flow-gate-report.v1"',
+      `schemaVersion: "${input.schemaVersion ?? "speclite.flow-gate-report.v2"}"`,
       'mode: "story-kickoff"',
       `target: "${target}"`,
       `storyKey: "${input.storyKey}"`,
       `result: "${input.result}"`,
       `generatedAt: "${input.generatedAt ?? "2026-06-14T00:00:00.000Z"}"`,
+      ...(input.includeHandoffContractVersion === false
+        ? []
+        : ['handoffContractVersion: "speclite.story-kickoff-handoff.v1"']),
       ...(input.includeFoundationMetadata === false
         ? []
         : [

@@ -3,7 +3,7 @@ name: speclite-goal-orchestrator-epic-story-code-review-runner
 description: "用于用户要求按 Epic 下每个 Story 执行开发与 CR strict serial 闭环，或提到 fresh sub-agent、speclite-dev-story、speclite-code-review-01..06、PLAN.md、EXPERIMENTS.md、EXPERIMENT_NOTES.md、最终本地提交。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -92,6 +92,8 @@ Story 开发前门禁必须由本 runner 显式执行或验证。项目级 `flow
 - `mode: "story-kickoff"`
 - `target` 与 `storyKey` 均匹配当前 `story_id`
 - `result` 为 `PASS` 或 `PASS_EQUIVALENT`
+- `schemaVersion` 为 `speclite.flow-gate-report.v2`
+- `handoffContractVersion` 为 `speclite.story-kickoff-handoff.v1`
 - `foundationPrerequisiteStatus` 为 `PASS` 或 `NOT_APPLICABLE`
 - `closureOwnerCheckStatus` 为 `PASS` 或 `NOT_APPLICABLE`
 - `generatedAt` 存在且没有超过项目当前 hook freshness policy；若无法判断 freshness，采用保守策略重新运行 gate
@@ -147,7 +149,7 @@ Story 开发前门禁必须由本 runner 显式执行或验证。项目级 `flow
 
 - 使用 `GPT-5.5`；若不可用，记录实际模型。
 - 如果已有 `{implementation_artifacts}/flow-gates/{story_id}-story-kickoff-gate.md`，必须读取 YAML frontmatter metadata，不得只看 Markdown prose。
-- 只有 `PASS` 或 `PASS_EQUIVALENT`，且 `foundationPrerequisiteStatus`、`closureOwnerCheckStatus` 均为 `PASS` 或 `NOT_APPLICABLE`，才允许进入 Story 开发；`FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE`、`DECISION_NEEDED` 或 metadata 缺失/不匹配/过期时必须停止开发。
+- 只有 v2 report、`handoffContractVersion=speclite.story-kickoff-handoff.v1`、`PASS` 或 `PASS_EQUIVALENT`，且 `foundationPrerequisiteStatus`、`closureOwnerCheckStatus` 均为 `PASS` 或 `NOT_APPLICABLE`，才允许进入 Story 开发；legacy v1、`FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE`、`DECISION_NEEDED` 或 metadata 缺失/不匹配/过期时必须停止开发。
 - 不得用 Markdown prose 或历史摘要替代 `foundationPrerequisiteStatus` / `closureOwnerCheckStatus`；closure owner 是否正确以 `speclite-flow-gate` 写入的 frontmatter metadata 为准。
 - 如果门禁未通过，根据 gate report 的 recommended next action 记录下一步；除非用户明确授权，不得擅自修订当前 Story/Epic 之外的文件。
 - 将 gate report 路径、result、foundation prerequisite status、closure owner status、是否 `PASS_EQUIVALENT`、继续/停止决策写入 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。
@@ -253,7 +255,7 @@ Fixer 完成后，回到 Step 4，开启下一轮 reviewer/evaluator。
 
 当前 Story 满足完成标准后，才能进入 Epic 下一个 Story：
 
-- `story-kickoff` Flow Gate result 为 `PASS` 或 `PASS_EQUIVALENT`，`foundationPrerequisiteStatus` 与 `closureOwnerCheckStatus` 允许继续，且 gate report metadata 匹配当前 Story。
+- `story-kickoff` Flow Gate 为 v2 report，`handoffContractVersion`、result、`foundationPrerequisiteStatus` 与 `closureOwnerCheckStatus` 允许继续，且 gate report metadata 匹配当前 Story。
 - 开发完成。
 - 最新 CR reviewer 通过。
 - 最新 CR evaluator 通过。
@@ -339,7 +341,7 @@ Epic 范围内所有目标 Story 完成后，执行：
 
 只有同时满足以下条件，才能视为 Epic CR 闭环完成：
 
-- Epic 范围内每个目标 Story 均有当前 Story 匹配的 `story-kickoff` Flow Gate report，且 result、foundation prerequisite status 与 closure owner status 均允许继续。
+- Epic 范围内每个目标 Story 均有当前 Story 匹配的 v2 `story-kickoff` Flow Gate report，且 handoff contract version、result、foundation prerequisite status 与 closure owner status 均允许继续。
 - Epic 范围内每个目标 Story 均已完成开发。
 - 每个 Story 最新 `speclite-code-review-01-reviewer` 结论通过。
 - 每个 Story 最新 `speclite-code-review-02-evaluator` 评估结果通过。

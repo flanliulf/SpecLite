@@ -30,6 +30,9 @@ describe("speclite-flow-gate canonical contract", () => {
     const workflow = await readFile(path.join(flowGateRoot, "references/workflow-details.md"), "utf8");
     const template = await readFile(path.join(flowGateRoot, "assets/report-template.md"), "utf8");
 
+    expect(template).toContain('schemaVersion: "speclite.flow-gate-report.v2"');
+    expect(template).toContain('handoffContractVersion: "speclite.story-kickoff-handoff.v1"');
+
     for (const field of [
       "foundationPrerequisiteStatus",
       "foundationPrerequisiteRefs",
@@ -41,5 +44,15 @@ describe("speclite-flow-gate canonical contract", () => {
     }
     expect(workflow).toContain("future-closure owner");
     expect(workflow).toContain("Downstream hooks and workflow runners treat missing status fields");
+  });
+
+  it("uses project handoff source index instead of project-specific default paths", async () => {
+    const workflow = await readFile(path.join(flowGateRoot, "references/workflow-details.md"), "utf8");
+
+    expect(workflow).toContain("foundation_handoff_source_index");
+    expect(workflow).toContain("speclite.foundation-handoff-source-index.v1");
+    expect(workflow).toContain("{implementation_artifacts}/foundation-handoff/source-index.json");
+    expect(workflow).toContain("_speclite/custom/speclite-flow-gate.toml");
+    expect(workflow).not.toContain("packages/shared-schema/fixtures/foundation");
   });
 });

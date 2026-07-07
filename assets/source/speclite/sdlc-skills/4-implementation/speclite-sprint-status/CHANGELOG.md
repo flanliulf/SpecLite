@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2] - 2026-07-07
+
+### Changed
+
+- 将 ready-for-dev Story 的 `story-kickoff` gate 推荐规则升级为同时检查 v2 schema、handoff contract version、gate result、foundation prerequisite 与 closure owner metadata。
+- 对 legacy v1 report 或缺失 `handoffContractVersion` 的 report 给出重新运行 `speclite-flow-gate` 的建议。
+
 ## [1.0.1] - 2026-05-27
 
 ### Added

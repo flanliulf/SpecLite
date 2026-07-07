@@ -2,6 +2,13 @@
 
 本文件记录 `speclite-dev-story` 的版本变更。
 
+## [1.0.4] - 2026-07-07
+
+### 变更
+
+- 在 `story-kickoff` gate 校验中要求 `speclite.flow-gate-report.v2` 与 `handoffContractVersion: "speclite.story-kickoff-handoff.v1"`。
+- 明确 `foundationPrerequisiteStatus` 与 `closureOwnerCheckStatus` 必须来自 Flow Gate 读取的 handoff source index 或显式 references，禁止用 Markdown prose 替代 machine-readable metadata。
+
 ## [1.0.3] - 2026-05-27
 
 ### 新增

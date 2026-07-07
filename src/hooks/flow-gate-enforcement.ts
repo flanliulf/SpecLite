@@ -7,6 +7,9 @@ import { resolvePortableProjectPath } from "../config/config-schema.js";
 const ALLOWING_RESULTS = new Set(["PASS", "PASS_EQUIVALENT"]);
 const ALLOWING_FOUNDATION_STATUSES = new Set(["PASS", "NOT_APPLICABLE"]);
 const FOUNDATION_GATE_STATUS_KEYS = ["foundationPrerequisiteStatus", "closureOwnerCheckStatus"] as const;
+const REQUIRED_REPORT_SCHEMA_VERSION = "speclite.flow-gate-report.v2";
+const LEGACY_REPORT_SCHEMA_VERSION = "speclite.flow-gate-report.v1";
+const REQUIRED_HANDOFF_CONTRACT_VERSION = "speclite.story-kickoff-handoff.v1";
 const MAX_METADATA_AGE_DAYS = 30;
 
 export type FlowGateHookDecision = {
@@ -75,6 +78,27 @@ export async function evaluateFlowGateHookEvent(input: {
   if (isStaleGeneratedAt(metadata.generatedAt, input.now ?? new Date())) {
     return block(
       `Flow Gate metadata is stale for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
+    );
+  }
+  const handoffContractStatus = evaluateHandoffContractStatus(metadata);
+  if (handoffContractStatus.status === "legacy") {
+    return block(
+      `Legacy Flow Gate report v1 must be regenerated for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
+    );
+  }
+  if (handoffContractStatus.status === "schema-mismatch") {
+    return block(
+      `Flow Gate schemaVersion ${String(handoffContractStatus.value)} does not allow development for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
+    );
+  }
+  if (handoffContractStatus.status === "missing-handoff-contract-version") {
+    return block(
+      `Flow Gate handoff contract version is missing for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
+    );
+  }
+  if (handoffContractStatus.status === "handoff-contract-version-mismatch") {
+    return block(
+      `Flow Gate handoff contract version ${String(handoffContractStatus.value)} does not allow development for ${storyResolution.storyKey}. ${nextAction(storyResolution.storyKey)}`,
     );
   }
   const foundationGateStatus = evaluateFoundationGateStatus(metadata);
@@ -182,6 +206,29 @@ async function readFlowGateMetadata(filePath: string): Promise<Record<string, un
   if (end < 0) return undefined;
   const parsed = parseYaml(contents.slice(4, end));
   return isRecord(parsed) ? parsed : undefined;
+}
+
+function evaluateHandoffContractStatus(
+  metadata: Record<string, unknown>,
+):
+  | { status: "allowed" }
+  | { status: "legacy" }
+  | { status: "schema-mismatch"; value: unknown }
+  | { status: "missing-handoff-contract-version" }
+  | { status: "handoff-contract-version-mismatch"; value: unknown } {
+  if (metadata.schemaVersion === LEGACY_REPORT_SCHEMA_VERSION) return { status: "legacy" };
+  if (metadata.schemaVersion !== REQUIRED_REPORT_SCHEMA_VERSION) {
+    return { status: "schema-mismatch", value: metadata.schemaVersion };
+  }
+
+  const handoffContractVersion = metadata.handoffContractVersion;
+  if (typeof handoffContractVersion !== "string" || handoffContractVersion.trim().length === 0) {
+    return { status: "missing-handoff-contract-version" };
+  }
+  if (handoffContractVersion !== REQUIRED_HANDOFF_CONTRACT_VERSION) {
+    return { status: "handoff-contract-version-mismatch", value: handoffContractVersion };
+  }
+  return { status: "allowed" };
 }
 
 function evaluateFoundationGateStatus(

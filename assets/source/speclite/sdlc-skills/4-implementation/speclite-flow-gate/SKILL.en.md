@@ -3,7 +3,7 @@ name: speclite-flow-gate
 description: "Validates SpecLite Story and Epic flow gates by checking contract, functional, and evidence anchors. Use when the user asks for flow gate, story kickoff gate, story completion gate, epic gate, or anchor drift prevention around dev-story handoff. Capable of four gate modes, PASS_EQUIVALENT decisions, anchor classification, report generation, and handoff guidance."
 allowed-tools: Read, Write, Grep, Glob, Bash
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -15,7 +15,7 @@ metadata:
     - **Mode-driven gates**: Supports `story-kickoff`, `story-completion`, `epic-completion`, and `epic-kickoff`.
     - **Anchor classification**: Separates `Contract Anchor`, `Functional Anchor`, `Evidence Anchor`, and `Guidance Anchor`, preventing non-contract file names from becoming the only hard gate.
     - **Equivalent implementation decisions**: Emits `PASS_EQUIVALENT` when implementation shape differs from Story guidance but owning SPEC, source path, and test evidence are valid.
-    - **Foundation handoff validation**: In `story-kickoff`, reads project-provided downstream prerequisite and future closure ledgers, then writes `foundationPrerequisiteStatus` and `closureOwnerCheckStatus` so later Stories cannot rely on the wrong closure owner.
+    - **Foundation handoff validation**: In `story-kickoff`, reads project-provided foundation handoff source indexes, downstream prerequisites, and future closure sources, then writes v2 report `handoffContractVersion`, `foundationPrerequisiteStatus`, and `closureOwnerCheckStatus` so later Stories cannot rely on the wrong closure owner.
     - **Failure typing**: Uses `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, and `DECISION_NEEDED` to explain blockers precisely.
     - **Report generation**: Writes gate reports under `{implementation_artifacts}/flow-gates/` for `sprint-status`, `dev-story`, CR, and finalizer workflows.
     - **Flow handoff guidance**: Recommends the next action, such as continuing `dev-story`, revising Story text, adding test evidence, or running an Epic completion gate.
@@ -24,14 +24,14 @@ metadata:
     1. Read `references/workflow-details.md` in full; it is the authoritative definition for modes, result enum, report format, and HALT rules. When equivalent implementation or fixed-path ambiguity appears, also read `references/regression-scenarios.md`.
     2. Resolve the target mode and target object: Story key, Story file path, Epic number, or next Epic number.
     3. Load merged runtime config, `sprint-status.yaml`, target Story/Epic, owning SPECs, related source files, and test evidence.
-    4. Evaluate in `Contract -> Functional -> Evidence -> Guidance` order, then generate the report using `assets/report-template.md`.
+    4. Evaluate in `Contract -> Functional -> Evidence -> Guidance -> Foundation Handoff` order, then generate the v2 report using `assets/report-template.md`.
     5. Only `PASS` or `PASS_EQUIVALENT` allows downstream workflow continuation; any other result must be handled before proceeding.
 
 [Notes]
     - A fixed file name is a hard gate only when an owning SPEC explicitly requires it; otherwise check equivalent functional implementation and test evidence first.
     - This Skill only generates gate reports. It does not modify source code, advance Story/Epic status, or replace CR.
     - Reports must be written to `{implementation_artifacts}/flow-gates/` with stable file names by mode and target.
-    - YAML frontmatter at the start of each report is the machine-readable source for downstream hooks, dev-story, CR, and finalizer workflows; consumers must not parse Markdown prose to determine the gate result, foundation prerequisites, or closure owner.
+    - YAML frontmatter at the start of each report is the machine-readable source for downstream hooks, dev-story, CR, and finalizer workflows; consumers must not parse Markdown prose to determine the gate result, foundation prerequisites, or closure owner. Legacy v1 reports must be regenerated as v2.
     - `Guidance Anchor` mismatch cannot directly block the workflow; fail only after contract, function, or evidence is truly missing.
     - Update SKILL.md, SKILL.en.md, and `references/workflow-details.md` together when adding modes or result values.
 

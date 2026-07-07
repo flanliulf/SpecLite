@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3] - 2026-07-07
+
+### Changed
+
+- 将逐 Story `story-kickoff` gate 校验升级为要求 `speclite.flow-gate-report.v2` 与 `handoffContractVersion: "speclite.story-kickoff-handoff.v1"`。
+- 明确 legacy v1 report、缺失 handoff contract version 或 foundation/closure metadata 不允许进入 `speclite-dev-story`。
+
 ## [1.0.2] - 2026-07-06
 
 ### Changed

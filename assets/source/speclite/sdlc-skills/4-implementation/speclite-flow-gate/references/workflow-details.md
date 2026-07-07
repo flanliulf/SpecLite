@@ -10,7 +10,7 @@ Validate SpecLite implementation flow handoffs before they mutate Story/Epic sta
 - `story_root` = value of `story_location` from `sprint-status.yaml`, otherwise `{implementation_artifacts}/stories`
 - `flow_gate_root` = `{implementation_artifacts}/flow-gates`
 - `report_template` = `assets/report-template.md`
-- `foundation_handoff_candidates` = project-provided foundation handoff manifests when present, such as `evidence/foundation/downstream-prerequisites.md`, `evidence/foundation/future-closure-ledger.md`, `packages/shared-schema/fixtures/foundation/downstream-prerequisites.valid.json`, and `packages/shared-schema/fixtures/foundation/future-closure-ledger.valid.json`
+- `foundation_handoff_source_index` = project-provided source index when present, discovered from `_speclite/custom/speclite-flow-gate.toml`, `{implementation_artifacts}/foundation-handoff/source-index.json`, or explicit Story / Epic references.
 
 ## Inputs
 
@@ -49,25 +49,54 @@ Classify every dependency in the Story/Epic into one of four types:
 
 ## Foundation Handoff Metadata（地基交接元数据）
 
-Story kickoff reports must always write these YAML frontmatter fields:
+Story kickoff reports must write `schemaVersion: "speclite.flow-gate-report.v2"` and these YAML frontmatter fields:
 
 | Field | Allowed values for downstream development | Meaning |
 | --- | --- | --- |
+| `handoffContractVersion` | `speclite.story-kickoff-handoff.v1` | Versioned machine contract used by downstream hooks and workflow runners. |
 | `foundationPrerequisiteStatus` | `PASS`, `NOT_APPLICABLE` | Whether project foundation handoff prerequisites were checked for the target Story. |
 | `foundationPrerequisiteRefs` | Free text path or comma-separated refs | Source manifests, evidence docs, or gate reports used for the prerequisite decision. |
 | `closureOwnerCheckStatus` | `PASS`, `NOT_APPLICABLE` | Whether future-closure ownership was checked against the correct owning Epic/Story. |
 | `closureOwnerRefs` | Free text path or comma-separated refs | Closure ledger refs and owning Story/Epic refs used for the owner decision. |
 
-When a project does not provide foundation handoff manifests, write `NOT_APPLICABLE` for both status fields and explain that no project-level foundation handoff source was found. When manifests exist, `NOT_APPLICABLE` is valid only if the target Story is outside their declared downstream prerequisite or future-closure scope.
+When a project does not provide a foundation handoff source index or explicit Story / Epic handoff references, write `NOT_APPLICABLE` for both status fields and explain that no project-level foundation handoff source was found. When source index entries exist, `NOT_APPLICABLE` is valid only if the target Story is outside their declared downstream prerequisite or future-closure scope.
 
 If either status is `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, or `DECISION_NEEDED`, the report `result` must also block downstream development. Downstream hooks and workflow runners treat missing status fields or non-allowing values as a hard stop.
+
+## Foundation Handoff Source Index（地基交接源索引）
+
+Projects may define a source index to point SpecLite at project-specific handoff evidence without baking project paths into this Skill. The preferred machine artifact is:
+
+```json
+{
+  "schemaVersion": "speclite.foundation-handoff-source-index.v1",
+  "sources": [
+    {
+      "kind": "downstream-prerequisites",
+      "humanRef": "project-specific human-readable handoff path",
+      "machineRef": "project-specific machine-readable handoff path",
+      "verifyCommand": "project-specific verification command",
+      "scope": ["epic-2"]
+    },
+    {
+      "kind": "future-closure-ledger",
+      "humanRef": "project-specific human-readable closure ledger path",
+      "machineRef": "project-specific machine-readable closure ledger path"
+    }
+  ]
+}
+```
+
+Supported `kind` values are `downstream-prerequisites`, `future-closure-ledger`, and `foundation-handoff-snapshot`. `machineRef` and `verifyCommand` are project-owned; this Skill reads them as evidence inputs but must not assume repository layout, framework, schema package, service name, or Epic numbering.
+
+The source index only identifies handoff sources. It does not by itself make a Story `ready-for-dev`, `done`, or release-ready. `speclite-flow-gate` must still write the normalized frontmatter statuses in the report.
 
 ## Execution
 
 1. Load runtime config and sprint status. If `story_location` exists, resolve Story files from it; otherwise use `{implementation_artifacts}/stories`.
 2. Load target Story/Epic and relevant prior Story records. For Story mode, read the complete Story file.
 3. Locate owning SPECs from Story references, project-context, and planning-artifact specs index. If the Story names a contract but no owning SPEC can be found, mark that item `DECISION_NEEDED`.
-4. For `story-kickoff`, locate project-provided foundation handoff manifests from `foundation_handoff_candidates` and any Story/Epic references to foundation handoff reports. Do not hardcode project-specific owners inside the Skill; use the project's own manifests as the source of truth.
+4. For `story-kickoff`, locate project-provided foundation handoff sources from `foundation_handoff_source_index` and any Story/Epic references to foundation handoff reports. Do not hardcode project-specific owners, paths, schemas, services, or Epic numbers inside the Skill; use the project's own source index and explicit references as the source of truth.
 5. Inspect actual source files and tests referenced by File List, Dev Notes, previous gate reports, foundation manifests, or git diff. Do not mutate files.
 6. Evaluate in this exact order: `Contract -> Functional -> Evidence -> Guidance -> Foundation Handoff`.
    - Contract: required anchors from owning SPECs exist and are not contradicted.
@@ -85,7 +114,7 @@ If either status is `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, or `DECIS
 
 - Must run before `speclite-dev-story` changes `ready-for-dev` to `in-progress`.
 - Validate all predecessor dependencies in the Story's first task and Dev Notes.
-- Validate foundation handoff manifests when they exist:
+- Validate foundation handoff sources when a source index or explicit references exist:
   - For downstream Epic prerequisites, match the target Story's Epic and declared contract surfaces, expected checks, planned evidence type, and known exclusions against the project's downstream prerequisites manifest.
   - For future closures, match any Story claim to implement or close a future-only capability against the project's closure ledger. The owning Epic and first possible Story (or equivalent owner Story explicitly documented by the current Epic) must match before `closureOwnerCheckStatus` can be `PASS`.
   - If the target Story references a closure item but the ledger has no owner, has a different owner, marks the item active-ready prematurely, or conflicts with Story scope, output `FAIL_CONTRACT` or `DECISION_NEEDED`.
@@ -115,7 +144,7 @@ If either status is `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, or `DECIS
 
 Every report must include:
 
-- YAML frontmatter at the start of the file with `schemaVersion`, `mode`, `target`, `storyKey` for Story modes, `result`, `generatedAt`, `foundationPrerequisiteStatus`, `foundationPrerequisiteRefs`, `closureOwnerCheckStatus`, `closureOwnerRefs`, and `sourceSkill`.
+- YAML frontmatter at the start of the file with `schemaVersion`, `mode`, `target`, `storyKey` for Story modes, `result`, `generatedAt`, `handoffContractVersion`, `foundationPrerequisiteStatus`, `foundationPrerequisiteRefs`, `closureOwnerCheckStatus`, `closureOwnerRefs`, and `sourceSkill`.
 - Mode, target, date, result, and reviewer model.
 - Contract anchors checked.
 - Functional anchors checked.

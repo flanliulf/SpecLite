@@ -10,6 +10,7 @@ Reference 文档用于提供快速查阅的技术规格、命令、字段、目�
 | [`cli-human-output-matrix.md`](cli-human-output-matrix.md) | CLI human-readable output 的 command/outcome/test/docs 覆盖矩阵。 |
 | [`command-result-json.md`](command-result-json.md) | machine-readable CommandResult JSON 参考。 |
 | [`runtime-layout.md`](runtime-layout.md) | 目标项目安装后的 runtime layout 参考。 |
+| [`flow-gate-handoff-contract.md`](flow-gate-handoff-contract.md) | Flow Gate、foundation handoff source index、hook 和 downstream workflow 的交接契约。 |
 | [`config-and-customization.md`](config-and-customization.md) | config 与 customization 参考。 |
 | [`canonical-source-layout.md`](canonical-source-layout.md) | canonical source 目录结构参考。 |
 | [`canonical-source-governance.md`](canonical-source-governance.md) | canonical source 变更分类、影响面矩阵和 hook + skill 治理机制。 |

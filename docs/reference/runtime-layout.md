@@ -84,7 +84,7 @@ Agent 的完整 persona、菜单和 activation 协议仍来自 installed Skill p
 
 每个 hook runtime root 都包含 `runner.mjs` 和 `hook-manifest.json`。`_speclite/config.toml` 的 `[hooks.<hook-id>]` descriptor 会记录 `module`、`source_skill`、保护目标、`runtime_root`、`runner`、`events`、`platform_configs` 和 `trust_note`。
 
-`flow-gate-enforcement` runner 只读取 hook event JSON、installed `_speclite/config.toml` 和 `{implementation_artifacts}/flow-gates/<story-key>-story-kickoff-gate.md` 的 frontmatter metadata。它不生成 Flow Gate report、不修改 Story，也不推进 `sprint-status.yaml`。
+`flow-gate-enforcement` runner 只读取 hook event JSON、installed `_speclite/config.toml` 和 `{implementation_artifacts}/flow-gates/<story-key>-story-kickoff-gate.md` 的 frontmatter metadata。该 metadata 必须使用 `schemaVersion: "speclite.flow-gate-report.v2"`，并声明 `handoffContractVersion: "speclite.story-kickoff-handoff.v1"`；legacy v1 report 会被阻断并要求重新生成。runner 不生成 Flow Gate report、不修改 Story，也不推进 `sprint-status.yaml`。
 
 `canonical-source-change-check` runner 只读取 git diff / staged diff / untracked files 是否触及 `assets/source/speclite/`。触及时调用 support skill 的只读检查脚本并输出 warning JSON，提示先用 `speclite-canonical-source-governance-runner` 分类影响面和记录 D1/D2 决策，再用 `speclite-check-canonical-source-change` 收口；它不返回 `decision: block`，不使用 exit code `2`。
 

@@ -2,6 +2,14 @@
 
 本文件记录 `speclite-flow-gate` 技能的版本变更历史。
 
+## [1.1.0] - 2026-07-07
+
+### Changed
+
+- 将 story-kickoff report 契约升级为 `speclite.flow-gate-report.v2`，新增 `handoffContractVersion: "speclite.story-kickoff-handoff.v1"`。
+- 用项目提供的 `foundation_handoff_source_index` 或 Story/Epic 显式 references 读取 foundation handoff 事实，移除对特定仓库目录和 schema package 的默认假设。
+- 明确 `NOT_APPLICABLE` 只适用于项目未声明 foundation handoff source 的场景；legacy v1 report 必须重新生成。
+
 ## [1.0.0] - 2026-05-27
 
 ### Added

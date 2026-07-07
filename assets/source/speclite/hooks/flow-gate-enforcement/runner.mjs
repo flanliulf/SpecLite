@@ -6,6 +6,9 @@ import process from "node:process";
 const ALLOWING_RESULTS = new Set(["PASS", "PASS_EQUIVALENT"]);
 const ALLOWING_FOUNDATION_STATUSES = new Set(["PASS", "NOT_APPLICABLE"]);
 const FOUNDATION_GATE_STATUS_KEYS = ["foundationPrerequisiteStatus", "closureOwnerCheckStatus"];
+const REQUIRED_REPORT_SCHEMA_VERSION = "speclite.flow-gate-report.v2";
+const LEGACY_REPORT_SCHEMA_VERSION = "speclite.flow-gate-report.v1";
+const REQUIRED_HANDOFF_CONTRACT_VERSION = "speclite.story-kickoff-handoff.v1";
 const MAX_METADATA_AGE_DAYS = 30;
 
 const stdin = await readStdin();
@@ -53,6 +56,19 @@ async function evaluate(input) {
   }
   if (isStaleGeneratedAt(metadata.generatedAt, input.now)) {
     return block(`Flow Gate metadata is stale for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  const handoffContractStatus = evaluateHandoffContractStatus(metadata);
+  if (handoffContractStatus.status === "legacy") {
+    return block(`Legacy Flow Gate report v1 must be regenerated for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (handoffContractStatus.status === "schema-mismatch") {
+    return block(`Flow Gate schemaVersion ${String(handoffContractStatus.value)} does not allow development for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (handoffContractStatus.status === "missing-handoff-contract-version") {
+    return block(`Flow Gate handoff contract version is missing for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (handoffContractStatus.status === "handoff-contract-version-mismatch") {
+    return block(`Flow Gate handoff contract version ${String(handoffContractStatus.value)} does not allow development for ${storyKey}. ${nextAction(storyKey)}`);
   }
   const foundationGateStatus = evaluateFoundationGateStatus(metadata);
   if (foundationGateStatus.status === "missing") {
@@ -118,6 +134,22 @@ function isStaleGeneratedAt(value, now) {
   const generatedAt = new Date(value);
   if (!Number.isFinite(generatedAt.getTime())) return true;
   return now.getTime() - generatedAt.getTime() > MAX_METADATA_AGE_DAYS * 24 * 60 * 60 * 1000;
+}
+
+function evaluateHandoffContractStatus(metadata) {
+  if (metadata.schemaVersion === LEGACY_REPORT_SCHEMA_VERSION) return { status: "legacy" };
+  if (metadata.schemaVersion !== REQUIRED_REPORT_SCHEMA_VERSION) {
+    return { status: "schema-mismatch", value: metadata.schemaVersion };
+  }
+
+  const handoffContractVersion = metadata.handoffContractVersion;
+  if (typeof handoffContractVersion !== "string" || handoffContractVersion.trim().length === 0) {
+    return { status: "missing-handoff-contract-version" };
+  }
+  if (handoffContractVersion !== REQUIRED_HANDOFF_CONTRACT_VERSION) {
+    return { status: "handoff-contract-version-mismatch", value: handoffContractVersion };
+  }
+  return { status: "allowed" };
 }
 
 function evaluateFoundationGateStatus(metadata) {

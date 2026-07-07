@@ -1,11 +1,12 @@
 ```markdown
 ---
-schemaVersion: "speclite.flow-gate-report.v1"
+schemaVersion: "speclite.flow-gate-report.v2"
 mode: "{{mode}}"
 target: "{{target}}"
 storyKey: "{{story_key}}"
 result: "{{result}}"
 generatedAt: "{{generated_at}}"
+handoffContractVersion: "speclite.story-kickoff-handoff.v1"
 foundationPrerequisiteStatus: "{{foundation_prerequisite_status}}"
 foundationPrerequisiteRefs: "{{foundation_prerequisite_refs}}"
 closureOwnerCheckStatus: "{{closure_owner_check_status}}"
