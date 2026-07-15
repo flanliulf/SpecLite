@@ -49,3 +49,11 @@
 - Hook 是 deterministic guard，不是 workflow engine。
 - `dev-story` 和 goal orchestrator 不应直接读 source index；它们应要求 `speclite-flow-gate` 生成或刷新 gate report。
 - Report refs 不应引用不存在的文件。source index 缺失时，应写真实 explicit refs。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| 完整 handoff 契约 | [`../flow-gate-handoff-contract.md`](../flow-gate-handoff-contract.md) |
+| Workflow artifact layout | [`../workflow-artifact-layout.md`](../workflow-artifact-layout.md) |
+| Workflow 体系解释 | [`../../explanation/speclite-workflows.md`](../../explanation/speclite-workflows.md) |

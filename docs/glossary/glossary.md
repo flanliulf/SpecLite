@@ -1,6 +1,12 @@
 # Glossary（术语）
 
-- **[File Ownership Boundaries](file-ownership-boundaries.md)**: 区分 installer-owned、human-owned、workflow-owned 文件的更新保护边界。
-- **IDE-specific discovery metadata**: 特定 IDE 用于发现、加载、展示或索引 skill 的适配层元数据，不定义 skill 语义。
-- **SpecLite Runtime Boundaries**: 区分 canonical source、IDE skills、`_speclite` 与 `_speclite-output` 的四类运行边界。
-- **Workflow Artifact**: 已激活 workflow 按配置输出的过程产物，记录类型、来源 skill 和生成时间。
+> Status: Frozen Compatibility（冻结兼容）。本目录不设置强制删除日期。
+
+本目录是 legacy compatibility surface。新增术语统一维护在 [`../reference/glossary/`](../reference/glossary/index.md)，旧路径只保留跳转和必要兼容说明。除保持历史行为或测试所必需的最小说明外，不得在本目录新增术语、扩写概念或维护第二份正文。
+
+| Legacy Entry | Primary Glossary | Detailed Document |
+|---|---|---|
+| [`file-ownership-boundaries.md`](file-ownership-boundaries.md) | [`../reference/glossary/file-ownership.md`](../reference/glossary/file-ownership.md) | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
+| [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md) | [`../reference/glossary/ide-discovery.md`](../reference/glossary/ide-discovery.md) | [`../explanation/ide-specific-discovery-metadata.md`](../explanation/ide-specific-discovery-metadata.md) |
+| [`speclite-runtime-boundaries.md`](speclite-runtime-boundaries.md) | [`../reference/glossary/runtime-boundaries.md`](../reference/glossary/runtime-boundaries.md) | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
+| [`workflow-artifact.md`](workflow-artifact.md) | [`../reference/glossary/workflow-artifact.md`](../reference/glossary/workflow-artifact.md) | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |
