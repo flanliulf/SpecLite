@@ -4,6 +4,34 @@ SpecLite 是一个本地安装器与治理层，用于把 SpecLite 方法论源�
 
 ## Language（语言）
 
+**Canonical Source（规范来源）**:
+唯一决定 SpecLite 可安装方法论内容及 canonical Skill package 语义的权威来源；仓库内置实现位于 `assets/source/speclite/`。该术语只用于产品源及其安装单元，不用于泛指公开文档中的当前页面。
+_避免_: primary public document、compatibility entry、installed runtime projection、workflow artifact
+
+**Normative Specification（规范性说明）**:
+明确规定公共 schema、字段或行为契约，并被声明为该契约文本依据的 SPEC 文档；实现 schema、fixtures 和 contract tests 必须与其保持一致。
+_避免_: 一般 Tutorial、How-to、Explanation、未声明规范效力的 Reference
+
+**Primary Public Document（主要公开文档）**:
+`docs/` 中当前应被新增链接引用和持续维护的 Tutorial、How-to、Explanation 或 Reference 页面。它负责公开说明与导航，但不会因为是主要页面就自动成为 **Canonical Source（规范来源）** 或 **Normative Specification（规范性说明）**。
+_避免_: compatibility entry、历史过程产物、安装态 mirror
+
+**Compatibility Entry（兼容入口）**:
+为保持旧链接或既有访问路径可用而保留的最小公开页面；它必须明确指向对应的 **Primary Public Document（主要公开文档）**，且不得与后者双写同一事实。
+_避免_: 新增术语或长文的维护位置、第二事实来源、无替代目标的永久副本
+
+**Distribution Entrypoint（发布入口）**:
+随 npm package 发布、适用于携带该文件的 package version，并在脱离完整仓库文档时仍可独立完成核心操作的自包含文档；当前入口是 `docs/quick-start.md`。
+_避免_: Compatibility Entry、依赖未打包 `docs/` 页面的 Tutorial、手工写死 package version
+
+**Frozen Compatibility（冻结兼容）**:
+Compatibility Entry 的稳定维护状态。页面不设置强制删除日期，只允许维护主要替代文档链接和保持历史行为或测试所必需的最小说明；新增术语和长文不得进入该位置。
+_避免_: 双轨正文维护、默认新增入口、未经明确决策删除旧路径
+
+**Draft Public Document（公开文档草稿）**:
+位于 `docs/` 分类目录中但尚未达到最低可发布标准的页面。Draft 必须显式标记，且不得进入 `docs/index.md` 或子目录读者索引。
+_避免_: 把待补充页描述为完整指南、未标记的占位页、正式读者导航入口
+
 **Canonical Source Tree（规范来源树）**:
 经过校验的 SpecLite 源定义树，安装器可以将其打包、镜像到 AI IDE skill 目录，并记录到 manifest 中。
 _避免_: `_bmad`、`_bmad-output`、开发辅助产物
@@ -89,7 +117,7 @@ MVP 面向用户的核心命令在传入 `--json` 时使用的统一机器可读
 _避免_: 每个命令自定义 JSON shape、只提供人类可读输出、把 Post-MVP 命令面提前到 MVP
 
 **CommandResult JSON Contract SPEC（命令结果 JSON 契约 SPEC）**:
-位于 `docs/specs/command-result-json-contract.md` 的 canonical public JSON contract。PRD 只拥有产品需求和验收意图，Architecture 只拥有实现映射；字段 schema、排序、路径、timestamp、兼容性和 fixture comparison policy 以该 SPEC 为准。
+位于 `docs/reference/specs/command-result-json-contract.md` 的 **Normative Specification（规范性说明）**。PRD 只拥有产品需求和验收意图，Architecture 只拥有实现映射；字段 schema、排序、路径、timestamp、兼容性和 fixture comparison policy 以该 SPEC 为准。
 _避免_: PRD/architecture 复制契约细节后漂移、fixture 断言缺少单一依据、把 schema version 写成装饰字段
 
 **Executable Contract Anchor（可执行契约锚点）**:
@@ -169,7 +197,7 @@ _避免_: human/json 输出与退出码不一致、warning 破坏脚本化流程
 _避免_: `Record<string, unknown>` 长期作为公共契约、把 CI 所需字段只放在人类可读 summary、不同命令随意命名同类字段
 
 **Command Data Public Projection（命令数据公开投影）**:
-`CommandResult.data` 中会暴露给 CLI consumers 的嵌套类型字段，例如 `SourceDescriptor`、`IdeTargetStatus`、`CommandPathSummary`、`UpdatePlan`、`RepairPlan` 和 `UpdateConflict`。这些字段属于 `docs/specs/command-result-json-contract.md` 的 public projection；内部 resolver、installer、validator 或 update model 可以更丰富，但不得直接泄漏到 public JSON。
+`CommandResult.data` 中会暴露给 CLI consumers 的嵌套类型字段，例如 `SourceDescriptor`、`IdeTargetStatus`、`CommandPathSummary`、`UpdatePlan`、`RepairPlan` 和 `UpdateConflict`。这些字段属于 `docs/reference/specs/command-result-json-contract.md` 的 public projection；内部 resolver、installer、validator 或 update model 可以更丰富，但不得直接泄漏到 public JSON。
 _避免_: 只稳定顶层 envelope、嵌套 data 字段随实现漂移、把内部 model 当输出契约
 
 **Command Data Array Order（命令数据数组顺序）**:
@@ -298,6 +326,11 @@ _避免_: SpecLite 源定义、installer-owned 产品文件
 
 ## Relationships（关系）
 
+- **Distribution Entrypoint（发布入口）** 与 **Compatibility Entry（兼容入口）** 必须分开：前者持续维护自包含操作正文，后者只保持旧路径并指向 **Primary Public Document（主要公开文档）**。
+- `docs/glossary/` 使用 **Frozen Compatibility（冻结兼容）**；`docs/reference/glossary/` 承担主要术语表职责。
+- **Draft Public Document（公开文档草稿）** 只有达到明确目标、事实依据、核心内容、可验证结果或稳定字段、相关文档这些最低要求后，才能成为 **Primary Public Document（主要公开文档）** 并恢复索引。
+- `docs/reference/specs/` 只承载 **Normative Specification（规范性说明）**；`_bmad-output/planning-artifacts/specs/` 只保存规划来源和历史证据。
+- 完整 `docs/` 默认描述当前仓库 `main`；**Distribution Entrypoint（发布入口）** 描述携带该文件的 package version。
 - **SpecLite Source Definition（SpecLite 源定义）** 随产品发布时位于 **Bundled Source Assets（内置源资产）** 中，经 source resolution 和 validation 后成为 **Canonical Source Tree（规范来源树）**。
 - **Canonical Skill Package（规范 Skill 包）** 是 **Canonical Source Tree（规范来源树）** 中的 skill 级不可变安装单元；安装后在目标项目和 IDE 中保持固化，直到下一次人为 update/install。
 - **Source Resolver（来源解析器）** 从 `assets/source/speclite/` 读取 **Bundled Source Assets（内置源资产）**；`src/source/` 存放 resolver 代码，不存放内置 skill 内容。
@@ -317,7 +350,7 @@ _避免_: SpecLite 源定义、installer-owned 产品文件
 - **Resolver Runtime Entry（解析器运行入口）** 暴露 **Node Config Resolver（Node 配置解析器）** 的能力；skill instructions 只能依赖这个稳定入口，不得依赖 `dist/` 内部文件路径。
 - `speclite resolve config` 与 `speclite resolve customization` 是 **Runtime Support Command（运行时支撑命令）**，属于 MVP 支撑 API，但不是面向终端用户宣传的主命令。
 - `speclite install`、`speclite status`、`speclite validate`、`speclite update` 和 `speclite update --repair` 必须支持 **Unified JSON Output Contract（统一 JSON 输出契约）**；`--json` 只改变输出格式，不改变写入确认语义。
-- **CommandResult JSON Contract SPEC（命令结果 JSON 契约 SPEC）** 是 MVP public JSON behavior 的 canonical source；PRD/architecture 中的 JSON 规则均应视为摘要或实现映射。
+- **CommandResult JSON Contract SPEC（命令结果 JSON 契约 SPEC）** 是 MVP public JSON behavior 的 **Normative Specification（规范性说明）**；**Canonical Source（规范来源）** 仍专指 `assets/source/speclite/` 中的可安装方法论源。PRD/architecture 中的 JSON 规则均应视为摘要或实现映射。
 - **Executable Contract Anchor（可执行契约锚点）** 必须实现并校验 **CommandResult JSON Contract SPEC（命令结果 JSON 契约 SPEC）** 的 public JSON shape；若二者冲突，以 SPEC 为准并修正实现锚点。
 - **CommandResult Envelope（命令结果信封）** 必须包含顶层 `schemaVersion: "speclite.command-result.v1"`，并复用 `ValidationIssue` issue model；命令专属结构放入 `data`，例如 `update --repair --json` 的 repair plan。
 - **CommandResult Schema Evolution（命令结果 Schema 演进）** 必须保护 `speclite.command-result.v1` 的 consumer；`v1` 内只允许向后兼容扩展。
@@ -442,8 +475,8 @@ _避免_: SpecLite 源定义、installer-owned 产品文件
 - “`summary` 是否要做稳定模板化” — 已澄清：需要，但只限定 JSON 的 `CommandResult.summary`。MVP 每个核心命令必须使用 **Command Summary Template（命令摘要模板）**，不得包含 timestamp、absolute path、环境相关措辞或随机排序内容；human-readable output 可以自由组织更详细说明。
 - “`CommandResult.data` 是否可以长期保持 `Record<string, unknown>`” — 已澄清：不可以。实现可用泛型承载扩展，但 MVP 公共契约必须定义每个核心命令的稳定 payload schema。
 - “`CommandResult.data` 中数组字段是否需要默认排序策略” — 已澄清：需要。所有 public JSON arrays 都必须声明排序；未声明专属顺序时按 normalized stable key 字典序。`changedPaths`、`skippedPaths`、`updatePlan.actions`、`repairPlan.actions`、`conflicts`、`completedSteps`、`pendingSteps`、`installedModules` 等已由 CommandResult JSON Contract SPEC 声明排序规则。
-- “统一 JSON output 的细则应该独立成 SPEC 还是继续放在 PRD” — 已澄清：独立 SPEC 更合理。`docs/specs/command-result-json-contract.md` 是 canonical contract；PRD 只保留产品需求和验收意图，Architecture 只保留实现映射。
-- “Markdown SPEC 与实现期 Zod schema 谁是真源” — 已澄清：Markdown SPEC 是 canonical contract；`src/diagnostics/command-result-schema.ts` 是唯一 **Executable Contract Anchor（可执行契约锚点）**，供 reporter、fixture assertions 和 contract tests 复用，但不是第二份契约真源。
+- “统一 JSON output 的细则应该独立成 SPEC 还是继续放在 PRD” — 已澄清：独立 SPEC 更合理。`docs/reference/specs/command-result-json-contract.md` 是 **Normative Specification（规范性说明）**；PRD 只保留产品需求和验收意图，Architecture 只保留实现映射。
+- “Markdown SPEC 与实现期 Zod schema 谁是真源” — 已澄清：Markdown SPEC 是规范性契约文本；`src/diagnostics/command-result-schema.ts` 是唯一 **Executable Contract Anchor（可执行契约锚点）**，供 reporter、fixture assertions 和 contract tests 复用，但不是第二份契约真源。
 - “JSON payload 里的路径是否可以使用绝对路径或平台分隔符” — 已澄清：不可以。除明确标记的 redacted absolute diagnostic 外，公共 JSON path fields 必须使用 project-relative POSIX path。
 - “`CommandResult.targetProject` 是否可以是目标项目路径” — 已澄清：不可以。它是稳定项目标识，优先 trim 后非空的 project config 项目名，缺失、空字符串或纯空白时用目录 basename；`data.paths.projectRoot` 固定为 `"."`。
 - “project config 项目名为空字符串或纯空白时是否算缺失” — 已澄清：算缺失。`targetProject` 不得输出空字符串，必须 fallback 到目录 basename。

@@ -6,7 +6,6 @@
 
 | 文档 | 说明 |
 |---|---|
-| [`core-skills.md`](core-skills.md) | core skills catalog。 |
 | [`sdlc-workflows.md`](sdlc-workflows.md) | SDLC workflow skills catalog。 |
 | [`ecosystem-skills.md`](ecosystem-skills.md) | optional ecosystem extension skills catalog。 |
 | [`support-skills.md`](support-skills.md) | support skills catalog。 |

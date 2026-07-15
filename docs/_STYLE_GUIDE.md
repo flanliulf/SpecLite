@@ -65,8 +65,14 @@ Tutorial 是学习导向文档，用于带新用户从零完成一条完整路�
 
 | 文档 | 用途 |
 |---|---|
+| `tutorials/speclite-orientation.md` | 用最小心智模型帮助初学者理解产品职责、核心概念和学习路径。 |
+| `tutorials/speclite-developer-training.md` | 将多篇材料组织成有顺序、实验和验收标准的开发者培训。 |
 | `tutorials/quick-start.md` | 从安装 SpecLite 到完成首次验证。 |
 | `tutorials/first-brownfield-project.md` | 在既有项目中完成第一次 brownfield baseline。 |
+
+## Distribution Entrypoint（发布入口）
+
+`docs/quick-start.md` 是随 npm package 发布的自包含操作入口，不是 Compatibility Entry。它必须只引用 `package.json.files` 中实际发布的文件，并以“适用于携带本文的 package version”表达版本范围，不手工写死 package version。
 
 ## How-To Guides（操作指南）
 
@@ -120,6 +126,8 @@ Reference 是信息导向文档，用于快速查阅稳定技术规格。
 
 Reference 文档回答“是什么”“怎么调用”“字段是什么”，不展开解释“为什么”。需要概念深度时，链接到 `explanation/`。
 
+`reference/specs/` 是 Reference 的规范性说明子类型，只承载已被当前实现采用、对实现和外部消费者具有规范效力、并具备 executable anchors 的公共契约。
+
 常见类型：
 
 | 类型 | 用途 | 示例 |
@@ -165,24 +173,47 @@ Glossary 属于 Reference 类型，用于短定义和快速查阅。
 | **workflow artifact** | workflow 按配置输出的过程产物，记录来源 skill 和生成时间。 |
 ```
 
-## Target Tooling（目标工具）
+## Draft Publication（草稿发布）
 
-后续应补充 docs tooling，并把以下命令接入 `package.json`。
+未达到最低可发布标准的页面必须在标题后标记：
 
-这些命令是目标规范，不是当前已实现的提交门禁。
-
-```sh
-npm run docs:fix-links
-npm run docs:fix-links -- --write
-npm run docs:validate-links
-npm run docs:build
+```md
+> Status: Draft（草稿）。本文尚未达到最低可发布标准，因此不进入读者索引。
 ```
 
-目标职责：
+Draft 可以保留在原分类目录中，但不得进入 `docs/index.md` 或子目录 `index.md`。达到明确目标、事实依据、核心内容、可验证结果或稳定字段、相关文档这些最低要求后，才能移除标记并恢复索引。
 
-| 命令 | 目标职责 |
+## Related Documents（相关文档）
+
+除 index、Draft、Frozen Compatibility 和 Distribution Entrypoint 外，主要公开文档必须在末尾区域提供带关系类型的表格：
+
+```md
+## Related Documents（相关文档）
+
+| Relationship | Document |
 |---|---|
-| `npm run docs:fix-links` | 预览 Markdown link 格式修复。 |
-| `npm run docs:fix-links -- --write` | 应用 Markdown link 格式修复。 |
-| `npm run docs:validate-links` | 校验文档内部链接和相对路径。 |
-| `npm run docs:build` | 构建未来文档站点或执行等价渲染检查。 |
+| 规范性说明 | [`specs/example-contract.md`](specs/example-contract.md) |
+| 概念解释 | [`../explanation/example.md`](../explanation/example.md) |
+```
+
+链接关系必须表达前置、下一步、概念解释、技术参考或契约依据之一，不能只为对称而添加反向链接。
+
+## Docs Tooling（文档工具）
+
+当前统一检查入口是：
+
+```sh
+npm run docs:check
+```
+
+检查职责：
+
+| Check | Responsibility |
+|---|---|
+| Link and fragment | 校验相对链接、heading fragment、图片和 HTML entry。 |
+| Reachability | 校验主要公开 Markdown 可以从 `docs/index.md` 到达。 |
+| Boundary | 校验 package Quick Start 只引用发布包文件，Compatibility Entry 指向主要公开文档。 |
+| Publication | 阻止 Draft 被读者索引列出。 |
+| Relationships | 校验主要公开正文包含 `Related Documents（相关文档）`。 |
+
+没有文档站点之前不提供虚构的 `docs:build`；自动修复命令等出现稳定重复需求后再增加。

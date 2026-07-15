@@ -97,3 +97,12 @@ npm test
 npm run release:packaging-check
 git diff --check
 ```
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| Canonical source layout | [`canonical-source-layout.md`](canonical-source-layout.md) |
+| Runtime 边界解释 | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
+| Module 体系解释 | [`../explanation/speclite-modules.md`](../explanation/speclite-modules.md) |
+| 治理演示材料 | [`../presentations/canonical-source-governance/README.md`](../presentations/canonical-source-governance/README.md) |
