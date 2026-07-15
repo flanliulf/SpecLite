@@ -199,3 +199,12 @@ Next Actions（下一步）
 - `Issues` 为空时会显示 `- 无问题`；`未写入项目文件` 属于 `Summary` / write state，不会混入问题列表。
 - `NO_COLOR`、non-TTY、CI 和窄终端输出不依赖 ANSI color、spinner 或动态覆盖行表达唯一语义。
 - 安装后不知道下一步时，先运行 `speclite status`，再运行 `speclite validate`。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| 学习型教程 | [`../tutorials/quick-start.md`](../tutorials/quick-start.md) |
+| 安装验证 | [`validate-installation.md`](validate-installation.md) |
+| CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
+| Runtime layout | [`../reference/runtime-layout.md`](../reference/runtime-layout.md) |

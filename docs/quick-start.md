@@ -1,6 +1,10 @@
 # Quick Start（快速开始）
 
-本文面向第一次接触 SpecLite 的使用者，说明如何把 SpecLite 安装到一个本地项目中，并完成安装后的基础检查和首次使用。
+本文是随 npm package 发布的自包含操作入口，面向第一次接触 SpecLite 的使用者。即使读者只拿到发布包，也应能依靠本文完成 CLI 安装、目标项目安装、验证、常见故障排查和必要维护操作。
+
+本文适用于携带该文件的 package version，不手工写死版本号。仓库 `main` 上的完整文档可能描述尚未发布的变化；已发布版本的使用者应优先以 package 内本文、当前 CLI help 和 package metadata 为准。
+
+本文以“可以直接复制执行”为主，不承担完整的学习叙事，也不依赖未进入 npm package 的其他 `docs/` 页面。仓库文档中的 `tutorials/quick-start.md` 负责按步骤讲解 preview、write authorization、human output 和 JSON boundary。
 
 SpecLite 不是普通文档包。它是一套面向企业级生产项目的 AI Coding 落地方法论，通过 CLI 安装到本地项目后，会生成 runtime、IDE skill mirrors、manifest/index 和过程产物目录，让团队可以在多个 AI IDE 中使用一致的工作流入口。
 
@@ -380,7 +384,7 @@ speclite governance-report /path/to/project --json
 - `--json` 会输出 machine-readable CommandResult JSON。
 - 自动化不要依赖 spinner、颜色、emoji 或 human-readable 文本。
 - 写入类命令仍然需要显式 `--yes`。
-- 安装后的治理和维护命令见 [`how-to/manage-installed-project.md`](how-to/manage-installed-project.md)。
+- 安装后的常用维护操作见本文的 `Update and Repair（更新与修复）`；完整 CLI command surface 见随包发布的 [`../README.md`](../README.md)。
 
 ## Next Steps（下一步）
 

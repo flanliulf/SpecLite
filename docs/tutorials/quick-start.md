@@ -1,8 +1,8 @@
 # Quick Start Tutorial（快速开始教程）
 
-本教程带你从零完成一次 SpecLite 安装、验证和首次使用。完成后，你会知道哪些命令只是读取状态，哪些命令会写入项目文件，以及如何在人工阅读输出和自动化 JSON 之间切换。
+本教程是学习导向入口，带你按顺序完成一次 SpecLite 安装、验证和首次使用。完成后，你会知道哪些命令只是读取状态，哪些命令会写入项目文件，以及如何在人工阅读输出和自动化 JSON 之间切换。
 
-如果你只想查命令清单，读 [`../reference/cli.md`](../reference/cli.md)。如果你需要 npm package 中的精简入口，读 [`../quick-start.md`](../quick-start.md)。
+如果你只想查命令清单，读 [`../reference/cli.md`](../reference/cli.md)。如果你需要 npm package 中可以独立使用的安装、排错和维护说明，读 [`../quick-start.md`](../quick-start.md)。
 
 ## What You'll Learn（你会学到什么）
 
@@ -11,6 +11,7 @@
 - 如何先做安全预览，再授权写入。
 - 如何读取 `status`、`validate`、`update` 和 `repair` 的 human-readable output。
 - 什么时候使用 `--json`，什么时候只看 `Next Actions`。
+- 安装验证通过后，如何继续到 AI IDE 中的第一次 installed Skill 调用。
 
 ## Prerequisites（前置条件）
 
@@ -45,22 +46,9 @@ speclite validate "$PROJECT_ROOT"
 
 ## Command Prefix（命令前缀）
 
-后续示例默认使用全局安装后的 `speclite`。如果你使用其它方式，只替换命令前缀，子命令和参数保持不变。
+本教程统一使用全局安装后的 `speclite`，避免在学习主路径中混入多套命令前缀。
 
-| Scenario | Prefix | Example |
-|---|---|---|
-| 全局安装 | `speclite` | `speclite install "$PROJECT_ROOT" --yes` |
-| 临时运行 npm 包 | `npx @fancyliu/speclite@latest` | `npx @fancyliu/speclite@latest install "$PROJECT_ROOT" --yes` |
-| 本仓库开发版 | `npm run dev --` | `npm run dev -- install "$PROJECT_ROOT" --yes` |
-
-开发版命令必须在 SpecLite 仓库目录执行：
-
-```sh
-cd /path/to/SpecLite
-npm install
-npm run build
-npm run dev -- install "$PROJECT_ROOT" --yes
-```
+需要使用 `npx` 或本仓库开发版时，只替换命令前缀，子命令和参数保持不变。CLI 安装方式、PATH 前置条件和开发版执行目录见 package-facing Quick Start 的 [`Install CLI Tool（安装命令行工具）`](../quick-start.md#install-cli-tool安装命令行工具) 与 [`Where to Run Commands（命令在哪个目录执行）`](../quick-start.md#where-to-run-commands命令在哪个目录执行)。
 
 ## Step 1: Preview The Target（预览目标）
 
@@ -101,13 +89,13 @@ speclite install "$PROJECT_ROOT" --yes
 | IDE targets | `claude`、`agents` |
 | Human output locale | `zh-CN` |
 
-`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。需要 React、Vue、Java / Spring Boot、Node.js、Python、npm package、CLI tool 或 documentation-only project 等额外方法论能力时，使用：
+本教程继续使用默认 `core` + `sdlc` 路径。需要自定义 Module、config 或 IDE targets 时，改用 interactive install：
 
 ```sh
 speclite install "$PROJECT_ROOT" --yes --interactive
 ```
 
-interactive mode 会按 `ecosystem category -> id` 引导选择。先选择 `frontend`、`backend`、`other` 或 skip，再选择具体 id。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies。
+Interactive mode 的完整选择、配置复核和 ecosystem boundary 见 [`../how-to/install-speclite.md`](../how-to/install-speclite.md)。Tutorial 只要求理解：`--yes`、`--json` 和 default no-prompt install 不会自动选择 optional ecosystem modules。
 
 安装完成后，目标项目会出现：
 
@@ -135,6 +123,15 @@ speclite validate "$PROJECT_ROOT"
 ```
 
 `validate` 会读取 manifest/index、runtime path、IDE mirrors、source integrity、file ownership 等本地证据，并输出 issue category、severity、affected path 和建议动作。
+
+`status` 和 `validate` 证明 installed state 是否健康，但不代表当前 AI 会话已经发现并能执行 Skill。在准备使用 installed Skill 的终端和 AI IDE 会话中再确认：
+
+```sh
+cd "$PROJECT_ROOT"
+command -v speclite
+```
+
+两项检查通过后，按 [`use-installed-skills.md`](../how-to/use-installed-skills.md) 在新 AI 会话中调用 `speclite-help`，完成从“安装成功”到“第一次实际使用”的衔接。
 
 ## Step 4: Read Human Output（读取人类输出）
 
@@ -228,6 +225,7 @@ speclite validate "$PROJECT_ROOT"
 - 用 `status` 获取轻量 installed-state summary。
 - 用 `validate` 做本地 deterministic validation。
 - 理解了 human-readable output 和 `CommandResult` JSON 的边界。
+- 知道如何继续到 AI IDE 中的 installed Skill discovery 和首次调用。
 
 ## Quick Reference（快速参考）
 
@@ -253,11 +251,24 @@ speclite validate "$PROJECT_ROOT"
 | `status` 成功是否代表安装健康？ | 不一定。`status` 是轻量摘要；完整健康检查使用 `validate`。 |
 | 我可以让 CI 解析 `Next Actions` 吗？ | 不建议。CI 应解析 `--json` 的 stable fields。 |
 | 想切换英文输出怎么办？ | 对支持 locale 的命令传 `--locale en-US`，或设置 `SPECLITE_LOCALE=en-US`。 |
-| `resolve --human` 什么时候用？ | 只在人工排查 config/customization resolver 时使用；默认 `resolve` stdout 仍是 pure JSON。 |
+| 安装与 `validate` 都通过后，怎样开始实际使用？ | 在目标项目的新 AI 会话中确认 `command -v speclite`，再按 [`use-installed-skills.md`](../how-to/use-installed-skills.md) 调用 `speclite-help`。 |
+| 从哪里查看 `npx`、开发版或自定义来源？ | 查看 [`Quick Start（快速开始）`](../quick-start.md)；这些安装变体不进入本教程主路径。 |
 
 ## Key Takeaways（关键要点）
 
 - `install` 默认先预览，`--yes` 才写入。
 - `status` 和 `validate` 始终是 read-only checks。
 - human-readable output 面向人；`--json` 面向自动化。
-- docs 示例不是 contract source；contract 来自 SPEC、schema 和 focused tests。
+- docs 示例不是规范来源；公共语义来自 [`../reference/specs/command-result-json-contract.md`](../reference/specs/command-result-json-contract.md)，schema 和 focused tests 提供 executable evidence。
+
+## Related Documents（相关文档）
+
+| Topic | Link |
+|---|---|
+| npm package 自包含操作入口 | [`../quick-start.md`](../quick-start.md) |
+| 安装与 interactive configuration | [`../how-to/install-speclite.md`](../how-to/install-speclite.md) |
+| 安装校验 | [`../how-to/validate-installation.md`](../how-to/validate-installation.md) |
+| Installed Skill 首次调用 | [`../how-to/use-installed-skills.md`](../how-to/use-installed-skills.md) |
+| Update 与 repair | [`../how-to/update-and-repair.md`](../how-to/update-and-repair.md) |
+| CLI command surface | [`../reference/cli.md`](../reference/cli.md) |
+| CommandResult JSON | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
