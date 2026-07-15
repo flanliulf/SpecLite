@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:fbd7976e2cbe0dddf32eb770078dd676f8a52313d7f49d4969f4bbcabdccc157",
+  "packageHash": "sha256:cde70591818e6d66093abe463e3a10e7e3f3c4b9e596a60ea9f33d65a6e57a41",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",
@@ -687,6 +687,7 @@
     "dist/bin/speclite.js.map",
     "dist/packaging-manifest.json",
     "docs/quick-start.md",
+    "docs/README.md",
     "LICENSE",
     "package.json",
     "README.md"
