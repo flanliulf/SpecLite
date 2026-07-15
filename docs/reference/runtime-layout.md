@@ -131,6 +131,16 @@ Installed-state validation 以 `_speclite/_config/manifest.yaml` 中的 `install
 
 详细保护模型见 [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md)。
 
+## Related Documents（相关文档）
+
+| Topic | Link |
+|---|---|
+| Runtime 三层边界 | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
+| Runtime boundary 术语 | [`glossary/runtime-boundaries.md`](glossary/runtime-boundaries.md) |
+| Workflow artifact 目录 | [`workflow-artifact-layout.md`](workflow-artifact-layout.md) |
+| Config 与 customization | [`config-and-customization.md`](config-and-customization.md) |
+| IDE discovery metadata | [`../explanation/ide-specific-discovery-metadata.md`](../explanation/ide-specific-discovery-metadata.md) |
+
 ## Related Sources（相关源码）
 
 | Topic | Source |

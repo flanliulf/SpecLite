@@ -146,12 +146,13 @@ Hooks 是独立 canonical package，不等同于 Skill package root。当前 hoo
 - 修改 canonical source 时，应先按 [`canonical-source-governance.md`](canonical-source-governance.md) 分类影响面；`D0` 用 checker / strict mode 收口，`D1` / `D2` 记录更新或跳过决策。
 - 不要把 `_speclite-output/` 过程产物回写到 canonical source。
 
-## Related Docs（相关文档）
+## Related Documents（相关文档）
 
 | Topic | Link |
 |---|---|
 | SDLC skill catalog | [`skills/sdlc-workflows.md`](skills/sdlc-workflows.md) |
 | Runtime layout | [`runtime-layout.md`](runtime-layout.md) |
+| Runtime boundary explanation | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
 | Canonical source governance | [`canonical-source-governance.md`](canonical-source-governance.md) |
 | File ownership model | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
 | Agent explanation | [`../explanation/speclite-agents.md`](../explanation/speclite-agents.md) |

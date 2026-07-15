@@ -50,3 +50,12 @@ JSON 输出位于 `data.metrics`，完整 envelope 遵循 [`../reference/command
 ## Extensions（扩展）
 
 趋势、导出、多项目或团队视角只能建立在 MVP phase coverage matrix 与 validate output 之上。不要把这些扩展实现为 Web dashboard、数据库趋势服务、后台 daemon 或 hosted registry UI，除非未来有新的 owning SPEC 明确授权。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
+| JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
+| Workflow artifact layout | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |
+| Flow Gate handoff 契约 | [`../reference/flow-gate-handoff-contract.md`](../reference/flow-gate-handoff-contract.md) |

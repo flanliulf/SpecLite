@@ -96,11 +96,12 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 
 Legacy Python resolver scripts 可能存在于 `_speclite/scripts/`，但它们是 compatibility assets，不是默认 activation resolver。
 
-## Related Docs（相关文档）
+## Related Documents（相关文档）
 
 | Topic | Link |
 |---|---|
 | Runtime layout | [`runtime-layout.md`](runtime-layout.md) |
+| Runtime boundaries | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
 | File ownership model | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
 | CLI resolve reference | [`cli.md`](cli.md#resolve-options解析参数) |
 | Agent explanation | [`../explanation/speclite-agents.md`](../explanation/speclite-agents.md) |

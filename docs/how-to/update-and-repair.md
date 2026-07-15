@@ -94,3 +94,12 @@ Next Actions / Next actions:
 ```
 
 docs 示例只解释人类输出。脚本、CI 和 gate 判断应使用 `speclite update "$PROJECT_ROOT" --json`、`speclite validate "$PROJECT_ROOT" --json` 以及 `CommandResult` schema。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
+| JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
+| 文件所有权解释 | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
+| 安装验证 | [`validate-installation.md`](validate-installation.md) |

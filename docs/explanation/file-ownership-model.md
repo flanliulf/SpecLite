@@ -2,7 +2,7 @@
 
 SpecLite 的文件所有权模型解释 installer-owned、human-owned 和 workflow-owned 三类路径如何被 install、update、repair、validate 和 uninstall 命令保护。它的核心目的不是给目录命名，而是防止安装控制面误改用户定制和 workflow 过程产物。
 
-术语速查见 [`../glossary/file-ownership-boundaries.md`](../glossary/file-ownership-boundaries.md)。
+术语速查见 [`../reference/glossary/file-ownership.md`](../reference/glossary/file-ownership.md)。
 
 ## Overview（概览）
 
@@ -73,9 +73,10 @@ SpecLite 是 local-first CLI control plane。它会把 canonical skill package�
 
 - `_speclite-output/planning-artifacts/*`
 - `_speclite-output/implementation-artifacts/*`
-- `_speclite-output/review-artifacts/*`
-- `_speclite-output/research-artifacts/*`
-- story、CR、SR、research 和 process record 等 workflow 记录
+- `_speclite-output/devops-artifacts/*`
+- planning artifacts 下的 research，以及 implementation artifacts 下的 Story、Flow Gate、CR、SR、retrospective 和 process records
+
+`review-artifacts/` 和 `research-artifacts/` 可以作为概念分类出现，但不是当前 `module.yaml` 声明的默认顶层目录。当前实际布局见 [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md)。
 
 这些文件记录真实研发过程，不是 installer metadata，也不是 canonical source mirror。它们可能包含人工判断、review 结论、gate 状态和历史证据，因此不能被 install/update 覆盖。
 
@@ -133,14 +134,15 @@ SpecLite 是 local-first CLI control plane。它会把 canonical skill package�
 
 如果项目把 `artifactRoot` 配置为 `.artifacts`，那么 `.artifacts/review/report.md` 会归为 workflow-owned，而不是 unknown 或 installer-owned。
 
-## Related Docs（相关文档）
+## Related Documents（相关文档）
 
 | Topic | Link |
 |---|---|
-| 术语速查 | [`../glossary/file-ownership-boundaries.md`](../glossary/file-ownership-boundaries.md) |
+| 术语速查 | [`../reference/glossary/file-ownership.md`](../reference/glossary/file-ownership.md) |
 | update / repair 操作 | [`../how-to/update-and-repair.md`](../how-to/update-and-repair.md) |
 | uninstall 操作 | [`../how-to/manage-installed-project.md`](../how-to/manage-installed-project.md) |
 | CLI 参考 | [`../reference/cli.md`](../reference/cli.md) |
 | runtime 边界 | [`runtime-boundaries.md`](runtime-boundaries.md) |
+| workflow artifact layout | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |
 
 本文档由 speclite-agent-docs-steward Skill 自动生成

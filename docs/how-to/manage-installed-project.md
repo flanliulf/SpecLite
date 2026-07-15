@@ -148,3 +148,12 @@ speclite governance-report /path/to/project --json
 - `completedSteps` / `failedStep` / `pendingSteps`
 
 自动化不要解析 human-readable output，也不要把 `summary` 当作稳定 contract。字段细节见 [`../reference/command-result-json.md`](../reference/command-result-json.md)。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
+| JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
+| 更新与修复 | [`update-and-repair.md`](update-and-repair.md) |
+| 文件所有权解释 | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |

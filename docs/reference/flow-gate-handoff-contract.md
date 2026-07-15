@@ -138,3 +138,12 @@ Goal orchestrator：
 ## Current NOI Implication（当前 NOI 含义）
 
 如果 NOI live tree 中不存在 `_speclite-output/implementation-artifacts/foundation-handoff/source-index.json`，则后续 gate report 不应再引用该路径。可接受的通用做法是让 `speclite-flow-gate` 使用 Story 1.16、foundation fixtures、future closure ledger 和对应 verification commands 作为 explicit refs，并把这些真实 refs 写入 v2 metadata。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| Flow Gate 术语 | [`glossary/flow-gate-handoff.md`](glossary/flow-gate-handoff.md) |
+| Workflow artifact layout | [`workflow-artifact-layout.md`](workflow-artifact-layout.md) |
+| Workflow 体系解释 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) |
+| Process governance 操作 | [`../how-to/process-governance-report.md`](../how-to/process-governance-report.md) |
