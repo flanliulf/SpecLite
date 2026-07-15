@@ -159,4 +159,15 @@ Workflow 的可靠性来自边界：
 | Backend-specific ecosystem workflow roots | `assets/source/speclite/ecosystems/backend/<id>/` |
 | Epic 级目标编排 workflow roots | `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-*` |
 
+## Related Documents（相关文档）
+
+| Topic | Link |
+|---|---|
+| Workflow artifact layout | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |
+| Workflow artifact 术语 | [`../reference/glossary/workflow-artifact.md`](../reference/glossary/workflow-artifact.md) |
+| Runtime boundaries | [`runtime-boundaries.md`](runtime-boundaries.md) |
+| SDLC Workflow catalog | [`../reference/skills/sdlc-workflows.md`](../reference/skills/sdlc-workflows.md) |
+| Agent 体系 | [`speclite-agents.md`](speclite-agents.md) |
+| Module 体系 | [`speclite-modules.md`](speclite-modules.md) |
+
 本文档由 speclite-agent-docs-steward Skill 自动生成

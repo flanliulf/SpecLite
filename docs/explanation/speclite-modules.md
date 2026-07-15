@@ -147,4 +147,14 @@ SpecLite 本身仍是 CLI + filesystem control plane。新增 frontend ecosystem
 | Runtime config 初始化 | `src/installer/config-initialization.ts` |
 | Hook runtime projection | `assets/source/speclite/hooks/` 和 `src/installer/hook-artifacts.ts` |
 
+## Related Documents（相关文档）
+
+| Topic | Link |
+|---|---|
+| Runtime boundaries | [`runtime-boundaries.md`](runtime-boundaries.md) |
+| IDE discovery metadata | [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md) |
+| Canonical source layout | [`../reference/canonical-source-layout.md`](../reference/canonical-source-layout.md) |
+| Runtime layout | [`../reference/runtime-layout.md`](../reference/runtime-layout.md) |
+| Module Skill catalogs | [`../reference/skills/index.md`](../reference/skills/index.md) |
+
 本文档由 speclite-agent-docs-steward Skill 自动生成

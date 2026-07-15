@@ -53,7 +53,7 @@ Ecosystem modules 是 selected-only extension。选择 React 不会安装 Vue、
 
 generic UX、PRD、Architecture、Story creation 和 Code Review workflow 仍留在 `sdlc`。SpecLite 本身仍是 CLI + filesystem control plane，不因 frontend ecosystem module 而新增 Web UI、dashboard、browser runtime 或 GUI product scope。
 
-## Related Contracts（相关契约）
+## Related Documents（相关文档）
 
 | Contract | Source |
 |---|---|
@@ -62,3 +62,5 @@ generic UX、PRD、Architecture、Story creation 和 Code Review workflow 仍留
 | Module discovery | `src/modules/module-metadata.ts` |
 | Module selection | `src/modules/module-selection.ts` |
 | Selected-only projection | `src/ide/target-writer.ts` |
+| Module 体系解释 | [`../../explanation/speclite-modules.md`](../../explanation/speclite-modules.md) |
+| Canonical source layout | [`../canonical-source-layout.md`](../canonical-source-layout.md) |

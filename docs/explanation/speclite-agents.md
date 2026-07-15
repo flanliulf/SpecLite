@@ -106,4 +106,14 @@ SpecLite 里有一组名字也包含 `agent` 的支撑工具：
 | Agent 支撑工具边界 | `assets/source/speclite/support-skills/speclite-agent-creator/` 和 `speclite-agent-lint/` |
 | Module help 中的菜单入口 | `assets/source/speclite/sdlc-skills/module-help.csv` |
 
+## Related Documents（相关文档）
+
+| Topic | Link |
+|---|---|
+| IDE discovery metadata | [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md) |
+| Runtime boundaries | [`runtime-boundaries.md`](runtime-boundaries.md) |
+| Module 体系 | [`speclite-modules.md`](speclite-modules.md) |
+| Workflow 体系 | [`speclite-workflows.md`](speclite-workflows.md) |
+| SDLC Skill catalog | [`../reference/skills/sdlc-workflows.md`](../reference/skills/sdlc-workflows.md) |
+
 本文档由 speclite-agent-docs-steward Skill 自动生成

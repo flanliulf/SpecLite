@@ -39,3 +39,12 @@ node assets/source/speclite/support-skills/speclite-check-canonical-source-chang
 python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py <skill-dir>
 python3 assets/source/speclite/support-skills/speclite-agent-lint/scripts/check_agent_skill.py <agent-dir>
 ```
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| Skill catalog 入口 | [`index.md`](index.md) |
+| Canonical source governance | [`../canonical-source-governance.md`](../canonical-source-governance.md) |
+| Canonical source layout | [`../canonical-source-layout.md`](../canonical-source-layout.md) |
+| Workflow 体系解释 | [`../../explanation/speclite-workflows.md`](../../explanation/speclite-workflows.md) |

@@ -104,7 +104,7 @@
 |---|---|---|---|---|
 | `speclite-npm-publisher` | Workflow | `NP` | `{devops_artifacts}/npm-releases` | 发布开源 Node.js package 到 npm，并保留证据化 release gate 报告。 |
 
-## Related Contracts（相关契约）
+## Related Documents（相关文档）
 
 | Contract | Source |
 |---|---|
@@ -113,5 +113,7 @@
 | package root discovery | `src/modules/module-metadata.ts` |
 | Agent 概念解释 | [`../../explanation/speclite-agents.md`](../../explanation/speclite-agents.md) |
 | Workflow 概念解释 | [`../../explanation/speclite-workflows.md`](../../explanation/speclite-workflows.md) |
+| CLI、Help、Agent、Workflow 与 support Skill 选择规则 | [`../../explanation/skill-taxonomy-and-sdlc.md`](../../explanation/skill-taxonomy-and-sdlc.md) |
+| 第一次 brownfield baseline 教程 | [`../../tutorials/first-brownfield-project.md`](../../tutorials/first-brownfield-project.md) |
 
 本文档由 speclite-agent-docs-steward Skill 自动生成
