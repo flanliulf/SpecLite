@@ -1,6 +1,6 @@
 # CommandResult JSON（CommandResult JSON）
 
-`--json` 输出使用统一的 `CommandResult` envelope。它面向脚本、CI 和其它工具，不受 locale、human-readable 文本或终端渲染影响。
+`--json` 输出使用统一的 `CommandResult` envelope。它面向脚本、CI 和其它工具，不受 locale、human-readable 文本或终端渲染影响。公共契约以 [`specs/command-result-json-contract.md`](specs/command-result-json-contract.md) 为规范性说明；本文用于消费者快速查阅。
 
 ## Envelope（顶层结构）
 
@@ -58,7 +58,7 @@ Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human re
 | `Outcome` label | 不作为 JSON 顶层字段。命令状态仍由 `status`、`issues` 和 command-specific `data` 表达。 |
 | install target presentation context | 可让 human output 展示目标绝对路径、命令执行目录和 path-safe `Next Actions`；不得作为 enumerable JSON field 输出。 |
 | `Next Actions` prose | 可帮助人和 agent 操作者，但不作为稳定状态机或 CI gate。 |
-| docs 示例 | 不是 contract source；contract source 是 SPEC、schema、focused tests 和 fixture policy。 |
+| docs 示例 | 不是规范来源；公共语义以规范性说明为准，schema、focused tests 和 fixture policy 提供 executable evidence。 |
 
 `resolve config` 和 `resolve customization` 是例外的 runtime support surface：默认 stdout 是 resolved JSON object，而不是 `CommandResult` envelope。只有显式传入 `--human` 时，`resolve` 才渲染 human-readable support frame；此时仍不得改变默认 machine output contract。
 
@@ -105,3 +105,12 @@ Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human re
 - 不把 `summary`、`nextActions` 或 human renderer 的 `Outcome` 文案当作稳定状态机。
 - 对写入类命令，区分 plan、authorized apply、conflict 和 no-op。
 - 对 external access，读取 `externalAccesses[].confirmationState`，不要把 `--yes` 以外的信号当作授权。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| 规范性说明 | [`specs/command-result-json-contract.md`](specs/command-result-json-contract.md) |
+| CLI 参数参考 | [`cli.md`](cli.md) |
+| Human output 边界 | [`cli-human-output-matrix.md`](cli-human-output-matrix.md) |
+| CI 消费方式 | [`../how-to/ci-enterprise-automation.md`](../how-to/ci-enterprise-automation.md) |

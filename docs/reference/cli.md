@@ -247,7 +247,7 @@ Human-readable output 会按 command intent 选择 presentation profile：
 
 `install` prewrite preview 的 `Scope` 会展示目标项目、目标路径和命令执行目录。`Next Actions` 使用从原执行目录可复制的 target：绝对 target 保持绝对路径，`../project` 这类相对跨目录 target 保留相对参数，不降级为 basename。没有 issue 时，`Issues` section 显示 `- 无问题`；写入状态由 `Summary` / state 表达。
 
-CLI human-readable output 的完整 command/outcome/test/docs matrix 见 [`cli-human-output-matrix.md`](cli-human-output-matrix.md)。docs 示例不是 contract source；`--json` contract 以 schema、SPEC 和 focused tests 为准。
+CLI human-readable output 的完整 command/outcome/test/docs matrix 见 [`cli-human-output-matrix.md`](cli-human-output-matrix.md)。docs 示例不是规范来源；`--json` 公共语义以 [`specs/command-result-json-contract.md`](specs/command-result-json-contract.md) 为准，schema 和 focused tests 提供 executable evidence。
 
 ## Exit Codes（退出码）
 
@@ -291,3 +291,12 @@ NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair
 NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
 NO_COLOR=1 speclite resolve config --project-root "$PROJECT_ROOT" --key core.project_name --human
 ```
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| 安装操作 | [`../how-to/install-speclite.md`](../how-to/install-speclite.md) |
+| 安装验证 | [`../how-to/validate-installation.md`](../how-to/validate-installation.md) |
+| JSON 消费者参考 | [`command-result-json.md`](command-result-json.md) |
+| JSON 规范性说明 | [`specs/command-result-json-contract.md`](specs/command-result-json-contract.md) |

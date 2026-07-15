@@ -4,9 +4,10 @@
 
 ## Contract Sources（契约来源）
 
-docs 示例不是 contract source；`CommandResult` JSON contract、issue model、outcome vocabulary 和 fixture policy 的来源仍是 SPEC、schema 和 focused tests。
+docs 示例不是 contract source；`CommandResult` JSON contract、issue model、outcome vocabulary 和 fixture policy 的来源仍是规范性说明、schema 和 focused tests。
 
-- SPEC：`_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`、`_bmad-output/planning-artifacts/specs/08-fixture-contract.md`。
+- 规范性说明：[`specs/command-result-json-contract.md`](specs/command-result-json-contract.md)。
+- 历史规划证据：`_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`、`_bmad-output/planning-artifacts/specs/08-fixture-contract.md`；它们不替代当前公开契约。
 - schema：`src/diagnostics/command-result-schema.ts`、`src/config/resolve-output-schema.ts`。
 - focused tests：下表列出的 `test/*.test.ts`。
 - docs example：只展示稳定、可复制、无颜色的人类输出；不得作为唯一 contract source。
@@ -152,3 +153,12 @@ Artifact root: _speclite-output
 ## Packaging Boundary（打包边界）
 
 本 matrix 是维护者 reference，不是 packaged runtime asset。除非未来显式加入 `package.json.files` 并在 release manifest 中标记为 `packaged-documentation-example`，它不得被 fixture/release tests 当作 package runtime docs 示例。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| JSON 规范性说明 | [`specs/command-result-json-contract.md`](specs/command-result-json-contract.md) |
+| JSON 消费者参考 | [`command-result-json.md`](command-result-json.md) |
+| CLI 参数参考 | [`cli.md`](cli.md) |
+| CI 消费方式 | [`../how-to/ci-enterprise-automation.md`](../how-to/ci-enterprise-automation.md) |

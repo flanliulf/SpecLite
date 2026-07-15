@@ -76,7 +76,7 @@ describe("CLI human output coverage matrix", () => {
       "docs example",
       "fixture or semantic assertion",
       "docs 示例不是 contract source",
-      "SPEC、schema 和 focused tests",
+      "规范性说明、schema 和 focused tests",
       "normalization: ANSI color, terminal width, timestamps, platform path",
       "Presentation Profiles（展示 Profile）",
       "Operation",

@@ -202,3 +202,12 @@ speclite governance-report /path/to/project --json
 3. 对 release 或 update preview 运行 `update --json`，读取 `update.data.updatePlan.actions`、`update.data.changedPaths`、`update.data.skippedPaths` 和 `update.data.conflicts`。
 4. 需要流程治理证据时运行 `governance-report --json`，读取 metrics 和 phase gaps，不解析 human-readable report。
 5. 只有在人工或自动策略明确允许时，才运行带 `--yes` 的 write-capable command。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
+| JSON 规范性说明 | [`../reference/specs/command-result-json-contract.md`](../reference/specs/command-result-json-contract.md) |
+| CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
+| 安装验证 | [`validate-installation.md`](validate-installation.md) |

@@ -63,4 +63,13 @@ speclite status "$PROJECT_ROOT" --json
 speclite validate "$PROJECT_ROOT" --json
 ```
 
-`--json` 不受 locale、TTY、terminal width 或颜色影响。contract source 是 `CommandResult` schema、SPEC 和 focused tests；docs 示例不是唯一 contract source。
+`--json` 不受 locale、TTY、terminal width 或颜色影响。公共语义以 [`../reference/specs/command-result-json-contract.md`](../reference/specs/command-result-json-contract.md) 为准，`CommandResult` schema 和 focused tests 提供 executable evidence；docs 示例不是规范来源。
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| 安装操作 | [`install-speclite.md`](install-speclite.md) |
+| CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
+| JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
+| 更新与修复 | [`update-and-repair.md`](update-and-repair.md) |
