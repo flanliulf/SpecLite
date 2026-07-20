@@ -6,7 +6,7 @@
 
 | Area | Current Count | Source |
 |---|---:|---|
-| Core skill package roots | 13 | `assets/source/speclite/core-skills/` |
+| Core skill package roots | 17 | `assets/source/speclite/core-skills/` |
 | SDLC skill package roots | 48 | `assets/source/speclite/sdlc-skills/` |
 | Ecosystem modules | 8 modules / 8 package roots | `assets/source/speclite/ecosystems/<category>/<id>/` |
 | Support skill package roots | 8 | `assets/source/speclite/support-skills/` |

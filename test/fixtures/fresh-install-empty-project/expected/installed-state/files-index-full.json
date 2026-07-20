@@ -5,7 +5,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/help-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:98cddb0f41f543703b91c43f4e2e554f84cfad6ce4c069ec9f7c3846500a7a8a",
+      "hash": "sha256:24eda473213e66343d82972b4079949934a273f9b8f30857ff1c089839142661",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "help-index",
@@ -25,7 +25,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/phase-coverage.json",
       "ownership": "installer-owned",
-      "hash": "sha256:f223522b7683050121b403b61596d41585173f366b4453dcd963b392073c8193",
+      "hash": "sha256:c93070cc1a19a18d2838c075296e86811c5c65cc7e928a6c1bdc97b8e387e7f6",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "phase-coverage",
@@ -35,7 +35,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/skill-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:d4a5d918687100b88085ee7715d13d36e4f88eba564867e03d9970343f6938d3",
+      "hash": "sha256:87d02bf0103d35e2f637a11c5fd78539cd0bcedda3555fc12e2423bba3aa8c1d",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "skill-index",
@@ -2783,6 +2783,46 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-domain-modeling/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:048d56c940c2a10ab5635219a169207869850d4745f402a9ae188fb482dc53a2",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-domain-modeling/references/ADR-FORMAT.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b322cf6c7ae8276e33c07826bed7d7fd97bdc1d5ce50c672d33ceffff4411fbe",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/references/ADR-FORMAT.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:c49c0429b990c5b48c59992c69d5c95a627677f02e17901d32d393a4863ad396",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-domain-modeling/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:34b3d742a4b1d45fd55c93ea89487c8c8248ea3f7e11487c43e99b7b5cc4b803",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".agents/skills/speclite-domain-research/assets/research.template.md",
       "ownership": "installer-owned",
       "hash": "sha256:507bb6729476246b1ca2fca4693986d286a33af5529b6cd5cb1b0bb5ea9926ce",
@@ -3260,6 +3300,66 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-grill-with-docs/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:ef9e3174c054f3e4e518ace63595c29af8eca8bc5c9993ea0a3aed405646eb4c",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grill-with-docs/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-grill-with-docs/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:0b0f67b4b2b039683cbc176464a96a5d41f243d82634fa6fd271954c864ad02d",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grill-with-docs/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-grilling/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:0325343905720b48acb107224b8784c5205b300e986a9009e2f3b46a06feb194",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grilling/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-grilling/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b1fb5ebd9fd8c2bc9a306c74410790fa3a2ac6529f9b586de9f26a3b8b965432",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grilling/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-handoff/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:24525d2209bef9ab3814d29b43a719f5b0e01b223f5b0167db752d44dffd471e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-handoff/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-handoff/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:9bca6af94543ead2c39cd690ee40c16c2b76d139fe28156846e2b086932365d1",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-handoff/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -7583,6 +7683,46 @@
     },
     {
       "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-domain-modeling/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:048d56c940c2a10ab5635219a169207869850d4745f402a9ae188fb482dc53a2",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-domain-modeling/references/ADR-FORMAT.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b322cf6c7ae8276e33c07826bed7d7fd97bdc1d5ce50c672d33ceffff4411fbe",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/references/ADR-FORMAT.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:c49c0429b990c5b48c59992c69d5c95a627677f02e17901d32d393a4863ad396",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-domain-modeling/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:34b3d742a4b1d45fd55c93ea89487c8c8248ea3f7e11487c43e99b7b5cc4b803",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
       "path": ".claude/skills/speclite-domain-research/assets/research.template.md",
       "ownership": "installer-owned",
       "hash": "sha256:507bb6729476246b1ca2fca4693986d286a33af5529b6cd5cb1b0bb5ea9926ce",
@@ -8060,6 +8200,66 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-grill-with-docs/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:ef9e3174c054f3e4e518ace63595c29af8eca8bc5c9993ea0a3aed405646eb4c",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grill-with-docs/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-grill-with-docs/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:0b0f67b4b2b039683cbc176464a96a5d41f243d82634fa6fd271954c864ad02d",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grill-with-docs/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-grilling/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:0325343905720b48acb107224b8784c5205b300e986a9009e2f3b46a06feb194",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grilling/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-grilling/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:b1fb5ebd9fd8c2bc9a306c74410790fa3a2ac6529f9b586de9f26a3b8b965432",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-grilling/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-handoff/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:24525d2209bef9ab3814d29b43a719f5b0e01b223f5b0167db752d44dffd471e",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-handoff/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-handoff/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:9bca6af94543ead2c39cd690ee40c16c2b76d139fe28156846e2b086932365d1",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-handoff/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",

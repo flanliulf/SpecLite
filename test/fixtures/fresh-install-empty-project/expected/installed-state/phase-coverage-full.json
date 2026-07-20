@@ -1242,6 +1242,27 @@
       "phaseId": "anytime",
       "phaseLabel": "Anytime",
       "moduleId": "core",
+      "canonicalSkillId": "speclite-domain-modeling",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-domain-modeling",
+          "activationTarget": ".claude/skills/speclite-domain-modeling/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-domain-modeling",
+          "activationTarget": ".agents/skills/speclite-domain-modeling/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
       "canonicalSkillId": "speclite-editorial-review-prose",
       "ideTargets": [
         {
@@ -1275,6 +1296,69 @@
           "targetId": "agents",
           "entryPath": ".agents/skills/speclite-editorial-review-structure",
           "activationTarget": ".agents/skills/speclite-editorial-review-structure/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-grill-with-docs",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-grill-with-docs",
+          "activationTarget": ".claude/skills/speclite-grill-with-docs/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-grill-with-docs",
+          "activationTarget": ".agents/skills/speclite-grill-with-docs/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-grilling",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-grilling",
+          "activationTarget": ".claude/skills/speclite-grilling/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-grilling",
+          "activationTarget": ".agents/skills/speclite-grilling/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-handoff",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-handoff",
+          "activationTarget": ".claude/skills/speclite-handoff/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-handoff",
+          "activationTarget": ".agents/skills/speclite-handoff/SKILL.md",
           "status": "mapped"
         }
       ]

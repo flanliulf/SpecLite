@@ -403,7 +403,7 @@ describe("CLI smoke", () => {
       expect(prompts[1]).toContain("quick or detailed");
       expect(prompts[2]).toContain("Quick config user_name");
       expect(stdout.join("")).toContain("Step 3/4 Final pre-write review");
-      expect(stdout.join("")).toContain("canonicalPackageRoots=core=13, total=13");
+      expect(stdout.join("")).toContain("canonicalPackageRoots=core=17, total=17");
       expect(stdout.join("")).toContain("projectFilesWritten=false");
       expect(prompts[3]).not.toContain("canonicalPackageRoots");
       expect(prompts[3]).not.toContain("projectFilesWritten=false");

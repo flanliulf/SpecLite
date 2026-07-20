@@ -409,6 +409,20 @@
     },
     {
       "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-domain-modeling",
+      "moduleId": "core",
+      "sourcePackagePath": "assets/source/speclite/core-skills/speclite-domain-modeling",
+      "canonicalPackageHash": "sha256:14fd3e071391c1a678dc1548fd9f15687d72501f19af79cc2907a06536b1072a",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "anytime"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
       "canonicalSkillId": "speclite-domain-research",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/research/speclite-domain-research",
@@ -517,6 +531,48 @@
       ],
       "phaseIds": [
         "4-implementation"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-grill-with-docs",
+      "moduleId": "core",
+      "sourcePackagePath": "assets/source/speclite/core-skills/speclite-grill-with-docs",
+      "canonicalPackageHash": "sha256:cd1d0774c17ce898e30fcd9d84900fe77f89355fd5d6aaf6119eb0e0bf37c14d",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "anytime"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-grilling",
+      "moduleId": "core",
+      "sourcePackagePath": "assets/source/speclite/core-skills/speclite-grilling",
+      "canonicalPackageHash": "sha256:870c5a4c84cf9e5b1e752258cc435dfbf92414889d2b194c19e65be777f29795",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "anytime"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-handoff",
+      "moduleId": "core",
+      "sourcePackagePath": "assets/source/speclite/core-skills/speclite-handoff",
+      "canonicalPackageHash": "sha256:4a9d17c1cc22951867bd0c99105384ec7803359e6da8e8489cbda2155a4cee40",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "anytime"
       ]
     },
     {

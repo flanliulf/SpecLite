@@ -598,6 +598,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "anytime",
+      "entryLabel": "Domain Modeling",
+      "canonicalSkillId": "speclite-domain-modeling",
+      "activationTarget": ".claude/skills/speclite-domain-modeling/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
       "entryLabel": "Editorial Review - Prose",
       "canonicalSkillId": "speclite-editorial-review-prose",
       "activationTarget": ".claude/skills/speclite-editorial-review-prose/SKILL.md",
@@ -623,6 +634,39 @@
       "entryLabel": "Generate Project Context",
       "canonicalSkillId": "speclite-generate-project-context",
       "activationTarget": ".claude/skills/speclite-generate-project-context/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Grill with Docs",
+      "canonicalSkillId": "speclite-grill-with-docs",
+      "activationTarget": ".claude/skills/speclite-grill-with-docs/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Grilling",
+      "canonicalSkillId": "speclite-grilling",
+      "activationTarget": ".claude/skills/speclite-grilling/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Handoff",
+      "canonicalSkillId": "speclite-handoff",
+      "activationTarget": ".claude/skills/speclite-handoff/SKILL.md",
       "targetIds": [
         "claude",
         "agents"

@@ -101,7 +101,7 @@ SpecLite 会把 canonical Skill packages 投影到 selected IDE targets：
 | `claude` | `.claude/skills/<skill-id>/` | Claude Skill package mirror。 |
 | `agents` | `.agents/skills/<skill-id>/` | Agents/Codex Skill package mirror。 |
 
-当前 default no-ecosystem install baseline 包含 13 个 core package roots 和 48 个 SDLC package roots。默认同时选择 `core` 和 `sdlc` 时，每个 selected IDE target 会获得 61 个 skill mirrors；这个数字只描述 default fixture，不是 selected ecosystem installs 的全局 truth。
+当前 default no-ecosystem install baseline 包含 17 个 core package roots 和 48 个 SDLC package roots。默认同时选择 `core` 和 `sdlc` 时，每个 selected IDE target 会获得 65 个 skill mirrors；这个数字只描述 default fixture，不是 selected ecosystem installs 的全局 truth。
 
 技术生态扩展位于 `assets/source/speclite/ecosystems/<category>/<id>/`，例如 `ecosystems/backend/java-springboot/`。这些 ecosystem modules 是可选模块，依赖 `sdlc`，但不会在 `--yes`、`--json` 或无交互默认路径中自动安装。用户显式选择 `ecosystem-backend-java-springboot` 时，installer 会安装 `core`、`sdlc` 和该 Java / Spring Boot ecosystem module；未选择的 `ecosystem-backend-nodejs`、`ecosystem-backend-python` 不会出现在 `.claude/skills/`、`.agents/skills/`、`skill-index.json`、`help-index.json`、`phase-coverage.json` 或 `files-index.json`。
 
