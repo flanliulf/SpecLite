@@ -124,14 +124,16 @@ Wait for completion, record evaluation file, conclusion, valid findings, and pas
 
 ### Step 4: Gate
 
-Use the latest reviewer and evaluator outputs:
+**Before deciding, first run `## Convergence Control` (below)**: read this round's reviewer/evaluator outputs, update the convergence metrics in `PLAN.md`, and check the terminal-verdict set. If any of `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE` / `STOP_LOSS` fires, exit the loop per its routing and **do not enter fixer**.
 
-- If reviewer passes and evaluator passes, exit the loop.
+If no convergence terminal verdict fires, use the latest reviewer and evaluator outputs:
+
+- If reviewer passes and evaluator passes, exit the loop (`PASS`).
 - If evaluator requires revisions, enter fixer.
 - If evaluator rejects findings and no revision is needed, record the reason and either rerun reviewer or end based on the latest evaluation.
 - If unclear, choose the most conservative traceable engineering decision and record it.
 
-Never fabricate a pass conclusion to finish the loop.
+Never fabricate a pass conclusion to finish the loop. Likewise, never revise unboundedly chasing "0 P1" — `## Convergence Control` is a hard upper bound.
 
 ### Step 5: Fixer
 
@@ -169,6 +171,35 @@ Use a Chinese Conventional Commit, local only, no push. Audit git status first a
 - Record decisions, reasons, and impact in `EXPERIMENT_NOTES.md`.
 - Do not wait for routine engineering tradeoffs.
 - Stop and ask before changing requirements, modifying unauthorized files, deleting content, pushing, or doing destructive operations.
+
+## Convergence Control
+
+The SR loop MUST be bounded, not an unbounded "repeat until pass". Run this section before every Gate (Step 4).
+
+### Convergence metrics (record each round in `PLAN.md` and `EXPERIMENT_NOTES.md`)
+
+- `round`: current round.
+- `p1_accepted` / `p2_accepted`: P1 / P2 accepted by the evaluator this round.
+- `p1_trend`: up / down / flat vs. the previous round.
+- `doc_delta`: line-count growth of the reviewed Story design doc vs. the previous round (positive = the contract is growing).
+- `category_recurrence`: whether this round's P1 categories repeat the last two rounds (e.g. totality/state-machine, lifecycle/concurrency, provenance/metadata, cross-doc drift).
+
+### Thresholds (overridable in `references/sr-config.md` convergence block)
+
+- `max_rounds`: default `5`.
+- `stop_loss_consecutive_rounds`: default `3`.
+- `doc_growth_watch`: default `on`.
+
+### Terminal verdict set (check before Gate; on hit, exit per routing, do not enter fixer)
+
+1. **PASS**: reviewer and evaluator both pass.
+2. **PASS_WITH_VERIFY_OBLIGATIONS**: remaining blockers are only `verify-obligation` (properties decidable by compiler/tests) or `metadata/provenance` → stop the prose loop; hand `verify-obligation` items to implementation as tests; the Story design is ready.
+3. **ARCHITECTURE_TRIAGE**: P1 migrates to authority / ownership / lifecycle / cross-component concurrency → stop per-finding prose revision; produce a one-shot architecture-decision input for the user/architect; do NOT keep iterating prose via fixer.
+4. **STOP_LOSS**: `stop_loss_consecutive_rounds` consecutive rounds still produce NEW P1, or `round` reaches `max_rounds`, or `doc_growth_watch` triggers → stop the loop and report the convergence metrics plus candidate exits (accept current contract and implement / architecture triage / explicitly reduce scope) to the user; do NOT revise unboundedly.
+
+### Reporting (the human is a data-informed circuit breaker)
+
+On `STOP_LOSS` or `ARCHITECTURE_TRIAGE`, record and surface the convergence metrics (round, P1 trend, `doc_delta`, category recurrence); do not default to "authorize one more revision".
 
 ## Serial Execution Rules
 
@@ -224,6 +255,6 @@ Epic {epic_id} SR goal:
    - speclite-story-review-01-reviewer epic {epic_id}
    - speclite-story-review-02-evaluator epic {epic_id}
    - speclite-story-review-03-fixer epic {epic_id} only when evaluation requires fixes
-4. Repeat until reviewer and evaluator both pass.
+4. Repeat until reviewer and evaluator both pass, OR `## Convergence Control` fires a terminal verdict (round cap / stop-loss / architecture-triage / verify-obligations-only); never loop unbounded.
 5. Run git-commit-convention in Chinese, local commit only, no push.
 ```

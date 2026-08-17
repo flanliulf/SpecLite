@@ -3,7 +3,7 @@ name: speclite-goal-orchestrator-epic-story-code-review-runner
 description: "用于用户要求按 Epic 下每个 Story 执行开发与 CR strict serial 闭环，或提到 fresh sub-agent、speclite-dev-story、speclite-code-review-01..06、PLAN.md、EXPERIMENTS.md、EXPERIMENT_NOTES.md、最终本地提交。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -206,14 +206,16 @@ Reviewer 完成后，启动一个全新的 sub-agent，执行：
 
 ### Step 6：CR Gate（CR 门禁判断）
 
-根据 reviewer 和 evaluator 的最新输出判断：
+**判断前必须先执行 `## Convergence Control（收敛控制）`（见下文）**：读取本轮 reviewer/evaluator 产物，更新 `PLAN.md` 的收敛度量，并检查终止判定集。若命中 `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE` / `STOP_LOSS` 中任一，按其路由退出循环，**不得进入 fixer 继续迭代**。
+
+未命中收敛终止判定时，再根据 reviewer 和 evaluator 的最新输出判断：
 
 - 如果 reviewer 结论通过，且 evaluator 评估结果也通过：进入 CR 收口步骤。
 - 如果 evaluator 判定存在需要修复的问题：进入 fixer。
 - 如果 evaluator 判定 reviewer 发现无效且无需修复：记录原因，重新进入 reviewer 或结束，依据最新评估结论判断。
 - 如果结果不明确：优先采用工程上保守且可追溯的推荐决策，并记录原因。
 
-不得为了“完成流程”伪造通过结论。
+不得为了“完成流程”伪造通过结论。同样，不得为了“追求 0 P1”而无界修复——`## Convergence Control` 是硬性上界。
 
 ### Step 7：CR Fixer（修复）
 
@@ -230,7 +232,7 @@ Reviewer 完成后，启动一个全新的 sub-agent，执行：
 - 等待 fixer 完成。
 - 记录修复文件、修复摘要、验证结果和遗留风险。
 
-Fixer 完成后，回到 Step 4，开启下一轮 reviewer/evaluator。
+Fixer 完成后，回到 Step 4，开启下一轮 reviewer/evaluator。每次回到 Step 4 即 `round + 1`；下一轮 Step 6 仍受 `## Convergence Control` 的轮次上限与 stop-loss 约束，循环有界。
 
 ### Step 8：CR Closeout（CR 收口）
 
@@ -291,6 +293,36 @@ Epic 范围内所有目标 Story 完成后，执行：
 - 必须在 `EXPERIMENT_NOTES.md` 中记录决策、原因和影响。
 - 不要因为普通工程取舍挂起等待用户。
 - 如果决策会改变需求边界、修改未授权文件、删除内容、推送远端或引入破坏性操作，必须停止并询问。
+- 当 `## Convergence Control` 命中 `STOP_LOSS` 或 `ARCHITECTURE_TRIAGE`：必须停止审查循环并携带收敛度量询问用户，不得以“再修一轮”作为默认下一步。这是对“不要因普通工程取舍挂起等待用户”的明确例外——收敛失败不是普通工程取舍。
+
+## Convergence Control（收敛控制 — 防审查死循环）
+
+CR 循环必须是**有界**循环，不得是“repeat until pass”的无界循环。每一轮 CR Gate（Step 6）判断前，必须执行本节。
+
+### 收敛度量（每轮写入 `PLAN.md` 与 `EXPERIMENT_NOTES.md`）
+
+- `round`：当前轮次。
+- `p1_accepted` / `p2_accepted`：本轮 evaluator 接受的 P1 / P2 数。
+- `p1_trend`：较上一轮 P1 升 / 降 / 平。
+- `churn_recurrence`：本轮 fixer 是否又在反复触及同一文件/同一函数（patch loop 信号）。
+- `category_recurrence`：本轮 P1 的类别是否与前两轮重复（如 totality/穷尽性、lifecycle/并发、authority/ownership、provenance/元数据）。
+
+### 阈值（可被 `references/cr-config.md` 的 convergence 段覆盖）
+
+- `max_rounds`：默认 `5`。
+- `stop_loss_consecutive_rounds`：默认 `3`（连续该轮数仍产“新”P1 即止损）。
+- `churn_watch`：默认 `on`（patch 反复触及同一处而 P1 未归零视为发散信号）。
+
+### 终止判定集（Gate 前检查，命中即按路由退出，不再进入 fixer）
+
+1. **PASS**：reviewer 通过且 evaluator 通过 → 进入 CR 收口。
+2. **PASS_WITH_VERIFY_OBLIGATIONS**：剩余阻塞项仅为 `verify-obligation`（可由编译器/测试判定的属性，见 reviewer/evaluator 的“可验证性路由”）或 `metadata/provenance` 类 → 停止逐条修复循环；把 `verify-obligation` 落为具体测试/断言后进入收口。
+3. **ARCHITECTURE_TRIAGE**：本轮或近轮 P1 迁移到 authority / ownership / lifecycle / 跨组件并发等架构层 → 停止逐条 patch，产出一次性架构裁决输入，交用户或架构决策；**不得**继续 fixer 迭代 patch。
+4. **STOP_LOSS**：连续 `stop_loss_consecutive_rounds` 轮仍产“新”P1，或 `round` 达 `max_rounds`，或 `churn_watch` 命中（patch 反复触及同一处而 P1 未归零）→ 停止循环，向用户呈报收敛度量与候选出路（接受当前实现切片 / 架构裁决 / 显式降范围），由用户裁决；**不得**继续无界修复。
+
+### 呈报（人是带数据的熔断器）
+
+命中 `STOP_LOSS` 或 `ARCHITECTURE_TRIAGE` 时，必须在 `PLAN.md` 记录并在给用户的消息中附上收敛度量（轮次、P1 趋势、churn/类别复现），不得以“再修一轮”作为默认下一步。
 
 ## Serial Execution Rules（串行规则）
 
@@ -352,6 +384,8 @@ Epic 范围内所有目标 Story 完成后，执行：
 - 已使用 `git-commit-convention` 完成本地中文提交。
 - 未执行 push，除非用户明确要求。
 
+CR 循环也可能经 `## Convergence Control` 以 `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE` / `STOP_LOSS` 终止——这是合法的循环出口，而非“未完成”。此时不得强行继续循环追求 reviewer+evaluator 通过；完成状态由其路由结果定义（补 `verify-obligation` 测试后收口、进架构裁决、或由用户裁决后的选择），并如实记录在 `PLAN.md`。
+
 ## Common Mistakes（常见错误）
 
 - 同时推进多个 Story。
@@ -382,7 +416,7 @@ Epic {epic_id} Story dev/CR goal:
    - speclite-code-review-01-reviewer {story_id}
    - speclite-code-review-02-evaluator {story_id}
    - speclite-code-review-03-fixer {story_id} only when evaluation requires fixes
-4. Repeat CR reviewer/evaluator/fixer until reviewer and evaluator both pass.
+4. Repeat CR reviewer/evaluator/fixer until reviewer and evaluator both pass, OR `## Convergence Control` fires a terminal verdict (round cap / stop-loss / architecture-triage / verify-obligations-only); never loop unbounded.
 5. Run speclite-code-review-04-rules-extractor, speclite-code-review-05-todo-tracker, speclite-code-review-06-finalizer in order.
 6. Move to the next Story only after the current Story is fully complete.
 7. After all target Stories complete, run git-commit-convention in Chinese, local commit only, no push.

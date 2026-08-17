@@ -77,6 +77,15 @@
 - 串行模式下，每完成一层就将结果写入对应临时文件，然后继续下一层
 - 向用户提示：「Agent 工具不可用，已降级为串行审查模式。」
 
+### B0.5. 共同审查约束（必须原样注入 B1/B2/B3 每层子代理 prompt 的开头）
+
+以下约束对三层审查一律适用；构造每层 prompt 时必须置于其开头：
+
+- **不设最低问题数**：只报会实质阻塞的问题，无实质问题时报零；严禁为凑数而制造问题。
+- **可验证性路由**：可由编译器/测试判定的属性——穷尽性/全函数（totality）、determinism、replay 等价、幂等（idempotency）、资源无泄漏（no-leak）、类型/shape 一致性——不应作为反复迭代的阻塞散文问题；若担心其成立，改为要求补一条测试并标为 `verify-obligation`，交可执行门禁裁决，而非无界追问。
+- **新颖性要求**：不得仅因“修复引入的新表述又存在一个未覆盖分支”就反复提出同类问题；除非能给出具体新失败场景（具体输入/状态 → 错误结果），否则判为噪音不提。
+- **元数据非阻塞**：provenance / round 号 / pointer 漂移属于可机械同步的记账问题，永不作为阻塞项。
+
 ### B1. Blind Hunter（Agent 子代理 #1）
 
 - **调用方式**：Agent 工具，启动独立子代理
@@ -187,6 +196,10 @@
 
 读取 `$cr_dir/.tmp/normalized-findings.json` 进行分类。
 
+### D0. 分类前置过滤（新颖性 + 可验证性 + 元数据）
+
+四桶分类前，先按 B0.5 过滤：命中可验证性路由 → `verify-obligation`；仅“又一未覆盖分支”无新失败场景 → `dismiss`；provenance/round/pointer 漂移 → `verify-obligation` 或 `dismiss`，绝不进 `patch`/`decision_needed`。
+
 ### D1. 四桶分类
 
 对每条去重后的发现，分入恰好一个桶：
@@ -195,8 +208,9 @@
 |----|------|------|
 | `decision_needed` | 存在需人工裁决的模糊选择；不知道用户意图则无法判断正确修复方式 | 仅当 `$review_mode` = `"full"` 时可能出现 |
 | `patch` | 代码问题，修复方案明确，无需人工输入 | 最常见的桶 |
+| `verify-obligation` | 可由编译器/测试判定的属性，或元数据机械同步 | totality/determinism/replay/幂等/no-leak/shape；provenance/round 漂移 |
 | `defer` | 既有问题，非本次改动引起；真实存在但现在无法处理 | 已有代码的历史债务 |
-| `dismiss` | 噪音、误报、或已在其他地方处理 | 丢弃不输出 |
+| `dismiss` | 噪音、误报、已处理，或仅“又一未覆盖分支”无新失败场景 | 丢弃不输出 |
 
 分类不确定时，优先选择更保守的分类（向严重方向倾斜）。
 
@@ -211,6 +225,7 @@
 | `patch` | `[中]` | 多来源命中但非安全相关，或单来源但涉及安全/数据 |
 | `patch` | `[低]` | 单来源，非安全相关 |
 | `defer` | — | 不标严重性，记入"通过项"区域，标注为「已知既有问题」 |
+| `verify-obligation` | — | 不标严重性；作为“应补测试/机械同步”义务交实现阶段，非阻塞 |
 | `dismiss` | — | 丢弃不输出 |
 
 安全/数据关键词判断：发现的 `title` 或 `detail` 中包含以下关键词时视为涉及安全/数据——`安全`、`漏洞`、`注入`、`XSS`、`CSRF`、`认证`、`授权`、`数据丢失`、`数据泄露`、`越权`、`security`、`vulnerability`、`injection`、`data loss`、`data leak`、`auth`。
@@ -236,7 +251,7 @@
 | `title` | string | Phase C1 | — | 一行摘要 |
 | `detail` | string | Phase C1 | — | 完整描述（含推理和上下文） |
 | `location` | string | Phase C1 | 文件:行号 或空字符串 | 代码位置引用，如 `src/auth.ts:42-58` |
-| `bucket` | string | Phase D1 | `decision_needed` / `patch` / `defer` / `dismiss` | 四桶分类 |
+| `bucket` | string | Phase D1 | `decision_needed` / `patch` / `verify-obligation` / `defer` / `dismiss` | 分类 |
 | `severity` | string | Phase D2 | `[高]` / `[中]` / `[低]` / `""` | 严重性标签，defer 和 dismiss 为空字符串 |
 
 ---

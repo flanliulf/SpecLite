@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.1.0] - 2026-08-17
+
+### Changed
+
+- 新增 B0.5 共同审查约束（可验证性路由 / 新颖性 / 元数据非阻塞），必须注入 B1/B2/B3 每层 prompt。
+- Phase D 新增 D0 分类前置过滤，扩展为含 `verify-obligation` 桶（D1/D2 及 bucket 枚举）。
+
 ## [1.0.1] - 2026-05-27
 
 ### Added

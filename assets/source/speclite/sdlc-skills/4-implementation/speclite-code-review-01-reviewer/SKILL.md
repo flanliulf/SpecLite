@@ -3,7 +3,7 @@ name: speclite-code-review-01-reviewer
 description: "执行 Story 代码审查，用三层对抗分析检查实现并保存 CR 结果。用于用户要求 CR、code review、cross-LLM review、代码审查、复审或审查 Story 变更。核心能力：识别轮次、并行 Blind Hunter/Edge Case/AC 审计、四类分流、生成 review 文档。"
 allowed-tools: Read, Write, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.1"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

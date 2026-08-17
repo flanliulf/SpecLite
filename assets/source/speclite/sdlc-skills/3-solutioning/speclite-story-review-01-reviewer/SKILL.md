@@ -3,7 +3,7 @@ name: speclite-story-review-01-reviewer
 description: "执行 Story 设计审查，对 Epic 或单个 Story 做三层对抗分析并保存结果。用于用户要求 SR、story review、design review、Story 审查或开发前审查。核心能力：识别范围、并行结构/一致性/契约检查、四类分流、生成轮次化 review 文档。"
 allowed-tools: Read, Write, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.1"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

@@ -3,7 +3,7 @@ name: speclite-code-review-03-fixer
 description: "根据 CR evaluation 结论执行代码修复并记录摘要。用于用户要求 CR fix、apply CR fixes、代码审查修复或执行 CR 修正。核心能力：读取评估结论、定向修改相关代码、在 evaluation 文档追加 fix summary。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -38,6 +38,11 @@ metadata:
             - 涉及的文件和代码位置
             - 具体修复方案
             - 预期效果
+        - 修复风格约束（防 patch loop / 冻结靶子）：
+            - **可验证属性优先补测试而非增补实现**：对 totality/穷尽性/determinism/replay/幂等/no-leak 类关切，优先以增加测试/断言（`verify-obligation`）固化，而非向实现新增推测性构造；这类发现应已被评估降级为 `verify-obligation`。
+            - **优先最小定点修复**：能以最小改动消解的问题不做结构性重写。
+            - **反 churn**：若本轮修复又在反复触及同一文件/函数（patch loop 信号），停止并在计划中标注“建议交编排器 Convergence Control 判定 STOP_LOSS/ARCHITECTURE_TRIAGE”。
+            - **元数据机械同步**：provenance/round/pointer 漂移只做最小机械同步。
         - 向用户展示修复计划供确认
         - 生成数据：fix-plan（修复计划）
 
@@ -64,6 +69,8 @@ metadata:
 
 [注意事项]
     - 只修复评估结论中明确标记为"需要修复"的问题，禁止自行扩大修复范围
+    - 对 totality/determinism/replay 等可验证属性优先补测试固化（`verify-obligation`），而非向实现新增推测性构造
+    - 若修复反复触及同一文件/函数（patch loop），停止并交编排器 `Convergence Control` 判定，不得无界修复
     - **禁止**修改 Story 文档内容
     - 修复总结追加到最新一轮（n 值最大）的《代码审查结果评估文件》中
     - 路径约定和文件名格式以 `references/cr-config.md` 为准，不硬编码

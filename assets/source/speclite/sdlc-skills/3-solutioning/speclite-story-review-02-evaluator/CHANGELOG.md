@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.1.0] - 2026-08-17
+
+### Changed
+
+- Step 4 评估新增可验证性路由 / 元数据非阻塞 / 新颖性三道门：可测属性降级为 `verify-obligation`，元数据标为机械同步，仅“又一未穷尽格”判误报。
+- 输出收敛信号（P1/P2/verify-obligation 计数、类别迁移标注），供编排器 `Convergence Control` 判定 `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE`。
+
 ## [1.0.0] - 2026-05-11
 
 ### Added

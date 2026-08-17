@@ -4,6 +4,12 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.1.0] - 2026-08-17
+
+### Changed
+
+- Step 2 新增“防 patch loop / 冻结靶子”修复风格约束：可验证属性优先补测试固化（`verify-obligation`）而非增补实现；最小定点修复；反 churn；反复触及同一处即交编排器 `Convergence Control` 判定。
+
 ## [1.0.0] - 2026-05-11
 
 ### Added

@@ -67,6 +67,26 @@
 
 ---
 
+## 收敛控制配置（Convergence）
+
+供编排器 `speclite-goal-orchestrator-epic-story-code-review-runner` 的 `## Convergence Control` 读取；CR 循环必须有界。
+
+- `max_rounds`：默认 `5`。达到即触发 `STOP_LOSS`。
+- `stop_loss_consecutive_rounds`：默认 `3`。连续该轮数仍产“新”P1 即 `STOP_LOSS`。
+- `churn_watch`：默认 `on`。patch 反复触及同一文件/函数而 P1 未归零，视为发散信号。
+- 终止判定集：`PASS` / `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE` / `STOP_LOSS`。命中即退出循环，不再进入 fixer。
+- `verify-obligation` 桶：可由编译器/测试判定的属性（totality/determinism/replay/幂等/no-leak/shape）与元数据机械同步项归此桶，非阻塞，交实现阶段。
+
+---
+
+## 审查独立性（Independence）
+
+- 尽量让 reviewer 与 evaluator 使用**不同模型**（harness 允许时）；两者产物头部的 `Model Used` / `Review Model` 字段用于核对是否同模型。
+- 若 reviewer 与 evaluator 为**同一模型**：evaluator 必须提高 `dismiss` 门槛、主动为每条 P1 寻找反证（disconfirmation），并优先按“可验证性路由”降级可测属性，避免自证式 `false_positive=0`。
+- evaluator 允许跨轮读取收敛度量（round / P1 趋势 / churn / 类别复现），以识别 patch loop，不受“只看最新一轮”限制。
+
+---
+
 ## 输出语言
 
 - 始终使用中文输出审查结果、评估结果和修复记录

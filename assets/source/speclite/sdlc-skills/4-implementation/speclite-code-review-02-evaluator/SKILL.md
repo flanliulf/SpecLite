@@ -3,7 +3,7 @@ name: speclite-code-review-02-evaluator
 description: "评估 CR review 结果并生成结构化评估文档。用于用户要求 CR evaluate、review assessment、代码审查评估或判断 CR findings 是否有效。核心能力：读取最新 review、验证问题有效性、按轮次输出 evaluation 文件。"
 allowed-tools: Read, Write, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -54,11 +54,16 @@ metadata:
             - 严重性判断是否合理？
             - 修复建议是否可行？
             - 是否存在误报（false positive）？
+            - **可验证性路由**：该问题是否可由编译器/测试判定（totality/穷尽性、determinism、replay 等价、幂等、no-leak、类型/shape 一致性）？若是，降级为 `verify-obligation`（应补一个测试），不作阻塞 patch。
+            - **元数据非阻塞**：该问题是否为 provenance / round 号 / pointer 漂移？若是，标为待机械同步项，不作阻塞。
+            - **新颖性**：该问题是否只是“修复引入的新表述又有一个未覆盖分支”而无具体新失败场景？若是，判误报/`dismiss`。
         - 如有明确异议，可参考过往轮次的《代码审查结果文件》进行交叉验证
         - 给出整体评估结论：
             - 哪些发现需要修复（分优先级）
             - 哪些发现可以忽略（说明理由）
             - 哪些发现需要进一步讨论
+            - 哪些发现为 `verify-obligation`（交实现阶段补测试）或元数据待机械同步项
+        - **收敛信号（供编排器 Convergence Control 使用）**：汇总本轮接受的 P1/P2 数、`verify-obligation` 数；若接受的阻塞 P1 已全部迁移到 authority/ownership/lifecycle/跨组件并发等架构层，标注“建议 ARCHITECTURE_TRIAGE”；若剩余阻塞项仅为 `verify-obligation`/元数据，标注“可判 PASS_WITH_VERIFY_OBLIGATIONS”。
         - 生成数据：evaluation-findings（评估结论列表）
 
     Step 5：保存评估结果

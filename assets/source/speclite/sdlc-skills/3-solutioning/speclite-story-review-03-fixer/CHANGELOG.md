@@ -4,6 +4,12 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.1.0] - 2026-08-17
+
+### Changed
+
+- Step 2 新增“冻结靶子”修订风格约束：优先澄清/删除而非增补；禁止为满足 totality/determinism/replay 等可验证属性向契约新增命名构造或转移表（应为 `verify-obligation` 交实现阶段）；文档持续膨胀即交编排器 `Convergence Control` 判定。
+
 ## [1.0.0] - 2026-05-11
 
 ### Added

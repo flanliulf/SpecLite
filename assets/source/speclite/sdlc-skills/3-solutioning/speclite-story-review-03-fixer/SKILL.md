@@ -3,7 +3,7 @@ name: speclite-story-review-03-fixer
 description: "根据 SR evaluation 结论修订 Story 文档并追加修复摘要。用于用户要求 SR fix、story revision、apply SR fixes、修订 Story 或执行设计修正。核心能力：读取评估结论、定向修改 Story `.md`、记录 revision summary。"
 allowed-tools: Read, Write, Edit, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -43,6 +43,11 @@ metadata:
         - 范围控制：
             - Epic 模式：可修改该 Epic 下多个 Story 文件，以及必要时的 Epic 定义文件和架构文档
             - Story 模式：仅修改该单个 Story 文件；如评估指出需修改 Epic 文件或架构文档，标记为"⚠️ 超出范围 — 需在 Epic 模式下处理"
+        - 修订风格约束（防契约膨胀 / 冻结靶子）：
+            - **优先澄清或删除，而非增补**：能通过澄清措辞、删除歧义、合并重复来消解的问题，不得通过新增章节/类型/表格解决。
+            - **禁止为满足可验证属性而增补**：不得仅为满足 totality/穷尽性/determinism/replay/幂等/no-leak 类发现，向契约新增命名构造、状态、转移表或矩阵；这类发现应已被评估降级为 `verify-obligation`（交实现阶段补测试），fixer 不得把它变成扩大散文的修订。
+            - **元数据机械同步**：provenance/round/pointer 漂移只做最小机械同步，不触发结构性修订。
+            - **增长上限**：若本轮修订将使 Story 文档显著增长（而非收敛），停止并在修订计划中标注“建议交编排器 Convergence Control 判定 STOP_LOSS/ARCHITECTURE_TRIAGE”，不得强行增补。
         - 向用户展示修订计划供确认
         - 生成数据：`$fix_plan`（修订计划）
 
@@ -77,6 +82,8 @@ metadata:
 
 [注意事项]
     - 只修订评估结论中明确标记为"需要修订"的问题，禁止自行扩大修订范围
+    - 修订优先澄清/删除而非增补；**禁止**为满足 totality/determinism/replay/幂等/no-leak 等可验证属性向契约新增命名构造、状态或转移表（应为 `verify-obligation` 交实现阶段补测试）
+    - 若修订会使文档持续膨胀而非收敛，停止并交编排器 `Convergence Control` 判定，不得无界增补
     - **禁止**修改任何源码文件
     - 修订总结追加到最新一轮（round 值最大）的审查评估文件中
     - 路径约定和文件名格式以 `references/sr-config.md` 为准，不硬编码
