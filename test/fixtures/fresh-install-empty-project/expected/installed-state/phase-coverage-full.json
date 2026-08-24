@@ -465,6 +465,27 @@
       "phaseId": "3-solutioning",
       "phaseLabel": "Solutioning",
       "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-create-technical-solution-document",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-create-technical-solution-document",
+          "activationTarget": ".claude/skills/speclite-create-technical-solution-document/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-create-technical-solution-document",
+          "activationTarget": ".agents/skills/speclite-create-technical-solution-document/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
       "ideTargets": [
         {

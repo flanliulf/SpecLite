@@ -202,6 +202,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "3-solutioning",
+      "entryLabel": "Create Technical Solution Document",
+      "canonicalSkillId": "speclite-create-technical-solution-document",
+      "activationTarget": ".claude/skills/speclite-create-technical-solution-document/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
       "entryLabel": "IR Grill",
       "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
       "activationTarget": ".claude/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",

@@ -7,7 +7,7 @@
 | Item | Value |
 |---|---|
 | Canonical source root | `assets/source/speclite/sdlc-skills/` |
-| 当前 package roots | 48 个带 `SKILL.md` 的目录 |
+| 当前 package roots | 49 个带 `SKILL.md` 的目录 |
 | Agent roster | 7 个 `speclite-agent-*` role activation skills |
 | Backend tech-stack boundary | 通用 backend tech-stack workflow 留在 SDLC；language / runtime specific backend workflows 已迁移到 ecosystem catalog |
 | Help catalog | `assets/source/speclite/sdlc-skills/module-help.csv` |
@@ -69,6 +69,7 @@
 | `speclite-generate-project-context` | Workflow | `GPC` | `{output_folder}` | 生成 AI agent 使用的项目上下文。 |
 | `speclite-check-implementation-readiness` | Workflow | `IR` | `{planning_artifacts}` | 检查 PRD、UX、Architecture、Epics 和 Stories 是否可进入实现。 |
 | `speclite-ir-grill-consistency-reviewer` | Workflow | `IRG` | `{planning_artifacts}/ir-grill` | 对 PRD、UX、Architecture、Epics 和 Stories 做严格串行 implementation-readiness 一致性 grill。 |
+| `speclite-create-technical-solution-document` | Workflow | `TSD` | `{project_knowledge}/tsd` | 在 implementation readiness 后综合规划产物与项目事实，生成面向人类评审和交付的技术方案说明文档。 |
 | `speclite-story-review-01-reviewer` | Workflow | `SR` | `{implementation_artifacts}/story-reviews` | 执行 Story 设计审查。 |
 | `speclite-story-review-02-evaluator` | Workflow | `SRE` | `{implementation_artifacts}/story-reviews` | 评估 Story Review findings。 |
 | `speclite-story-review-03-fixer` | Workflow | `SRF` | `{implementation_artifacts}/story-reviews` | 按评估结论修订 Story 文档。 |

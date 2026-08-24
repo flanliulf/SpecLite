@@ -188,7 +188,7 @@
       "canonicalSkillId": "speclite-code-review-01-reviewer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer",
-      "canonicalPackageHash": "sha256:00d4d6124828a12bf4470e3361090d8668fdae53feb224409338f5475dc09782",
+      "canonicalPackageHash": "sha256:83ddc458671637708467e56d5d5789bbdb3b993c19cdae346ff26312db16cb14",
       "installedTargets": [
         "claude",
         "agents"
@@ -202,7 +202,7 @@
       "canonicalSkillId": "speclite-code-review-02-evaluator",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator",
-      "canonicalPackageHash": "sha256:6201593ad311e84623bcd5cde5e21563071d5af3563902f5fb05ab8c4eb4607a",
+      "canonicalPackageHash": "sha256:ab01e211bccbe2407cca02b670700f56fa772d8a66ea9089ffbcff093a3b98d2",
       "installedTargets": [
         "claude",
         "agents"
@@ -216,7 +216,7 @@
       "canonicalSkillId": "speclite-code-review-03-fixer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer",
-      "canonicalPackageHash": "sha256:0f106fb921b04729370f73d8cb111f897286c338d345da90e17f75f9693a3659",
+      "canonicalPackageHash": "sha256:163c060e2a65f6866f6f018b5ed5daf45110211f3e3716048d056d82a41c5fbc",
       "installedTargets": [
         "claude",
         "agents"
@@ -230,7 +230,7 @@
       "canonicalSkillId": "speclite-code-review-04-rules-extractor",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor",
-      "canonicalPackageHash": "sha256:e98f572985ae9aef5d80b9479c91a76ca9800dff0a3dafdeac4472b1de5b3c80",
+      "canonicalPackageHash": "sha256:a391d2d81c2a56fd64ec497163e0d580d033e2294901f4dc7edf1ba2b39575ec",
       "installedTargets": [
         "claude",
         "agents"
@@ -244,7 +244,7 @@
       "canonicalSkillId": "speclite-code-review-05-todo-tracker",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker",
-      "canonicalPackageHash": "sha256:ee04fb1a03e40b617b6a3d17aa7f4e29d7b7de5af855e57573d824b68daf6eb4",
+      "canonicalPackageHash": "sha256:43a743b9e60bc14f2b780fc56c54009156049e0bfc0f1d338e1ec655c3dbc02c",
       "installedTargets": [
         "claude",
         "agents"
@@ -258,7 +258,7 @@
       "canonicalSkillId": "speclite-code-review-06-finalizer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer",
-      "canonicalPackageHash": "sha256:bcef6491f4a4fca7dc478f9cb88bdc7297912c0c16899a9c10281bd9de1cf832",
+      "canonicalPackageHash": "sha256:725deddb834deeca9a1f3f8cca407b66c3275128052b7db88c080fa20b5e7994",
       "installedTargets": [
         "claude",
         "agents"
@@ -335,6 +335,20 @@
       ],
       "phaseIds": [
         "4-implementation"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-create-technical-solution-document",
+      "moduleId": "sdlc",
+      "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-technical-solution-document",
+      "canonicalPackageHash": "sha256:f26a77ce3a509f262dd9ed19bf6a81d495c9df6645a0bbc40970f331652a1295",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "3-solutioning"
       ]
     },
     {
@@ -510,7 +524,7 @@
       "canonicalSkillId": "speclite-goal-orchestrator-epic-story-code-review-runner",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner",
-      "canonicalPackageHash": "sha256:73362155eef6566906725a9e1b120aafbed146ee9215c63b3a4d059c2e65b824",
+      "canonicalPackageHash": "sha256:c48c02b1db831e50ed9278ff120443d28a2963659971d1c5152de81d0db5298b",
       "installedTargets": [
         "claude",
         "agents"
@@ -524,7 +538,7 @@
       "canonicalSkillId": "speclite-goal-orchestrator-epic-story-review-runner",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-review-runner",
-      "canonicalPackageHash": "sha256:f2547b843c4db82c31f6c3e3f88630e66c104e24f3cb0e3e926fe7916c1f1e17",
+      "canonicalPackageHash": "sha256:35c1df84020f536529753a3080528312b3408a13ad53bf2bf148e10c92b0f33d",
       "installedTargets": [
         "claude",
         "agents"
@@ -832,7 +846,7 @@
       "canonicalSkillId": "speclite-story-review-01-reviewer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer",
-      "canonicalPackageHash": "sha256:25d89fa1e7015d388d241cdfb9f48e18414013fa1f5264ae98c0c75f9d143c4f",
+      "canonicalPackageHash": "sha256:eb8d0e8f4f68b5a82739d6e31304f1abbfcc5467e1b83345c232123f7042382c",
       "installedTargets": [
         "claude",
         "agents"
@@ -846,7 +860,7 @@
       "canonicalSkillId": "speclite-story-review-02-evaluator",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-02-evaluator",
-      "canonicalPackageHash": "sha256:91b8f214cb5adeb9fcd938ad99e19c8a9bad531fbe1093a387c39d0bb4b731a3",
+      "canonicalPackageHash": "sha256:e93bcefb6b3f7e42516dc94e630c6194ab9ac3aa9b9cd799f81a79dc46a96966",
       "installedTargets": [
         "claude",
         "agents"
@@ -860,7 +874,7 @@
       "canonicalSkillId": "speclite-story-review-03-fixer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-03-fixer",
-      "canonicalPackageHash": "sha256:2ae7622a76d79bf38dd449b39fee2bd87e616f0d45a2959512dc022c0e349fe1",
+      "canonicalPackageHash": "sha256:71433807ef9ba268a851c6b8c9d60beca81fd02c9983a54a6aa109d06c608279",
       "installedTargets": [
         "claude",
         "agents"

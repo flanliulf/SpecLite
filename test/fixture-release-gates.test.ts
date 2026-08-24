@@ -86,12 +86,12 @@ describe("fresh-install-empty-project release gate fixture", () => {
         await readFile(path.join(firstRoot, "_speclite/_config/files-index.json"), "utf8"),
       ) as { entries: Array<{ path: string }> };
 
-      expect(skillIndex.entries).toHaveLength(65);
-      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(65);
-      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(65);
+      expect(skillIndex.entries).toHaveLength(66);
+      expect(await listInstalledSkillIds(firstRoot, ".claude/skills")).toHaveLength(66);
+      expect(await listInstalledSkillIds(firstRoot, ".agents/skills")).toHaveLength(66);
       expect(skillIndex.entries.every((entry) => entry.installedTargets.join(",") === "claude,agents")).toBe(true);
       expect(filesIndex.entries.some((entry) => entry.path === "_speclite/_config/manifest.yaml")).toBe(true);
-      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(130);
+      expect(filesIndex.entries.filter((entry) => entry.path.endsWith("/SKILL.md"))).toHaveLength(132);
       expect(filesIndex.entries.every((entry) => isProjectRelativePosixPath(entry.path))).toBe(true);
 
       expect(normalizeFreshInstallResult(first.result)).toEqual(normalizeFreshInstallResult(second.result));
@@ -168,7 +168,7 @@ describe("selected ecosystem fresh install release gate fixtures", () => {
       expect(parsed.data.installedModules).toEqual(assertions.expectedInstalledModules);
       expect(parsed.summary).toContain(`Selected modules: ${assertions.expectedInstalledModules.join(", ")}`);
       expect(parsed.summary).toContain(`${assertions.selectedModuleId}=1`);
-      expect(parsed.summary).not.toContain("total=65.");
+      expect(parsed.summary).not.toContain("total=66.");
       expect(humanOutput).toContain("Canonical package roots");
       expect(humanOutput).not.toContain(tempRoot);
       expect(humanOutput).not.toMatch(/\u001b\[[0-9;]*m/);

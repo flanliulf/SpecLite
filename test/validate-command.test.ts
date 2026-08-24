@@ -590,7 +590,7 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          actualCount: 65,
+          actualCount: 66,
           duplicateRoot: "core:assets/source/speclite/core-skills/speclite-brainstorming",
         },
       });
@@ -1678,6 +1678,7 @@ const SKILL_SOURCE_PACKAGE_PATHS = [
   "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd",
   "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect",
   "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness",
+  "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-technical-solution-document",
   "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture",
   "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories",
   "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context",

@@ -68,6 +68,7 @@ directories:
   - "{devops_artifacts}/deployments"
   - "{devops_artifacts}/npm-releases"
   - "{project_knowledge}"
+  - "{project_knowledge}/tsd"
   - "{project_knowledge}/brownfield"
   - "{project_knowledge}/brownfield/evidence"
   - "{project_knowledge}/brownfield/baseline"
