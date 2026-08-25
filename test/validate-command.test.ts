@@ -551,7 +551,7 @@ describe("validate command manifest/index schema validation", () => {
           field: "entries",
           actualCount: 2,
           actualRootCount: 1,
-          expectedRootCount: 17,
+          expectedRootCount: 18,
           missingModuleId: "core",
           missingSourcePackagePath:
             "assets/source/speclite/core-skills/speclite-advanced-elicitation",
@@ -590,7 +590,7 @@ describe("validate command manifest/index schema validation", () => {
           artifactKind: "skill-index",
           reason: "missing-required-field",
           field: "entries",
-          actualCount: 66,
+          actualCount: 67,
           duplicateRoot: "core:assets/source/speclite/core-skills/speclite-brainstorming",
         },
       });
@@ -1646,6 +1646,7 @@ const SKILL_SOURCE_PACKAGE_PATHS = [
   "assets/source/speclite/core-skills/speclite-customize",
   "assets/source/speclite/core-skills/speclite-distillator",
   "assets/source/speclite/core-skills/speclite-domain-modeling",
+  "assets/source/speclite/core-skills/speclite-terminology-governance",
   "assets/source/speclite/core-skills/speclite-editorial-review-prose",
   "assets/source/speclite/core-skills/speclite-editorial-review-structure",
   "assets/source/speclite/core-skills/speclite-grill-with-docs",

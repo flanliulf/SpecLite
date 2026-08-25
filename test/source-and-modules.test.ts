@@ -13,9 +13,9 @@ import {
 import { createModuleSelection } from "../src/modules/module-selection.js";
 import { runInstallCommand } from "../src/commands/install.js";
 
-const EXPECTED_CORE_PACKAGE_ROOT_COUNT = 17;
+const EXPECTED_CORE_PACKAGE_ROOT_COUNT = 18;
 const EXPECTED_SDLC_PACKAGE_ROOT_COUNT = 49;
-const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 66;
+const EXPECTED_DEFAULT_CANONICAL_PACKAGE_ROOT_COUNT = 67;
 
 describe("bundled source descriptor discovery", () => {
   it("projects bundled official source through a display-safe SourceDescriptor", async () => {
@@ -312,6 +312,7 @@ describe("official module metadata parser", () => {
       expect.arrayContaining([
         "speclite-advanced-elicitation",
         "speclite-domain-modeling",
+        "speclite-terminology-governance",
         "speclite-grill-with-docs",
         "speclite-grilling",
         "speclite-handoff",

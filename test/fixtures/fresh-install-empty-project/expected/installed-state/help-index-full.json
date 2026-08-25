@@ -774,6 +774,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "anytime",
+      "entryLabel": "Terminology Governance",
+      "canonicalSkillId": "speclite-terminology-governance",
+      "activationTarget": ".claude/skills/speclite-terminology-governance/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
       "entryLabel": "SpecLite Write OpenSource Docs",
       "canonicalSkillId": "speclite-write-opensource-docs",
       "activationTarget": ".claude/skills/speclite-write-opensource-docs/SKILL.md",

@@ -1535,6 +1535,27 @@
       "schemaVersion": "speclite.phase-coverage.v1",
       "phaseId": "anytime",
       "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-terminology-governance",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-terminology-governance",
+          "activationTarget": ".claude/skills/speclite-terminology-governance/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-terminology-governance",
+          "activationTarget": ".agents/skills/speclite-terminology-governance/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
       "moduleId": "sdlc",
       "canonicalSkillId": "speclite-agent-docs-steward",
       "ideTargets": [

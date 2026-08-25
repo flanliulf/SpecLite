@@ -5,7 +5,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/help-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:569e52036074a0d313e1c35a78d364875f3b43aaef095a7b6a0af4a2b0d62f17",
+      "hash": "sha256:08748acdd2a1237bcc43a7c40ad0d0e38c657df05247545b6df4f5ed95298b98",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "help-index",
@@ -25,7 +25,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/phase-coverage.json",
       "ownership": "installer-owned",
-      "hash": "sha256:2006b0d640bdd9c154f925ae6d7bd6e4e71d343dfd74dbe760d4e49fcf458764",
+      "hash": "sha256:c70da1de1a363ff335342eb1e908a8da2d7bba74f5f2e1de175cc3fbfc26dd62",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "phase-coverage",
@@ -35,7 +35,7 @@
       "schemaVersion": "speclite.files-index.v1",
       "path": "_speclite/_config/skill-index.json",
       "ownership": "installer-owned",
-      "hash": "sha256:fdaedb5d2a69a704892a9ad671fcd67fdb85f7b9f8dda264ff2d2aa0f291a4f9",
+      "hash": "sha256:b0725921a36ddd12064b9d69d4cfce053c865d20e2183dacf9d8afa4ed400cd7",
       "hashAlgorithm": "sha256",
       "executable": false,
       "artifactKind": "skill-index",
@@ -4770,6 +4770,86 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/research/speclite-technical-research/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/assets/epic-glossary-template.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:bbb9169337a6a1d39e0d39610c0e427203058cd6c45dc25bf117fedf525a9437",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/assets/epic-glossary-template.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/assets/terminology-inventory-template.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:797ff0bee3edbc73034c7a665f19d7070b5fb22570eed872d477d72f5b889f29",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/assets/terminology-inventory-template.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:5e967b3b1ab4f4352ebaf44574700d143a857135ff192eac0a4ad9d7d66208ee",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/references/source-authority-and-provenance.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:256aa9329403626b1035f0b4e868bd0ccedbbdbebe3753a5712beb3d8d954579",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/references/source-authority-and-provenance.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/references/term-taxonomy-and-promotion.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:627170728664aa83e8743231f6267b7cb285aba55ecab515e5161cee847b65c2",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/references/term-taxonomy-and-promotion.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/references/terminology-governance-workflow.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:4f20ee386275136d150f10f0559909e1a87e0b32cb3cd048ee936896a40767f7",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/references/terminology-governance-workflow.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/scripts/validate_glossary.py",
+      "ownership": "installer-owned",
+      "hash": "sha256:49717670a3f6c26b2b9e37947e7dd11fad116f61957622a11976833ff8ea2e0d",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/scripts/validate_glossary.py"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".agents/skills/speclite-terminology-governance/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:8da71c8ae57c4a06130292af343c9d9f0893c67a1104e17422401bd7257587d1",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",
@@ -9770,6 +9850,86 @@
       "executable": false,
       "artifactKind": "ide-skill-package",
       "sourceRef": "assets/source/speclite/sdlc-skills/1-analysis/research/speclite-technical-research/SKILL.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/assets/epic-glossary-template.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:bbb9169337a6a1d39e0d39610c0e427203058cd6c45dc25bf117fedf525a9437",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/assets/epic-glossary-template.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/assets/terminology-inventory-template.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:797ff0bee3edbc73034c7a665f19d7070b5fb22570eed872d477d72f5b889f29",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/assets/terminology-inventory-template.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/CHANGELOG.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:5e967b3b1ab4f4352ebaf44574700d143a857135ff192eac0a4ad9d7d66208ee",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/CHANGELOG.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/references/source-authority-and-provenance.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:256aa9329403626b1035f0b4e868bd0ccedbbdbebe3753a5712beb3d8d954579",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/references/source-authority-and-provenance.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/references/term-taxonomy-and-promotion.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:627170728664aa83e8743231f6267b7cb285aba55ecab515e5161cee847b65c2",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/references/term-taxonomy-and-promotion.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/references/terminology-governance-workflow.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:4f20ee386275136d150f10f0559909e1a87e0b32cb3cd048ee936896a40767f7",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/references/terminology-governance-workflow.md"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/scripts/validate_glossary.py",
+      "ownership": "installer-owned",
+      "hash": "sha256:49717670a3f6c26b2b9e37947e7dd11fad116f61957622a11976833ff8ea2e0d",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/scripts/validate_glossary.py"
+    },
+    {
+      "schemaVersion": "speclite.files-index.v1",
+      "path": ".claude/skills/speclite-terminology-governance/SKILL.md",
+      "ownership": "installer-owned",
+      "hash": "sha256:8da71c8ae57c4a06130292af343c9d9f0893c67a1104e17422401bd7257587d1",
+      "hashAlgorithm": "sha256",
+      "executable": false,
+      "artifactKind": "ide-skill-package",
+      "sourceRef": "assets/source/speclite/core-skills/speclite-terminology-governance/SKILL.md"
     },
     {
       "schemaVersion": "speclite.files-index.v1",

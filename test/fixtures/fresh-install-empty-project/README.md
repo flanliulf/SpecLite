@@ -14,7 +14,7 @@
 - `_speclite/_config/files-index.json`
 - `_speclite/_config/phase-coverage.json`
 
-当前默认 `core` + `sdlc` baseline 必须安装 66 个 canonical package roots，并在 `.claude/skills` 与 `.agents/skills` 中各生成 66 个 `SKILL.md` mirror entries。这个 count 只属于 default no-ecosystem fixture，不是 selected ecosystem installs 的全局 truth。技术生态 Skill 仅在选择对应 ecosystem module 时安装。
+当前默认 `core` + `sdlc` baseline 必须安装 67 个 canonical package roots，并在 `.claude/skills` 与 `.agents/skills` 中各生成 67 个 `SKILL.md` mirror entries。这个 count 只属于 default no-ecosystem fixture，不是 selected ecosystem installs 的全局 truth。技术生态 Skill 仅在选择对应 ecosystem module 时安装。
 
 Selected ecosystem release gate matrix 由独立 fixture case 承担：
 

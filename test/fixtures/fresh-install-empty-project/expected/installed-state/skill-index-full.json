@@ -899,6 +899,20 @@
     },
     {
       "schemaVersion": "speclite.skill-index.v1",
+      "canonicalSkillId": "speclite-terminology-governance",
+      "moduleId": "core",
+      "sourcePackagePath": "assets/source/speclite/core-skills/speclite-terminology-governance",
+      "canonicalPackageHash": "sha256:aa4cb11de8c8d29e6274c22e1514d61cb3b8c79adf2d3b6067b4a41c9dce8d49",
+      "installedTargets": [
+        "claude",
+        "agents"
+      ],
+      "phaseIds": [
+        "anytime"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.skill-index.v1",
       "canonicalSkillId": "speclite-validate-prd",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd",
