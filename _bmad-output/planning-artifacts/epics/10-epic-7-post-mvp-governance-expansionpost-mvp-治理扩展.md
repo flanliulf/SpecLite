@@ -47,6 +47,12 @@ MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 ownin
 **则** `speclite-flow-gate`、`speclite-dev-story`、installer tests、fresh install fixtures 和 validation rules 必须覆盖 source-to-installed-to-runtime 全链路
 **并且** Codex 项目 hooks 的 `/hooks` review/trust 边界必须在 install summary 或文档中明确。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** 无直接 PRD FR；本 Story 是受 Epic 7 MVP guard 约束的 Post-MVP Flow Gate hook enforcement extension
+- **Supporting NFRs:** `NFR14`、`NFR17`、`NFR17a`、`NFR28b`、`NFR32f`
+- **UX / Contract Anchors:** Flow Gate `story-kickoff` contract、SPEC 03 plan-before-write、SPEC 04 hook installed projection、SPEC 09 implementation artifact root
+
 ## Story 7.2: Doctor, Sync And Uninstall Commands（Doctor、Sync 与 Uninstall 命令）
 
 作为工具链维护者，
@@ -88,6 +94,24 @@ MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 ownin
 **并且** command-specific `data` payload 必须先由对应 command owning SPEC 定义，再同步 `CommandResult` schema anchor 和 fixture expected outputs
 **并且** 不破坏 MVP fixture 和既有 automation 依赖。
 
+### Historical Scope Decomposition（历史范围拆分）
+
+Story 7.2 已在 sprint tracker 中标记为 `done`，且既有 implementation artifact、review 与 closure evidence 均使用 `7-2-doctor-sync-and-uninstall-commands`。为保留历史身份与证据链，本轮不重编号、不创建新的可执行 Story，也不把 Story 7.2 或后续已完成 Stories 改回 `ready-for-dev`。
+
+后续维护或审计应将该历史 Story 按三个独立产品命令域读取：
+
+1. **Doctor Diagnostics：** 环境、source、权限、IDE target、manifest、path/file integrity 深度诊断，以及显式 external access authorization。
+2. **Source And IDE Mirror Sync：** source-to-mirror reconciliation、manifest/index、ownership/hash、adapter registry 与 plan-before-write。
+3. **Ownership-Safe Uninstall：** 只移除 installer-owned 内容，并保留或提示处理 human-owned custom 与 workflow-owned artifacts。
+
+Project operation lock、safe write、partial failure 与 `CommandResult` compatible extension 是三个命令域共享的横切契约，不应被误读为它们必须在同一实现批次交付。这三个域仅用于历史 evidence mapping 和独立回归定位，不形成新的 backlog item，不进入当前 implementation authorization。未来若任一命令产生新产品范围，必须通过新的 change-controlled Story 建立独立 ID、gate 和状态。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR74`、`FR75`、`FR76`
+- **Supporting NFRs:** `NFR9a`、`NFR12`、`NFR14`、`NFR15`、`NFR16`、`NFR32`、`NFR35a-schema`
+- **UX / Contract Anchors:** SPEC 01 compatible command results、SPEC 03 external access and safe write、SPEC 04/05 installed mirror truth、SPEC 07 diagnostics
+
 ## Story 7.3: CI And Enterprise Automation Integration（CI 与企业自动化集成）
 
 作为工具链维护者，
@@ -125,6 +149,12 @@ MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 ownin
 **当** 生成日志、报告或 artifacts
 **则** 仍需遵守 project-relative POSIX path 与 redaction 策略
 **并且** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR77`
+- **Supporting NFRs:** `NFR19`、`NFR35a-schema`、`NFR35c`、`NFR35d`、`NFR35f`、`NFR35j`
+- **UX / Contract Anchors:** `UX-DR1`、SPEC 01 automation contract、SPEC 04 installed-state projection、SPEC 08 release evidence
 
 ## Story 7.4: Process Governance Coverage Report（流程治理覆盖报告）
 
@@ -164,6 +194,12 @@ MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 ownin
 **则** 路径和 source 信息遵守 project-relative POSIX path 与 redaction 策略
 **并且** 不泄露 credentials、home directory、cache path 或 temporary extraction path。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR78`
+- **Supporting NFRs:** `NFR16`、`NFR19`、`NFR28`、`NFR28b`、`NFR35c`
+- **UX / Contract Anchors:** `UX-DR4`、`UX-DR5`、`UX-DR8`、SPEC 04 phase coverage/artifact projection、SPEC 07 validation issues
+
 ## Story 7.5: Project Config Init And Listing Commands（项目配置初始化与列表命令）
 
 作为项目维护者，
@@ -196,3 +232,9 @@ MVP 只需提供稳定 `CommandResult` JSON、manifest/index、fixture 和 ownin
 **当** 实现该字段
 **则** 必须先新增或扩展对应 command owning SPEC，再更新 `CommandResult` executable schema/parser 和 fixture expected outputs
 **并且** 不依赖 human-readable output 承载自动化字段。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR72`、`FR73`
+- **Supporting NFRs:** `NFR14`、`NFR17a`、`NFR24`、`NFR28a`、`NFR35a-schema`
+- **UX / Contract Anchors:** SPEC 01 compatible payload extension、SPEC 03 config write planning、SPEC 04/05 canonical skill and target identity

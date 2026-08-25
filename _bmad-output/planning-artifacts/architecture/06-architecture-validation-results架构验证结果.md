@@ -1,85 +1,79 @@
 # Architecture Validation Results（架构验证结果）
 
-## Coherence Validation（一致性验证）✅
+## Coherence Validation（一致性验证）
 
 **Decision Compatibility（决策兼容性）：**
-整体架构决策兼容。TypeScript + commander 的轻量 CLI 基础与 local-first filesystem architecture、manifest/index gateway、data-driven IDE adapters、hash-backed update protection 和 deterministic validation pipeline 相互支撑，没有要求数据库、后台服务或云运行时。
+Architecture 内部决策一致。TypeScript + commander、filesystem-first storage、manifest/index gateway、data-driven IDE adapters、hash-backed update protection 与 deterministic validation pipeline 相互兼容；Node.js 22 minimum / Node.js 24 recommended 的 runtime policy 未发生冲突。
 
-Starter 模板评估中的初始化命令已同步为 `engines.node='>=22'` 和 Node 22 类型基线；“核心架构决策”继续要求 Node.js 22 LTS 为 minimum、Node.js 24 LTS 为 recommended，并通过 Node 22/24 测试矩阵覆盖兼容性。
+新增阶段化 artifact topology 由 `SPEC 09` 统一拥有七个 runtime fields、placeholders、fresh defaults 与 legacy fallback；`SPEC 03` 只消费 resolved roots 并生成 install plan；`SPEC 04` 只拥有 canonical Skill identity 与 rename metadata。三份契约的 producer/consumer 边界清楚，普通 install、update、repair 均不隐式迁移 workflow artifacts。
 
 **Pattern Consistency（模式一致性）：**
-Implementation Patterns 支持核心架构决策。路径规范化、issue model、ownership model、config resolver、IDE adapter、fixture assertions 都被定义为共享规则，能够减少不同 AI agent 在命名、目录、错误格式、manifest 字段和更新行为上的分歧。
+Implementation Patterns 已覆盖 artifact root/fallback resolution、canonical Skill rename identity、project-relative POSIX paths、issue model、ownership model、config resolver、IDE adapter 与 fixture assertions。`renamedFromCanonicalSkillIds` 仅作为 active Skill entry 的兼容元数据，不创建 alias package、第二个 help entry、重复 phase row 或 IDE mirror。
 
 **Structure Alignment（结构对齐）：**
-项目结构与架构边界一致。`src/source/`、`src/modules/`、`src/config/`、`src/manifest/`、`src/ide/`、`src/validation/`、`src/diagnostics/`、`src/update/`、`src/installer/`、`src/fs/` 的职责边界清楚，能够承载 PRD 中的 install/status/validate/update/resolve、source/channel、IDE mirror、manifest/index、文件所有权、diagnostic output 和 fixture 验证需求。
+项目结构与决策一致：`src/config/` 解析七类 runtime roots，`src/manifest/` 投影配置与 rename metadata，`src/installer/` 消费 resolved roots，`src/update/` 维护 non-migration 与 ownership protection，`src/validation/` 检查 topology、fallback、rename residue 和 drift。`docs/` 保持 Primary Public Document；workflow-generated project knowledge 默认进入 `_speclite-output/project-knowledge-base/`；Analysis producers 写入 Analysis root 的对应子目录。
 
-## Requirements Coverage Validation（需求覆盖验证）✅
+## Requirements Coverage Validation（需求覆盖验证）
 
 **Epic/Feature Coverage（Epic/功能覆盖）：**
-当前已加载 sharded Epics，并以 PRD FR 集合、Epic 覆盖映射和 Architecture 结构映射共同验证。所有主要功能域都有明确架构承载位置：安装与 onboarding、方法论发现与执行、status/validate、update protection、config/customization、distribution source、readiness summary、maintainer fixture workflow 和 Post-MVP 扩展点均已映射到目录与组件；Epic 7 保持 Post-MVP backlog，不进入 MVP implementation readiness gate。
+当前 Architecture 已应用 `CC-2026-08-17-architecture-root` 的 Architecture-owned decision：Architecture fresh canonical subject directory 为 `{solutioning_artifacts}/architecture/`。PRD、UX、Epic/Story 尚待按 application matrix 同步，因此此处只确认架构能力覆盖，不把旧 coverage 或 proposal approval 视为本轮 implementation-readiness 证据。
 
 **Functional Requirements Coverage（功能需求覆盖）：**
-FR1-FR78 及当前 PRD 中的 lettered FR extensions（FR23a、FR28a、FR35a-FR35c、FR41a-FR41c、FR51a-FR51b、FR52a-FR52c、FR63a、FR71a-FR71b）均有架构支撑：
+当前 PRD baseline 为 106 条 explicit tracked FR entries。除既有功能域外，本轮重点覆盖：
 
-按 traceability 口径，FR1-FR78 是 base numbering；纳入 lettered extensions 后，explicit tracked FR entries 共 94 条。Architecture 与 Epics 使用这一口径做覆盖校验，避免把 base numbering 与 explicit entry count 混用。
-
-- FR1-FR17 → installer/source/modules/ide/manifest。
-- FR18-FR24 → help index、IDE adapter、skill artifact fixture；FR24 的阶段覆盖矩阵由 manifest/help index/installed skill entries 本地生成和验证。
-- FR25-FR35、FR28a 与 FR35a-FR35c → status/validate、validation rules、diagnostics、human/json reporters。
-- FR36-FR41 与 FR41a-FR41c → update、ownership model、files index/hash、update plan、repair plan、changed/skipped/conflict paths、operation lock、safe write 和 partial failure recovery；standalone report artifact 和 backup/restore 属于 Post-MVP。
-- FR42-FR52、FR51a-FR51b 与 FR52a-FR52c → config/customization resolver and `resolve` runtime support command。
-- FR53-FR59 → source resolver/source descriptor。
-- FR60-FR65 与 FR63a → progress events、ready summary、diagnostics output。
-- FR66-FR71 与 FR71a-FR71b → fixture projects、expected outputs、docs。
-- FR72-FR78 → Post-MVP 命令与 reporter 扩展边界；FR78 的流程覆盖报告在 MVP 最小阶段覆盖矩阵和 validate output 之上扩展覆盖率、趋势、导出和团队/多项目治理视图。
+- `FR13a`：fresh install 创建六个阶段 roots 与 Project Knowledge root。
+- `FR23b-FR23g`：Brainstorming、Analysis、Planning、Solutioning、Implementation、DevOps、Project Knowledge 的生产者与消费者使用统一 runtime metadata 路由。
+- canonical Skill rename：active identity 唯一，existing activation 可重定向或给出稳定 deprecation diagnostic，update/validate 能识别 rename、reprojection 与 drifted legacy package。
+- compatibility：existing explicit config 继续权威；新增 field 缺失时使用 legacy fallback；不自动迁移既有 artifacts。
 
 **Non-Functional Requirements Coverage（非功能需求覆盖）：**
-NFR 已被架构显式覆盖。按 traceability 口径，NFR1-NFR40 是 base numbering；纳入 lettered sub-requirements 后，explicit tracked NFR entries 共 95 条：
+当前 PRD baseline 为 101 条 explicit tracked NFR entries。本轮 Architecture 明确覆盖：
 
-- Performance（性能）：`status` 轻量读取，`validate` 分层检查，`update` 使用 hash skip。
-- Reliability & Determinism（可靠性与确定性）：manifest/index、fixture expected outputs、stable issue model。
-- Security & Safety（安全与保护）：install plan、source descriptor、ownership/hash、protected human/workflow files。
-- Compatibility & Portability（兼容性与可移植性）：Node 22/24 policy、project-relative POSIX paths、跨平台 path normalization。
-- Integration Quality（集成质量）：data-driven IDE adapters、mirror validator、canonical skill hash boundary。
-- Diagnostics & Observability（诊断与可观测性）：`CommandResult`、`ValidationIssue`、human/json reporters。
-- UX Output & Accessibility（UX 输出与可访问性）：CLI renderer profiles、terminal width fallback、`NO_COLOR`、non-TTY、CI、文本等价表达和 fixture expected outputs 已由 Epics/Story AC 承接。
-- Maintainability & Extensibility（可维护性与可扩展性）：模块边界与 schema/version 扩展点。
+- `NFR14a`：阶段 roots、fallback 与 non-migration 行为可由 fixture 和 deterministic validation 复现。
+- `NFR40f`：fresh-install 与 existing-install-update fixtures 共同验证 artifact topology、legacy whole/sharded discovery、既有 workflow artifacts 原位保护，以及 config/artifact mismatch 不得误报 migration success。
+- portability 与 safety：所有持久化路径采用 project-relative POSIX-style 表达；ordinary lifecycle operations 不移动、复制、重命名、删除或重写 workflow-owned artifacts。
 
-## Implementation Readiness Validation（实现就绪验证）✅
+## Implementation Readiness Validation（实现就绪验证）
 
 **Decision Completeness（决策完整性）：**
-关键决策已覆盖运行时、CLI 基础、存储模型、runtime boundaries、validation model、update safety、文件格式、IDE adapter、source/channel 和 fixture 资产。核心依赖版本已在 Starter/Core 决策阶段核验。
+Architecture-owned decisions 已完整记录，`SPEC 03`、`SPEC 04`、`SPEC 09` 的 ownership 和引用方向明确。
 
 **Structure Completeness（结构完整性）：**
-项目结构足够具体，覆盖 root config、source modules、tests、fixtures、expected outputs、build output 和 CI 入口。每个 FR 分类均能找到落点。
+实现组件、数据边界、root resolution flow、install/update/validate integration points 均有明确落点。
 
 **Pattern Completeness（模式完整性）：**
-命名、结构、格式、communication、state、error handling、loading/progress、enforcement 和 anti-patterns 均已定义。AI agent 可据此避免重复实现 config merge、随意写 absolute path、绕过 issue model 或覆盖 custom artifacts。
+新增 artifact topology 与 canonical Skill rename 的命名、解析、兼容、错误处理、验证和 fixture patterns 已定义，可约束后续实现一致性。
+
+**Cross-Artifact Readiness（跨制品就绪性）：** `NOT READY`
+
+本轮 Architecture 已完成 `CC-2026-08-17-architecture-root` 的 owner-stage application，但当前 PRD `FR23c`、UX discovery/evidence、Epic 11 / Story 11.5、requirements inventory 与 Epic lifecycle metadata 尚未完成同一 transaction 的 downstream application；`[VP]` 与 `[IR]` 也尚未重跑。因此当前不能宣称 planning corpus 已可直接进入实现。独立 gate evidence 继续引用 `implementation-readiness-report-2026-08-17-rerun.md` 的 `NOT READY` 结论，直至新报告取代。
 
 ## Gap Analysis Results（缺口分析结果）
 
 **Critical Gaps（关键缺口）：**
-无未解决 critical gap。当前架构可以指导 implementation story 创建。
+Architecture-owned scope 内未发现未解决 contract gap；Architecture root 双真源已在 owning `SPEC 09` 与 Architecture structure 中统一为 `{solutioning_artifacts}/architecture/`。
 
-**Important Gaps（重要缺口）：**
+**Downstream Blocking Gaps（下游阻塞缺口）：**
 
-- Starter 初始化命令已跟随最终 runtime 决策修正为 `engines.node='>=22'` 和 Node 22 类型基线；实现 story 仍必须覆盖 Node 22/24 fixture matrix。
-- JSON reporter 已进入 MVP 必交付边界；实现时应保持 `CommandResult` envelope 与 `ValidationIssue` issue model 稳定，并避免把 Post-MVP 命令面一起提前。
-- Bundled source、Git source、private registry、offline bundle 和 local path 的 source resolver 边界、MVP trust status 语义和 validate no-network boundary 已定义；其中 Git source 在 MVP 中必须固定到 commit SHA 后才可写入，local path 不得指向已安装状态或输出目录，`trusted` 只由 expected hash、lock match 或 bundled source 的等价 packaging manifest/package hash/package lock match 产生。MVP 只消费最小 integrity evidence，不生成或轮转外部 source lockfile；更细的 source lockfile 生命周期管理、企业 source policy、allowlist、签名验证或 provenance 检查仍保持 Post-MVP。
+- PRD `FR23c` 尚未应用 Architecture Solutioning subject root decision，也尚未重跑 `[VP]`。
+- UX 尚未同步 Architecture discovery/evidence root，并仍有固定 module count 历史示例需要去除 fixture/assertion 歧义。
+- Epic/Story、requirements inventory、coverage/traceability 与 index lifecycle metadata 尚未应用本次 decision。
+- Implementation Readiness 尚未在所有 application matrix 项完成后重新执行。
+- sprint tracking 只能在 IR gate 通过后更新。
 
 **Nice-to-Have Gaps（可选增强缺口）：**
-
-- Source descriptor schema 已在 `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.md` 和 `_bmad-output/planning-artifacts/adr/0004-source-descriptor-trust-model.md` 中固化；后续 ADR 只记录供应链策略取舍，不重新定义字段真源。
-- Manifest/index contract 已在 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 和 `_bmad-output/planning-artifacts/adr/0005-manifest-index-contract-boundary.md` 中固化；后续 ADR 只记录取舍，不重新定义字段真源。
-- Validation issue taxonomy 已在 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 和 `_bmad-output/planning-artifacts/adr/0006-validation-issue-taxonomy-boundary.md` 中固化；后续 ADR 只记录取舍，不重新定义 category 语义。
-- 可在后续文档中补充 fixture expected output 示例，但 fixture expected outputs 本身是契约测试资产。
+无新增 Architecture-level optional gap；后续实现 fixture 只应落实已定义契约，不重新定义 root ownership、fallback 或 rename semantics。
 
 ## Validation Issues Addressed（已处理的验证问题）
 
-- Node runtime policy 已从 “Node 24 only / `>=20`” 修正为 “Node 22 minimum + Node 24 recommended”。
-- 架构验证记录 starter 命令与最终 runtime policy 的不一致，并要求第一条 implementation story 修正初始化命令和 CI fixture matrix。
-- 数据库、REST API、frontend UI、云服务和后台 daemon 均明确排除在 MVP 之外，避免 implementation agent 扩大范围。
-- `_speclite`、IDE skill mirrors 和 `_speclite-output` 的边界已在决策、patterns 和 project structure 三处交叉确认。
+- 将旧的 94 FR / 95 NFR 统计口径更新为 106 FR / 101 NFR。
+- 补齐七类 runtime artifact roots、fresh defaults、legacy fallback 与 non-migration 边界。
+- 明确 `docs/`、Project Knowledge 和 Analysis producers 的输出归属。
+- 明确 canonical Skill rename 的单一 active identity 与兼容行为。
+- 移除旧的“无 critical gap，可进入实现”结论，改为 `Revalidation Required`。
+- 通过 `CC-2026-08-17-architecture-root` 将 Architecture whole/sharded fresh canonical subject directory 固化为 `{solutioning_artifacts}/architecture/`，并保留 existing-install legacy fallback 与 no-migration 边界。
+- 修正 `NFR40f` traceability，使其指向 artifact topology、legacy discovery 与 config/artifact mismatch fixtures，而不是 canonical Skill rename。
+- 刷新 post-CU/CE downstream state，移除“UX、Epics 尚未完成上一轮同步”的过时 handoff，改为本次 application matrix 的实际剩余项。
 
 ## Architecture Completeness Checklist（架构完整性检查清单）
 
@@ -92,61 +86,57 @@ NFR 已被架构显式覆盖。按 traceability 口径，NFR1-NFR40 是 base num
 
 **Architectural Decisions（架构决策）**
 
-- [x] 关键决策已记录版本信息
+- [x] 关键决策已记录版本与 contract owner
 - [x] 技术栈已完整说明
 - [x] 集成模式已定义
-- [x] 性能考量已覆盖
+- [x] 性能与 lifecycle safety 已覆盖
 
 **Implementation Patterns（实现模式）**
 
 - [x] 命名约定已建立
-- [x] 结构模式已定义
-- [x] 通信模式已说明
-- [x] 流程模式已记录
+- [x] 结构与 artifact resolution patterns 已定义
+- [x] 通信与 diagnostic patterns 已说明
+- [x] fallback、rename、non-migration 流程模式已记录
 
 **Project Structure（项目结构）**
 
 - [x] 完整目录结构已定义
-- [x] 组件边界已建立
-- [x] 集成点已映射
-- [x] 需求到结构的映射已完成
+- [x] 组件与 data ownership 边界已建立
+- [x] 集成点与 data flow 已映射
+- [x] Architecture-owned requirements 到结构的映射已完成
 
 ## Architecture Readiness Assessment（架构就绪评估）
 
-**Overall Status（整体状态）：** Planning artifacts ready for MVP implementation（规划制品可进入 MVP 实现）
+**Overall Status（整体状态）：** `NOT READY`
 
 **Confidence Level（信心等级）：** 高
 
 **Key Strengths（关键优势）：**
 
-- 架构围绕 installer/control plane 的真实复杂度展开，而不是把 SpecLite 降级为文件复制器。
-- runtime/control/artifact 三层边界清晰。
-- 文件所有权、hash update protection 和 deterministic validation 被放在 MVP 核心位置。
-- FR/NFR 与目录结构有明确映射。
-- AI agent 一致性规则足够具体，能减少实现分歧。
+- `SPEC 09`、`SPEC 03`、`SPEC 04` 的 ownership 与消费顺序明确。
+- fresh defaults、existing explicit config、legacy fallback 与 non-migration 形成可执行的兼容演进规则。
+- canonical Skill rename 保持唯一 active identity，并为 activation、update、validate 定义一致行为。
+- Architecture、patterns、project structure 和 SPEC 交叉引用一致。
+- Architecture whole/sharded canonical subject directory 与 phase ownership 已形成单一真源。
 
 **Areas for Future Enhancement（未来增强方向）：**
 
-- Source descriptor、manifest/index schema 与 validation issue taxonomy 已有 SPEC 与 ADR；后续 ADR 只补供应链治理、迁移或平台扩展取舍。
-- 在 implementation 阶段补充 fixture expected outputs，目录命名遵守 `fresh-install-empty-project`、`existing-install-update`、`ide-drift`、`source-integrity` required sub-cases、`resolve-parity`、`path-portability` 和最小 `skill-artifact-loop` release gate baseline。
-- Post-MVP 再扩展 JSON output 的 CI/企业集成、doctor/sync/uninstall 和迁移指南。
-- 若企业采用要求更高，可追加 Node 22/24 之外的运行时兼容策略评估，但必须以 fixture coverage 为前提。
+- 由 PRD workflow 先同步 `FR23c`，并重跑 `[VP]`。
+- 由 UX workflow 同步 Architecture discovery/evidence root 与 fixed-count historical example。
+- 由 Epic/Story workflow 同步 Story 11.5、requirements inventory、coverage/traceability 与 index lifecycle metadata。
+- 所有 application matrix 项完成后由 IR workflow 重新建立 gate 结论。
 
 ## Implementation Handoff（实现交接）
 
+**Current Handoff（当前交接）：**
+当前交接对象不是 implementation agent，而是 PRD owner；随后严格按 UX Designer、Epic/Story workflow、PRD Validator、Implementation Readiness validator 的顺序继续。
+
 **AI Agent Guidelines（AI Agent 指南）：**
 
-- 严格遵循本文档中的架构决策，不自行引入数据库、服务端、UI 或后台 daemon。
-- 所有路径、manifest、index 和 validation output 使用 project-relative POSIX-style paths。
-- 通过 `src/config/` 复用 config/customization merge logic，不在 adapter 或 skill helper 中实现第二套规则。
-- 任何 install/update/validate/source/IDE adapter 行为变化必须同步 fixture assertions。
-- Human-owned custom files 和 workflow artifacts 默认保护，不得静默覆盖。
-- Node 22 minimum + Node 24 recommended 的兼容声明必须由 fixture install/status/validate/update/resolve 覆盖支撑。
+- 严格遵循 `SPEC 09` → `SPEC 03` / workflow consumer 的 artifact-root ownership 与解析顺序。
+- 严格遵循 `SPEC 04` 的 canonical Skill rename identity，不创建 legacy alias surfaces。
+- 不把 legacy fallback 解释为 migration，不在 ordinary install/update/repair 中移动 workflow artifacts。
+- 在 IR gate 通过前，不把本 Architecture validation 解释为 implementation authorization。
 
-**First Implementation Priority（第一实现优先级）：**
-实现 agent 的契约阅读顺序必须先看 `_bmad-output/planning-artifacts/specs/README.md`，再按其中顺序阅读各 owning SPEC，然后再读 PRD 与 Architecture 摘要。Story 1.1 的执行顺序必须先创建 TypeScript CLI skeleton、`src/diagnostics/command-result-schema.ts` executable contract anchor、producer/consumer contract tests 和最小 fixture expected outputs；这些基础通过冒烟测试后，才能接入 runtime/platform guard，并由 guard 复用同一 diagnostics contract 产生确定性 failure envelope。随后再实现 JSON reporter，并修正 starter 初始化命令：
-
-- `engines.node` 应表达 Node 22 minimum 和 Node 24 recommended 的策略。
-- CI/fixture matrix 必须覆盖 Node 22 和 Node 24。
-- 不得使用 Node 24-only API，除非提供 Node 22 兼容路径或调整 runtime policy；runtime/platform guard failure 必须使用 `environment.unsupported-node` 或 `environment.unsupported-platform`。
-- 第一批代码应优先建立 `src/bin/`、`src/commands/`、`src/fs/`、`src/diagnostics/` 和测试骨架。
+**Next Planning Priority（下一规划优先级）：**
+执行 `bmad-edit-prd` 的已批准 `FR23c` 增量修改；其后依次执行 UX、Epic/Story、`[VP]` 与 `[IR]`。只有新 `[IR]` 报告达到 `READY` 后，授权 workflow 才能决定是否更新 sprint tracking。

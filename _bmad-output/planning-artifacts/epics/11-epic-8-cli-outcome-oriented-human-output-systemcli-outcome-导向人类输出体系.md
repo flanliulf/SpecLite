@@ -242,6 +242,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **则** 必须共享 status、issue、path、next action、severity 和 sorting semantics
 **并且** human-readable 文案不得成为 automation 的唯一信息来源。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR35a`、`FR35b`、`FR35c`、`FR63a`
+- **Supporting NFRs:** `NFR30`、`NFR31`、`NFR35`、`NFR35b-11`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR5`、SPEC 01 shared semantic model、SPEC 07 issue presentation
+
 ## Story 8.2: Install Outcome-Oriented Output（Install Outcome 导向输出）
 
 作为首次安装 SpecLite 的项目维护者，
@@ -279,6 +285,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **并且** 默认 no-prompt 与 explicit interactive 的文案必须准确区分
 **并且** 不得新增未契约化 public JSON 字段。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR63a`、`FR63b`、`FR65a`
+- **Supporting NFRs:** `NFR1`、`NFR1a`、`NFR10`、`NFR11`、`NFR11a`、`NFR30`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR3`、`UX-DR9`、`UX-DR10`、`UX-DR12`、`UX-DR13`、`UX-DR14`、SPEC 01 install result
+
 ## Story 8.3: Update And Repair Outcome-Oriented Output（Update 与 Repair Outcome 导向输出）
 
 作为项目维护者，
@@ -314,6 +326,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **则** outcome 为 `applied`
 **并且** changed、skipped、conflicts、protected boundaries 和 next validation action 必须可见。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR41`、`FR41c`
+- **Supporting NFRs:** `NFR8`、`NFR14`、`NFR30`、`NFR32g`、`NFR35b-11`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR6`、`UX-DR9`、`UX-DR10`、SPEC 03 update/repair plan projection
+
 ## Story 8.4: Status And Validate Human Output Separation（Status 与 Validate 人类输出分层）
 
 作为工具链维护者，
@@ -341,6 +359,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **当** 输出 Next Actions
 **则** 必须优先展示具体修复动作或下一条诊断命令
 **并且** 不得只输出泛化的“检查配置”。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR25`、`FR26`、`FR35`、`FR35a`、`FR35b`
+- **Supporting NFRs:** `NFR2`、`NFR2a`、`NFR3`、`NFR9`、`NFR9a`、`NFR30`、`NFR33`、`NFR35b-1`、`NFR35b-2`、`NFR35b-3`、`NFR35b-4`、`NFR35b-5`、`NFR35b-6`、`NFR35b-7`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR5`、`UX-DR9`、`UX-DR10`、SPEC 01 status/validate result boundaries
 
 ## Story 8.5: Resolve Command Support Output（Resolve 命令支持输出）
 
@@ -370,6 +394,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **则** outcome 为 `invalid-input`
 **并且** Next Actions 必须说明合法命令形态。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR52a`、`FR52b`
+- **Supporting NFRs:** `NFR35b-12`、`NFR35b-13`、`NFR35b-14`、`NFR39`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、SPEC 06 resolve command and diagnostics
+
 ## Story 8.6: Localized Next Actions And Message Catalog（本地化 Next Actions 与消息目录）
 
 作为中文默认用户，
@@ -398,6 +428,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **则** 可以使用 issue id / category 映射为本地化文案
 **并且** 不得丢失原始 reason code 或 affected path。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR35b`、`FR63b`
+- **Supporting NFRs:** `NFR35b-11`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR10`、`UX-DR13`、SPEC 01 nextActions ordering、SPEC 07 issue identity preservation
+
 ## Story 8.7: Human Output Fixture And Documentation Matrix（人类输出 Fixture 与文档矩阵）
 
 作为 SpecLite 维护者，
@@ -424,6 +460,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **当** quick-start、reference 或 troubleshooting 文档引用命令
 **则** 示例必须与 outcome vocabulary 和实际 renderer 一致
 **并且** 不得把只读命令、预览命令和写入命令混为同一步。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR69`、`FR71`、`FR71a`
+- **Supporting NFRs:** `NFR35a`、`NFR35d`、`NFR35j`、`NFR40`、`NFR40e`
+- **UX / Contract Anchors:** `UX-DR9`、`UX-DR10`、`UX-DR11`、SPEC 08 human/JSON fixture and documentation matrix
 
 ## Story 8.8: CLI Human Output Presentation Profiles（CLI 人类输出展示 Profile）
 
@@ -472,6 +514,12 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **当** 用户从 `/Users/fancyliu/Repos/SpecLite` 或其他非 target cwd 执行 `speclite install /Users/fancyliu/Repos/noi`
 **则** human output 必须清楚展示 `targetProject=noi` 与目标绝对路径
 **并且** Next Actions 必须使用路径安全目标；自定义安装命令必须包含 `--yes --interactive`。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR35a`、`FR35b`、`FR41`、`FR41c`、`FR52a`、`FR52b`、`FR63a`、`FR71`
+- **Supporting NFRs:** `NFR30`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR5`、`UX-DR6`、`UX-DR9`、`UX-DR10`、`UX-DR11`、Operation/Diagnostic/Report-Support profiles
 
 ## Story 8.9: CLI Human Output Scan-Friendly Layout And Color（CLI 人类输出可扫描布局与颜色）
 
@@ -528,9 +576,17 @@ Outcome 不应全 CLI 共用一套枚举，而应按 command 分组。共享的�
 **当** 运行 focused tests
 **则** 必须断言 install absolute-target prewrite output 的 exact section fragments、bullet、nested step list、step count、Evidence hierarchy、labeled Next Actions、TTY color positive case、无色环境无 ANSI、`stripAnsi(output)` 语义完整性和 JSON 无 human-only absolute path / ANSI。
 
-## Logical Dependency / Corrective Addendum（逻辑依赖 / 纠偏补充）
+### Requirement Traceability（需求追踪）
 
-Story 8.8 和 Story 8.9 是在 Story 8.1-8.7 完成后新增的 corrective addendum。下列顺序表达的是理想化的逻辑依赖和后续维护口径，不是当前 sprint 的历史执行顺序。当前 sprint 状态以 `_bmad-output/implementation-artifacts/sprint-status.yaml` 为准：Story 8.1-8.8 已完成，Story 8.9 为 `ready-for-dev`。
+- **Primary FRs:** `FR63a`、`FR71`
+- **Supporting NFRs:** `NFR1a`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`、`NFR40e`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR9`、`UX-DR10`、`UX-DR11`、`UX-DR12`、`UX-DR13`、`UX-DR14`、install Operation Profile
+
+## Historical Sequencing Disposition（历史顺序处置）
+
+Story 8.8 和 Story 8.9 是在 Story 8.1-8.7 完成后新增的 corrective addendum。下列顺序表达理想化的逻辑依赖和后续维护口径，不重写当时的历史执行顺序。Story 状态及完成证据以 `_bmad-output/implementation-artifacts/sprint-status.yaml` 和对应 implementation artifacts 为唯一真源，本 planning artifact 不再复制易漂移的状态值。
+
+Epic 8 作为已完成历史 baseline 保留：不重编号 Story 8.1-8.9，不将任一 Story 改回 `ready-for-dev`，不进入当前待实施 backlog、implementation authorization 或 runner replay scope。未来若需要维护、重放或扩展任一 outcome/presentation 领域，必须通过新的 change-controlled Story 建立独立 ID、gate 和状态；不得按旧编号顺序重放 Epic 8。
 
 1. 先实现 Story 8.1，共享 outcome/presentation contract 和本地化 Next Actions 基础设施。
 2. 再实现 Story 8.8，先固化 Operation / Diagnostic / Report-Support profiles，避免把 `install` 的 section 顺序误推广到所有命令。

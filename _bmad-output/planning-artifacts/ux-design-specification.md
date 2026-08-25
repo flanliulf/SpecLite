@@ -49,7 +49,20 @@ inputDocuments:
   - "_bmad-output/planning-artifacts/epics/08-epic-5-source-integrity-and-distribution-channels来源完整性与分发渠道.md"
   - "_bmad-output/planning-artifacts/epics/09-epic-6-maintainer-fixture-and-release-confidence维护者-fixture-与发布信心.md"
   - "_bmad-output/planning-artifacts/epics/10-epic-7-post-mvp-governance-expansionpost-mvp-治理扩展.md"
+  - "_bmad-output/planning-artifacts/epics/11-epic-8-cli-outcome-oriented-human-output-systemcli-outcome-导向人类输出体系.md"
+  - "_bmad-output/planning-artifacts/epics/12-epic-9-installed-runtime-activation-contract-hardening已安装-runtime-激活契约收口.md"
+  - "_bmad-output/planning-artifacts/epics/13-epic-10-canonical-source-ecosystem-module-governancecanonical-source-生态模块治理.md"
+  - "_bmad-output/planning-artifacts/epics/14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md"
   - "docs/index.md"
+revisionSource: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-08-17.md"
+revisionStatus: "complete"
+revisionItemsCompleted:
+  - "architecture-solutioning-subject-root"
+  - "architecture-whole-sharded-discovery-evidence"
+  - "existing-install-legacy-compatible-no-migration"
+  - "dynamic-module-count-example"
+revisionUpdatedAt: "2026-08-18"
+revisionCompletedAt: "2026-08-18"
 ---
 
 # UX Design Specification（UX 设计规格）：SpecLite
@@ -89,7 +102,7 @@ SpecLite 的一等用户包括：
 
 ### Design Opportunities（设计机会）
 
-1. 把安装过程设计成可审查的阶段化旅程：source discovery、manifest generation、IDE mirror creation、config initialization 和 ReadyCheck 每一步都有明确状态。
+1. 把安装过程设计成可审查的阶段化旅程：source discovery、manifest generation、IDE mirror creation、config initialization 和 minimum readiness verification 每一步都有明确状态。
 2. 把诊断设计成“问题 -> 影响 -> 建议动作”的工作流，而不是原始错误堆栈，让工具链维护者能快速判断是否需要 repair、manual cleanup 或重新配置。
 3. 把文件所有权模型转化为用户信任体验：默认保护 human-owned custom files 和 workflow-owned artifacts，并在 update plan 中显式展示 changed、skipped 和 conflict paths。
 4. 把跨 IDE 一致性设计成可见承诺：通过阶段覆盖矩阵、canonical skill id、IDE target status 和 entry path，让用户看到方法论是否真的进入执行现场。
@@ -114,7 +127,7 @@ MVP 不设计传统 Web、mobile 或 desktop GUI。UX 需要优先优化 CLI 输
 以下交互应尽量不让用户思考：
 
 1. 安装后立即知道是否 ready，以及下一步如何在 AI IDE 中使用 SpecLite。
-2. 看到路径时能判断它属于 `_speclite`、IDE execution plane、`_speclite-output`，还是 project knowledge。
+2. 看到路径时能判断它属于 Metadata / Control Plane、IDE Execution Plane、Phase Artifact Plane、Project Knowledge Plane，还是 Public Documentation Plane。
 3. 运行 `status` 时快速得到安装来源、版本、IDE 覆盖和 high-level health，而不被完整验证噪音打断。
 4. 运行 `validate` 时看到稳定排序的问题、影响范围和建议动作。
 5. 运行 `update` 时先看到写入计划，并明确哪些文件会 changed、skipped 或 conflict。
@@ -172,7 +185,7 @@ SpecLite 应让用户感到信任、掌控和清醒。它处理的是本地项�
 2. 所有危险动作都需要体现 plan-before-write，尤其是 `install`、`update` 和 `update --repair`。
 3. `status` 要保持轻量，避免把用户拖入完整验证细节。
 4. `validate` 的情绪设计重点是消除模糊性：稳定 category、issue id、affected path、impact 和 suggested next step。
-5. 文件路径展示要帮助用户形成空间模型：`_speclite`、IDE execution plane、`_speclite-output`、project knowledge 各自是什么。
+5. 文件路径展示要帮助用户形成五空间模型：Metadata / Control、IDE Execution、Phase Artifact、Project Knowledge 与 Public Documentation 各自是什么，不能把 `docs/` 与 workflow-generated project knowledge 合并解释。
 6. 对企业规范负责人，阶段覆盖矩阵和过程产物证据要能带来“标准真的进入执行现场”的确认感。
 7. 对自动化用户，`--json` 的稳定性本身就是情绪体验：它减少 CI、fixture 和企业集成中的不确定性。
 
@@ -204,7 +217,7 @@ BMAD-METHOD 的关键 UX 优点包括：
 1. Guided next step pattern：SpecLite 应在 `install` ready summary、`status` 和 `validate` 结果中持续告诉用户“下一步做什么”，而不是只报告当前状态。
 2. Phase map as navigation：SpecLite 的阶段覆盖矩阵不应只是治理报告字段，也应成为用户理解方法论入口的导航模型。
 3. Dual-mode command design：每个核心命令都要同时考虑 human-readable flow 和 `--json` automation flow，避免后期补自动化接口。
-4. Filesystem as interface：目录结构本身就是 UX。`_speclite`、IDE skill mirrors、`_speclite-output` 和 `docs` 需要在输出、文档和示例中持续保持同一套空间语言。
+4. Filesystem as interface：目录结构本身就是 UX。Metadata / Control、IDE Execution、Phase Artifact、Project Knowledge 与 Public Documentation 五个 planes 需要在输出、文档和示例中持续保持同一套空间语言。
 5. Help without memorization：SpecLite 不应要求用户记住所有 command、phase、skill 和 target id；关键输出应暴露可选项、推荐动作和验证命令。
 6. Artifact-backed progress：每个 workflow 或命令完成后，都应留下可复核 artifact、manifest/index 投影或 structured output，而不是只给 transient terminal message。
 
@@ -213,7 +226,7 @@ BMAD-METHOD 的关键 UX 优点包括：
 1. 只有安装入口，没有状态闭环：如果用户安装后必须自己翻目录确认结果，控制面信任会下降。
 2. 把帮助文档当作主要导航：当用户必须查文档才能知道下一步，CLI/control-plane 体验就没有闭环。
 3. 交互流程和 CI 流程割裂：如果 interactive install 与 headless install 语义不同，企业 rollout 和 fixture 会变脆弱。
-4. 目录名存在但语义不稳定：如果 `_speclite`、IDE mirrors 和 `_speclite-output` 的职责边界不在输出中反复强化，用户会把 runtime metadata、execution plane 和 workflow artifacts 混在一起。
+4. 目录名存在但语义不稳定：如果五个 planes 的职责边界不在输出中反复强化，用户会把 runtime metadata、IDE execution、phase artifacts、workflow-generated project knowledge 与 public docs 混在一起。
 5. 只强调 AI workflow，不暴露治理证据：SpecLite 的一等用户包括企业规范负责人，因此不能只优化“开发者顺手”，还要优化“标准是否落地”的可审查体验。
 
 ### Design Inspiration Strategy（设计灵感策略）
@@ -270,7 +283,7 @@ MVP 应定义一组稳定输出模式：
 
 1. Summary block：每个核心命令都先给稳定摘要，说明当前状态和关键结论。
 2. Progress steps：`install`、`validate`、`update` 使用稳定 step id 与人类可读 label。
-3. Path table：路径统一使用 project-relative POSIX path，并标注所属空间：`_speclite`、IDE execution plane、`_speclite-output`、project knowledge。
+3. Path table：路径统一使用 project-relative POSIX path，并标注所属 plane、phase、resolved root、resolution mode 与 ownership；五类 plane 固定为 Metadata / Control、IDE Execution、Phase Artifact、Project Knowledge 与 Public Documentation。
 4. Issue list：诊断问题统一展示 severity、category、issue id、affected path、impact、suggested next step。
 5. Plan before write：写入型命令必须先展示 planned effects、changed paths、skipped paths、conflicts 和 authorization boundary。
 6. Next actions：每个命令输出都应给 command-specific priority order 的下一步动作。
@@ -299,16 +312,36 @@ SpecLite 的定义性体验是：用户运行一个核心命令后，系统把�
 
 ### 2.2 User Mental Model（用户心智模型）
 
-用户带来的初始心智模型通常是“安装器会复制文件到项目里”。SpecLite 需要把这个心智模型升级为“本地项目里有一个可审查的 AI 方法论控制面”。
+用户带来的初始心智模型通常是“安装器会复制文件到项目里”。SpecLite 需要把这个心智模型升级为“由五个空间组成、可审查的本地方法论控制面”。
 
-用户需要逐步形成四个空间概念：
+1. Metadata / Control Plane（元数据与控制平面）
+   - 典型位置：`_speclite/`。
+   - 承载 config、manifest/index、source descriptor、installed state 和 runtime scripts。
+   - 主要由 installer 管理，不存放 workflow artifacts 或公共项目文档。
 
-1. `_speclite` 是 metadata/control hub，承载 config、manifest/index、source descriptor 和 installed state。
-2. IDE skill directories 是 execution plane，承载可被 Claude Code、Agents 等工具发现并激活的 skill entries。
-3. `_speclite-output` 是 workflow artifact repository，承载 planning、implementation、review 等过程产物。
-4. `docs` 或 project knowledge paths 是长期项目知识，不应与 installer runtime 或 workflow artifacts 混淆。
+2. IDE Execution Plane（IDE 执行平面）
+   - 典型位置：`.claude/skills/`、`.agents/skills/`。
+   - 承载 IDE 可发现、可激活的 canonical Skill projections。
+   - 可由 installer 重新投影，不是 canonical source，也不是 workflow artifact repository。
 
-用户最容易困惑的地方是：哪些文件由 installer 管、哪些文件由人维护、哪些文件由 workflow 生成；哪个命令只是读取状态，哪个命令会写入；`status` 和 `validate` 的职责差异；普通 `update` 与 `update --repair` 的边界差异。
+3. Phase Artifact Plane（阶段产物平面）
+   - fresh install 默认包含 `_speclite-output/0-brainstorming-artifacts/`、`_speclite-output/1-analysis-artifacts/`、`_speclite-output/2-planning-artifacts/`、`_speclite-output/3-solutioning-artifacts/`、`_speclite-output/4-implementation-artifacts/` 与 `_speclite-output/5-devops-artifacts/`。
+   - workflow 根据 phase、artifact kind 和 resolved runtime root 写入对应位置。
+   - ordinary install、update 和 `update --repair` 不迁移或重写既有 workflow-owned artifacts。
+
+4. Project Knowledge Plane（项目知识平面）
+   - fresh install 默认位置：`_speclite-output/project-knowledge-base/`。
+   - 承载 workflow-generated project knowledge。
+   - 不包含 domain、market、technical research、Product Brief 或 PRFAQ；这些属于 Analysis producers。
+
+5. Public Documentation Plane（公共文档平面）
+   - 典型位置：`docs/`。
+   - 是 Primary Public Document，面向项目读者和维护者。
+   - 不得与 workflow-generated project knowledge 或阶段产物根合并解释。
+
+existing install 的显式配置继续权威。新增 runtime field 缺失时，系统可以使用定义好的 legacy fallback，但必须展示实际 resolved root，并标记 `legacy-compatible`；fallback 不是 artifact migration。
+
+用户应能从任何 Filesystem Space Map、Ready Summary、diagnostic 或 artifact evidence 中判断：当前路径属于哪个 plane 和 phase，使用的是 fresh default、explicit config 还是 legacy fallback，workflow 实际消费了哪个路径，哪些内容由 installer 管理、哪些属于 workflow 或人类，以及 config 与既有 artifact 位置不一致时是否需要人工处理。
 
 ### 2.3 Success Criteria（成功标准）
 
@@ -330,7 +363,7 @@ SpecLite 使用的基础模式是 established CLI patterns：命令、摘要、�
 
 需要重点设计的 novel patterns 包括：
 
-1. Filesystem control-plane map：用路径与空间标签解释 `_speclite`、IDE execution plane、`_speclite-output` 和 project knowledge 的职责。
+1. Filesystem control-plane map：用五个 plane、phase/root、resolution mode 和 ownership 解释 Metadata / Control、IDE Execution、Phase Artifact、Project Knowledge 与 Public Documentation 的职责。
 2. Governance-aware ready summary：安装完成不是只说 done，而是展示可治理证据和下一步动作。
 3. Validation issue as recovery instruction：每个 issue 不只是错误，而是可执行的恢复建议。
 4. Phase coverage as navigation and audit：阶段覆盖矩阵既帮助用户找 skill，也帮助企业规范负责人审查落地情况。
@@ -535,7 +568,7 @@ flowchart TD
   E -- "No" --> F["Exit with no write and next actions"]
   E -- "Yes" --> G["Create runtime, mirrors, output dirs"]
   G --> H["Generate manifest/index"]
-  H --> I{"ReadyCheck passes?"}
+  H --> I{"Required install stages and minimum readiness assertions pass?"}
   I -- "No" --> J["Show failed step, pending steps, manual action"]
   I -- "Yes" --> K["Show ready summary, paths, targets, next commands"]
 ```
@@ -562,19 +595,65 @@ flowchart TD
 
 ### Journey 3: Phase-Based Skill Use & Artifact Evidence（按阶段使用 Skill 与产物证据）
 
-AI IDE 使用者从阶段覆盖或 ready summary 找到对应 skill，在 IDE 中激活 workflow。workflow 读取配置与 customization，产物写入 `_speclite-output`，并保留 metadata 以支持治理和复用。
+AI IDE 使用者从 phase coverage 或 Ready Summary 找到 canonical Skill。workflow 激活后先读取 runtime config 与 customization，再根据 canonical workflow metadata 判断 artifact plane、phase、artifact kind 和 owning root，而不是把所有产物笼统写入 `_speclite-output`。
+
+标准路由为：
+
+- Brainstorming → `{brainstorming_artifacts}`
+- Analysis → `{analysis_artifacts}`
+- Planning → `{planning_artifacts}`；PRD、Epics、UX 分别使用 `{planning_artifacts}/prd/`、`{planning_artifacts}/epics/`、`{planning_artifacts}/ux/`
+- Solutioning → `{solutioning_artifacts}`；Architecture whole document、sharded `index.md` 与 shards 使用 `{solutioning_artifacts}/architecture/`
+- Implementation → `{implementation_artifacts}`
+- DevOps → `{devops_artifacts}`
+- workflow-generated project knowledge → `{project_knowledge}`
+- Primary Public Document → `docs/`
+
+Domain、market、technical research、Product Brief 和 PRFAQ 属于 Analysis producers。`docs/` 是 Public Documentation Plane，不是 Project Knowledge Plane 的 fresh default 或隐式 alias。
+
+existing install 使用实际 resolved root：显式配置继续权威；缺少 `solutioning_artifacts` 时，Architecture discovery 按 `SPEC 09` fallback 到既有 `{planning_artifacts}` 并标记 `legacy-compatible`。Artifact Evidence 必须同时展示 resolved root 与 Architecture 实际消费路径，不得用 fresh canonical path 覆盖 legacy 事实。若 config root 与既有 artifact 位置不一致，workflow 或 validator 必须报告 config/artifact mismatch，不得自动迁移 artifact 或误报 migration success。
 
 ```mermaid
 flowchart TD
-  A["User needs a methodology workflow"] --> B["Find phase entry from ready summary or phase coverage"]
-  B --> C["Open IDE skill entry"]
-  C --> D["Activate canonical skill"]
-  D --> E["Resolve config/customization"]
-  E --> F["Run guided workflow"]
-  F --> G["Write artifact to configured output path"]
-  G --> H["Record workflowType, sourceSkill, generatedAt"]
-  H --> I["Show artifact path and next recommended step"]
+  A["User needs a methodology workflow"] --> B["Find phase entry from Ready Summary or phase coverage"]
+  B --> C["Open IDE Skill entry"]
+  C --> D["Activate canonical Skill"]
+  D --> E["Resolve runtime config and customization"]
+  E --> F["Read canonical phase and artifact intent"]
+  F --> G{"Artifact plane?"}
+
+  G -- "Phase artifact" --> H["Select phase root: brainstorming / analysis / planning / solutioning / implementation / devops"]
+  G -- "Workflow-generated knowledge" --> I["Resolve project_knowledge root"]
+  G -- "Primary public document" --> J["Route to docs/"]
+
+  H --> K["Resolve explicit config, fresh default, or legacy fallback"]
+  I --> K
+  J --> L["Resolve public documentation path"]
+
+  K --> M{"Config and artifact location consistent?"}
+  M -- "No" --> N["Report config/artifact mismatch; do not migrate"]
+  M -- "Yes" --> O["Resolve subject directory and whole/sharded input deterministically"]
+  L --> O
+
+  O --> P["Run guided workflow"]
+  P --> Q["Write or consume actual project-relative path"]
+  Q --> R["Record phase, resolved root, actual consumed path, resolution mode, and ambiguity"]
+  R --> S["Show Artifact Evidence and next recommended step"]
 ```
+
+完成后的 Artifact Evidence 必须让用户看到：
+
+- `phase`
+- `artifactKind`
+- `resolvedRoot`
+- `resolutionMode`
+- `actualConsumedPath`
+- whole/sharded discovery 结果
+- 是否存在 ambiguity 或 config/artifact mismatch
+- 下一步推荐 workflow
+
+对 Architecture，fresh install 的 `resolvedRoot` 与 whole/sharded discovery subject directory 必须指向 `{solutioning_artifacts}/architecture/`。Existing install 必须展示 explicit config 或 `legacy-compatible` fallback 解析得到的实际 root 和 `actualConsumedPath`，不得将 fallback 表述为 migration。
+
+任何 ordinary install、update 或 `update --repair` 都不得借此流程移动、复制、重命名、删除或重写 workflow-owned artifacts。
 
 ### Journey 4: Governance Verification（研发规范落地验证）
 
@@ -630,22 +709,34 @@ SpecLite 的设计系统组件不是 GUI 组件，而是 CLI/control-plane prese
 
 #### Ready Summary
 
-**Purpose:** 让用户确认安装完成且可进入下一步。  
-**Usage:** `speclite install` 成功完成 ReadyCheck 后展示。  
-**Anatomy:** Summary、completed steps、installed modules、IDE targets、key paths、next actions。  
-**States:** ready、partial、failed。  
-**Accessibility:** 不依赖颜色；ready 必须由文本字段表达。  
-**Content Guidelines:** 不说泛化的 `done`；必须展示可复核证据。  
-**Interaction Behavior:** 提供下一步命令，例如 `speclite status`、`speclite validate`、如何在 IDE 中找到 skill。
+**Purpose:** 让用户确认安装或更新后的实际可用状态、五个 filesystem planes、resolved roots 与下一步动作。
+
+**Usage:** `speclite install` 或 existing-install update 的 required install stages 与 minimum readiness assertions 全部通过后展示。
+
+**Anatomy:** overall result、completed / failed / pending steps、installed modules、IDE targets、完整 Filesystem Space Map、七个 runtime root fields 的实际 `resolvedRoot`、每个 root 的 `resolutionMode`、compatibility label、validation warnings / blockers 与 next actions。
+
+**States:** `ready`、`partial`、`failed`。`legacy-compatible` 是 compatibility label，不是新的 command status。
+
+**Accessibility:** 不依赖颜色；status、compatibility label、plane、phase 和 path 均提供文本表达。
+**Content Guidelines:**
+
+- fresh install 展示实际创建的新 roots。
+- existing install 必须展示实际 resolved roots，不得拿 fresh defaults 代替实际状态。
+- 使用 legacy fallback 的 root 必须标记 `legacy-compatible`。
+- `docs/` 与 Project Knowledge 必须作为两个独立 planes 展示。
+- config/artifact mismatch 必须显示 diagnostic，不得宣称 migration 已完成。
+
+**Interaction Behavior:** 用户可以直接判断系统创建了什么、继续沿用了什么、哪些 root 来自 explicit config 或 legacy fallback，以及下一步应执行哪个 workflow 或 validation command。
 
 #### Phase Coverage Matrix
 
 **Purpose:** 同时服务方法论导航和企业治理审查。  
 **Usage:** ready summary、status 扩展输出、validate / governance report 中使用。  
 **Anatomy:** phaseId、phaseLabel、moduleId、canonicalSkillId、targetId、entryPath、activationTarget、status、artifactContract。  
-**States:** mapped、missing、unsupported、failed。  
+**Contract States:** `mapped`、`unsupported`、`failed`。这三个值是 installed phase coverage schema 的唯一 status vocabulary。
+**Human Presentation State:** `missing` 仅用于 human-readable renderer 表达预期 phase row 或 target mapping 缺失；它必须由缺失证据派生，不得写入 `PhaseCoverageRow.ideTargets[].status`、`phase-coverage.json` 或其他 installed matrix schema。
 **Accessibility:** 窄终端可降级为 key-value block；`--json` 保持完整数组结构。  
-**Content Guidelines:** 缺失项必须给出原因和建议动作。  
+**Content Guidelines:** 人类输出中的缺失项必须给出原因和建议动作；structured output 必须保持 owning contract 的 schema vocabulary，并通过契约允许的缺失证据表达 gap。
 **Interaction Behavior:** 人类输出用于找入口；structured output 用于 CI / governance 判断覆盖。
 
 #### Validation Issue Row
@@ -670,23 +761,67 @@ SpecLite 的设计系统组件不是 GUI 组件，而是 CLI/control-plane prese
 
 #### Filesystem Space Map
 
-**Purpose:** 帮助用户理解 SpecLite 的本地空间模型。  
-**Usage:** install summary、docs examples、troubleshooting、validate path issues。  
-**Anatomy:** path、space、role、owner、safe action。  
-**States:** configured、missing、invalid、outside-project-boundary。  
-**Accessibility:** 表格可降级为列表。  
-**Content Guidelines:** 用同一术语解释 `_speclite`、IDE execution plane、`_speclite-output`、project knowledge。  
-**Interaction Behavior:** 用户据此判断某个路径是否可手动编辑、可修复、可删除或应保留。
+**Purpose:** 用完整空间、phase/root、resolution mode 和 ownership 模型解释 SpecLite 的实际文件布局。
+
+**Usage:** Ready Summary、install/update plan、status/validate evidence、troubleshooting 和文档示例。
+**Anatomy:** `plane`、`phase`、`runtimeField`、`placeholder`、`resolvedRoot`、`resolutionMode`、`role`、`owner`、`status`、`safeAction` 与 optional diagnostic。
+
+五个 planes 固定为：
+
+1. Metadata / Control Plane
+2. IDE Execution Plane
+3. Phase Artifact Plane
+4. Project Knowledge Plane
+5. Public Documentation Plane
+
+Phase Artifact Plane 必须分别展示：
+
+- Brainstorming / `{brainstorming_artifacts}`
+- Analysis / `{analysis_artifacts}`
+- Planning / `{planning_artifacts}`：PRD / `{planning_artifacts}/prd/`，Epics / `{planning_artifacts}/epics/`，UX / `{planning_artifacts}/ux/`
+- Solutioning / `{solutioning_artifacts}`：Architecture / `{solutioning_artifacts}/architecture/`
+- Implementation / `{implementation_artifacts}`
+- DevOps / `{devops_artifacts}`
+
+Project Knowledge Plane 展示 `{project_knowledge}`；Public Documentation Plane 独立展示 `docs/`。
+
+**Resolution Modes:** `fresh-default`、`explicit-config`、`legacy-compatible`。
+
+**States:** `configured`、`missing`、`invalid`、`outside-project-boundary`、`config-artifact-mismatch`。
+
+**Accessibility:** 宽终端使用 table；窄终端降级为保留全部字段的 key-value blocks。
+**Content Guidelines:**
+
+- 所有 path 使用 display-safe project-relative POSIX form。
+- existing install 显示实际 resolved root。
+- legacy fallback 必须标记 `legacy-compatible`，且不得被描述为 migration。
+- config 已改但 artifacts 仍位于旧路径时，显示 `config-artifact-mismatch`、实际发现位置与人工处理建议。
+- 不建议 ordinary install、update 或 repair 移动 workflow-owned artifacts。
+
+**Interaction Behavior:** 用户可以按 plane、phase 和状态扫描路径，区分 installer-owned、workflow-owned 与 human-owned 内容，并判断路径能否安全修改。
 
 #### Artifact Evidence Card
 
-**Purpose:** 展示 workflow artifact 已被生成并可复用。  
-**Usage:** skill artifact loop、workflow completion、governance verification。  
-**Anatomy:** artifact path、workflowType、sourceSkill、generatedAt、configured root、default output path。  
-**States:** generated、missing、metadata-invalid、outside-boundary。  
-**Accessibility:** 时间戳与路径必须可文本读取；JSON 中可 normalize / exclude unstable timestamp。  
-**Content Guidelines:** 强调产物是 workflow-owned，不由 install/update 静默覆盖。  
-**Interaction Behavior:** 用户可把 artifact 作为下一 workflow 输入或治理证据。
+**Purpose:** 证明 workflow 实际发现、消费或生成了哪个 artifact，以及该 artifact 如何映射到 phase-aware runtime root。
+
+**Usage:** workflow completion、whole/sharded discovery、skill artifact loop、readiness evidence 和 governance verification。
+**Presentation Fields:** `workflowType`、`canonicalSkillId` / `sourceSkill`、`phase`、`artifactKind`、`resolvedRoot`、`resolutionMode`、`actualConsumedPath`、`discoveryShape`（`whole`、`sharded` 或 `not-applicable`）、`ambiguityStatus`、owning contract 允许时的 `generatedAt`，以及 next recommended workflow。
+
+这些是 UX presentation requirements；字段真源仍由 owning SPEC、manifest/index 或 workflow artifact contract 管理。
+
+**States:** `generated`、`consumed`、`missing`、`ambiguous`、`config-artifact-mismatch`、`metadata-invalid`、`outside-project-boundary`。
+
+**Accessibility:** phase、shape、ambiguity 与 state 必须使用文本，不依赖颜色或图标。
+**Content Guidelines:**
+
+- `resolvedRoot` 与 `actualConsumedPath` 必须同时可见，避免“配置指向哪里”与“实际用了哪里”混淆。
+- Architecture 在 fresh install 中必须显示 `Solutioning / {solutioning_artifacts}/architecture/`；PRD、Epics 与 UX 继续显示各自的 Planning subject directory。
+- whole 与 sharded candidates 同时存在时，必须显示 ambiguity，不得静默任选其一。
+- legacy fallback 标记为 `legacy-compatible`，不得暗示 artifacts 已迁移。
+- `docs/` 输出明确标记为 Public Documentation；workflow-generated project knowledge 标记为 Project Knowledge。
+- path 使用 project-relative POSIX form，不泄露 absolute path。
+
+**Interaction Behavior:** 用户可以把该 evidence 作为下一 workflow 输入、readiness proof 或 config/artifact mismatch 的排查入口。
 
 ### Component Implementation Strategy（组件实现策略）
 
@@ -696,6 +831,7 @@ SpecLite 的设计系统组件不是 GUI 组件，而是 CLI/control-plane prese
 4. 每个组件都必须有 fixture expected output 或 snapshot 保护，避免文案和排序漂移。
 5. 组件必须支持 compact、evidence、structured 三种 profile。
 6. 组件必须遵守 no-color、CI、non-TTY、Windows path portability 和 redaction/display-safe 约束。
+7. Ready Summary、Filesystem Space Map 与 Artifact Evidence Card 必须共享同一 resolved-root model、compatibility label 与 diagnostic source；renderer 不得各自推导 fallback 或 migration 状态。
 
 ### Implementation Roadmap（实现路线图）
 
@@ -817,7 +953,7 @@ SpecLite 的 navigation 不是页面导航，而是 command-to-command、phase-t
 
 **Filesystem navigation**
 
-- 路径展示必须帮助用户理解空间：`_speclite`、IDE execution plane、`_speclite-output`、project knowledge。
+- 路径展示必须帮助用户理解五个 planes，并明确 Phase Artifact Plane 内的 phase/root、Project Knowledge Plane 与 `docs/` Public Documentation Plane 的差异。
 - 默认展示 project-relative POSIX path。
 - 需要隐藏或脱敏 home directory、cache path、temporary extraction path 和 credentials。
 

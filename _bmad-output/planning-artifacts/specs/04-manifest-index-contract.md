@@ -43,6 +43,7 @@ Source-side truth：
 - 对 selected modules，`skill-index.json` 必须覆盖该模块下全部 canonical package roots；help/menu metadata 缺失不得导致 package root 从 skill index、files index 或 IDE mirrors 中消失。
 - `help-index.json` 与 `phase-coverage.json` 是 discovery/menu/phase projections。它们可以只包含有 help/menu metadata 的 entries，但必须引用已存在于 `skill-index.json` 的 `canonicalSkillId`，不得定义第二套 installed skill inventory。
 - Help index source data 必须引用 canonical skill ids。它不得定义第二套 skill identity。
+- Canonical source metadata 可以在 active Skill entry 上声明 optional `renamedFromCanonicalSkillIds`，用于把 historical canonical ids 映射到唯一 active canonical identity；该字段不得创建 alias package 或第二套 installed inventory。
 - `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md` 负责 adapter ids、target ids、target order 和 adapter capability semantics。
 - `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 负责 fixture layout 和 release gate policy。
 
@@ -166,6 +167,7 @@ Required MVP fields：
 
 - `schemaVersion`
 - `canonicalSkillId`
+- `renamedFromCanonicalSkillIds?`
 - `moduleId`
 - `sourcePackagePath`
 - `canonicalPackageHash`
@@ -173,6 +175,36 @@ Required MVP fields：
 - `phaseIds[]`
 
 `canonicalPackageHash` 是 package-level。它验证相同 canonical package content 是否跨 IDE targets 被 mirror。它不替代 files index 中的 file-level hashes。
+
+## Canonical Skill Rename Mapping（Canonical Skill 更名映射）
+
+`renamedFromCanonicalSkillIds` 是 `speclite.skill-index.v1` 的 optional additive field：
+
+```ts
+type SkillIndexEntry = {
+  schemaVersion: "speclite.skill-index.v1";
+  canonicalSkillId: string;
+  renamedFromCanonicalSkillIds?: string[];
+  moduleId: string;
+  sourcePackagePath: string;
+  canonicalPackageHash: string;
+  installedTargets: InstalledTarget[];
+  phaseIds: string[];
+};
+```
+
+Rename mapping 必须遵守：
+
+- `renamedFromCanonicalSkillIds` 只出现在 active canonical Skill entry 上。
+- 每个 old canonical Skill ID 必须全局唯一地映射到一个 active canonical ID。
+- Old ID 不得等于 active ID，也不得同时出现在多个 active entries。
+- Old ID 不得生成独立 source/installed package、skill-index entry、help entry、phase coverage row 或 IDE mirror。
+- Fresh install 只投影 active canonical ID。
+- Help、activation、status、validate 和 update 可以消费 rename mapping，但不得把 old ID 恢复成第二个 active identity。
+- Existing install/update 识别 old ID 时，必须重定向到 active canonical ID，或返回包含 replacement ID/command 的稳定 deprecation diagnostic。
+- Update plan 必须显式展示 package rename/reprojection；发生 drift 的 old package 不得被静默覆盖或删除。
+
+添加此 optional field 不改变 `speclite.skill-index.v1` 的既有 required fields 或字段语义，因此不要求 schema version bump。若未来让该字段变为 required、改变 old-to-active identity 语义或允许多 active targets，必须发布新的 skill-index schema version。
 
 ## Help Index（Help 索引）
 

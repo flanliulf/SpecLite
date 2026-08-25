@@ -4,7 +4,9 @@
 
 所有 MVP Epic 和 Story 的开发流转必须引用 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`，不得在单个 Story、review 记录或 finalizer 中重新定义第二套流程契约。
 
-Runtime artifact roots 使用 `modules.sdlc.planning_artifacts`、`modules.sdlc.implementation_artifacts`、`modules.sdlc.project_knowledge` 以及对应 `{planning_artifacts}`、`{implementation_artifacts}`、`{project_knowledge}` placeholders。Story lifecycle 使用 `sprint_status_file`、`{sprint_status_file}`、`sprint_status`、`{sprint_status}`、`story_location`、`story_location_absolute`、`story_root`、`{story_root}`、`flow_gate_root`、`{flow_gate_root}`、`default_output_file` 和 `{default_output_file}`。
+Runtime artifact roots 使用 `core.brainstorming_artifacts`、`modules.sdlc.analysis_artifacts`、`modules.sdlc.planning_artifacts`、`modules.sdlc.solutioning_artifacts`、`modules.sdlc.implementation_artifacts`、`modules.sdlc.devops_artifacts`、`modules.sdlc.project_knowledge`，以及对应 `{brainstorming_artifacts}`、`{analysis_artifacts}`、`{planning_artifacts}`、`{solutioning_artifacts}`、`{implementation_artifacts}`、`{devops_artifacts}`、`{project_knowledge}` placeholders。七类 fields、fresh defaults、existing explicit config、legacy fallback、non-migration 与 `docs/` / Project Knowledge boundary 均由 `SPEC 09` 唯一管理。
+
+Canonical Skill rename 由 `SPEC 04` 的 active Skill entry optional `renamedFromCanonicalSkillIds` 管理：`speclite-ir-grill-consistency-reviewer` → `speclite-implementation-readiness-grill-consistency-reviewer`，`speclite-check-implementation-readiness` → `speclite-implementation-readiness-check`。Fresh install 只投影新 active identity；不得生成 alias package、help entry、phase row 或 IDE mirror。Story lifecycle 使用 `sprint_status_file`、`{sprint_status_file}`、`sprint_status`、`{sprint_status}`、`story_location`、`story_location_absolute`、`story_root`、`{story_root}`、`flow_gate_root`、`{flow_gate_root}`、`default_output_file` 和 `{default_output_file}`。
 
 Sprint 状态和 Story lifecycle 字段使用 `development_status`、`development_status{story_key}`、`{current_sprint_status}`、`epic_status`、`story_completion_status`、`dependency_gate`、`anchor_contract_map` 和 `evidence_plan`。Flow Gate mode 固定为 `story-kickoff`、`story-completion`、`epic-completion`、`epic-kickoff`；Flow Gate result 固定为 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE`、`DECISION_NEEDED`。
 
@@ -14,7 +16,7 @@ Story dependency 必须按 `Contract Anchor`、`Functional Anchor`、`Evidence A
 
 项目维护者可以使用默认官方内置来源，从选择目录、官方模块和 AI IDE targets 到生成 `_speclite` runtime、IDE skill mirrors、`_speclite-output` 和 ready summary，完成一次可信 fresh install。npm/private registry、local tarball、offline bundle、Git source 和 local path 等替代来源路径由 Epic 5 扩展，不属于 Epic 1 的最小垂直切片。
 
-**覆盖 FR：** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR42, FR43, FR44, FR45, FR46, FR47, FR48, FR60, FR61, FR62, FR63, FR63a, FR64, FR65
+**覆盖 FR：** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR17a, FR42, FR43, FR44, FR45, FR46, FR47, FR47a, FR48, FR60, FR61, FR62, FR63, FR63a, FR63b, FR64, FR65, FR65a
 
 ## Epic 2: Methodology Discovery And Skill Execution（方法论发现与 Skill 执行）
 
@@ -85,3 +87,13 @@ SpecLite 维护者可以把持续新增的技术生态源定义放入 `assets/so
 **MVP guard：** 本 Epic 不改变 `core` required、`sdlc` default selected、`CommandResult` JSON contract、`speclite resolve` contract 或 workflow artifact contract。`--yes` / JSON 默认安装不得自动选择 ecosystem modules；任何 ecosystem module 被选择时必须通过 dependency 自动包含 `sdlc`，且未选择的 ecosystem modules 必须有 negative fixture assertions。
 
 **覆盖 FR / NFR / UX：** FR2, FR3, FR18, FR19, FR20, FR63a, FR66, FR67, FR71, NFR local-only deterministic release gate, UX install module selection clarity, canonical source governance
+
+## Epic 11: Phase-Aligned Workflow Artifact Governance（阶段对齐的 Workflow Artifact 治理）
+
+目标项目维护者与 AI IDE 使用者可以获得与 SpecLite SDLC 阶段顺序一致、可预测、可审计的 workflow artifact 文件体系：fresh install 预创建完整阶段 roots，canonical Skills 将产物写入唯一约定位置，existing installs 继续尊重既有配置与 workflow-owned artifacts，不发生静默迁移。
+
+**实施范围：** Corrective planning Epic。覆盖 `_speclite-output/` phase roots、Analysis/Planning/Solutioning/Implementation/DevOps artifact routing、PRD validation 命名、Implementation Readiness Skill identity/output consolidation、Story CR directory normalization、全 canonical corpus `grill` 引用清单，以及 fresh/legacy fixtures。PRD、Epics 与 UX 使用 Planning subject directories，Architecture whole/sharded artifacts 使用 `{solutioning_artifacts}/architecture/`。
+
+**兼容 guard：** Fresh install 使用新 fields 与新默认路径；existing install 已配置的 artifact roots 继续权威，缺少新增 fields 时使用明确且可观测的 `legacy-compatible` fallback。Producer/consumer 必须记录实际 resolved root 与 consumed path；普通 install/update/repair 不得移动、复制、重命名、删除或重写 workflow-owned artifacts。目标项目 `docs/` 保持 Primary Public Document（主要公开文档）定位，workflow 产生的 project knowledge 默认位于 `_speclite-output/project-knowledge-base/`。
+
+**覆盖 FR / NFR / UX：** FR13a, FR23b, FR23c, FR23d, FR23e, FR23f, FR23g, FR66a, NFR14a, NFR40f, UX-DR3, UX-DR7, UX-DR8, UX-DR15

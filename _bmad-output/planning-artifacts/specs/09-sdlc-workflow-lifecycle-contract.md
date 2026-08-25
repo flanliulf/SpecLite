@@ -22,11 +22,19 @@ Implementation agents、Story reviewers、Code reviewers、finalizer 和流程�
 
 本 SPEC 是以下字段和流程术语的 field-level contract source：
 
+- `[core].brainstorming_artifacts`
+- `[modules.sdlc].analysis_artifacts`
 - `[modules.sdlc].planning_artifacts`
+- `[modules.sdlc].solutioning_artifacts`
 - `[modules.sdlc].implementation_artifacts`
+- `[modules.sdlc].devops_artifacts`
 - `[modules.sdlc].project_knowledge`
+- `{brainstorming_artifacts}`
+- `{analysis_artifacts}`
 - `{planning_artifacts}`
+- `{solutioning_artifacts}`
 - `{implementation_artifacts}`
+- `{devops_artifacts}`
 - `{project_knowledge}`
 - `story_location`
 - `story_location_absolute`
@@ -51,15 +59,38 @@ Architecture、Epic、Story、canonical skill 和 audit report 可以引用这�
 
 ## Runtime Artifact Roots（Runtime Artifact 根路径）
 
-Runtime config 中的 `[modules.sdlc]` 定义 SDLC workflow 使用的项目级 artifact roots。Skill 必须通过 installed runtime config 或 `speclite resolve config` 读取这些值，不得从 source checkout 或 skill package 文案反推。
+Runtime config 中的 `[core]` 与 `[modules.sdlc]` 定义 workflow 使用的项目级 artifact roots。Skill 必须通过 installed runtime config 或 `speclite resolve config` 读取这些值，不得从 source checkout、Skill package 文案、hardcoded command path 或 manifest projection 反推。
 
-| Runtime key | Placeholder | Meaning | Contract |
-| --- | --- | --- | --- |
-| `modules.sdlc.planning_artifacts` | `{planning_artifacts}` | PRD、Architecture、Specs、Epics、readiness、workflow status 等 planning artifacts 的根目录。 | Runtime config 中必须写成 `{project-root}`-prefixed portable path；消费时必须解析到 target project 内。 |
-| `modules.sdlc.implementation_artifacts` | `{implementation_artifacts}` | sprint status、stories、flow-gates、story reviews、code reviews、retrospectives、implementation audits 等 implementation artifacts 的根目录。 | Runtime config 中必须写成 `{project-root}`-prefixed portable path；消费时必须解析到 target project 内。 |
-| `modules.sdlc.project_knowledge` | `{project_knowledge}` | 项目知识、背景文档和长期参考材料的根目录。 | Runtime config 中必须写成 `{project-root}`-prefixed portable path；Skill 可以读取；写入必须由具体 workflow 明确授权。 |
+| Runtime key | Placeholder | Meaning | Fresh-install default | Existing-install behavior |
+| --- | --- | --- | --- | --- |
+| `core.brainstorming_artifacts` | `{brainstorming_artifacts}` | Brainstorming workflow artifacts 根目录。 | `{project-root}/_speclite-output/0-brainstorming-artifacts` | 缺少新增 field 时 fallback 到 `{output_folder}/brainstorming`。 |
+| `modules.sdlc.analysis_artifacts` | `{analysis_artifacts}` | Research、Product Brief、PRFAQ 等 Analysis artifacts 根目录。 | `{project-root}/_speclite-output/1-analysis-artifacts` | 缺少新增 field 时 fallback 到已有 `{planning_artifacts}`。 |
+| `modules.sdlc.planning_artifacts` | `{planning_artifacts}` | PRD、Epics、UX 与 planning status 等 Planning artifacts 根目录。 | `{project-root}/_speclite-output/2-planning-artifacts` | 已有显式配置继续权威，不得因 fresh default 变化自动改写。 |
+| `modules.sdlc.solutioning_artifacts` | `{solutioning_artifacts}` | Architecture、Specs 与 implementation readiness 等 Solutioning artifacts 根目录。 | `{project-root}/_speclite-output/3-solutioning-artifacts` | 缺少新增 field 时 fallback 到已有 `{planning_artifacts}`。 |
+| `modules.sdlc.implementation_artifacts` | `{implementation_artifacts}` | sprint status、stories、flow-gates、reviews、retrospectives 和 implementation audits 根目录。 | `{project-root}/_speclite-output/4-implementation-artifacts` | 已有显式配置继续权威，不得因 fresh default 变化自动改写。 |
+| `modules.sdlc.devops_artifacts` | `{devops_artifacts}` | DevOps 与 release workflow artifacts 根目录。 | `{project-root}/_speclite-output/5-devops-artifacts` | 已有显式配置继续权威，不得因 fresh default 变化自动改写。 |
+| `modules.sdlc.project_knowledge` | `{project_knowledge}` | Workflow-generated project knowledge 与长期内部参考材料根目录。 | `{project-root}/_speclite-output/project-knowledge-base` | 已有显式配置继续权威，包括 legacy 显式 `{project-root}/docs`；不得因 fresh default 变化自动改写。 |
 
-`{project-root}` 是 runtime config 中允许持久化的 portable token，不是 raw absolute path。`{planning_artifacts}`、`{implementation_artifacts}` 和 `{project_knowledge}` 是 logical placeholders；它们可以在 runtime config 中展开为 `{project-root}/...`，但任何 filesystem I/O 前必须解析为当前 target project root 下的真实路径。Public report、manifest projection、audit result 和 fixture snapshot 中持久化路径时，必须记录 display-safe path，不得泄露真实 absolute path、home directory、drive letter 或 temporary/cache path。
+Fresh install 的 phase-owned subject directories 必须保持单一 canonical producer root：PRD 与 Epics 分别使用 `{planning_artifacts}/prd/`、`{planning_artifacts}/epics/`，UX 使用 `{planning_artifacts}/ux/`，Architecture whole document、sharded `index.md` 与 shards 使用 `{solutioning_artifacts}/architecture/`。Whole/sharded producer 与 consumer 必须在对应 subject directory 内使用确定性发现规则，并记录实际消费路径。Existing install 若缺少 `solutioning_artifacts`，仍按下述 legacy fallback 解析；该 fallback 不改变 fresh canonical root，也不授权迁移既有 Architecture artifacts。
+
+`{project-root}` 是 runtime config 中允许持久化的 portable token，不是 raw absolute path。七类 artifact placeholders 是 logical placeholders；它们可以在 runtime config 中展开为 `{project-root}/...`，但任何 filesystem I/O 前必须解析为当前 target project root 下的真实路径。Public report、manifest projection、audit result 和 fixture snapshot 中持久化路径时，必须记录 display-safe project-relative POSIX path，不得泄露真实 absolute path、home directory、drive letter 或 temporary/cache path。
+
+### Compatible Evolution And Legacy Fallback（兼容演进与旧配置回退）
+
+- Fresh install 必须使用表中的新 fields 与新 defaults，并由 canonical module metadata/directory declarations 驱动 root creation；command 层不得维护第二份 hardcoded path list。
+- Existing install 已显式配置的 `planning_artifacts`、`implementation_artifacts`、`devops_artifacts` 和 `project_knowledge` 继续权威。
+- Legacy fallback 只补足 existing install 缺少的新增 `brainstorming_artifacts`、`analysis_artifacts` 和 `solutioning_artifacts`，不得自动把 fallback value 回写到 config。
+- Fallback resolution 必须可报告为 `legacy-compatible`；它不得表示 artifact migration 已完成。
+- 普通 install、update 和 repair 不得根据新 defaults 移动、复制、重命名、删除或重写 workflow-owned artifacts。
+- 仅修改 config root、但实际 artifacts 仍在旧路径时，validator 必须产生 config/artifact mismatch 诊断，不得报告 migration success。
+- Explicit artifact migration 属于未来独立能力，不属于本 SPEC 当前 install/update/repair contract。
+
+### Public Docs And Project Knowledge Boundary（Public Docs 与 Project Knowledge 边界）
+
+- `docs/` 是 Primary Public Document；它不是 fresh-install `{project_knowledge}` default、alias 或 fallback。
+- Existing install 若显式配置 `project_knowledge = "{project-root}/docs"`，该 explicit value 继续权威；这只是 legacy configured value，不改变 `docs/` 的 steady-state public-document 定位。
+- Workflow-generated project knowledge 的 fresh-install default 是 `_speclite-output/project-knowledge-base/`。
+- Domain、market、technical research 必须写入 `{analysis_artifacts}/research/`；Product Brief 写入 `{analysis_artifacts}/product-brief/`；PRFAQ 写入 `{analysis_artifacts}/prfaq/`。这些 workflows 不是 project knowledge producers。
 
 ## Story Lifecycle Artifact Paths（Story 生命周期产物路径）
 

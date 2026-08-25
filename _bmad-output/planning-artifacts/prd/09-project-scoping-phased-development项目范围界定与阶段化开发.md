@@ -30,7 +30,8 @@ MVP 必须支持以下核心旅程：
 - 默认 bundled source discovery（`assets/source/speclite/`）与正式可分发 SpecLite source skill discovery。
 - 安装到 `.claude/skills` 和 `.agents/skills`。
 - 生成 `_speclite` metadata/control hub。
-- 生成 `_speclite-output` artifact repository。
+- 生成阶段对齐的 `_speclite-output` workflow artifact repository：fresh install 预创建 `0-brainstorming-artifacts/`、`1-analysis-artifacts/`、`2-planning-artifacts/`、`3-solutioning-artifacts/`、`4-implementation-artifacts/`、`5-devops-artifacts/` 与 `project-knowledge-base/`。
+- 保持目标项目 `docs/` 的 Primary Public Document（主要公开文档）定位，不将其作为 workflow-generated project knowledge 的 alias 或 fallback。
 - 生成 manifest/index 文件，包括 skill/help/files 等索引能力。
 - 阶段化 skills 菜单可被 IDE 发现，并能激活核心研发 workflow。
 - 核心流程产物可输出到配置约定路径。
@@ -67,9 +68,10 @@ MVP 生成的 metadata、manifest/index 和 validation issue model 必须为 Pos
 - 新增 MVP 命令 JSON 字段必须通过 `CommandResult.schemaVersion` 扩展；不得破坏既有 `speclite.command-result.v1`、`CommandResult` 和 `ValidationIssue` 字段语义。
 - 新增 IDE adapter 必须通过 adapter registry 扩展，不改变 canonical skill package 内容。
 - 新增配置键必须允许旧 resolver 忽略未知字段，且不得破坏 human-owned override 文件。
+- 阶段 artifact roots 采用兼容演进：existing install 继续以既有显式配置为权威，缺少新增字段时使用约定的 legacy fallback；普通 install、update 和 repair 不自动迁移 workflow-owned artifacts。
 - 如未来必须升级 schema，工具必须输出 migration-needed 状态、旧版本、新版本和人工确认步骤；MVP producers 只能输出 manual 或 unsupported migration kind，automated-available 保留给 Post-MVP migration tooling。
 
-MVP 暂不包含完整迁移指南，也不自动迁移手工复制 skills、旧参考结构或其他历史目录。MVP 只记录新安装状态、保护当前安装所有权边界，并把自动迁移能力留到 Post-MVP。
+MVP 暂不包含完整迁移指南，也不自动迁移手工复制 skills、旧参考结构、既有 workflow artifacts 或其他历史目录。MVP 只记录新安装状态、保护当前安装所有权边界，并把显式 artifact migration 能力留到 Post-MVP。
 
 ## Post-MVP Features（Post-MVP 功能）
 

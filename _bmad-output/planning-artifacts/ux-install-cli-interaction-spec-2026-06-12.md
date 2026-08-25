@@ -3,8 +3,14 @@ title: "Install CLI Interaction Revision"
 date: "2026-06-12"
 source: "bmad-agent-ux-designer"
 status: "ready-for-prd-and-story"
+revisionSource: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-08-17.md"
+revisionStatus: "complete"
+revisionUpdatedAt: "2026-08-18"
+revisionCompletedAt: "2026-08-18"
 related:
   - "_bmad-output/planning-artifacts/ux-design-specification.md"
+  - "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md"
+  - "_bmad-output/planning-artifacts/sprint-change-proposal-2026-08-17.md"
   - "_bmad-output/planning-artifacts/prd/10-functional-requirements功能需求.md"
   - "_bmad-output/planning-artifacts/prd/11-non-functional-requirements非功能需求.md"
   - "_bmad-output/planning-artifacts/epics/04-epic-1-project-installation-onboarding项目安装引导.md"
@@ -90,11 +96,13 @@ Required: core
 Default: core, sdlc
 
 Available modules:
-- core  SpecLite Core Module 0.0.0  package roots: 13
-- sdlc  SpecLite SDLC Module 0.0.0  package roots: 44
+- core  SpecLite Core Module 0.0.0  package roots: <derived-count>
+- sdlc  SpecLite SDLC Module 0.0.0  package roots: <derived-count>
 
 ? 请输入 module ids，直接回车使用默认值：
 ```
+
+`<derived-count>` 是动态占位，renderer 必须从当次 selected modules 对应的 source inventory / manifest projection 推导实际数量。文档不把任何历史 module count 固化为 fixture 或 implementation assertion；fixture 若需验证数量，必须使用其受控 source inventory 的派生值。
 
 分隔规则：
 
@@ -145,7 +153,7 @@ Ready Summary 必须在 ReadyCheck 通过后展示，并按稳定顺序包含：
 1. Summary：安装已完成、target project、manifest version。
 2. Installed modules：module id、display name、package root count。
 3. IDE targets：target id、target path、skill count。
-4. Key paths：`_speclite`、`_speclite-output`、manifest path、IDE mirror paths。
+4. Key paths：`_speclite`、manifest path、IDE mirror paths，以及七个 runtime artifact roots 的实际 `resolvedRoot` 与 `resolutionMode`。Planning 展示 PRD / `{planning_artifacts}/prd/`、Epics / `{planning_artifacts}/epics/`、UX / `{planning_artifacts}/ux/`；Solutioning 展示 Architecture / `{solutioning_artifacts}/architecture/`。
 5. Next actions：打开 IDE skill、运行 `speclite status`、必要时运行 `speclite validate`。
 
 失败时不得展示 Ready Summary heading，也不得输出容易被理解为 ready 的 success block。
@@ -160,6 +168,7 @@ Ready Summary 必须在 ReadyCheck 通过后展示，并按稳定顺序包含：
 6. 如保留自定义交互，必须通过显式 interactive mode 或显式 flags 进入，不得让 `--yes` 同时表示“授权写入”和“继续询问默认问题”。
 7. `NO_COLOR`、non-TTY 和 CI 输出不包含 ANSI escape，不依赖 spinner-only progress。
 8. Fixture 或 CLI smoke 必须覆盖中文默认输出、英文 locale 输出、prompt/summary 分离、`--yes` no-prompt flow、`--json` stability。
+9. Fresh install 的 Architecture discovery/evidence 必须指向 `{solutioning_artifacts}/architecture/`。Existing install 必须显示 explicit config 或 `legacy-compatible` fallback 解析得到的实际 root；普通 install、update 或 repair 不得迁移、重命名或重写既有 workflow-owned Architecture artifacts。
 
 ## Implementation Notes（实现备注）
 

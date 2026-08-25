@@ -40,6 +40,12 @@
 **则** 命令输出明确失败原因和建议下一步
 **并且** 使用稳定 `source-integrity` issue category 或对应 command-level diagnostic。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR8`、`FR58`、`FR59`
+- **Supporting NFRs:** `NFR12`、`NFR13`、`NFR13e`、`NFR16`、`NFR22`
+- **UX / Contract Anchors:** SPEC 02 `SourceDescriptor`、SPEC 03 external-access declaration and confirmation
+
 ## Story 5.2: Registry Source Resolution And Diagnostics（Registry 来源解析与诊断）
 
 作为项目维护者，
@@ -82,6 +88,12 @@
 **当** 本地 manifest 中已有 source descriptor
 **则** validate 只检查 descriptor 和 integrity evidence shape
 **并且** 不重新访问 registry 或执行 remote freshness check。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR53`、`FR54`、`FR58`、`FR59`
+- **Supporting NFRs:** `NFR12`、`NFR13`、`NFR13a`、`NFR13b`、`NFR13c`、`NFR13e`、`NFR16`、`NFR22`、`NFR32e`
+- **UX / Contract Anchors:** SPEC 02 registry evidence and trust status、SPEC 07 source-integrity diagnostics
 
 ## Story 5.3: Local Tarball, Offline Bundle And Local Path Integrity（本地包、离线包与本地路径完整性）
 
@@ -131,6 +143,12 @@
 **则** issue 使用稳定 `source-integrity` issue id，例如 tarball unreadable 或 offline bundle unreadable
 **并且** cache path、temporary extraction path 和本机 absolute path 必须 redacted。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR9`、`FR55`、`FR56`、`FR58`、`FR59`
+- **Supporting NFRs:** `NFR12`、`NFR13`、`NFR13a`、`NFR13b`、`NFR13b-1`、`NFR13b-2`、`NFR13c`、`NFR13d`、`NFR13e`、`NFR16`、`NFR22`、`NFR32e`
+- **UX / Contract Anchors:** SPEC 02 local-source/tarball/offline evidence、SPEC 07 source-integrity and redaction diagnostics
+
 ## Story 5.4: Git Source Pinning And Floating Source Rejection（Git 来源固定与浮动来源拒绝）
 
 作为项目维护者，
@@ -173,6 +191,12 @@
 **当** resolved commit SHA evidence 可复现且无 mismatch
 **则** source 可以是 `unverified`
 **并且** 不得自动标记为 `trusted`。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR9`、`FR57`、`FR58`、`FR59`
+- **Supporting NFRs:** `NFR12`、`NFR13`、`NFR13a`、`NFR13b`、`NFR13c`、`NFR13e`、`NFR16`、`NFR22`、`NFR32e`
+- **UX / Contract Anchors:** SPEC 02 Git commit evidence and floating-source rejection、SPEC 03 declared external access
 
 ## Story 5.5: SourceDescriptor Trust Status And Redacted Reporting（SourceDescriptor 信任状态与脱敏报告）
 
@@ -217,3 +241,9 @@
 **当** 文档或实现描述该对象
 **则** 必须引用 source-descriptor owning SPEC 作为字段与语义真源
 **并且** 不在多个文件中定义第二套 trust/evidence 规则。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR58`、`FR59`
+- **Supporting NFRs:** `NFR9a`、`NFR13a`、`NFR13b`、`NFR13b-1`、`NFR13b-2`、`NFR13c`、`NFR13d`、`NFR13e`、`NFR16`、`NFR22`、`NFR32e`、`NFR35f`
+- **UX / Contract Anchors:** SPEC 02 owning source truth、SPEC 04 installed SourceDescriptor projection、SPEC 07 redacted diagnostics

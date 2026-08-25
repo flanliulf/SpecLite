@@ -4,7 +4,7 @@
 
 SpecLite 作为 developer tool，核心交付物是一个 Node-first CLI installer/control plane，用于把 SpecLite 方法论体系安装、状态检查、验证和更新到目标项目及多个 AI IDE 中。它不是通用脚手架，也不是单一 IDE 插件，而是围绕 SpecLite skills、runtime metadata、manifest/index、IDE mirrors 和 workflow artifacts 建立本地可治理工具链。
 
-MVP 必须把既有 SpecLite source skill 体系转化为可安装系统：用户通过 CLI 完成安装后，目标项目中应生成 `_speclite` metadata/control hub、`_speclite-output` artifact repository、manifest/index 文件，以及 `.claude/skills`、`.agents/skills` 等 IDE execution mirrors。CLI 还必须提供安装状态检查、确定性验证和安全更新入口，使 SpecLite 能作为团队研发规范工具链被持续使用。
+MVP 必须把既有 SpecLite source skill 体系转化为可安装系统：用户通过 CLI 完成安装后，目标项目中应生成 `_speclite` metadata/control hub、阶段对齐的 `_speclite-output` workflow artifact repository、manifest/index 文件，以及 `.claude/skills`、`.agents/skills` 等 IDE execution mirrors；目标项目 `docs/` 独立承担 Primary Public Document（主要公开文档）职责。CLI 还必须提供安装状态检查、确定性验证和安全更新入口，使 SpecLite 能作为团队研发规范工具链被持续使用。
 
 ## Technical Architecture Considerations（技术架构考量）
 
@@ -12,7 +12,7 @@ MVP 运行时与控制面必须以 Node.js 为主。现有 Python resolver 可�
 
 TOML 继续作为外部配置与定制化契约。Node 工具链必须能够读取和生成 installer-owned TOML，同时对 human-owned TOML 默认采用只读或保守更新策略，避免破坏注释、排序和人工维护结构。YAML、CSV、Markdown、JSON 可继续承担 manifest、skill index、help index、source metadata 和报告输出等职责。
 
-架构上应保持 canonical source、installer control plane、IDE execution plane 和 artifact repository 的清晰边界。source skill 是唯一权威来源；IDE skills 目录是可再生成 mirror；`_speclite` 存放配置、manifest、索引、runtime scripts 和安装状态；`_speclite-output` 存放 research、planning、implementation、review 等 workflow 产物。
+架构上应保持 canonical source、installer control plane、IDE execution plane、workflow artifact repository、workflow-generated project knowledge 与 public docs 的清晰边界。source skill 是唯一权威来源；IDE skills 目录是可再生成 mirror；`_speclite` 存放配置、manifest、索引、runtime scripts 和安装状态；`_speclite-output` 按 `0-brainstorming-artifacts/`、`1-analysis-artifacts/`、`2-planning-artifacts/`、`3-solutioning-artifacts/`、`4-implementation-artifacts/`、`5-devops-artifacts/` 保存阶段产物，并以 `project-knowledge-base/` 保存 workflow-generated project knowledge；`docs/` 不属于 project knowledge alias 或 fallback。Domain、market、technical research 及 product brief、PRFAQ 属于 Analysis 产物。
 
 ## Language Matrix（语言矩阵）
 
@@ -85,6 +85,21 @@ Post-MVP 命令包括：
 
 CLI 应同时支持交互式使用和脚本化使用。MVP 输出必须同时提供人类可读文本和统一 JSON output；Post-MVP 可在该契约基础上扩展 CI、企业工具链和自动化验证集成。
 
+## CLI User States & Recovery Paths（CLI 用户状态与恢复路径）
+
+下表聚合既有用户可观察状态、写入边界与恢复入口，便于区分 command result、installed health 与 update/repair planning。它不新增 state、command、issue id、schema 或自动迁移能力；精确字段和 producer/consumer 语义以 Existing Contract Anchors（既有契约锚点）为准。
+
+| User Scenario | Observable State/Result | Write Behavior | Recovery/Next Action | Existing Contract Anchors |
+| --- | --- | --- | --- | --- |
+| Fresh interactive flow | 依次展示 plan、稳定顺序的 final review、独立 confirmation prompt、执行阶段与成功后的 Ready Summary | confirmation 前不写入；确认只授权 plan 中声明且无 blocker 的 writes | 在确认前调整 modules、config mode、IDE targets 或 source；写入后运行 `status` / `validate` | FR47、FR65a；NFR1、NFR1a、NFR11、NFR40e；SPEC 03、SPEC 08 |
+| Fresh `install --yes` | 使用 deterministic defaults，human-readable output 说明默认值；`--json --yes` 保持 no-prompt | 仅授权无 conflict 的 planned writes；required value 无法解析或出现 unsupported target、drift、conflict 时在写入前失败 | 提供显式 flags、进入显式 interactive mode，或先处理 reported blocker；不得隐式切换为 interactive mode | FR47a；NFR11a、NFR40e；SPEC 03 |
+| Existing install detected | Human-readable output 给出 `existing-install` 检测结果，列出 detected runtime、manifest version、IDE targets 与下一步选项；该词不是新的 `CommandResult.status` | 不得静默覆盖已有 SpecLite 状态、human-owned custom 文件或 workflow-owned artifacts | 先运行 `status` / `validate` 核对 installed state，再按计划运行 `update`；artifact roots 继续遵守 existing config 与 legacy fallback | NFR7、NFR14、NFR14a、NFR40f；SPEC 03、SPEC 09 |
+| `not-configured` / `configured` / `partial` / `failed` health | `status.data.highLevelHealth` 表示 installed health；它不与 `CommandResult.status` 互相推导，成功读取 `partial` / `failed` 时 command 仍可为 `success`、exit code 0 | `status` 是 local-only read-only summary，不执行完整 hash scan、remote check 或隐式 update | `not-configured` 时运行 `install`；`partial` / `failed` 时运行 `validate` 获取逐项 issue 与修复建议 | NFR2a、NFR24a、NFR26、NFR33、NFR35b-1–NFR35b-5；SPEC 01、SPEC 05 |
+| Command warning | `CommandResult.status: warning`，exit code 0；warning 不等于 installation healthy，也不得作为 blocking error | warning 本身不授权额外写入；write-capable command 仍受既有 plan 与 authorization 约束 | 按稳定 `nextActions` 处理；需要完整健康判断或逐项诊断时运行 `validate` | NFR30、NFR31、NFR35g；SPEC 01、SPEC 07；resolve 例外见 SPEC 06 |
+| Update conflict / IDE drift | 普通 `update` 输出 blocking conflict；IDE mirror/file drift 具有稳定 issue 与 affected path，且不得被 `--yes` 隐式修复 | 冲突路径保持原样并进入 `data.conflicts`；普通 `update` 跳过，只有显式 `update --repair` 可修复 eligible installer-owned drift | 审查 conflict 与 ownership；对可安全恢复内容运行 `update --repair`，随后运行 `validate`；human-owned 与 workflow-owned 内容继续受保护 | FR41a–FR41b；NFR8、NFR14、NFR25a–NFR25c、NFR32g；SPEC 01、SPEC 03、SPEC 07 |
+| Partial write failure / operation lock | failure 返回非 0 exit code；install failure 列出 completed steps、failed step、pending steps 与 manual action，且不展示 Ready Summary；`operation-lock.project-locked` 是 command-level blocker | lock 获取失败时不写入；partial failure 前已完成的 safe writes 不得被报告为已 rollback，MVP 不提供 transactional rollback | 处理 reported issue 或 lock；随后运行 `validate`、`update` 或 `update --repair`。stale lock 只按 warning 与 manual guidance 处理，不自动删除 | FR41c；NFR10、NFR30、NFR32f；SPEC 01、SPEC 03 |
+| Config/artifact mismatch or schema migration needed | config path 与实际 artifacts 不一致时输出可诊断结果；不兼容 schema 使用 `manifest-schema.migration-needed`，包含版本、migration kind 与 manual-action requirement | 普通 install/update/repair 不移动 workflow artifacts，也不执行未契约化 schema migration；不得误报 migration 已完成 | 恢复 authoritative existing config，或按 manual action 完成显式人工迁移后重新 `validate`；MVP 的 migration kind 仅为 `manual` / `unsupported` | FR23b–FR23g；NFR14a、NFR32b–NFR32c、NFR40f；SPEC 07、SPEC 09 |
+
 ## Code Examples（代码示例）
 
 MVP 文档与测试资料必须包含 fixture project，用于展示安装前后结构和典型命令流程。示例应覆盖：
@@ -119,7 +134,7 @@ MVP 文档必须提供最小迁移边界清单：
 
 实现顺序应优先保证控制面闭环，而不是先扩展大量命令或 IDE 类型。MVP 应先完成 Node CLI skeleton、source discovery、TOML resolver、manifest/index 生成、IDE adapter、fresh install、status、validate、update 和 fixture install tests。
 
-文件所有权模型必须在第一版实现：installer-owned 文件可由 installer 管理；human-owned custom TOML 和用户定制内容不得被无提示覆盖；workflow-owned artifacts 不参与 update 覆盖。`update` 必须基于 hash、manifest 或等价完整性机制识别本地改动，并输出 update plan、impact summary、changed/skipped/conflict paths；无法确认安全时保守跳过。持久报告产物、备份/恢复和历史对比留到 Post-MVP。
+文件所有权模型必须在第一版实现：installer-owned 文件可由 installer 管理；human-owned custom TOML 和用户定制内容不得被无提示覆盖；workflow-owned artifacts 不参与 update 覆盖。Fresh install 使用阶段对齐的新 fields 与新默认 paths；existing install 的显式 artifact root 配置继续权威，缺少新增 fields 时应用 legacy fallback。普通 install、update 和 repair 不得移动、重命名、删除或重写既有 workflow artifacts；显式 artifact migration 留作独立后续能力。`update` 必须基于 hash、manifest 或等价完整性机制识别本地改动，并输出 update plan、impact summary、changed/skipped/conflict paths；无法确认安全时保守跳过。持久报告产物、备份/恢复和历史对比留到 Post-MVP。
 
 跨平台路径处理必须作为基础设施实现，覆盖 macOS 和 Windows 的路径分隔符、换行符、文件权限、大小写敏感性、shell 差异和可执行入口。所有 manifest、hash、IDE target 和 validate 报告应使用稳定、可比较的路径规范。
 

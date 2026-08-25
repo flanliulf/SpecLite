@@ -45,6 +45,12 @@
 **则** issue 会包含稳定 issue id、category、severity 和 affected path
 **并且** suggested next step 不会建议用户删除或覆盖 human-owned/workflow-owned 文件作为默认修复方式。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR37`、`FR39`、`FR40`、`FR51`、`FR51a`、`FR51b`
+- **Supporting NFRs:** `NFR14`、`NFR17`、`NFR17a`
+- **UX / Contract Anchors:** SPEC 04 ownership projection、SPEC 05 protected IDE mirrors、workflow-owned artifact boundary
+
 ## Story 4.2: Config And Customization Merge Order For Updates（更新中的配置与定制化合并顺序）
 
 作为项目维护者，
@@ -82,6 +88,12 @@
 **当** 更新 config/customization 解析实现
 **则** 必须同步 resolve parity fixture、owning SPEC 和 expected outputs
 **并且** update/repair 不得实现第二套私有 merge logic。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR37`、`FR39`、`FR50`、`FR51`、`FR51a`
+- **Supporting NFRs:** `NFR14`、`NFR39`、`NFR40b`
+- **UX / Contract Anchors:** SPEC 06 resolve command、config/customization precedence contract
 
 ## Story 4.3: Update Plan Before Write（写入前更新计划）
 
@@ -136,6 +148,12 @@
 **则** affected path、ownership、proposed action、conflict reason、suggested next step 和是否需要 `--yes` 仍必须可读
 **并且** human-readable output 不得把 automation 依赖字段作为唯一承载位置。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR36`、`FR38`、`FR41`、`FR41c`
+- **Supporting NFRs:** `NFR8`、`NFR14`、`NFR19`、`NFR30`、`NFR32g`
+- **UX / Contract Anchors:** `UX-DR6`、SPEC 03 install/update plan-before-write、SPEC 01 update result projection
+
 ## Story 4.4: Project Operation Lock And Safe Write（项目操作锁与安全写入）
 
 作为项目维护者，
@@ -184,6 +202,12 @@
 **则** 不暴露不稳定的 createdAt、pid 或 checkout-specific absolute path
 **并且** lock file 不进入 files index 或 stable files-index hash。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR41c`
+- **Supporting NFRs:** `NFR20`、`NFR30`、`NFR32f`、`NFR35f`
+- **UX / Contract Anchors:** SPEC 03 project operation lock、safe write and partial failure contract、SPEC 07 operation-lock diagnostics
+
 ## Story 4.5: Conflict Detection And Default Non-Overwrite Behavior（冲突检测与默认不覆盖行为）
 
 作为项目维护者，
@@ -226,6 +250,12 @@
 **当** files、manifest 和 source 未变化
 **则** conflicts 的 affected path、reason code 和 action 集合保持稳定
 **并且** 不依赖 filesystem traversal order。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR38`、`FR39`、`FR40`、`FR41`、`FR41a`
+- **Supporting NFRs:** `NFR4`、`NFR8`、`NFR14`、`NFR25a`、`NFR32g`
+- **UX / Contract Anchors:** SPEC 03 conflict projection and reason-code registry、SPEC 04 files-index hash baseline
 
 ## Story 4.6: Explicit Repair For Recoverable Installer-Owned Drift（可恢复 Installer-Owned Drift 的显式修复）
 
@@ -274,3 +304,9 @@
 **当** source evidence、manifest 和 files index 未变化
 **则** affected path、hash、reason code 和 action 集合保持稳定
 **并且** consumer/parser 必须容忍 unknown future reason codes，不得仅因 code unknown 而 parsing failed。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR36`、`FR39`、`FR40`、`FR41b`、`FR41c`
+- **Supporting NFRs:** `NFR4`、`NFR8`、`NFR14`、`NFR25a`、`NFR25b`、`NFR25c`、`NFR32g`
+- **UX / Contract Anchors:** SPEC 03 repair eligibility and action contract、SPEC 04 canonical/file hash evidence、SPEC 05 IDE mirror repair boundary

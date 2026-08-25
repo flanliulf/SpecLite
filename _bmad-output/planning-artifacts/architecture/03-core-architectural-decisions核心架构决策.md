@@ -10,6 +10,9 @@
 - Runtime Boundaries（运行时边界）：`_speclite` 是 metadata/control hub，IDE skill directories 是 execution plane，`_speclite-output` 是 artifact repository。
 - Validation Model（验证模型）：`status`、`validate`、MVP JSON output 和 fixture assertions 共享 deterministic issue model。
 - Update Safety（更新安全）：写入前先执行 ownership manifest + hash comparison。
+- Phase-Aligned Artifact Topology（阶段对齐的产物拓扑）：七类 runtime artifact roots 及 placeholders 由 `SPEC 09` 统一管理。
+- Compatible Evolution（兼容演进）：fresh install 使用新 fields/defaults；existing install 的显式配置继续权威；缺失新增 fields 时使用 legacy fallback；普通 install、update 和 repair 不执行 artifact migration。
+- Canonical Skill Identity Evolution（Canonical Skill 身份演进）：Skill rename 由 `SPEC 04` 的 `renamedFromCanonicalSkillIds` 表达，并始终保持唯一 active canonical identity。
 
 **Important Decisions（重要决策，塑造架构）：**
 
@@ -18,6 +21,9 @@
 - Data-Driven IDE Adapters（数据驱动 IDE 适配器）：IDE integrations 采用 data-driven adapters。
 - Source/Channel Abstraction（来源/渠道抽象）：将 npm、private registry、tarball、offline bundle 和 Git source 归一为 canonical source descriptor。
 - Fixture Projects（Fixture 项目）：fixture projects 是必需的验收资产，不是可选示例。
+- Runtime Config Projection（Runtime 配置投影）：`SPEC 03` 的 fresh-install config 示例必须生成全部新 roots；existing-install resolution 服从 `SPEC 09`。
+- Manifest/Index Projection（Manifest/Index 投影）：manifest/index 投影 resolved roots 和 rename metadata，但不得成为第二套配置或 identity 真源。
+- Workflow Artifact Protection（Workflow 产物保护）：仅修改 config 而没有移动 artifacts 时必须诊断 mismatch，不得报告 migration 完成。
 
 **Deferred Decisions（延后决策，Post-MVP）：**
 
@@ -52,6 +58,24 @@ SpecLite 使用 filesystem-backed data contracts，而不是数据库。
 **Caching Strategy（缓存策略）：**
 MVP 不使用持久 database cache。使用 manifest/hash baselines 优化 update 与 validation。
 
+**Phase-Aligned Artifact Root Contract（阶段对齐的 Artifact Root 契约）：**
+
+`_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md` 是七类 runtime fields/placeholders、fresh defaults、legacy fallback、public docs/project knowledge 边界和 workflow consumer resolution 的 field-level contract source：
+
+- `core.brainstorming_artifacts` → `{brainstorming_artifacts}`
+- `modules.sdlc.analysis_artifacts` → `{analysis_artifacts}`
+- `modules.sdlc.planning_artifacts` → `{planning_artifacts}`
+- `modules.sdlc.solutioning_artifacts` → `{solutioning_artifacts}`
+- `modules.sdlc.implementation_artifacts` → `{implementation_artifacts}`
+- `modules.sdlc.devops_artifacts` → `{devops_artifacts}`
+- `modules.sdlc.project_knowledge` → `{project_knowledge}`
+
+Architecture、installer、manifest、UX、Epic、Story 和 canonical Skills 只能引用这些字段，不得重新定义 defaults 或 fallback。
+
+**Canonical Skill Rename Contract（Canonical Skill 更名契约）：**
+
+`_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 通过 active Skill entry 上的 optional `renamedFromCanonicalSkillIds` 保存旧 ID 到新 ID 的兼容关系。Fresh install 只投影 active canonical ID；old ID 不生成 alias package、help entry、phase row 或 IDE mirror。Existing install/update 可以识别旧 ID，但必须重定向或给出稳定 deprecation diagnostic；update plan 必须显式展示 rename/reprojection，且 drifted old package 不得静默覆盖或删除。
+
 ## Authentication & Security（认证与安全）
 
 **Decision（决策）：** MVP 不实现用户认证系统。安全重点放在 local source trust、file ownership 和 safe writes。
@@ -68,6 +92,9 @@ SpecLite 在 MVP 中不托管用户账号或远程服务。真正的安全面是
 - `--yes` 或交互确认只表示 command-level write authorization，不表示接受 unverified source、floating Git、unsupported source、failed evidence verification 或 source policy rejection。
 - 显式 `--dry-run` 只产生 plan、不写文件、`writeAuthorized: false`；未显式 dry-run 但确认未完成或脚本模式缺少 `--yes` 时也保持 unapplied plan，不得把真实 planned action 改写成 `skip:not-authorized`。
 - Human-owned custom files 与 workflow-owned artifacts 永不被静默覆盖。
+- Install、update 和 `update --repair` 不得移动、复制、重命名、删除或重写 workflow-owned artifacts。
+- Legacy fallback 是 read/resolve compatibility，不是 migration；仅修改 config 而没有移动 artifacts 时必须产生 config/artifact mismatch 诊断，不得报告 migration 完成。
+- Explicit artifact migration 属于未来独立能力，必须拥有独立 authorization、plan、evidence 和 recovery contract。
 - MVP 默认不修改 `_speclite/custom/*.toml` 或 `_speclite/custom/*.user.toml`；Architecture 中的“保守更新”只表示读取、保护和诊断，未来写入必须通过显式命令或交互确认并记录 ADR。
 - Fresh install 可以 create-if-absent 方式创建 human-owned TOML stub；MVP 仅限 `_speclite/custom/config.toml` 与 `_speclite/custom/config.user.toml`。如果目标文件已存在，install/update/repair 不得覆盖、重写、重排或格式化；fresh install 不默认创建 skill-specific `_speclite/custom/{skill}.toml` 或 `_speclite/custom/{skill}.user.toml`。
 - Installer-owned drift 虽发生在 installer-owned areas，也不得被 `validate` 或普通 `update` 静默覆盖；`update` 默认产生 conflict，普通 `update` 的确认或 `--yes` 不得把 drift conflict 转成 repair。MVP 通过 `speclite update --repair` 恢复可安全 repair 的 canonical 内容，不新增顶级 `speclite repair` 命令，`speclite sync` 保持 Post-MVP。
@@ -114,6 +141,16 @@ MVP 不适用。未来企业策略控制可以叠加在 source/channel allowlist
 - Skill-to-runtime：skills 通过 `_speclite` 解析 project config/customization。
 - Workflow-to-artifact：workflows 写入已配置的 artifact locations。
 - Validator-to-user：findings 使用稳定的 issue id、category、severity、affected path、impact 和 suggested next step。
+
+**Artifact Root Resolution Flow（Artifact Root 解析流）：**
+
+1. Runtime config 提供显式 fields。
+2. `SPEC 09` 解析 fresh defaults 或 legacy fallback。
+3. Installer directory planner 使用 canonical metadata 创建 fresh roots。
+4. Manifest/index 投影 resolved roots、compatibility mode 和 canonical identity。
+5. Installed workflow 使用 resolved placeholders 路由产物。
+6. Validator 比较 configured root、actual consumed path 与 on-disk artifacts。
+7. Config/artifact mismatch 只报告诊断，不触发迁移。
 
 **Error Handling Standard（错误处理标准）：**
 所有失败在内部返回 structured diagnostic objects，再渲染为 human-readable CLI output 或 `--json` output。MVP JSON output 必须复用同一 issue model。Human-readable output 可以更丰富，但不得承载 structured JSON 或 file contract 中不存在的自动化依赖；progress events/spinner output 不是 MVP automation API。Machine-readable progress `stepId` 只作为 fixture-observable deterministic signal；自动化必须依赖 `CommandResult.data.completedSteps`、`CommandResult.data.pendingSteps` 或 owning SPEC 中定义的 file contracts。
@@ -163,6 +200,14 @@ MVP 不需要环境服务器配置。CLI 读取 explicit flags、project config 
 通过 deterministic manifests、shared target dedupe、hash-based skip logic 和 scoped validation 扩展。除非 file-contract complexity 被证明不足，否则不引入服务或数据库。
 
 ## Decision Impact Analysis（决策影响分析）
+
+**Planning Contract Update Sequence（规划契约更新顺序）：**
+
+1. 更新 `SPEC 09`，建立 artifact roots、defaults、fallback 和 boundary 真源。
+2. 更新 `SPEC 04`，建立 canonical Skill rename mapping。
+3. 更新 `SPEC 03`，同步 fresh-install runtime config 示例。
+4. 更新 Architecture 的 runtime boundaries、implementation patterns、project structure 和 validation 状态。
+5. 后续由 UX、Epic/Story 和 readiness workflow 消费这些 owning contracts。
 
 **Implementation Sequence（实现顺序）：**
 

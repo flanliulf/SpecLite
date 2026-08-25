@@ -15,6 +15,7 @@
 - FR11: 系统可以展示每个目标 AI IDE 的配置结果。
 - FR12: 系统可以为目标项目创建 SpecLite 项目级运行元数据结构。
 - FR13: 系统可以为目标项目创建 SpecLite 过程产物输出结构。
+- FR13a: Fresh install 必须在 `_speclite-output/` 下预创建阶段对齐的一级 artifact roots：`0-brainstorming-artifacts/`、`1-analysis-artifacts/`、`2-planning-artifacts/`、`3-solutioning-artifacts/`、`4-implementation-artifacts/`、`5-devops-artifacts/`；workflow 产生的 project knowledge 默认位于 `_speclite-output/project-knowledge-base/`，目标项目 `docs/` 保持 Primary Public Document（主要公开文档）定位。
 - FR14: 系统可以发现正式可分发的 SpecLite source skills；MVP 默认官方安装集合必须递归发现 `core-skills/` 与 `sdlc-skills/` 下全部包含 `SKILL.md` 的 canonical package roots，并排除 `support-skills/`、已删除入口和非正式分发辅助来源。
 - FR15: 系统可以将同一 canonical skill 暴露到多个目标 AI IDE；对于被选中模块下的每个 canonical package root，MVP 必须在每个已选择且支持的 IDE target 中生成 self-contained skill entry，并在 skill index / files index 中记录 source reference 与 hash。
 - FR16: 项目维护者可以查看安装完成后的项目结构和安装摘要。
@@ -30,6 +31,12 @@
 - FR22: 已激活的 skill 可以读取项目级配置、customization 覆盖和相关上下文。
 - FR23: 已激活的 workflow 可以将产物输出到配置约定的位置，并在产物中记录 workflow type、source skill 和生成时间。MVP artifact contract 至少校验 artifact type、默认输出路径、configured artifact root、`workflowType`、`sourceSkill` 和 `generatedAt` 元数据字段；artifact root 和默认输出路径必须是 project-relative POSIX path 且位于 target project boundary 内，产物内容质量不进入 MVP validation。
 - FR23a: Artifact metadata 的 MVP 校验必须覆盖最小值域：`workflowType` 必须是非空稳定字符串，`sourceSkill` 必须是非空 canonical skill id，`generatedAt` 必须存在且是 ISO 8601 string，且默认在 stable fixture snapshot comparison 中 normalize 或 exclude。
+- FR23b: 1-analysis 阶段的 domain、market、technical research 必须写入 `{analysis_artifacts}/research/`；product brief 必须写入 `{analysis_artifacts}/product-brief/`；PRFAQ 必须写入 `{analysis_artifacts}/prfaq/`。这些 research skills 不是 `{project_knowledge}` 的产生者。
+- FR23c: `{planning_artifacts}` 必须预创建 `epics/` 与 `prd/`；`{solutioning_artifacts}` 必须预创建 `architecture/`。PRD、Epics、Architecture 对应 workflow 的 whole documents 与 `shard-doc` 产生的 shards 必须在各自 phase-owned subject directory 内保持可发现、无 whole/sharded 双真源歧义；existing install 必须遵守 `SPEC 09` 的显式配置权威、`legacy-compatible` fallback 与 no-migration contract。
+- FR23d: `{planning_artifacts}` 必须预创建 `ux/`，承载 `ux-design-specification.md`、`ux-color-themes.html`、`ux-design-directions.html`；`design-system/` 子树仅在对应 workflow 首次需要时按需创建，UX workflow、discovery 与引用必须统一使用该 root。
+- FR23e: `speclite-validate-prd` 的报告文件名必须固定为 `prd-validate-report-{yyyy-MM-dd}.md`，并写入 `{planning_artifacts}/prd/`；existing install 中的旧名称报告必须保持原位且可作为历史 evidence 被发现，install、update 或 repair 不得自动重命名、迁移、覆盖或删除。
+- FR23f: SpecLite 方法论维护者必须将 Canonical skill `speclite-ir-grill-consistency-reviewer` 更名为 `speclite-implementation-readiness-grill-consistency-reviewer`，将 `speclite-check-implementation-readiness` 更名为 `speclite-implementation-readiness-check`，并将两者的输出统一置于 `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/`；readiness report 文件名保持 `implementation-readiness-report-{yyyy-MM-dd}.md`。SpecLite 方法论维护者必须同步更新 package、help、manifest、activation、cross-skill 与 docs references。Canonical metadata 必须维护旧 ID 到新 ID 的 rename mapping，不得生成 alias package/help/phase row；fresh install 只投影新 canonical ID，existing install 的 update 必须显式展示 rename/reprojection，并保护发生 drift 的旧 package。
+- FR23g: Epic Story code-review orchestrator 及 reviewer/evaluator/fixer/finalizer 相关 workflows 必须把每个 Story 的 CR artifact root 规范为 `{story-id}-code-review/`，其中 `story-id` 使用 `x-x` 形式；不得再把 Story title/name 拼入目录名。既有 title-bearing CR 目录不得被自动迁移、重命名或删除；恢复 legacy-only 未完成 CR 时必须在一个目录内完成，canonical 与 legacy 目录并存且无法唯一判断当前轮次时必须停止并报告稳定冲突诊断。
 - FR24: 企业规范负责人可以查看 MVP 最小阶段覆盖矩阵，确认 SPEC、方案评审、故事规划、实现、测试和审查阶段是否存在 mapped skill entry、对应 canonical skill id、以及目标 IDE target 是否可见。MVP 阶段覆盖矩阵来自 manifest、help index 和 installed skill entries，最小字段必须覆盖 `phaseId`、`phaseLabel`、`moduleId`、`canonicalSkillId`、`ideTargets[].targetId`、`ideTargets[].entryPath`、`ideTargets[].activationTarget`、`ideTargets[].status` 和可选 `artifactContract`；不提供覆盖率百分比、趋势、团队汇总或治理 dashboard。
 
 ## Methodology Responsibility Matrix（方法论责任矩阵）
@@ -47,7 +54,7 @@
 - FR25: 工具链维护者可以查看当前项目的 SpecLite 安装状态。
 - FR26: 工具链维护者可以查看安装来源、版本和目标 IDE 覆盖情况。
 - FR27: 工具链维护者可以验证 manifest、skill index、help index 和 files index 的有效性。
-- FR28: 工具链维护者可以验证多个 IDE mirrors 是否与 canonical source 一致。
+- FR28: 工具链维护者可以验证 manifest 中记录的所有已选择且支持的 IDE target mirrors 是否与 canonical source 一致。
 - FR28a: 当 IDE mirror 中的 canonical skill package 文件偏离 manifest 记录的 canonical package hash 时，`validate` 必须报告 `ide-mirror` 或 `file-integrity` error，但不得自动修复。
 - FR29: 工具链维护者可以检测缺失的菜单目标或不可激活的 skill。
 - FR30: 工具链维护者可以检测错误 runtime path、legacy namespace residue 和产物路径问题。
@@ -58,7 +65,7 @@
 - FR35: 系统可以输出可诊断的验证结果，指出问题类型、影响范围和修复方向。
 - FR35a: MVP 面向用户的核心命令必须支持 `--json`，并使用统一 `CommandResult` envelope；详细字段、排序、路径、timestamp、schema evolution、status 推导、exit code 和 fixture comparison 契约以 `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md` 为准。
 - FR35b: `CommandResult` 中的 issues 必须复用同一 `ValidationIssue` model，并与 human-readable output、exit code 和 fixture assertions 保持一致；issue category、issue id 与默认 severity 语义以 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 为准。
-- FR35c: PRD 不定义第二份 public JSON 字段真源。新增 public JSON 字段、reason code、redacted path 形状、排序规则或 command-specific payload 行为时，必须先更新 owning SPEC，再同步 executable schema/parser 和 fixture expected outputs。Reason code producer 只能输出 owning SPEC registry 中的 MVP codes；consumer/parser 必须容忍 unknown future codes，并保留其 stable display string。
+- FR35c: PRD 不定义第二份 public JSON 字段真源。负责 public JSON contract 变更的 SpecLite 维护者在新增 public JSON 字段、reason code、redacted path 形状、排序规则或 command-specific payload 行为时，必须先更新 owning SPEC，再同步 executable schema/parser 和 fixture expected outputs。Reason code producer 只能输出 owning SPEC registry 中的 MVP codes；consumer/parser 必须容忍 unknown future codes，并保留其 stable display string。
 
 ## Update & File Ownership Protection（更新与文件所有权保护）
 
@@ -80,7 +87,7 @@
 - FR45: 项目维护者可以在安装过程中配置文档输出语言。
 - FR46: 项目维护者可以在安装过程中配置过程产物输出目录。
 - FR47: 项目维护者可以选择快速配置或详细配置模式。
-- FR47a: `speclite install --yes` 必须表示使用安全默认值并授权无 conflict 的 planned writes；默认情况下不得继续要求模块选择、配置模式或最终写入确认等普通交互输入。需要自定义模块、配置或 IDE targets 时，必须通过显式 interactive mode 或显式 flags 进入。
+- FR47a: `speclite install --yes` 必须采用 module metadata、config contract 和 adapter registry 明确声明的 deterministic defaults，并仅授权 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 定义的无 conflict planned writes；该模式不得发起或等待 module selection、config mode、IDE target selection 或 final write confirmation 等交互输入。若必需值无法由 defaults 或显式 flags 解析，或 planning 产生 unsupported target、drift 或 conflict，命令必须在写入前失败，以非 0 exit code 和 owning SPEC registry 中的 stable issue id 报告原因；显式 flags 必须覆盖对应 default。需要人工选择时，用户必须显式进入 interactive mode，`--yes` 不得隐式切换为 interactive mode。
 - FR48: 项目维护者可以使用项目级配置定义用户称呼、项目名称、交流语言、文档输出语言、产物路径、安装模块和 IDE targets。
 - FR49: 用户可以通过定制化配置覆盖 skill workflow、agent persona、菜单项和输出路径默认值。
 - FR50: 系统可以按 installer base、installer user、team custom、user custom 的优先级解析并合并配置。
@@ -100,7 +107,7 @@
 - FR56: 项目维护者可以从 offline bundle 安装 SpecLite。
 - FR57: 项目维护者可以从 Git source 安装 SpecLite，并在 install/update 的 source resolution 阶段验证 Git source；写入前 Git source 必须解析到具体 commit SHA，只指定 remote URL、branch 或 tag 的浮动 Git source 不得进入 install planning。`speclite validate` 不负责访问 Git remote 或重新验证远程 freshness/provenance，只检查本地记录的 source descriptor、integrity evidence shape 和 hash baseline。
 - FR58: 系统可以记录并展示安装来源、channel 和版本信息。
-- FR59: 系统可以在安装来源不可用或不合法时给出明确失败原因。
+- FR59: 当安装来源不可用或不合法时，系统必须在写入前失败，并通过统一 `CommandResult` / `ValidationIssue` model 输出 stable issue id、category、severity、affected component、impact 和 suggested next step；command data 或 summary 中的 source facts 必须遵守 source descriptor 的 display-safe/redaction contract，human-readable output、`--json` output 与 exit code 必须由同一 issue/status 语义推导。各 source type 的 unavailable、invalid descriptor、integrity failure 和 unsupported case 必须由 owning SPEC registry 定义，并由 fixture assertions 验证。
 
 ## Installation Feedback & Readiness（安装反馈与就绪状态）
 
@@ -117,12 +124,13 @@
 ## Maintainer Workflow & Examples（维护者工作流与示例）
 
 - FR66: SpecLite 维护者可以验证新增或修改的 source skill 是否可安装。
+- FR66a: SpecLite 维护者必须能够生成完整、可复查、只读的全 canonical Skill corpus `grill` 引用清单，逐项记录 skill id、引用文件、引用表达、目标 skill/path 与引用用途，用于更名和路由变更后的人工确认与负向残留检查；生成清单不得修改被盘点的 canonical Skill definitions。
 - FR67: SpecLite 维护者可以使用 fixture project 复现 fresh install 流程。
 - FR68: SpecLite 维护者可以使用 fixture project 验证安装前后目录变化。
 - FR69: SpecLite 维护者可以使用 fixture project 验证 status、validate 和 update 行为。
 - FR70: SpecLite 维护者可以验证至少一个 skill 从 IDE 发现到产物输出的最小闭环。
-- FR71: 文档读者可以通过 fresh install 示例、安装前后目录树、manifest/index 示例、status/validate 输出示例和 update 保护示例理解安装后结构、常用命令和验证结果。
-- FR71a: Fixture expected outputs 是契约测试资产，不是仅供阅读的示例；新增模块、adapter、source type、validation rule、ownership 行为或 installed artifact kind 时，必须同步相关 fixture 输入和 expected outputs。
+- FR71: MVP 文档必须提供 fresh install、安装前后目录树、manifest/index、status/validate output 和 update protection 五类可执行示例；每类示例必须包含前置条件、命令或操作、expected artifact/output 与 verification step，并通过 docs link/reference check 及对应 fixture/CLI assertions 验证示例中的 command、path、field 与当前 contract 一致。
+- FR71a: SpecLite 维护者必须将 Fixture expected outputs 作为契约测试资产，而不是仅供阅读的示例；新增模块、adapter、source type、validation rule、ownership 行为或 installed artifact kind 时，SpecLite 维护者必须同步相关 fixture 输入和 expected outputs。
 - FR71b: Fixture case directory、expected output classes、snapshot comparison、ready summary gate、release gate / regression asset 区分和 baseline case 集合由 `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 管理。实现不得先更新 snapshots 再反推契约行为；契约变更必须先更新 owning SPEC 和 executable schema/parser，再更新 fixture expected outputs。
 
 ## Post-MVP Governance & Expansion（Post-MVP 治理与扩展）

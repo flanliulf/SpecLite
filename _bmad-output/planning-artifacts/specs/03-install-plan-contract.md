@@ -128,15 +128,22 @@ Runtime config 中所有表示 target project 内目录的 generated values 必�
 ```toml
 [core]
 output_folder = "{project-root}/_speclite-output"
+brainstorming_artifacts = "{project-root}/_speclite-output/0-brainstorming-artifacts"
 
 [modules.sdlc]
-planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"
-implementation_artifacts = "{project-root}/_speclite-output/implementation-artifacts"
-devops_artifacts = "{project-root}/_speclite-output/devops-artifacts"
-project_knowledge = "{project-root}/docs"
+analysis_artifacts = "{project-root}/_speclite-output/1-analysis-artifacts"
+planning_artifacts = "{project-root}/_speclite-output/2-planning-artifacts"
+solutioning_artifacts = "{project-root}/_speclite-output/3-solutioning-artifacts"
+implementation_artifacts = "{project-root}/_speclite-output/4-implementation-artifacts"
+devops_artifacts = "{project-root}/_speclite-output/5-devops-artifacts"
+project_knowledge = "{project-root}/_speclite-output/project-knowledge-base"
 ```
 
 `{project-root}` 是 portable runtime token。Resolver、hook runner、installed skills 和 workflow code 在执行 filesystem I/O 前必须把它解析为当前 target project root；public JSON、manifest/index 和 fixture snapshots 不得因此泄露真实 absolute path。
+
+该示例只定义 fresh-install generated values。Existing-install explicit values、missing-field fallback、七类 placeholders、`docs/` 与 project knowledge 的边界由 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md` 管理。
+
+Fresh-install directory creation 必须由 canonical module metadata 和 directory declarations 驱动；command 层不得维护第二份路径列表。Config regenerate、update 和 repair 不得借新 defaults 移动、复制、重命名、删除或重写 workflow-owned artifacts。Legacy fallback 是 read/resolve compatibility，不是 artifact migration。
 
 ## Runtime Config Descriptor Sections（Runtime Config 描述符段）
 

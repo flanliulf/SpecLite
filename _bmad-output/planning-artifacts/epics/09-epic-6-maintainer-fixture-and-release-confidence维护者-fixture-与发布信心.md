@@ -50,6 +50,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 必须同步新增或更新相关 fixture 输入和 expected outputs
 **并且** release gate 或 regression asset 分类保持明确。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR67`、`FR68`、`FR69`、`FR71a`、`FR71b`
+- **Supporting NFRs:** `NFR19`、`NFR35a`、`NFR35d`、`NFR35i`、`NFR35j`、`NFR40`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR5`、`UX-DR6`、`UX-DR9`、`UX-DR10`、`UX-DR11`、SPEC 08 fixture contract
+
 ## Story 6.2: Fresh Install And Existing Update Fixture Gates（Fresh Install 与 Existing Update Fixture Gate）
 
 作为 SpecLite 维护者，
@@ -88,6 +94,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **当** 测试生成结果
 **则** 不展示 ready summary 或 release-ready summary
 **并且** failure 输出包含 completed steps、failed step、pending steps 和 suggested manual action。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR67`、`FR68`、`FR69`
+- **Supporting NFRs:** `NFR6`、`NFR7`、`NFR8`、`NFR10`、`NFR11`、`NFR14`、`NFR40`、`NFR40e`
+- **UX / Contract Anchors:** SPEC 03 plan/write protection、SPEC 04 complete canonical package projection、SPEC 08 fresh/update gate baseline
 
 ## Story 6.3: Drift, Source Integrity And Resolve Parity Fixtures（Drift、来源完整性与 Resolve Parity Fixtures）
 
@@ -152,11 +164,29 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 必须同一变更中更新 owning SPEC、executable schema/parser 和 fixture assertions
 **并且** 不得只改 snapshot 让测试通过。
 
+### Historical Scope Decomposition（历史范围拆分）
+
+Story 6.3 已在 sprint tracker 中标记为 `done`，且既有 implementation artifact、review 与 closure evidence 均使用 `6-3-drift-source-integrity-and-resolve-parity-fixtures`。为保留历史身份与证据链，本轮不重编号、不创建新的可执行 Story，也不把任何已完成 Story 改回 `ready-for-dev`。
+
+后续维护或审计应将该历史 Story 按三个独立验收域读取：
+
+1. **IDE Drift Evidence：** canonical skill hash mismatch、target、stable issue 与 human/JSON parity。
+2. **Source Integrity Evidence：** 独立 sub-cases、trust/write eligibility、blocking behavior 与 redaction。
+3. **Resolve Parity Evidence：** config/customization merge、stdout/stderr、diagnostics 与 Python baseline parity。
+
+这三个域仅用于历史 evidence mapping 和独立回归定位，不形成新的 backlog item，不进入当前 implementation authorization。未来若其中任一域产生新产品范围，必须通过新的 change-controlled Story 建立独立 ID、gate 和状态。
+
 **Implementation Tasking Guidance（实现拆分建议）：**
 
 - 先实现 `ide-drift` fixture 的最小闭环，锁定 canonical skill hash mismatch、target、suggested next step 和 human/json output parity。
 - 再分批实现 `source-integrity` sub-cases，每个 sub-case 保持独立 input、expected command JSON、expected issues 和 redaction assertions，避免把 trustStatus、write planning 和 redaction 断言混在一个大 fixture。
 - 最后实现 `resolve-parity` fixture，把 config merge、customization merge、diagnostic stderr shape 和 Python parity baseline 分成可独立失败的断言组。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR69`、`FR71a`、`FR71b`
+- **Supporting NFRs:** `NFR9`、`NFR9a`、`NFR13a`、`NFR13b`、`NFR13b-1`、`NFR13b-2`、`NFR13c`、`NFR13d`、`NFR25a`、`NFR39`、`NFR40`、`NFR40c`
+- **UX / Contract Anchors:** SPEC 02 source integrity、SPEC 06 resolve parity、SPEC 07 stable issues、SPEC 08 fixture sub-case contract
 
 ## Story 6.4: Path Portability And Runtime Matrix Evidence（路径可移植性与运行时矩阵证据）
 
@@ -222,6 +252,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **并且** packaging acceptance 是 release checklist gate，必须保存 stable artifact、expected assertions 和 CI/release evidence
 **并且** `test/fixtures/` 与 root `fixtures/` 默认不得进入 package，除非明确标记为 packaged documentation example；packaged examples 不等同于 release gate fixtures。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR67`、`FR68`、`FR69`、`FR71b`
+- **Supporting NFRs:** `NFR2`、`NFR3`、`NFR4`、`NFR5`、`NFR5a`、`NFR17b`、`NFR18`、`NFR19`、`NFR20`、`NFR21`、`NFR35d`、`NFR40a`、`NFR40d`
+- **UX / Contract Anchors:** `UX-DR9`、`UX-DR10`、`UX-DR11`、SPEC 08 platform/runtime/packaging evidence
+
 ## Story 6.5: Skill Artifact Loop And Documentation Examples（Skill Artifact Loop 与文档示例）
 
 作为 SpecLite 维护者，
@@ -265,6 +301,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 同步更新相关 fixture 输入、expected outputs 和 validation assertions
 **并且** 保持最小 `skill-artifact-loop` release gate 与 richer regression assets 的分类明确。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR70`、`FR71`、`FR71a`
+- **Supporting NFRs:** `NFR28b`、`NFR40b`
+- **UX / Contract Anchors:** `UX-DR4`、`UX-DR8`、`UX-DR11`、SPEC 04 activation/artifact projection、SPEC 08 skill-artifact-loop
+
 ## Story 6.6: Fixture Contract Hardening（Fixture Contract 收口）
 
 作为 SpecLite 维护者，
@@ -298,6 +340,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 仅关闭有代码、fixture 和测试证据支撑的 TODO
 **并且** 不得提前关闭 packaging gate、默认测试稳定性或 Git confirmationState 相关 TODO。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR69`、`FR71a`、`FR71b`
+- **Supporting NFRs:** `NFR28b`、`NFR35i`、`NFR40`、`NFR40b`、`NFR40c`
+- **UX / Contract Anchors:** SPEC 06 resolve inputs、SPEC 08 fixture ID/classification/timestamp/path-escape assertions
+
 ## Story 6.7: Packaging Gate Hardening（Packaging Gate 收口）
 
 作为 SpecLite 维护者，
@@ -326,6 +374,12 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **则** 只关闭 packaging script 和 docs example assertion 相关 TODO
 **并且** 保留未完成的 fixture contract 或 test stability TODO。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR71`、`FR71a`、`FR71b`
+- **Supporting NFRs:** `NFR40d`
+- **UX / Contract Anchors:** `UX-DR11`、SPEC 08 packaging acceptance and documentation-example classification
+
 ## Story 6.8: Test Stability And CR TODO Closure（测试稳定性与 CR TODO 收尾）
 
 作为 SpecLite 维护者，
@@ -353,3 +407,9 @@ SpecLite 维护者可以用 fixture projects 和 expected outputs 验证 fresh i
 **当** 准备再次收尾 Epic 6
 **则** 必须运行 focused tests、`npm run build`、默认 `npm test` 和可用的 release verification command
 **并且** sprint/story 状态更新不得早于代码、测试和 backlog 证据。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR66`、`FR69`、`FR71a`、`FR71b`
+- **Supporting NFRs:** `NFR5`、`NFR5a`、`NFR13b`、`NFR40`、`NFR40c`、`NFR40d`
+- **UX / Contract Anchors:** SPEC 02 Git confirmation evidence、SPEC 08 test/release evidence and CR TODO closure

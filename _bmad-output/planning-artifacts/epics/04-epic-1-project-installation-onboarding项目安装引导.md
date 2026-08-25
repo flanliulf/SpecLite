@@ -58,6 +58,12 @@
 **则** 命令返回符合 `CommandResult` 契约的 install failure envelope
 **并且** 输出可用于 fixture assertion 的确定性 issue 字段。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR35a`、`FR35b`、`FR60`
+- **Supporting NFRs:** `NFR18`、`NFR19`、`NFR20`、`NFR21`、`NFR30`
+- **UX / Contract Anchors:** Architecture runtime baseline、SPEC 01 `CommandResult`、SPEC 07 issue taxonomy
+
 **Implementation Tasking Guidance（实现拆分建议）：**
 
 - 先建立 ESM package、commander command layer、tsup/tsx/vitest 和 `bin.speclite`。
@@ -103,6 +109,12 @@
 **则** 系统不会创建或修改 `_speclite`、`_speclite-output`、`.claude/skills` 或 `.agents/skills` 文件
 **并且** 后续安装阶段必须等待明确确认后才能继续。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR1`、`FR2`、`FR3`、`FR4`
+- **Supporting NFRs:** `NFR19`、`NFR20`
+- **UX / Contract Anchors:** Architecture project boundary、project-relative POSIX-style path contract
+
 ## Story 1.3: Official Module Selection And Install Summary（官方模块选择与安装摘要）
 
 作为项目维护者，
@@ -137,6 +149,12 @@
 **当** 模块选择阶段完成或失败
 **则** 机器可读输出仅使用当前 `CommandResult<InstallCommandData>` 字段表达状态
 **并且** pre-write fresh install 中 `installedModules` 为空，pending / selected module state 通过 `completedSteps`、`pendingSteps`、`issues`、`nextActions` 和 human-readable summary 表达。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR5`、`FR6`、`FR7`、`FR14`
+- **Supporting NFRs:** `NFR13e`、`NFR22`
+- **UX / Contract Anchors:** SPEC 02 `SourceDescriptor`、canonical package root discovery contract
 
 ## Story 1.4: Project Config Initialization（项目配置初始化）
 
@@ -181,6 +199,12 @@
 **则** 机器可读输出通过 `completedSteps`、`pendingSteps`、`paths`、`issues` 和 `nextActions` 表达配置初始化状态
 **并且** 不新增未契约化 config blob、selected module field 或 pending module field
 **并且** 不泄露 home directory、环境变量或认证信息。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR42`、`FR43`、`FR44`、`FR45`、`FR46`、`FR47`、`FR48`、`FR51b`
+- **Supporting NFRs:** `NFR14`、`NFR19`
+- **UX / Contract Anchors:** SPEC 03 install plan、create-if-absent human-owned config contract
 
 ## Story 1.5: Runtime Structure, Artifact Directory And IDE Mirror Creation（运行时结构、产物目录与 IDE 镜像创建）
 
@@ -231,6 +255,12 @@
 **当** 命令返回失败结果
 **则** 系统不会展示 ready summary
 **并且** 通过 `CommandResult.status`、`issues`、`completedSteps`、`pendingSteps` 和 manual action 表达失败，不新增未契约化 `failedStep` 字段。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR10`、`FR11`、`FR12`、`FR13`、`FR14`、`FR15`、`FR61`
+- **Supporting NFRs:** `NFR14`、`NFR17`、`NFR17a`、`NFR19`、`NFR20`、`NFR23`、`NFR24`、`NFR25`
+- **UX / Contract Anchors:** SPEC 03 install plan、SPEC 04 manifest/index、SPEC 05 ownership and safe write
 
 ## Story 1.6: Install Progress And Ready Summary（安装进度与就绪摘要）
 
@@ -289,6 +319,12 @@
 **则** 输出不得包含 ANSI escape、spinner-only progress 或依赖颜色/符号才能理解的状态
 **并且** status、step id、target id、path 和 next action 必须有文本等价表达。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR16`、`FR17`、`FR60`、`FR61`、`FR62`、`FR63`、`FR63a`、`FR64`、`FR65`
+- **Supporting NFRs:** `NFR1`、`NFR10`、`NFR11`、`NFR30`、`NFR34`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR3`、`UX-DR9`、`UX-DR10`、SPEC 01 `CommandResult`
+
 ## Story 1.7: Install CLI Interaction And Localized Human Output（安装 CLI 交互与本地化人类输出）
 
 作为首次安装 SpecLite 的项目维护者，
@@ -340,3 +376,9 @@
 **当** 修改 CLI prompt adapter、install renderer、message catalog 或 `--yes` 行为
 **则** 必须补充 focused CLI smoke / fixture tests，覆盖默认中文输出、英文 locale fallback、prompt/summary 分离、`install --yes` no-prompt flow、`install --json --yes` 无交互稳定输出、`NO_COLOR` / non-TTY / CI 无 ANSI 输出
 **并且** 不得新增未契约化 JSON 字段；若确需新增 public JSON 字段，必须先更新 owning SPEC、schema/parser 和 fixture expected outputs。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR17a`、`FR47a`、`FR63b`、`FR65a`
+- **Supporting NFRs:** `NFR1a`、`NFR11a`、`NFR35b-14`、`NFR40e`
+- **UX / Contract Anchors:** `UX-DR12`、`UX-DR13`、`UX-DR14`、UX install interaction specification、SPEC 01、SPEC 03

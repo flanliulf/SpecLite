@@ -3,7 +3,7 @@
 ## Pattern Categories Defined（已定义的模式类别）
 
 **Critical Conflict Points Identified（已识别的关键冲突点）：**
-已识别 11 类容易造成 AI agent 实现不一致的冲突点：命令命名、文件命名、路径规范化、manifest 字段、配置合并行为、source descriptor、IDE adapter 输出、validation issue 格式、update ownership 状态、fixture 组织和诊断文案。
+已识别 13 类容易造成 AI agent 实现不一致的冲突点：命令命名、文件命名、路径规范化、manifest 字段、配置合并行为、source descriptor、IDE adapter 输出、validation issue 格式、update ownership 状态、fixture 组织、诊断文案、artifact root/fallback 解析和 canonical Skill rename identity。
 
 ## Naming Patterns（命名模式）
 
@@ -27,6 +27,14 @@ SpecLite 的 API 表面是 CLI 命令和文件契约。
 - 全局常量仅在 process-wide constant 场景使用 SCREAMING_SNAKE_CASE：`DEFAULT_MANIFEST_VERSION`。
 - Canonical skill id 以 source 定义为准，不得被代码风格规则改写。
 
+**Canonical Skill Identity Patterns（Canonical Skill 身份模式）：**
+
+- Active Skill identity 以 canonical source metadata 和 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 为准。
+- Old Skill ID 只能出现在 active entry 的 `renamedFromCanonicalSkillIds` 中。
+- Fresh install、skill index、help index、phase coverage 和 IDE mirrors 只生成 active canonical ID。
+- Consumer 遇到 old ID 时必须使用 rename mapping 重定向或输出稳定 deprecation diagnostic。
+- Agent 不得通过复制 package、help entry、phase row 或 IDE mirror 创建 alias-only identity。
+
 ## Structure Patterns（结构模式）
 
 **Project Organization（项目组织）：**
@@ -45,6 +53,15 @@ SpecLite 的 API 表面是 CLI 命令和文件契约。
 - `src/update/`: ownership state、hash comparison 与 update plan。
 - `src/fs/`: path normalization、safe writes 与 project-relative POSIX paths。
 - `test/fixtures/`: fixture projects 与 expected outputs。
+
+**Artifact Root Resolution Patterns（Artifact Root 解析模式）：**
+
+- 七类 artifact roots 及 placeholders 的字段、fresh defaults 和 legacy fallback 只引用 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`。
+- Installer、manifest generator、validator 和 workflow consumer 必须使用同一 resolved artifact-root model。
+- Command 层不得维护第二份 root/path 列表。
+- Fresh directory creation 必须由 canonical module metadata 和 directory declarations 驱动。
+- Existing install 缺少新增 fields 时使用 `SPEC 09` 的 fallback，且不得自动回写 config。
+- Workflow output path 必须从 resolved placeholder 派生，不得硬编码 `_speclite-output` 子目录。
 
 **File Structure Patterns（文件结构模式）：**
 
@@ -94,6 +111,8 @@ CommandResult 行为在实现中的关键边界是：
 Manifest/index 文件契约必须引用 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`，不得在 Architecture type snippet 中复制字段真源。Validation issue taxonomy 必须引用 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`，不得由单个 validation rule 自行定义 category 语义。
 
 SDLC workflow lifecycle 字段和流程术语必须引用 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`，不得由单个 Story、review skill 或 finalizer 自行定义第二套 gate/status schema。该 SPEC 管理 `modules.sdlc.planning_artifacts`、`modules.sdlc.implementation_artifacts`、`modules.sdlc.project_knowledge`、`{planning_artifacts}`、`{implementation_artifacts}`、`story_location`、`story_root`、`flow_gate_root`、`sprint_status_file`、`development_status`、`development_status{story_key}`、`anchor_contract_map`、`dependency_gate`、`evidence_plan`、`story_completion_status`、Flow Gate mode/result 和 legacy baseline rule。
+
+Artifact lifecycle、七类 root fields/placeholders、fresh defaults、legacy fallback、`docs/`/project knowledge boundary 和 Story lifecycle paths 必须引用 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`。Canonical Skill rename mapping、唯一 active identity、fresh projection 和 no-alias semantics 必须引用 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`。Architecture、installer、manifest、UX、Epic、Story 和 canonical Skill 不得复制或重新定义上述 fields、defaults、fallback 或 rename identity 语义。
 
 ## Communication Patterns（通信模式）
 
@@ -145,6 +164,21 @@ Flow Gate result 只允许 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_
 
 历史 Story 不因新增 `Dependency Gate`、`Anchor Contract Map`、`Equivalent Implementation Policy`、`Evidence Plan` 或 `Anchor Evidence Summary` 而被批量回填。新建 Story、重新打开的 Story、进入开发前的 Story 和进入 review 前的 Story 必须遵守 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`。
 
+**Artifact Compatibility Patterns（Artifact 兼容模式）：**
+
+- Legacy fallback 表示 `legacy-compatible` resolution，不表示 migration。
+- 普通 install、update 和 repair 不得移动、复制、重命名、删除或重写 workflow-owned artifacts。
+- Configured root 与 actual consumed path 不一致时必须报告 config/artifact mismatch。
+- Validator 不得因发现 mismatch 自动修改 config 或 artifact。
+- Explicit artifact migration 必须作为未来独立 workflow 处理。
+
+**Skill Rename Patterns（Skill 更名模式）：**
+
+- Rename 先更新 `SPEC 04` 和 canonical metadata，再更新 package/help/activation/manifest consumers。
+- Update planning 必须显式展示 rename/reprojection。
+- Drifted old package 必须进入 protected conflict path，不得静默覆盖或删除。
+- Tests 必须证明 fresh install 只产生 active ID，existing install 能识别 old ID，且不存在 alias package/help/phase row。
+
 ## Enforcement Guidelines（执行与约束指南）
 
 **All AI Agents MUST（所有 AI Agent 必须）：**
@@ -155,6 +189,10 @@ Flow Gate result 只允许 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_
 - 默认保护 human-owned custom files 与 workflow artifacts。
 - 修改 install、update、validation、source 或 IDE adapter 行为时，同步新增或更新 fixture assertions。
 - 将 config/customization merge logic 集中放在 `src/config/`。
+- 所有 artifact path consumer 必须引用 `SPEC 09` 并复用统一 resolver。
+- 所有 canonical Skill identity consumer 必须引用 `SPEC 04` 并复用 rename mapping。
+- 修改 root/fallback 时必须同步 fresh-install、existing-install-update 和 config/artifact mismatch fixtures。
+- 修改 rename mapping 时必须同步 skill/help/phase projections、activation、update plan 和 drift-protection fixtures。
 
 **Pattern Enforcement（模式约束）：**
 
@@ -172,6 +210,10 @@ Flow Gate result 只允许 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_
 - `category: "ide-mirror"`
 - `src/validation/ide-mirror.test.ts`
 - `speclite validate --project-root ./fixtures/fresh-install-empty-project`
+- `outputRoot: resolveArtifactRoot("solutioning_artifacts")`
+- `compatibilityMode: "legacy-compatible"`
+- `renamedFromCanonicalSkillIds: ["speclite-check-implementation-readiness"]`
+- Fresh skill index 只包含 `speclite-implementation-readiness-check`
 
 **Anti-Patterns（反模式）：**
 
@@ -181,3 +223,7 @@ Flow Gate result 只允许 `PASS`、`PASS_EQUIVALENT`、`FAIL_CONTRACT`、`FAIL_
 - install/update 未经明确用户动作就修改 `_speclite/custom/*.toml`。
 - 未覆盖 Node 22 fixture 却使用 Node 24-only API。
 - validation failure 只输出 free-form string，没有 issue id、category 和 affected path。
+- 在 command 或单个 Skill 中硬编码 `_speclite-output/3-solutioning-artifacts`。
+- 将 legacy fallback 自动写回 existing config，或仅修改 config path 后宣称 artifacts 已迁移。
+- 为 old Skill ID 生成 alias package、help entry、phase row 或 IDE mirror。
+- 删除或覆盖发生 drift 的 old Skill package。

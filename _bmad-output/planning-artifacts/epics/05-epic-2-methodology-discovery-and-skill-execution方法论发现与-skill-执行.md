@@ -36,6 +36,12 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 **则** 字段、target order、hash 和 ownership 投影遵守 manifest/index owning SPEC
 **并且** 不依赖 filesystem traversal order、glob 顺序或异步完成顺序。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR18`、`FR24`
+- **Supporting NFRs:** `NFR24`、`NFR28a`、`NFR36`
+- **UX / Contract Anchors:** SPEC 04 manifest/index、SPEC 05 IDE adapter registry
+
 ## Story 2.2: IDE Skill Entry Mapping（IDE Skill Entry 映射）
 
 作为 AI IDE 使用者，
@@ -74,6 +80,12 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 **则** 系统只允许记录 `none` 或 `unsupported` 语义
 **并且** 不会生成 GitHub Copilot/Cursor 专用 command pointer artifact。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR19`
+- **Supporting NFRs:** `NFR23`、`NFR24`、`NFR24a`、`NFR27`
+- **UX / Contract Anchors:** SPEC 04 manifest/index、SPEC 05 IDE adapter registry、self-contained IDE execution plane
+
 ## Story 2.3: Skill Activation And Phase Capability Coverage（Skill 激活与阶段能力覆盖）
 
 作为 AI IDE 使用者，
@@ -111,6 +123,12 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 **当** 自动化或 validation 读取它
 **则** 输出顺序遵守 manifest/adapter registry canonical target order
 **并且** 字段值使用稳定、可比较的 project-relative POSIX path。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR20`、`FR21`、`FR24`
+- **Supporting NFRs:** `NFR24`、`NFR24a`、`NFR28`、`NFR28a`
+- **UX / Contract Anchors:** SPEC 04 minimum phase coverage matrix、SPEC 05 activation target contract
 
 ## Story 2.4: Runtime Config And Customization Resolve（Runtime Config 与 Customization Resolve）
 
@@ -154,6 +172,12 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 **当** resolver 合并数组
 **则** 只有所有元素都是 table 且共享同一个 `code` 或同一个 `id` 时才 keyed merge
 **并且** 命中同 key 时 override item 整项替换 base item，不做 item-level deep merge。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR22`、`FR49`、`FR52`、`FR52a`、`FR52b`、`FR52c`
+- **Supporting NFRs:** `NFR39`、`NFR40b`
+- **UX / Contract Anchors:** SPEC 06 resolve command、runtime config and customization precedence contract
 
 ## Story 2.5: Workflow Artifact Output And Metadata Validation（Workflow Artifact 输出与 Metadata 校验）
 
@@ -202,3 +226,9 @@ AI IDE 使用者可以在 `.claude/skills` 与 `.agents/skills` 中发现、选�
 **当** 后续 skill、validator 或自动化读取它
 **则** artifact type、默认输出路径、workflowType、sourceSkill 和 generatedAt 语义保持一致
 **并且** 不在 PRD、Architecture、Manifest/index 或 CommandResult 中各自定义第二套 artifact contract。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR23`、`FR23a`
+- **Supporting NFRs:** `NFR14`、`NFR28b`、`NFR40b`
+- **UX / Contract Anchors:** SPEC 04 artifact contract projection、SPEC 09 workflow artifact lifecycle

@@ -26,6 +26,9 @@ speclite-cli/
 │       └── speclite/
 │           ├── core-skills/
 │           ├── sdlc-skills/
+│           ├── ecosystems/
+│           │   └── <category>/
+│           │       └── <id>/
 │           ├── custom/
 │           └── scripts/
 ├── src/
@@ -156,12 +159,13 @@ SpecLite 的 API 边界是 CLI commands 与 file contracts。`src/commands/` 只
 - `source/` 只负责把 bundled source、npm/private registry/tarball/offline bundle/Git source/local path 归一为 Canonical Source Tree（规范来源树）与 Source Descriptor（来源描述符）；trust/evidence 语义以 `_bmad-output/planning-artifacts/specs/02-source-descriptor-contract.md` 为准。Local path source 必须先经过 self-reference guard，不得把 target project 的 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`_speclite-output/`、fixture output、`node_modules/`、cache、temporary 或 build output 当作 canonical source；违反时输出 `source-integrity.local-source-self-reference`。
 - `assets/source/speclite/` 是 bundled source assets（内置源资产）边界，存放产品随包发布的 SpecLite source definitions；它由 `src/source/` 读取，但不属于 resolver 代码。
 - `modules/` 只负责读取 Module Metadata（模块元数据）、选择模块、创建 Declarative Directories（声明式目录）。
-- `config/` 是唯一 Config/Customization Merge Implementation（配置/定制化合并实现）所在位置。
-- `manifest/` 是唯一 Manifest/Index/Hash Generation（清单/索引/哈希生成）位置；字段契约以 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 为准。
+- `config/` 是唯一 Config/Customization Merge Implementation（配置/定制化合并实现）所在位置；它负责解析 runtime fields 并调用 `SPEC 09` 定义的 artifact-root/fallback 语义，不得从 manifest 或 command defaults 反推 roots。
+- `manifest/` 是唯一 Manifest/Index/Hash Generation（清单/索引/哈希生成）位置；字段契约以 `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md` 为准。它只投影 resolved roots、compatibility mode 和 `SPEC 04` rename metadata，不得拥有第二套 root 或 identity 真源。
 - `ide/` 只处理 Platform Adapter（平台适配器）、Target Directory（目标目录）、adapter metadata、canonical target order 和 Mirror Validation（镜像验证）。Adapter registry 字段、target id、target order、capability 和 status 语义以 `_bmad-output/planning-artifacts/specs/05-ide-adapter-registry-contract.md` 为准。MVP adapter schema 可保留 command pointer 扩展位，但不得生成 Command Pointer（命令指针）artifact。
 - `validation/` 只读取 State（状态）并产生 Issues（问题），不直接修复。
+- `validation/` 比较 configured root、resolved root、actual consumed path 和 on-disk artifacts；发现 mismatch 只输出诊断，不得修改 config 或 artifact。
 - `update/` 只基于 Ownership/Hash（所有权/哈希）生成并执行 Update Plan（更新计划）；遇到 installer-owned drift 默认生成 conflict。普通 `update` 的交互确认或 `--yes` 只授权无 conflict 的 planned update writes，不得把 drift conflict 转成 repair。只有 `speclite update --repair` 可以恢复可安全 repair 的 IDE mirrors、manifest/index 和 runtime scripts，且不得覆盖 human-owned custom 或 workflow-owned artifacts。repair 写入前必须生成 repair plan，列出 affected paths、ownership、current hash、expected hash 和 action；交互模式确认后写入，脚本模式需要 `--yes`。普通 dry-run、交互确认前或脚本模式缺少 `--yes` 时仍输出真实 unapplied plan，不得把 planned action 改写为 `skip:not-authorized`。`restore-canonical` 必须有 resolved canonical source 或 installed canonical package baseline；缺少 source evidence 时进入 conflict，reason 为 `missing-source-evidence`。MVP 输出 impact summary、changed/skipped/conflict paths 和 machine-readable plan，但不生成 standalone report artifact；`sync`、顶级 `repair`、backup/restore 和 richer update reports 不进入 MVP。
-- `installer/` 编排 Install Flow（安装流程），但不拥有各领域规则；pre-write install plan、external access、dry-run、`--yes` 和 write authorization 语义以 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 为准。实现必须保持 `SourceResolutionPlan -> InstallPlan -> write/apply -> CommandResult projection` 顺序。
+- `installer/` 编排 Install Flow（安装流程），但不拥有各领域规则；pre-write install plan、external access、dry-run、`--yes` 和 write authorization 语义以 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 为准。它只根据 canonical module metadata、directory declarations 和 resolved runtime config 创建 fresh roots；不得在 command 层硬编码路径列表。实现必须保持 `SourceResolutionPlan -> InstallPlan -> write/apply -> CommandResult projection` 顺序。
 - `fs/` 是唯一允许实现 Path Normalization（路径规范化）、Safe Writes（安全写入）和跨平台文件操作的模块。Installer-owned 写入必须 temp-write + rename；`changedPaths` 只记录当前命令实际完成的 mutation。Safe-write temporary files 不进入 files index；`validate` 可将不阻断 safe write 的 stale temp files 报告为 `file-integrity.stale-temp-file` warning，如果 stale temp file 阻断 safe-write target naming、rename 或 safe mutation 则必须报告为 error；MVP update/repair 不自动清理 lock 或 stale temp files。`fs/` 还负责阻断 symlink escape、path escape、case conflict 和 unsafe overwrite。
 
 **Service Boundaries（服务边界）：**
@@ -169,11 +173,19 @@ MVP 无网络服务。内部 service boundary 通过 TypeScript module API 和 f
 
 **Data Boundaries（数据边界）：**
 
-- `_speclite/`: metadata/control hub。
+- `_speclite/`: metadata/control plane，保存 runtime config、manifest/index、runtime scripts、installer state 和 operation control。
 - `assets/source/speclite/`: product-shipped bundled source assets。
-- `.claude/skills/`、`.agents/skills/`: MVP IDE execution plane；target id 分别为 `claude` 与 `agents`。Copilot/Cursor 专用 command pointer 或 adapter 是 Post-MVP，MVP 中不得伪造 `copilot` 或 `cursor` target id。
-- `_speclite-output/`: workflow artifact repository；SDLC workflow 的 `planning_artifacts`、`implementation_artifacts`、`project_knowledge`、`story_location`、`story_root`、`flow_gate_root`、`sprint_status_file` 和 related lifecycle artifact path 语义以 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md` 为准。
-- `docs/`: project knowledge。
+- `.claude/skills/`、`.agents/skills/`: MVP IDE execution plane；只投影 active canonical Skill identity。Target id 分别为 `claude` 与 `agents`。Copilot/Cursor 专用 command pointer 或 adapter 是 Post-MVP，MVP 中不得伪造 `copilot` 或 `cursor` target id。
+- `_speclite-output/`: phase-aligned workflow artifact repository；七类 runtime roots/placeholders、fresh defaults、legacy fallback 和 related lifecycle artifact path 语义以 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md` 为准。
+  - `0-brainstorming-artifacts/`: Brainstorming artifacts。
+  - `1-analysis-artifacts/`: Research、Product Brief 和 PRFAQ 等 Analysis artifacts。
+  - `2-planning-artifacts/`: PRD、Epics、UX 和 planning status；fresh-install canonical subject directories 为 `{planning_artifacts}/prd/`、`{planning_artifacts}/epics/` 与 `{planning_artifacts}/ux/`。
+  - `3-solutioning-artifacts/`: Architecture、Specs 和 implementation readiness；Architecture whole document、sharded `index.md` 与 shards 的 fresh-install canonical subject directory 为 `{solutioning_artifacts}/architecture/`。
+  - `4-implementation-artifacts/`: sprint status、Stories、Flow Gates、SR/CR、retrospectives 和 implementation audits。
+  - `5-devops-artifacts/`: DevOps 与 release artifacts。
+  - `project-knowledge-base/`: workflow-generated project knowledge。
+- Existing install 缺少 `solutioning_artifacts` 时按 `SPEC 09` fallback 到既有 `{planning_artifacts}`；该路径只能报告为 `legacy-compatible`，不得被描述为 fresh canonical root，也不得触发 Architecture artifact 的自动移动、复制、重命名、删除或重写。
+- `docs/`: Primary Public Document；不是 project knowledge alias 或 fresh-install fallback。
 - `test/fixtures/`: acceptance and regression assets。
 
 ## Requirements to Structure Mapping（需求到结构的映射）
@@ -189,6 +201,9 @@ MVP 无网络服务。内部 service boundary 通过 TypeScript module API 和 f
 - FR60-FR65 与 FR63a 安装反馈与就绪状态 → `src/installer/progress-events.ts`、`src/installer/ready-summary.ts`、`src/diagnostics/output.ts`。
 - FR66-FR71 与 FR71a-FR71b 维护者工作流与示例 → `test/fixtures/`、`fixtures/expected/`、`docs/`。Fixture expected outputs 是契约测试资产，不是普通示例；fixture layout、expected output classes、comparison policy 和 release gate 分类以 `_bmad-output/planning-artifacts/specs/08-fixture-contract.md` 为准。
 - FR72-FR78 Post-MVP 治理与扩展 → 在 `commands/`、`validation/reporters/`、`ide/adapters/` 中复用 MVP JSON schema 与 module boundaries。
+- FR13a、NFR14a、NFR40f 阶段化 artifact topology 与兼容演进 → `src/config/`、`src/installer/`、`src/manifest/`、`src/validation/`、canonical module metadata 和 compatibility fixtures。
+- FR23b-FR23g artifact routing 与 deterministic discovery → installed workflow Skills、`SPEC 09` roots/placeholders 和 manifest artifact contracts；其中 `FR23c` 的 PRD/Epics subject directories 属于 `{planning_artifacts}`，Architecture subject directory 属于 `{solutioning_artifacts}`。
+- FR23f canonical Skill rename → canonical source metadata、`SPEC 04`、skill/help/phase projections、activation 和 update planning。
 
 **Cross-Cutting Concerns（横切关注点）：**
 
@@ -223,13 +238,15 @@ MVP 无网络服务。内部 service boundary 通过 TypeScript module API 和 f
 
 **Data Flow（数据流）：**
 
-1. 用户命令创建 command context。
-2. Source resolver 返回 canonical source descriptor。
-3. Module manager 选择模块并声明 required directories。
-4. Installer 写入 `_speclite`、IDE mirrors 和 `_speclite-output`。
-5. Manifest generator 记录 installed state 与 file hashes。
-6. Validator 读取 installed state 并输出 issues。
-7. Update 在写入变更前使用 files manifest 与 ownership model。
+1. 用户命令创建 command context，并解析 canonical source、selected modules 和 target adapters。
+2. Runtime config resolver 按 `SPEC 09` 解析七类 explicit fields、fresh defaults 或 legacy fallback。
+3. Fresh-install directory planner 从 canonical module metadata 和 directory declarations 生成 required root plan。
+4. Installer 在 write authorization 和 operation lock 通过后创建 `_speclite`、IDE mirrors 和 fresh artifact roots。
+5. Manifest/index generator 投影 resolved roots、compatibility mode、active canonical identities、rename metadata、ownership 和 hashes。
+6. Installed workflows 使用 resolved placeholders 写入对应 phase root；不得从 manifest 或 hardcoded path 获取第二套 routing。
+7. Validator 比较 configured root、resolved root、actual consumed path 和 on-disk artifacts，并报告 ambiguity、escape 或 config/artifact mismatch。
+8. Existing-install update/repair 保持显式配置和 workflow artifacts 原位；legacy fallback 不触发 migration。
+9. Explicit artifact migration 保持为未来独立能力。
 
 **Manifest And Index Semantics（清单与索引语义）：**
 

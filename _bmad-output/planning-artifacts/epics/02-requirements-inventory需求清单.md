@@ -28,6 +28,8 @@ FR12: 系统可以为目标项目创建 SpecLite 项目级运行元数据结构�
 
 FR13: 系统可以为目标项目创建 SpecLite 过程产物输出结构。
 
+FR13a: Fresh install 必须在 `_speclite-output/` 下预创建阶段对齐的一级 artifact roots：`0-brainstorming-artifacts/`、`1-analysis-artifacts/`、`2-planning-artifacts/`、`3-solutioning-artifacts/`、`4-implementation-artifacts/`、`5-devops-artifacts/`；workflow 产生的 project knowledge 默认位于 `_speclite-output/project-knowledge-base/`，目标项目 `docs/` 保持 Primary Public Document（主要公开文档）定位。
+
 FR14: 系统可以发现正式可分发的 SpecLite source skills。
 
 FR15: 系统可以将同一 canonical skill 暴露到多个目标 AI IDE。
@@ -52,6 +54,18 @@ FR23: 已激活的 workflow 可以将产物输出到配置约定的位置，并�
 
 FR23a: Artifact metadata 的 MVP 校验必须覆盖最小值域：workflowType 必须是非空稳定字符串，sourceSkill 必须是非空 canonical skill id，generatedAt 必须存在且是 ISO 8601 string，且默认在 stable fixture snapshot comparison 中 normalize 或 exclude。
 
+FR23b: 1-analysis 阶段的 domain、market、technical research 必须写入 `{analysis_artifacts}/research/`；product brief 必须写入 `{analysis_artifacts}/product-brief/`；PRFAQ 必须写入 `{analysis_artifacts}/prfaq/`。这些 research skills 不是 `{project_knowledge}` 的产生者。
+
+FR23c: `{planning_artifacts}` 必须预创建 `epics/` 与 `prd/`；`{solutioning_artifacts}` 必须预创建 `architecture/`。PRD、Epics、Architecture 对应 workflow 的 whole documents 与 `shard-doc` 产生的 shards 必须在各自 phase-owned subject directory 内保持可发现、无 whole/sharded 双真源歧义；existing install 必须遵守 `SPEC 09` 的显式配置权威、`legacy-compatible` fallback 与 no-migration contract。
+
+FR23d: `{planning_artifacts}` 必须预创建 `ux/`，承载 `ux-design-specification.md`、`ux-color-themes.html`、`ux-design-directions.html`；`design-system/` 子树仅在对应 workflow 首次需要时按需创建，UX workflow、discovery 与引用必须统一使用该 root。
+
+FR23e: `speclite-validate-prd` 的报告文件名必须固定为 `prd-validate-report-{yyyy-MM-dd}.md`，并写入 `{planning_artifacts}/prd/`；existing install 中的旧名称报告必须保持原位且可作为历史 evidence 被发现，install、update 或 repair 不得自动重命名、迁移、覆盖或删除。
+
+FR23f: Canonical skill `speclite-ir-grill-consistency-reviewer` 必须更名为 `speclite-implementation-readiness-grill-consistency-reviewer`，`speclite-check-implementation-readiness` 必须更名为 `speclite-implementation-readiness-check`；两者的输出必须统一位于 `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/`，readiness report 文件名保持 `implementation-readiness-report-{yyyy-MM-dd}.md`，并同步 package、help、manifest、activation、cross-skill 与 docs references。Canonical metadata 必须维护旧 ID 到新 ID 的 rename mapping，不得生成 alias package/help/phase row；fresh install 只投影新 canonical ID，existing install 的 update 必须显式展示 rename/reprojection，并保护发生 drift 的旧 package。
+
+FR23g: Epic Story code-review orchestrator 及 reviewer/evaluator/fixer/finalizer 相关 workflows 必须把每个 Story 的 CR artifact root 规范为 `{story-id}-code-review/`，其中 `story-id` 使用 `x-x` 形式；不得再把 Story title/name 拼入目录名。既有 title-bearing CR 目录不得被自动迁移、重命名或删除；恢复 legacy-only 未完成 CR 时必须在一个目录内完成，canonical 与 legacy 目录并存且无法唯一判断当前轮次时必须停止并报告稳定冲突诊断。
+
 FR24: 企业规范负责人可以查看 MVP 最小阶段覆盖矩阵，确认 SPEC、方案评审、故事规划、实现、测试和审查阶段是否存在 mapped skill entry、canonical skill id，以及目标 IDE target 是否可见；矩阵最小字段必须覆盖 phaseId、phaseLabel、moduleId、canonicalSkillId、ideTargets[].targetId、ideTargets[].entryPath、ideTargets[].activationTarget、ideTargets[].status 和可选 artifactContract。
 
 FR25: 工具链维护者可以查看当前项目的 SpecLite 安装状态。
@@ -60,7 +74,7 @@ FR26: 工具链维护者可以查看安装来源、版本和目标 IDE 覆盖情
 
 FR27: 工具链维护者可以验证 manifest、skill index、help index 和 files index 的有效性。
 
-FR28: 工具链维护者可以验证多个 IDE mirrors 是否与 canonical source 一致。
+FR28: 工具链维护者可以验证 manifest 中记录的所有已选择且支持的 IDE target mirrors 是否与 canonical source 一致。
 
 FR28a: 当 IDE mirror 中的 canonical skill package 文件偏离 manifest 记录的 canonical package hash 时，validate 必须报告 ide-mirror 或 file-integrity error，但不得自动修复。
 
@@ -82,7 +96,7 @@ FR35a: MVP 面向用户的核心命令必须支持 --json，并使用统一 Comm
 
 FR35b: CommandResult 中的 issues 必须复用同一 ValidationIssue model，并与 human-readable output、exit code 和 fixture assertions 保持一致；issue category、issue id 与默认 severity 语义以 validation issue taxonomy owning SPEC 为准。
 
-FR35c: PRD 不定义第二份 public JSON 字段真源；新增 public JSON 字段、reason code、redacted path 形状、排序规则或 command-specific payload 行为时，必须先更新 owning SPEC，再同步 executable schema/parser 和 fixture expected outputs。Reason code producer 只能输出 owning SPEC registry 中的 MVP codes；consumer/parser 必须容忍 unknown future codes，并保留其 stable display string。
+FR35c: PRD 不定义第二份 public JSON 字段真源。负责 public JSON contract 变更的 SpecLite 维护者在新增 public JSON 字段、reason code、redacted path 形状、排序规则或 command-specific payload 行为时，必须先更新 owning SPEC，再同步 executable schema/parser 和 fixture expected outputs。Reason code producer 只能输出 owning SPEC registry 中的 MVP codes；consumer/parser 必须容忍 unknown future codes，并保留其 stable display string。
 
 FR36: 项目维护者可以更新已安装的 SpecLite installer-owned 文件。
 
@@ -114,7 +128,7 @@ FR46: 项目维护者可以在安装过程中配置过程产物输出目录。
 
 FR47: 项目维护者可以选择快速配置或详细配置模式。
 
-FR47a: `speclite install --yes` 必须表示使用安全默认值并授权无 conflict 的 planned writes；默认情况下不得继续要求模块选择、配置模式或最终写入确认等普通交互输入。需要自定义模块、配置或 IDE targets 时，必须通过显式 interactive mode 或显式 flags 进入。
+FR47a: `speclite install --yes` 必须采用 module metadata、config contract 和 adapter registry 明确声明的 deterministic defaults，并仅授权 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 定义的无 conflict planned writes；该模式不得发起或等待 module selection、config mode、IDE target selection 或 final write confirmation 等交互输入。若必需值无法由 defaults 或显式 flags 解析，或 planning 产生 unsupported target、drift 或 conflict，命令必须在写入前失败，以非 0 exit code 和 owning SPEC registry 中的 stable issue id 报告原因；显式 flags 必须覆盖对应 default。需要人工选择时，用户必须显式进入 interactive mode，`--yes` 不得隐式切换为 interactive mode。
 
 FR48: 项目维护者可以使用项目级配置定义用户称呼、项目名称、交流语言、文档输出语言、产物路径、安装模块和 IDE targets。
 
@@ -170,6 +184,8 @@ FR65a: 安装写入前的 final review 必须以稳定顺序展示 target、sour
 
 FR66: SpecLite 维护者可以验证新增或修改的 source skill 是否可安装。
 
+FR66a: SpecLite 维护者必须能够生成全 canonical Skill corpus 的 `grill` 引用清单，逐项记录 skill id、引用文件、引用表达、目标 skill/path 与引用用途，用于更名和路由变更后的人工确认与负向残留检查。
+
 FR67: SpecLite 维护者可以使用 fixture project 复现 fresh install 流程。
 
 FR68: SpecLite 维护者可以使用 fixture project 验证安装前后目录变化。
@@ -180,7 +196,7 @@ FR70: SpecLite 维护者可以验证至少一个 skill 从 IDE 发现到产物�
 
 FR71: 文档读者可以通过 fresh install 示例、安装前后目录树、manifest/index 示例、status/validate 输出示例和 update 保护示例理解安装后结构、常用命令和验证结果。
 
-FR71a: Fixture expected outputs 是契约测试资产，不是仅供阅读的示例；新增模块、adapter、source type、validation rule、ownership 行为或 installed artifact kind 时，必须同步相关 fixture 输入和 expected outputs。
+FR71a: SpecLite 维护者必须将 Fixture expected outputs 作为契约测试资产，而不是仅供阅读的示例；新增模块、adapter、source type、validation rule、ownership 行为或 installed artifact kind 时，SpecLite 维护者必须同步相关 fixture 输入和 expected outputs。
 
 FR71b: Fixture case directory、expected output classes、snapshot comparison、ready summary gate、release gate / regression asset 区分和 baseline case 集合由 fixture contract owning SPEC 管理；实现不得先更新 snapshots 再反推契约行为，契约变更必须先更新 owning SPEC 和 executable schema/parser，再更新 fixture expected outputs。
 
@@ -202,7 +218,7 @@ Post-MVP FR72-FR78 只作为 backlog inventory，不得进入 MVP sprint backlog
 
 ### Traceability Count Convention（可追踪计数口径）
 
-本文档保留 PRD 的 base numbering：FR1-FR78 与 NFR1-NFR40 表示主编号范围。为 implementation readiness、fixture planning 和 story acceptance tracking，lettered extensions 也作为独立可追踪条目统计；当前显式条目为 98 个 FR entries 与 99 个 NFR entries。后续报告应同时说明 base range 与 explicit tracked entry count，避免把 lettered extensions 误判为缺失或额外范围。
+本文档保留 PRD 的 base numbering：FR1-FR78 与 NFR1-NFR40 表示主编号范围。为 implementation readiness、fixture planning 和 story acceptance tracking，lettered extensions 也作为独立可追踪条目统计；当前显式条目为 106 个 FR entries 与 101 个 NFR entries。后续报告应同时说明 base range 与 explicit tracked entry count，避免把 lettered extensions 误判为缺失或额外范围。
 
 ## NonFunctional Requirements（非功能需求）
 
@@ -257,6 +273,8 @@ NFR13d: source-integrity 与 file-integrity 必须是不同 issue category；sou
 NFR13e: Source descriptor 字段与语义以 source-descriptor owning SPEC 为准，PRD、Architecture、Manifest/index 和 CommandResult 中的 source descriptor 描述只作为摘要或投影，不得各自定义 trust/evidence 规则。
 
 NFR14: human-owned custom 文件、workflow-owned 产物和发生 drift 的 IDE mirror 文件不得被 install 或 update 静默覆盖；覆盖保护通过 ownership manifest、路径规则和 hash comparison 共同判断。
+
+NFR14a: 阶段 artifact root 演进必须采用兼容演进策略：fresh install 使用新字段与新默认路径；existing install 继续以已有 `planning_artifacts`、`implementation_artifacts`、`devops_artifacts`、`project_knowledge` 配置为权威；缺少新字段时，`brainstorming_artifacts` fallback 到旧 `{output_folder}/brainstorming`，`analysis_artifacts` 与 `solutioning_artifacts` fallback 到既有 `{planning_artifacts}`。普通 install/update/repair 不得静默移动、重命名或重写 workflow-owned artifacts；显式 artifact migration 属于独立后续能力。
 
 NFR15: 对遗留入口或 stale entries 的处理必须默认提供 path、risk category、suggested manual action 和 verification command，不应在未确认的情况下删除用户目录中的文件。
 
@@ -400,9 +418,11 @@ NFR40b: MVP release gate fixtures 必须包含最小 skill-artifact-loop，覆�
 
 NFR40c: source-integrity release gate 必须拆为稳定 sub-cases，至少覆盖 bundled-packaging-trusted、bundled-packaging-missing-evidence-blocked、registry-lock-trusted、registry-unverified、git-floating-blocked、local-source-snapshot-unverified、local-source-path-redacted、local-source-installed-state-blocked、artifact-hash-mismatch-blocked 和 source-unreadable-blocked。
 
-NFR40d: Release packaging acceptance 必须作为 release checklist gate 生成 packaging manifest，验证 npm package、local tarball 和 offline bundle 包含 compiled CLI、package.json bin mapping、assets/source/speclite/、installer/runtime schemas、runtime scripts/templates 和安装执行所需 runtime assets；test/fixtures/ 与 root fixtures/ 默认不得进入 package，除非明确标记为 packaged documentation example。Packaging acceptance 不一定是 fixture project case，但必须有 stable artifact、expected assertions 和 CI/release evidence。
+NFR40d: Release packaging acceptance 必须作为 release checklist gate 生成 packaging manifest，验证 npm package、local tarball 和 offline bundle 包含 executable CLI runtime entry、`package.json` bin mapping、`assets/source/speclite/`、installer/runtime schemas、runtime scripts/templates 和安装执行所需 runtime assets；`test/fixtures/` 与 root `fixtures/` 默认不得进入 package，除非明确标记为 packaged documentation example。Packaging acceptance 不一定是 fixture project case，但必须有 stable artifact、expected assertions 和 CI/release evidence。
 
 NFR40e: Install interaction fixture / CLI smoke 必须覆盖默认中文 human-readable 输出、英文 locale fallback、prompt/summary 分离、`install --yes` no-prompt flow、`install --interactive --yes` 或等价显式交互入口、`NO_COLOR` / non-TTY / CI 无 ANSI 输出，以及 `install --json --yes` 无交互稳定输出。
+
+NFR40f: Artifact topology 变更必须由 fresh-install 与 existing-install-update fixtures 共同验证：新安装生成所有新 root/subdirectory 与新 config fields；旧配置缺少新 fields 时仍可解析旧 whole/sharded planning documents、旧 `sprint-status.story_location` 和既有 workflow artifacts；手工只改 config path 而未迁移 artifacts 时必须产生可诊断结果，不得误报迁移完成。
 
 ## Additional Requirements（补充需求）
 
@@ -414,7 +434,15 @@ NFR40e: Install interaction fixture / CLI smoke 必须覆盖默认中文 human-r
 
 - MVP 不引入数据库、REST/GraphQL API、browser UI、desktop UI、后台 daemon 或云服务；系统状态来自本地文件系统和 manifest/hash baselines。
 
-- canonical source、installer control plane、IDE execution plane 和 artifact repository 必须保持边界清晰：assets/source/speclite/ 是内置 source definitions，_speclite 是 metadata/control hub，.claude/skills 与 .agents/skills 是 execution plane，_speclite-output 是 artifact repository。
+- canonical source 与五个 runtime planes 必须保持边界清晰：`assets/source/speclite/` 是内置 source definitions；`_speclite/` 是 Metadata / Control Plane；`.claude/skills/` 与 `.agents/skills/` 是 IDE Execution Plane；六个阶段 roots 构成 Phase Artifact Plane；`_speclite-output/project-knowledge-base/` 是 Project Knowledge Plane 的 fresh default；`docs/` 是 Public Documentation Plane。
+
+- `SPEC 09` 是七类 runtime artifact fields、placeholders、fresh defaults、legacy fallback 与 public docs / project knowledge 边界的唯一 owner；workflow、Architecture、Epic 与 Story 只能引用，不得重新定义第二份 path contract。
+
+- compatible evolution 必须区分 fresh default、existing explicit config 与 `legacy-compatible` fallback；普通 install、update 和 repair 不得移动、复制、重命名、删除或重写 workflow-owned artifacts，explicit artifact migration 保留为未来独立能力。
+
+- Domain、market、technical research、Product Brief 与 PRFAQ 是 Analysis producers；它们分别写入 `{analysis_artifacts}/research/`、`{analysis_artifacts}/product-brief/` 与 `{analysis_artifacts}/prfaq/`，不是 `{project_knowledge}` producers。
+
+- `SPEC 03` 只消费 resolved runtime roots 生成 install plan；`SPEC 04` 通过 active Skill entry 上的 optional `renamedFromCanonicalSkillIds` 管理 canonical Skill rename，保持唯一 active identity，不创建 alias package、help entry、phase row 或 IDE mirror。
 
 - bundled source assets 必须位于 assets/source/speclite/，不得与 src/source/ resolver 代码混放；已删除或非正式分发辅助来源不得进入 installer scope、IDE mirrors 或 manifest。
 
@@ -495,7 +523,8 @@ NFR40e: Install interaction fixture / CLI smoke 必须覆盖默认中文 human-r
 | --- | --- | --- |
 | NFR1、NFR1a、NFR10-NFR11a、NFR34 | Epic 1 / Story 1.6 与 Story 1.7 覆盖 install progress、prompt/summary 分离、`--yes` no-prompt flow、ready summary gate、失败时不展示 ready summary 和安装摘要信息；Epic 6 / Story 6.2 用 fixture gate 验证。 | `01-command-result-json-contract.md`、`08-fixture-contract.md` |
 | NFR2-NFR3、NFR5-NFR5a、NFR9-NFR9a、NFR33 | Epic 3 / Story 3.1 与 Story 3.6 覆盖 lightweight status、local deterministic validate、checked categories 和 status/validate 分工；Epic 6 / Story 6.4 覆盖 performance evidence。 | `01-command-result-json-contract.md`、`07-validation-issue-taxonomy.md`、`08-fixture-contract.md` |
-| NFR4-NFR8、NFR14-NFR17b、NFR25a-NFR25c、NFR32f-NFR32g | Epic 4 / Story 4.1-4.6 覆盖 ownership/hash、update conflict、operation lock、safe write、repair planning 和 protected files；Epic 6 / Story 6.2-6.3 用 drift/update fixtures 验证。 | `03-install-plan-contract.md`、`04-manifest-index-contract.md`、`08-fixture-contract.md` |
+| NFR4-NFR8、NFR14、NFR15-NFR17b、NFR25a-NFR25c、NFR32f-NFR32g | Epic 4 / Story 4.1-4.6 覆盖 ownership/hash、update conflict、operation lock、safe write、repair planning 和 protected files；Epic 6 / Story 6.2-6.3 用 drift/update fixtures 验证。 | `03-install-plan-contract.md`、`04-manifest-index-contract.md`、`08-fixture-contract.md` |
+| NFR14a、NFR40f | Epic 11 / Story 11.1-11.10 覆盖 executable root resolution、fresh projection、existing compatibility/diagnostics、phase-aligned routing、whole/sharded discovery、Skill rename 与 config/artifact mismatch；Epic completion gate 汇总 fresh-install、existing-install-update 和 mismatch fixture evidence。 | `03-install-plan-contract.md`、`04-manifest-index-contract.md`、`08-fixture-contract.md`、`09-sdlc-workflow-lifecycle-contract.md` |
 | NFR12-NFR13e、NFR22 | Epic 5 / Story 5.1-5.5 覆盖 source selection、source integrity evidence、trust status、redaction、Git pinning 和 validate no-network boundary。 | `02-source-descriptor-contract.md`、`03-install-plan-contract.md`、`07-validation-issue-taxonomy.md` |
 | NFR18-NFR21、NFR35d、NFR40a | Epic 1 / Story 1.1 覆盖 runtime/platform guard；Epic 3 / Story 3.6 和 Epic 6 / Story 6.4 覆盖 project-relative POSIX path、Node 22/24、macOS/Windows portability、case/symlink/path escape 和 executable intent。 | `01-command-result-json-contract.md`、`04-manifest-index-contract.md`、`08-fixture-contract.md` |
 | NFR23-NFR29、NFR24a、NFR28b | Epic 2 / Story 2.1-2.3 覆盖 discovery metadata、IDE target mapping 和 phase coverage；Epic 3 / Story 3.2-3.4 覆盖 manifest/help/menu/IDE mirror/artifact root validation；Epic 6 / Story 6.3 验证 drift。 | `04-manifest-index-contract.md`、`05-ide-adapter-registry-contract.md` |
@@ -512,20 +541,21 @@ UX 设计确认 SpecLite MVP 不提供传统 Web、mobile 或 desktop GUI；核�
 
 - UX-DR1: Human-readable output 与 `--json` output 必须共享同一 semantic model；automation 依赖字段必须进入 structured JSON 或 file contract，不得只存在于 human-readable 文案。
 - UX-DR2: 输出层必须支持 Compact、Evidence、Structured 三类 presentation profiles；`status` 默认偏 compact，`install`/`validate`/`update` 默认偏 evidence，`--json`/fixture/CI 使用 structured。
-- UX-DR3: Ready summary 必须展示可复核证据，包括 completed steps、installed modules、IDE targets、key paths 和 next actions，而不是只输出 `done` 或 `success`。
+- UX-DR3: Ready Summary 必须展示可复核证据，包括 completed steps、installed modules、IDE targets、完整 Filesystem Space Map、七个 runtime fields 的实际 `resolvedRoot`、`resolutionMode`、compatibility label 和 next actions；existing install 不得用 fresh defaults 替代实际 roots，legacy fallback 必须标记 `legacy-compatible`。
 - UX-DR4: Phase Coverage Matrix 必须可作为方法论导航和治理证据，展示 phaseId、phaseLabel、moduleId、canonicalSkillId、targetId、entryPath、activationTarget、status 和 artifactContract。
 - UX-DR5: Validation Issue Row 必须包含 severity、category、issueId、affectedPath、impact 和 suggestedNextStep；颜色或符号不得成为唯一语义载体。
 - UX-DR6: Update Plan Block 必须在授权前展示 planned effects、write authorization status、changed/skipped/conflict paths 和 protected boundaries。
-- UX-DR7: Filesystem Space Map 必须把 `_speclite`、IDE execution plane、`_speclite-output` 和 project knowledge 的 path role / ownership / safe action 表达清楚。
-- UX-DR8: Artifact Evidence Card 必须展示 artifact path、workflowType、sourceSkill、generatedAt、configured root 和 default output path，并明确 workflow-owned artifacts 不由 install/update 静默覆盖。
+- UX-DR7: Filesystem Space Map 必须完整展示 Metadata / Control、IDE Execution、Phase Artifact、Project Knowledge 与 Public Documentation 五个 planes，并对 Phase Artifact Plane 展示 phase、runtime field、placeholder、actual `resolvedRoot`、`resolutionMode`、ownership、safe action、legacy fallback 与 `config-artifact-mismatch`。Planning 必须展示 PRD / `{planning_artifacts}/prd/`、Epics / `{planning_artifacts}/epics/`、UX / `{planning_artifacts}/ux/`；Solutioning 必须展示 Architecture / `{solutioning_artifacts}/architecture/`。
+- UX-DR8: Artifact Evidence Card 必须展示 `workflowType`、`canonicalSkillId` / `sourceSkill`、`phase`、`artifactKind`、`resolvedRoot`、`resolutionMode`、`actualConsumedPath`、whole/sharded `discoveryShape` 与 `ambiguityStatus`。Architecture fresh install 必须显示 `Solutioning / {solutioning_artifacts}/architecture/`；existing install 必须展示 explicit config 或 `legacy-compatible` fallback 的实际 root 与消费路径，不得将 fallback 表述为 migration，也不得由 install/update 静默覆盖 workflow-owned artifacts。
 - UX-DR9: Human-readable output 必须在 compact terminal width、standard width、wide width 下保持关键字段可读；窄终端宽表格必须降级为 key-value block。
 - UX-DR10: `NO_COLOR`、non-TTY 和 CI 环境下 human-readable output 不得包含 ANSI escape，且不依赖 spinner-only progress、颜色、图标或动态覆盖行传达唯一信息。
 - UX-DR11: 文档示例默认使用无颜色、固定顺序、可复制输出，并应与 fixture expected outputs 的结构语言一致。
 - UX-DR12: `speclite install` 首次安装必须使用分阶段 block、独立 prompt 行和明确写入确认说明，避免日志、摘要、确认和用户输入混在同一文本流中。
 - UX-DR13: Human-readable CLI 默认 locale 为 `zh-CN`，通过 message catalog 提供 `en-US` fallback；技术标识保持英文且不本地化。
 - UX-DR14: `install --yes` 是默认值 + 写入授权的 no-prompt flow；需要交互选择时必须进入显式 interactive mode 或显式 flags。
+- UX-DR15: Workflow artifact journey 必须根据 canonical phase 与 artifact intent 路由到 Brainstorming、Analysis、Planning、Solutioning、Implementation、DevOps、Project Knowledge 或 Public Documentation；PRD、Epics 与 UX 继续使用 Planning subject directories，Architecture whole/sharded artifacts 使用 `{solutioning_artifacts}/architecture/`。`docs/` 是 Primary Public Document，不是 Project Knowledge 的 fresh default 或隐式 alias，config/artifact mismatch 不得触发或冒充自动 migration。
 
-这些 UX-DR 通过现有 stories 与 corrective Story 承接，不新增 MVP Epic：Story 1.6 承接 ready summary 与 install progress；Story 1.7 承接 install prompt 分区、默认中文 message catalog 和 `--yes` no-prompt flow；Story 3.5 承接 shared semantic model 与 renderer profiles；Story 3.6 承接 validate ordering、terminal fallback 和 no-color/non-TTY 可读性；Story 4.3 承接 update plan block；Story 6.1 与 Story 6.4 承接 fixture/snapshot、terminal width、no-color/CI 和 cross-platform evidence。
+这些 UX-DR 通过现有 stories 与 Epic 11 corrective Stories 承接，不新增 MVP Epic：Story 1.6 承接 ready summary 与 install progress；Story 1.7 承接 install prompt 分区、默认中文 message catalog 和 `--yes` no-prompt flow；Story 3.5 承接 shared semantic model 与 renderer profiles；Story 3.6 承接 validate ordering、terminal fallback 和 no-color/non-TTY 可读性；Story 4.3 承接 update plan block；Story 6.1 与 Story 6.4 承接 fixture/snapshot、terminal width、no-color/CI 和 cross-platform evidence；Epic 11 承接 phase-aware roots、actual resolved paths、legacy compatibility、whole/sharded ambiguity 与 Public Documentation boundary。
 
 ## FR Coverage Map（FR 覆盖映射）
 
@@ -563,6 +593,8 @@ FR16: Epic 1 - 查看安装完成后的项目结构和安装摘要。
 
 FR17: Epic 1 - 查看安装完成后的下一步指引。
 
+FR17a: Epic 1 - 首次安装 human-readable CLI 使用分阶段 blocks，并分离 summary、prompt、确认和用户输入。
+
 FR18: Epic 2 - 生成 IDE-specific discovery metadata。
 
 FR19: Epic 2 - 将 discovery metadata 映射为 self-contained skill entry。
@@ -585,7 +617,7 @@ FR26: Epic 3 - 查看安装来源、版本和 IDE target 覆盖情况。
 
 FR27: Epic 3 - 验证 manifest、skill index、help index 和 files index。
 
-FR28: Epic 3 - 验证多个 IDE mirrors 与 canonical source 一致。
+FR28: Epic 3 - 验证 manifest 中记录的所有已选择且支持的 IDE target mirrors 与 canonical source 一致。
 
 FR28a: Epic 3 - 报告 IDE mirror canonical package hash drift。
 
@@ -639,6 +671,8 @@ FR46: Epic 1 - 安装过程中配置过程产物输出目录。
 
 FR47: Epic 1 - 选择快速配置或详细配置模式。
 
+FR47a: Epic 1 - `install --yes` 使用 deterministic defaults，只授权无 conflict writes，并保持 no-prompt behavior。
+
 FR48: Epic 1 - 使用项目级配置定义用户称呼、项目名称、语言、产物路径、安装模块和 IDE targets。
 
 FR49: Epic 2 - 通过 customization 覆盖 skill workflow、agent persona、菜单项和输出路径默认值。
@@ -683,9 +717,13 @@ FR63: Epic 1 - 展示 SpecLite ready summary。
 
 FR63a: Epic 1 - install --json 的 InstallCommandData 承载 ready summary 自动化字段。
 
+FR63b: Epic 1 - Human-readable install output 使用 `zh-CN` 默认 message catalog 与 `en-US` fallback。
+
 FR64: Epic 1 - 展示如何启动 AI agent 和调用帮助 skill。
 
 FR65: Epic 1 - 展示安装位置、已安装模块和已配置工具清单。
+
+FR65a: Epic 1 - 写入前 final review 以稳定顺序展示 target、source、config、modules、IDE targets、planned writes 和 pending phases。
 
 FR66: Epic 6 - 验证新增或修改 source skill 是否可安装。
 
@@ -718,3 +756,21 @@ FR76: Epic 7 - 移除 installer-owned 安装结果。
 FR77: Epic 7 - Post-MVP CI、企业工具链和自动化验证流程消费 MVP 机器可读输出；MVP 不实现企业集成 workflow。
 
 FR78: Epic 7 - 查看规范落地与流程覆盖报告。
+
+Artifact topology corrective coverage：
+
+FR13a: Epic 11 - Fresh install 预创建阶段对齐 artifact roots，并区分 `docs/` 与 `_speclite-output/project-knowledge-base/`。
+
+FR23b: Epic 11 - Analysis research、product brief 与 PRFAQ 统一写入 `{analysis_artifacts}` 下的规范子目录。
+
+FR23c: Epic 11 - PRD 与 Epics whole/sharded documents 使用 `{planning_artifacts}/prd/` 与 `{planning_artifacts}/epics/`；Architecture whole/sharded documents 使用 `{solutioning_artifacts}/architecture/`，existing install 保留 explicit config、`legacy-compatible` fallback 与 no-migration 边界。
+
+FR23d: Epic 11 - UX artifacts 与后续 design-system 子树统一写入 `{planning_artifacts}/ux/`。
+
+FR23e: Epic 11 - PRD validation 使用固定 dated report filename。
+
+FR23f: Epic 11 - Implementation Readiness Skills 更名并统一 solutioning output root。
+
+FR23g: Epic 11 - Story CR artifact root 统一为 `{story-id}-code-review/`。
+
+FR66a: Epic 11 - 生成全 canonical Skill corpus 的 `grill` 引用清单与残留检查证据。

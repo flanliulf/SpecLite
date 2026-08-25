@@ -45,6 +45,12 @@
 **则** 命令不得访问 npm registry、private registry、Git remote、offline bundle origin 或其他远程 source
 **并且** 不得执行 remote freshness check、provenance revalidation、完整文件 hash scan 或隐式 update check。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR25`、`FR26`
+- **Supporting NFRs:** `NFR2`、`NFR3`、`NFR5`、`NFR5a`、`NFR9`、`NFR9a`、`NFR26`、`NFR33`、`NFR35b-1`、`NFR35b-2`、`NFR35b-3`、`NFR35b-4`、`NFR35b-5`
+- **UX / Contract Anchors:** SPEC 01 status `CommandResult`、SPEC 04 installed-state projection
+
 ## Story 3.2: Manifest And Index Schema Validation（Manifest 与索引 Schema 验证）
 
 作为工具链维护者，
@@ -94,6 +100,12 @@
 **则** 系统会报告稳定 issue id、category、severity 和 affected path
 **并且** 不使用自由文本 issue id 表达 schema 或 index 问题。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR27`、`FR29`、`FR34`
+- **Supporting NFRs:** `NFR17a`、`NFR28`、`NFR28a`、`NFR29`、`NFR32a`、`NFR32b`、`NFR32c`、`NFR32d`
+- **UX / Contract Anchors:** SPEC 04 manifest/index、SPEC 07 validation issue taxonomy
+
 ## Story 3.3: IDE Mirror And File Integrity Validation（IDE 镜像与文件完整性验证）
 
 作为工具链维护者，
@@ -137,6 +149,12 @@
 **则** 返回的 issue id、category、severity 和 affected path 集合保持一致
 **并且** 输出不依赖 filesystem traversal order。
 
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR28`、`FR28a`、`FR34`
+- **Supporting NFRs:** `NFR17a`、`NFR23`、`NFR25`、`NFR25a`、`NFR27`
+- **UX / Contract Anchors:** SPEC 04 package/file hash boundaries、SPEC 05 IDE adapter registry、SPEC 07 stable drift diagnostics
+
 ## Story 3.4: Runtime Path, Menu Target, Legacy Entry And Artifact Path Validation（运行时路径、菜单目标、遗留入口与产物路径验证）
 
 作为工具链维护者，
@@ -174,6 +192,12 @@
 **当** 输出诊断结果
 **则** affected path 不泄露无关 absolute local path、home directory、环境变量或认证信息
 **并且** 必须使用稳定 issue id、category、severity 和 suggested next step。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR29`、`FR30`、`FR31`、`FR32`、`FR33`
+- **Supporting NFRs:** `NFR15`、`NFR16`、`NFR28`、`NFR28b`、`NFR31`、`NFR32`、`NFR32a`、`NFR32d`
+- **UX / Contract Anchors:** SPEC 07 issue taxonomy、SPEC 09 artifact path lifecycle
 
 ## Story 3.5: CommandResult And ValidationIssue JSON Contract（CommandResult 与 ValidationIssue JSON 契约）
 
@@ -227,6 +251,12 @@
 **当** structured renderer 输出 command result
 **则** JSON 必须不包含 ANSI escape、terminal width formatting、颜色标记、图标或 human-only 装饰字段
 **并且** human-readable output 中出现的 automation 必需字段必须在 structured JSON 或 file contract 中有对应来源。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR35`、`FR35a`、`FR35b`、`FR35c`
+- **Supporting NFRs:** `NFR30`、`NFR31`、`NFR32a`、`NFR35`、`NFR35a`、`NFR35a-schema`、`NFR35a-0`、`NFR35a-1`、`NFR35b`、`NFR35c`、`NFR35e`、`NFR35f`、`NFR35g`、`NFR35h`、`NFR35i`
+- **UX / Contract Anchors:** `UX-DR1`、`UX-DR2`、`UX-DR5`、SPEC 01 `CommandResult`、SPEC 07 `ValidationIssue`
 
 ## Story 3.6: Validation Progress, Category Coverage And Local Determinism（验证进度、类别覆盖与本地确定性）
 
@@ -282,3 +312,9 @@
 **当** 用户在无颜色、screen reader、复制到 issue tracker 或 CI log 的场景阅读输出
 **则** severity、status、empty state、issue category 和 next action 必须仍有文本等价物
 **并且** `No issues found`、`No conflicts detected` 或未检查项必须显式呈现，不得以空白表示。
+
+### Requirement Traceability（需求追踪）
+
+- **Primary FRs:** `FR35`、`FR35a`、`FR35b`
+- **Supporting NFRs:** `NFR2`、`NFR3`、`NFR5`、`NFR5a`、`NFR9`、`NFR9a`、`NFR19`、`NFR32`、`NFR35a`、`NFR35b-6`、`NFR35b-7`、`NFR35b-8`、`NFR35b-9`、`NFR35b-10`、`NFR35b-11`、`NFR35b-12`、`NFR35b-13`、`NFR35b-14`、`NFR35d`、`NFR35j`
+- **UX / Contract Anchors:** `UX-DR5`、`UX-DR9`、`UX-DR10`、SPEC 01 deterministic arrays/order、SPEC 07 canonical category order
