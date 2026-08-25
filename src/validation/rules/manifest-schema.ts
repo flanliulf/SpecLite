@@ -96,6 +96,7 @@ const OFFICIAL_BUNDLED_SELECTED_MODULE_PACKAGE_ROOTS: ExpectedSelectedModulePack
     "assets/source/speclite/core-skills/speclite-customize",
     "assets/source/speclite/core-skills/speclite-distillator",
     "assets/source/speclite/core-skills/speclite-domain-modeling",
+    "assets/source/speclite/core-skills/speclite-terminology-governance",
     "assets/source/speclite/core-skills/speclite-editorial-review-prose",
     "assets/source/speclite/core-skills/speclite-editorial-review-structure",
     "assets/source/speclite/core-skills/speclite-grill-with-docs",
