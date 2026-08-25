@@ -212,3 +212,17 @@ npm run release:check
 涉及 skill package、manifest、fixture、runtime path、validation issue model 或 release packaging 的变更，应同步检查对应 specs、fixtures 和 packaging verification。Optional ecosystem modules 不改变 default install guarantee；default fixture count 与 selected ecosystem fixture matrix 应分别维护。
 
 CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/cli-human-output-matrix.md](docs/reference/cli-human-output-matrix.md)。
+
+## Roadmap（后续迭代路线）
+
+- [ ] 优化 canonical source skills 目录结构，包括输出 Artifacts 目录、文档命名规范和顺序可读性等。
+- [ ] 支持既有项目多次迭代的 `_speclite-output` 体系。
+- [ ] 支持微服务体系的跨多仓库迭代开发体系。
+- [ ] 将 Grill 能力无痕融合到核心流程 Skills，并增强 debugging 等核心能力 Skills。
+- [ ] 遵循新的 doc system 体系，重构 canonical source skills。
+- [ ] 增强既有项目的 project knowledge 体系。
+- [ ] 整体优化 UX 体系。
+- [ ] 支持测试架构体系模块（TEA）。
+- [ ] 支持 CI/CD 能力。
+- [ ] 支持代码工程化风格能力，以及代码简化和代码重构 skills。
+- [ ] 支持企业级定制化代码规范，以及实现风险左移的流程。
