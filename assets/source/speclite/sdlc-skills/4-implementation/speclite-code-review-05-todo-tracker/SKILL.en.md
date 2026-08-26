@@ -3,7 +3,7 @@ name: speclite-code-review-05-todo-tracker
 description: "管理 CR TODO backlog，记录、检查、解决和列出延期改进项。用于用户要求 CR TODO、add TODO、resolve TODO、CR backlog、查看待办或批量提取 TODO。核心能力：维护待办状态、关联审查来源、输出可跟踪清单。"
 allowed-tools: Read, Write, Glob, Grep, Edit
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -34,7 +34,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 
 ## Inputs
 
-- `mode=add | check | resolve | list | extract` plus the Story/TODO identity required by that mode.
+- `mode=closeout | add | check | resolve | list | extract` plus the Story/TODO identity required by that mode. `closeout` is Story-closeout only; read-only `list`/`check` skip the durable result by default.
 - `confirmationPolicy: explicit | preauthorized`; default to `explicit` when omitted.
 - `authorizationSource`, `orchestrationMode`, and `handoffTarget`; authorization source is mandatory for `preauthorized`.
 

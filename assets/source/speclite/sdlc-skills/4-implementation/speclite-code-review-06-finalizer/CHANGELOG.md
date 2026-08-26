@@ -1,5 +1,12 @@
 # Changelog（变更记录）
 
+## [2.1.1] - 2026-08-26
+
+### Changed（变更）
+
+- 入口同步 fail-closed coordinated write 语义（写前/写后 hash + 失败逆序回退），不再表述为「原子收口」。
+- Inputs 补 `confirmationPolicy` 与 `authorizationSource`，`preauthorized` 缺授权来源时 HALT，与共享契约调用参数矩阵对齐。
+
 ## [2.1.0] - 2026-08-25
 
 ### Changed（变更）

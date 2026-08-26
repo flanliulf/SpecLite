@@ -244,7 +244,7 @@
       "canonicalSkillId": "speclite-code-review-05-todo-tracker",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker",
-      "canonicalPackageHash": "sha256:b99c9945b316bd4a34eb8dd1c3c343897a90678d7cde379bd8a13742df2da4c6",
+      "canonicalPackageHash": "sha256:48e04048c82024cdc692351f915a7b0490f3815fce529711e80262f6c411fe57",
       "installedTargets": [
         "claude",
         "agents"
@@ -258,7 +258,7 @@
       "canonicalSkillId": "speclite-code-review-06-finalizer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer",
-      "canonicalPackageHash": "sha256:e0ea2c11c9e448611e13245ce1d123ef253a05ead6b2d15c8e1cb2f35dca88a0",
+      "canonicalPackageHash": "sha256:d7b29528f2d3522d0ffe41c536128a5175fb5b46da5a6205bf2be2778f561dcb",
       "installedTargets": [
         "claude",
         "agents"

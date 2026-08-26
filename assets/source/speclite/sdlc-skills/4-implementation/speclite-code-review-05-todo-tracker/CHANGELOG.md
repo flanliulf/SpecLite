@@ -1,5 +1,12 @@
 # Changelog（变更记录）
 
+## [2.1.1] - 2026-08-26
+
+### Changed（变更）
+
+- Inputs mode 枚举补 `closeout`（Story 收口专用），与共享契约状态机 `TODO(mode=closeout)` 对齐。
+- 明确只读 `list`/`check` 默认不写 durable result、不产生 workspace mutation。
+
 ## [2.1.0] - 2026-08-25
 
 ### Changed（变更）

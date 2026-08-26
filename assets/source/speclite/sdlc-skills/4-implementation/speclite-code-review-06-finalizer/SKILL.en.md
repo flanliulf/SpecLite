@@ -1,9 +1,9 @@
 ---
 name: speclite-code-review-06-finalizer
-description: "在 current CR v2 evaluation 与 fresh completion gate 通过后原子同步 Story 状态。用于用户要求 CR done、CR approved、mark done、关闭 Story 或 CR finalizer。核心能力：精确 verdict、scope/gate freshness、required tracker fail-closed 和写后重读一致性。"
+description: "在 current CR v2 evaluation 与 fresh completion gate 通过后 fail-closed 同步 Story 状态。用于用户要求 CR done、CR approved、mark done、关闭 Story 或 CR finalizer。核心能力：精确 verdict、scope/gate freshness、required tracker fail-closed 和写后重读一致性。"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -24,7 +24,7 @@ Mark a Story done only when the current CR v2 state, fresh completion gate, and 
 - **Exact eligibility**: Accept only a current, exactly bound, closable v2 verdict.
 - **Evidence freshness**: Independently recompute scope and require a completion gate newer than the latest mutation/evaluation.
 - **Tracker fail-closed**: Stop when any required tracker is missing, ambiguous, or unwritable.
-- **Atomic closeout**: Prepare one change set, reread every write, and emit a durable result.
+- **Fail-closed closeout**: Prepare one change set, apply a coordinated write with before/after hashes, roll back in reverse on failure, and emit a durable result.
 
 ## Contract
 
@@ -33,7 +33,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - Story identity, `reviewSeries`, and the current evaluation, or enough information to locate it independently.
-- `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
+- `confirmationPolicy`, `authorizationSource`, `orchestrationMode`, and `handoffTarget`; default missing confirmation policy to `explicit`, and HALT when `preauthorized` lacks an `authorizationSource`.
 
 ## Workflow
 
@@ -42,7 +42,7 @@ Fully read and execute `references/finalizer-workflow.md`:
 1. Independently resolve identity, current evaluation/review, and current scope hash.
 2. Validate exact verdict, TODO mapping, and a fresh completion gate.
 3. Validate Story, sprint, and configured required workflow trackers.
-4. Prepare the change set, apply minimal writes, reread, and write the finalizer report.
+4. Prepare the change set, apply the fail-closed coordinated write, reread, and write the finalizer report.
 
 HALT on any binding, freshness, TODO-mapping, or required-tracker failure. Never replace enum validation with prose words such as Approved or pass.
 

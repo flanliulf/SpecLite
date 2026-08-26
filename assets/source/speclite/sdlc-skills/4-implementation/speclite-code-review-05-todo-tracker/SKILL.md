@@ -3,7 +3,7 @@ name: speclite-code-review-05-todo-tracker
 description: "管理 CR TODO backlog，记录、检查、解决和列出延期改进项。用于用户要求 CR TODO、add TODO、resolve TODO、CR backlog、查看待办或批量提取 TODO。核心能力：维护待办状态、关联审查来源、输出可跟踪清单。"
 allowed-tools: Read, Write, Glob, Grep, Edit
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -34,7 +34,7 @@ metadata:
 
 ## Inputs（输入）
 
-- `mode=add | check | resolve | list | extract`，以及该 mode 所需的 Story/TODO identity。
+- `mode=closeout | add | check | resolve | list | extract`，以及该 mode 所需的 Story/TODO identity。`closeout` 为 Story 收口专用，只读 `list`/`check` 默认不写 durable result。
 - `confirmationPolicy: explicit | preauthorized`；缺失时固定为 `explicit`。
 - `authorizationSource`、`orchestrationMode` 与 `handoffTarget`；`preauthorized` 时 authorization source 必填。
 

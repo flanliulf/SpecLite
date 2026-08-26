@@ -1,9 +1,9 @@
 ---
 name: speclite-code-review-06-finalizer
-description: "在 current CR v2 evaluation 与 fresh completion gate 通过后原子同步 Story 状态。用于用户要求 CR done、CR approved、mark done、关闭 Story 或 CR finalizer。核心能力：精确 verdict、scope/gate freshness、required tracker fail-closed 和写后重读一致性。"
+description: "在 current CR v2 evaluation 与 fresh completion gate 通过后 fail-closed 同步 Story 状态。用于用户要求 CR done、CR approved、mark done、关闭 Story 或 CR finalizer。核心能力：精确 verdict、scope/gate freshness、required tracker fail-closed 和写后重读一致性。"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -24,7 +24,7 @@ metadata:
 - **精确资格判断**：只接受 current、精确绑定且可收口的 v2 verdict。
 - **证据新鲜度**：独立重算 scope，并校验 completion gate 晚于最后 mutation/evaluation。
 - **Tracker fail-closed**：required tracker 缺失、歧义或不可写时停止。
-- **原子收口**：准备统一 change set，写后重读并输出 durable result。
+- **Fail-closed 收口**：准备统一 change set，按写前/写后 hash 协调写入，失败时逆序回退并输出 durable result。
 
 ## Contract（共享契约）
 
@@ -33,7 +33,7 @@ metadata:
 ## Inputs（输入）
 
 - Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
-- `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
+- `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`，`preauthorized` 缺 `authorizationSource` 时 HALT。
 
 ## Workflow（工作流）
 
@@ -42,7 +42,7 @@ metadata:
 1. 独立解析 identity、current evaluation/review 和 current scope hash。
 2. 验证 exact verdict、TODO mapping 和 fresh completion gate。
 3. 验证 Story、sprint 与 configured required workflow trackers。
-4. 准备 change set、执行最小写入、重读并写 finalizer report。
+4. 准备 change set、fail-closed 协调写入、重读并写 finalizer report。
 
 任何 binding、freshness、TODO mapping 或 required tracker 条件失败都必须 HALT。禁止使用“Approved”“通过”等 prose 字符串代替 enum。
 
