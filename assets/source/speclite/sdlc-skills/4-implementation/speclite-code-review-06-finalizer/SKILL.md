@@ -1,129 +1,64 @@
 ---
 name: speclite-code-review-06-finalizer
-description: "在 CR 通过后将 Story 标记为 Done 并同步 workflow 状态。用于用户要求 CR done、CR approved、mark done、关闭 Story 或 CR 收尾。核心能力：更新 Story 状态、同步 `sprint-status.yaml` 与 `speclite-workflow-status.yaml`。"
-allowed-tools: Read, Edit, Grep, Glob
+description: "在 current CR v2 evaluation 与 fresh completion gate 通过后原子同步 Story 状态。用于用户要求 CR done、CR approved、mark done、关闭 Story 或 CR finalizer。核心能力：精确 verdict、scope/gate freshness、required tracker fail-closed 和写后重读一致性。"
+allowed-tools: Read, Edit, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.1"
+  version: "2.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[技能说明]
-    Story 通过代码审查（CR Approved）后的收尾操作技能。一次性完成 Story 状态更新和流程文档同步，确保所有跟踪文件的状态一致性。是 Speclite CR 工作流的最终环节（承接 Speclite-cr-01 ~ 05 之后）。
+# Speclite Code Review 06 Finalizer（代码审查 Finalizer）
 
-[核心能力]
-    - **CR 审批确认**：读取最新一轮 CR 评估文件，验证 CR 结论确实为 Approved
-    - **Completion Gate 验证**：读取最新 story-completion gate report，确认结果为 `PASS` 或 `PASS_EQUIVALENT` 后才允许标记 Done
-    - **Story 状态更新**：将 Story 文件中的状态字段更新为 Done
-    - **Sprint 状态同步**：更新 `{implementation_artifacts}/sprint-status.yaml` 中对应 Story 的状态
-    - **工作流状态同步**：更新 `{planning_artifacts}/speclite-workflow-status.yaml` 中对应 Story 的状态
-    - **Epic 状态联动**：检测所属 Epic 下所有 Story 是否均已 Done，如果是则提示用户是否同步更新 Epic 状态
-    - **防重复执行**：检测 Story 是否已经是 Done 状态，避免重复操作
-    - **操作审计**：输出完整的状态变更清单供用户确认
+## Overview（概述）
 
-[执行流程]
-    路径约定和文件名格式以 `references/cr-config.md` 为准。
+只在 current CR v2、fresh completion gate 和所有 required trackers 一致时将 Story 收口为 done，并写入 durable `speclite.cr-finalizer.v2` report。支持 runner 与人工 fresh session，所有资格由 Finalizer 自身独立验证。
 
-    Step 1：定位 Story 和 CR 审查目录
-        - 接收用户指定的 Story 标识（Story 文件路径或 Story ID）
-        - 读取 `references/cr-config.md` 获取路径约定
-        - 按配置中的 Story 文件目录定位 Story 文件
-        - 按配置中的 Story ID 规则提取 `{story-id}`
-        - 按配置中的代码审查目录格式确定路径
-        - 生成数据：story-id、story-file-path、code-review-dir
+## Activation Boundary（激活边界）
 
-    Step 2：验证 CR 审批状态
-        - 按配置中的审查评估文件名格式，扫描 code-review-dir 下匹配的文件
-        - 找到 round 值最大的评估文件
-        - 读取该文件，确认 CR 结论为 Approved（查找"Approved"、"通过"等关键词）
-        - IF CR 结论不是 Approved：
-            - 立即停止，告知用户："❌ 最新一轮 CR 评估结论不是 Approved，无法标记为 Done"
-            - 展示实际的 CR 结论内容
-            - 退出流程
-        - IF 找不到评估文件：
-            - 立即停止，告知用户："❌ 未找到 CR 评估文件，请先完成代码审查流程"
-            - 退出流程
-        - 生成数据：cr-conclusion（CR 结论）、latest-evaluation-file
+- 用于验证最终 CR/gate/tracker eligibility 并执行最小 Story 状态同步。
+- 不用于执行修复、补测试、登记 TODO、推断 prose approval、提交 Git 或自动关闭 Epic。
 
-    Step 3：验证 story-completion gate
-        - 按 `references/cr-config.md` 中的 Flow Gate 目录和文件名格式，读取 `{story-id}-story-completion-gate.md`
-        - 确认 gate result 为 `PASS` 或 `PASS_EQUIVALENT`
-        - IF gate report 缺失：
-            - 立即停止，告知用户："❌ 未找到 story-completion gate report，请先运行 speclite-flow-gate mode=story-completion"
-            - 退出流程
-        - IF gate result 不是 `PASS` 或 `PASS_EQUIVALENT`：
-            - 立即停止，告知用户："❌ story-completion gate 未通过，无法标记为 Done"
-            - 展示 gate result 和推荐下一步
-            - 退出流程
-        - 生成数据：story-completion-gate-result、story-completion-gate-file
+## Core Capabilities（核心能力）
 
-    Step 4：检查当前状态（防重复）
-        - 读取 Story 文件，检查当前状态字段
-        - IF 状态已经是 Done：
-            - 告知用户："ℹ️ Story {story-id} 已经是 Done 状态，无需重复操作"
-            - 退出流程
-        - 生成数据：current-status
+- **精确资格判断**：只接受 current、精确绑定且可收口的 v2 verdict。
+- **证据新鲜度**：独立重算 scope，并校验 completion gate 晚于最后 mutation/evaluation。
+- **Tracker fail-closed**：required tracker 缺失、歧义或不可写时停止。
+- **原子收口**：准备统一 change set，写后重读并输出 durable result。
 
-    Step 5：更新 Story 文件状态
-        - 在 Story 文件中找到状态字段（如 `status:` 行）
-        - 将状态值更新为 `done`
-        - 生成数据：story-updated
+## Contract（共享契约）
 
-    Step 6：更新 sprint-status.yaml
-        - 按 `references/cr-config.md` 中的实现产物目录配置定位 sprint-status.yaml
-        - IF 文件不存在：
-            - 警告用户："sprint-status.yaml 不存在，跳过此步骤"
-            - 跳到 Step 7
-        - 在 `development_status` 段中找到匹配当前 Story 的条目（通过 story-id 前缀匹配）
-        - 将该条目的状态值更新为 `done`
-        - 更新 `last_updated` 时间戳为当前时间（格式：YYYY-MM-DD HH:MM）
-        - 生成数据：sprint-status-updated
+将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再通过 `speclite resolve config --project-root {project-root}` 获取路径和 required tracker 配置。失败时 HALT；不得依赖 runner。
 
-    Step 7：更新 speclite-workflow-status.yaml
-        - 按 `references/cr-config.md` 中的规划产物目录配置定位 speclite-workflow-status.yaml
-        - IF 文件不存在：
-            - 警告用户："speclite-workflow-status.yaml 不存在，跳过此步骤"
-            - 跳到 Step 8
-        - 找到匹配当前 Story 的条目
-        - 将该条目的状态值更新为 `done`
-        - 更新文件的时间戳字段为当前时间
-        - 生成数据：workflow-status-updated
+## Inputs（输入）
 
-    Step 8：检测 Epic 完成状态
-        - 从 story-id 中提取 epic 编号（如 story-id 为 1-2，则 epic 编号为 1）
-        - 在 sprint-status.yaml 的 `development_status` 中查找所有以该 epic 编号开头的 Story 条目
-        - 检查这些 Story 是否全部为 `done` 状态
-        - IF 全部 Done：
-            - 提示用户："Epic {epic-num} 下所有 Story 已全部完成。先运行 speclite-flow-gate mode=epic-completion 生成 Epic 实现证据摘要，再决定是否将 Epic 状态更新为 done。"
-            - 等待用户确认后再执行 Epic 状态更新；若用户要求更新 Epic 状态，必须先确认 epic-completion gate 为 `PASS` 或 `PASS_EQUIVALENT`
-        - IF 未全部 Done：
-            - 展示剩余未完成的 Story 列表
+- Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
+- `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
 
-    Step 9：输出变更总结
-        - 展示完整的操作清单：
-            ```
-            ✅ CR Done 收尾操作完成！
+## Workflow（工作流）
 
-            📋 变更清单：
-            - Story 文件：{story-file-path} → status: done
-            - sprint-status.yaml：{story-key} → done
-            - speclite-workflow-status.yaml：{story-key} → done
-            - Epic 状态：{epic-status-info}
+完整读取并执行 `references/finalizer-workflow.md`：
 
-            📌 CR 信息：
-            - 最终 CR 轮次：Round {n}
-            - CR 结论：Approved
-            - 评估文件：{latest-evaluation-file}
-            - Story completion gate：{story-completion-gate-result} ({story-completion-gate-file})
-            ```
-        - 完成后返回："✅ Story {story-id} 已标记为 Done，所有流程文档已同步更新"
+1. 独立解析 identity、current evaluation/review 和 current scope hash。
+2. 验证 exact verdict、TODO mapping 和 fresh completion gate。
+3. 验证 Story、sprint 与 configured required workflow trackers。
+4. 准备 change set、执行最小写入、重读并写 finalizer report。
 
-[注意事项]
-    - **前置条件**：必须确认最新一轮 CR 评估结论为 Approved，且 story-completion gate 为 `PASS` 或 `PASS_EQUIVALENT`，不允许跳过任一验证
-    - **状态只进不退**：Story 状态只允许从 review/in-progress 变更为 done，禁止将已 done 的 Story 改回其他状态
-    - **文件容错**：sprint-status.yaml 或 speclite-workflow-status.yaml 不存在时跳过对应步骤并警告，不阻塞整体流程
-    - **Epic 状态需确认**：Epic 状态变更必须由用户显式确认，不自动更新
-    - 路径约定和文件名格式以 `references/cr-config.md` 为准，不硬编码
-    - 始终使用中文输出
-    - 如果 Story 文件中没有明确的 status 字段，根据文件内容和格式智能定位状态标记位置
-    - 本 Skill 不修改任何源代码文件，只更新状态跟踪文档
+任何 binding、freshness、TODO mapping 或 required tracker 条件失败都必须 HALT。禁止使用“Approved”“通过”等 prose 字符串代替 enum。
+
+## Outputs and Handoff（输出与交接）
+
+- 使用 `assets/output-template.md`，写入共享 contract 定义的 finalizer canonical path。
+- 返回 report path/hash、evaluation/gate binding、tracker writes/reread 和 `DONE | HALTED`。
+- partial write 必须为 `HALTED` 并列出恢复动作；人工模式直接把 durable result 交给 manual orchestrator 或用户。
+
+## Notes（注意事项）
+
+- 状态只允许从 current review/in-progress 前进到 done；已 done 时先重验全部 evidence，再幂等返回。
+- required tracker 缺失和 stale gate 都是 blocker，不是 warning。
+- Epic 状态只提示运行 epic-completion gate；未经用户授权不更新。
+- 本 Skill 不执行 commit/push，始终使用中文输出并列出精确写入文件。
+
+## Generation Metadata（生成信息）
+
+本 Skill 由 speclite-skill-creator 体系维护。如需修改，必须同步更新 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`、`references/`、`assets/` 与实际安装副本。

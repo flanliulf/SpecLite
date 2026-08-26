@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [2.8.1] - 2026-08-25
+
+### Fixed（修复）
+
+- `check_skill_density.py` 同时识别 `[Workflow（执行流程）]` 与 Markdown `## Workflow（工作流）` / `## Workflow` 章节。
+- Markdown 模式按同级或更高级标题结束 Workflow，避免把 `### Step` 子标题误判为下一章节。
+
 ## [2.8.0] - 2026-07-06
 
 ### Added

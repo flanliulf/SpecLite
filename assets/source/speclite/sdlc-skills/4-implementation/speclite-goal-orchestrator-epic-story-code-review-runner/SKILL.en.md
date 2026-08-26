@@ -1,9 +1,9 @@
 ---
 name: speclite-goal-orchestrator-epic-story-code-review-runner
-description: "Use when the user asks to run Epic Story development and CR in strict serial order, fresh sub-agents, speclite-dev-story, speclite-code-review-01..06, PLAN.md, EXPERIMENTS.md, EXPERIMENT_NOTES.md, or a final local commit."
+description: "按 Epic 对 Story 执行 strict serial 开发与 CR 闭环。用于用户要求 Epic Story runner、fresh sub-agent、code review loop、review/evaluate/fix/finalize 或 local commit。核心能力：显式 Flow Gate、结构化 CR v2 状态机、有界收敛、证据时效校验和安全收口。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.0.3"
+  version: "2.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -12,307 +12,93 @@ metadata:
 
 ## Overview
 
-This Skill is the global orchestration layer for Epic-level Story development and code review (CR) loops. It handles goal decomposition, strict per-Story serial execution, progress logging, CR gate decisions, CR closeout, and the final local commit. It does not replace the internal capabilities of `speclite-dev-story`, `speclite-code-review-*`, or `git-commit-convention`.
+Epic-level strict-serial orchestration for Story development, CR closure, Flow Gates, convergence, tracker sync, and local commit.
 
-Core principle: advance only one Story and one step at a time. Each step must finish before the next begins. No parallel outer orchestration is allowed.
+Advance one Story, outer agent, and state transition at a time. Route only from structured frontmatter.
 
-Story development entry gates must be explicitly run or verified by this runner. The project-level `flow-gate-enforcement` hook is only a deterministic guardrail for direct prompt execution; outer sub-agent dispatch must not assume that `UserPromptSubmit` hooks will fire.
+## Activation Boundary
 
-## When To Use
+Use for an Epic or Story set requiring a full CR loop, fresh outer agents, goal records, strict serial execution, or local commit.
 
-Use this Skill when the user asks for:
+Do not use for isolated Story development, one CR role, read-only status, parallel Story execution, or SR work.
 
-- Running each Story in an Epic through fresh sub-agents.
-- `speclite-dev-story` for each Story.
-- `speclite-code-review-01-reviewer {story_id}`.
-- `speclite-code-review-02-evaluator {story_id}`.
-- `speclite-code-review-03-fixer {story_id}`.
-- Repeating reviewer/evaluator/fixer until both review and evaluation pass.
-- Running `speclite-code-review-04-rules-extractor`, `speclite-code-review-05-todo-tracker`, and `speclite-code-review-06-finalizer`.
-- Maintaining `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md`.
-- A final Chinese Conventional Commit, local only, no push.
-- Fresh sub-agents, strict serial execution, or no parallel execution.
+## Core Capabilities
 
-Do not use this Skill when:
+- **Strict-serial orchestration**: Advance one Story and one outer state transition at a time.
+- **Structured CR v2 routing**: Route by exact schema, verdict, scope hash, and round binding.
+- **Bounded convergence**: Use finding fingerprints, quorum, churn, and stop-loss limits.
+- **Resumable execution**: Derive one next state from current structured artifacts and goal records without repeating completed work.
+- **Safe closeout**: Validate evidence freshness, TODO mapping, atomic tracker rereads, and local commit boundaries.
 
-- Only one Story needs development and no CR loop is needed.
-- The user only wants one CR reviewer run.
-- The user is asking about status and has not requested execution.
-- The user explicitly asks for parallel execution.
-- The task is Story design review (SR); use the Epic Story Review runner instead.
+## Contract
+
+Fully read `{skills-root}/speclite-code-review-contract/references/cr-contract.md`, the sole owner of shared CR identity, schemas, verdicts, rounds, freshness, and governance.
+
+HALT if the contract is unavailable or required fields cannot be resolved.
 
 ## Inputs
 
-Extract from the user request:
+- `epicId`: Target Epic.
+- `storyScope`: All Epic Stories or an explicit subset.
+- `projectRoot`: Target project root.
+- `modelPolicy`: Current environment unless user-specified; record the actual model.
+- `commitPolicy`: Local Chinese Conventional Commit; no push by default.
+- `confirmationPolicy`: `explicit | preauthorized`; default `explicit`, changed only by confirmed authorization.
 
-- `epic_id`: for example `5`.
-- `story_scope`: all Stories under the Epic, or a user-specified subset.
-- `model`: default `GPT-5.5`; if unavailable, record the actual model.
-- `runtime_config`: resolved with `speclite resolve config --project-root {project-root}`.
-- `planning_artifacts`: from runtime config; default semantics are `{project-root}/_speclite-output/planning-artifacts`.
-- `implementation_artifacts`: from runtime config; default semantics are `{project-root}/_speclite-output/implementation-artifacts`.
-- `cr_dir_pattern`: `{implementation_artifacts}/code-reviews/{story_id}-code-review/`.
-- `progress_record_dir_pattern`: `{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`.
-- `plan_files`: `PLAN.md`, `EXPERIMENTS.md`, `EXPERIMENT_NOTES.md`.
-- `commit_policy`: Chinese Conventional Commit, local only, no push.
+HALT when Epic, Story set, project root, or authorization is unclear.
 
-If `epic_id` or the Story list cannot be identified, ask the user instead of guessing.
+## Runtime Activation
 
-## Speclite Adaptation
-
-This runner must use the SpecLite runtime and current canonical skills:
-
-- Story kickoff gate: `speclite-flow-gate`.
-- Story development: `speclite-dev-story`.
-- CR reviewer: `speclite-code-review-01-reviewer`.
-- CR evaluator: `speclite-code-review-02-evaluator`.
-- CR fixer: `speclite-code-review-03-fixer`.
-- CR rules extractor: `speclite-code-review-04-rules-extractor`.
-- CR TODO tracker: `speclite-code-review-05-todo-tracker`.
-- CR finalizer: `speclite-code-review-06-finalizer`.
-- Final commit: `git-commit-convention`.
-
-All Story, CR, and progress artifact paths must come from merged runtime config. Common runtime paths:
-
-- Epic files: `{planning_artifacts}/epics/`.
-- Story files: `{implementation_artifacts}/stories/`.
-- Sprint status: `{implementation_artifacts}/sprint-status.yaml`.
-- Flow Gate output: `{implementation_artifacts}/flow-gates/`.
-- Code Review output: `{implementation_artifacts}/code-reviews/`.
-- CR rules and TODO output: `{implementation_artifacts}/cr-rules/`.
-- Goal execution records: `{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`.
-
-Fixed source paths, fixtures, schemas, commands, or file names are hard gates only when the owning SPEC says so. Otherwise use equivalent implementation policy and record the basis in `EXPERIMENT_NOTES.md`.
-
-The `flow-gate-enforcement` hook does not replace this runner's explicit gate step. Before each Story starts development, the runner must confirm `{implementation_artifacts}/flow-gates/{story_id}-story-kickoff-gate.md` frontmatter metadata:
-
-- `mode: "story-kickoff"`
-- `target` and `storyKey` both match the current `story_id`
-- `result` is `PASS` or `PASS_EQUIVALENT`
-- `schemaVersion` is `speclite.flow-gate-report.v2`
-- `handoffContractVersion` is `speclite.story-kickoff-handoff.v1`
-- `foundationPrerequisiteStatus` is `PASS` or `NOT_APPLICABLE`
-- `closureOwnerCheckStatus` is `PASS` or `NOT_APPLICABLE`
-- `generatedAt` exists and is not older than the project's current hook freshness policy; if freshness cannot be judged, rerun the gate conservatively
+1. Run `speclite resolve config --project-root {projectRoot}`.
+2. Read merged artifact roots and workflow tracker config.
+3. Resolve the Skill parent as `{skills-root}` and read the shared contract.
+4. HALT on resolution failure, empty required paths, or identity conflicts.
+5. Never fall back to examples or historical default directories.
 
 ## Workflow
 
-### Step 0: Preflight
+Fully read `references/runner-workflow.md` and execute Steps 0-12:
 
-Before starting any sub-agent:
-
-1. Confirm the repository path and user goal.
-2. Confirm `epic_id`.
-3. Resolve runtime config and confirm `planning_artifacts` and `implementation_artifacts`.
-4. Cross-check the Epic Story list and each Story status from `sprint-status.yaml`, `{implementation_artifacts}/stories/`, and `{planning_artifacts}/epics/`.
-5. Locate or create the current Story code review output directory and its `goal-execute-records/` execution record directory.
-6. Check the execution record directory for existing `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md`.
-7. Check whether `{story_id}-story-kickoff-gate.md` exists in the current Story Flow Gate output directory, and record whether its metadata allows development.
-8. Check the code review output directory for existing CR review files, CR evaluation files, fixer records, and finalizer records.
-9. Check git status and identify unrelated changes.
-10. Decide whether this is a new run or a continuation.
-
-For continuation runs, do not restart. Determine the next step from Story status, CR artifacts, fix records, and git state.
-
-### Step 1: Initialize Logs
-
-Maintain three Chinese log files in the current Story code review directory's `goal-execute-records/` subdirectory:
-
-- `PLAN.md`: overall plan, current Story, checklist, current state.
-- `EXPERIMENTS.md`: each attempt, rationale, result.
-- `EXPERIMENT_NOTES.md`: live judgment, current decisions, risks.
-
-The execution record directory must be `{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`; do not write these three files directly in the code review output directory root.
-
-Create missing files. Append or update current state without overwriting history.
-
-### Step 2: Story Kickoff Flow Gate
-
-Before starting the `speclite-dev-story` sub-agent, explicitly run or verify the current Story kickoff gate:
-
-```text
-/speclite-flow-gate mode=story-kickoff target={story_id}
-```
-
-Rules:
-
-- Use `GPT-5.5`; if unavailable, record the actual model.
-- If `{implementation_artifacts}/flow-gates/{story_id}-story-kickoff-gate.md` already exists, read YAML frontmatter metadata; do not infer the result from Markdown prose.
-- Only a v2 report with `handoffContractVersion=speclite.story-kickoff-handoff.v1`, `PASS` or `PASS_EQUIVALENT`, and `foundationPrerequisiteStatus` / `closureOwnerCheckStatus` both `PASS` or `NOT_APPLICABLE` may enter Story development. Legacy v1, `FAIL_CONTRACT`, `FAIL_FUNCTION`, `FAIL_EVIDENCE`, `DECISION_NEEDED`, or missing/mismatched/stale metadata must stop development.
-- Do not replace `foundationPrerequisiteStatus` / `closureOwnerCheckStatus` with Markdown prose or historical summaries; closure owner correctness comes from the frontmatter metadata written by `speclite-flow-gate`.
-- If the gate does not pass, record the recommended next action from the gate report. Do not modify files outside the current Story/Epic unless the user explicitly authorized it.
-- Record gate report path, result, foundation prerequisite status, closure owner status, any `PASS_EQUIVALENT` rationale, and the continue/stop decision in `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md`.
-- Do not rely on the `flow-gate-enforcement` hook as the only guard; this step is still required when the hook does not fire or is not enabled.
-
-### Step 3: Story Development
-
-Start a fresh sub-agent:
-
-```text
-/speclite-dev-story story {story_id}
-```
-
-Wait for completion and record changed files, verification commands, verification results, Story status, and residual risks. Do not start CR reviewer before development completes.
-
-If the Story is already review-ready and development completion is evidenced, record the basis and skip to CR reviewer.
-
-### Step 4: CR Reviewer
-
-Start a fresh sub-agent:
-
-```text
-/speclite-code-review-01-reviewer {story_id}
-```
-
-Wait for completion and record review result file, conclusion, finding count, and pass/fail status. Do not start evaluator before reviewer finishes.
-
-Any internal sub-agents used by `speclite-code-review-01-reviewer` belong to that Skill; the outer orchestrator remains serial.
-
-### Step 5: CR Evaluator
-
-Start a fresh sub-agent:
-
-```text
-/speclite-code-review-02-evaluator {story_id}
-```
-
-Wait for completion and record evaluation file, conclusion, valid findings, and pass/fail status. Do not start fixer before evaluator finishes.
-
-### Step 6: CR Gate
-
-Use the latest reviewer and evaluator outputs:
-
-- If reviewer passes and evaluator passes, enter CR closeout.
-- If evaluator requires fixes, enter fixer.
-- If evaluator rejects findings and no fix is needed, record the reason and either rerun reviewer or end based on the latest evaluation.
-- If unclear, choose the most conservative traceable engineering decision and record it.
-
-Never fabricate a pass conclusion to finish the loop.
-
-### Step 7: CR Fixer
-
-If fixes are needed, start a fresh sub-agent:
-
-```text
-/speclite-code-review-03-fixer {story_id}
-```
-
-The fixer may only perform targeted fixes from evaluator conclusions. Wait for completion and record changed files, fix summary, verification, and residual risk. Then return to CR reviewer.
-
-### Step 8: CR Closeout
-
-After both reviewer and evaluator pass, start a fresh sub-agent and run these strictly in order:
-
-```text
-/speclite-code-review-04-rules-extractor {story_id}
-/speclite-code-review-05-todo-tracker {story_id}
-/speclite-code-review-06-finalizer {story_id}
-```
-
-Rules:
-
-- No parallel execution.
-- If CR4 or CR5 produces default recommendations, apply them only within the authorized scope and record the decision.
-- If a recommendation modifies global docs, TODO, state files, or files outside the current Story/Epic scope, first confirm it is authorized; ask if uncertain.
-- CR6 must confirm the Story can be marked Done and sync related status files.
-- Update `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md` after each Skill.
-
-### Step 9: Next Story Gate
-
-Move to the next Story only when the current Story has:
-
-- `story-kickoff` Flow Gate is a v2 report, handoff contract version, result, foundation prerequisite status, and closure owner status allow continuation, and metadata matches the current Story.
-- Development completed.
-- Latest CR reviewer pass.
-- Latest CR evaluator pass.
-- Re-review/re-evaluation after any fixer work.
-- CR rules/todo/finalizer executed in order.
-- Updated progress files.
-- Completed Story status or explicit completion evidence.
-
-### Step 10: Final Commit
-
-After all target Stories in the Epic are complete, run:
-
-```text
-/git-commit-convention
-```
-
-Use a Chinese Conventional Commit, local only, no push. Audit git status first and include only changes from this Epic Story development and CR loop. Isolate or ask about unrelated worktree changes.
+1. Resolve unique Story identity, legacy artifacts, and current records.
+2. Require a current kickoff gate before fresh development.
+3. Update all three records before every next state.
+4. Freeze scope before review; HALT on `scopeExceptions`.
+5. Run fresh reviewer then read-only evaluator; require v2 artifacts.
+6. Run convergence before verdict routing or fixer.
+7. Route fix to `patch` and verify to `verify-only`; then fresh review/evaluate.
+8. Map deferred TODOs; triage, stop-loss, and decision-needed HALT.
+9. Run rules -> TODO -> finalizer; advance only on structured `DONE`.
+10. Audit Git scope, commit as authorized, and do not push by default.
 
 ## Decision Policy
 
-- Choose the most conservative, traceable option aligned with existing docs.
-- Record decisions, reasons, and impact in `EXPERIMENT_NOTES.md`.
-- Do not wait for routine engineering tradeoffs.
-- Stop and ask before changing requirements, modifying unauthorized files, deleting content, pushing, or doing destructive operations.
-
-## Serial Execution Rules
-
-- No parallel execution.
-- Do not advance multiple Stories at once.
-- Do not start multiple outer sub-agents at once.
-- Wait for each step to finish.
-- Internal Skill parallelism belongs to that Skill; the outer orchestrator remains serial.
-- Update log files after each step.
-- Each loop must show development/reviewer/evaluator/fixer/closeout status in the logs.
-- Each Story's `story-kickoff` gate must finish before development and be written to the logs.
-
-## Logging Rules
-
-All log content must be Chinese.
-
-`PLAN.md` includes goal, current Epic, Story list and order, current Story, round, per-step status, and stop condition.
-
-`EXPERIMENTS.md` records time, Story ID, round, skill run, rationale, result, and next judgment.
-
-`EXPERIMENT_NOTES.md` records live judgment, decision reasons, risks, watch items, and user intervention points.
+- Record the most conservative traceable choice that does not expand requirements.
+- Ask before requirement changes, unauthorized edits, deletion, push, triage, or stop-loss resolution.
+- Never fabricate PASS or chase zero findings without bounds.
+- Prefer different reviewer/evaluator models; otherwise seek counterevidence and record the caveat.
 
 ## Completion Criteria
 
-The Epic CR loop is complete only when:
+Every target Story must satisfy:
 
-- Each target Story has a matching v2 `story-kickoff` Flow Gate report with handoff contract version, result, foundation prerequisite status, and closure owner status all allowing continuation.
-- Each target Story has completed development.
-- Each Story's latest `speclite-code-review-01-reviewer` conclusion passes.
-- Each Story's latest `speclite-code-review-02-evaluator` conclusion passes.
-- Any fixer work has been followed by review/evaluation.
-- Each Story has run CR rules extractor, TODO tracker, and finalizer.
-- Each Story's progress files are updated.
-- Git status is audited.
-- A local Chinese Conventional Commit has been created with `git-commit-convention`.
-- No push was performed unless explicitly requested.
+- current valid kickoff gate and completed development;
+- v2 review/evaluation bound by scope, series, and round;
+- `PASS`, or mapped TODOs for `PASS_WITH_DEFERRED_TODOS`;
+- fresh review/evaluation after the last source mutation;
+- completion gate newer than that mutation;
+- ordered rules, TODO, and finalizer completion;
+- matching Story, sprint, and required trackers after reread;
+- final-state `PLAN.md`, `EXPERIMENTS.md`, and `EXPERIMENT_NOTES.md`;
+- audited Git scope and, unless explicit no-commit, a local Chinese `git-commit-convention` commit;
+- no push unless explicitly requested.
 
-## Common Mistakes
+## Notes
 
-- Advancing multiple Stories at once.
-- Relying on implicit `flow-gate-enforcement` hook execution without explicitly running or verifying `story-kickoff` Flow Gate inside the runner.
-- Starting `speclite-dev-story` when the `story-kickoff` gate is missing, failed, stale, or target-mismatched.
-- Starting CR reviewer before development completes.
-- Starting evaluator before reviewer completes.
-- Starting fixer before evaluator completes.
-- Treating reviewer internal parallelism as permission for outer parallelism.
-- Checking reviewer pass but ignoring evaluator status.
-- Skipping re-review/re-evaluation after fixer.
-- Skipping rules extractor, TODO tracker, or finalizer after CR pass.
-- Overwriting log history.
-- Including unrelated worktree changes in the final commit.
-- Changing requirement boundaries because a recommendation exists.
+- No parallel Stories or outer steps; internal reviewer quorum may be parallel.
+- Fixed paths are hard gates only when owned by a SPEC; otherwise accept equivalent implementation with test, fixture, snapshot, or command evidence.
+- Legacy v1 artifacts cannot drive a v2 finalizer.
+- Records are Chinese; technical identifiers remain English.
 
-## Invocation Template
+## Generation Metadata
 
-```text
-Epic {epic_id} Story dev/CR goal:
-1. Preflight runtime config, current progress, Epic file, Story list and git status.
-2. For each Story, maintain PLAN.md, EXPERIMENTS.md, EXPERIMENT_NOTES.md under {implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/.
-3. Strictly serial per Story:
-   - speclite-flow-gate mode=story-kickoff target={story_id}; continue only on PASS/PASS_EQUIVALENT
-   - speclite-dev-story story {story_id}
-   - speclite-code-review-01-reviewer {story_id}
-   - speclite-code-review-02-evaluator {story_id}
-   - speclite-code-review-03-fixer {story_id} only when evaluation requires fixes
-4. Repeat CR reviewer/evaluator/fixer until reviewer and evaluator both pass.
-5. Run speclite-code-review-04-rules-extractor, speclite-code-review-05-todo-tracker, speclite-code-review-06-finalizer in order.
-6. Move to the next Story only after the current Story is fully complete.
-7. After all target Stories complete, run git-commit-convention in Chinese, local commit only, no push.
-```
+Update both entries, `references/runner-workflow.md`, `CHANGELOG.md`, and installed copies together.

@@ -117,12 +117,15 @@ IR grill 过程记录默认位于：
 {project-root}/_speclite-output/planning-artifacts/ir-grill/
 ```
 
-配置文件：
+Review 共享契约：
 
-- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/cr-config.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
+
+Story Review 配置：
+
 - `assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/references/sr-config.md`
 
-注意：用户或格式化器在最近修改过上述两个 config 文件。后续改动前必须重新读取当前内容，不要基于旧上下文直接 patch。CR/SR config 当前顶部带有 `<!-- markdownlint-disable MD032 MD060 -->`，用于保留迁移来的表格规约格式。
+注意：CR01–06 与 runner 都是独立 CR contract package 的 consumer；人工在 fresh session 中顺序调用 CR01–06 时不依赖 runner。后续修改前必须重新读取共享契约，不得在 consumer package 中复制或覆盖定义。SR config 仍由 Story Review 链路单独维护。
 
 ## 迁移原则
 
@@ -168,7 +171,7 @@ rg -n '_bmad|config\.yaml|/bmad:|bmad-|BMAD|BMad|_bmad-output|bmm-workflow-statu
 ## 建议新代理接手方式
 
 1. 先读 `assets/source/speclite/README.md` 和本文件，了解 Speclite catalog 与 review 迁移状态。
-2. 若继续改 review skill，先读对应 `SKILL.md`、`references/cr-config.md` 或 `references/sr-config.md` 的当前内容。
+2. 若继续改 review skill，先读对应 `SKILL.md`、CR 共享 `speclite-code-review-contract/references/cr-contract.md` 或 `references/sr-config.md` 的当前内容。
 3. 若要运行 Speclite lint 思路，参考 `assets/source/speclite/support/speclite-skill-lint/SKILL.md` 与 `references/lint-rules.md`。
 4. 若只改 README，同步检查 `README.en.md`，避免中英文 catalog 漂移。
 5. 复查时优先 scoped 检查，不要全仓库大 diff。

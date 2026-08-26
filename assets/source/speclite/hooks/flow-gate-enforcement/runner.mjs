@@ -13,13 +13,13 @@ const MAX_METADATA_AGE_DAYS = 30;
 
 const stdin = await readStdin();
 const event = stdin.trim().length === 0 ? {} : JSON.parse(stdin);
+const runtimeOptions = resolveRuntimeOptions(process.argv.slice(2));
 const result = await evaluate({
   event,
   projectRoot: event.projectRoot ?? event.cwd ?? process.cwd(),
   now: new Date(),
 });
-process.stdout.write(`${JSON.stringify({ decision: result.decision, reason: result.reason })}\n`);
-process.exitCode = result.exitCode;
+emitHookResult(result, runtimeOptions.platform);
 
 async function evaluate(input) {
   const prompt = extractPrompt(input.event);
@@ -171,6 +171,26 @@ function allow(reason) {
 
 function block(reason) {
   return { decision: "block", reason, exitCode: 2 };
+}
+
+function emitHookResult(result, platform) {
+  if (platform === "claude") {
+    if (result.decision === "block") {
+      process.stdout.write(`${JSON.stringify({ decision: "block", reason: result.reason })}\n`);
+    }
+    process.exitCode = 0;
+    return;
+  }
+
+  process.stdout.write(`${JSON.stringify({ decision: result.decision, reason: result.reason })}\n`);
+  process.exitCode = result.exitCode;
+}
+
+function resolveRuntimeOptions(args) {
+  const platformIndex = args.indexOf("--platform");
+  return {
+    platform: platformIndex >= 0 ? args[platformIndex + 1] : undefined,
+  };
 }
 
 async function readStdin() {

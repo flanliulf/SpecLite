@@ -3,32 +3,31 @@ name: speclite-skill-lint
 description: "Validates Agent Skills against specification, including YAML, naming, description quality, version consistency, and content constraints. Use when the user asks for speclite-skill-lint, lint skill, validate skill, check skill, skill compliance, or audit an existing Skill. Capable of YAML violation detection, bilingual trigger coverage analysis, version mismatch checks, forbidden file scanning, and structured report generation."
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.8.0"
+  version: "2.8.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
 [Overview]
-    A read-only Skill compliance checker. It scans a target Skill directory against 42 rules and returns a structured report without modifying files. The rule list is in `references/check-rules.md`; the detailed scan flow is in `references/lint-workflow.md`.
+    Read-only Skill compliance checking against the rules in `references/check-rules.md` and scan flow in `references/lint-workflow.md`.
 
 [Core Capabilities]
-    - **YAML frontmatter validation**: Check name, description, allowed-tools, the metadata field contract, and safety boundaries.
-    - **Description quality analysis**: Verify three-part description shape, bilingual trigger coverage, trigger specificity, and angle bracket safety.
-    - **File structure compliance**: Check SKILL.md, SKILL.en.md, CHANGELOG.md, directory naming, README.md prohibition, reserved prefixes, and the `speclite-` namespace prefix.
-    - **Agent routing detection**: When the target is `speclite-agent-*` or an Agent definition package with `[agent]`, route to `speclite-agent-lint` to avoid workflow-only false positives.
-    - **Version and mirror consistency**: Verify version, YAML, and reference alignment across SKILL.md, SKILL.en.md, and CHANGELOG.md.
-    - **Body and Workflow density checks**: Count body length, Workflow length, and Workflow ratio to identify flows that should move into references/, and check whether fixed path hard gates cite an owning SPEC or equivalent implementation policy.
-    - **Config reference classification checks**: Classify local definitions, local placeholders, runtime config, artifact paths, workflow variables, template placeholders, schema fields, and external project references so explainable references are not reported as missing config.
+    - **YAML frontmatter validation**: Check name, description, allowed-tools, metadata, and safety boundaries.
+    - **Description quality analysis**: Check three-part shape, bilingual triggers, specificity, and angle-bracket safety.
+    - **File structure compliance**: Check entries, changelog, naming, forbidden README, reserved prefixes, and `speclite-` namespace.
+    - **Agent routing detection**: Route `speclite-agent-*` or `[agent]` packages to `speclite-agent-lint`.
+    - **Version and mirror consistency**: Check version, YAML, and reference alignment across both entries and changelog.
+    - **Body and Workflow density checks**: Count body and Workflow density, and check fixed-path ownership or equivalent implementation policy.
+    - **Config reference classification checks**: Classify local, runtime, artifact, workflow, template, schema, and external references.
     - **Naming and file classification checks**: Check naming and responsibility boundaries for references/, scripts/, and assets/.
     - **Ecosystem source validation**: Detect `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` and check category, `ecosystem_id`, module code, `module-help.csv`, version/changelog/mirror sync, and runtime path boundaries.
     - **Structured reporting**: Output rule tables, summaries, and concrete repair guidance separated by Error and Warning.
 
 [Workflow]
-    This Skill follows an iterative scan, report, repair guidance, and rescan workflow. Full steps are in `references/lint-workflow.md`; the entry keeps only phase routing, and detailed execution rules live in the reference.
+    Follow scan -> report -> repair guidance -> rescan. Full steps are in `references/lint-workflow.md`.
 
     Step 1: Locate target Skill
-        Accept a full directory, Skill name, or "all Skills". Search actual existing roots under `assets/source/speclite/`, `.claude/skills/`, `.agents/skills/`, and `.codex/skills/`. The target must contain SKILL.md.
-        If the target directory name matches `speclite-agent-*`, or if it has `customize.toml` with `[agent]`, stop the generic lint flow and use `speclite-agent-lint`.
+        Accept a directory, Skill name, or "all Skills" and search existing canonical or installed roots. Require SKILL.md. Route `speclite-agent-*` or `[agent]` packages to `speclite-agent-lint`.
 
     Step 2: Read rules and compute density
         Read `references/check-rules.md` and `references/lint-workflow.md`. Run the read-only script:
@@ -36,10 +35,10 @@ metadata:
         Use the script JSON result as the only source for BODY-07 and BODY-08 decisions.
 
     Step 3: Run 42 checks
-        Follow the grouped flow in `references/lint-workflow.md` to check YAML, description, file structure, version, body, naming, mirror, classification, the `speclite-` prefix, Workflow density, and ecosystem source rules. Do not modify target files.
+        Follow `references/lint-workflow.md` for all rule groups. Do not modify target files.
 
     Step 4: Report and rescan
-        Output a table with rule id, item, status, details, and repair suggestions. When the user asks to re-check, rerun Step 2-4 and mark fixed and newly introduced issues.
+        Report rule id, status, evidence, and repair guidance. On re-check, rerun Steps 2-4 and mark changes.
 
 [Notes]
     - This Skill is read-only and must not modify files; Bash is allowed only for read-only statistics scripts such as `scripts/check_skill_density.py`.

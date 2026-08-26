@@ -1,423 +1,112 @@
 ---
 name: speclite-goal-orchestrator-epic-story-code-review-runner
-description: "用于用户要求按 Epic 下每个 Story 执行开发与 CR strict serial 闭环，或提到 fresh sub-agent、speclite-dev-story、speclite-code-review-01..06、PLAN.md、EXPERIMENTS.md、EXPERIMENT_NOTES.md、最终本地提交。"
+description: "按 Epic 对 Story 执行 strict serial 开发与 CR 闭环。用于用户要求 Epic Story runner、fresh sub-agent、code review loop、review/evaluate/fix/finalize 或 local commit。核心能力：显式 Flow Gate、结构化 CR v2 状态机、有界收敛、证据时效校验和安全收口。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.1.0"
+  version: "2.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-# Speclite Goal Orchestrator Epic Story Code Review Runner（目标编排：Epic Story 开发与代码审查执行器）
+# Speclite Goal Orchestrator Epic Story Code Review Runner（Epic Story 开发与代码审查执行器）
 
 ## Overview（概述）
 
-本 Skill 是 Epic 粒度 Story 开发与代码审查（CR）闭环的全局编排层。它只负责目标拆解、逐 Story 严格串行执行、进度记录、CR 循环 gate 判断、CR 收口和最终本地提交，不替代 `speclite-dev-story`、`speclite-code-review-*` 或 `git-commit-convention` 的内部能力。
+本 Skill 是 Epic 粒度 Story 开发与 CR 闭环的全局编排层。它只负责目标拆解、strict serial 调度、Flow Gate、CR v2 状态机、收敛控制、状态同步和最终本地提交，不替代被编排 Skill 的内部能力。
 
-核心原则：同一时间只推进一个 Story、一个步骤。每一步必须等前一步完成后才能开始，绝不并行。
+同一时间只能推进一个 Story、一个外层 sub-agent、一个状态迁移。所有 current decision 必须来自结构化 frontmatter，不得解析“通过”“不通过”“Approved”等 prose 关键词。
 
-Story 开发前门禁必须由本 runner 显式执行或验证。项目级 `flow-gate-enforcement` hook 只是 direct prompt execution 的 deterministic guardrail；外层 sub-agent 调度不允许假设一定会触发 `UserPromptSubmit` hook。
+## Activation Boundary（激活边界）
 
-## When To Use（使用场景）
+仅在用户要求以 Epic 或明确 Story 集合为范围，执行 development → review → evaluate → fix/verify → closeout 的 strict-serial 闭环，并要求 fresh outer sub-agent、goal records 或最终本地提交时使用本 Skill。
 
-使用本 Skill，当用户提出类似以下请求：
+以下情况不要使用本 Skill：
 
-- `针对 Epic 5 中的每个 Story，依次使用全新的 sub agent 执行...`
-- 要求对 Epic 下每个 Story 执行 `speclite-dev-story`
-- 要求执行 `speclite-code-review-01-reviewer {story_id}`
-- 要求执行 `speclite-code-review-02-evaluator {story_id}`
-- 要求执行 `speclite-code-review-03-fixer {story_id}`
-- 要求重复 reviewer/evaluator/fixer，直到 review 和 evaluation 都通过
-- 要求通过后执行 `speclite-code-review-04-rules-extractor`、`speclite-code-review-05-todo-tracker`、`speclite-code-review-06-finalizer`
-- 要求维护 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`
-- 要求最后使用 `git-commit-convention` 本地中文提交、不推送
-- 明确要求 fresh sub-agent、strict serial、no parallel
+- 只开发单个 Story 且不要求完整 CR 闭环；
+- 只运行一次 reviewer、evaluator、fixer 或 finalizer；
+- 用户只询问状态，未授权开发、状态推进或提交；
+- 用户明确要求并行推进多个 Story；
+- 任务属于 Story Review，应使用对应 SR runner。
 
-不要使用本 Skill：
+## Core Capabilities（核心能力）
 
-- 只需要单独开发一个 Story，且不需要 CR 闭环
-- 只需要执行一次 CR reviewer
-- 用户只是在询问状态，未要求执行
-- 用户明确要求并行执行
-- 任务是 Story 设计审查（SR），应使用 Epic Story Review runner
+- **严格串行编排**：每次只推进一个 Story 和一个外层状态迁移。
+- **结构化 CR v2 路由**：按 exact schema、verdict、scope hash 和 round binding 路由。
+- **有界收敛**：按 finding fingerprint、quorum、churn 与 stop-loss 机械收敛。
+- **可恢复执行**：根据 current structured artifact 和 goal records 决定唯一下一状态，不重复已完成步骤。
+- **安全收口**：校验 evidence freshness、TODO 映射、tracker 原子同步与本地提交边界。
+
+## Contract（共享契约）
+
+执行前必须完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`。独立的 `speclite-code-review-contract` package 是 CR01–06 与 runner 的唯一规范性共享契约 owner，定义 identity、路径、scope manifest、artifact schema、verdict、finding fingerprint、layer quorum、round binding、state machine、freshness 和 TODO/rules governance。
+
+共享契约不可读或关键字段无法解析时 HALT。
 
 ## Inputs（输入）
 
-从用户请求中提取：
+- `epicId`：目标 Epic，例如 `8`。
+- `storyScope`：Epic 全部 Story 或用户明确指定的子集。
+- `projectRoot`：目标项目根目录。
+- `modelPolicy`：默认使用当前环境配置；如用户指定模型则遵从，并如实记录实际模型。
+- `commitPolicy`：默认中文 Conventional Commit、本地提交、不 push。
+- `confirmationPolicy`：`explicit | preauthorized`；默认 `explicit`，只能由用户请求或已确认授权范围切换。
 
-- `epic_id`：例如 `5`
-- `story_scope`：Epic 下全部 Story，或用户指定的子集
-- `model`：默认 `GPT-5.5`；若当前运行环境不支持，记录实际使用模型
-- `runtime_config`：必须通过 `speclite resolve config --project-root {project-root}` 获取
-- `planning_artifacts`：从 runtime config 读取，默认语义为 `{project-root}/_speclite-output/planning-artifacts`
-- `implementation_artifacts`：从 runtime config 读取，默认语义为 `{project-root}/_speclite-output/implementation-artifacts`
-- `cr_dir_pattern`：`{implementation_artifacts}/code-reviews/{story_id}-code-review/`
-- `progress_record_dir_pattern`：`{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`
-- `plan_files`：
-  - `PLAN.md`
-  - `EXPERIMENTS.md`
-  - `EXPERIMENT_NOTES.md`
-- `commit_policy`：默认中文 Conventional Commit，本地提交，不推送
+无法识别 Epic、Story 列表、project root 或授权范围时 HALT 并询问，不得猜测。
 
-如果无法识别 `epic_id` 或无法定位 Story 列表，立即询问用户，不要猜测。
+## Runtime Activation（运行时激活）
 
-## Speclite Adaptation（Speclite 适配）
-
-本 runner 必须使用 SpecLite 运行时与现有 canonical skill：
-
-- Story 启动门禁：`speclite-flow-gate`
-- Story 开发：`speclite-dev-story`
-- CR reviewer：`speclite-code-review-01-reviewer`
-- CR evaluator：`speclite-code-review-02-evaluator`
-- CR fixer：`speclite-code-review-03-fixer`
-- CR rules extractor：`speclite-code-review-04-rules-extractor`
-- CR TODO tracker：`speclite-code-review-05-todo-tracker`
-- CR finalizer：`speclite-code-review-06-finalizer`
-- 最终提交：`git-commit-convention`
-
-所有 Story、CR 和进度产物路径必须从 merged runtime config 推导，不得把历史默认输出根写成 runtime 依赖。常用路径约定：
-
-- Epic 文件：`{planning_artifacts}/epics/`
-- Story 文件：`{implementation_artifacts}/stories/`
-- Sprint 状态：`{implementation_artifacts}/sprint-status.yaml`
-- Flow Gate 输出：`{implementation_artifacts}/flow-gates/`
-- Code Review 输出：`{implementation_artifacts}/code-reviews/`
-- CR rules / TODO 输出：`{implementation_artifacts}/cr-rules/`
-- 目标执行记录：`{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`
-
-固定源码路径、fixture、schema、command 或文件名只有在 owning SPEC 明确要求时才是 hard gate；否则按 equivalent implementation policy 判断，并在 `EXPERIMENT_NOTES.md` 记录依据。
-
-`flow-gate-enforcement` hook 不替代本 runner 的显式门禁步骤。每个 Story 启动开发前，runner 必须确认 `{implementation_artifacts}/flow-gates/{story_id}-story-kickoff-gate.md` 的 frontmatter metadata 满足：
-
-- `mode: "story-kickoff"`
-- `target` 与 `storyKey` 均匹配当前 `story_id`
-- `result` 为 `PASS` 或 `PASS_EQUIVALENT`
-- `schemaVersion` 为 `speclite.flow-gate-report.v2`
-- `handoffContractVersion` 为 `speclite.story-kickoff-handoff.v1`
-- `foundationPrerequisiteStatus` 为 `PASS` 或 `NOT_APPLICABLE`
-- `closureOwnerCheckStatus` 为 `PASS` 或 `NOT_APPLICABLE`
-- `generatedAt` 存在且没有超过项目当前 hook freshness policy；若无法判断 freshness，采用保守策略重新运行 gate
+1. 运行 `speclite resolve config --project-root {projectRoot}`。
+2. 读取 merged `planning_artifacts`、`implementation_artifacts` 和 workflow tracker 配置。
+3. 将当前 Skill 目录父目录解析为 `{skills-root}`。
+4. 读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`。
+5. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
 
 ## Workflow（工作流）
 
-### Step 0：Preflight（前置审计）
+必须完整读取 `references/runner-workflow.md`，并按其中 Step 0–12 执行。入口只保留以下不可跳过的路由规则：
 
-在启动任何 sub-agent 之前，必须先审计当前状态：
-
-1. 确认当前仓库路径和用户目标。
-2. 确认 `epic_id`。
-3. 运行或读取 `speclite resolve config --project-root {project-root}` 的结果，确认 `planning_artifacts` 与 `implementation_artifacts`。
-4. 从 `sprint-status.yaml`、`{implementation_artifacts}/stories/` 和 `{planning_artifacts}/epics/` 交叉定位 Epic 下 Story 列表和每个 Story 当前状态。
-5. 为当前 Story 定位或创建对应 `code review` 输出目录和 `goal-execute-records/` 执行记录目录。
-6. 检查当前 Story 的执行记录目录中是否已存在：
-   - `PLAN.md`
-   - `EXPERIMENTS.md`
-   - `EXPERIMENT_NOTES.md`
-7. 检查当前 Story 的 Flow Gate 输出目录中是否已存在 `{story_id}-story-kickoff-gate.md`，并记录 metadata 是否允许进入开发。
-8. 检查当前 Story 的 `code review` 输出目录中是否已存在：
-   - 已有 CR review 文件
-   - 已有 CR evaluation 文件
-   - 已有 fixer 修复记录
-   - 已有 finalizer 状态记录
-9. 检查 git 状态，识别是否有无关改动。
-10. 判断是新任务还是续跑任务。
-
-如果是续跑任务，不要从头开始；必须基于 Story 状态、CR 产物、fix 记录和 git 状态判断下一步。
-
-### Step 1：Initialize Logs（初始化记录）
-
-对当前正在执行的 Story，在对应 `code review` 输出目录下的 `goal-execute-records/` 子目录中维护三个中文记录文件：
-
-- `PLAN.md`：整体计划、当前 Story、执行 checklist、当前状态。
-- `EXPERIMENTS.md`：每一轮尝试、选择原因、结果。
-- `EXPERIMENT_NOTES.md`：实时思考、当前判断、待关注问题。
-
-执行记录目录必须是 `{implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/`，不得把这三个文件直接写在 `code review` 输出目录根目录。
-
-如果文件不存在，创建。
-如果文件已存在，追加或更新当前状态，不要覆盖历史记录。
-
-### Step 2：Story Kickoff Flow Gate（Story 启动门禁）
-
-在启动 `speclite-dev-story` sub-agent 之前，必须对当前 Story 显式执行或验证启动门禁：
-
-```text
-/speclite-flow-gate mode=story-kickoff target={story_id}
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 如果已有 `{implementation_artifacts}/flow-gates/{story_id}-story-kickoff-gate.md`，必须读取 YAML frontmatter metadata，不得只看 Markdown prose。
-- 只有 v2 report、`handoffContractVersion=speclite.story-kickoff-handoff.v1`、`PASS` 或 `PASS_EQUIVALENT`，且 `foundationPrerequisiteStatus`、`closureOwnerCheckStatus` 均为 `PASS` 或 `NOT_APPLICABLE`，才允许进入 Story 开发；legacy v1、`FAIL_CONTRACT`、`FAIL_FUNCTION`、`FAIL_EVIDENCE`、`DECISION_NEEDED` 或 metadata 缺失/不匹配/过期时必须停止开发。
-- 不得用 Markdown prose 或历史摘要替代 `foundationPrerequisiteStatus` / `closureOwnerCheckStatus`；closure owner 是否正确以 `speclite-flow-gate` 写入的 frontmatter metadata 为准。
-- 如果门禁未通过，根据 gate report 的 recommended next action 记录下一步；除非用户明确授权，不得擅自修订当前 Story/Epic 之外的文件。
-- 将 gate report 路径、result、foundation prerequisite status、closure owner status、是否 `PASS_EQUIVALENT`、继续/停止决策写入 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。
-- 不得依赖 `flow-gate-enforcement` hook 作为本步骤的唯一保障；hook 没有触发或未启用时，本步骤仍必须执行。
-
-### Step 3：Story Development（Story 开发）
-
-启动一个全新的 sub-agent，执行：
-
-```text
-/speclite-dev-story story {story_id}
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 等待开发 sub-agent 完成。
-- 记录修改文件、验证命令、验证结果、Story 状态和遗留风险。
-- 不允许在开发未完成时启动 CR reviewer。
-
-如果 Story 已经处于可审查状态，且已有证据证明开发步骤已完成，可记录依据后跳过开发步骤，进入 CR reviewer。
-
-### Step 4：CR Reviewer（代码审查）
-
-开发完成后，启动一个全新的 sub-agent，执行：
-
-```text
-/speclite-code-review-01-reviewer {story_id}
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 等待 reviewer 完成。
-- 记录审查结果文件、结论、发现数量、是否通过。
-- 不允许在 reviewer 未完成时启动 evaluator。
-
-`speclite-code-review-01-reviewer` 内部即使会启动多个 sub-agent，也视为 reviewer skill 的内部机制；外层 orchestrator 不得同时启动 evaluator 或 fixer。
-
-### Step 5：CR Evaluator（审查评估）
-
-Reviewer 完成后，启动一个全新的 sub-agent，执行：
-
-```text
-/speclite-code-review-02-evaluator {story_id}
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 等待 evaluator 完成。
-- 记录评估文件、评估结论、哪些发现有效、是否通过。
-- 不允许在 evaluator 未完成时启动 fixer。
-
-### Step 6：CR Gate（CR 门禁判断）
-
-**判断前必须先执行 `## Convergence Control（收敛控制）`（见下文）**：读取本轮 reviewer/evaluator 产物，更新 `PLAN.md` 的收敛度量，并检查终止判定集。若命中 `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE` / `STOP_LOSS` 中任一，按其路由退出循环，**不得进入 fixer 继续迭代**。
-
-未命中收敛终止判定时，再根据 reviewer 和 evaluator 的最新输出判断：
-
-- 如果 reviewer 结论通过，且 evaluator 评估结果也通过：进入 CR 收口步骤。
-- 如果 evaluator 判定存在需要修复的问题：进入 fixer。
-- 如果 evaluator 判定 reviewer 发现无效且无需修复：记录原因，重新进入 reviewer 或结束，依据最新评估结论判断。
-- 如果结果不明确：优先采用工程上保守且可追溯的推荐决策，并记录原因。
-
-不得为了“完成流程”伪造通过结论。同样，不得为了“追求 0 P1”而无界修复——`## Convergence Control` 是硬性上界。
-
-### Step 7：CR Fixer（修复）
-
-如果需要修复，启动一个全新的 sub-agent，执行：
-
-```text
-/speclite-code-review-03-fixer {story_id}
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 只允许 fixer 根据 evaluator 结论执行定点修复。
-- 等待 fixer 完成。
-- 记录修复文件、修复摘要、验证结果和遗留风险。
-
-Fixer 完成后，回到 Step 4，开启下一轮 reviewer/evaluator。每次回到 Step 4 即 `round + 1`；下一轮 Step 6 仍受 `## Convergence Control` 的轮次上限与 stop-loss 约束，循环有界。
-
-### Step 8：CR Closeout（CR 收口）
-
-当 reviewer 和 evaluator 均通过后，启动一个全新的 sub-agent，严格按顺序执行：
-
-```text
-/speclite-code-review-04-rules-extractor {story_id}
-/speclite-code-review-05-todo-tracker {story_id}
-/speclite-code-review-06-finalizer {story_id}
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 三个 skill 必须顺序执行，绝不并行。
-- `speclite-code-review-04-rules-extractor` 和 `speclite-code-review-05-todo-tracker` 若产出默认推荐决策，应在已授权范围内采用默认推荐并记录决策。
-- 如果推荐动作会修改全局文档、TODO、状态文件或当前 Story/Epic 之外的文件，必须先确认该修改是否属于用户授权范围；不确定时停止询问。
-- `speclite-code-review-06-finalizer` 必须确认 Story 可标记 Done，并同步相关状态文件。
-- 每个 skill 完成后更新 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。
-
-### Step 9：Next Story Gate（进入下一个 Story）
-
-当前 Story 满足完成标准后，才能进入 Epic 下一个 Story：
-
-- `story-kickoff` Flow Gate 为 v2 report，`handoffContractVersion`、result、`foundationPrerequisiteStatus` 与 `closureOwnerCheckStatus` 允许继续，且 gate report metadata 匹配当前 Story。
-- 开发完成。
-- 最新 CR reviewer 通过。
-- 最新 CR evaluator 通过。
-- 如有 fixer，修复后已重新 review/evaluate。
-- CR rules/todo/finalizer 已按顺序执行。
-- 三个进度文件已更新。
-- 当前 Story 状态已完成或有明确完成证据。
-
-不得在当前 Story 未完成时启动下一个 Story。
-
-### Step 10：Final Commit（最终提交）
-
-Epic 范围内所有目标 Story 完成后，执行：
-
-```text
-/git-commit-convention
-```
-
-要求：
-
-- 使用 `GPT-5.5`；若不可用，记录实际模型。
-- 默认中文 Conventional Commit。
-- 默认只本地提交，不推送。
-- 提交前审计 git 状态。
-- 只纳入本次 Epic Story 开发与 CR 闭环相关变更。
-- 如果工作树存在无关改动，先隔离或询问，不要误提交。
+1. preflight 建立唯一 Story identity，识别 legacy artifact，并维护 goal records。
+2. 通过 current Story kickoff gate 后，才允许 fresh development sub-agent。
+3. 每个状态迁移完成后先更新三个 goal records，再进入下一状态。
+4. 每轮 review 前冻结 scope manifest；`scopeExceptions` 非空即 HALT。
+5. fresh reviewer 与 read-only evaluator strict serial；只接受 CR v2 artifact 和 exact verdict。
+6. evaluator 后必须先执行 convergence，再按 verdict 路由；不得在 stop-loss 检查前启动 fixer。
+7. `FIX_REQUIRED` 进入 `patch`，`VERIFY_REQUIRED` 进入 `verify-only`；之后必须 fresh review/evaluate。
+8. `PASS_WITH_DEFERRED_TODOS` 必须先完成 TODO 映射；triage、stop-loss、decision-needed 均 HALT。
+9. closeout 固定为 rules extractor → TODO tracker → finalizer；只有结构化 `DONE` 才可推进下一 Story。
+10. 全部 Story 完成后先审计 Git scope，再按授权本地提交；默认不 push。
 
 ## Decision Policy（决策策略）
 
-执行中遇到需要决策的事项时：
-
-- 优先采用当前上下文中最保守、最可追溯、最符合既有文档体系的方案。
-- 必须在 `EXPERIMENT_NOTES.md` 中记录决策、原因和影响。
-- 不要因为普通工程取舍挂起等待用户。
-- 如果决策会改变需求边界、修改未授权文件、删除内容、推送远端或引入破坏性操作，必须停止并询问。
-- 当 `## Convergence Control` 命中 `STOP_LOSS` 或 `ARCHITECTURE_TRIAGE`：必须停止审查循环并携带收敛度量询问用户，不得以“再修一轮”作为默认下一步。这是对“不要因普通工程取舍挂起等待用户”的明确例外——收敛失败不是普通工程取舍。
-
-## Convergence Control（收敛控制 — 防审查死循环）
-
-CR 循环必须是**有界**循环，不得是“repeat until pass”的无界循环。每一轮 CR Gate（Step 6）判断前，必须执行本节。
-
-### 收敛度量（每轮写入 `PLAN.md` 与 `EXPERIMENT_NOTES.md`）
-
-- `round`：当前轮次。
-- `p1_accepted` / `p2_accepted`：本轮 evaluator 接受的 P1 / P2 数。
-- `p1_trend`：较上一轮 P1 升 / 降 / 平。
-- `churn_recurrence`：本轮 fixer 是否又在反复触及同一文件/同一函数（patch loop 信号）。
-- `category_recurrence`：本轮 P1 的类别是否与前两轮重复（如 totality/穷尽性、lifecycle/并发、authority/ownership、provenance/元数据）。
-
-### 阈值（可被 `references/cr-config.md` 的 convergence 段覆盖）
-
-- `max_rounds`：默认 `5`。
-- `stop_loss_consecutive_rounds`：默认 `3`（连续该轮数仍产“新”P1 即止损）。
-- `churn_watch`：默认 `on`（patch 反复触及同一处而 P1 未归零视为发散信号）。
-
-### 终止判定集（Gate 前检查，命中即按路由退出，不再进入 fixer）
-
-1. **PASS**：reviewer 通过且 evaluator 通过 → 进入 CR 收口。
-2. **PASS_WITH_VERIFY_OBLIGATIONS**：剩余阻塞项仅为 `verify-obligation`（可由编译器/测试判定的属性，见 reviewer/evaluator 的“可验证性路由”）或 `metadata/provenance` 类 → 停止逐条修复循环；把 `verify-obligation` 落为具体测试/断言后进入收口。
-3. **ARCHITECTURE_TRIAGE**：本轮或近轮 P1 迁移到 authority / ownership / lifecycle / 跨组件并发等架构层 → 停止逐条 patch，产出一次性架构裁决输入，交用户或架构决策；**不得**继续 fixer 迭代 patch。
-4. **STOP_LOSS**：连续 `stop_loss_consecutive_rounds` 轮仍产“新”P1，或 `round` 达 `max_rounds`，或 `churn_watch` 命中（patch 反复触及同一处而 P1 未归零）→ 停止循环，向用户呈报收敛度量与候选出路（接受当前实现切片 / 架构裁决 / 显式降范围），由用户裁决；**不得**继续无界修复。
-
-### 呈报（人是带数据的熔断器）
-
-命中 `STOP_LOSS` 或 `ARCHITECTURE_TRIAGE` 时，必须在 `PLAN.md` 记录并在给用户的消息中附上收敛度量（轮次、P1 趋势、churn/类别复现），不得以“再修一轮”作为默认下一步。
-
-## Serial Execution Rules（串行规则）
-
-硬性规则：
-
-- 不允许并行。
-- 不允许同时推进多个 Story。
-- 不允许同时启动多个外层 sub-agent。
-- 每一步必须等待前一步完成。
-- 内部 skill 的并行机制只属于该 skill 内部；外层 orchestrator 仍然严格串行。
-- 每一步完成后必须更新记录文件，再进入下一步。
-- 每一轮循环必须能从记录文件中看出 development、reviewer、evaluator、fixer、closeout 的状态。
-- 每个 Story 的 `story-kickoff` gate 必须在 development 前完成并写入记录文件。
-
-## Logging Rules（记录规则）
-
-所有记录文件内容必须使用中文。
-
-`PLAN.md` 至少包含：
-
-- 目标
-- 当前 Epic
-- Story 列表和执行顺序
-- 当前 Story
-- 当前轮次
-- 每一步状态
-- 终止条件
-
-`EXPERIMENTS.md` 每次尝试记录：
-
-- 时间
-- Story ID
-- 轮次
-- 执行了哪个 skill
-- 为什么执行
-- 结果
-- 下一步判断
-
-`EXPERIMENT_NOTES.md` 记录：
-
-- 实时判断
-- 决策原因
-- 风险
-- 待关注问题
-- 用户介入点
+- 普通工程取舍采用最保守、可追溯且不扩大需求的方案，并记录。
+- 改变需求、未授权文件、删除、远端 push、architecture triage 或 stop-loss 必须询问用户。
+- 不得为了流程完成伪造 PASS，也不得为了 0 finding 无界修复。
+- reviewer 与 evaluator 应使用不同模型；环境不支持时 evaluator 必须主动寻找反证并记录 independence caveat。
 
 ## Completion Criteria（完成标准）
 
-只有同时满足以下条件，才能视为 Epic CR 闭环完成：
+Epic runner 完成要求每个目标 Story 同时满足：
 
-- Epic 范围内每个目标 Story 均有当前 Story 匹配的 v2 `story-kickoff` Flow Gate report，且 handoff contract version、result、foundation prerequisite status 与 closure owner status 均允许继续。
-- Epic 范围内每个目标 Story 均已完成开发。
-- 每个 Story 最新 `speclite-code-review-01-reviewer` 结论通过。
-- 每个 Story 最新 `speclite-code-review-02-evaluator` 评估结果通过。
-- 如果曾有 fixer 修复，修复后已重新 review/evaluate。
-- 每个 Story 均已执行 CR rules extractor、TODO tracker、finalizer。
-- 每个 Story 的三个进度文件已更新。
-- git 状态已审计。
-- 已使用 `git-commit-convention` 完成本地中文提交。
-- 未执行 push，除非用户明确要求。
+- kickoff gate 当前有效；
+- development 完成；
+- current review/evaluation 均为 v2 且 scope/series/round 精确绑定；
+- evaluation 为 `PASS`，或 `PASS_WITH_DEFERRED_TODOS` 且 TODO 映射完成；
+- 最后一次 source mutation 后已经 fresh review/evaluate；
+- completion gate 不早于最后 source mutation；
+- rules/TODO/finalizer 按顺序完成；
+- Story、sprint、required workflow tracker 写后重读一致；
+- `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md` 已记录最终状态且不早于最后状态迁移；
+- 最终 git scope 已审计；除非用户明确选择 no-commit，否则已使用 `git-commit-convention` 完成中文本地提交；
+- 未 push，除非用户明确要求。
 
-CR 循环也可能经 `## Convergence Control` 以 `PASS_WITH_VERIFY_OBLIGATIONS` / `ARCHITECTURE_TRIAGE` / `STOP_LOSS` 终止——这是合法的循环出口，而非“未完成”。此时不得强行继续循环追求 reviewer+evaluator 通过；完成状态由其路由结果定义（补 `verify-obligation` 测试后收口、进架构裁决、或由用户裁决后的选择），并如实记录在 `PLAN.md`。
+## Notes（注意事项）
 
-## Common Mistakes（常见错误）
+- 不允许并行推进多个 Story 或多个外层步骤。
+- 内层 reviewer 可以按自身 quorum 并行三层审查；外层仍 strict serial。
+- 固定源码路径、fixture、schema 或 command 只有 owning SPEC 明确要求时才是 hard gate；否则按 shared contract 的 equivalent implementation policy 接受有测试、fixture、snapshot 或 command evidence 的等价实现。
+- legacy v1 artifact 只可作为历史证据，不得驱动 v2 finalizer。
+- 所有执行记录使用中文；技术标识保留英文。
 
-- 同时推进多个 Story。
-- 依赖 `flow-gate-enforcement` hook 隐式触发，却没有在 runner 内显式执行或验证 `story-kickoff` Flow Gate。
-- 在 `story-kickoff` gate 缺失、失败、过期或 target mismatch 时启动 `speclite-dev-story`。
-- 在开发未完成时启动 CR reviewer。
-- 在 reviewer 未完成时启动 evaluator。
-- 在 evaluator 未完成时启动 fixer。
-- 把 reviewer 内部并行 sub-agent 误认为外层也可以并行。
-- 只看 reviewer 通过，不看 evaluator 是否通过。
-- fixer 后不重新 review/evaluate。
-- CR 通过后漏掉 rules extractor、TODO tracker 或 finalizer。
-- 覆盖 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md` 历史内容。
-- 把无关工作树改动纳入最终 commit。
-- 因为有推荐方案就修改需求边界。
+## Generation Metadata（生成信息）
 
-## Invocation Template（调用模板）
-
-当用户只给出 Epic ID 时，可按以下模板执行：
-
-```text
-Epic {epic_id} Story dev/CR goal:
-1. Preflight runtime config, current progress, Epic file, Story list and git status.
-2. For each Story, maintain PLAN.md, EXPERIMENTS.md, EXPERIMENT_NOTES.md under {implementation_artifacts}/code-reviews/{story_id}-code-review/goal-execute-records/.
-3. Strictly serial per Story:
-   - speclite-flow-gate mode=story-kickoff target={story_id}; continue only on PASS/PASS_EQUIVALENT
-   - speclite-dev-story story {story_id}
-   - speclite-code-review-01-reviewer {story_id}
-   - speclite-code-review-02-evaluator {story_id}
-   - speclite-code-review-03-fixer {story_id} only when evaluation requires fixes
-4. Repeat CR reviewer/evaluator/fixer until reviewer and evaluator both pass, OR `## Convergence Control` fires a terminal verdict (round cap / stop-loss / architecture-triage / verify-obligations-only); never loop unbounded.
-5. Run speclite-code-review-04-rules-extractor, speclite-code-review-05-todo-tracker, speclite-code-review-06-finalizer in order.
-6. Move to the next Story only after the current Story is fully complete.
-7. After all target Stories complete, run git-commit-convention in Chinese, local commit only, no push.
-```
+本 Skill 按 speclite-skill-creator 的 progressive disclosure 规则维护。修改时必须同步 `SKILL.md`、`SKILL.en.md`、`references/runner-workflow.md`、`CHANGELOG.md` 与实际安装副本。

@@ -3,90 +3,61 @@ name: speclite-code-review-04-rules-extractor
 description: "从历史 CR review、evaluation 与 fix 记录中提炼可复用开发规则。用于用户要求 extract CR rules、CR summary、代码审查经验总结或提取最佳实践。核心能力：分析多轮记录、识别重复问题、提出 project-context.md 等文档更新建议。"
 allowed-tools: Read, Write, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "2.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[技能说明]
-    从指定 Story 的历史代码审查、评估及修正记录中提炼共性问题和最佳实践，判断是否可以补充到项目全局文档中，避免同类问题在后续 Story 开发中重复出现。
+# Speclite Code Review 04 Rules Extractor（代码审查规则提炼）
 
-[核心能力]
-    - **CR 历史分析**：系统性阅读和分析 Story 的全部 CR 审查、评估及修正记录
-    - **四桶分类感知**：识别审查结果中的「来源」和「分类」增强字段，按审查层维度（blind/edge/auditor）和四桶分类（decision_needed/patch/defer）进行交叉统计分析
-    - **共性问题识别**：从多轮 CR 发现中识别重复出现的模式和共性问题
-    - **规则提炼**：将共性问题转化为可操作的开发规约、指导原则或最佳实践
-    - **全局文档建议**：评估提炼的规则是否适合补充到 project-context.md、architect.md 等全局文档
-    - **结构化输出**：以清晰的结构输出分析结果和建议，供用户确认
+## Overview（概述）
 
-[执行流程]
-    路径约定和文件名格式以 `references/cr-config.md` 为准。
+从 evaluator 接受且有证据的 v2 CR 历史中提炼 candidate rules，并写入 durable `speclite.cr-rules-extraction.v2` report。支持 runner 和人工 fresh session，不依赖聊天上下文证明完成。
 
-    Step 1：收集 CR 历史记录
-        - 接收用户指定的 Story 标识
-        - 读取 `references/cr-config.md` 获取路径约定
-        - 按配置中的 Story ID 规则提取 `{story-id}`
-        - 按配置中的代码审查目录格式确定路径
-        - 读取该目录下所有文件：
-            - 按配置中的审查总结文件名格式匹配 CR 代码审查结果
-            - 按配置中的审查评估文件名格式匹配 CR 评估结果（含 "## 修复执行记录" 章节）
-        - 生成数据：all-cr-records（全部 CR 历史记录）
+## Activation Boundary（激活边界）
 
-    Step 2：梳理各轮次模型信息
-        - 从每个 CR 文件的头部元信息中提取 `Model Used` 字段
-        - 构建模型使用时间线：哪一轮审查/评估/修复分别由哪个模型执行
-        - 生成数据：model-timeline（模型使用记录）
+- 用于分析一个 Story/current series 的 CR 历史、提炼候选规则并评估全局推广资格。
+- 默认不修改全局文档；只有用户另行明确授权具体目标文件后才能应用建议。
+- 不用于重新裁决 finding、执行修复、登记 TODO 或推进 Story 状态。
 
-    Step 3：分析 Findings 情况
-        - 系统性分析所有 CR 发现（Findings），分类统计：
-            - AC 验收标准审核摘要中的问题
-            - 测试充分性相关问题
-            - 质量门禁相关问题
-            - 代码逻辑和设计问题
-            - 安全性和性能问题
-        - 若发现包含「来源」字段，按审查层维度统计各层的发现分布和命中率
-        - 若发现包含「分类」字段，按四桶分类维度统计各分类的占比和修复率
-        - 标记哪些问题在多轮 CR 中重复出现
-        - 标记哪些问题的修复引入了新问题
-        - 生成数据：findings-analysis（发现分析报告）
+## Core Capabilities（核心能力）
 
-    Step 4：提炼共性规则
-        - 从分析结果中提炼出 Story 开发过程中容易重复出现的共性问题
-        - 将共性问题转化为以下形式：
-            - **规避指南**：明确告诉开发者应避免什么
-            - **指导原则**：描述推荐的做法和原因
-            - **最佳实践**：提供可直接参照的代码模式或流程
-            - **豁免说明**：记录合理的例外情况和豁免理由
-        - 生成数据：extracted-rules（提炼的规则列表）
+- **CR 历史分析**：读取 Story 的 review、evaluation 与 fix 记录。
+- **v2 证据过滤**：只消费 evaluator accepted、非 dismissed/superseded 且有验证 evidence 的 finding。
+- **跨 Story 推广门禁**：至少跨两个 Story 复现或获得用户明确批准。
+- **共性模式识别**：按 invariant/fingerprint family 识别重复问题与修复引入问题。
+- **规则提炼**：转化为规避指南、指导原则、最佳实践或豁免说明。
+- **全局文档建议**：定位适合的 project context、architecture 或开发指南章节。
+- **Durable 输出**：写入可由下一 fresh session 校验的结构化 report。
 
-    Step 5：评估全局文档更新建议
-        - 扫描项目中的全局文档（包括但不限于）：
-            - `project-context.md`
-            - `architect.md` 或 `architect/` 目录下的文档
-            - `CLAUDE.md` 等开发指南文档
-        - 对每条提炼的规则，评估：
-            - 是否具有跨 Story 的普适性？
-            - 适合补充到哪个全局文档？
-            - 建议放在文档的哪个章节？
-        - 生成数据：update-suggestions（文档更新建议列表）
+## Contract（共享契约）
 
-    Step 6：输出总结供用户确认
-        - 将分析结果、提炼的规则和文档更新建议整理为结构化总结
-        - 包含以下部分：
-            - 模型使用时间线（各轮次使用的模型及其角色）
-            - CR Findings 概况统计（含审查层分布和四桶分类占比，如有）
-            - 识别的共性问题（含出现频次）
-            - 提炼的规则/指南/最佳实践
-            - 全局文档更新建议（含具体文档和章节）
-        - 向用户展示总结，等待确认后再执行实际的文档更新
-        - 完成后返回："✅ CR 历史分析和规则提炼完成，请确认是否需要更新全局文档"
+将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再通过 `speclite resolve config --project-root {project-root}` 获取路径。失败时 HALT；不得依赖 runner 或旧 artifact。
 
-[注意事项]
-    - 本 Skill 只输出分析结果和建议，不自动修改全局文档，需等待用户确认
-    - 路径约定和文件名格式以 `references/cr-config.md` 为准，不硬编码
-    - 始终使用中文输出
-    - 提炼的规则要具体可操作，避免过于抽象的描述（如 "注意代码质量"）
-    - 如果某条规则只在特定技术栈或场景下适用，需要明确标注适用范围
-    - 如果 CR 历史记录较少（只有 1 轮），可能不足以提炼共性规则，需如实告知用户
-    - 避免将仅适用于当前 Story 的特殊情况泛化为全局规则
-    - 审查结果中的「来源」和「分类」字段为可选增强信息，若存在则利用其进行交叉统计分析，若不存在则按原有逻辑分析
+## Inputs（输入）
+
+- Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
+- `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
+
+## Workflow（工作流）
+
+完整读取并执行 `references/rules-extractor-workflow.md`：收集 eligible CR records、分析 model/finding timeline、提炼 candidate rules、判断 global eligibility，并使用 `assets/output-template.md` 写入 durable report。
+
+找不到有效 current v2 evaluation、证据不满足资格或 artifact identity/hash 不一致时，写 `result: HALTED` 并停止；不得用 legacy/superseded finding 推广全局规则。
+
+## Outputs and Handoff（输出与交接）
+
+- 写入共享 contract 定义的 rules extraction canonical path，schema 为 `speclite.cr-rules-extraction.v2`。
+- 返回 report path/hash、eligible/excluded findings、candidate/global counts 和 `COMPLETED | HALTED`。
+- 将 durable result 交给 `handoffTarget`；人工模式可据此在下一 fresh session 独立进入 CR05。
+
+## Notes（注意事项）
+
+- 规则必须具体、可操作并标注适用范围，不能把当前 Story 特例泛化。
+- Correct Course superseded finding 只保留迁移后的根 invariant，不按轮次放大置信度。
+- 未经用户明确授权，不读取或修改目标项目范围之外的全局文档。
+- 始终使用中文输出，模型与 evidence 来源必须真实。
+
+## Generation Metadata（生成信息）
+
+本 Skill 由 speclite-skill-creator 体系维护。如需修改，必须同步更新 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`、`references/`、`assets/` 与实际安装副本。

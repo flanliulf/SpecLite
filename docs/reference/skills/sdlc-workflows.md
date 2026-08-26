@@ -84,6 +84,7 @@
 | `speclite-flow-gate` | Workflow | `FG` | `{implementation_artifacts}/flow-gates` | 验证 Story / Epic flow gate。 |
 | `speclite-create-story` | Workflow | `CS` / `VS` | `{implementation_artifacts}` | 创建或校验上下文完整的 Story。 |
 | `speclite-dev-story` | Workflow | `DS` | - | 执行 Story 实现、测试和交付。 |
+| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews` | 独立解析并验证 CR v2 共享契约及 artifact 绑定。 |
 | `speclite-code-review-01-reviewer` | Workflow | `CR1` | `{implementation_artifacts}/code-reviews` | 执行代码审查。 |
 | `speclite-code-review-02-evaluator` | Workflow | `CR2` | `{implementation_artifacts}/code-reviews` | 评估代码审查 findings。 |
 | `speclite-code-review-03-fixer` | Workflow | `CR3` | `{implementation_artifacts}/code-reviews` | 按评估结论执行代码修复。 |

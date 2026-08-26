@@ -3,7 +3,7 @@ name: speclite-skill-lint
 description: "检查 Agent Skill 是否符合规范，包括 YAML、命名、description、版本与内容约束。用于用户要求 speclite-skill-lint、lint skill、check skill、检查 Skill 规范或验证技能。核心能力：发现 YAML 违规、校验双语触发词、识别版本不一致、输出结构化报告。"
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.8.0"
+  version: "2.8.1"
   author: "fancyliu"
   catalog: "speclite"
 ---

@@ -1,10 +1,72 @@
+import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { evaluateFlowGateHookEvent } from "../src/hooks/flow-gate-enforcement.js";
 
+const RUNNER_PATH = path.join(process.cwd(), "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs");
+
 describe("flow gate hook runner", () => {
+  it("serializes an unrelated Claude prompt as a silent allow", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-flow-hook-claude-noop-"));
+
+    try {
+      const result = await runHookRunner(tempRoot, {
+        hook_event_name: "UserPromptSubmit",
+        cwd: tempRoot,
+        prompt: "先执行 「应用第①项」 ,然后「继续②」",
+      });
+
+      expect(result).toEqual({ exitCode: 0, stdout: "", stderr: "" });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes a passed Claude Flow Gate as a silent allow", async () => {
+    const tempRoot = await createProjectWithConfig();
+    await writeGateMetadata(tempRoot, {
+      storyKey: "7-1-flow-gate-hook-enforcement",
+      result: "PASS",
+      generatedAt: new Date().toISOString(),
+    });
+
+    try {
+      const result = await runHookRunner(tempRoot, {
+        hook_event_name: "UserPromptSubmit",
+        cwd: tempRoot,
+        prompt: "/bmad-dev-story story 7-1",
+      });
+
+      expect(result).toEqual({ exitCode: 0, stdout: "", stderr: "" });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes a blocked Claude Flow Gate with the UserPromptSubmit decision schema", async () => {
+    const tempRoot = await createProjectWithConfig();
+
+    try {
+      const result = await runHookRunner(tempRoot, {
+        hook_event_name: "UserPromptSubmit",
+        cwd: tempRoot,
+        prompt: "/bmad-dev-story story 7-1",
+      });
+      const output = JSON.parse(result.stdout);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(output).toEqual({
+        decision: "block",
+        reason: expect.stringContaining("Missing Flow Gate metadata"),
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("no-ops quickly for unrelated prompts", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-flow-hook-noop-"));
 
@@ -239,7 +301,7 @@ async function writeGateMetadata(
       `target: "${target}"`,
       `storyKey: "${input.storyKey}"`,
       `result: "${input.result}"`,
-      `generatedAt: "${input.generatedAt ?? "2026-06-14T00:00:00.000Z"}"`,
+      `generatedAt: "${input.generatedAt ?? new Date().toISOString()}"`,
       ...(input.includeHandoffContractVersion === false
         ? []
         : ['handoffContractVersion: "speclite.story-kickoff-handoff.v1"']),
@@ -257,4 +319,32 @@ async function writeGateMetadata(
     ].join("\n"),
     "utf8",
   );
+}
+
+type HookRunnerResult = {
+  exitCode: number | null;
+  stdout: string;
+  stderr: string;
+};
+
+async function runHookRunner(projectRoot: string, event: Record<string, unknown>): Promise<HookRunnerResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [RUNNER_PATH, "--platform", "claude"], {
+      cwd: projectRoot,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", reject);
+    child.on("close", (exitCode) => {
+      resolve({ exitCode, stdout, stderr });
+    });
+    child.stdin.end(JSON.stringify(event));
+  });
 }

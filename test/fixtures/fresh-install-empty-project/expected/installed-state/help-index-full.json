@@ -345,6 +345,17 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "4-implementation",
+      "entryLabel": "Code Review Contract",
+      "canonicalSkillId": "speclite-code-review-contract",
+      "activationTarget": ".claude/skills/speclite-code-review-contract/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "4-implementation",
       "entryLabel": "Create Story",
       "canonicalSkillId": "speclite-create-story",
       "activationTarget": ".claude/skills/speclite-create-story/SKILL.md",

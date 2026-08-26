@@ -1,4 +1,9 @@
-# Changelog
+# Changelog（变更记录）
+
+## [2.0.0] - 2026-08-25
+
+- JSON finding 增加 category、invariant、expected/actual result，支持稳定 fingerprint。
+- 无具体 trigger 与错误结果时禁止输出 finding。
 
 本文件记录 `speclite-review-edge-case-hunter` 的版本变更。
 

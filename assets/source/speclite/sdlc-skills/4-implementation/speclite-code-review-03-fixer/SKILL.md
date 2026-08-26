@@ -1,81 +1,64 @@
 ---
 name: speclite-code-review-03-fixer
-description: "根据 CR evaluation 结论执行代码修复并记录摘要。用于用户要求 CR fix、apply CR fixes、代码审查修复或执行 CR 修正。核心能力：读取评估结论、定向修改相关代码、在 evaluation 文档追加 fix summary。"
+description: "根据 current CR v2 evaluation 执行有界修复或 verify-only 义务。用于用户要求 CR fix、apply review fixes、代码审查修复、verify obligation 或 test-only closure。核心能力：evaluation hash/scope 绑定、patch 与 verify-only 分流、反 churn 和 fresh review 交接。"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 metadata:
-  version: "1.1.0"
+  version: "2.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[技能说明]
-    根据代码审查结果评估的结论执行代码修复，并将修复执行总结追加到评估文档中。是跨 LLM 代码审查工作流中唯一允许修改源码的环节。
+# Speclite Code Review 03 Fixer（代码审查 Fixer）
 
-[核心能力]
-    - **评估驱动修复**：严格按照《代码审查结果评估文件》的结论执行修复，不自行扩大修复范围
-    - **自动定位评估文件**：自动扫描并定位最新一轮的《代码审查结果评估文件》
-    - **精准定点修复**：针对评估确认需要修复的问题逐一处理
-    - **修复记录追踪**：将修复执行总结追加到评估文件的指定章节
-    - **修复验证**：修复后验证代码编译/运行是否正常
+## Overview（概述）
 
-[执行流程]
-    路径约定和文件名格式以 `references/cr-config.md` 为准。
+CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或人工 fresh session 调用，只消费 current `speclite.cr-evaluation.v2` 明确授权的 `patch` 或 `verify-only` obligations。
 
-    Step 1：定位最新评估文件
-        - 接收用户指定的 Story 标识
-        - 读取 `references/cr-config.md` 获取路径约定
-        - 按配置中的 Story ID 规则提取 `{story-id}`
-        - 按配置中的代码审查目录格式确定路径
-        - 按配置中的审查评估文件名格式，扫描 code-review-dir 下匹配的文件
-        - 找到 round 值（n）最大的文件作为修复依据
-        - 读取该文件的完整内容，提取需要修复的问题列表
-        - 生成数据：evaluation-file-path、fix-items（待修复问题列表）
+## Activation Boundary（激活边界）
 
-    Step 2：制定修复计划
-        - 根据评估结论中"需要修复"的条目，制定修复计划
-        - 按优先级排序修复顺序
-        - 确认每个修复项的：
-            - 涉及的文件和代码位置
-            - 具体修复方案
-            - 预期效果
-        - 修复风格约束（防 patch loop / 冻结靶子）：
-            - **可验证属性优先补测试而非增补实现**：对 totality/穷尽性/determinism/replay/幂等/no-leak 类关切，优先以增加测试/断言（`verify-obligation`）固化，而非向实现新增推测性构造；这类发现应已被评估降级为 `verify-obligation`。
-            - **优先最小定点修复**：能以最小改动消解的问题不做结构性重写。
-            - **反 churn**：若本轮修复又在反复触及同一文件/函数（patch loop 信号），停止并在计划中标注“建议交编排器 Convergence Control 判定 STOP_LOSS/ARCHITECTURE_TRIAGE”。
-            - **元数据机械同步**：provenance/round/pointer 漂移只做最小机械同步。
-        - 向用户展示修复计划供确认
-        - 生成数据：fix-plan（修复计划）
+- 用于执行 evaluator 已接受且已限定范围的修复或验证义务。
+- 不用于自行评估 finding、吸收 deferred/TODO 项、改变需求边界、更新 Story/tracker 或授权 finalizer。
 
-    Step 3：逐项执行修复
-        - 按修复计划逐项执行代码修改
-        - 每项修复完成后记录：
-            - 修改了哪些文件的哪些位置
-            - 修改前后的关键差异
-            - 修复是否成功
-        - 生成数据：fix-results（修复执行结果列表）
+## Core Capabilities（核心能力）
 
-    Step 4：记录修复总结
-        - 将修复执行总结整理为结构化内容
-        - 将总结内容**追加**到最新一轮《代码审查结果评估文件》的 "## 修复执行记录" 章节中
-        - 如果该章节不存在，在文件末尾创建该章节
-        - 修复执行记录的开头必须包含元信息：
-            ```
-            ### 修复执行记录
-            - **Date**: <YYYY-MM-DD>
-            - **Model Used**: <当前执行本次修复的模型名称，如 Claude Opus 4、GPT-4o 等>
-            - **Fix Items**: <修复条目数>
-            ```
-        - 完成后返回："✅ CR 修复执行完成，修复记录已追加到评估文件"
+- **授权范围**：只消费 current evaluation 明确批准的 obligations。
+- **模式分离**：严格分离 production patch 与 verify-only 证据补强。
+- **反复修改防护**：识别重复修复、位置迁移与 architecture category。
+- **新鲜度交接**：记录 fixRecord，并强制回到 fresh review/evaluation。
 
-[注意事项]
-    - 只修复评估结论中明确标记为"需要修复"的问题，禁止自行扩大修复范围
-    - 对 totality/determinism/replay 等可验证属性优先补测试固化（`verify-obligation`），而非向实现新增推测性构造
-    - 若修复反复触及同一文件/函数（patch loop），停止并交编排器 `Convergence Control` 判定，不得无界修复
-    - **禁止**修改 Story 文档内容
-    - 修复总结追加到最新一轮（n 值最大）的《代码审查结果评估文件》中
-    - 路径约定和文件名格式以 `references/cr-config.md` 为准，不硬编码
-    - 始终使用中文输出修复记录
-    - 如果某项修复无法完成（如缺少上下文信息），标记为"待确认"并说明原因
-    - 修复后如有条件应运行相关测试验证修复效果
-    - 修复执行记录中的 `Model Used` 字段必须如实填写当前执行修复的模型名称，便于跨 LLM 追溯
-    - 如果找不到评估文件，立即停止并告知用户
+## Contract（共享契约）
+
+将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再通过 `speclite resolve config --project-root {project-root}` 获取路径。失败时 HALT；不得依赖 runner 或旧 artifact。
+
+## Inputs（输入）
+
+- Story identity、`reviewSeries`、current evaluation 和 `mode=patch | verify-only`。
+- `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`。
+
+## Workflow（工作流）
+
+完整读取并执行 `references/fixer-workflow.md`：
+
+1. 绑定 current evaluation/hash/scope/round 与 exact mode。
+2. 生成 included/excluded 修复计划并验证授权来源。
+3. 执行 churn guard、最小修改和 focused verification。
+4. 更新单一 leading frontmatter `fixRecord`，重读后交接 fresh CR01/CR02。
+
+hash/scope/round 不匹配、授权不完整、已有 completed fixRecord 或 verification 失败时 HALT。Fixer 完成绝不直接授权 finalizer。
+
+## Outputs and Handoff（输出与交接）
+
+- durable output 是 evaluation artifact 中的结构化 `fixRecord` 及正文 Fix Record。
+- 正常完成时返回 changed files、fingerprints、commands/results、caveats 和下一步 fresh reviewer/evaluator。
+- churn/architecture 命中时返回结构化 route recommendation 给 `handoffTarget`；人工模式直接交给 manual orchestrator 或用户，不要求 runner 生成裁决。
+
+## Notes（注意事项）
+
+- 禁止修改 Story、tracker、需求边界和未授权文件。
+- `verify-only` 不得修改 production semantics，也不能降级成 TODO。
+- 无法完成时写 `fixRecord.status: blocked`，不得声称 completed。
+- 始终使用中文记录，模型、命令和验证结果必须真实。
+
+## Generation Metadata（生成信息）
+
+本 Skill 由 speclite-skill-creator 体系维护。如需修改，必须同步更新 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`、`references/` 与实际安装副本。

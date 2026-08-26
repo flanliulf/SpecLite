@@ -828,6 +828,36 @@
       "phaseId": "4-implementation",
       "phaseLabel": "Implementation",
       "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-code-review-contract",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-code-review-contract",
+          "activationTarget": ".claude/skills/speclite-code-review-contract/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-code-review-contract",
+          "activationTarget": ".agents/skills/speclite-code-review-contract/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "contract-validation-report",
+        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "4-implementation",
+      "phaseLabel": "Implementation",
+      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-create-story",
       "ideTargets": [
         {

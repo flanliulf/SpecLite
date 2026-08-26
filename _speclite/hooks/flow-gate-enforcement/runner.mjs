@@ -4,17 +4,22 @@ import path from "node:path";
 import process from "node:process";
 
 const ALLOWING_RESULTS = new Set(["PASS", "PASS_EQUIVALENT"]);
+const ALLOWING_FOUNDATION_STATUSES = new Set(["PASS", "NOT_APPLICABLE"]);
+const FOUNDATION_GATE_STATUS_KEYS = ["foundationPrerequisiteStatus", "closureOwnerCheckStatus"];
+const REQUIRED_REPORT_SCHEMA_VERSION = "speclite.flow-gate-report.v2";
+const LEGACY_REPORT_SCHEMA_VERSION = "speclite.flow-gate-report.v1";
+const REQUIRED_HANDOFF_CONTRACT_VERSION = "speclite.story-kickoff-handoff.v1";
 const MAX_METADATA_AGE_DAYS = 30;
 
 const stdin = await readStdin();
 const event = stdin.trim().length === 0 ? {} : JSON.parse(stdin);
+const runtimeOptions = resolveRuntimeOptions(process.argv.slice(2));
 const result = await evaluate({
   event,
   projectRoot: event.projectRoot ?? event.cwd ?? process.cwd(),
   now: new Date(),
 });
-process.stdout.write(`${JSON.stringify({ decision: result.decision, reason: result.reason })}\n`);
-process.exitCode = result.exitCode;
+emitHookResult(result, runtimeOptions.platform);
 
 async function evaluate(input) {
   const prompt = extractPrompt(input.event);
@@ -51,6 +56,26 @@ async function evaluate(input) {
   }
   if (isStaleGeneratedAt(metadata.generatedAt, input.now)) {
     return block(`Flow Gate metadata is stale for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  const handoffContractStatus = evaluateHandoffContractStatus(metadata);
+  if (handoffContractStatus.status === "legacy") {
+    return block(`Legacy Flow Gate report v1 must be regenerated for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (handoffContractStatus.status === "schema-mismatch") {
+    return block(`Flow Gate schemaVersion ${String(handoffContractStatus.value)} does not allow development for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (handoffContractStatus.status === "missing-handoff-contract-version") {
+    return block(`Flow Gate handoff contract version is missing for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (handoffContractStatus.status === "handoff-contract-version-mismatch") {
+    return block(`Flow Gate handoff contract version ${String(handoffContractStatus.value)} does not allow development for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  const foundationGateStatus = evaluateFoundationGateStatus(metadata);
+  if (foundationGateStatus.status === "missing") {
+    return block(`Flow Gate foundation prerequisite metadata is missing for ${storyKey}. ${nextAction(storyKey)}`);
+  }
+  if (foundationGateStatus.status === "blocked") {
+    return block(`Flow Gate ${foundationGateStatus.key} ${String(foundationGateStatus.value)} does not allow development for ${storyKey}. ${nextAction(storyKey)}`);
   }
 
   return allow(`Flow Gate story-kickoff evidence passed for ${storyKey}.`);
@@ -111,6 +136,31 @@ function isStaleGeneratedAt(value, now) {
   return now.getTime() - generatedAt.getTime() > MAX_METADATA_AGE_DAYS * 24 * 60 * 60 * 1000;
 }
 
+function evaluateHandoffContractStatus(metadata) {
+  if (metadata.schemaVersion === LEGACY_REPORT_SCHEMA_VERSION) return { status: "legacy" };
+  if (metadata.schemaVersion !== REQUIRED_REPORT_SCHEMA_VERSION) {
+    return { status: "schema-mismatch", value: metadata.schemaVersion };
+  }
+
+  const handoffContractVersion = metadata.handoffContractVersion;
+  if (typeof handoffContractVersion !== "string" || handoffContractVersion.trim().length === 0) {
+    return { status: "missing-handoff-contract-version" };
+  }
+  if (handoffContractVersion !== REQUIRED_HANDOFF_CONTRACT_VERSION) {
+    return { status: "handoff-contract-version-mismatch", value: handoffContractVersion };
+  }
+  return { status: "allowed" };
+}
+
+function evaluateFoundationGateStatus(metadata) {
+  for (const key of FOUNDATION_GATE_STATUS_KEYS) {
+    const value = metadata[key];
+    if (typeof value !== "string" || value.trim().length === 0) return { status: "missing" };
+    if (!ALLOWING_FOUNDATION_STATUSES.has(value)) return { status: "blocked", key, value };
+  }
+  return { status: "allowed" };
+}
+
 function nextAction(storyKey) {
   return `Run speclite-flow-gate mode=story-kickoff target=${storyKey} before dev-story.`;
 }
@@ -121,6 +171,26 @@ function allow(reason) {
 
 function block(reason) {
   return { decision: "block", reason, exitCode: 2 };
+}
+
+function emitHookResult(result, platform) {
+  if (platform === "claude") {
+    if (result.decision === "block") {
+      process.stdout.write(`${JSON.stringify({ decision: "block", reason: result.reason })}\n`);
+    }
+    process.exitCode = 0;
+    return;
+  }
+
+  process.stdout.write(`${JSON.stringify({ decision: result.decision, reason: result.reason })}\n`);
+  process.exitCode = result.exitCode;
+}
+
+function resolveRuntimeOptions(args) {
+  const platformIndex = args.indexOf("--platform");
+  return {
+    platform: platformIndex >= 0 ? args[platformIndex + 1] : undefined,
+  };
 }
 
 async function readStdin() {

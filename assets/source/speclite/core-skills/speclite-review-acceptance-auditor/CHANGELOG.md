@@ -1,4 +1,9 @@
-# Changelog
+# Changelog（变更记录）
+
+## [2.0.0] - 2026-08-25
+
+- AC finding 增加稳定 category、invariant 与具体失败场景。
+- 仅实现风格异议、无 AC 违规结果时不再输出 finding。
 
 本文件记录 `speclite-review-acceptance-auditor` 技能的版本变更历史。
 
@@ -6,7 +11,7 @@
 
 ## [1.0.0] - 2026-05-11
 
-### Added
+### Added（新增）
 
 - 从对应的 BMEnhance review skill 迁移为 Speclite skill。
 - 保留原有审查语义、阶段编号、执行流程、references 与 assets 结构。
@@ -16,9 +21,9 @@
 ---
 
 版本变更类型说明：
-- **Added**：新增功能
-- **Changed**：已有功能的变更
-- **Fixed**：缺陷修复
-- **Removed**：移除的功能
+- **Added（新增）**：新增功能
+- **Changed（变更）**：已有功能的变更
+- **Fixed（修复）**：缺陷修复
+- **Removed（移除）**：移除的功能
 
 后续版本更新时，在最新版本之前插入新版本记录，并同步更新 SKILL.md 中的 metadata.version。

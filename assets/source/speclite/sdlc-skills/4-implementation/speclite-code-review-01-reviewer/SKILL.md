@@ -1,105 +1,65 @@
 ---
 name: speclite-code-review-01-reviewer
-description: "执行 Story 代码审查，用三层对抗分析检查实现并保存 CR 结果。用于用户要求 CR、code review、cross-LLM review、代码审查、复审或审查 Story 变更。核心能力：识别轮次、并行 Blind Hunter/Edge Case/AC 审计、四类分流、生成 review 文档。"
+description: "执行 Story code review，用 Blind Hunter、Edge Case Hunter、Acceptance Auditor 三层审查并生成 CR v2 结果。用于用户要求 CR、code review、代码审查、复审或 Story implementation review。核心能力：精确 scope、稳定 finding fingerprint、layer quorum 和结构化 verdict。"
 allowed-tools: Read, Write, Bash, Grep, Glob, Agent
 metadata:
-  version: "1.1.0"
+  version: "2.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[技能说明]
-    针对指定 Story 执行跨 LLM 代码审查（CR），通过并行三层对抗式审查（Blind Hunter、Edge Case Hunter、Acceptance Auditor）对代码变更进行多维度分析，将发现进行四桶分类和严重性标签映射后，输出结构化的审查总结并保存到规范化的结果文件中。支持多轮审查的自动编号和历史记录追踪。
+# Speclite Code Review 01 Reviewer（代码审查 Reviewer）
 
-[核心能力]
-    - **并行三层审查**：通过 Agent 工具同时启动 Blind Hunter（speclite-review-adversarial-general）、Edge Case Hunter（speclite-review-edge-case-hunter）、Acceptance Auditor（speclite-review-acceptance-auditor）三个独立子代理，从对抗式批判、边界条件穷举、验收标准对照三个正交维度并行分析，天然实现上下文隔离
-    - **四桶分类**：将所有发现去重后分入 decision_needed / patch / defer / dismiss 四个桶，每个桶有明确的判定条件
-    - **严重性标签映射**：四桶分类与 [高/中/低] 严重性标签并存，基于来源数量和安全关键词进行映射
-    - **自动轮次检测**：自动扫描已有审查结果文件，确定当前轮次编号（n）
-    - **首轮/复审自适应**：首轮审查聚焦全量代码，复审聚焦上轮修复点和残留问题
-    - **Anchor 证据审计**：Acceptance Auditor 读取 Story 的 `Anchor Evidence Summary` 与最新 story-completion gate report，核对 contract/function/evidence 是否支持当前实现
-    - **结构化结果保存**：按规范文件名格式自动创建审查结果文件
-    - **历史记录感知**：复审时自动参考历次 CR 结果和修复记录，避免重复指出已修复的问题
-    - **子审查失败降级**：任一子代理失败时使用剩余层继续；Agent 工具不可用时降级为串行模式；全部失败时降级为单一 LLM 审查
-    - **只读安全保障**：严格禁止修改源码和 Story 文档，仅输出审查总结（Bash 仅用于 git diff，Agent 仅用于子审查调度）
+## Overview（概述）
 
-[执行流程]
+针对一个指定 Story 执行只读三层代码审查，输出 `speclite.cr-review.v2`。本 Skill 可由 runner 编排，也可在 fresh session 中独立调用；不修改源码、测试、Story 或 tracker。
 
-    路径约定和文件名格式以 `references/cr-config.md` 为准。
-    运行时变量使用 `$snake_case` 格式标识，与 cr-config.md 中的文件名模板占位符 `{花括号}` 区分。
+## Activation Boundary（激活边界）
 
-    Step 1：定位 Story 和代码审查目录
-        - 接收用户指定的 Story 标识（如 Story 文件路径或 Story ID）
-        - 读取 `references/cr-config.md` 获取路径约定
-        - 按配置中的 Story 文件目录定位 Story 文件
-        - 按配置中的 Story ID 规则提取 → `$story_id`
-        - 按配置中的代码审查目录格式确定路径 → `$cr_dir`
-        - 创建临时文件目录：`$cr_dir/.tmp/`（如不存在）
+- 用于冻结一个 Story 的 current review scope、执行三层审查并生成 reviewer artifact。
+- 不用于评估 finding、执行修复、登记 TODO、同步 Story 状态或编排整个 Epic；这些任务分别交给 CR02–06 或 runner。
 
-    Step 2：检测审查轮次
-        - 读取 `references/cr-config.md` 获取审查总结文件名格式
-        - 按配置中的轮次检测规则，扫描 `$cr_dir` 下已有的审查总结文件
-        - 统计已有的审查轮次数量，确定本轮轮次号 → `$round_number` = 已有轮次 + 1
-        - 判断审查类型 → `$review_type`：
-            - `$round_number` == 1 → 首轮审查
-            - `$round_number` > 1 → 复审（需参考历史记录）
+## Core Capabilities（核心能力）
 
-    Step 3：收集审查上下文（复审场景）
-        - IF 复审（`$round_number` > 1）：
-            - 读取历次 CR 结果文件（按配置中的文件名格式匹配）
-            - 读取历次评估文件（按配置中的文件名格式匹配）
-            - 重点关注最新一轮评估文件中的 "## 修复执行记录" 章节
-            - 建立"已修复问题清单" → `$review_context`
-            - 将 `$review_context` 写入 `$cr_dir/.tmp/review-context.md`
-        - IF 首轮（`$round_number` == 1）：
-            - 跳过此步骤
-        - 读取 Story 文件中的 `Anchor Evidence Summary`
-        - 读取 `{implementation_artifacts}/flow-gates/{story-id}-story-completion-gate.md`（如存在）
-        - IF story-completion gate 缺失，记录为 Acceptance Auditor 必查风险，不直接替代 CR 结论
+- **精确范围**：冻结并核对 declared、actual、excluded files 与 `scopeHash`。
+- **三层 quorum**：组合 Blind Hunter、Edge Case Hunter 与 Acceptance Auditor。
+- **稳定 finding**：用具体失败场景和 fingerprint 过滤噪声、重复与历史漂移。
+- **结构化交接**：输出可被 evaluator 精确绑定的 `speclite.cr-review.v2`。
 
-    Step 4：执行代码审查（三层并行审查引擎）
-        - 传入 review-engine.md 的变量（上下文传递）：
-            - `$story_id`、`$cr_dir`、`$round_number`、`$review_type`
-            - `$anchor_evidence_summary`、`$story_completion_gate_report`
-        - 传入 review-engine.md 的文件（复审时）：
-            - `$cr_dir/.tmp/review-context.md`
-        - 读取并执行 `references/review-engine.md`
-        - 该引擎将完成：构建审查输入（diff/文件内容）→ 并行三层审查 → 规范化去重 → 四桶分类 + 严重性标签映射
-        - 引擎执行完毕后获取：
-            - `$failed_layers`（上下文传回，失败的审查层名称列表）
-            - `$review_findings`（从 `$cr_dir/.tmp/classified-findings.json` 读取）
+## Contract（共享契约）
 
-    Step 5：生成并保存审查总结
-        - 读取 `$cr_dir/.tmp/classified-findings.json` 获取 `$review_findings`
-        - 读取输出格式模板：`assets/output-template.md`
-        - 根据 `$review_type`（首轮/复审）选择对应模板，将 `$review_findings` 整理为结构化总结
-        - 只保存总结/结论部分，不保存完整审查过程
-        - 确定今天日期，格式为 YYYYMMDD
-        - 创建 `$cr_dir` 目录（如不存在）
-        - 按 `references/cr-config.md` 中的文件名格式保存文件
-        - 严格按照模板中定义的章节结构和格式规范输出，包括：
-            - YAML 元信息头部
-            - 审查结论（含审查层状态标注，引用 `$failed_layers`）
-            - 上轮问题回顾（复审时）
-            - 新发现（含严重性标签、四桶分类、审查来源、证据、影响、建议）
-            - 验证摘要
-            - 通过项（含 defer 桶的已知既有问题）
-            - 结论（复审时）
-        - 清理临时文件：删除 `$cr_dir/.tmp/` 目录及其所有内容（删除失败不阻断流程）
-        - 向用户展示审查总结要点
-        - 完成后返回："✅ CR 代码审查完成（第 `$round_number` 轮），结果已保存"
+将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再运行 `speclite resolve config --project-root {project-root}`。任一解析失败即 HALT；不得使用 runner、旧 artifact 或历史默认路径作为 fallback。
 
-[注意事项]
-    - **绝对禁止**修改任何源码文件
-    - **绝对禁止**修改 Story 文档内容
-    - **绝对禁止**自行执行修复操作
-    - Bash 工具仅用于执行 `git diff` 获取代码差异，禁止用于任何代码修改操作
-    - 结果文件中只保存总结/结论部分，禁止保存完整的审查输出过程，避免内容篇幅过大
-    - 路径约定和文件名格式以 `references/cr-config.md` 为准，不硬编码
-    - 三层子审查的详细执行逻辑见 `references/review-engine.md`
-    - 子审查失败时使用剩余层继续；全部失败时降级为单一 LLM 自行按 6 维度审查，并向用户明确告知降级
-    - 始终使用中文输出审查结果
-    - 复审时必须标注哪些问题是新发现的、哪些是上轮遗留的
-    - 输出文件头部的 `Model Used` 字段必须如实填写当前执行审查的模型名称，便于跨 LLM 追溯和质量归因
-    - 如果找不到 Story 文件或关联代码，立即停止并告知用户
-    - 禁止对同一 Story 同时发起多次审查——同一 Story 的临时文件共享同一 `$cr_dir/.tmp/` 目录，并行执行会导致文件互相覆盖
+## Inputs（输入）
+
+- Story path、`storyId` 或 `storyKey`，以及 `reviewSeries`。
+- review scope manifest，或足够独立生成它的 development record/用户指定 commit range。
+- `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
+
+## Workflow（工作流）
+
+完整读取并执行 `references/reviewer-workflow.md`；三层内部算法继续以 `references/review-engine.md` 为准。入口只保留以下硬门禁：
+
+1. 解析 identity、current series round 和 runtime paths。
+2. 冻结包含 staged、unstaged、untracked 的完整 scope。
+3. 执行三个 fresh review layer 并规范 finding。
+4. 写入模板、重读验证并交接 CR02。
+
+`scopeExceptions` 非空时只能输出 `REVIEW_DEGRADED`；仅 0/3 或 1/3 layer 成功时 HALT，不得生成 current review。完整 PASS 建议必须满足 3/3 quorum。
+
+## Outputs and Handoff（输出与交接）
+
+- 严格使用 `assets/output-template.md`，写入共享 contract 定义的 review canonical path。
+- 返回 artifact path、hash、scope、round、verdict、layer status 和下一步 `speclite-code-review-02-evaluator`。
+- 将结果交给 `handoffTarget`；人工模式直接交给 manual orchestrator 或用户，不要求 runner 存在。
+
+## Notes（注意事项）
+
+- 不设最低 finding 数；零 finding 在 scope complete 且 3/3 quorum 下合法。
+- 不得把旧 completion gate 或历史测试数字表述为本轮实际执行。
+- 不得对同一 `storyId + reviewSeries + round` 并发执行两次 reviewer。
+- 始终使用中文输出，模型、命令和 evidence 来源必须如实记录。
+
+## Generation Metadata（生成信息）
+
+本 Skill 由 speclite-skill-creator 体系维护。如需修改，必须同步更新 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md`、`references/`、`assets/` 与实际安装副本。

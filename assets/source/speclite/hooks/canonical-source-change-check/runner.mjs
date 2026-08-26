@@ -12,8 +12,15 @@ const CHECK_SCRIPT = "assets/source/speclite/support-skills/speclite-check-canon
 const GOVERNANCE_RUNNER = "speclite-canonical-source-governance-runner";
 
 const event = await readEvent();
+const runtimeOptions = resolveRuntimeOptions(process.argv.slice(2));
 const projectRoot = resolveProjectRoot(event);
 const eventName = resolveEventName(event);
+const isClaudeStopSummary =
+  runtimeOptions.platform === "claude" &&
+  runtimeOptions.mode === "warn" &&
+  (runtimeOptions.stopSummary || eventName === "Stop");
+
+if (isClaudeStopSummary && event.stop_hook_active === true) process.exit(0);
 
 try {
   const changedPaths = await listCanonicalChangedPaths(projectRoot);
@@ -24,12 +31,14 @@ try {
     eventName,
     changedPaths,
     report,
+    includeAdditionalContext: !isClaudeStopSummary,
   });
   process.stdout.write(`${JSON.stringify(output)}\n`);
 } catch (error) {
   const output = createWarningOutput({
     eventName,
     changedPaths: [],
+    includeAdditionalContext: !isClaudeStopSummary,
     report: {
       status: "warning",
       findings: [
@@ -134,13 +143,16 @@ function createWarningOutput(input) {
     `Suggested command: ${command}`,
     "This hook is warning-only and exits 0.",
   ].join("\n");
-  return {
+  const output = {
     systemMessage: `SpecLite canonical source changed; run ${GOVERNANCE_RUNNER}.`,
-    hookSpecificOutput: {
+  };
+  if (input.includeAdditionalContext) {
+    output.hookSpecificOutput = {
       hookEventName: input.eventName,
       additionalContext,
-    },
-  };
+    };
+  }
+  return output;
 }
 
 function recommendedCommands() {
@@ -167,6 +179,16 @@ function resolveEventName(event) {
     }
   }
   return "PostToolUse";
+}
+
+function resolveRuntimeOptions(args) {
+  const platformIndex = args.indexOf("--platform");
+  const modeIndex = args.indexOf("--mode");
+  return {
+    platform: platformIndex >= 0 ? args[platformIndex + 1] : undefined,
+    mode: modeIndex >= 0 ? args[modeIndex + 1] : undefined,
+    stopSummary: args.includes("--stop-summary"),
+  };
 }
 
 async function readEvent() {

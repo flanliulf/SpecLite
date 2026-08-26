@@ -149,6 +149,7 @@
 
 **BODY-07 Workflow density**：
 - 必须使用 `scripts/check_skill_density.py <skill-dir>` 的 JSON 输出，不允许用 LLM 估算替代脚本结果
+- checker 必须同时识别 `[Workflow（执行流程）]` / `[Workflow]` 方括号章节，以及 `## Workflow（工作流）` / `## Workflow` Markdown 章节；Markdown Workflow 内的更低级标题属于同一章节
 - 对 SKILL.md 和 SKILL.en.md 分别检查 `triggered_density_warning`
 - 阈值固定为 `workflow_chars > 1500` 且 `workflow_ratio > 0.5`
 - `near_body_limit` 为 true 时，在详情中提示正文接近 5000 字上限

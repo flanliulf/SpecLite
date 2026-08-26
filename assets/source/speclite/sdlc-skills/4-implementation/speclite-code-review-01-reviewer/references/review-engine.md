@@ -1,300 +1,123 @@
-# 三层并行审查引擎
+# Three-Layer Review Engine v2（三层审查引擎 v2）
 
-本文件定义 speclite-code-review-01-reviewer Step 4 的审查执行逻辑。通过并行启动三个独立审查层（Blind Hunter、Edge Case Hunter、Acceptance Auditor），对代码变更进行多维度对抗式审查，然后将发现规范化、去重、分类，最终输出符合 `assets/output-template.md` 模板的结构化数据。
+本文件定义 `speclite-code-review-01-reviewer` 的内部执行引擎。共享 identity、scope、schema、quorum、round 和 fingerprint 规则以 `{skills-root}/speclite-code-review-contract/references/cr-contract.md` 为准，不依赖 runner。
 
-**运行时变量约定**：使用 `$snake_case` 格式标识运行时变量，与 cr-config.md 中的文件名模板占位符 `{花括号}` 区分。
+## Phase A: Scope and Inputs（范围与输入）
 
-**临时文件目录**：`$cr_dir/.tmp/`（由 SKILL.md Step 1 创建）。大体积中间数据写入临时文件，后续步骤通过 Read 工具读取，避免上下文窗口溢出。
+### A1. Scope Completeness（范围完整性）
 
-**隔离机制**：每个 Story 拥有独立的 `$cr_dir`（如 `code-reviews/1-1-code-review/`、`code-reviews/2-3-code-review/`），因此不同 Story 的临时文件天然隔离、互不干扰。但同一 Story 不得同时发起多次审查，否则共享同一 `.tmp/` 目录会导致临时文件互相覆盖。
+1. 从 Story 提取 `declaredFiles`。
+2. 相对显式 `baseSha` 读取全部 tracked diff，并加入 staged、unstaged、untracked 文件，得到 `actualChangedFiles`。
+3. 应用用户明确批准的 `excludedFiles`。
+4. 计算 `scopeExceptions = actualChangedFiles - declaredFiles - excludedFiles`。
+5. `scopeExceptions` 非空时写入 scope report，review verdict 固定为 `REVIEW_DEGRADED`，不得只过滤后继续。
+6. 计算 `scopeHash`，绑定 base/head、三类文件清单及当前内容摘要。
 
----
+禁止自动使用 `main...HEAD`。用户未指定 baseline 时必须从 development record 读取；仍无法确定则 HALT。
 
-## Phase A：构建审查输入
+### A2. Review Input（审查输入）
 
-### A1. 提取关联代码文件列表
+将完整 scoped diff 写入：
 
-从 Story 文档中提取本次审查涉及的代码文件路径。查找顺序：
-1. Story 文件中的 `## File List` 章节（如存在）
-2. Story 文件中的 `## Implementation Files` 章节（如存在）
-3. Story 文件中 `## Tasks` 或 `## Subtasks` 章节中引用的文件路径
+`$crDir/.tmp/$reviewSeries-round-$round/review-input.diff`
 
-若以上均未找到，停止并询问用户提供涉及的代码文件列表。
+同时写入：
 
-### A2. 构建 diff → 写入 `$cr_dir/.tmp/review-input.diff`
+- `spec-content.md`：Story AC 与必要约束。
+- `anchor-evidence.md`：Anchor Evidence Summary 与 completion gate，标注 evidence freshness。
+- `history-registry.json`：current series 历史 finding fingerprint/disposition。
+- `scope-manifest.json`：共享契约定义的 scope 字段。
 
-根据当前 git 状态和用户意图，按以下优先级尝试获取 diff，将结果保存为 `$review_input`：
+diff 为空但 Story 明确要求 full-file review 时可以读取完整文件，并标记 `inputMode=full-file`；否则 HALT。
 
-1. **用户提供 diff**：若用户直接粘贴了 diff 内容或指定了 diff 文件路径
-   - 验证：内容非空且可解析为统一 diff 格式
-   - 若不可解析，停止并要求用户提供有效 diff
-2. **提交范围**：`git log --oneline <range> -- <file1> <file2> ...` 确认范围有效后，`git diff <range> -- <file1> <file2> ...`
-   - 条件：用户指定了提交范围（如 `HEAD~3..HEAD`、`<sha1>..<sha2>`）
-   - 验证：范围可解析且 diff 非空
-3. **分支对比**（默认优先）：`git diff main...HEAD -- <file1> <file2> ...`
-   - 条件：当前分支不是 main/master
-   - 验证：基准分支存在且 diff 非空
-4. **未提交变更**（降级）：`git diff HEAD -- <file1> <file2> ...`
-   - 条件：存在暂存或未暂存的变更
-   - 对于未追踪的新文件：`git diff --no-index /dev/null <file>`
-5. **全文件内容**（再降级）：直接读取完整文件内容
-   - 条件：以上四种 diff 均为空（代码已提交且无差异）
-   - 此模式下审查范围为完整文件而非差异
+## Phase B: Independent Layers（独立审查层）
 
-选择逻辑：
-- 若用户在触发审查时明确指定了 diff 来源（如"审查最近 3 次提交"、"审查这个 diff"），直接使用对应模式
-- 若用户未指定，按 3→4→5 的优先级自动检测
-- 无论何种来源，验证 `$review_input` 非空；若为空则停止并告知用户无内容可审查
+优先在 reviewer 内部并行启动三个 fresh sub-agent。每层 prompt 开头必须原样注入：
 
-**写入临时文件**：将 `$review_input` 写入 `$cr_dir/.tmp/review-input.diff`（全文件模式时使用 `review-input.md` 后缀），并记录输入模式（`diff` 或 `full-file`）。后续 Phase B 的子审查层通过读取此文件获取审查输入。
+> 不设最低 finding 数，零 finding 是合法结果。只报告有第一手证据的实质问题。每个 blocking finding 必须给出稳定 category、被违反的单一 invariant、具体输入/状态 → 实际错误结果、primary location。无法给出具体失败场景时不得输出 blocking finding。历史 finding 只有具体失败场景变化时才可视为 new；仅措辞或位置变化按 fingerprint 归为 recurred。可由测试判定但尚无反例的关切标为 verify-required。metadata 机械同步不阻塞，但 authority/provenance 真实绕过仍可阻塞。
 
-### A3. 确定审查模式 → 写入 `$cr_dir/.tmp/spec-content.md`
+### B1. Blind Hunter（盲点猎手）
 
-- Story 文件本身作为规格文件 → `$review_mode` = `"full"`（始终为 full，因为 CR 工作流必然有 Story 上下文）
-- 提取 Story 文档中的验收标准（AC）章节内容 → `$spec_content`
-- 提取 Story 文档中的 `Anchor Evidence Summary` 章节内容 → `$anchor_evidence_summary`
-- 读取最新 story-completion gate report（`{implementation_artifacts}/flow-gates/{story-id}-story-completion-gate.md`）→ `$story_completion_gate_report`
-- 若 gate report 缺失或结果不是 `PASS` / `PASS_EQUIVALENT`，把该事实追加到 `$spec_content` 的审查约束中，交由 Acceptance Auditor 判断是否阻断验收
-- **写入临时文件**：将 `$spec_content` 写入 `$cr_dir/.tmp/spec-content.md`。后续 Phase B3 Acceptance Auditor 通过读取此文件获取验收标准。
-- **写入临时文件**：将 `$anchor_evidence_summary` 和 `$story_completion_gate_report` 写入 `$cr_dir/.tmp/anchor-evidence.md`。后续 Phase B3 Acceptance Auditor 必须读取该文件。
+- 使用 `speclite-review-adversarial-general`。
+- 只读取 scoped diff，不读取 Story/AC，保持盲审。
+- 输出 `b1-blind-hunter.md`，每项包含 category、invariant、concrete failure scenario、primary location。
 
----
+### B2. Edge Case Hunter（边界条件猎手）
 
-## Phase B：并行三层审查
+- 使用 `speclite-review-edge-case-hunter`。
+- 可以读取引用关系，但不得扩展到 scope 外修改。
+- 输出 `b2-edge-case-hunter.json`，使用 core Skill v2 JSON 字段。
 
-通过 Agent 工具同时启动三个独立子代理，实现真正的并行执行和上下文隔离。三个子代理各自拥有独立的上下文窗口，天然实现信息隔离——B1 无法看到 B2/B3 的输出，反之亦然。
+### B3. Acceptance Auditor（验收标准审计员）
 
-**并发读安全**：三个子代理均以只读方式（Read 工具）读取 `$cr_dir/.tmp/review-input.diff`，文件系统层面多进程并发读同一文件不会产生冲突。该文件在 Phase A2 写入完成后才启动子代理，时序上保证先写后读。
+- 使用 `speclite-review-acceptance-auditor`。
+- 读取 scoped diff、Story AC、Anchor Evidence 和 completion gate。
+- 固定路径只有 owning contract 明确规定时才是 hard gate；否则评估 functional equivalence。
+- 输出 `b3-acceptance-auditor.md`。
 
-**输出格式说明**：三个子代理的输出格式基于各自审查方法的特性选择——Blind Hunter 和 Acceptance Auditor 的发现以自然语言描述为主，使用 Markdown 格式；Edge Case Hunter 的发现具有固定 4 字段结构，使用 JSON 格式以实现零歧义的字段映射。Phase C1 会将三种格式统一规范化为中间 JSON 格式。
+## Phase C: Quorum（层级 Quorum）
 
-### B0. 执行模式选择
+- 3/3：允许继续规范化并产生 `PASS_RECOMMENDED` 或 `FINDINGS_REPORTED`。
+- 2/3：保留发现，但 verdict 固定 `REVIEW_DEGRADED`；补跑失败层是唯一可升级路径。
+- 0/3 或 1/3：HALT，不生成可供 evaluator/finalizer 消费的 current review。
+- Acceptance Auditor 缺失时 `acCoverageComplete=false`。
 
-优先使用 Agent 工具并行启动三个子代理（**在同一条消息中发起全部三个 Agent 调用**）。
+不得以当前模型单独补写结果来冒充独立层。
 
-若 Agent 工具不可用或调用失败：
-- 降级为串行模式：在当前上下文中依次执行 B1 → B2 → B3
-- 串行模式下，每完成一层就将结果写入对应临时文件，然后继续下一层
-- 向用户提示：「Agent 工具不可用，已降级为串行审查模式。」
+## Phase D: Normalize and Fingerprint（规范化与指纹）
 
-### B0.5. 共同审查约束（必须原样注入 B1/B2/B3 每层子代理 prompt 的开头）
+统一字段：
 
-以下约束对三层审查一律适用；构造每层 prompt 时必须置于其开头：
+| 字段 | 含义 |
+|---|---|
+| `findingId` | 当前 round 展示编号 |
+| `category` | 稳定问题类别 |
+| `invariant` | 被违反的单一不变量 |
+| `concreteFailureScenario` | 具体输入/状态 → 实际错误结果 |
+| `primaryLocation` | 主要文件与行号 |
+| `sourceLayers` | blind/edge/auditor 组合 |
+| `bucket` | decision-needed/patch/verify-required/defer/dismiss |
+| `disposition` | new/recurred/resolved/superseded/deferred/dismissed |
+| `fingerprint` | SHA-256(category + invariant + scenario + location) |
 
-- **不设最低问题数**：只报会实质阻塞的问题，无实质问题时报零；严禁为凑数而制造问题。
-- **可验证性路由**：可由编译器/测试判定的属性——穷尽性/全函数（totality）、determinism、replay 等价、幂等（idempotency）、资源无泄漏（no-leak）、类型/shape 一致性——不应作为反复迭代的阻塞散文问题；若担心其成立，改为要求补一条测试并标为 `verify-obligation`，交可执行门禁裁决，而非无界追问。
-- **新颖性要求**：不得仅因“修复引入的新表述又存在一个未覆盖分支”就反复提出同类问题；除非能给出具体新失败场景（具体输入/状态 → 错误结果），否则判为噪音不提。
-- **元数据非阻塞**：provenance / round 号 / pointer 漂移属于可机械同步的记账问题，永不作为阻塞项。
+### D1. Reject Noise（拒绝噪音）
 
-### B1. Blind Hunter（Agent 子代理 #1）
+- 无具体失败场景 → `dismiss`。
+- 只是“可能还有分支”且无错误结果 → `dismiss`。
+- 纯 round/pointer/展示 provenance 漂移 → `verify-required` 或 `dismiss`。
+- 实际 authority/provenance 可绕过 server-owned policy → 可进入 patch/decision-needed。
 
-- **调用方式**：Agent 工具，启动独立子代理
-- **Agent prompt**：
+### D2. Semantic Deduplication（语义去重）
 
-> 使用 speclite-review-adversarial-general skill 对代码变更进行对抗式审查。
->
-> 待审查内容位于文件：`$cr_dir/.tmp/review-input.diff`
-> 请用 Read 工具读取该文件，然后按 speclite-review-adversarial-general skill 的指令执行审查。
->
-> 重要约束：不要读取项目中的任何其他文件，不要寻找项目上下文、Story 文档或规格说明。仅基于上述文件的内容进行审查。
->
-> 完成后将审查结果（Markdown 无序列表）写入文件：`$cr_dir/.tmp/b1-blind-hunter.md`
+以 invariant + concrete failure scenario 为主，location 为辅。多个层发现同一失败行为时合并 `sourceLayers`；不得仅因相同行号合并不同不变量。
 
-- **信息隔离**：prompt 中不包含任何 Story、项目上下文或其他审查层的信息，确保零上下文审查
+### D3. Historical Disposition（历史处置）
 
-### B2. Edge Case Hunter（Agent 子代理 #2）
+- fingerprint 相同且仍可复现 → `recurred`。
+- 历史 finding 已验证关闭 → `resolved`。
+- Correct Course 删除对应实现 → `superseded`，同时保留根 invariant 的迁移引用。
+- 新 fingerprint 必须有新的具体失败场景，才能计入 `new`。
 
-- **调用方式**：Agent 工具，启动独立子代理
-- **Agent prompt**：
+写入 `classified-findings.json`，并对规范化 JSON 计算 `findingSetHash`。
 
-> 使用 speclite-review-edge-case-hunter skill 对代码变更进行边界条件分析。
->
-> 待审查内容位于文件：`$cr_dir/.tmp/review-input.diff`
-> 请用 Read 工具读取该文件，然后按 speclite-review-edge-case-hunter skill 的指令执行审查。
->
-> 你可以使用 Read、Grep、Glob 工具访问项目代码库，查看引用关系和上下文。
->
-> 完成后将审查结果（JSON 数组）写入文件：`$cr_dir/.tmp/b2-edge-case-hunter.json`
+## Phase E: Classification（分类）
 
-### B3. Acceptance Auditor（Agent 子代理 #3）
+| 分类桶 | 规则 |
+|---|---|
+| `decision-needed` | 需求/授权不明确，无法安全选择正确修复 |
+| `patch` | 有确定失败场景且修复方向明确 |
+| `verify-required` | 只需测试/断言/fixture/机械证据，不需要改变生产语义 |
+| `defer` | 真实但非当前阻塞，必须由 evaluator 决定是否进入 TODO |
+| `dismiss` | 误报、无证据、已关闭或纯噪音 |
 
-- **调用条件**：`$review_mode` = `"full"`（CR 工作流中始终满足）
-- **调用方式**：Agent 工具，启动独立子代理
-- **Agent prompt**：
+Reviewer 不决定 P0/P1/TODO；只提供证据和建议 bucket，最终由 evaluator 裁决。
 
-> 使用 speclite-review-acceptance-auditor skill 对代码变更进行验收标准审查。
->
-> 待审查内容位于文件：`$cr_dir/.tmp/review-input.diff`
-> 验收标准（AC）位于文件：`$cr_dir/.tmp/spec-content.md`
-> Anchor evidence 与 story-completion gate report 位于文件：`$cr_dir/.tmp/anchor-evidence.md`
-> 请用 Read 工具读取这三个文件，然后按 speclite-review-acceptance-auditor skill 的指令执行审查。
->
-> 额外审计要求：
-> 1. 核对 Story `Anchor Evidence Summary` 是否覆盖 File List、测试证据和等价实现说明。
-> 2. 若 story-completion gate 缺失、失败或非 `PASS` / `PASS_EQUIVALENT`，作为 Acceptance finding 输出。
-> 3. 固定文件名只有在 owning SPEC 明确要求时才是 hard gate；否则必须检查 functional implementation 与 evidence 是否构成等价实现。
->
-> 完成后将审查结果（Markdown 列表）写入文件：`$cr_dir/.tmp/b3-acceptance-auditor.md`
+## Phase F: Output（输出）
 
-### B4. 收集结果与失败处理
+使用 `assets/output-template.md` 生成 v2 review summary：
 
-三个 Agent 子代理全部返回后：
-
-1. **收集结果**：依次用 Read 工具读取三个输出文件：
-   - `$cr_dir/.tmp/b1-blind-hunter.md`
-   - `$cr_dir/.tmp/b2-edge-case-hunter.json`
-   - `$cr_dir/.tmp/b3-acceptance-auditor.md`
-
-2. **失败检测**：若某个文件不存在、为空或子代理返回错误，将该层名称记录到 `$failed_layers` 列表，使用剩余层的发现继续
-
-3. **全部失败降级**：若三个文件均不存在或为空，回退到单一 LLM 自行审查模式——按以下 6 个维度直接审查 `$cr_dir/.tmp/review-input.diff`：
-  1. AC 验收标准覆盖情况
-  2. 代码逻辑正确性
-  3. 错误处理和边界条件
-  4. 测试充分性
-  5. 代码质量和可维护性
-  6. 安全性和性能隐患
-- 降级时向用户明确告知：「三层子审查均不可用，已降级为单一审查模式。」
-
----
-
-## Phase C：规范化与去重
-
-### C1. 格式规范化
-
-从临时文件读取三层输出，将不同格式统一转换为中间格式。每条发现包含：
-
-| 字段 | 说明 |
-|------|------|
-| `id` | 顺序整数（1, 2, 3...） |
-| `source` | 来源层标识：`blind` / `edge` / `auditor`，合并后为 `blind+edge` 等 |
-| `title` | 一行摘要 |
-| `detail` | 完整描述（含推理和上下文） |
-| `location` | 文件和行引用（如 `src/auth.ts:42-58`），若无则为空 |
-
-转换规则：
-- **Blind Hunter**（读取 `$cr_dir/.tmp/b1-blind-hunter.md`）：每条列表项的首句作为 `title`，完整内容作为 `detail`，`location` 从内容中提取（如有文件:行号引用）
-- **Edge Case Hunter**（读取 `$cr_dir/.tmp/b2-edge-case-hunter.json`）：`trigger_condition` 作为 `title`，`potential_consequence` + `guard_snippet` 组合为 `detail`，`location` 直接映射
-- **Acceptance Auditor**（读取 `$cr_dir/.tmp/b3-acceptance-auditor.md`）：标题作为 `title`，AC 引用 + 证据组合为 `detail`，从证据中提取 `location`
-
-### C2. 语义去重
-
-若两条或多条发现描述同一问题，合并为一条：
-1. 以最具体的发现为基础（优先有 `location` 的 Edge Case Hunter JSON）
-2. 将其他发现的唯一细节追加到 `detail` 字段
-3. 将 `source` 设为合并来源（如 `blind+edge`）
-
-判断"同一问题"的标准：
-- 引用相同文件和相同/重叠行号范围
-- 描述的问题本质相同（即使措辞不同）
-
-**写入临时文件**：将规范化 + 去重后的发现列表写入 `$cr_dir/.tmp/normalized-findings.json`（JSON 数组格式）。
-
----
-
-## Phase D：四桶分类 + 严重性标签映射
-
-读取 `$cr_dir/.tmp/normalized-findings.json` 进行分类。
-
-### D0. 分类前置过滤（新颖性 + 可验证性 + 元数据）
-
-四桶分类前，先按 B0.5 过滤：命中可验证性路由 → `verify-obligation`；仅“又一未覆盖分支”无新失败场景 → `dismiss`；provenance/round/pointer 漂移 → `verify-obligation` 或 `dismiss`，绝不进 `patch`/`decision_needed`。
-
-### D1. 四桶分类
-
-对每条去重后的发现，分入恰好一个桶：
-
-| 桶 | 条件 | 说明 |
-|----|------|------|
-| `decision_needed` | 存在需人工裁决的模糊选择；不知道用户意图则无法判断正确修复方式 | 仅当 `$review_mode` = `"full"` 时可能出现 |
-| `patch` | 代码问题，修复方案明确，无需人工输入 | 最常见的桶 |
-| `verify-obligation` | 可由编译器/测试判定的属性，或元数据机械同步 | totality/determinism/replay/幂等/no-leak/shape；provenance/round 漂移 |
-| `defer` | 既有问题，非本次改动引起；真实存在但现在无法处理 | 已有代码的历史债务 |
-| `dismiss` | 噪音、误报、已处理，或仅“又一未覆盖分支”无新失败场景 | 丢弃不输出 |
-
-分类不确定时，优先选择更保守的分类（向严重方向倾斜）。
-
-### D2. 严重性标签映射
-
-四桶分类与严重性标签 [高/中/低] **并存**——两套标签同时写入输出。映射规则：
-
-| 四桶分类 | 严重性标签 | 映射条件 |
-|---------|----------|---------|
-| `decision_needed` | `[高]` | 始终 |
-| `patch` | `[高]` | 多来源命中（如 `blind+edge`）且涉及安全/数据完整性 |
-| `patch` | `[中]` | 多来源命中但非安全相关，或单来源但涉及安全/数据 |
-| `patch` | `[低]` | 单来源，非安全相关 |
-| `defer` | — | 不标严重性，记入"通过项"区域，标注为「已知既有问题」 |
-| `verify-obligation` | — | 不标严重性；作为“应补测试/机械同步”义务交实现阶段，非阻塞 |
-| `dismiss` | — | 丢弃不输出 |
-
-安全/数据关键词判断：发现的 `title` 或 `detail` 中包含以下关键词时视为涉及安全/数据——`安全`、`漏洞`、`注入`、`XSS`、`CSRF`、`认证`、`授权`、`数据丢失`、`数据泄露`、`越权`、`security`、`vulnerability`、`injection`、`data loss`、`data leak`、`auth`。
-
-### D3. 复审场景补充处理
-
-若当前为复审轮次（`$round_number` > 1）：
-1. 读取 `$cr_dir/.tmp/review-context.md` 获取「已修复问题清单」
-2. 将 Phase C 去重后的发现与已修复清单交叉比对
-3. 已修复的问题从发现列表中移除，记入「上轮问题回顾 → 已修复」区域
-4. 仍未修复的历史问题保留在发现列表中，额外标注为「上轮遗留」
-
-**写入临时文件**：将分类后的发现列表写入 `$cr_dir/.tmp/classified-findings.json`（JSON 数组格式，每条包含 id/source/title/detail/location/bucket/severity 字段）。
-
-### D4. classified-findings.json Schema
-
-每条发现的完整字段定义（Phase C 规范化 + Phase D 分类的最终产物）：
-
-| 字段 | 类型 | 来源阶段 | 值域 | 说明 |
-|------|------|---------|------|------|
-| `id` | integer | Phase C1 | 1, 2, 3... | 顺序整数 |
-| `source` | string | Phase C1/C2 | `blind` / `edge` / `auditor` / `blind+edge` 等 | 来源层标识，去重合并后为组合值 |
-| `title` | string | Phase C1 | — | 一行摘要 |
-| `detail` | string | Phase C1 | — | 完整描述（含推理和上下文） |
-| `location` | string | Phase C1 | 文件:行号 或空字符串 | 代码位置引用，如 `src/auth.ts:42-58` |
-| `bucket` | string | Phase D1 | `decision_needed` / `patch` / `verify-obligation` / `defer` / `dismiss` | 分类 |
-| `severity` | string | Phase D2 | `[高]` / `[中]` / `[低]` / `""` | 严重性标签，defer 和 dismiss 为空字符串 |
-
----
-
-## Phase E：构建输出数据
-
-读取 `$cr_dir/.tmp/classified-findings.json`，将分类后的发现整理为 `assets/output-template.md` 模板所需的结构。
-
-### E1. 新发现区域
-
-每条发现按以下结构输出：
-
-```markdown
-### <序号>. [<严重性>] <问题标题>
-
-- **来源**：<blind / edge / auditor / blind+edge 等>
-- **分类**：<decision_needed / patch / defer>
-
-- **证据**
-  - <代码位置和行为描述，引用具体文件:行号>
-
-- **影响**
-  - <对功能/安全/质量的影响说明>
-
-- **建议**
-  - <具体修复建议>
-```
-
-- `来源` 和 `分类` 为本次新增的可选增强字段
-- 严重性标签 `[高/中/低]` 作为主标签，保持与 output-template.md 模板一致
-
-### E2. 通过项区域
-
-- `defer` 桶的发现记入通过项区域，标注为「已知既有问题，非本次改动引起」
-- 三层审查中未发现问题的功能模块/文件记入通过项
-
-### E3. 审查层状态标注
-
-若 `$failed_layers` 非空，在审查结论中标注：
-- 「注意：<层名称> 审查层不可用，本轮审查结果基于 <可用层数>/3 层。」
-
-### E4. 输出交接
-
-1. `$cr_dir/.tmp/classified-findings.json` 已在 Phase D 写入，SKILL.md Step 5 通过 Read 工具读取
-2. `$failed_layers` 保留在上下文中传回 SKILL.md（体积小，无需写文件）
-3. Phase E 的格式化输出作为 SKILL.md Step 5 的参考，由 Step 5 按 output-template.md 模板写入最终的审查总结文件
+- frontmatter 字段完整且计数与正文一致；
+- 明确本轮实际执行的命令与引用既有证据；
+- 写入 scope manifest、layer status、finding registry 和 convergence input；
+- 零 finding 且 3/3 quorum 时合法输出 `PASS_RECOMMENDED`；
+- 任一 scope/quorum hard gate 不满足时输出 `REVIEW_DEGRADED`，不得写“通过”。

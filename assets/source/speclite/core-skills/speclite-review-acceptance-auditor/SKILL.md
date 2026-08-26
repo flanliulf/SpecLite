@@ -3,24 +3,27 @@ name: speclite-review-acceptance-auditor
 description: "按 Story 验收标准 AC 审计代码变更并报告偏差。用于用户要求 acceptance audit、AC review、规格合规检查或核对实现是否满足 Story。核心能力：关联 AC 与代码证据、发现缺口、输出结构化 Markdown findings。"
 allowed-tools: Read, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "2.0.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[技能说明]
+## Overview（概述）
+
     对照 Story 验收标准（AC）审查代码变更，检查实现是否违反验收条件、偏离规格意图、遗漏规格行为或存在矛盾，以结构化 Markdown 列表格式输出发现报告。与对抗式审查（speclite-review-adversarial-general）和边界条件分析（speclite-review-edge-case-hunter）正交——本 Skill 聚焦「规格合规性」维度。
 
-[核心能力]
-    - **AC 逐条对照**：将代码变更与 Story 验收标准逐条对照，确保每条 AC 均有对应实现
-    - **违规检测**：识别违反验收条件的代码实现
-    - **偏差检测**：识别偏离规格意图的行为
-    - **缺失检测**：识别规格中指定但未实现的行为
-    - **矛盾检测**：识别规格约束与实际代码之间的矛盾
-    - **结构化输出**：每条发现包含一行标题、违反的 AC/约束引用、以及来自代码的证据（文件:行号）
-    - **可选领域聚焦**：支持通过 `also_consider` 参数指定额外关注领域
+## Core Capabilities（核心能力）
 
-[执行流程]
+- **AC 逐条对照**：将代码变更与 Story 验收标准逐条对照，确保每条 AC 均有对应实现
+- **违规检测**：识别违反验收条件的代码实现
+- **偏差检测**：识别偏离规格意图的行为
+- **缺失检测**：识别规格中指定但未实现的行为
+- **矛盾检测**：识别规格约束与实际代码之间的矛盾
+- **结构化输出**：每条发现包含 category、invariant、具体失败场景、AC 引用和代码证据，供上层生成稳定 fingerprint
+- **可选领域聚焦**：支持通过 `also_consider` 参数指定额外关注领域
+
+## Workflow（工作流）
+
     采用顺序工作流，共 3 步。
 
     Step 1：接收内容
@@ -42,8 +45,10 @@ metadata:
 
     Step 3：输出发现
         1. 以 Markdown 列表格式输出所有发现
-        2. 每条发现包含三部分：
+        2. 每条发现包含五部分：
            - **一行标题**：简要描述问题
+           - **Category / Invariant**：稳定类别与被违反的单一不变量
+           - **Concrete failure scenario**：具体输入/状态 → 实际错误结果
            - **AC 引用**：违反的具体验收标准条目或约束
            - **代码证据**：具体文件:行号，以及实际代码行为描述
         3. 输出格式示例：
@@ -51,9 +56,10 @@ metadata:
            - **搜索结果排序与规格不符** — 违反 AC: "默认按相关性降序排列" — 证据: `src/search/index.ts:142` 使用了创建时间排序
         4. 若无发现：返回空列表并说明所有 AC 均已覆盖
 
-[注意事项]
+## Notes（注意事项）
     - 发现报告只包含客观事实描述，不含主观评分或情绪化语言
     - 每条发现必须引用具体的 AC 条目和代码位置，禁止模糊描述
+    - 只有“实现方式可能不理想”但无法给出 AC 违规结果时不得输出 finding
     - 本 Skill 为并行代码审查流程中的"验收审计员"角色
     - 审查范围限于待审查内容和验收标准，不主动扩展到其他文件（除非通过 Grep/Glob 验证引用关系）
     - `also_consider` 为可选输入，缺省时仅按 AC 维度审查

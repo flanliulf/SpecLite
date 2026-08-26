@@ -1,165 +1,107 @@
-# CR 审查总结 — 输出格式模板
-
-本文档定义了代码审查总结文件的标准输出格式。LLM 执行审查后，必须严格按照此模板生成结果文件，无需检索已有审查文件。
-
----
-
-## 文件命名
-
-`<story-id>-code-review-summary-<YYYYMMDD>-round-<n>.md`
-
----
-
-## 首轮审查模板（Round 1）
+# CR Review v2 Output Template（CR Review v2 输出模板）
 
 ```markdown
 ---
-Story: <story-id>
-Round: 1
-Date: <YYYY-MM-DD>
-Model Used: <模型全名> (<模型标识符>)
-Type: Code Review Summary
+schemaVersion: speclite.cr-review.v2
+artifactType: code-review-summary
+storyId: <story-id>
+storyKey: <story-key>
+reviewSeries: <series>
+round: <round>
+generatedAt: <RFC3339 timestamp>
+modelUsed: <actual model>
+verdict: <PASS_RECOMMENDED|FINDINGS_REPORTED|REVIEW_DEGRADED>
+baseSha: <git sha>
+headSha: <git sha>
+scopeHash: sha256:<hex>
+sourceMutationAt: <RFC3339 timestamp>
+inputMode: <diff|full-file>
+declaredFiles: []
+actualChangedFiles: []
+excludedFiles: []
+scopeExceptions: []
+availableLayers: [blind, edge, auditor]
+failedLayers: []
+acCoverageComplete: true
+findingSetHash: sha256:<hex>
+findingCounts:
+  decisionNeeded: 0
+  patch: 0
+  verifyRequired: 0
+  defer: 0
+  dismiss: 0
 ---
 
-## 审查结论
+# Code Review Summary（代码审查总结）
 
-首轮审查。<测试/lint/build 通过情况概述>，<是否存在阻塞问题>，<通过/不通过建议>。
+## Scope Manifest（范围清单）
 
-## 新发现
+- 声明文件：...
+- 实际改动文件：...
+- 排除文件及授权依据：...
+- 范围例外：无
+- 基线来源：<用户输入或开发记录>
 
-### 1. [<严重性>] <问题标题>
+## Layer Status（审查层状态）
 
-- **来源**：<审查层标识，如 blind / edge / auditor / blind+edge 等>（可选）
-- **分类**：<四桶分类标签，如 decision_needed / patch / defer>（可选）
+| 审查层 | 状态 | 输出 |
+|---|---|---|
+| blind | PASS/FAILED | ... |
+| edge | PASS/FAILED | ... |
+| auditor | PASS/FAILED | ... |
 
-- **证据**
-  - <代码位置和行为描述，引用具体文件:行号>
-  - <定向复现结果（如适用）>
+## Previous Findings（历史发现）
 
-- **影响**
-  - <对功能/安全/质量的影响说明>
+| 发现指纹 | 历史轮次 | 处置 | 证据 |
+|---|---:|---|---|
 
-- **建议**
-  - <具体修复建议>
-  - <需要补充的测试用例>
+## Findings（发现）
 
-### 2. [<严重性>] <问题标题>
+### <finding-id>: <title>
 
-<同上结构，按需列出所有发现>
+- 发现指纹：`sha256:...`
+- 类别：`<category>`
+- 不变量：<被违反的单一不变量>
+- 具体失败场景：<输入或状态 -> 错误结果>
+- 主要位置：`<file:line>`
+- 来源审查层：`<blind+edge>`
+- 分类桶：`<decision-needed|patch|verify-required|defer|dismiss>`
+- 处置：`<new|recurred|resolved|superseded|deferred|dismissed>`
+- 证据：...
+- 影响：...
+- 建议下一步：...
 
-## 验证摘要
+零 finding 时写：`本轮在冻结范围和 3/3 quorum 下未发现实质问题。`
 
-- `npm test` <结果>（<通过数> / <总数>）
-- `npm run lint` <结果>
-- `npm run build` <结果>
-- 定向复现 <结果>
-  - <具体复现场景和结果>
+## Verification Evidence（验证证据）
 
-## 通过项
+### Executed This Round（本轮实际执行）
 
-- <已通过检查的功能/模块概述>
-- <测试覆盖正常的区域说明>
+- `<command>`：PASS/FAIL
+
+### Referenced Historical Evidence（引用历史证据）
+
+- `<artifact>`：<结果与时效限制>
+
+## Convergence Input（收敛输入）
+
+- 新增阻塞指纹候选：...
+- 复现指纹候选：...
+- 已关闭指纹：...
+- 反复修改位置：...
+- 架构类别：...
+
+## Reviewer Verdict（Reviewer 结论）
+
+- 裁决：`<exact enum>`
+- 理由：...
+- 必须执行的下一步：`speclite-code-review-02-evaluator`
 ```
 
----
+## Rules（规则）
 
-## 复审模板（Round N, N > 1）
-
-```markdown
----
-Story: <story-id>
-Round: <n>
-Date: <YYYY-MM-DD>
-Model Used: <模型全名> (<模型标识符>)
-Type: Code Review Summary
----
-
-## 审查结论
-
-本轮为复审。<上轮问题修复情况概述>，<当前测试/lint/build 通过情况>，<是否存在新阻塞问题>，<通过/不通过建议>。
-
-## 上轮问题回顾
-
-### 已修复
-
-1. Round <x> / Finding #<y> — <问题标题>
-   - <修复位置和方式简述>
-   - <验证结果>
-
-2. <按需列出所有已修复项>
-
-### 仍为非阻塞待办
-
-1. Round <x> / Finding #<y> — <问题标题>
-   - 维持既有评估结论：CR TODO / 非阻塞。
-
-2. <按需列出所有仍待办项>
-
-## 新发现
-
-<如果有新发现，按首轮模板的 "新发现" 格式列出，包含可选的「来源」和「分类」字段>
-
-<如果没有新发现>：
-本轮未发现新的阻塞项或中高优先级问题。
-
-## 验证摘要
-
-- `npm test` <结果>（<通过数> / <总数>）
-- `npm run lint` <结果>
-- `npm run build` <结果>
-- 额外复核：
-  - <对历史修复项的回归验证>
-
-## 通过项
-
-- <已通过检查的功能/模块概述>
-- <历史修复持续有效的确认>
-
-## 结论
-
-- **结论：<通过/不通过>**
-- **阻塞项**：<无 / 列出阻塞项>
-- **建议**：<后续行动建议>
-```
-
----
-
-## 格式规范
-
-### 严重性标签
-
-- `[高]`：安全漏洞、数据丢失风险、核心功能缺陷
-- `[中]`：功能回归、质量门禁违规、边界条件处理不当
-- `[低]`：代码质量改进、诊断体验优化
-
-### 新发现标注
-
-- 复审中的新发现需在严重性标签后加 `[新]` 标记，如 `[中][新]`
-- 首轮审查的发现不需要 `[新]` 标记
-
-### 证据引用格式
-
-- 代码位置：`文件路径:行号` 或 `文件路径:起始行-结束行`
-- 定向复现：提供输入、预期行为、实际行为的对比
-
-### 验证摘要
-
-- 必须包含 `npm test`、`npm run lint`、`npm run build` 的实际执行结果
-- 如果项目使用其他构建/测试工具，按实际情况替换
-- 用 ✅ 和 ❌ 标注通过/失败状态
-
-### 审查来源与分类标注（可选增强字段）
-
-当使用三层并行审查引擎时，每条发现可附带以下字段：
-
-- `来源`：标识发现由哪个审查层产出
-  - `blind`：盲猎手（对抗式审查）
-  - `edge`：边界猎手（边缘情况分析）
-  - `auditor`：验收审计员（AC 对照审查）
-  - 合并来源：如 `blind+edge` 表示两层同时发现了同一问题
-- `分类`：四桶分类标签
-  - `decision_needed`：需人工裁决的模糊选择
-  - `patch`：修复方案明确的代码问题
-  - `defer`：既有问题，非本次改动引起
-
-这两个字段为可选增强，不影响下游 02-evaluate 对文件的消费（不识别时忽略即可）。
+- Frontmatter 必须是文件唯一 leading YAML block。
+- 计数必须与 findings 正文一致。
+- `PASS_RECOMMENDED` 只在 scope complete、3/3 quorum、无 blocking candidate 时使用。
+- Reviewer 不能输出最终 `PASS`、`FIX_REQUIRED` 或 finalizer authorization。
+- 不得把历史测试结果写入“本轮实际执行”。

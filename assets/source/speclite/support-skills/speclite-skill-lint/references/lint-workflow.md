@@ -83,6 +83,7 @@ YML-01 与 FILE-02/FILE-05 同时检查 SpecLite canonical skill 的命名空间
 ## Workflow Density（Workflow 密度）
 
 BODY-07 与 BODY-08 必须使用 `scripts/check_skill_density.py` 的输出：
+- 方括号 `[Workflow（执行流程）]` / `[Workflow]` 与 Markdown `## Workflow（工作流）` / `## Workflow` 都必须被识别；Markdown 模式只在同级或更高级标题处结束，不能在 `### Step` 子标题处截断。
 - `body_chars`：入口正文字符数。
 - `workflow_chars`：Workflow 章节字符数。
 - `workflow_ratio`：Workflow 占正文比例。

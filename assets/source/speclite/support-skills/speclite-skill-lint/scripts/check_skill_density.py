@@ -32,15 +32,25 @@ def split_body(text: str) -> str:
 
 def extract_workflow(body: str, filename: str) -> str:
     if filename == "SKILL.en.md":
-        pattern = r"^\[Workflow\]\s*$"
+        pattern = r"^(?:\[Workflow\]|(?P<markdown>#{1,6})[ \t]+Workflow)[ \t]*$"
     else:
-        pattern = r"^\[Workflow（执行流程）\]\s*$"
+        pattern = (
+            r"^(?:\[Workflow（(?:执行流程|工作流)）\]|"
+            r"(?P<markdown>#{1,6})[ \t]+Workflow（(?:执行流程|工作流)）)[ \t]*$"
+        )
 
     match = re.search(pattern, body, re.MULTILINE)
     if not match:
         return ""
 
-    next_section = re.search(r"^\[[^\n]+\]\s*$", body[match.end() :], re.MULTILINE)
+    markdown_prefix = match.groupdict().get("markdown")
+    if markdown_prefix:
+        heading_level = len(markdown_prefix)
+        next_pattern = rf"^#{{1,{heading_level}}}[ \t]+\S.*$"
+    else:
+        next_pattern = r"^\[[^\n]+\]\s*$"
+
+    next_section = re.search(next_pattern, body[match.end() :], re.MULTILINE)
     end = match.end() + next_section.start() if next_section else len(body)
     return body[match.start() : end]
 

@@ -29,41 +29,91 @@ describe("canonical source change check hook runner", () => {
     }
   });
 
-  it.each(["PostToolUse", "Stop"])(
-    "emits warning-only context for canonical source changes on %s",
-    async (eventName) => {
-      const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-canonical-hook-warning-"));
+  it("emits warning-only context for canonical source changes on PostToolUse", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-canonical-hook-warning-"));
 
-      try {
-        await runCommand("git", ["init"], tempRoot);
-        await writeProjectLocalCheckScript(tempRoot);
-        await writeFile(
-          path.join(tempRoot, "assets/source/speclite/README.md"),
-          "# Canonical source fixture\n",
-          "utf8",
-        );
+    try {
+      await runCommand("git", ["init"], tempRoot);
+      await writeProjectLocalCheckScript(tempRoot);
+      await writeFile(
+        path.join(tempRoot, "assets/source/speclite/README.md"),
+        "# Canonical source fixture\n",
+        "utf8",
+      );
 
-        const result = await runNode(RUNNER_PATH, ["--platform", "codex"], {
+      const result = await runNode(RUNNER_PATH, ["--platform", "claude", "--mode", "warn"], {
+        cwd: tempRoot,
+        stdin: JSON.stringify({ hook_event_name: "PostToolUse", cwd: tempRoot }),
+      });
+      const parsed = JSON.parse(result.stdout);
+
+      expect(result.exitCode).toBe(0);
+      expect(parsed.decision).toBeUndefined();
+      expect(JSON.stringify(parsed)).not.toContain("block");
+      expect(parsed.systemMessage).toContain("speclite-canonical-source-governance-runner");
+      expect(parsed.hookSpecificOutput.hookEventName).toBe("PostToolUse");
+      expect(parsed.hookSpecificOutput.additionalContext).toContain("speclite-canonical-source-governance-runner");
+      expect(parsed.hookSpecificOutput.additionalContext).toContain("speclite-check-canonical-source-change");
+      expect(parsed.hookSpecificOutput.additionalContext).toContain("Impacted governance classes");
+      expect(parsed.hookSpecificOutput.additionalContext).toContain("module-help.missing-row");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("warns without continuing the conversation on the first Stop event", async () => {
+    const tempRoot = await createChangedCanonicalWorkspace();
+
+    try {
+      const result = await runNode(
+        RUNNER_PATH,
+        ["--platform", "claude", "--mode", "warn", "--stop-summary"],
+        {
           cwd: tempRoot,
-          stdin: JSON.stringify({ hook_event_name: eventName, cwd: tempRoot }),
-        });
-        const parsed = JSON.parse(result.stdout);
+          stdin: JSON.stringify({ hook_event_name: "Stop", cwd: tempRoot, stop_hook_active: false }),
+        },
+      );
+      const parsed = JSON.parse(result.stdout);
 
-        expect(result.exitCode).toBe(0);
-        expect(parsed.decision).toBeUndefined();
-        expect(JSON.stringify(parsed)).not.toContain("block");
-        expect(parsed.systemMessage).toContain("speclite-canonical-source-governance-runner");
-        expect(parsed.hookSpecificOutput.hookEventName).toBe(eventName);
-        expect(parsed.hookSpecificOutput.additionalContext).toContain("speclite-canonical-source-governance-runner");
-        expect(parsed.hookSpecificOutput.additionalContext).toContain("speclite-check-canonical-source-change");
-        expect(parsed.hookSpecificOutput.additionalContext).toContain("Impacted governance classes");
-        expect(parsed.hookSpecificOutput.additionalContext).toContain("module-help.missing-row");
-      } finally {
-        await rm(tempRoot, { recursive: true, force: true });
-      }
-    },
-  );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(parsed.systemMessage).toContain("speclite-canonical-source-governance-runner");
+      expect(parsed.decision).toBeUndefined();
+      expect(parsed.hookSpecificOutput).toBeUndefined();
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("exits silently when a Stop hook continuation is already active", async () => {
+    const tempRoot = await createChangedCanonicalWorkspace();
+
+    try {
+      const result = await runNode(
+        RUNNER_PATH,
+        ["--platform", "claude", "--mode", "warn", "--stop-summary"],
+        {
+          cwd: tempRoot,
+          stdin: JSON.stringify({ hook_event_name: "Stop", cwd: tempRoot, stop_hook_active: true }),
+        },
+      );
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toBe("");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
 });
+
+async function createChangedCanonicalWorkspace(): Promise<string> {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-canonical-hook-stop-"));
+  await runCommand("git", ["init"], tempRoot);
+  await writeProjectLocalCheckScript(tempRoot);
+  await writeFile(path.join(tempRoot, "assets/source/speclite/README.md"), "# Canonical source fixture\n", "utf8");
+  return tempRoot;
+}
 
 async function writeProjectLocalCheckScript(projectRoot: string): Promise<void> {
   const scriptPath = path.join(
