@@ -3,7 +3,7 @@ name: speclite-review-acceptance-auditor
 description: "按 Story 验收标准 AC 审计代码变更并报告偏差。用于用户要求 acceptance audit、AC review、规格合规检查或核对实现是否满足 Story。核心能力：关联 AC 与代码证据、发现缺口、输出结构化 Markdown findings。"
 allowed-tools: Read, Grep, Glob
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -34,7 +34,7 @@ metadata:
 
     Step 2：AC 对照审查
         1. 逐条解析验收标准，建立 AC 检查清单
-        2. 对每条 AC，在代码变更中查找对应实现
+        2. 对每条 AC，在代码变更中查找对应实现；若 AC 由未改动的既有实现、当前测试、fixture 或既有等价实现满足（可用 Grep/Glob 验证），也视为已覆盖，不得仅因 diff 中未见即判缺失
         3. 检查以下内容：
            - 违反验收条件的实现（代码行为与 AC 要求相反或不一致）
            - 偏离规格意图的行为（实现方式虽不违反字面 AC 但偏离了设计目的）
@@ -62,4 +62,5 @@ metadata:
     - 只有“实现方式可能不理想”但无法给出 AC 违规结果时不得输出 finding
     - 本 Skill 为并行代码审查流程中的"验收审计员"角色
     - 审查范围限于待审查内容和验收标准，不主动扩展到其他文件（除非通过 Grep/Glob 验证引用关系）
+    - AC 可由 current test、fixture、既有等价实现或 review engine 传入的 Anchor Evidence 证明；仅 diff 中未见实现不构成 finding
     - `also_consider` 为可选输入，缺省时仅按 AC 维度审查

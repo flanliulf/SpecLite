@@ -222,11 +222,11 @@ globalRuleEligibleCount: 0
 result: COMPLETED
 ```
 
-`result` 值域为 `COMPLETED | HALTED`。报告正文必须列出 eligible evidence、candidate rules、global eligibility、排除项及理由。未经用户明确授权不得修改全局文档。
+`result` 值域为 `COMPLETED | HALTED`。合法 current evaluation 下 eligible finding 为零时，result 为 `COMPLETED` 且 `candidateRuleCount: 0`，是 clean PASS 的正常结果，不得因此 HALT；`HALTED` 仅用于缺失/无效 evaluation 或 artifact identity/hash 不一致。报告正文必须列出 eligible evidence、candidate rules、global eligibility、排除项及理由。未经用户明确授权不得修改全局文档。
 
 ### TODO Result Report（TODO 结果报告）
 
-CR05 每次 add/check/resolve/list/extract/closeout 都必须写入 durable result report。`closeout` 是 Story 收口唯一入口：`PASS` 产出 `COMPLETED` 且 `mappedFingerprints: []` 的 no-op，`PASS_WITH_DEFERRED_TODOS` 等价 add。Story closeout 使用 `{crDir}` canonical path；无 Story identity 的 project utility 使用 TODO utility result path，并把 Story/evaluation binding fields 写为 `null`：
+CR05 的收口与变更操作（`closeout`、`add`、`resolve`、`extract`）每次都必须写入 durable result report；只读查询（`list`、`check`）不修改 backlog，默认只返回结果、不产生 workspace mutation，仅在用户显式要求留档时写 utility result。`closeout` 是 Story 收口唯一入口：`PASS` 产出 `COMPLETED` 且 `mappedFingerprints: []` 的 no-op，`PASS_WITH_DEFERRED_TODOS` 等价 add。Story closeout 使用 `{crDir}` canonical path；无 Story identity 的 project utility 使用 TODO utility result path，并把 Story/evaluation binding fields 写为 `null`：
 
 ```yaml
 schemaVersion: speclite.cr-todo-result.v2
@@ -249,7 +249,7 @@ backlogSourceHash: sha256:hex
 result: COMPLETED
 ```
 
-`result` 值域为 `COMPLETED | HALTED`。没有 deferred candidate 的合法 check/list/add 结果可以是 `COMPLETED` 且 `mappedFingerprints: []`；不得据此改变 evaluation verdict。
+`result` 值域为 `COMPLETED | HALTED`。变更/收口操作没有 deferred candidate 时结果可以是 `COMPLETED` 且 `mappedFingerprints: []`；只读 `list`/`check` 默认不写 result，如用户要求留档亦记 `COMPLETED`；均不得据此改变 evaluation verdict。
 
 ### Finalizer Report（Finalizer 报告）
 

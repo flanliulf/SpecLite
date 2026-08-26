@@ -306,7 +306,7 @@ describe("CR shared contract ownership", () => {
       ),
     ]);
     expect(contract).toContain("TODO(mode=closeout)");
-    expect(contract).toContain("add/check/resolve/list/extract/closeout");
+    expect(contract).toContain("是 Story 收口唯一入口");
     expect(tracker).toContain("## Mode F: Closeout（收口）");
     expect(tracker).toContain("不写 backlog");
   });
@@ -386,6 +386,59 @@ describe("CR shared contract ownership", () => {
     expect(finalizerWorkflow).toContain("按逆序用 `before hash`");
     expect(contract).toContain("fail-closed coordinated write");
     expect(finalizerTemplate).toContain("trackerChangeSet");
+  });
+
+  it("clarifies zero-eligible CR04 as COMPLETED and read-only CR05 queries as non-writing", async () => {
+    const [contract, rulesWorkflow, todoWorkflow] = await Promise.all([
+      readFile(
+        path.join(IMPLEMENTATION_ROOT, "speclite-code-review-contract/references/cr-contract.md"),
+        "utf8",
+      ),
+      readFile(
+        path.join(
+          IMPLEMENTATION_ROOT,
+          "speclite-code-review-04-rules-extractor/references/rules-extractor-workflow.md",
+        ),
+        "utf8",
+      ),
+      readFile(
+        path.join(
+          IMPLEMENTATION_ROOT,
+          "speclite-code-review-05-todo-tracker/references/todo-tracker-workflow.md",
+        ),
+        "utf8",
+      ),
+    ]);
+    expect(contract).toContain("eligible finding 为零时");
+    expect(rulesWorkflow).toContain("candidateRuleCount: 0");
+    expect(contract).toContain("只读查询（`list`、`check`）");
+    expect(todoWorkflow).toContain("只读 `list`/`check` 默认跳过");
+  });
+
+  it("lets the acceptance auditor accept AC satisfied by existing or test evidence", async () => {
+    const base = path.join(
+      process.cwd(),
+      "assets/source/speclite/core-skills/speclite-review-acceptance-auditor",
+    );
+    const [zh, en] = await Promise.all([
+      readFile(path.join(base, "SKILL.md"), "utf8"),
+      readFile(path.join(base, "SKILL.en.md"), "utf8"),
+    ]);
+    expect(zh).toContain("既有等价实现");
+    expect(en.toLowerCase()).toContain("equivalent implementation");
+  });
+
+  it("keeps the shared state machine well-formed (closeable verdicts reach FINALIZE via RULES and TODO)", async () => {
+    const contract = await readFile(
+      path.join(IMPLEMENTATION_ROOT, "speclite-code-review-contract/references/cr-contract.md"),
+      "utf8",
+    );
+    const block = contract.split("## State Machine")[1]?.split("```text")[1]?.split("```")[0] ?? "";
+    const finalizeLines = block.split("\n").filter((line) => line.includes("FINALIZE"));
+    expect(finalizeLines.length).toBeGreaterThan(0);
+    for (const line of finalizeLines) {
+      expect(line).toContain("RULES -> TODO(mode=closeout) -> FINALIZE");
+    }
   });
 
   // 真行为测试需要 runner 状态机模拟器（独立基建），先登记为 todo：

@@ -23,7 +23,7 @@ Compare scoped implementation changes with Story acceptance criteria and report 
 ## Workflow
 
 1. Load the scoped code input and AC set; halt if either is unreadable.
-2. Build an AC checklist and verify each item against code evidence.
+2. Build an AC checklist and verify each item against code evidence; an AC satisfied by unchanged existing implementation, current tests, fixtures, or equivalent implementation (verifiable via Grep/Glob) counts as covered — absence from the diff alone is not a gap.
 3. Reject style-only concerns that do not produce an AC violation.
 4. Return structured Markdown findings, or an empty list when coverage is complete.
 

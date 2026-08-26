@@ -37,7 +37,7 @@
 ## Step 6: Write Durable Report（写入 Durable Report）
 
 1. 使用 `assets/output-template.md` 写入 shared contract 的 rules extraction canonical path。
-2. frontmatter 写 evaluation source/hash、eligible finding set hash、candidate/global counts 和 `result`。
+2. frontmatter 写 evaluation source/hash、eligible finding set hash、candidate/global counts 和 `result`。合法 evaluation 下 eligible finding 为零时写 `result: COMPLETED`、`candidateRuleCount: 0`（clean PASS 正常结果），不得 HALT。
 3. 正文列出 model timeline、eligible/excluded evidence、candidate rules、global eligibility 和 document suggestions。
 4. 写入后重读并验证 schema、identity、hash、counts、canonical filename。
 5. 将 report path/hash 和 `COMPLETED | HALTED` 返回 `handoffTarget`。

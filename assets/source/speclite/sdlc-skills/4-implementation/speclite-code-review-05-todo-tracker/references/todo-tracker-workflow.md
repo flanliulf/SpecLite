@@ -32,7 +32,7 @@
 
 ## Mode D: List（查看）
 
-按 T1/T2/T3 展示 open/in-progress 条目和 open/in-progress/resolved 统计，不修改 backlog。
+按 T1/T2/T3 展示 open/in-progress 条目和 open/in-progress/resolved 统计。只读操作，不修改 backlog，默认只返回结果、不写 durable result（仅用户显式要求留档时才写 utility result）。
 
 ## Mode E: Extract（批量提取）
 
@@ -50,6 +50,8 @@
 3. 两分支都必须写 durable result 并返回 `handoffTarget`。
 
 ## Write Durable Result（写 Durable Result）
+
+本节仅适用于变更/收口操作（`closeout`/`add`/`resolve`/`extract`）；只读 `list`/`check` 默认跳过，除非用户显式要求留档。
 
 1. Story closeout 使用 shared contract 的 `{crDir}/{storyId}-cr-todo-result-...` path。
 2. 无 Story identity 的 project utility 使用 `{implementation_artifacts}/cr-rules/todo-results/cr-todo-result-{YYYYMMDDTHHmmss}-{mode}.md`。

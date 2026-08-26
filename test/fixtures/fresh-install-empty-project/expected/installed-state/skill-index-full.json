@@ -230,7 +230,7 @@
       "canonicalSkillId": "speclite-code-review-04-rules-extractor",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor",
-      "canonicalPackageHash": "sha256:e4ebc64896abd4c544b0cc0fe9bcef50d883969df83df8cf2dce2293851ebc18",
+      "canonicalPackageHash": "sha256:a50e69241e81c42dedc1e79ccb8c090881a543ac2120e0cef126fedc7360ddf2",
       "installedTargets": [
         "claude",
         "agents"
@@ -244,7 +244,7 @@
       "canonicalSkillId": "speclite-code-review-05-todo-tracker",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker",
-      "canonicalPackageHash": "sha256:12595a5427e9934f9fb9981cff0c07c9258d2409956158a08e754ad49a0f727a",
+      "canonicalPackageHash": "sha256:b99c9945b316bd4a34eb8dd1c3c343897a90678d7cde379bd8a13742df2da4c6",
       "installedTargets": [
         "claude",
         "agents"
@@ -272,7 +272,7 @@
       "canonicalSkillId": "speclite-code-review-contract",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract",
-      "canonicalPackageHash": "sha256:586464470ce0fea2250bf41159c19f6637adeaa29a2308296e813ac4ed74da99",
+      "canonicalPackageHash": "sha256:b37de7fb1b45dd4daa18df1be00ab15165e8a50132c7fc79f54b0a9c36e4be87",
       "installedTargets": [
         "claude",
         "agents"
@@ -776,7 +776,7 @@
       "canonicalSkillId": "speclite-review-acceptance-auditor",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-review-acceptance-auditor",
-      "canonicalPackageHash": "sha256:bf42cee9970510d4c1ce30073c46747f295acda6a8d4974960eda14d3c2fee3b",
+      "canonicalPackageHash": "sha256:68aa0293e1bec6d6b4a43b5684501178c94242bbec72ab5a2f5b3eac75958448",
       "installedTargets": [
         "claude",
         "agents"

@@ -1,5 +1,11 @@
 # Changelog（变更记录）
 
+## [2.0.1] - 2026-08-26
+
+### Changed（变更）
+
+- 明确 AC 可由既有实现、当前测试、fixture 或等价实现满足，diff 中未见实现不单独构成 finding。
+
 ## [2.0.0] - 2026-08-25
 
 - AC finding 增加稳定 category、invariant 与具体失败场景。
