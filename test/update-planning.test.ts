@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -6,6 +6,10 @@ import { runUpdateCommand } from "../src/commands/update.js";
 import { RepairCommandResultSchema, UpdateCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
 import { renderUpdateHumanOutput } from "../src/diagnostics/output.js";
 import { hashBytes, hashFile, hashPackageDirectory } from "../src/manifest/hash.js";
+import {
+  applyRecoverableUpdateTransaction,
+  finalizeCompletedUpdateTransaction,
+} from "../src/fs/update-transaction.js";
 
 describe("update ownership planning", () => {
   it("blocks update planning when required project config cannot be resolved", async () => {
@@ -144,6 +148,212 @@ describe("update ownership planning", () => {
       await expect(
         readFile(path.join(tempRoot, "_speclite/custom/speclite-dev-story.user.toml"), "utf8"),
       ).resolves.toBe(malformedUserCustom);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("skips customization resolution for installed skills without optional defaults", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-no-customization-"));
+
+    try {
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeProjectFile(tempRoot, "canonical/speclite-help/SKILL.md", "# Help\n");
+      await writeProjectFile(tempRoot, ".agents/skills/speclite-help/SKILL.md", "# Help\n");
+      await writeInstalledState(tempRoot, [
+        await filesIndexEntry(tempRoot, ".agents/skills/speclite-help/SKILL.md", "# Help\n", {
+          ownership: "installer-owned",
+          sourceRef: "canonical/speclite-help/SKILL.md",
+        }),
+      ]);
+
+      const outcome = await runUpdateCommand({ runtime: { cwd: tempRoot, targetProject: "no-customization" } });
+      const parsed = UpdateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.issues).toEqual([]);
+      expect(parsed.data.updatePlan.actions).toEqual([
+        expect.objectContaining({
+          affectedPath: ".agents/skills/speclite-help/SKILL.md",
+          action: "skip",
+          reason: "unchanged",
+        }),
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("reads bundled canonical evidence from the SpecLite package instead of the target project", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-bundled-source-"));
+    const sourceRef = "assets/source/speclite/hooks/flow-gate-enforcement/runner.mjs";
+    const bundledContents = await readFile(path.join(process.cwd(), sourceRef), "utf8");
+
+    try {
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeProjectFile(tempRoot, sourceRef, "// target shadow must not be trusted\n");
+      await writeProjectFile(tempRoot, "_speclite/hooks/flow-gate-enforcement/runner.mjs", bundledContents);
+      await writeInstalledState(tempRoot, [
+        await filesIndexEntry(
+          tempRoot,
+          "_speclite/hooks/flow-gate-enforcement/runner.mjs",
+          bundledContents,
+          { ownership: "installer-owned", sourceRef },
+        ),
+      ]);
+
+      const outcome = await runUpdateCommand({ runtime: { cwd: tempRoot, targetProject: "bundled-source" } });
+      const parsed = UpdateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.data.conflicts).toEqual([]);
+      expect(parsed.data.updatePlan.actions).toEqual([
+        expect.objectContaining({
+          affectedPath: "_speclite/hooks/flow-gate-enforcement/runner.mjs",
+          action: "skip",
+          reason: "unchanged",
+        }),
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("plans canonical files missing from the installed files index as safe creates", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-canonical-inventory-"));
+
+    try {
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeInstalledState(tempRoot, [], { installedModules: ["core"], targetIds: ["agents"] });
+      await writeSkillIndex(tempRoot, [
+        skillIndexEntry({
+          canonicalSkillId: "speclite-help",
+          canonicalPackageHash: "sha256:old-package",
+          installedTargets: ["agents"],
+        }),
+      ]);
+      const helpIndex = `${JSON.stringify({ schemaVersion: "speclite.help-index.v1", entries: [] }, null, 2)}\n`;
+      const phaseCoverage = `${JSON.stringify({ schemaVersion: "speclite.phase-coverage.v1", rows: [] }, null, 2)}\n`;
+      await writeProjectFile(tempRoot, "_speclite/_config/help-index.json", helpIndex);
+      await writeProjectFile(tempRoot, "_speclite/_config/phase-coverage.json", phaseCoverage);
+      const baselineEntries = [];
+      for (const [relativePath, artifactKind, sourceRef] of [
+        ["_speclite/_config/manifest.yaml", "manifest", "installed-state:manifest"],
+        ["_speclite/_config/skill-index.json", "skill-index", "installed-state:skill-index"],
+        ["_speclite/_config/help-index.json", "help-index", "installed-state:help-index"],
+        ["_speclite/_config/phase-coverage.json", "phase-coverage", "installed-state:phase-coverage"],
+      ] as const) {
+        baselineEntries.push(await filesIndexEntry(
+          tempRoot,
+          relativePath,
+          await readFile(path.join(tempRoot, relativePath), "utf8"),
+          { ownership: "installer-owned", sourceRef, artifactKind },
+        ));
+      }
+      await writeProjectFile(
+        tempRoot,
+        "_speclite/_config/files-index.json",
+        `${JSON.stringify({ schemaVersion: "speclite.files-index.v1", entries: baselineEntries }, null, 2)}\n`,
+      );
+
+      const outcome = await runUpdateCommand({ runtime: { cwd: tempRoot, targetProject: "canonical-inventory" } });
+      const parsed = UpdateCommandResultSchema.parse(outcome.result);
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.data.conflicts).toEqual([]);
+      expect(parsed.data.updatePlan.actions).toContainEqual({
+        affectedPath: ".agents/skills/speclite-domain-modeling/SKILL.md",
+        ownership: "installer-owned",
+        action: "create",
+        expectedHash: expect.stringMatching(/^sha256:/),
+      });
+      expect(parsed.data.changedPaths).toEqual([]);
+
+      const applied = await runUpdateCommand({
+        options: { yes: true },
+        runtime: { cwd: tempRoot, targetProject: "canonical-inventory" },
+      });
+      const appliedParsed = UpdateCommandResultSchema.parse(applied.result);
+      expect(applied.exitCode).toBe(0);
+      expect(appliedParsed.data.changedPaths).toContain(
+        ".agents/skills/speclite-domain-modeling/SKILL.md",
+      );
+      expect(appliedParsed.data.changedPaths).toContain("_speclite/_config/files-index.json");
+      const migratedManifest = JSON.parse(
+        await readFile(path.join(tempRoot, "_speclite/_config/manifest.yaml"), "utf8"),
+      ) as {
+        sourceDescriptor: { integrityEvidence: Array<{ kind: string; version?: string }> };
+      };
+      const packageJson = JSON.parse(await readFile(path.join(process.cwd(), "package.json"), "utf8")) as {
+        version: string;
+      };
+      expect(migratedManifest.sourceDescriptor.integrityEvidence).toContainEqual(
+        expect.objectContaining({ kind: "version-lock", version: packageJson.version }),
+      );
+      await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8")).rejects.toThrow();
+
+      const followUp = await runUpdateCommand({
+        runtime: { cwd: tempRoot, targetProject: "canonical-inventory" },
+      });
+      const followUpParsed = UpdateCommandResultSchema.parse(followUp.result);
+      expect(followUp.exitCode).toBe(0);
+      expect(followUpParsed.data.updatePlan.actions.some(
+        (action) => action.action === "create" || action.action === "update",
+      )).toBe(false);
+
+      await writeProjectFile(tempRoot, ".agents/skills/speclite-help/SKILL.en.md", "# excluded locale copy\n");
+      const excludedExtra = UpdateCommandResultSchema.parse((await runUpdateCommand({
+        runtime: { cwd: tempRoot, targetProject: "canonical-inventory" },
+      })).result);
+      expect(excludedExtra.data.conflicts).toEqual([]);
+
+      await writeProjectFile(tempRoot, ".agents/skills/speclite-help/references/unindexed.md", "# unknown\n");
+      const installableExtra = UpdateCommandResultSchema.parse((await runUpdateCommand({
+        runtime: { cwd: tempRoot, targetProject: "canonical-inventory" },
+      })).result);
+      expect(installableExtra.data.conflicts).toContainEqual(expect.objectContaining({
+        affectedPath: ".agents/skills/speclite-help",
+        reason: "unknown-ownership",
+      }));
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("adds only the unique ecosystem module owner proven by the old skill index", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-owner-closure-"));
+    try {
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      await writeGeneratedInstalledStateBaseline({
+        projectRoot: tempRoot,
+        installedModules: ["core", "sdlc"],
+        targetIds: ["agents"],
+        skillEntries: [{
+          schemaVersion: "speclite.skill-index.v1",
+          canonicalSkillId: "speclite-brownfield-nodejs-backend-tech-stack-digger",
+          moduleId: "ecosystem-backend-nodejs",
+          sourcePackagePath: "assets/source/speclite/ecosystems/backend/nodejs/speclite-brownfield-nodejs-backend-tech-stack-digger",
+          canonicalPackageHash: "sha256:old-package",
+          installedTargets: ["agents"],
+          phaseIds: ["anytime"],
+        }],
+      });
+
+      const outcome = await runUpdateCommand({ runtime: { cwd: tempRoot, targetProject: "owner-closure" } });
+      const parsed = UpdateCommandResultSchema.parse(outcome.result);
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.data.conflicts).toEqual([]);
+      expect(parsed.data.updatePlan.actions).toContainEqual(expect.objectContaining({
+        affectedPath: ".agents/skills/speclite-brownfield-nodejs-backend-tech-stack-digger/SKILL.md",
+        action: "create",
+      }));
+      const manifestAction = parsed.data.updatePlan.actions.find(
+        (action) => action.affectedPath === "_speclite/_config/manifest.yaml",
+      );
+      expect(manifestAction?.action).toBe("update");
+      expect(parsed.data.updatePlan.actions.some(
+        (action) => action.affectedPath.includes("speclite-brownfield-python"),
+      )).toBe(false);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -1071,7 +1281,7 @@ describe("update ownership planning", () => {
       const canonicalPackageHash = await hashPackageDirectory(
         path.join(tempRoot, "assets/source/speclite/core-skills/speclite-help"),
       );
-      await writeInstalledState(tempRoot, []);
+      await writeInstalledState(tempRoot, [], { sourceDescriptor: localSourceDescriptor() });
       await writeSkillIndex(tempRoot, [
         skillIndexEntry({
           canonicalSkillId: "speclite-help",
@@ -1152,7 +1362,7 @@ describe("update ownership planning", () => {
       const canonicalPackageHash = await hashPackageDirectory(
         path.join(tempRoot, "assets/source/speclite/core-skills/speclite-help"),
       );
-      await writeInstalledState(tempRoot, []);
+      await writeInstalledState(tempRoot, [], { sourceDescriptor: localSourceDescriptor() });
       await writeSkillIndex(tempRoot, [
         skillIndexEntry({
           canonicalSkillId: "speclite-help",
@@ -1189,10 +1399,180 @@ describe("update ownership planning", () => {
   });
 });
 
+describe("recoverable update transaction", () => {
+  it("rejects malformed and duplicate journal operation contracts before writing", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-transaction-contract-"));
+    try {
+      await writeProjectFile(tempRoot, "_speclite/hooks/a/runner.mjs", "old\n");
+      await writeProjectFile(tempRoot, "_speclite/_config/.update-journal.json", `${JSON.stringify({
+        schemaVersion: "speclite.update-journal.v1",
+        planId: `sha256:${"0".repeat(64)}`,
+        completedPaths: [],
+        operations: [null],
+      })}\n`);
+      const malformed = await applyRecoverableUpdateTransaction({
+        projectRoot: tempRoot,
+        artifactRoot: "_speclite-output",
+        operations: [{
+          path: "_speclite/hooks/a/runner.mjs",
+          contents: "new\n",
+          executable: false,
+          oldHash: hashBytes("old\n"),
+        }],
+      });
+      expect(malformed).toEqual(expect.objectContaining({ ok: false }));
+      if (!malformed.ok) expect(malformed.issue.details).toEqual(expect.objectContaining({ reason: "malformed-journal" }));
+
+      await rm(path.join(tempRoot, "_speclite/_config/.update-journal.json"));
+      const duplicate = await applyRecoverableUpdateTransaction({
+        projectRoot: tempRoot,
+        artifactRoot: "_speclite-output",
+        operations: [0, 1].map(() => ({
+          path: "_speclite/hooks/a/runner.mjs",
+          contents: "new\n",
+          executable: false,
+          oldHash: hashBytes("old\n"),
+        })),
+      });
+      expect(duplicate).toEqual(expect.objectContaining({ ok: false }));
+      if (!duplicate.ok) expect(duplicate.issue.details).toEqual(expect.objectContaining({ reason: "duplicate-operation-path" }));
+      await expect(readFile(path.join(tempRoot, "_speclite/hooks/a/runner.mjs"), "utf8")).resolves.toBe("old\n");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("treats executable mode as transaction state and cleans a completed journal", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-transaction-mode-"));
+    const targetPath = "_speclite/hooks/a/runner.mjs";
+    try {
+      await writeProjectFile(tempRoot, targetPath, "same\n");
+      const applied = await applyRecoverableUpdateTransaction({
+        projectRoot: tempRoot,
+        artifactRoot: "_speclite-output",
+        operations: [{
+          path: targetPath,
+          contents: "same\n",
+          executable: true,
+          oldHash: hashBytes("same\n"),
+          oldExecutable: false,
+        }],
+      });
+      expect(applied).toEqual({ ok: true, changedPaths: [targetPath] });
+
+      await writeProjectFile(tempRoot, "_speclite/_config/.update-journal.json", `${JSON.stringify({
+        schemaVersion: "speclite.update-journal.v1",
+        planId: `sha256:${"1".repeat(64)}`,
+        completedPaths: [targetPath],
+        operations: [{
+          path: targetPath,
+          oldHash: hashBytes("same\n"),
+          oldExecutable: false,
+          newHash: hashBytes("same\n"),
+          executable: true,
+        }],
+      })}\n`);
+      expect(await finalizeCompletedUpdateTransaction(tempRoot)).toEqual({ ok: true, changedPaths: [] });
+      await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8")).rejects.toThrow();
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("resumes an interrupted coordinated apply only from provable old/new states", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-transaction-resume-"));
+    const blockedRoot = path.join(tempRoot, "_speclite/hooks/z-blocked");
+    try {
+      await writeProjectFile(tempRoot, "_speclite/hooks/a-first/runner.mjs", "old-a\n");
+      await writeProjectFile(tempRoot, "_speclite/hooks/z-blocked/runner.mjs", "old-b\n");
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      const operations = [
+        {
+          path: "_speclite/hooks/a-first/runner.mjs",
+          contents: "new-a\n",
+          executable: false,
+          oldHash: hashBytes("old-a\n"),
+        },
+        {
+          path: "_speclite/hooks/z-blocked/runner.mjs",
+          contents: "new-b\n",
+          executable: false,
+          oldHash: hashBytes("old-b\n"),
+        },
+      ];
+      await chmod(blockedRoot, 0o555);
+      const interrupted = await applyRecoverableUpdateTransaction({
+        projectRoot: tempRoot,
+        artifactRoot: "_speclite-output",
+        operations,
+      });
+      expect(interrupted.ok).toBe(false);
+      await expect(readFile(path.join(tempRoot, "_speclite/hooks/a-first/runner.mjs"), "utf8")).resolves.toBe("new-a\n");
+      await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8")).resolves.toContain(
+        "speclite.update-journal.v1",
+      );
+
+      await chmod(blockedRoot, 0o755);
+      const resumed = await applyRecoverableUpdateTransaction({
+        projectRoot: tempRoot,
+        artifactRoot: "_speclite-output",
+        operations,
+      });
+      expect(resumed).toEqual({
+        ok: true,
+        changedPaths: [
+          "_speclite/hooks/a-first/runner.mjs",
+          "_speclite/hooks/z-blocked/runner.mjs",
+        ],
+      });
+      await expect(readFile(path.join(tempRoot, "_speclite/hooks/z-blocked/runner.mjs"), "utf8")).resolves.toBe("new-b\n");
+      await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8")).rejects.toThrow();
+    } finally {
+      await chmod(blockedRoot, 0o755).catch(() => undefined);
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks recovery when a journal target is neither the old nor new hash", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-transaction-drift-"));
+    try {
+      await writeProjectFile(tempRoot, "_speclite/hooks/a-first/runner.mjs", "old-a\n");
+      await mkdir(path.join(tempRoot, "_speclite/_config"), { recursive: true });
+      const operations = [{
+        path: "_speclite/hooks/a-first/runner.mjs",
+        contents: "new-a\n",
+        executable: false,
+        oldHash: hashBytes("old-a\n"),
+      }];
+      await writeProjectFile(tempRoot, "_speclite/hooks/a-first/runner.mjs", "local-drift\n");
+      const result = await applyRecoverableUpdateTransaction({
+        projectRoot: tempRoot,
+        artifactRoot: "_speclite-output",
+        operations,
+      });
+      expect(result).toEqual(expect.objectContaining({
+        ok: false,
+        changedPaths: [],
+        issue: expect.objectContaining({
+          issueId: "file-integrity.recovery-blocked",
+          affectedPath: "_speclite/hooks/a-first/runner.mjs",
+        }),
+      }));
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+});
+
 async function writeInstalledState(
   projectRoot: string,
   entries: Array<Record<string, unknown>>,
-  options: { artifactRoot?: string; sourceDescriptor?: string } = {},
+  options: {
+    artifactRoot?: string;
+    installedModules?: string[];
+    sourceDescriptor?: string;
+    targetIds?: Array<"claude" | "agents">;
+  } = {},
 ): Promise<void> {
   await mkdir(path.join(projectRoot, "_speclite/_config"), { recursive: true });
   const sourceDescriptor =
@@ -1210,7 +1590,15 @@ async function writeInstalledState(
     ].join("\n");
   await writeFile(
     path.join(projectRoot, "_speclite/_config/manifest.yaml"),
-    `paths:\n  artifactRoot: ${options.artifactRoot ?? "_speclite-output"}\n${sourceDescriptor}\n`,
+    [
+      `paths:\n  artifactRoot: ${options.artifactRoot ?? "_speclite-output"}`,
+      ...(options.installedModules === undefined
+        ? []
+        : [`installedModules: ${JSON.stringify(options.installedModules)}`]),
+      ...(options.targetIds === undefined ? [] : [`targetIds: ${JSON.stringify(options.targetIds)}`]),
+      sourceDescriptor,
+      "",
+    ].join("\n"),
     "utf8",
   );
   await writeFile(
@@ -1218,6 +1606,63 @@ async function writeInstalledState(
     `${JSON.stringify({ schemaVersion: "speclite.files-index.v1", entries }, null, 2)}\n`,
     "utf8",
   );
+}
+
+async function writeGeneratedInstalledStateBaseline(input: {
+  projectRoot: string;
+  installedModules: string[];
+  targetIds: Array<"claude" | "agents">;
+  skillEntries: Array<Record<string, unknown>>;
+}): Promise<void> {
+  await writeInstalledState(input.projectRoot, [], {
+    installedModules: input.installedModules,
+    targetIds: input.targetIds,
+  });
+  await writeSkillIndex(input.projectRoot, input.skillEntries);
+  await writeProjectFile(
+    input.projectRoot,
+    "_speclite/_config/help-index.json",
+    `${JSON.stringify({ schemaVersion: "speclite.help-index.v1", entries: [] }, null, 2)}\n`,
+  );
+  await writeProjectFile(
+    input.projectRoot,
+    "_speclite/_config/phase-coverage.json",
+    `${JSON.stringify({ schemaVersion: "speclite.phase-coverage.v1", rows: [] }, null, 2)}\n`,
+  );
+  const entries = [];
+  for (const [relativePath, artifactKind, sourceRef] of [
+    ["_speclite/_config/manifest.yaml", "manifest", "installed-state:manifest"],
+    ["_speclite/_config/skill-index.json", "skill-index", "installed-state:skill-index"],
+    ["_speclite/_config/help-index.json", "help-index", "installed-state:help-index"],
+    ["_speclite/_config/phase-coverage.json", "phase-coverage", "installed-state:phase-coverage"],
+  ] as const) {
+    entries.push(await filesIndexEntry(
+      input.projectRoot,
+      relativePath,
+      await readFile(path.join(input.projectRoot, relativePath), "utf8"),
+      { ownership: "installer-owned", sourceRef, artifactKind },
+    ));
+  }
+  await writeProjectFile(
+    input.projectRoot,
+    "_speclite/_config/files-index.json",
+    `${JSON.stringify({ schemaVersion: "speclite.files-index.v1", entries }, null, 2)}\n`,
+  );
+}
+
+function localSourceDescriptor(): string {
+  return [
+    "sourceDescriptor:",
+    "  sourceType: local",
+    "  resolvedRoot: assets/source/speclite",
+    "  contentHash: fixture-source",
+    "  trustStatus: trusted",
+    "  integrityEvidence:",
+    "    - kind: content-hash",
+    "      algorithm: sha256",
+    "      value: fixture-source",
+    "      verified: true",
+  ].join("\n");
 }
 
 async function writeProjectFile(projectRoot: string, relativePath: string, contents: string): Promise<void> {

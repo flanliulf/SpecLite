@@ -1,4 +1,4 @@
-import { readFile, unlink } from "node:fs/promises";
+import { access, lstat, readFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
@@ -10,10 +10,13 @@ import type {
   ValidationIssue,
 } from "../diagnostics/command-result-schema.js";
 import { SourceDescriptorSchema, type SourceDescriptor } from "../source/source-descriptor-schema.js";
+import { discoverBundledSourceDescriptor } from "../source/source-discovery.js";
 import { hashBytes, hashFile } from "../manifest/hash.js";
 import { hashPackageDirectory, listFiles } from "../manifest/hash.js";
 import {
   FilesIndexSchema,
+  type FilesIndexEntry,
+  type Manifest,
   type FilesIndex,
   type SkillIndex,
   SkillIndexSchema,
@@ -21,6 +24,7 @@ import {
 } from "../manifest/manifest-schema.js";
 import { resolveProjectRelativePath } from "../fs/path-normalizer.js";
 import { safeWriteFile } from "../fs/safe-write.js";
+import { isInstallableCanonicalPackageFile } from "../fs/copy-tree.js";
 import {
   createMissingSourceEvidenceConflict,
   detectFilesIndexEntryConflict,
@@ -29,6 +33,22 @@ import {
 import { classifyOwnership } from "./ownership-model.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry } from "../ide/adapter-registry.js";
 import { isCanonicalPackageHashFile } from "../validation/rules/ide-mirror.js";
+import { discoverOfficialModules } from "../modules/module-metadata.js";
+import { buildIdeMirrorProjection } from "../ide/target-writer.js";
+import {
+  createFilesIndex,
+  createFilesIndexEntry,
+  createHelpIndex,
+  createInstalledManifest,
+  createPhaseCoverage,
+  createSkillIndex,
+} from "../manifest/manifest-generator.js";
+import {
+  applyRecoverableUpdateTransaction,
+  finalizeCompletedUpdateTransaction,
+  inspectUpdateTransactionJournal,
+  readUpdateTransactionRecoveryHashes,
+} from "../fs/update-transaction.js";
 
 const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const BUNDLED_SOURCE_DISPLAY_ROOT = "assets/source/speclite";
@@ -55,10 +75,37 @@ export async function planUpdate(input: {
   }
 
   const actions: UpdateCommandData["updatePlan"]["actions"] = [];
-  const conflicts: UpdateCommandData["conflicts"] = [...context.conflicts];
+  const migration = await buildCanonicalMigrationProjection({
+    ...context,
+    projectRoot: input.projectRoot,
+  });
+  const contextConflicts = await filterResolvedIdeRootConflicts({
+    projectRoot: input.projectRoot,
+    conflicts: context.conflicts,
+    desiredFiles: migration.files,
+    filesIndex: context.filesIndex,
+  });
+  const conflicts: UpdateCommandData["conflicts"] = [...contextConflicts, ...migration.conflicts];
+  const oldEntriesByPath = new Map(context.filesIndex.entries.map((entry) => [entry.path, entry]));
+  const journalState = await inspectUpdateTransactionJournal(input.projectRoot);
+  const recoveryHashes = journalState === "present"
+    ? await readUpdateTransactionRecoveryHashes(input.projectRoot)
+    : undefined;
+  if (journalState === "malformed") {
+    conflicts.push({
+      affectedPath: "_speclite/_config/.update-journal.json",
+      ownership: "installer-owned",
+      reason: "malformed-recovery-journal",
+    });
+  }
 
   for (const entry of context.filesIndex.entries) {
-    const currentHash = await readCurrentHash(input.projectRoot, entry.path);
+    const currentState = await readCurrentState(input.projectRoot, entry.path);
+    const currentHash = currentState?.hash;
+    const desired = migration.files.get(entry.path);
+    const recoveryState = recoveryHashes?.get(entry.path);
+    const recoveringNewState = recoveryState?.hash === currentHash &&
+      recoveryState.executable === currentState?.executable;
     const classification = classifyOwnership({
       relativePath: entry.path,
       artifactRoot: context.artifactRoot,
@@ -81,7 +128,7 @@ export async function planUpdate(input: {
       continue;
     }
 
-    const conflict = detectFilesIndexEntryConflict({
+    const conflict = recoveringNewState ? undefined : detectFilesIndexEntryConflict({
       entry,
       currentHash,
       artifactRoot: context.artifactRoot,
@@ -102,9 +149,27 @@ export async function planUpdate(input: {
       continue;
     }
 
-    const sourceHash = await readSourceHash({
+    if (entry.artifactKind === "ide-skill-package" && desired === undefined) {
+      conflicts.push({
+        affectedPath: entry.path,
+        ownership: "installer-owned",
+        ...(currentHash === undefined ? {} : { currentHash }),
+        expectedHash: entry.hash,
+        reason: "canonical-stale-path",
+      });
+      actions.push({
+        affectedPath: entry.path,
+        ownership: "installer-owned",
+        action: "conflict",
+        ...(currentHash === undefined ? {} : { currentHash }),
+        expectedHash: entry.hash,
+      });
+      continue;
+    }
+    const sourceHash = desired?.entry.hash ?? await readSourceHash({
       projectRoot: input.projectRoot,
       sourceRef: entry.sourceRef,
+      sourceDescriptor: context.sourceDescriptor,
     });
     if (
       entry.ownership === "installer-owned" &&
@@ -125,9 +190,9 @@ export async function planUpdate(input: {
 
     if (
       entry.ownership === "installer-owned" &&
-      currentHash === entry.hash &&
+      (currentHash === entry.hash || recoveringNewState) &&
       sourceHash !== undefined &&
-      sourceHash !== entry.hash
+      (sourceHash !== entry.hash || (desired?.entry.executable ?? entry.executable) !== currentState?.executable)
     ) {
       actions.push({
         affectedPath: entry.path,
@@ -149,14 +214,91 @@ export async function planUpdate(input: {
     });
   }
 
-  const writeAuthorized = input.writeAuthorized === true && conflicts.length === 0 && hasPlannedWrite(actions);
+  for (const desired of migration.files.values()) {
+    if (oldEntriesByPath.has(desired.entry.path)) continue;
+    const currentState = await readCurrentState(input.projectRoot, desired.entry.path);
+    const currentHash = currentState?.hash;
+    if (desired.entry.path === "_speclite/_config/files-index.json" && currentHash !== undefined) {
+      if (currentHash !== desired.entry.hash) {
+        actions.push({
+          affectedPath: desired.entry.path,
+          ownership: "installer-owned",
+          action: "update",
+          currentHash,
+          expectedHash: desired.entry.hash,
+        });
+      }
+      continue;
+    }
+    const recoveryState = recoveryHashes?.get(desired.entry.path);
+    if (currentHash !== undefined && recoveryState?.hash === currentHash &&
+      recoveryState.executable === currentState?.executable) {
+      actions.push({
+        affectedPath: desired.entry.path,
+        ownership: "installer-owned",
+        action: "create",
+        expectedHash: desired.entry.hash,
+      });
+      continue;
+    }
+    if (currentHash !== undefined) {
+      conflicts.push({
+        affectedPath: desired.entry.path,
+        ownership: "unknown",
+        currentHash,
+        expectedHash: desired.entry.hash,
+        reason: "unknown-ownership",
+      });
+      actions.push({
+        affectedPath: desired.entry.path,
+        ownership: "installer-owned",
+        action: "conflict",
+        currentHash,
+        expectedHash: desired.entry.hash,
+      });
+      continue;
+    }
+    actions.push({
+      affectedPath: desired.entry.path,
+      ownership: "installer-owned",
+      action: "create",
+      expectedHash: desired.entry.hash,
+    });
+  }
+  actions.sort((left, right) => left.affectedPath.localeCompare(right.affectedPath));
+
+  if (journalState === "present") {
+    const recoveryMatchesCurrentPlan = recoveryHashes !== undefined && [...recoveryHashes].every(([affectedPath, state]) =>
+      affectedPath === "_speclite/_config/files-index.json" ||
+      actions.some((action) => action.affectedPath === affectedPath && action.expectedHash === state.hash),
+    );
+    if (!recoveryMatchesCurrentPlan) {
+      conflicts.push({
+        affectedPath: "_speclite/_config/.update-journal.json",
+        ownership: "installer-owned",
+        reason: "journal-plan-mismatch",
+      });
+    } else if (input.writeAuthorized !== true) {
+      conflicts.push({
+        affectedPath: "_speclite/_config/.update-journal.json",
+        ownership: "installer-owned",
+        reason: "recovery-pending",
+      });
+    }
+  }
+
+  const writeAuthorized = input.writeAuthorized === true && conflicts.length === 0;
   const applyResult = writeAuthorized
-    ? await applyUpdateActions({
+    ? hasPlannedWrite(actions)
+      ? await applyUpdateActions({
         projectRoot: input.projectRoot,
         artifactRoot: context.artifactRoot,
         actions,
         filesIndex: context.filesIndex,
+        desiredFiles: migration.files,
+        sourceDescriptor: context.sourceDescriptor,
       })
+      : await finalizeAuthorizedRecovery(input.projectRoot, journalState)
     : {
         changedPaths: [] as string[],
         skippedPaths: [] as string[],
@@ -196,6 +338,7 @@ export async function planRepair(input: {
   const ideRepair = await planIdeMirrorRepairActions({
     projectRoot: input.projectRoot,
     skillIndex: context.skillIndex,
+    sourceDescriptor: context.sourceDescriptor,
   });
   actions.push(...ideRepair.actions);
   const ideRepairActionPaths = new Set(ideRepair.actions.map((action) => action.affectedPath));
@@ -227,6 +370,7 @@ export async function planRepair(input: {
           targetPath: entry.path,
           sourceRef: entry.sourceRef,
           artifactKind: entry.artifactKind,
+          sourceDescriptor: context.sourceDescriptor,
         });
         if (sourceBytes === undefined) {
           conflicts.push(createMissingSourceEvidenceConflict({ entry, currentHash }));
@@ -271,6 +415,7 @@ export async function planRepair(input: {
         actions,
         filesIndex: context.filesIndex,
         skillIndex: context.skillIndex,
+        sourceDescriptor: context.sourceDescriptor,
       })
     : {
         changedPaths: [] as string[],
@@ -299,7 +444,11 @@ async function readPlanningContext(projectRoot: string): Promise<{
   conflicts: UpdateCommandData["conflicts"];
   issues: ValidationIssue[];
   blocked: boolean;
+  installedModules: string[];
+  sourceDescriptor?: SourceDescriptor;
   skillIndex?: SkillIndex;
+  targetIds: Array<"claude" | "agents">;
+  manifest?: Manifest;
 }> {
   const issues: ValidationIssue[] = [];
   const configResult = await resolveProjectConfig({ projectRoot });
@@ -314,7 +463,10 @@ async function readPlanningContext(projectRoot: string): Promise<{
       conflicts: [],
       issues,
       blocked: true,
+      installedModules: [],
       skillIndex: undefined,
+      targetIds: [],
+      manifest: undefined,
     };
   }
 
@@ -344,11 +496,15 @@ async function readPlanningContext(projectRoot: string): Promise<{
       conflicts,
       issues,
       blocked: true,
+      installedModules: manifestContext.installedModules,
       skillIndex: undefined,
+      targetIds: manifestContext.targetIds,
+      manifest: manifestContext.manifest,
     };
   }
   const artifactRoot = manifestContext.artifactRoot;
   for (const skillDir of findInstalledSkillDirs(filesIndex)) {
+    if (!(await fileExists(path.join(projectRoot, skillDir, "customize.toml")))) continue;
     const result = await resolveSkillCustomization({
       projectRoot,
       skillDir: path.join(projectRoot, skillDir),
@@ -367,7 +523,11 @@ async function readPlanningContext(projectRoot: string): Promise<{
     conflicts,
     issues,
     blocked: hasBlockingResolverIssue(issues),
+    installedModules: manifestContext.installedModules,
+    sourceDescriptor: manifestContext.sourceDescriptor,
     ...(skillIndex === undefined ? {} : { skillIndex }),
+    targetIds: manifestContext.targetIds,
+    manifest: manifestContext.manifest,
   };
 }
 
@@ -384,27 +544,37 @@ async function readSkillIndexIfPresent(projectRoot: string) {
 
 async function readManifestContext(projectRoot: string): Promise<{
   artifactRoot: string;
+  installedModules: string[];
   sourceDescriptor?: SourceDescriptor;
   issues: ValidationIssue[];
+  targetIds: Array<"claude" | "agents">;
+  manifest?: Manifest;
 }> {
   try {
     const parsed = parseYaml(
       await readFile(path.join(projectRoot, "_speclite/_config/manifest.yaml"), "utf8"),
     ) as unknown;
+    const manifest = (typeof parsed === "object" && parsed !== null ? parsed : undefined) as Manifest | undefined;
     const artifactRoot = readArtifactRootFromManifest(parsed);
+    const installedSelection = readInstalledSelectionFromManifest(parsed);
     const sourceDescriptorResult = readSourceDescriptorFromManifest(parsed);
     if (sourceDescriptorResult.issue !== undefined) {
-      return { artifactRoot, issues: [sourceDescriptorResult.issue] };
+      return { artifactRoot, ...installedSelection, manifest, issues: [sourceDescriptorResult.issue] };
     }
     const sourceIssue = validateSourceDescriptorForUpdate(sourceDescriptorResult.sourceDescriptor);
     return {
       artifactRoot,
+      ...installedSelection,
       sourceDescriptor: sourceDescriptorResult.sourceDescriptor,
+      manifest,
       issues: sourceIssue === undefined ? [] : [sourceIssue],
     };
   } catch {
     return {
       artifactRoot: "_speclite-output",
+      installedModules: [],
+      targetIds: [],
+      manifest: undefined,
       issues: [
         createSourceIntegrityIssue({
           issueId: "source-integrity.missing-source-descriptor",
@@ -415,6 +585,21 @@ async function readManifestContext(projectRoot: string): Promise<{
       ],
     };
   }
+}
+
+function readInstalledSelectionFromManifest(parsed: unknown): {
+  installedModules: string[];
+  targetIds: Array<"claude" | "agents">;
+} {
+  if (typeof parsed !== "object" || parsed === null) return { installedModules: [], targetIds: [] };
+  const manifest = parsed as Record<string, unknown>;
+  const installedModules = Array.isArray(manifest.installedModules)
+    ? manifest.installedModules.filter((value): value is string => typeof value === "string")
+    : [];
+  const targetIds = Array.isArray(manifest.targetIds)
+    ? manifest.targetIds.filter((value): value is "claude" | "agents" => value === "claude" || value === "agents")
+    : [];
+  return { installedModules, targetIds };
 }
 
 function readArtifactRootFromManifest(parsed: unknown): string {
@@ -544,22 +729,277 @@ async function readCurrentHash(projectRoot: string, relativePath: string): Promi
   }
 }
 
+async function readCurrentState(projectRoot: string, relativePath: string): Promise<
+  { hash: `sha256:${string}`; executable: boolean } | undefined
+> {
+  try {
+    const absolutePath = resolveProjectRelativePath({ projectRoot, relativePath }).absolutePath;
+    const metadata = await lstat(absolutePath);
+    if (!metadata.isFile()) return undefined;
+    return { hash: await hashFile(absolutePath), executable: (metadata.mode & 0o111) !== 0 };
+  } catch {
+    return undefined;
+  }
+}
+
 async function readSourceEvidence(input: {
   projectRoot: string;
   sourceRef: string;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<Buffer | undefined> {
   if (!isProjectRelativePosixPath(input.sourceRef)) return undefined;
 
   try {
-    return await readFile(
-      resolveProjectRelativePath({
-        projectRoot: input.projectRoot,
-        relativePath: input.sourceRef,
-      }).absolutePath,
-    );
+    const absolutePath = resolveSourceEvidencePath(input);
+    return absolutePath === undefined ? undefined : await readFile(absolutePath);
   } catch {
     return undefined;
   }
+}
+
+function resolveSourceEvidencePath(input: {
+  projectRoot: string;
+  sourceRef: string;
+  sourceDescriptor?: SourceDescriptor;
+}): string | undefined {
+  if (!isProjectRelativePosixPath(input.sourceRef)) return undefined;
+  if (
+    input.sourceDescriptor?.sourceType === "bundled" &&
+    (input.sourceRef === BUNDLED_SOURCE_DISPLAY_ROOT ||
+      input.sourceRef.startsWith(`${BUNDLED_SOURCE_DISPLAY_ROOT}/`))
+  ) {
+    return path.join(PACKAGE_ROOT, input.sourceRef);
+  }
+  return resolveProjectRelativePath({
+    projectRoot: input.projectRoot,
+    relativePath: input.sourceRef,
+  }).absolutePath;
+}
+
+type DesiredMigrationFile = {
+  entry: FilesIndexEntry;
+  contents: Buffer;
+};
+
+async function buildCanonicalMigrationProjection(input: {
+  filesIndex: FilesIndex;
+  installedModules: string[];
+  manifest?: Manifest;
+  projectRoot: string;
+  sourceDescriptor?: SourceDescriptor;
+  skillIndex?: SkillIndex;
+  targetIds: Array<"claude" | "agents">;
+  artifactRoot: string;
+}): Promise<{
+  files: Map<string, DesiredMigrationFile>;
+  conflicts: UpdateCommandData["conflicts"];
+}> {
+  const canonicalSourceRoot = resolveCanonicalSourceRoot(input);
+  const prerequisiteConflicts: UpdateCommandData["conflicts"] = [];
+  const rawManifest = input.manifest as unknown as Record<string, unknown> | undefined;
+  const rawModules = rawManifest?.installedModules;
+  const rawTargets = rawManifest?.targetIds;
+  if (Array.isArray(rawModules) && rawModules.some((value) => typeof value !== "string")) {
+    prerequisiteConflicts.push({ affectedPath: "_speclite/_config/manifest.yaml", ownership: "installer-owned", reason: "invalid-module-selection" });
+  }
+  if (Array.isArray(rawTargets) && rawTargets.some((value) => value !== "claude" && value !== "agents")) {
+    prerequisiteConflicts.push({ affectedPath: "_speclite/_config/manifest.yaml", ownership: "installer-owned", reason: "invalid-target-selection" });
+  }
+  if (input.installedModules.length > 0 && input.skillIndex === undefined) {
+    prerequisiteConflicts.push({ affectedPath: "_speclite/_config/skill-index.json", ownership: "installer-owned", reason: "missing-source-evidence" });
+  }
+  if (input.installedModules.length > 0 && input.targetIds.length === 0) {
+    prerequisiteConflicts.push({ affectedPath: "_speclite/_config/manifest.yaml", ownership: "installer-owned", reason: "missing-target-selection" });
+  }
+  if (prerequisiteConflicts.length > 0) return { files: new Map(), conflicts: prerequisiteConflicts };
+  if (
+    canonicalSourceRoot === undefined ||
+    input.installedModules.length === 0 ||
+    input.targetIds.length === 0 ||
+    input.manifest === undefined ||
+    input.skillIndex === undefined
+  ) {
+    return { files: new Map(), conflicts: [] };
+  }
+
+  const modules = await discoverOfficialModules({ sourceRoot: canonicalSourceRoot });
+  const selectedModuleIds = new Set(input.installedModules);
+  const conflicts: UpdateCommandData["conflicts"] = [];
+  const modulesByCode = new Map(modules.map((module) => [module.code, module]));
+  for (const moduleId of selectedModuleIds) {
+    if (!modulesByCode.has(moduleId)) {
+      conflicts.push({
+        affectedPath: "_speclite/_config/manifest.yaml",
+        ownership: "installer-owned",
+        reason: "unknown-module-selection",
+      });
+    }
+  }
+  for (const oldSkill of input.skillIndex?.entries ?? []) {
+    const owners = modules.filter((module) =>
+      module.packageRoots.some((packageRoot) => path.posix.basename(packageRoot) === oldSkill.canonicalSkillId),
+    );
+    if (owners.length !== 1) {
+      conflicts.push({
+        affectedPath: `_speclite/_config/skill-index.json`,
+        ownership: "installer-owned",
+        reason: owners.length === 0 ? "canonical-owner-missing" : "canonical-owner-ambiguous",
+      });
+      continue;
+    }
+    const owner = owners[0]!;
+    if (selectedModuleIds.has(owner.code)) continue;
+    if (owner.moduleKind === "ecosystem") {
+      selectedModuleIds.add(owner.code);
+      continue;
+    }
+    conflicts.push({
+      affectedPath: `_speclite/_config/skill-index.json`,
+      ownership: "installer-owned",
+      reason: "canonical-owner-not-selected",
+    });
+  }
+  if (conflicts.length > 0) return { files: new Map(), conflicts };
+
+  for (const moduleId of [...selectedModuleIds]) addRequiredModuleClosure(moduleId, selectedModuleIds, modulesByCode, conflicts);
+  if (conflicts.length > 0) return { files: new Map(), conflicts };
+
+  const selectedModules = modules.filter((module) => selectedModuleIds.has(module.code));
+  const adapters = getIdeAdapterRegistry()
+    .filter((adapter) => input.targetIds.includes(adapter.id))
+    .map((adapter) => ({
+      targetId: adapter.id,
+      targetDirectory: adapter.targetDirectory,
+      status: "planned" as const,
+    }));
+  const projection = await buildIdeMirrorProjection({
+    packageRoot: PACKAGE_ROOT,
+    sourceRoot: canonicalSourceRoot,
+    sourceRefRoot: input.sourceDescriptor?.sourceType === "local"
+      ? input.sourceDescriptor.resolvedRoot
+      : BUNDLED_SOURCE_DISPLAY_ROOT,
+    selectedModules,
+    targetAdapters: adapters,
+    artifactRoots: {
+      output_folder: input.artifactRoot,
+      planning_artifacts: `${input.artifactRoot}/planning-artifacts`,
+      implementation_artifacts: `${input.artifactRoot}/implementation-artifacts`,
+      devops_artifacts: `${input.artifactRoot}/devops-artifacts`,
+      project_knowledge: "docs",
+    },
+  });
+  if (!projection.ok) {
+    return {
+      files: new Map(),
+      conflicts: [{
+        affectedPath: projection.issue.affectedPath ?? "_speclite/_config/skill-index.json",
+        ownership: "installer-owned",
+        reason: "canonical-projection-failed",
+      }],
+    };
+  }
+
+  const desired = new Map<string, DesiredMigrationFile>();
+  for (const file of projection.files) desired.set(file.entry.path, file);
+
+  const desiredSourceDescriptor = input.sourceDescriptor?.sourceType === "bundled"
+    ? await discoverBundledSourceDescriptor({ projectRoot: PACKAGE_ROOT })
+    : input.sourceDescriptor!;
+  if (desiredSourceDescriptor.trustStatus === "blocked") {
+    return {
+      files: new Map(),
+      conflicts: [{
+        affectedPath: "_speclite/_config/manifest.yaml",
+        ownership: "installer-owned",
+        reason: "missing-source-evidence",
+      }],
+    };
+  }
+  const manifest = createInstalledManifest({
+    sourceDescriptor: desiredSourceDescriptor,
+    installedModules: selectedModules.map((module) => module.code),
+    targetIds: CANONICAL_TARGET_ORDER.filter((targetId) => input.targetIds.includes(targetId)),
+    paths: input.manifest.paths,
+  });
+  const generated = [
+    {
+      path: "_speclite/_config/manifest.yaml",
+      value: manifest,
+      artifactKind: "manifest",
+      sourceRef: "installed-state:manifest",
+    },
+    {
+      path: "_speclite/_config/skill-index.json",
+      value: createSkillIndex(projection.skillIndexEntries),
+      artifactKind: "skill-index",
+      sourceRef: "installed-state:skill-index",
+    },
+    {
+      path: "_speclite/_config/help-index.json",
+      value: createHelpIndex(projection.helpIndexEntries),
+      artifactKind: "help-index",
+      sourceRef: "installed-state:help-index",
+    },
+    {
+      path: "_speclite/_config/phase-coverage.json",
+      value: createPhaseCoverage(projection.phaseCoverageRows),
+      artifactKind: "phase-coverage",
+      sourceRef: "installed-state:phase-coverage",
+    },
+  ];
+  for (const item of generated) {
+    const contents = Buffer.from(`${JSON.stringify(item.value, null, 2)}\n`);
+    desired.set(item.path, {
+      contents,
+      entry: createFilesIndexEntry({
+        path: item.path,
+        bytes: contents,
+        executable: false,
+        artifactKind: item.artifactKind,
+        sourceRef: item.sourceRef,
+        artifactRoot: input.artifactRoot,
+      }),
+    });
+  }
+
+  const regeneratedKinds = new Set(["ide-skill-package", "manifest", "skill-index", "help-index", "phase-coverage"]);
+  const retainedEntries = input.filesIndex.entries.filter((entry) => !regeneratedKinds.has(entry.artifactKind));
+  const projectedFilesIndex = createFilesIndex([
+    ...retainedEntries,
+    ...[...desired.values()].map((file) => file.entry),
+  ]);
+  const filesIndexContents = Buffer.from(`${JSON.stringify(projectedFilesIndex, null, 2)}\n`);
+  desired.set("_speclite/_config/files-index.json", {
+    contents: filesIndexContents,
+    entry: {
+      schemaVersion: "speclite.files-index.v1",
+      path: "_speclite/_config/files-index.json",
+      ownership: "installer-owned",
+      hash: hashBytes(filesIndexContents),
+      hashAlgorithm: "sha256",
+      executable: false,
+      artifactKind: "files-index",
+      sourceRef: "installed-state:files-index",
+    },
+  });
+
+  return { files: desired, conflicts };
+}
+
+function resolveCanonicalSourceRoot(input: {
+  projectRoot: string;
+  sourceDescriptor?: SourceDescriptor;
+}): string | undefined {
+  if (input.sourceDescriptor?.sourceType === "bundled") {
+    return path.join(PACKAGE_ROOT, BUNDLED_SOURCE_DISPLAY_ROOT);
+  }
+  if (input.sourceDescriptor?.sourceType === "local" && input.sourceDescriptor.resolvedRoot !== undefined) {
+    return resolveProjectRelativePath({
+      projectRoot: input.projectRoot,
+      relativePath: input.sourceDescriptor.resolvedRoot,
+    }).absolutePath;
+  }
+  return undefined;
 }
 
 async function readRepairCandidateBytes(input: {
@@ -567,6 +1007,7 @@ async function readRepairCandidateBytes(input: {
   targetPath: string;
   sourceRef: string;
   artifactKind: string;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<Buffer | undefined> {
   if (input.artifactKind === "runtime-compat-script") {
     const scriptName = compatRuntimeScriptName(input.sourceRef);
@@ -602,6 +1043,7 @@ function shouldRequireSourceEvidence(sourceRef: string): boolean {
 async function readSourceHash(input: {
   projectRoot: string;
   sourceRef: string;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<`sha256:${string}` | undefined> {
   const sourceBytes = await readSourceEvidence(input);
   return sourceBytes === undefined ? undefined : hashBytes(sourceBytes);
@@ -612,35 +1054,47 @@ async function applyUpdateActions(input: {
   artifactRoot: string;
   actions: UpdateCommandData["updatePlan"]["actions"];
   filesIndex: FilesIndex;
+  desiredFiles: Map<string, DesiredMigrationFile>;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<{
   changedPaths: string[];
   skippedPaths: string[];
   issues: ValidationIssue[];
   blocked: boolean;
 }> {
-  const changedPaths: string[] = [];
   const skippedPaths: string[] = [];
-  const appliedActions: UpdateCommandData["updatePlan"]["actions"] = [];
+  const operations: import("../fs/update-transaction.js").UpdateTransactionOperation[] = [];
+  const preconditions: import("../fs/update-transaction.js").UpdateTransactionPrecondition[] = [];
 
   for (const action of input.actions) {
     if (action.action === "skip") {
       if (action.reason === "human-owned" || action.reason === "workflow-owned") {
         skippedPaths.push(action.affectedPath);
       }
+      const indexed = input.filesIndex.entries.find((entry) => entry.path === action.affectedPath);
+      if (indexed?.ownership === "installer-owned" && action.reason === "unchanged") {
+        preconditions.push({
+          absolutePath: resolveProjectRelativePath({ projectRoot: input.projectRoot, relativePath: indexed.path }).absolutePath,
+          affectedPath: indexed.path,
+          hash: indexed.hash,
+          executable: indexed.executable,
+        });
+      }
       continue;
     }
     if (action.action === "conflict") continue;
 
-    const entry = input.filesIndex.entries.find((candidate) => candidate.path === action.affectedPath);
+    const desired = input.desiredFiles.get(action.affectedPath);
+    const entry = desired?.entry ?? input.filesIndex.entries.find((candidate) => candidate.path === action.affectedPath);
     if (entry === undefined) {
       return {
-        changedPaths,
+        changedPaths: [],
         skippedPaths,
         issues: [
           createUpdateApplyIssue({
             affectedPath: action.affectedPath,
             reason: "missing-files-index-entry",
-            changedPaths,
+            changedPaths: [],
             pendingPaths: pendingUpdatePaths(input.actions, action.affectedPath),
           }),
         ],
@@ -648,19 +1102,20 @@ async function applyUpdateActions(input: {
       };
     }
 
-    const sourceBytes = await readSourceEvidence({
+    const sourceBytes = desired?.contents ?? await readSourceEvidence({
       projectRoot: input.projectRoot,
       sourceRef: entry.sourceRef,
+      sourceDescriptor: input.sourceDescriptor,
     });
     if (sourceBytes === undefined) {
       return {
-        changedPaths,
+        changedPaths: [],
         skippedPaths,
         issues: [
           createUpdateApplyIssue({
             affectedPath: action.affectedPath,
             reason: "missing-source-evidence",
-            changedPaths,
+            changedPaths: [],
             pendingPaths: pendingUpdatePaths(input.actions, action.affectedPath),
           }),
         ],
@@ -668,147 +1123,169 @@ async function applyUpdateActions(input: {
       };
     }
 
-    const write = await safeWriteFile({
-      projectRoot: input.projectRoot,
-      relativePath: action.affectedPath,
+    operations.push({
+      path: action.affectedPath,
       contents: sourceBytes,
       executable: entry.executable,
-      allowExisting: action.currentHash !== undefined,
-      ...(action.currentHash === undefined
-        ? {}
-        : {
-            expectedExistingFile: {
-              ownership: "installer-owned" as const,
-              hash: action.currentHash,
-              artifactRoot: input.artifactRoot,
-            },
-          }),
-      component: "update-apply",
+      ...(input.filesIndex.entries.some((candidate) => candidate.path === action.affectedPath)
+        ? {
+            oldHash: input.filesIndex.entries.find((candidate) => candidate.path === action.affectedPath)!.hash,
+            oldExecutable: input.filesIndex.entries.find((candidate) => candidate.path === action.affectedPath)!.executable,
+          }
+        : action.currentHash === undefined
+          ? {}
+          : { oldHash: action.currentHash as `sha256:${string}`, oldExecutable: false }),
     });
-
-    if (!write.ok) {
+    if (shouldRequireSourceEvidence(entry.sourceRef)) {
+      const absolutePath = resolveSourceEvidencePath({
+        projectRoot: input.projectRoot,
+        sourceRef: entry.sourceRef,
+        sourceDescriptor: input.sourceDescriptor,
+      });
+      if (absolutePath !== undefined) {
+        preconditions.push({
+          absolutePath,
+          affectedPath: entry.sourceRef,
+          hash: hashBytes(sourceBytes),
+          executable: entry.executable,
+        });
+      }
+    }
+  }
+  if (
+    operations.length > 0 &&
+    !operations.some((operation) => operation.path === "_speclite/_config/files-index.json")
+  ) {
+    const appliedHashes = new Map(operations.map((operation) => [operation.path, hashBytes(operation.contents)]));
+    const projectedFilesIndex: FilesIndex = {
+      ...input.filesIndex,
+      entries: input.filesIndex.entries.map((entry) => ({
+        ...entry,
+        hash: appliedHashes.get(entry.path) ?? entry.hash,
+      })),
+    };
+    const filesIndexPath = "_speclite/_config/files-index.json";
+    const currentHash = await readCurrentHash(input.projectRoot, filesIndexPath);
+    if (currentHash === undefined) {
       return {
-        changedPaths,
+        changedPaths: [],
         skippedPaths,
-        issues: [
-          {
-            ...write.issue,
-            details: {
-              ...(write.issue.details ?? {}),
-              completedSteps: changedPaths.map((changedPath) => `changed:${changedPath}`),
-              failedStep: `update:${action.affectedPath}`,
-              pendingSteps: pendingUpdatePaths(input.actions, action.affectedPath).map(
-                (pendingPath) => `update:${pendingPath}`,
-              ),
-              changedPaths,
-              manualAction:
-                "Run speclite validate, inspect the failed update target, then rerun speclite update after resolving the blocker.",
-            },
-          },
-        ],
+        issues: [createFilesIndexProjectionIssue("missing-files-index")],
         blocked: true,
       };
     }
-
-    changedPaths.push(write.path);
-    appliedActions.push(action);
+    operations.push({
+      path: filesIndexPath,
+      contents: `${JSON.stringify(projectedFilesIndex, null, 2)}\n`,
+      executable: false,
+      oldHash: currentHash as `sha256:${string}`,
+      oldExecutable: false,
+    });
   }
-
-  const projectionResult = await syncAppliedFilesIndexProjection({
+  operations.sort((left, right) => {
+    if (left.path === "_speclite/_config/files-index.json") return 1;
+    if (right.path === "_speclite/_config/files-index.json") return -1;
+    const leftIndex = left.path.startsWith("_speclite/_config/") ? 1 : 0;
+    const rightIndex = right.path.startsWith("_speclite/_config/") ? 1 : 0;
+    return leftIndex - rightIndex || left.path.localeCompare(right.path);
+  });
+  const result = await applyRecoverableUpdateTransaction({
     projectRoot: input.projectRoot,
     artifactRoot: input.artifactRoot,
-    filesIndex: input.filesIndex,
-    appliedActions,
+    operations,
+    preconditions: [...new Map(preconditions.map((item) => [item.absolutePath, item])).values()],
   });
-  if (!projectionResult.ok) {
+  if (!result.ok) {
     return {
-      changedPaths,
+      changedPaths: result.changedPaths,
       skippedPaths,
-      issues: [
-        {
-          ...projectionResult.issue,
-          details: {
-            ...(projectionResult.issue.details ?? {}),
-            completedSteps: changedPaths.map((changedPath) => `changed:${changedPath}`),
-            failedStep: "update:_speclite/_config/files-index.json",
-            pendingSteps: [],
-            changedPaths,
-            manualAction:
-              "Run speclite validate, inspect _speclite/_config/files-index.json, then rerun speclite update after resolving the projection write blocker.",
-          },
-        },
-      ],
+      issues: [result.issue],
       blocked: true,
     };
   }
-  if (projectionResult.changedPath !== undefined) {
-    changedPaths.push(projectionResult.changedPath);
-  }
 
   return {
-    changedPaths,
+    changedPaths: result.changedPaths,
     skippedPaths,
     issues: [],
     blocked: false,
   };
 }
 
-async function syncAppliedFilesIndexProjection(input: {
-  projectRoot: string;
-  artifactRoot: string;
-  filesIndex: FilesIndex;
-  appliedActions: UpdateCommandData["updatePlan"]["actions"];
-}): Promise<
-  | { ok: true; changedPath?: string }
-  | { ok: false; issue: ValidationIssue }
-> {
-  const appliedByPath = new Map(
-    input.appliedActions
-      .filter((action) => action.action === "create" || action.action === "update")
-      .map((action) => [action.affectedPath, action] as const),
-  );
-  if (appliedByPath.size === 0) return { ok: true };
+async function finalizeAuthorizedRecovery(
+  projectRoot: string,
+  journalState: "missing" | "present" | "malformed",
+): Promise<{ changedPaths: string[]; skippedPaths: string[]; issues: ValidationIssue[]; blocked: boolean }> {
+  if (journalState !== "present") return { changedPaths: [], skippedPaths: [], issues: [], blocked: false };
+  const result = await finalizeCompletedUpdateTransaction(projectRoot);
+  return result.ok
+    ? { changedPaths: result.changedPaths, skippedPaths: [], issues: [], blocked: false }
+    : { changedPaths: result.changedPaths, skippedPaths: [], issues: [result.issue], blocked: true };
+}
 
-  const projectedFilesIndex: FilesIndex = {
-    ...input.filesIndex,
-    entries: input.filesIndex.entries.map((entry) => {
-      const applied = appliedByPath.get(entry.path);
-      if (applied?.expectedHash === undefined) return entry;
-      return {
-        ...entry,
-        hash: applied.expectedHash,
-      };
-    }),
-  };
-  const filesIndexPath = "_speclite/_config/files-index.json";
-  const currentHash = await readCurrentHash(input.projectRoot, filesIndexPath);
-  if (currentHash === undefined) {
-    return {
-      ok: false,
-      issue: createFilesIndexProjectionIssue("missing-files-index"),
-    };
+function addRequiredModuleClosure(
+  moduleId: string,
+  selected: Set<string>,
+  modulesByCode: Map<string, Awaited<ReturnType<typeof discoverOfficialModules>>[number]>,
+  conflicts: UpdateCommandData["conflicts"],
+): void {
+  const module = modulesByCode.get(moduleId);
+  if (module === undefined) return;
+  for (const dependency of module.requiredDependencies) {
+    if (!modulesByCode.has(dependency)) {
+      conflicts.push({ affectedPath: "_speclite/_config/manifest.yaml", ownership: "installer-owned", reason: "missing-module-dependency" });
+      continue;
+    }
+    if (selected.has(dependency)) continue;
+    selected.add(dependency);
+    addRequiredModuleClosure(dependency, selected, modulesByCode, conflicts);
   }
+}
 
-  const write = await safeWriteFile({
-    projectRoot: input.projectRoot,
-    relativePath: filesIndexPath,
-    contents: `${JSON.stringify(projectedFilesIndex, null, 2)}\n`,
-    allowExisting: true,
-    expectedExistingFile: {
-      ownership: "installer-owned",
-      hash: currentHash,
-      artifactRoot: input.artifactRoot,
-    },
-    component: "update-files-index-projection",
-  });
-  if (!write.ok) return { ok: false, issue: write.issue };
-
-  return { ok: true, changedPath: write.path };
+async function filterResolvedIdeRootConflicts(input: {
+  projectRoot: string;
+  conflicts: UpdateCommandData["conflicts"];
+  desiredFiles: Map<string, DesiredMigrationFile>;
+  filesIndex: FilesIndex;
+}): Promise<UpdateCommandData["conflicts"]> {
+  const result: UpdateCommandData["conflicts"] = [];
+  for (const conflict of input.conflicts) {
+    if (!isIdeMirrorPackageRoot(conflict.affectedPath)) {
+      result.push(conflict);
+      continue;
+    }
+    const desiredPaths = new Set(
+      [...input.desiredFiles.keys()].filter((filePath) => filePath.startsWith(`${conflict.affectedPath}/`)),
+    );
+    if (desiredPaths.size === 0) {
+      result.push(conflict);
+      continue;
+    }
+    try {
+      const actualFiles = await listFiles(resolveProjectRelativePath({
+        projectRoot: input.projectRoot,
+        relativePath: conflict.affectedPath,
+      }).absolutePath);
+      const indexedPaths = new Set(input.filesIndex.entries.map((entry) => entry.path));
+      if (actualFiles
+        .filter(isInstallableCanonicalPackageFile)
+        .some((relativePath) => {
+          const actualPath = `${conflict.affectedPath}/${relativePath}`;
+          return !desiredPaths.has(actualPath) && !indexedPaths.has(actualPath);
+        })) {
+        result.push({ ...conflict, reason: "unknown-ownership" });
+      }
+    } catch {
+      // A missing package root is fully represented by create actions in the projection.
+    }
+  }
+  return result;
 }
 
 async function planIdeMirrorRepairActions(input: {
   projectRoot: string;
   skillIndex?: SkillIndex;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<{
   actions: RepairCommandData["repairPlan"]["actions"];
   conflicts: RepairCommandData["conflicts"];
@@ -830,10 +1307,12 @@ async function planIdeMirrorRepairActions(input: {
     );
     for (const entry of expectedEntries) {
       const affectedPath = `${adapter.targetDirectory}/${entry.canonicalSkillId}`;
-      const sourceRoot = resolveProjectRelativePath({
+      const sourceRoot = resolveSourceEvidencePath({
         projectRoot: input.projectRoot,
-        relativePath: entry.sourcePackagePath,
-      }).absolutePath;
+        sourceRef: entry.sourcePackagePath,
+        sourceDescriptor: input.sourceDescriptor,
+      });
+      if (sourceRoot === undefined) continue;
       const sourceHash = await readCanonicalPackageHash(sourceRoot);
       const currentHash = await readCanonicalPackageHash(
         resolveProjectRelativePath({
@@ -942,6 +1421,7 @@ async function applyRepairActions(input: {
   actions: RepairCommandData["repairPlan"]["actions"];
   filesIndex: FilesIndex;
   skillIndex?: SkillIndex;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<{
   changedPaths: string[];
   skippedPaths: string[];
@@ -964,6 +1444,7 @@ async function applyRepairActions(input: {
         artifactRoot: input.artifactRoot,
         action,
         skillIndex: input.skillIndex,
+        sourceDescriptor: input.sourceDescriptor,
       });
       if (ideRepair !== undefined) {
         if (!ideRepair.ok) {
@@ -998,6 +1479,7 @@ async function applyRepairActions(input: {
       targetPath: action.affectedPath,
       sourceRef: entry.sourceRef,
       artifactKind: entry.artifactKind,
+      sourceDescriptor: input.sourceDescriptor,
     });
     if (sourceBytes === undefined) {
       return {
@@ -1073,6 +1555,7 @@ async function applyIdeMirrorRepairAction(input: {
   artifactRoot: string;
   action: RepairCommandData["repairPlan"]["actions"][number];
   skillIndex?: SkillIndex;
+  sourceDescriptor?: SourceDescriptor;
 }): Promise<
   | {
       ok: true;
@@ -1088,10 +1571,12 @@ async function applyIdeMirrorRepairAction(input: {
   const match = findIdeMirrorRepairSource(input.action.affectedPath, input.skillIndex);
   if (match === undefined) return undefined;
 
-  const sourceRoot = resolveProjectRelativePath({
+  const sourceRoot = resolveSourceEvidencePath({
     projectRoot: input.projectRoot,
-    relativePath: match.sourcePackagePath,
-  }).absolutePath;
+    sourceRef: match.sourcePackagePath,
+    sourceDescriptor: input.sourceDescriptor,
+  });
+  if (sourceRoot === undefined) return undefined;
   const targetRoot = resolveProjectRelativePath({
     projectRoot: input.projectRoot,
     relativePath: input.action.affectedPath,
@@ -1145,10 +1630,7 @@ async function applyIdeMirrorRepairAction(input: {
 
   for (const relativeFile of sourceFiles) {
     const targetPath = `${input.action.affectedPath}/${relativeFile}`;
-    const sourcePath = resolveProjectRelativePath({
-      projectRoot: input.projectRoot,
-      relativePath: `${match.sourcePackagePath}/${relativeFile}`,
-    }).absolutePath;
+    const sourcePath = path.join(sourceRoot, relativeFile);
     const contents = await readFile(sourcePath);
     const currentHash = await readCurrentHash(input.projectRoot, targetPath);
     const write = await safeWriteFile({
@@ -1248,6 +1730,10 @@ function isIdeMirrorPackagePath(affectedPath: string): boolean {
     /^\.claude\/skills\/[^/]+$/.test(affectedPath) ||
     /^\.agents\/skills\/[^/]+$/.test(affectedPath)
   );
+}
+
+function isIdeMirrorPackageRoot(affectedPath: string): boolean {
+  return /^\.(?:claude|agents)\/skills\/[^/]+$/.test(affectedPath);
 }
 
 function isCoveredByIdePackageRepair(pathValue: string, repairActionPaths: Set<string>): boolean {
@@ -1402,6 +1888,15 @@ function findInstalledSkillDirs(filesIndex: FilesIndex): string[] {
     skillDirs.add(path.posix.dirname(entry.path));
   }
   return [...skillDirs].sort();
+}
+
+async function fileExists(targetPath: string): Promise<boolean> {
+  try {
+    await access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function hasBlockingResolverIssue(issues: ValidationIssue[]): boolean {

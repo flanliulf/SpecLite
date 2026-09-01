@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { lstat, mkdir, open, readdir, realpath, rm, rename } from "node:fs/promises";
+import { link, lstat, mkdir, open, readdir, realpath, rm, rename } from "node:fs/promises";
 import path from "node:path";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import { createPrivateOperationId, hashBytes, hashFile, type FileHash } from "../manifest/hash.js";
@@ -88,7 +88,14 @@ export async function safeWriteFile(input: {
     await tempHandle.writeFile(input.contents);
     await tempHandle.close();
     tempHandle = undefined;
-    await rename(tempPath, safety.absolutePath);
+    if (input.allowExisting === true) {
+      await rename(tempPath, safety.absolutePath);
+    } else {
+      // A hard-link create is atomic and refuses to replace a target that appeared
+      // after validateProjectPath completed. The temp inode is removed afterwards.
+      await link(tempPath, safety.absolutePath);
+      await rm(tempPath);
+    }
   } catch (error) {
     await tempHandle?.close();
     try {

@@ -91,7 +91,7 @@ describe("Story 6.4 path-portability fixture", () => {
       const validateResult = await runSpecliteCli(["validate", tempRoot, "--json"]);
       const validate = ValidateCommandResultSchema.parse(JSON.parse(validateResult.stdout));
 
-      expect(update.status).toBe("failure");
+      expect(update.status).toBe("success");
       expect(repair.status).toBe("failure");
       expect(validate.status).toBe("failure");
       expect([
@@ -102,7 +102,7 @@ describe("Story 6.4 path-portability fixture", () => {
         updateResult.exitCode,
         repairResult.exitCode,
         validateResult.exitCode,
-      ]).toEqual([0, 0, 0, 0, 1, 1, 1]);
+      ]).toEqual([0, 0, 0, 0, 0, 1, 1]);
 
       expect(install.command).toBe("install");
       expect(install.status).toBe("success");
@@ -111,6 +111,7 @@ describe("Story 6.4 path-portability fixture", () => {
       expect(resolveConfig).toHaveProperty("core.project_name");
       expect(resolveCustomization).toHaveProperty("workflow.on_complete");
       expect(update.command).toBe("update");
+      expect(update.data.conflicts).toEqual([]);
       expect(repair.command).toBe("update.repair");
       expect(validate.command).toBe("validate");
       expect(validate.issues).toEqual(

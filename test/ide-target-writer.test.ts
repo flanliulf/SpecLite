@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { copyCanonicalPackage, isInstallableCanonicalPackageFile } from "../src/fs/copy-tree.js";
-import { writeIdeMirrors } from "../src/ide/target-writer.js";
+import { buildIdeMirrorProjection, writeIdeMirrors } from "../src/ide/target-writer.js";
 import { hashPackageDirectory } from "../src/manifest/hash.js";
 import type { ArtifactRootContext } from "../src/manifest/manifest-generator.js";
 import type { OfficialModule } from "../src/modules/module-metadata.js";
@@ -17,6 +17,23 @@ const artifactRoots: ArtifactRootContext = {
 };
 
 describe("self-contained IDE skill entry writer", () => {
+  it("returns a structured blocker when canonical package I/O cannot be read", async () => {
+    const result = await buildIdeMirrorProjection({
+      packageRoot: "/missing-package-root",
+      selectedModules: [createSampleModule({ packageRoots: ["speclite-sample"] })],
+      targetAdapters: [{ targetId: "agents", targetDirectory: ".agents/skills", status: "planned" }],
+      artifactRoots,
+    });
+    expect(result).toEqual({
+      ok: false,
+      issue: expect.objectContaining({
+        issueId: "ide-mirror.source-read-failed",
+        category: "ide-mirror",
+        severity: "error",
+      }),
+    });
+  });
+
   it("copies only installable canonical package files and preserves executable intent", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-target-writer-"));
     const sourceRoot = path.join(tempRoot, "source/speclite-sample");

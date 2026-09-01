@@ -1,6 +1,8 @@
 import path from "node:path";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
-import { copyCanonicalPackage, isInstallableCanonicalPackageFile } from "../fs/copy-tree.js";
+import { readFile, stat } from "node:fs/promises";
+import { isInstallableCanonicalPackageFile } from "../fs/copy-tree.js";
+import { safeWriteFile } from "../fs/safe-write.js";
 import type { FilesIndexEntry, HelpIndexEntry, PhaseCoverageRow, SkillIndexEntry } from "../manifest/manifest-schema.js";
 import {
   choosePrimaryInstalledSkillActivationTarget,
@@ -10,7 +12,7 @@ import {
   getPhaseLabel,
   type ArtifactRootContext,
 } from "../manifest/manifest-generator.js";
-import { hashPackageDirectory } from "../manifest/hash.js";
+import { hashBytes, hashPackageDirectory, isExecutableMode, listFiles } from "../manifest/hash.js";
 import type { InstallPlanTargetAdapter } from "../installer/install-plan-schema.js";
 import type { ModuleHelpEntry, OfficialModule } from "../modules/module-metadata.js";
 import { BUNDLED_SOURCE_DISPLAY_ROOT } from "../source/source-discovery.js";
@@ -30,6 +32,25 @@ export type IdeMirrorWriteResult =
       issue: ValidationIssue;
     };
 
+export type IdeMirrorProjectionFile = {
+  entry: FilesIndexEntry;
+  contents: Buffer;
+};
+
+export type IdeMirrorProjectionResult =
+  | {
+      ok: true;
+      skillIndexEntries: SkillIndexEntry[];
+      helpIndexEntries: HelpIndexEntry[];
+      phaseCoverageRows: PhaseCoverageRow[];
+      files: IdeMirrorProjectionFile[];
+      targetSkillCounts: Map<IdeTargetId, number>;
+    }
+  | {
+      ok: false;
+      issue: ValidationIssue;
+    };
+
 export async function writeIdeMirrors(input: {
   projectRoot: string;
   packageRoot: string;
@@ -40,6 +61,73 @@ export async function writeIdeMirrors(input: {
   artifactRoots: ArtifactRootContext;
   onChangedPath?: (relativePath: string) => void;
 }): Promise<IdeMirrorWriteResult> {
+  const projection = await buildIdeMirrorProjection(input);
+  if (!projection.ok) return projection;
+
+  for (const file of projection.files) {
+    const write = await safeWriteFile({
+      projectRoot: input.projectRoot,
+      relativePath: file.entry.path,
+      contents: file.contents,
+      executable: file.entry.executable,
+      component: "ide-mirror-writer",
+    });
+    if (!write.ok) {
+      return {
+        ok: false,
+        issue: mapCopyFailureToTargetIssue(write.issue, path.posix.dirname(file.entry.path)),
+      };
+    }
+    input.onChangedPath?.(write.path);
+  }
+
+  return {
+    ok: true,
+    skillIndexEntries: projection.skillIndexEntries,
+    helpIndexEntries: projection.helpIndexEntries,
+    phaseCoverageRows: projection.phaseCoverageRows,
+    files: projection.files.map((file) => file.entry),
+    targetSkillCounts: projection.targetSkillCounts,
+  };
+}
+
+export async function buildIdeMirrorProjection(input: {
+  packageRoot: string;
+  sourceRoot?: string;
+  sourceRefRoot?: string;
+  selectedModules: OfficialModule[];
+  targetAdapters: InstallPlanTargetAdapter[];
+  artifactRoots: ArtifactRootContext;
+}): Promise<IdeMirrorProjectionResult> {
+  try {
+    return await buildIdeMirrorProjectionUnsafe(input);
+  } catch (error) {
+    return {
+      ok: false,
+      issue: {
+        issueId: "ide-mirror.source-read-failed",
+        category: "ide-mirror",
+        severity: "error",
+        component: "ide-mirror-writer",
+        details: {
+          reason: "canonical-source-io-failed",
+          errorCode: error instanceof Error && "code" in error ? String(error.code) : "unknown",
+        },
+        impact: "The canonical skill projection could not be proven because source package I/O failed.",
+        suggestedNextStep: "Restore readable canonical package files and rerun the command.",
+      },
+    };
+  }
+}
+
+async function buildIdeMirrorProjectionUnsafe(input: {
+  packageRoot: string;
+  sourceRoot?: string;
+  sourceRefRoot?: string;
+  selectedModules: OfficialModule[];
+  targetAdapters: InstallPlanTargetAdapter[];
+  artifactRoots: ArtifactRootContext;
+}): Promise<IdeMirrorProjectionResult> {
   const selectedTargetIds = new Set(input.targetAdapters.map((adapter) => adapter.targetId));
   const orderedTargetIds = CANONICAL_TARGET_ORDER.filter((targetId) => selectedTargetIds.has(targetId));
   const adaptersById = new Map(getIdeAdapterRegistry().map((adapter) => [adapter.id, adapter]));
@@ -50,7 +138,7 @@ export async function writeIdeMirrors(input: {
   const skillIndexEntries: SkillIndexEntry[] = [];
   const helpIndexEntries: HelpIndexEntry[] = [];
   const phaseCoverageRows: PhaseCoverageRow[] = [];
-  const files: FilesIndexEntry[] = [];
+  const files: IdeMirrorProjectionFile[] = [];
   const targetSkillCounts = new Map<IdeTargetId, number>();
 
   for (const targetId of orderedTargetIds) {
@@ -89,22 +177,41 @@ export async function writeIdeMirrors(input: {
         };
       }
       const targetEntryRoot = `${adapter.targetDirectory}/${entry.canonicalSkillId}`;
-      const copy = await copyCanonicalPackage({
-        projectRoot: input.projectRoot,
-        sourcePackageRoot,
-        sourceRefRoot,
-        targetEntryRoot,
-        ...(input.onChangedPath !== undefined ? { onChangedPath: input.onChangedPath } : {}),
-      });
-
-      if (!copy.ok) {
+      const sourceFiles = await listFiles(sourcePackageRoot);
+      if (!sourceFiles.includes("SKILL.md")) {
         return {
           ok: false,
-          issue: mapCopyFailureToTargetIssue(copy.issue, targetEntryRoot),
+          issue: {
+            issueId: "menu-target.missing-target",
+            category: "menu-target",
+            severity: "error",
+            affectedPath: sourceRefRoot,
+            component: "ide-mirror-writer",
+            details: { reason: "missing-skill-md" },
+            impact: "The canonical skill package cannot be mapped because SKILL.md is missing.",
+            suggestedNextStep: "Restore SKILL.md in the canonical source package before installing IDE skill entries.",
+          },
         };
       }
-
-      files.push(...copy.files);
+      for (const relativeFile of sourceFiles.filter(isInstallableCanonicalPackageFile)) {
+        const sourceFile = path.join(sourcePackageRoot, relativeFile);
+        const contents = await readFile(sourceFile);
+        const executable = isExecutableMode((await stat(sourceFile)).mode);
+        const targetPath = `${targetEntryRoot}/${relativeFile}`;
+        files.push({
+          contents,
+          entry: {
+            schemaVersion: "speclite.files-index.v1",
+            path: targetPath,
+            ownership: "installer-owned",
+            hash: hashBytes(contents),
+            hashAlgorithm: "sha256",
+            executable,
+            artifactKind: "ide-skill-package",
+            sourceRef: `${sourceRefRoot}/${relativeFile}`,
+          },
+        });
+      }
       installedTargets.push(targetId);
       targetSkillCounts.set(targetId, (targetSkillCounts.get(targetId) ?? 0) + 1);
     }
@@ -174,7 +281,7 @@ export async function writeIdeMirrors(input: {
         `${right.phaseId}:${right.moduleId}:${right.canonicalSkillId}`,
       ),
     ),
-    files: files.sort((left, right) => left.path.localeCompare(right.path)),
+    files: files.sort((left, right) => left.entry.path.localeCompare(right.entry.path)),
     targetSkillCounts,
   };
 }

@@ -19,6 +19,7 @@ describe("sync command source-to-mirror reconciliation", () => {
       await writeFile(path.join(tempRoot, "_speclite/custom/config.toml"), "human custom\n", "utf8");
       await writeFile(path.join(tempRoot, "_speclite/hooks/flow-gate-enforcement/runner.mjs"), "old runner\n", "utf8");
       await writeFile(path.join(tempRoot, "canonical-runner.mjs"), "new runner\n", "utf8");
+      await chmod(path.join(tempRoot, "canonical-runner.mjs"), 0o755);
       await writeTrustedManifest(tempRoot);
       await writeFilesIndex(tempRoot);
 
@@ -65,7 +66,9 @@ describe("sync command source-to-mirror reconciliation", () => {
       await mkdir(hookRoot, { recursive: true });
       await writeFile(path.join(tempRoot, "_speclite/config.toml"), "[core]\nproject_name = \"Safe Write\"\n", "utf8");
       await writeFile(path.join(hookRoot, "runner.mjs"), "old runner\n", "utf8");
+      await chmod(path.join(hookRoot, "runner.mjs"), 0o755);
       await writeFile(path.join(tempRoot, "canonical-runner.mjs"), "new runner\n", "utf8");
+      await chmod(path.join(tempRoot, "canonical-runner.mjs"), 0o755);
       await writeTrustedManifest(tempRoot);
       await writeFile(
         path.join(tempRoot, "_speclite/_config/files-index.json"),
@@ -99,7 +102,7 @@ describe("sync command source-to-mirror reconciliation", () => {
       expect(parsed.status).toBe("failure");
       expect(parsed.data.writeAuthorized).toBe(true);
       expect(parsed.data.failedStep).toBe("update:_speclite/hooks/flow-gate-enforcement/runner.mjs");
-      expect(parsed.data.pendingSteps).toEqual([]);
+      expect(parsed.data.pendingSteps).toEqual(["update:_speclite/_config/files-index.json"]);
       expect(parsed.issues).toEqual([
         expect.objectContaining({
           issueId: "file-integrity.stale-temp-file",
@@ -107,12 +110,23 @@ describe("sync command source-to-mirror reconciliation", () => {
           severity: "error",
           affectedPath: "_speclite/hooks/flow-gate-enforcement/runner.mjs",
           details: expect.objectContaining({
-            reason: "safe-write-failed",
+            reason: "coordinated-apply-interrupted",
             failedStep: "update:_speclite/hooks/flow-gate-enforcement/runner.mjs",
+            pendingSteps: ["update:_speclite/_config/files-index.json"],
           }),
         }),
       ]);
       await expect(readFile(path.join(hookRoot, "runner.mjs"), "utf8")).resolves.toBe("old runner\n");
+      await chmod(hookRoot, 0o755);
+      const resumed = await runCli(["sync", tempRoot, "--json", "--yes"]);
+      const resumedParsed = SyncCommandResultSchema.parse(JSON.parse(resumed.stdout));
+      expect(resumed.exitCodes).toEqual([0]);
+      expect(resumedParsed.data.changedPaths).toEqual([
+        "_speclite/_config/files-index.json",
+        "_speclite/hooks/flow-gate-enforcement/runner.mjs",
+      ]);
+      await expect(readFile(path.join(hookRoot, "runner.mjs"), "utf8")).resolves.toBe("new runner\n");
+      await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8")).rejects.toThrow();
     } finally {
       await chmod(hookRoot, 0o755).catch(() => undefined);
       await rm(tempRoot, { recursive: true, force: true });
