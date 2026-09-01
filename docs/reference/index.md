@@ -8,6 +8,7 @@ Reference 文档用于提供快速查阅的技术规格、命令、字段、目�
 |---|---|
 | [`cli.md`](cli.md) | `speclite` CLI 命令和参数参考。 |
 | [`cli-human-output-matrix.md`](cli-human-output-matrix.md) | CLI human-readable output 的 command/outcome/test/docs 覆盖矩阵。 |
+| [`codex-claude-code-session-reference.md`](codex-claude-code-session-reference.md) | Codex 与 Claude Code 本机会话定位、恢复和 deep link 参考。 |
 | [`command-result-json.md`](command-result-json.md) | machine-readable CommandResult JSON 参考。 |
 | [`specs/`](specs/index.md) | 对实现和外部消费者具有规范效力的公共契约。 |
 | [`runtime-layout.md`](runtime-layout.md) | 目标项目安装后的 runtime layout 参考。 |
