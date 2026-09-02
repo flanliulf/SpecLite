@@ -10,8 +10,8 @@ Status: ready-for-dev
 
 ## Acceptance Criteria（验收标准）
 
-1. Fresh install 预创建 `{analysis_artifacts}/research/`、`product-brief/`、`prfaq/`。
-2. `speclite-domain-research`、`market-research`、`technical-research` 统一写 `research/`，保留原 basename 规则。
+1. Fresh install 预创建 `{analysis_artifacts}/research/`、`{analysis_artifacts}/product-brief/`、`{analysis_artifacts}/prfaq/`。
+2. `speclite-domain-research`、`speclite-market-research`、`speclite-technical-research` 统一写 `{analysis_artifacts}/research/`，保留原 basename 规则。
 3. `speclite-product-brief` 写入 `{analysis_artifacts}/product-brief/`。
 4. `speclite-prfaq` 写入 `{analysis_artifacts}/prfaq/`。
 5. 同步所有受影响 ZH/EN Skill、steps/references、help、metadata、artifact contracts、config examples 与治理文档，不遗留冲突 active defaults。
