@@ -48,6 +48,7 @@ Status: ready-for-dev
 - Legacy discovery 只提供 resume/evidence，不做 filesystem migration；所有同轮 outputs 保持单目录。
 - 无外部 API或版本升级；重点回归 CR contract tests 与 strict-serial state-machine semantics。
 - Current shared CR contract 尚未固定 legacy-only resume 应继续写 legacy directory 还是切换到 canonical directory，也未固定 dual-directory issue ID/category/details。Kickoff 必须先关闭这两个 observable decisions；未关闭时为 `DECISION_NEEDED`，CR01–06 不得各自选择。
+- CR stable diagnostics 必须先选择唯一 owner：若作为 project validation issue 暴露，则由 `SPEC 07` taxonomy 承载；若仅属 CR workflow-local continuation，则由 shared `speclite-code-review-contract` 承载。无论选择哪一方，legacy-only 与 dual-directory fixtures 必须断言 owner、stable ID/category/details、redaction、stop-before-write 与 zero progress mutation。
 
 ## Previous Story Intelligence（前序 Story 情报）
 
@@ -58,6 +59,7 @@ Status: ready-for-dev
 - Hard predecessors：11.1–11.8 `done` + completion Gates；不得依赖 11.10。
 - Kickoff report：`{implementation_artifacts}/flow-gates/11-9-normalize-code-review-artifact-directories-by-story-id-story-kickoff-gate.md`。
 - Legacy-only write target 或 dual-directory stable diagnostic 未关闭时不得开始实现。
+- 若 stable diagnostic owner 在 `SPEC 07` taxonomy 与 shared CR contract 之间未决，kickoff 必须返回 `DECISION_NEEDED`；CR01–06 不得各自发明 issue ID、category 或 resume behavior。
 
 ## Anchor Contract Map（锚点契约映射）
 
@@ -77,6 +79,7 @@ Status: ready-for-dev
 - `speclite-code-review-contract/{SKILL.md,SKILL.en.md,references/cr-contract.md}`。
 - `speclite-goal-orchestrator-epic-story-code-review-runner/**` 与 CR01–06 `SKILL*` / references / templates。
 - Shared owner `speclite-code-review-contract/references/cr-contract.md`、module help/metadata/contracts、scripts/hooks/fixtures/docs 的 path expressions；current canonical source 不存在 `cr-config.md`，不得把它当作既有 UPDATE file。
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`：仅当 kickoff 决定 legacy-only / dual-directory diagnostics 属 project validation taxonomy 时同变更更新；若 shared CR contract owns these diagnostics，必须记录 no-`SPEC 07` change rationale，并在 fixtures 断言 CR-local owner boundary。
 - 扩展 `test/code-review-contract.test.ts`，新增 legacy/ambiguity/propagation fixtures。
 
 ## References（参考资料）
