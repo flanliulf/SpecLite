@@ -27,6 +27,7 @@ Status: ready-for-dev
    | whole 与有效 sharded input 均不存在 | 报告 subject document missing | Block |
 
    每次记录 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`、`discoveryShape`、`ambiguityStatus`、selection source；selection 只作用于当前 invocation；block 使用 `SPEC 07` stable IDs 且零 write/progress mutation。
+   该 decision table 在 implementation 前必须由 `SPEC 09` owner decision 承载或明确批准为同变更 contract update；在 owner gate 关闭前，本表仅是 Story implementation target，不得宣称 owning SPEC 已更新。
 6. Existing explicit root 权威；缺 `solutioning_artifacts` 按 `SPEC 09` fallback 到 Planning 并标 `legacy-compatible`。
 7. Mismatch/legacy path 只诊断，不迁移、不宣称 migration。
 8. 同步 producers/consumers、ZH/EN、steps/references、help、metadata/contracts/examples/docs，不建立第二 root contract。
@@ -69,6 +70,7 @@ Status: ready-for-dev
 - Hard predecessors：11.1–11.4 `done` + completion Gates；同时锚定 `SPEC 07`、`SPEC 09`、`CC-2026-08-17-architecture-root`。
 - Kickoff report：`{implementation_artifacts}/flow-gates/11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts-story-kickoff-gate.md`。
 - 不得依赖 Story 11.6+ 才完成本 Story。
+- `SPEC 09` contract-update / owner-decision gate 必须先关闭：whole/sharded decision table、blocking continuation、required evidence fields 与 stable issue mapping 要么已由 `SPEC 09` 承载，要么有明确 owner decision 允许同变更更新；否则 kickoff 返回 `DECISION_NEEDED`，producer/consumer 不得各自复制 precedence。
 
 ## Anchor Contract Map（锚点契约映射）
 
@@ -89,6 +91,7 @@ Status: ready-for-dev
 - Producers：`speclite-create-prd/**`、`speclite-create-epics-and-stories/**`、`speclite-create-architecture/**`、`speclite-shard-doc/**`（仅保持 contract）。
 - Consumers：validate-prd、readiness、create-story、sprint-planning、retrospective、correct-course、generate-project-context 的 discovery references。
 - Runtime/contracts：module metadata、manifest interpolation、`SPEC 07` issue registry、shared discovery helper。
+- Owner-gated contract：`_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md` 仅在 `SPEC 09` owner decision 批准后同变更更新；若 owner 决定不改 SPEC，本 Story 必须记录 no-contract-update rationale，并说明实现如何消费已批准的 owning contract。
 - Tests：新增 `test/artifact-document-discovery.test.ts` 与 complete decision-table fixtures。
 
 ## References（参考资料）
