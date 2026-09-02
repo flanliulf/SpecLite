@@ -1,9 +1,9 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-07-07 12:17 CST
+# last_updated: 2026-09-02 15:55:16 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
-# story_location: _bmad-output/implementation-artifacts
+# story_location: _bmad-output/implementation-artifacts/stories
 
 # STATUS DEFINITIONS:
 # ==================
@@ -34,13 +34,15 @@
 # - Developer typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
+# - Epic 11 is strict-serial: 11.1 -> 11.10. Do not move multiple Epic 11 stories to in-progress.
+# - Each Epic 11 story requires SPEC 09 story-kickoff and story-completion Flow Gates.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-07-07 12:17 CST
+last_updated: 2026-09-02 15:55:16 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
-story_location: _bmad-output/implementation-artifacts
+story_location: _bmad-output/implementation-artifacts/stories
 
 development_status:
   epic-1: done
@@ -136,3 +138,17 @@ development_status:
   10-5-ecosystem-fixture-and-release-gate-generalization: done
   10-6-public-docs-and-maintainer-workflow: done
   epic-10-retrospective: done
+
+  # Phase-aligned workflow artifact governance. Strict serial: Story 11.1 -> 11.10.
+  epic-11: in-progress
+  11-1-executable-artifact-root-resolution-contract: ready-for-dev
+  11-2-fresh-install-artifact-root-projection: ready-for-dev
+  11-3-existing-install-compatibility-and-diagnostics: ready-for-dev
+  11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories: ready-for-dev
+  11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts: ready-for-dev
+  11-6-consolidate-ux-artifacts-under-the-planning-ux-space: ready-for-dev
+  11-7-standardize-the-prd-validation-report-filename: ready-for-dev
+  11-8-rename-and-relocate-implementation-readiness-skills: ready-for-dev
+  11-9-normalize-code-review-artifact-directories-by-story-id: ready-for-dev
+  11-10-inventory-all-grill-related-skill-references-for-human-confirmation: ready-for-dev
+  epic-11-retrospective: optional
