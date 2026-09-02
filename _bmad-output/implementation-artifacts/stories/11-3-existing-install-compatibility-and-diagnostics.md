@@ -80,7 +80,7 @@ Status: ready-for-dev
 
 - Hard predecessors：Story 11.1–11.2 `done` + target-matched completion gates。
 - Kickoff report：`{implementation_artifacts}/flow-gates/11-3-existing-install-compatibility-and-diagnostics-story-kickoff-gate.md`。
-- 缺 stable mismatch issue、no-migration proof strategy 或 predecessor evidence 时停止。
+- 缺 stable mismatch issue、`SPEC 07` registry update 或 no-new-ID reuse rationale、no-migration proof strategy、predecessor evidence 时停止。
 
 ## Anchor Contract Map（锚点契约映射）
 
@@ -103,6 +103,7 @@ Status: ready-for-dev
 - Canonical Flow Gate / Dev Story / Create Story references：仅接入或验证 shared legacy `story_location` compatibility。
 - `src/commands/status.ts`、validate/readout 与 `src/diagnostics/output.ts` 等 presenters：消费 shared actual-root evidence；保留 public envelope 与 human/JSON parity。
 - `test/artifact-path-validation.test.ts`、existing-install fixtures 与新 mismatch fixtures。
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`：仅当 `config-artifact-mismatch` 需要新增 stable issue ID 时由 owner-gated 同变更更新；若复用既有 ID，kickoff 必须记录 no-new-ID reuse rationale，并在 fixtures 断言 category、stable code、details 与 redaction。
 - 明确延后：Story 11.4–11.10 的具体 workflow routing/rename/inventory。
 
 ## References（参考资料）
