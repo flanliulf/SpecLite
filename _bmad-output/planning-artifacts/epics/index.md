@@ -19,10 +19,12 @@ inputDocuments:
 changeRequest: "architecture-artifact-canonical-root-unification"
 confirmedAt: "2026-08-18"
 revisionSource: "../sprint-change-proposal-2026-08-17.md"
-revisionStatus: "in-progress"
+revisionStatus: "complete"
 revisionStepsCompleted:
   - 1
   - 2
+  - 3
+  - 4
 revisionInputDocuments:
   - "../prd/index.md"
   - "../prd/prd-validate-report-2026-08-18.md"
@@ -33,7 +35,24 @@ revisionInputDocuments:
   - "../sprint-change-proposal-2026-08-17.md"
   - "./index.md"
   - "../../implementation-artifacts/sprint-status.yaml"
-revisionUpdatedAt: "2026-08-19"
+revisionUpdatedAt: "2026-09-01"
+readinessRevision:
+  changeRequest: "epic-11-implementation-readiness-contract-closure"
+  status: "complete"
+  stepsCompleted:
+    - 1
+    - 2
+    - 3
+    - 4
+  confirmedAt: "2026-09-02"
+  completedAt: "2026-09-02"
+  inputDocuments:
+    - "../prd/index.md"
+    - "../architecture/index.md"
+    - "../ux-design-specification.md"
+    - "../ux-install-cli-interaction-spec-2026-06-12.md"
+    - "../implementation-readiness-report-2026-09-01.md"
+    - "./index.md"
 ---
 
 # SpecLite Epic Breakdown（SpecLite Epic 拆解）
@@ -135,7 +154,7 @@ revisionUpdatedAt: "2026-08-19"
     - [Story 11.2: Fresh Install Artifact Root Projection（Fresh Install Artifact Root 投影）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-112-fresh-install-artifact-root-projectionfresh-install-artifact-root-投影)
     - [Story 11.3: Existing Install Compatibility And Diagnostics（Existing Install 兼容与诊断）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-113-existing-install-compatibility-and-diagnosticsexisting-install-兼容与诊断)
     - [Story 11.4: Route Analysis Workflows into Dedicated Artifact Subdirectories（将 Analysis Workflows 路由至专属 Artifact 子目录）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-114-route-analysis-workflows-into-dedicated-artifact-subdirectories将-analysis-workflows-路由至专属-artifact-子目录)
-    - [Story 11.5: Organize Planning Documents as Whole and Sharded Artifacts（组织 Planning 文档的整篇与分片产物）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-115-organize-planning-documents-as-whole-and-sharded-artifacts组织-planning-文档的整篇与分片产物)
+    - [Story 11.5: Govern Planning and Solutioning Documents as Whole and Sharded Artifacts（治理 Planning 与 Solutioning 文档的整篇与分片产物）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-115-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts治理-planning-与-solutioning-文档的整篇与分片产物)
     - [Story 11.6: Consolidate UX Artifacts under the Planning UX Space（将 UX Artifacts 归集到 Planning UX 空间）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-116-consolidate-ux-artifacts-under-the-planning-ux-space将-ux-artifacts-归集到-planning-ux-空间)
     - [Story 11.7: Standardize the PRD Validation Report Filename（统一 PRD Validation Report 文件名）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-117-standardize-the-prd-validation-report-filename统一-prd-validation-report-文件名)
     - [Story 11.8: Rename and Relocate Implementation Readiness Skills（更名并迁移 Implementation Readiness Skills）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-118-rename-and-relocate-implementation-readiness-skills更名并迁移-implementation-readiness-skills)

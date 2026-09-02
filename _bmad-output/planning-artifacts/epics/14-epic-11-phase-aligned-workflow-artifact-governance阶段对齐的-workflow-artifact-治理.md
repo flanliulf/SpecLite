@@ -11,7 +11,7 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
 - Story 11.1 建立 executable root-resolution contract。
 - Story 11.2 投影 fresh-install config、directories、manifest/index 与 evidence。
 - Story 11.3 建立 existing-install compatibility、no-silent-migration 与 mismatch diagnostics。
-- Story 11.4–11.10 依次消费上述基础；Story 11.10 的 grill inventory 在 Story 11.8 readiness rename/routing 完成后执行。
+- Story 11.4–11.10 依次消费上述基础；Story 11.8 必须以 exact-old-ID / exact-old-path bounded scan 独立完成 readiness rename/routing closure，Story 11.10 随后以新 canonical state 为 baseline 执行 broad、read-only grill semantic inventory，不作为 Story 11.8 的后置验收条件。
 
 ## Story 11.1: Executable Artifact Root Resolution Contract（可执行 Artifact Root 解析契约）
 
@@ -302,33 +302,33 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
 - NFR14a
 - NFR40f（Analysis 路由部分）
 
-## Story 11.5: Organize Planning Documents as Whole and Sharded Artifacts（组织 Planning 文档的整篇与分片产物）
+## Story 11.5: Govern Planning and Solutioning Documents as Whole and Sharded Artifacts（治理 Planning 与 Solutioning 文档的整篇与分片产物）
 
 作为使用 SpecLite 的产品、架构和项目维护人员，  
-我希望 PRD、Epics 和 Architecture 文档分别进入 `{planning_artifacts}` 下的专属目录，  
-以便完整文档与执行 `shard-doc` 后的分片文档可以被稳定创建、发现和消费。
+我希望 PRD、Epics 和 Architecture 文档进入各自 phase-owned subject directory，
+以便 fresh install 与 existing install 都能确定性地创建、发现和消费完整文档及分片文档，同时避免双重事实源或静默迁移。
 
 ### Acceptance Criteria（验收标准）
 
-1. **安装时预创建 Planning 子目录**
+1. **Fresh Install 预创建 Phase-owned Subject Directories**
 
    **Given** 目标项目执行 fresh install  
    **When** runtime structure creation 执行  
    **Then** 必须预创建：
 
-   - `{planning_artifacts}/epics/`
    - `{planning_artifacts}/prd/`
-   - `{planning_artifacts}/architecture/`
+   - `{planning_artifacts}/epics/`
+   - `{solutioning_artifacts}/architecture/`
 
-2. **Planning Creation Workflows 使用专属完整文档路径**
+2. **Creation Workflows 使用 Phase-owned 完整文档路径**
 
    **Given** 用户运行对应的 PRD、Epics 或 Architecture creation workflow  
    **When** workflow 创建完整文档  
    **Then** 默认输出路径必须分别为：
 
-   - `{planning_artifacts}/epics/epics.md`
    - `{planning_artifacts}/prd/prd.md`
-   - `{planning_artifacts}/architecture/architecture.md`
+   - `{planning_artifacts}/epics/epics.md`
+   - `{solutioning_artifacts}/architecture/architecture.md`
 
 3. **Shard 输出保留在对应 subject directory**
 
@@ -337,57 +337,129 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
    **Then** 分片必须继续位于对应的 `epics/`、`prd/` 或 `architecture/` subject directory  
    **And** 必须保留现有 `index.md` 与 shard 文件命名契约  
    **And** 不得额外引入未经要求的 `shards/` 层级  
-   **And** 完整文档与分片文档必须可以共存，不得静默覆盖彼此。
+   **And** 完整文档与分片文档可以在磁盘上共存，不得静默覆盖彼此；共存不代表 downstream workflow 获得自动选择任一版本的授权。
 
-4. **Consumers 支持新 Whole/Sharded 位置**
+4. **Consumers 支持 Phase-owned Whole/Sharded 位置**
 
    **Given** downstream Skill 需要读取 PRD、Epics 或 Architecture  
-   **When** 执行 planning document discovery  
-   **Then** 必须支持新完整文档位置、新 subject directory 中的 sharded `index.md`，以及 subject directory 中的 shard documents。
+   **When** 执行 artifact discovery
+   **Then** PRD 与 Epics 必须从 Planning root 支持完整文档、subject directory 中的 sharded `index.md` 及 shard documents
+   **And** Architecture 必须从 Solutioning root 支持相同的 whole/sharded discovery shape。
 
-5. **Whole/Sharded 共存时使用确定性发现规则**
+5. **Whole/Sharded Discovery 使用唯一决策表**
 
-   **Given** 完整文档和 sharded documents 同时存在  
-   **When** downstream workflow 选择输入  
-   **Then** 必须使用 canonical workflow 已定义的 whole/sharded discovery precedence  
-   **And** 必须记录实际消费的 artifact path  
-   **And** 不得无提示地混合两个版本。
+   **Given** downstream workflow 在 authoritative subject directory 中发现 PRD、Epics 或 Architecture input
+   **When** workflow 解析 whole/sharded discovery state
+   **Then** 必须严格应用以下决策表，不得由各 consumer 自行定义 precedence：
 
-6. **Canonical Source 与相关引用同步更新**
+   | Discovery State | Canonical Behavior | Continuation |
+   | --- | --- | --- |
+   | `whole-only` | 只消费 subject directory 中的 canonical whole document | Continue |
+   | `sharded-only`，且 `index.md` 与声明的 shard links 完整 | 只消费 `index.md` 及其声明的 shards | Continue |
+   | `whole+sharded`，且没有显式 input selection | 不选择任一版本、不混合内容；报告 ambiguity 并请求人工选择 | Block |
+   | `whole+sharded`，且用户已对当前 invocation 提供显式 input selection | 只消费显式选择的 whole document 或 sharded `index.md`，并记录未选版本 | Continue |
+   | sharded files 存在但缺少 `index.md` | 报告 invalid sharded shape | Block |
+   | `index.md` 引用缺失、越出 authoritative subject directory 或无法读取的 shard | 报告 broken shard reference | Block |
+   | whole document 与有效 sharded input 均不存在 | 报告 subject document missing | Block |
 
-   **Given** Planning 输出与发现路径发生变化  
-   **When** 本 Story 实施完成  
-   **Then** 必须同步更新所有相关 `SKILL.md`、`SKILL.en.md`、workflow steps/references、`module-help.csv`、module metadata、artifact contracts、config examples、planning/readiness 输入发现规则与路径治理文档  
-   **And** 不得遗留与新契约冲突的旧默认路径声明。
+   **And** 显式 input selection 只解决当前 workflow invocation，不得删除、覆盖、迁移或改写未选版本
+   **And** 每次 discovery 必须记录 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`、`discoveryShape`、`ambiguityStatus` 与选择来源
+   **And** blocking state 必须使用 `SPEC 07` 的 `artifact-path` taxonomy 中预先注册的稳定 issue ID；producer 不得临场生成自由文本 issue ID
+   **And** blocking state 必须保持 read-only，不得产生部分 artifact write 或更新 workflow progress。
 
-7. **旧 Planning 文档保持可发现且不迁移**
+6. **Existing Install 使用 Explicit Config 与 Legacy-compatible Fallback**
 
-   **Given** existing install 的 whole/sharded planning documents 位于旧路径  
-   **When** 执行 install、update、repair 或 downstream discovery  
-   **Then** 旧文档必须保持可发现  
-   **And** 不得自动迁移、移动、复制、重命名或删除这些文档。
+   **Given** existing install 执行 install、update、repair 或 downstream discovery
+   **When** config 显式声明 artifact roots
+   **Then** explicit config 必须作为 authoritative root
+   **And** 当 `solutioning_artifacts` 缺失时，必须按 SPEC 09 回退到既有 Planning root，并明确标记 `legacy-compatible`
+   **And** evidence 必须展示实际解析和消费路径，不得把 fallback 表述为 fresh canonical layout。
 
-8. **Corpus 与路径一致性检查排除旧生产者默认值**
+7. **Compatibility 不触发 Migration**
+
+   **Given** config 与现有 artifact location 不一致，或 Architecture 位于 legacy-compatible 路径
+   **When** runtime 或 consumer 发现该差异
+   **Then** 必须输出诊断与实际路径 evidence
+   **And** 不得自动移动、复制、重命名、删除或重写文档
+   **And** 不得宣称已完成 migration。
+
+8. **Canonical Source 与相关引用同步更新**
+
+   **Given** Planning 与 Solutioning 输出和发现路径发生变化
+   **When** 本 Story 实施完成
+   **Then** 必须同步更新受影响的 `SKILL.md`、`SKILL.en.md`、workflow steps/references、`module-help.csv`、module metadata、artifact contracts、config examples、producer/consumer rules 与路径治理文档
+   **And** 不得创建第二套 artifact-root contract。
+
+9. **Corpus 与路径一致性检查排除冲突的 Active Defaults**
 
    **Given** canonical source 已完成路径更新  
    **When** 执行 corpus/path consistency 检查  
-   **Then** 受影响的 producers 不得继续把新 PRD、Epics 或 Architecture 完整文档默认输出到 `{planning_artifacts}` 根目录。
+   **Then** active producer 不得继续把 fresh Architecture 输出到 `{planning_artifacts}/architecture/`
+   **And** active producer 不得把 fresh PRD 或 Epics 完整文档输出到 `{planning_artifacts}` 根目录
+   **And** 受控历史引用必须明确标记为 historical 或 `legacy-compatible`。
 
-9. **Focused Tests 与 Fixtures 覆盖 Whole/Sharded 路由**
+10. **Focused Tests 与 Fixtures 覆盖 Governance Matrix**
 
-   **Given** 本 Story 实现完成  
-   **When** 执行 focused test suite  
-   **Then** 至少覆盖 fresh install 子目录创建、三类完整文档的新路径、`shard-doc` 输出与 `index.md`、whole-only、sharded-only、whole-and-sharded coexistence、legacy planning paths 的发现，以及 artifact provenance 和实际消费路径。
+    **Given** 本 Story 实现完成
+    **When** 执行 focused test suite
+   **Then** 至少覆盖 fresh subject directories、三类完整文档路径、whole-only、valid sharded-only、whole-and-sharded without selection、whole-and-sharded with explicit selection、sharded index missing、broken shard reference、subject document missing、explicit config、fallback、compatibility evidence、config/artifact mismatch、no-migration、POSIX path 与 negative corpus scan
+   **And** 所有 blocking fixture 必须断言 stable issue ID、`ambiguityStatus`、continuation result、零 artifact write 与零 progress mutation。
 
-10. **Scope Boundary（范围边界）**
+11. **Scope Boundary（范围边界）**
 
-    本 Story 只处理 PRD、Epics 和 Architecture；UX artifacts 由 Story 11.6 单独处理。
+    本 Story 只处理 PRD、Epics 和 Architecture 的 whole/sharded governance；UX artifacts 由 Story 11.6 单独处理，validation/readiness/Correct Course 由后续 Story 处理；不得实施 artifact migration，不得重开已完成 Story 或改写历史完成记录。
+
+### Implementation Tasking Boundary（实现任务边界）
+
+为保证每个实现任务可由单个 dev agent 在 bounded context 中完成，本 Story 实施时必须依次拆为：
+
+1. resolver/discovery decision table 与 `SPEC 09` / `SPEC 07` contract anchors；
+2. PRD、Epics、Architecture producer paths；
+3. downstream consumer discovery 与 explicit input selection；
+4. fresh/existing/ambiguity fixture matrix；
+5. canonical corpus negative scan 与最终 evidence 汇总。
+
+后续任务只能消费更早任务已建立并验证的 contract/evidence；不得把 consumer behavior 或 fixture contract 留给 Story 11.6 及更晚 Story。
+
+### Dependency Gate（依赖门禁）
+
+- 必须以前置 Story 11.1–11.4、SPEC 07、SPEC 09 与 `CC-2026-08-17-architecture-root` 为当前约束。
+- 不得依赖 Story 11.6 或更晚 Story 才能完成本 Story 的验收。
+
+### Anchor Contract Map（锚点契约映射）
+
+- **Contract**：FR23c、SPEC 07、SPEC 09、`CC-2026-08-17-architecture-root`；`SPEC 09` 必须拥有 discovery decision table，`SPEC 07` 必须在任何 producer/consumer 输出前注册对应 blocking issue IDs。
+- **Functional**：artifact-root resolver、runtime structure、PRD/Epics/Architecture producers 与 consumers；允许 equivalent implementation，但必须保持同一外部契约。
+- **Evidence**：focused tests、fixtures、discovery evidence 与 negative corpus scans。
+- **Guidance**：候选实现位置包括 config schema/initialization、runtime structure、manifest/module metadata 与相关 workflow references；实际文件以实现时的 current codebase 为准。
+
+### Equivalent Implementation Policy（等价实现策略）
+
+允许实现调整内部组件边界、helper 名称或文件位置，但不得改变 phase-owned roots、discovery decision table、explicit input selection、explicit-config authority、`legacy-compatible` evidence、blocking continuation 与 no-migration 行为。任何等价实现都必须由相同的 acceptance tests 和 traceability evidence 证明。
+
+### Evidence Plan（证据计划）
+
+- 以 fresh 与 existing install fixtures 证明 canonical 与 compatibility 路径。
+- 以完整 discovery decision matrix 证明 whole-only、valid sharded-only、coexistence、invalid sharded shape 与 missing input 的唯一 continuation behavior 和实际消费路径。
+- 以 explicit input selection fixture 证明选择只作用于当前 invocation，且未选版本保持不变。
+- 以 blocking fixtures 证明 stable issue、read-only stop、零 artifact write 与零 progress mutation。
+- 以 mismatch/no-migration tests 证明诊断不会产生文件变更。
+- 以 corpus negative scan 证明 active defaults 不再违反 phase-owned root contract。
+
+### Anchor Evidence Summary（锚点证据摘要）
+
+本节由 Story implementation 与 review 阶段填写；当前仅定义所需证据，不预先宣称功能已实现或已验证。
 
 ### Requirement Traceability（需求追踪）
 
 - FR23c
 - NFR14a
-- NFR40f（Planning whole/sharded 部分）
+- NFR40f（Planning 与 Solutioning whole/sharded 部分）
+- UX-DR7
+- UX-DR8
+- UX-DR15
+- SPEC 09
+- CC-2026-08-17-architecture-root
 
 ## Story 11.6: Consolidate UX Artifacts under the Planning UX Space（将 UX Artifacts 归集到 Planning UX 空间）
 
@@ -533,22 +605,58 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
    **Then** 不得自动重命名、迁移、覆盖或删除这些报告  
    **And** 需要历史 validation evidence 的 consumers 必须继续识别既有报告。
 
-8. **重复运行遵循既有冲突策略**
+8. **同日目标已存在时执行 Read-only Block**
 
-   **Given** 同一天已存在目标 basename 的报告  
-   **When** 用户再次运行 workflow  
-   **Then** 必须沿用当前 workflow 的显式冲突处理策略  
-   **And** 不得因文件名统一而引入静默覆盖。
+   **Given** `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` 已存在
+   **When** 用户在同一天再次运行 workflow
+   **Then** workflow 必须在写入前停止
+   **And** 不得 overwrite、append、truncate、自动删除或生成 suffix filename
+   **And** 不得更新 workflow completion/progress metadata
+   **And** 必须报告 project-relative target path、冲突原因，以及“保留并移走或删除既有报告后重新运行”的人工处置建议
+   **And** 即使既有内容与本次结果看似相同，也不得未经本次完整 validation 复用为新 evidence
+   **And** conflict 必须使用 `SPEC 07` 的 `artifact-path` taxonomy 中预先注册的稳定 issue ID，不得使用自由文本 issue ID。
 
 9. **Focused Tests 与 Fixtures 覆盖命名契约**
 
    **Given** 本 Story 实现完成  
    **When** 执行 focused test suite  
-   **Then** 至少覆盖精确 basename、日期格式及零填充、`{planning_artifacts}/prd/` 默认路径、canonical metadata/help/example 一致性、legacy report discovery，以及同日重复运行的冲突行为。
+   **Then** 至少覆盖精确 basename、日期格式及零填充、`{planning_artifacts}/prd/` 默认路径、canonical metadata/help/example 一致性与 legacy report discovery
+   **And** target absent 时必须创建精确 dated basename
+   **And** target 存在且内容看似相同或不同时均必须 block，并断言零报告写入与零 progress mutation
+   **And** legacy-name report 存在但 canonical target 不存在时，必须保留 legacy report 并创建 canonical target
+   **And** conflict 后不得留下 partial report、temporary report 或受控 suffix report。
 
 10. **Scope Boundary（范围边界）**
 
     本 Story 不修改 PRD validation 的检查规则、评分逻辑或报告正文结构，也不处理 Implementation Readiness 文件名。
+
+### Dependency Gate（依赖门禁）
+
+- 必须以前置 Story 11.1–11.6、SPEC 07 与 SPEC 09 为当前约束。
+- 不得依赖 Story 11.8 或更晚 Story 才能完成报告命名、同日冲突和 legacy evidence discovery 验收。
+
+### Anchor Contract Map（锚点契约映射）
+
+- **Contract**：FR23e、SPEC 07、SPEC 09；固定 basename 与 same-day read-only block 由本 Story 定义，`SPEC 07` 必须在 producer 输出前注册对应 blocking issue ID。
+- **Functional**：`speclite-validate-prd` report path resolution、pre-write existence check、legacy report discovery 与 workflow progress handling。
+- **Evidence**：focused tests、same-day conflict fixtures、legacy discovery fixture 与 canonical corpus negative scan。
+- **Guidance**：候选实现位置包括 validation workflow output step、artifact contract、help/example 与 downstream discovery；实际文件以实现时的 current canonical source 为准。
+
+### Equivalent Implementation Policy（等价实现策略）
+
+允许实现调整内部 existence-check helper、write guard 或文件位置，但不得改变精确 dated basename、target-exists read-only block、零 progress mutation、legacy report preservation 与 no-suffix 行为。
+
+### Evidence Plan（证据计划）
+
+- 以 target-absent fixture 证明只创建精确 dated basename。
+- 以 same-content 与 different-content target-exists fixtures 证明两者均在写入前阻断。
+- 以 filesystem snapshot 与 progress metadata comparison 证明 conflict 为零写入、零 mutation。
+- 以 legacy-name-only fixture 证明历史 evidence 保持原位且不阻止 canonical target 首次创建。
+- 以 canonical corpus scan 证明 active producer/help/example 不再声明非标准 basename 或自动 suffix behavior。
+
+### Anchor Evidence Summary（锚点证据摘要）
+
+本节由 Story implementation 与 review 阶段填写；当前仅定义所需证据，不预先宣称功能已实现或已验证。
 
 ### Requirement Traceability（需求追踪）
 
@@ -600,11 +708,20 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
    **Then** 必须保持其现有报告文件命名规则  
    **And** 本 Story 不得擅自重命名该报告文件。
 
-6. **所有 Canonical References 同步更新**
+6. **Bounded Rename/Routing Surfaces 同步更新**
 
-   **Given** Skill 标识与输出路径发生变化  
-   **When** 本 Story 实施完成  
-   **Then** 必须同步更新相关 `SKILL.md`、`SKILL.en.md`、workflow steps/references/templates、upstream/downstream orchestration、`module-help.csv`、module metadata、artifact contracts、help/registry/manifest 数据、config examples、hooks、scripts、tests，以及面向用户和维护者的文档。
+   **Given** Skill 标识与输出路径发生变化
+   **When** 本 Story 实施完成
+   **Then** 必须同步更新以下 bounded surfaces：
+
+   - 两个 Skill package directories、frontmatter `name`、ZH/EN definitions 与 package-internal self-references；
+   - module metadata、`module-help.csv`、help/registry/manifest source entries 与 artifact contracts；
+   - direct upstream/downstream activation、customization 与 orchestration references；
+   - active docs、examples、hooks、scripts 与 tests 中两个旧 canonical IDs 的 exact matches；
+   - active producer/consumer、config example 与 artifact contract 中旧 `ir-grill/` output-path exact matches。
+
+   **And** 每个 bounded surface 必须使用新 canonical ID 或新 output root，或被明确分类为 compatibility、legacy documentation 或 regression fixture
+   **And** 本 AC 不要求建立所有 `grill` / `grilling` 语义引用的逐条关系清单；该 broad inventory 只属于 Story 11.10。
 
 7. **方案 A 提供显式旧 ID 兼容行为**
 
@@ -623,22 +740,54 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
    **Then** artifacts 必须保持原位并可作为历史 evidence 被发现  
    **And** 不得自动迁移、重命名或删除这些 artifacts。
 
-9. **Canonical Corpus 排除 Active 旧名称与旧路径**
+9. **Exact-old-ID / Exact-old-path Negative Scan 独立关闭 Rename Contract**
 
    **Given** canonical source 已完成更名与路径更新  
-   **When** 执行 corpus consistency 检查  
-   **Then** 旧 Skill 名称和 `ir-grill/` 仅允许存在于明确标注的 compatibility mapping、migration documentation 或 regression fixtures  
-   **And** 不得继续出现在 active producer、orchestrator 或 help 声明中。
+   **When** 对全部 canonical source packages 与 active canonical documentation 执行 exact-literal scan
+   **Then** 必须覆盖 `speclite-ir-grill-consistency-reviewer`、`speclite-check-implementation-readiness` 与旧 `ir-grill/` output-path expressions
+   **And** 每个 match 必须被修正，或明确分类为 compatibility mapping、legacy documentation 或 regression fixture
+   **And** 旧 ID 与旧 path 不得继续出现在 active package identity、producer、consumer、activation、orchestrator、customization、help、registry、manifest、artifact contract、hook、script 或 user/maintainer guidance 中
+   **And** 本 exact scan 与对应分类证据足以独立验收 Story 11.8，不得等待 Story 11.10 的 broad semantic inventory。
 
 10. **Focused Tests 与 Fixtures 覆盖 Rename/Routing 契约**
 
     **Given** 本 Story 实现完成  
     **When** 执行 focused test suite  
-    **Then** 至少覆盖 fresh install 仅投影新名称、frontmatter/package/help/registry 一致性、两个 Skills 的新输出目录、readiness check 报告 basename、old ID compatibility/deprecation、update plan rename 行为、用户修改旧 package 时的保护，以及 legacy `ir-grill/` evidence discovery。
+   **Then** 至少覆盖 fresh install 仅投影新名称、frontmatter/package/help/registry 一致性、两个 Skills 的新输出目录、readiness check 报告 basename、old ID compatibility/deprecation、update plan rename 行为、用户修改旧 package 时的保护，以及 legacy `ir-grill/` evidence discovery
+   **And** focused evidence 必须包含 bounded surface manifest、exact-old-ID / exact-old-path scan command、match classification 与 active negative assertions
+   **And** 不得用 Story 11.10 的 future inventory 代替本 Story 的 completion evidence。
 
 11. **Scope Boundary（范围边界）**
 
-    本 Story 不改变 Implementation Readiness 的检查算法、评分规则和报告正文结构；所有 grill 引用的全量盘点由 Story 11.10 单独处理。
+    本 Story 不改变 Implementation Readiness 的检查算法、评分规则和报告正文结构；不盘点与两个旧 canonical IDs 或旧 `ir-grill/` path 无关的泛化 grill semantics，不生成全 corpus grill relationship inventory。所有 broad grill semantic inventory 由 Story 11.10 在本 Story 完成后单独执行。
+
+### Dependency Gate（依赖门禁）
+
+- 必须以前置 Story 11.1–11.7、SPEC 04、SPEC 07 与 SPEC 09 为当前约束。
+- 本 Story 必须以 bounded surface manifest、exact-literal negative scan 与 focused fixtures 独立完成；不得依赖 Story 11.9、Story 11.10 或未来人工确认才成立。
+
+### Anchor Contract Map（锚点契约映射）
+
+- **Contract**：FR23f、SPEC 04、SPEC 07、SPEC 09；active identity 与 `renamedFromCanonicalSkillIds` 由 SPEC 04 拥有，artifact root 与 compatibility/no-migration 由 SPEC 09 拥有。
+- **Functional**：两个 canonical Skill packages、module/help/registry/manifest projections、activation/customization/orchestration references、readiness artifact routing 与 update rename/reprojection planning。
+- **Evidence**：bounded surface manifest、exact-old-ID / exact-old-path scan、focused fixtures、legacy evidence discovery 与 modified-old-package protection。
+- **Guidance**：Story 11.10 的 broad inventory 可以发现后续治理风险，但不得替代或延迟本 Story 的 completion evidence。
+
+### Equivalent Implementation Policy（等价实现策略）
+
+允许调整内部 registry、projection helper 或 package migration planner，但不得改变唯一 active canonical identity、rename mapping、fresh-only-new projection、new solutioning output root、legacy artifact no-migration、modified-old-package protection 与 bounded exact-scan completion gate。
+
+### Evidence Plan（证据计划）
+
+- 以 bounded surface manifest 证明本 Story 的同步范围是明确且封闭的。
+- 以 exact-old-ID / exact-old-path scan 证明所有 active legacy identity/path expressions 已消除，允许项均有 compatibility/legacy/fixture 分类。
+- 以 fresh/update/modified-old-package fixtures 证明 projection、rename plan 与 ownership protection。
+- 以 legacy artifact discovery fixture 证明旧 readiness evidence 保持原位且可发现。
+- 以独立 Story completion assertion 证明无需等待 Story 11.10 才能验收。
+
+### Anchor Evidence Summary（锚点证据摘要）
+
+本节由 Story implementation 与 review 阶段填写；当前仅定义所需证据，不预先宣称功能已实现或已验证。
 
 ### Requirement Traceability（需求追踪）
 
@@ -785,12 +934,13 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
    **Then** ZH 与 EN 引用必须分别列出并执行 parity check  
    **And** 不得因语义近似而合并成无法定位的单一条目。
 
-7. **以 Story 11.8 实施后的 Current State 为基准**
+7. **以 Story 11.8 独立完成后的 Current State 为基准**
 
    **Given** Story 11.8 已完成 Skill rename 和 routing 变更  
    **When** 执行最终 inventory  
    **Then** 报告必须反映 canonical current state  
-   **And** 必须单独保留旧 ID 和旧 `ir-grill/` compatibility expressions 清单。
+   **And** 必须单独保留旧 ID 和旧 `ir-grill/` compatibility expressions 清单
+   **And** 本 inventory 不得被定义为 Story 11.8 的后置 completion gate。
 
 8. **Inventory 写入可审计 Story Artifact**
 
@@ -809,9 +959,10 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
 
     **Given** 机器扫描已产生 canonical matches  
     **When** 校验 inventory 完整性  
-    **Then** 每一条 match 必须对应到报告条目  
-    **And** 任何未分类或遗漏的 match 都必须使 Story 失败  
-    **And** 不得用抽样结果宣称完整。
+   **Then** 每一条 match 必须对应到报告条目
+   **And** 任何未分类或遗漏的 match 都必须使 Story 失败
+   **And** 不得用抽样结果宣称完整
+   **And** inventory completion 表示机器 match 已 100% match-to-entry，不表示所有 grill references 都应删除、已修正或已获用户批准。
 
 11. **Read-Only Audit Boundary（只读审计边界）**
 
@@ -825,8 +976,44 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
 
     **Given** inventory 已完成  
     **When** 向用户交付 Story 11.10 结果  
-    **Then** 必须先展示清单摘要和高风险/歧义项，再明确请求用户确认  
-    **And** 不得把“已列出”解释为用户已经批准后续修改。
+   **Then** 必须先展示清单摘要和高风险/歧义项，再明确请求用户确认
+   **And** 不得把“已列出”解释为用户已经批准后续修改。
+
+13. **Story 11.8 Contract Regression 与其他治理建议分离**
+
+   **Given** broad inventory 发现 active exact-old-ID 或 active old `ir-grill/` output-path expression
+   **When** 对 match 分类
+   **Then** 必须将其标记为 Story 11.8 contract regression，并在高风险摘要中单独呈现
+   **And** 其他 generic grill semantic、relationship 或 parity 风险必须分类为等待人工确认的后续治理候选
+   **And** 两类 finding 均不得在本 Story 中自动修改 canonical definitions 或回写 Story 11.8。
+
+### Dependency Gate（依赖门禁）
+
+- 必须以前置 Story 11.1–11.9 的 current state 为 baseline，尤其消费 Story 11.8 已完成的新 canonical IDs、新 output root、rename mapping 与 bounded exact-scan evidence。
+- 本 Story 的完成条件是 broad inventory 对机器扫描结果 100% match-to-entry、分类完整、关系摘要完整并已请求人工确认；不得依赖未来治理 Story。
+
+### Anchor Contract Map（锚点契约映射）
+
+- **Contract**：FR66a、Story 11.8 bounded rename/routing contract、canonical source root 与 Story 11.10 read-only audit boundary。
+- **Functional**：case-insensitive broad grill scanner、match classifier、ZH/EN parity mapper、caller/callee/artifact-consumer relationship summary 与 auditable report writer。
+- **Evidence**：扫描命令与 scope、Git tree identity、raw match count、deduplicated entries、match-to-entry completeness、classification counts 与 human-confirmation handoff。
+- **Guidance**：Story 11.8 exact literals 是 regression classification boundary；其他 grill semantics 是后续治理候选，不自动扩大本 Story 写入范围。
+
+### Equivalent Implementation Policy（等价实现策略）
+
+允许调整 scanner、deduplication 或 report generator 的内部实现，但不得降低 canonical corpus coverage、逐项定位、ZH/EN parity、match-to-entry completeness、read-only boundary、regression classification 与 human-confirmation gate。
+
+### Evidence Plan（证据计划）
+
+- 以可复现 broad scan 与 raw output identity 证明搜索范围完整。
+- 以一对一 match-to-entry reconciliation 证明没有遗漏或未分类 match。
+- 以 relationship summary 与 ZH/EN parity section 证明语义关系没有被压缩为不可定位摘要。
+- 以 filesystem/canonical source diff 证明本 Story 除允许的 audit artifacts 与 tracking 外保持 read-only。
+- 以 final handoff 证明高风险、Story 11.8 regression 与后续治理候选已分离并请求人工确认。
+
+### Anchor Evidence Summary（锚点证据摘要）
+
+本节由 Story implementation 与 review 阶段填写；当前仅定义所需证据，不预先宣称 inventory 已完成或用户已确认。
 
 ### Requirement Traceability（需求追踪）
 
