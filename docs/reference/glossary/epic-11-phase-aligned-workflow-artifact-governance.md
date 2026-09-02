@@ -161,6 +161,41 @@
 | **read-only audit boundary** | 只读审计边界 | 盘点阶段只收集和分类证据，不据此擅自更名、删除或重写被审计的 canonical definitions。 |
 | **human confirmation** | 人工确认 | 人类先审阅清单摘要、高风险项和歧义项，再明确决定是否授权后续修改；“已列出”不等于“已批准”。 |
 
+## Story Expansion Terms（Story 扩展术语）
+
+本节基于 `Story 11.1–11.10` 的 `ready-for-dev` 实施上下文补充术语。它只解释 planned intent、acceptance contract 与 evidence plan，不表示对应实现、tests 或 Flow Gate 已完成。
+
+| Term | 中文直译 | Definition |
+|---|---|---|
+| **strict-serial predecessor gate** | 严格串行前序门禁 | 后续 Story 启动前必须核验全部前序 Story 已 `done`，且 current、target-matched completion Gate 已通过的门禁。`ready-for-dev` 规划文件不能替代前序完成证据。 |
+| **lifecycle context** | 生命周期上下文 | Resolver 接收的 fresh/existing 显式输入，用于决定 default、explicit config 或 fallback；不得仅凭字段缺失猜测安装状态。 |
+| **per-field resolution mode** | 逐字段解析模式 | 每个 artifact field 独立记录的 `resolutionMode`；mixed existing config 不能被压缩成单一 config-level mode。 |
+| **display-safe path** | 展示安全路径 | 可进入 public JSON、manifest/index、issue details 或 snapshot 的 project-relative POSIX path；不得包含 absolute、home、temporary/cache 或 credential-bearing 路径。 |
+| **cross-output reconciliation** | 跨输出核对 | 对 config、directory tree、manifest/index 与 Ready Summary 中的同一组 resolved roots 逐项核对，证明所有 projections 消费同一 contract。 |
+| **zero partial write** | 零部分写入 | 任一授权、锁或路径校验 blocker 出现时，在首个写入前停止，并以 before/after filesystem evidence 证明没有留下部分 config、目录或 manifest。 |
+| **configured/resolved/actual path reconciliation** | 配置/解析/实际路径核对 | 分离并核对 `configuredRoot`、`resolvedRoot` 与 `actualConsumedPath`，用于识别 config/artifact mismatch，而不修改任何一方。 |
+| **byte-identical preservation** | 字节级不变保全 | Lifecycle operation 前后对 workflow-owned artifacts 做 content hash 或 byte comparison，证明 compatibility/diagnostic 流程没有迁移或改写历史产物。 |
+| **three-plane separation** | 三平面分离 | Analysis Artifact、Project Knowledge 与 Public Documentation 各自具有独立写入职责；Analysis producers 可读取 Project Knowledge，但不得向其或 `docs/` 写 research output。 |
+| **active-default negative scan** | 当前默认值负向扫描 | 对 canonical corpus 扫描并证明旧 producer path、Skill ID 或 title-bearing pattern 不再作为 active default；明确的 compatibility、legacy 或 fixture expression 必须单独分类。 |
+| **discovery shape** | 发现形态 | Subject document discovery 的结构化形态，例如 `whole-only`、`sharded-only` 或 `whole+sharded`；字段名为 `discoveryShape`。 |
+| **invocation-scoped explicit selection** | 单次调用显式选择 | Whole 与 sharded 同时存在时，由当前 invocation 明确选择一种输入；选择只对本次调用有效，不删除、覆盖或修改未选版本。 |
+| **ambiguity status** | 歧义状态 | 记录 whole/sharded 输入是否存在未解决歧义的 evidence field；无显式 selection 的 `whole+sharded` 必须 block。 |
+| **invalid sharded shape** | 无效分片形态 | 存在 shard files 但缺少 owning `index.md` 的阻断状态；Consumer 不得猜测 shard 顺序或集合。 |
+| **broken shard reference** | 损坏的分片引用 | `index.md` 引用了缺失、不可读或越出 authoritative subject directory 的 shard 时产生的阻断状态。 |
+| **zero progress mutation** | 零进度变更 | Blocker 发生时不写 artifact，也不更新 resume/progress metadata；用于证明 read-only block 没有留下半完成状态。 |
+| **on-demand directory** | 按需目录 | Installer 不预创建、仅在对应 producer 实际需要时创建的子目录；Story 11.6 的 `ux/design-system/` 属此类。 |
+| **relative-link reconciliation** | 相对链接核对 | Artifact 路径下移后，逐项验证 Markdown/HTML links、screenshots、local assets 与 cross-document navigation 仍解析到 project boundary 内。 |
+| **invocation-fixed runtime date** | 单次调用固定运行日期 | Workflow 在一次 invocation 开始时生成并固定的日期，后续 steps 共用它，避免跨日导致 report target 漂移。 |
+| **same-day target conflict** | 同日报告目标冲突 | 当日 canonical report target 已存在时的 pre-write blocker；无论内容相同或不同都不得 overwrite、append、truncate、delete、reuse 或生成 suffix。 |
+| **bounded surface manifest** | 有界变更面清单 | 对 exact old IDs/paths 相关的 package、metadata、caller、docs、tests 与 fixtures 建立的完整表面清单，用于证明 rename/routing closure 未漏项且未扩大到 generic semantics。 |
+| **fresh-only-new projection** | 新安装仅投影新标识 | Fresh install 只生成新 canonical Skill IDs，不生成 old alias package、help entry 或 phase row；旧 ID 仅保留 typed compatibility mapping。 |
+| **modified-old-package protection** | 已修改旧包保护 | Update rename/reprojection 遇到用户修改过的 old package 时，将其视为 protected conflict，不覆盖或删除。 |
+| **single `$cr_dir` propagation** | 单一 `$cr_dir` 传递 | Orchestrator 只解析一次 canonical CR directory identity，并显式传给 CR01–06；下游不得用 title、slug 或 filename 重新推导。 |
+| **dual-directory ambiguity** | 双目录歧义 | Canonical 与 legacy CR directories 同时存在且无法唯一确定 current round 时的阻断状态；必须在任何 round write 或 progress mutation 前停止。 |
+| **raw-match reconciliation** | 原始匹配核对 | Broad scan 的每个 machine match 必须 1:1 映射到 inventory entry，并证明 `unmapped=0`；100% reconciliation 只证明盘点完整，不代表修改已获批。 |
+| **stable entry identity** | 稳定条目标识 | 基于 normalized source path、line 与 literal occurrence 形成的 inventory entry identity；不得把不同语言或语义角色的 match 合并。 |
+| **dirty-worktree scan identity** | 脏工作树扫描标识 | 除 commit/tree 外，记录未提交 canonical changes、normalized command 与 raw match artifact hash，使 broad inventory 能复现实际被扫描的 current state。 |
+
 ## Common Distinctions（常见区别）
 
 | Do Not Confuse | Difference |
@@ -184,3 +219,7 @@
 | Runtime 边界解释 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
 | 文件所有权术语 | [`file-ownership.md`](file-ownership.md) |
 | 配置与 customization 参考 | [`../config-and-customization.md`](../config-and-customization.md) |
+
+---
+
+*本文档由 speclite-terminology-governance Skill 自动生成*
