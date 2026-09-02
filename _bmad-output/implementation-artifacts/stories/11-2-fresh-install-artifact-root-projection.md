@@ -63,6 +63,7 @@ Status: ready-for-dev
 ### Contract Decision Required Before Development（开发前必须关闭的契约决策）
 
 - `SPEC 04` 当前 public manifest 与 `CommandResult` 只暴露单一 `artifactRoot`。Kickoff 必须先决定逐-root projection 的 container、exact fields、required/optional、ordering、backward compatibility 与 `schemaVersion`；未关闭时为 `DECISION_NEEDED`，generator/presenter 不得临场发明 public shape。
+- `SPEC 01` 拥有 public `CommandResult` JSON schema，`SPEC 04` 拥有 manifest/index public fields 与 schema evolution。若本 Story 需要新增或改变 public JSON / manifest shape，必须先取得 owning SPEC 同变更更新；若不改 schema，kickoff 必须记录 no-schema-change rationale，说明七 root evidence 如何通过既有字段表达，且不得由实现代码临场决定 actual public shape。
 
 ### Technical Requirements（技术要求）
 
@@ -94,7 +95,7 @@ Status: ready-for-dev
 
 - Hard predecessor：Story 11.1 必须 `done`，其 current completion Gate 的 `target/storyKey` 精确匹配且结论为 `PASS` / `PASS_EQUIVALENT`。
 - Required gate mode：`story-kickoff`；报告路径：`{implementation_artifacts}/flow-gates/11-2-fresh-install-artifact-root-projection-story-kickoff-gate.md`。
-- 若 shared resolver、mode literals、unresolved-token diagnostic 或 consumer handoff 未完成，Gate 必须停止；不得在 11.2 内临时补写 11.1 contract 后宣称前置已满足。
+- 若 shared resolver、mode literals、unresolved-token diagnostic、consumer handoff、`SPEC 01` / `SPEC 04` owner decision、同变更更新或 no-schema-change rationale 未完成，Gate 必须停止；不得在 11.2 内临时补写 11.1 contract 或 public schema shape 后宣称前置已满足。
 
 ## Anchor Contract Map（锚点契约映射）
 
@@ -130,6 +131,11 @@ Status: ready-for-dev
 - `src/diagnostics/output.ts`、`src/diagnostics/install-presentation-context.ts`、`src/installer/ready-check.ts`：呈现实际 planes；保留 human/JSON parity、manifest/index/mirror blocking checks 与 localized presentation。
 - `assets/source/speclite/sdlc-skills/module.yaml`：声明 canonical directories/defaults；不得成为第二真源。
 - `test/config-initialization.test.ts`、`test/runtime-structure.test.ts`、`test/install-progress-ready-summary.test.ts` 及相关 fixtures。
+
+### Owner-gated Contract Files（Owner 决策门禁文件）
+
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`：仅当 owner decision 批准 public `CommandResult` JSON schema 变更时同变更更新；否则在 kickoff 记录 no-schema-change rationale。
+- `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`：仅当 owner decision 批准 manifest/index public shape 或 schema evolution 变更时同变更更新；否则在 kickoff 记录 no-schema-change rationale。
 
 ### Explicitly Deferred Files（明确延后）
 
