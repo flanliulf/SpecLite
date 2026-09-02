@@ -54,6 +54,7 @@ Status: ready-for-dev
 - Kickoff report：`{implementation_artifacts}/flow-gates/11-8-rename-and-relocate-implementation-readiness-skills-story-kickoff-gate.md`。
 - 必须独立完成；不得依赖 11.9/11.10 或人工确认。
 - Old-ID deprecation 与 modified-old-package conflict 的 stable diagnostic contract 未关闭时，Kickoff 必须返回 `DECISION_NEEDED`。
+- stable diagnostic contract 必须明确由 `SPEC 07` registry 新增承载，或记录 no-new-ID reuse rationale；producer/activation/update plan 不得输出 free-form deprecation 或 modified-old-package issue。
 
 ## Anchor Contract Map（锚点契约映射）
 
@@ -74,6 +75,7 @@ Status: ready-for-dev
 - `module.yaml`、`module-help.csv`、`src/modules/module-metadata.ts`、`src/manifest/manifest-schema.ts`、`src/manifest/manifest-generator.ts`、`src/validation/rules/manifest-schema.ts`、`src/update/update-plan.ts`；保留 schema compatibility、ownership/hash conflict 与 plan-before-write。
 - 已知 bounded exact-match surfaces：source `README.md` / `README.en.md`、PM/Architect `customize.toml`、Create PRD `step-12-complete.md`、readiness check `step-01` 至 `step-06`、active docs、manifest/validate tests 与 fresh-install tree/index snapshots。Kickoff 必须刷新 exact scan，并逐项记录 update 或 compatibility/legacy/fixture classification。
 - 新增 `test/implementation-readiness-rename-routing.test.ts` 与 surface-manifest/classification fixture。
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`：仅当 old-ID deprecation 或 modified-old-package conflict 需要新增 stable issue ID 时由 owner-gated 同变更更新；若复用既有 ID，kickoff 必须记录 no-new-ID reuse rationale，并让 compat/deprecation/update fixtures 断言 category、stable code、details 与 redaction。
 
 ## References（参考资料）
 
