@@ -170,8 +170,8 @@
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "3-solutioning",
       "entryLabel": "Check Implementation Readiness",
-      "canonicalSkillId": "speclite-check-implementation-readiness",
-      "activationTarget": ".claude/skills/speclite-check-implementation-readiness/SKILL.md",
+      "canonicalSkillId": "speclite-implementation-readiness-check",
+      "activationTarget": ".claude/skills/speclite-implementation-readiness-check/SKILL.md",
       "targetIds": [
         "claude",
         "agents"
@@ -214,8 +214,8 @@
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "3-solutioning",
       "entryLabel": "IR Grill",
-      "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
-      "activationTarget": ".claude/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+      "canonicalSkillId": "speclite-implementation-readiness-grill-consistency-reviewer",
+      "activationTarget": ".claude/skills/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.md",
       "targetIds": [
         "claude",
         "agents"

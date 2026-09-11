@@ -220,6 +220,9 @@ async function buildIdeMirrorProjectionUnsafe(input: {
     skillIndexEntries.push({
       schemaVersion: "speclite.skill-index.v1",
       canonicalSkillId: entry.canonicalSkillId,
+      ...(entry.renamedFromCanonicalSkillIds.length === 0
+        ? {}
+        : { renamedFromCanonicalSkillIds: entry.renamedFromCanonicalSkillIds }),
       moduleId: entry.module.code,
       sourcePackagePath: sourceRefRoot,
       canonicalPackageHash,
@@ -329,6 +332,7 @@ function createPackageEntries(modules: OfficialModule[]): Array<{
   module: OfficialModule;
   packageRoot: string;
   canonicalSkillId: string;
+  renamedFromCanonicalSkillIds: string[];
   helpEntries: ModuleHelpEntry[];
 }> {
   const entries = modules.flatMap((module) =>
@@ -338,6 +342,7 @@ function createPackageEntries(modules: OfficialModule[]): Array<{
         module,
         packageRoot,
         canonicalSkillId,
+        renamedFromCanonicalSkillIds: module.skillRenames?.[canonicalSkillId] ?? [],
         helpEntries: module.helpEntries.filter((help) => help.canonicalSkillId === canonicalSkillId),
       };
     }),

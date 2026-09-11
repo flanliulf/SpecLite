@@ -92,7 +92,7 @@ flowchart LR
 | Brownfield 技术栈 | `speclite-brownfield-backend-tech-stack-digger`；backend-specific ecosystem workflows 见 `docs/reference/skills/ecosystem-skills.md` | code-fact based backend tech-stack reports。 |
 | 产品与计划 | `speclite-product-brief`、`speclite-prfaq`、`speclite-create-prd` | brief、PRFAQ、PRD。 |
 | 方案设计 | `speclite-create-architecture`、`speclite-create-epics-and-stories` | architecture、epics、stories。 |
-| 质量检查 | `speclite-ir-grill-consistency-reviewer`、`speclite-story-review-*`、`speclite-flow-gate`、`speclite-code-review-*` | grill records、review summary、evaluation、fix summary、gate report。 |
+| 质量检查 | `speclite-implementation-readiness-grill-consistency-reviewer`、`speclite-story-review-*`、`speclite-flow-gate`、`speclite-code-review-*` | grill records、review summary、evaluation、fix summary、gate report。 |
 | 目标编排 | `speclite-goal-orchestrator-epic-story-review-runner`、`speclite-goal-orchestrator-epic-story-code-review-runner` | `goal-execute-records/` 下的 PLAN、experiment 记录和闭环总结。 |
 | 实现执行 | `speclite-create-story`、`speclite-dev-story`、`speclite-quick-dev` | story、implementation、tests。 |
 | 发布运维 | `speclite-npm-publisher` | npm release report。 |

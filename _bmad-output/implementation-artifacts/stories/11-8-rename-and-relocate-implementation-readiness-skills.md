@@ -1,6 +1,6 @@
 # Story 11.8: Rename And Relocate Implementation Readiness Skills（更名并迁移 Implementation Readiness Skills）
 
-Status: ready-for-dev
+Status: done
 
 ## Story（故事）
 
@@ -24,12 +24,12 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] 核验 11.1–11.7 completion Gates，运行 11.8 kickoff并冻结 bounded surface manifest。
-- [ ] 先建立 identity/routing/rename/update/drift/legacy failing tests。
-- [ ] Rename 两 package directories/frontmatter/self refs，更新 metadata/help/registry/activation 与 exact direct callers。
-- [ ] 实现 `renamedFromCanonicalSkillIds` projection、activation/deprecation 与 update rename plan；保护 drifted old package。
-- [ ] 将两个 outputs 路由到 Solutioning fixed root，分别保持 basenames；保留 legacy artifacts。
-- [ ] 执行 exact-old-ID/path scan，对每个 match 分类；运行 focused suites、build、diff check 与独立 completion Gate。
+- [x] 核验 11.1–11.7 completion Gates，运行 11.8 kickoff并冻结 bounded surface manifest。
+- [x] 先建立 identity/routing/rename/update/drift/legacy failing tests。
+- [x] Rename 两 package directories/frontmatter/self refs，更新 metadata/help/registry/activation 与 exact direct callers。
+- [x] 实现 `renamedFromCanonicalSkillIds` projection、activation/deprecation 与 update rename plan；保护 drifted old package。
+- [x] 将两个 outputs 路由到 Solutioning fixed root，分别保持 basenames；保留 legacy artifacts。
+- [x] 执行 exact-old-ID/path scan，对每个 match 分类；运行 focused suites、build、diff check 与独立 completion Gate。
 
 ## Dev Notes（开发备注）
 
@@ -87,23 +87,51 @@ Status: ready-for-dev
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
-待实现 Agent 填写。
+GPT-5
 
 ### Completion Notes List（完成说明）
 - 终极上下文引擎分析已完成 —— 已创建完整开发者指南。
-- Story 尚未实现；new IDs/path 不得被描述为 current runtime state。
+- Exact target-matched kickoff 为 `PASS`；old-ID redirect 与 modified-old drift 复用诊断合同已唯一关闭，无 `DECISION_NEEDED`。
+- 两个 canonical packages、ZH/EN/frontmatter/self refs、module/help/direct callers 已 exact rename；fresh projection 仅含新 IDs，并带 `renamedFromCanonicalSkillIds`。
+- 两个 Skills 均写入 `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/`；readiness 与 grill basenames 保持不变，legacy `ir-grill/` 只读原位发现。
+- Update plan 显式记录 `canonical-skill-renamed` 与 replacement ID；modified old package 返回 redaction-safe `file-integrity.hash-mismatch` + `update.conflicts`，保持零写入。
+- Focused final `3 files / 43 tests passed`；build、docs、density、packaging、canonical strict 与 diff check 通过。Full suite `677 passed / 12 failed / 4 todo`，十二项仅为范围外 drawer 令 fixed counts 从 68 变 69，故 completion gate 为 `PASS_EQUIVALENT`。
 
 ### File List（文件清单）
 - `_bmad-output/implementation-artifacts/stories/11-8-rename-and-relocate-implementation-readiness-skills.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/flow-gates/11-8-rename-and-relocate-implementation-readiness-skills-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-8-rename-and-relocate-implementation-readiness-skills-story-completion-gate.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/`
+- `assets/source/speclite/sdlc-skills/module.yaml`
+- `assets/source/speclite/sdlc-skills/module-help.csv`
+- `src/modules/module-metadata.ts`
+- `src/ide/target-writer.ts`
+- `src/manifest/manifest-schema.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/update/update-plan.ts`
+- `test/implementation-readiness-rename-routing.test.ts`
+- `test/update-planning.test.ts`
+- `test/fixtures/implementation-readiness-rename-routing/bounded-surfaces.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/{skill-index-full.json,help-index-full.json,phase-coverage-full.json}`
+- `test/fixtures/fresh-install-empty-project/expected/installed-tree.txt`
+- `assets/source/speclite/{README.md,README.en.md}` 与 bounded exact-ID direct callers（由 surface manifest / exact scan 分类）
+- `docs/reference/skills/sdlc-workflows.md`
+- `docs/reference/workflow-artifact-layout.md`
+- `release/packaging-manifest.json`
 
 ## Anchor Evidence Summary（锚点证据摘要）
-- Bounded manifest / exact scan / tests / gates：待实际执行填写。
+- Contract：两个新 canonical identities 与全局唯一 mapping 通过 module/schema/projection assertions；fresh indexes 不含 old active rows。
+- Functional：两个 fixed Solutioning routes、readiness basename 与 grill record basenames 通过 package/help/step assertions。
+- Evidence：bounded surface manifest、exact old-ID/path classified scan、old-ID redirect、clean rename reprojection、modified-old zero-write protection与legacy原位发现均有 focused tests。
+- Gate：kickoff=`PASS`；completion=`PASS_EQUIVALENT`，唯一 caveat 为范围外 drawer fixed-count drift。
 
 ## Change Log（变更记录）
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 IR Skill rename、Solutioning routing、compatibility 与独立 evidence 上下文。 | Fancyliu / Codex |
+| 2026-09-05 | 1.0 | 完成 exact rename、mapping/projection、Solutioning route、safe update/drift/legacy保护与独立 completion evidence。 | Codex |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*

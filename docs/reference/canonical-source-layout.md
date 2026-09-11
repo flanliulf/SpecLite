@@ -82,7 +82,7 @@ Release packaging manifest 必须包含 `assets/source/speclite/ecosystems/**` �
 |---|---|---|
 | `1-analysis/` | 研究、brownfield baseline、通用技术栈分析、产品发现和文档治理。 | `speclite-brownfield-context-builder`、`speclite-brownfield-backend-tech-stack-digger`、`speclite-write-opensource-docs` |
 | `2-plan-workflows/` | PRD、UX 和产品规划 Agent。 | `speclite-agent-pm`、`speclite-agent-ux-designer` |
-| `3-solutioning/` | 架构、Epics/Stories、Story Review 和 readiness。 | `speclite-agent-architect`、`speclite-story-review-01-reviewer`、`speclite-ir-grill-consistency-reviewer` |
+| `3-solutioning/` | 架构、Epics/Stories、Story Review 和 readiness。 | `speclite-agent-architect`、`speclite-story-review-01-reviewer`、`speclite-implementation-readiness-grill-consistency-reviewer` |
 | `4-implementation/` | Sprint、Story、Flow Gate、Dev Story、Code Review、QA 和 Retrospective。 | `speclite-flow-gate`、`speclite-dev-story`、`speclite-code-review-01-reviewer`、`speclite-goal-orchestrator-epic-story-review-runner`、`speclite-goal-orchestrator-epic-story-code-review-runner` |
 | `5-devops/` | 发布和运维流程。 | `speclite-npm-publisher` |
 

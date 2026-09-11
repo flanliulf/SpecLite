@@ -140,19 +140,19 @@ The Story Review workflow lives under `sdlc-skills/3-solutioning/` and uses the 
 
 IR grill consistency review lives under `sdlc-skills/3-solutioning/`:
 
-- `speclite-ir-grill-consistency-reviewer`: runs strict-serial implementation-readiness consistency grill across PRD, UX, Architecture, and Epics / Stories, and writes process records under `{planning_artifacts}/ir-grill`.
+- `speclite-implementation-readiness-grill-consistency-reviewer`: runs strict-serial implementation-readiness consistency grill across PRD, UX, Architecture, and Epics / Stories, and writes process records under `{solutioning_artifacts}/implementation-readiness-report/grill-consistency`.
 
 Epic-level goal orchestration workflows live under `sdlc-skills/4-implementation/`:
 
 - `speclite-goal-orchestrator-epic-story-review-runner`: orchestrates strict-serial SR reviewer / evaluator / fixer loops for an Epic and keeps progress records under `story-reviews/.../goal-execute-records/`.
-- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops for every Story in an Epic and keeps progress records under `code-reviews/.../goal-execute-records/`.
+- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops, resolves and freezes one `directoryContext` from numeric Story identity, requires CR01–06 to validate that context before writes, and keeps progress records under the same `goal-execute-records/`.
 
 The unnumbered `speclite-code-review` is no longer a canonical source skill entrypoint. Code review starts with `speclite-code-review-01-reviewer`, then continues through the numbered CR2/CR3/CR6 skills for evaluation, fixes, and finalization.
 
 Review artifact directories are:
 
 - `stories/`: Story spec files.
-- `code-reviews/`: CR summaries, evaluations, and fix records.
+- `code-reviews/{story-id}-code-review/`: all review, evaluation, fix, rules, TODO-result, finalizer, `.tmp/`, and goal records for one Story. Titles/slugs never name a new directory; one unfinished legacy-only run resumes in place, while dual/multi ambiguity blocks before writes without migration.
 - `story-reviews/`: SR summaries, evaluations, and revision records.
 - `cr-rules/`: CR backlog, extracted rules, and cross-Story TODOs.
 - `retrospectives/`: Epic/Sprint retrospective summaries.

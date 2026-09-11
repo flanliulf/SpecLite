@@ -162,19 +162,19 @@ Story Review 工作流位于 `sdlc-skills/3-solutioning/`，采用 01-03 编号�
 
 IR grill consistency review 位于 `sdlc-skills/3-solutioning/`：
 
-- `speclite-ir-grill-consistency-reviewer`：对 PRD、UX、Architecture、Epics / Stories 做严格串行 implementation-readiness 一致性 grill，并把过程记录写入 `{planning_artifacts}/ir-grill`。
+- `speclite-implementation-readiness-grill-consistency-reviewer`：对 PRD、UX、Architecture、Epics / Stories 做严格串行 implementation-readiness 一致性 grill，并把过程记录写入 `{solutioning_artifacts}/implementation-readiness-report/grill-consistency`。
 
 Epic 级目标编排工作流位于 `sdlc-skills/4-implementation/`：
 
 - `speclite-goal-orchestrator-epic-story-review-runner`：按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环，并在 `story-reviews/.../goal-execute-records/` 下维护进度记录。
-- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环，并在 `code-reviews/.../goal-execute-records/` 下维护进度记录。
+- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环；从 numeric Story ID 单次解析并冻结 `directoryContext`，CR01–06 在写入前用 production validator 校验相同 context，并在同一 `goal-execute-records/` 下维护进度记录。
 
 非编号 `speclite-code-review` 已不再作为 canonical skill 源头入口；代码审查链路从 `speclite-code-review-01-reviewer` 开始，并由 CR2/CR3/CR6 等编号 skill 完成评估、修复与收尾。
 
 Review 产物目录约定如下：
 
 - `stories/`：Story spec 文件。
-- `code-reviews/`：CR summary、evaluation 和修复记录。
+- `code-reviews/{story-id}-code-review/`：同一 Story 的 CR summary、evaluation、fix、rules、TODO result、finalizer、`.tmp/` 与 goal records；title/slug 不参与新目录名。唯一 unfinished legacy-only run 原位续写，dual/multi ambiguity 在写入前阻断，且不自动迁移 legacy。
 - `story-reviews/`：SR summary、evaluation 和修订记录。
 - `cr-rules/`：CR backlog、规则提炼和跨 Story TODO。
 - `retrospectives/`：Epic/Sprint 回顾总结。

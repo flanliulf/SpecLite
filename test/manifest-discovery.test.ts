@@ -141,12 +141,12 @@ describe("methodology discovery metadata generation", () => {
     const rows: PhaseCoverageRow[] = [
       createRow("4-implementation", "sdlc", "speclite-dev-story"),
       createRow("2-planning", "sdlc", "speclite-create-prd"),
-      createRow("3-solutioning", "sdlc", "speclite-check-implementation-readiness"),
+      createRow("3-solutioning", "sdlc", "speclite-implementation-readiness-check"),
     ];
 
     expect(createPhaseCoverage(rows).rows.map((row) => row.canonicalSkillId)).toEqual([
       "speclite-create-prd",
-      "speclite-check-implementation-readiness",
+      "speclite-implementation-readiness-check",
       "speclite-dev-story",
     ]);
     expect(getPhaseLabel("2-planning")).toBe("Planning");

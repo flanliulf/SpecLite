@@ -52,7 +52,7 @@ skill = "speclite-create-epics-and-stories"
 [[agent.menu]]
 code = "IR"
 description = "Ensure the PRD, UX, Architecture and Epics and Stories List are all aligned"
-skill = "speclite-check-implementation-readiness"
+skill = "speclite-implementation-readiness-check"
 
 [[agent.menu]]
 code = "CC"

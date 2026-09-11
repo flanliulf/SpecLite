@@ -1,0 +1,229 @@
+{
+  "schemaVersion": "speclite.implementation-readiness-rename-surfaces.v1",
+  "activeIds": [
+    "speclite-implementation-readiness-check",
+    "speclite-implementation-readiness-grill-consistency-reviewer"
+  ],
+  "candidateRoots": [
+    "assets/source/speclite",
+    "src",
+    "test",
+    "docs",
+    "README.md",
+    "release/packaging-manifest.json"
+  ],
+  "excludedPaths": [
+    "assets/source/speclite/docs/legacy",
+    "assets/source/speclite/core-skills/speclite-drawer-er-modeler",
+    "assets/source/speclite/core-skills/speclite-drawer-er-modeler.zip"
+  ],
+  "searchTokens": [
+    { "key": "old-id-check", "parts": ["speclite-check-", "implementation-readiness"] },
+    { "key": "old-id-grill", "parts": ["speclite-ir-", "grill-consistency-reviewer"] },
+    { "key": "legacy-placeholder", "parts": ["{planning_artifacts}", "/ir-grill"] },
+    { "key": "legacy-segment", "parts": ["/ir-", "grill/"] },
+    { "key": "legacy-default", "parts": ["_speclite-output/planning-artifacts", "/ir-grill"] },
+    { "key": "legacy-resolved", "parts": ["_speclite-output/2-planning-artifacts", "/ir-grill"] }
+  ],
+  "canonicalOutputDirectory": "{solutioning_artifacts}/implementation-readiness-report/grill-consistency",
+  "matchLedger": [
+    {
+      "path": "assets/source/speclite/sdlc-skills/module.yaml",
+      "token": "old-id-check",
+      "occurrence": 1,
+      "role": "compatibility-mapping",
+      "rationale": "active canonical identity declares its unique historical ID"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/module.yaml",
+      "token": "old-id-grill",
+      "occurrence": 1,
+      "role": "compatibility-mapping",
+      "rationale": "active canonical identity declares its unique historical ID"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.md",
+      "token": "legacy-placeholder",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "read-only in-place historical discovery clause"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.md",
+      "token": "legacy-segment",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "read-only in-place historical discovery clause"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.en.md",
+      "token": "legacy-placeholder",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "read-only in-place historical discovery clause"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.en.md",
+      "token": "legacy-segment",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "read-only in-place historical discovery clause"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-01-document-discovery.md",
+      "token": "legacy-placeholder",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "bounded candidate for historical evidence discovery"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-01-document-discovery.md",
+      "token": "legacy-segment",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "bounded candidate for historical evidence discovery"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/workflow.md",
+      "token": "legacy-placeholder",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "read-only in-place historical record discovery clause"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/workflow.md",
+      "token": "legacy-segment",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "read-only in-place historical record discovery clause"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/record-output-spec.md",
+      "token": "legacy-placeholder",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "record contract preserves historical records in place"
+    },
+    {
+      "path": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/record-output-spec.md",
+      "token": "legacy-segment",
+      "occurrence": 1,
+      "role": "legacy-documentation",
+      "rationale": "record contract preserves historical records in place"
+    },
+    {
+      "path": "test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-full.json",
+      "token": "old-id-check",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "fresh projection snapshot records rename compatibility metadata"
+    },
+    {
+      "path": "test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-full.json",
+      "token": "old-id-grill",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "fresh projection snapshot records rename compatibility metadata"
+    },
+    {
+      "path": "test/implementation-readiness-rename-routing.test.ts",
+      "token": "old-id-check",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "focused rename mapping test input"
+    },
+    {
+      "path": "test/implementation-readiness-rename-routing.test.ts",
+      "token": "old-id-grill",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "focused rename mapping test input"
+    },
+    {
+      "path": "test/implementation-readiness-rename-routing.test.ts",
+      "token": "legacy-placeholder",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "focused legacy candidate assertion"
+    },
+    {
+      "path": "test/implementation-readiness-rename-routing.test.ts",
+      "token": "legacy-segment",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "focused legacy candidate assertion"
+    },
+    {
+      "path": "test/update-planning.test.ts",
+      "token": "old-id-check",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "clean update redirect matrix input"
+    },
+    {
+      "path": "test/update-planning.test.ts",
+      "token": "old-id-check",
+      "occurrence": 2,
+      "role": "regression-fixture",
+      "rationale": "modified historical package fixture input"
+    },
+    {
+      "path": "test/update-planning.test.ts",
+      "token": "old-id-check",
+      "occurrence": 3,
+      "role": "regression-fixture",
+      "rationale": "fresh install negative assertion"
+    },
+    {
+      "path": "test/update-planning.test.ts",
+      "token": "old-id-grill",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "clean update redirect matrix input"
+    },
+    {
+      "path": "test/update-planning.test.ts",
+      "token": "old-id-grill",
+      "occurrence": 2,
+      "role": "regression-fixture",
+      "rationale": "fresh install negative assertion"
+    },
+    {
+      "path": "test/update-planning.test.ts",
+      "token": "legacy-resolved",
+      "occurrence": 1,
+      "role": "regression-fixture",
+      "rationale": "real legacy lifecycle tree fixture root"
+    }
+  ],
+  "surfaceGroups": {
+    "canonicalPackages": [
+      "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check",
+      "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer"
+    ],
+    "moduleAndProjection": [
+      "assets/source/speclite/sdlc-skills/module.yaml",
+      "assets/source/speclite/sdlc-skills/module-help.csv",
+      "src/modules/module-metadata.ts",
+      "src/ide/target-writer.ts",
+      "src/manifest/manifest-schema.ts"
+    ],
+    "updateAndDiagnostics": [
+      "src/update/update-plan.ts",
+      "src/diagnostics/command-result-schema.ts"
+    ],
+    "freshInstallEvidence": [
+      "test/fixtures/fresh-install-empty-project/expected/installed-state/skill-index-full.json",
+      "test/fixtures/fresh-install-empty-project/expected/installed-state/help-index-full.json",
+      "test/fixtures/fresh-install-empty-project/expected/installed-state/phase-coverage-full.json",
+      "test/fixtures/fresh-install-empty-project/expected/installed-tree.txt"
+    ],
+    "publicGuidance": [
+      "assets/source/speclite/README.md",
+      "assets/source/speclite/README.en.md",
+      "docs/reference/skills/sdlc-workflows.md",
+      "docs/reference/workflow-artifact-layout.md"
+    ]
+  },
+  "allowedRoles": ["compatibility-mapping", "legacy-documentation", "regression-fixture"]
+}

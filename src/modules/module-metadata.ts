@@ -17,6 +17,7 @@ export type OfficialModule = {
   required: boolean;
   requiredDependencies: string[];
   packageRoots: string[];
+  skillRenames: Record<string, string[]>;
   capabilitySummary: string[];
   helpEntries: ModuleHelpEntry[];
   agents: ModuleAgentDescriptor[];
@@ -88,10 +89,35 @@ export async function discoverOfficialModules(input: {
 
   assertUniqueModuleCodes(modules);
   assertUniqueSkillIds(modules);
+  assertUniqueSkillRenames(modules);
   assertHelpEntriesReferenceDiscoveredPackageRoots(modules);
   assertKnownRequiredDependencies(modules);
 
   return modules.sort((left, right) => left.sourceDirectory.localeCompare(right.sourceDirectory));
+}
+
+export type CanonicalSkillIdentityResolution = {
+  canonicalSkillId: string;
+  requestedCanonicalSkillId: string;
+  redirected: boolean;
+};
+
+export function resolveCanonicalSkillIdentity(
+  modules: OfficialModule[],
+  requestedCanonicalSkillId: string,
+): CanonicalSkillIdentityResolution | undefined {
+  for (const module of modules) {
+    for (const packageRoot of module.packageRoots) {
+      const canonicalSkillId = path.posix.basename(packageRoot);
+      if (canonicalSkillId === requestedCanonicalSkillId) {
+        return { canonicalSkillId, requestedCanonicalSkillId, redirected: false };
+      }
+      if ((module.skillRenames[canonicalSkillId] ?? []).includes(requestedCanonicalSkillId)) {
+        return { canonicalSkillId, requestedCanonicalSkillId, redirected: true };
+      }
+    }
+  }
+  return undefined;
 }
 
 async function findModuleDirectories(sourceRoot: string): Promise<string[]> {
@@ -165,6 +191,7 @@ async function readOfficialModule(
     required: metadata.required,
     requiredDependencies: metadata.requiredDependencies,
     packageRoots,
+    skillRenames: metadata.skillRenames,
     capabilitySummary,
     helpEntries,
     agents: metadata.agents,
@@ -192,6 +219,7 @@ async function readModuleYaml(
   configPrompts: ModuleConfigPrompt[];
   agents: ModuleAgentDescriptor[];
   directories: string[];
+  skillRenames: Record<string, string[]>;
 }> {
   let parsed: unknown;
   try {
@@ -216,6 +244,7 @@ async function readModuleYaml(
   const version = readRequiredString(parsed, "version", sourceDirectory);
   const requiredDependencies = readStringArray(parsed.required_dependencies, sourceDirectory);
   const configTable = typeof parsed.config_table === "string" ? parsed.config_table : undefined;
+  const skillRenames = readSkillRenames(parsed.skill_renames, sourceDirectory);
   const moduleKind = readModuleKind(parsed, sourceDirectory);
   const ecosystemMetadata = readEcosystemMetadata({
     metadata: parsed,
@@ -241,7 +270,32 @@ async function readModuleYaml(
     configPrompts: readConfigPrompts(parsed),
     agents: readAgentDescriptors(parsed.agents, sourceDirectory, code),
     directories: readStringArray(parsed.directories, sourceDirectory).sort(),
+    skillRenames,
   };
+}
+
+function readSkillRenames(value: unknown, sourceDirectory: string): Record<string, string[]> {
+  if (value === undefined) return {};
+  if (!isRecord(value)) {
+    throw new ModuleMetadataError(
+      "module-metadata.invalid-skill-renames",
+      `skill_renames must be an object in ${sourceDirectory}`,
+    );
+  }
+  const result: Record<string, string[]> = {};
+  const seenOldIds = new Set<string>();
+  for (const [activeId, oldValue] of Object.entries(value)) {
+    const oldIds = readStringArray(oldValue, sourceDirectory);
+    if (oldIds.includes(activeId) || oldIds.some((oldId) => seenOldIds.has(oldId))) {
+      throw new ModuleMetadataError(
+        "module-metadata.invalid-skill-renames",
+        `skill_renames must map distinct old ids exactly once in ${sourceDirectory}`,
+      );
+    }
+    oldIds.forEach((oldId) => seenOldIds.add(oldId));
+    result[activeId] = [...new Set(oldIds)].sort();
+  }
+  return result;
 }
 
 function readModuleKind(
@@ -550,6 +604,32 @@ function assertUniqueSkillIds(modules: OfficialModule[]): void {
         );
       }
       seen.add(skillId);
+    }
+  }
+}
+
+function assertUniqueSkillRenames(modules: OfficialModule[]): void {
+  const activeIds = new Set(
+    modules.flatMap((module) => module.packageRoots.map((packageRoot) => path.posix.basename(packageRoot))),
+  );
+  const oldIds = new Set<string>();
+  for (const module of modules) {
+    for (const [activeId, renamedFromIds] of Object.entries(module.skillRenames)) {
+      if (!activeIds.has(activeId)) {
+        throw new ModuleMetadataError(
+          "module-metadata.invalid-skill-renames",
+          `skill_renames references missing active skill id: ${activeId}`,
+        );
+      }
+      for (const oldId of renamedFromIds) {
+        if (activeIds.has(oldId) || oldIds.has(oldId)) {
+          throw new ModuleMetadataError(
+            "module-metadata.invalid-skill-renames",
+            `Renamed skill id must be globally unique and inactive: ${oldId}`,
+          );
+        }
+        oldIds.add(oldId);
+      }
     }
   }
 }

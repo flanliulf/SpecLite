@@ -1,9 +1,14 @@
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { runUpdateCommand } from "../src/commands/update.js";
-import { RepairCommandResultSchema, UpdateCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
+import { runInstallCommand } from "../src/commands/install.js";
+import {
+  RepairCommandResultSchema,
+  UpdateCommandResultSchema,
+  UpdatePlanActionSchema,
+} from "../src/diagnostics/command-result-schema.js";
 import { renderUpdateHumanOutput } from "../src/diagnostics/output.js";
 import { hashBytes, hashFile, hashPackageDirectory } from "../src/manifest/hash.js";
 import {
@@ -11,7 +16,78 @@ import {
   finalizeCompletedUpdateTransaction,
 } from "../src/fs/update-transaction.js";
 
+const supportedRuntime = {
+  nodeVersion: "v22.12.0",
+  platform: "darwin",
+  platformRelease: "23.0.0",
+} as const;
+
 describe("update ownership planning", () => {
+  it("halts with the resolver issue before projecting an existing root symlink escape", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-root-failure-"));
+    const outsideRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-root-outside-"));
+    try {
+      await symlink(outsideRoot, path.join(tempRoot, "external-link"));
+      await writeProjectFile(tempRoot, "_speclite/config.toml", [
+        "[core]",
+        'project_name = "Base"',
+        'output_folder = "_speclite-output"',
+        "[modules.sdlc]",
+        'solutioning_artifacts = "external-link/solutioning"',
+        "",
+      ].join("\n"));
+      await writeInstalledState(tempRoot, [], {
+        installedModules: ["core", "sdlc"],
+        targetIds: ["agents"],
+      });
+
+      const outcome = await runUpdateCommand({
+        options: { yes: true },
+        runtime: { cwd: tempRoot, targetProject: "root-failure" },
+      });
+      const parsed = UpdateCommandResultSchema.parse(outcome.result);
+      expect(outcome.exitCode).toBe(1);
+      expect(parsed.issues).toContainEqual(expect.objectContaining({
+        issueId: "artifact-path.symlink-escape",
+        affectedPath: "project-config:modules.sdlc.solutioning_artifacts",
+      }));
+      expect(parsed.data.updatePlan.actions).toEqual([]);
+      expect(parsed.data.changedPaths).toEqual([]);
+      await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8"))
+        .rejects.toThrow();
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+      await rm(outsideRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts only typed canonical rename updates and skips", () => {
+    const base = {
+      affectedPath: ".agents/skills/old/SKILL.md",
+      ownership: "installer-owned",
+      expectedHash: "sha256:new",
+    } as const;
+    expect(UpdatePlanActionSchema.safeParse({
+      ...base,
+      action: "update",
+      reason: "canonical-skill-renamed",
+      replacementCanonicalSkillId: "active",
+    }).success).toBe(true);
+    expect(UpdatePlanActionSchema.safeParse({
+      ...base,
+      action: "update",
+      reason: "canonical-skill-renamed",
+    }).success).toBe(false);
+    for (const action of ["create", "update", "conflict"] as const) {
+      expect(UpdatePlanActionSchema.safeParse({ ...base, action, reason: "unchanged" }).success).toBe(false);
+      expect(UpdatePlanActionSchema.safeParse({
+        ...base,
+        action,
+        replacementCanonicalSkillId: "active",
+      }).success).toBe(false);
+    }
+  });
+
   it("blocks update planning when required project config cannot be resolved", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-config-required-"));
 
@@ -358,6 +434,267 @@ describe("update ownership planning", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("applies deterministic redirects for both historical IDs on both IDE targets", async () => {
+    const identities = [
+      ["speclite-check-implementation-readiness", "speclite-implementation-readiness-check"],
+      ["speclite-ir-grill-consistency-reviewer", "speclite-implementation-readiness-grill-consistency-reviewer"],
+    ] as const;
+    for (const target of ["agents", "claude"] as const) {
+      for (const [oldId, activeId] of identities) {
+        const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-skill-rename-"));
+        const oldPath = `.${target}/skills/${oldId}/SKILL.md`;
+        try {
+          await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+          const oldContents = "# historical installed package\n";
+          await writeProjectFile(tempRoot, oldPath, oldContents);
+          await writeGeneratedInstalledStateBaseline({
+            projectRoot: tempRoot,
+            installedModules: ["core", "sdlc"],
+            targetIds: [target],
+            skillEntries: [{
+              schemaVersion: "speclite.skill-index.v1",
+              canonicalSkillId: oldId,
+              moduleId: "sdlc",
+              sourcePackagePath: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}`,
+              canonicalPackageHash: await hashPackageDirectory(path.join(tempRoot, path.dirname(oldPath))),
+              installedTargets: [target],
+              phaseIds: ["solutioning"],
+            }],
+          });
+          const filesIndexPath = path.join(tempRoot, "_speclite/_config/files-index.json");
+          const filesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
+            schemaVersion: string;
+            entries: Array<Record<string, unknown>>;
+          };
+          filesIndex.entries.push(await filesIndexEntry(tempRoot, oldPath, oldContents, {
+            ownership: "installer-owned",
+            sourceRef: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}/SKILL.md`,
+            artifactKind: "ide-skill-package",
+          }));
+          await writeFile(filesIndexPath, `${JSON.stringify(filesIndex, null, 2)}\n`, "utf8");
+
+          const clean = UpdateCommandResultSchema.parse((await runUpdateCommand({
+            options: { yes: true },
+            runtime: { cwd: tempRoot, targetProject: "skill-rename-clean" },
+          })).result);
+          expect(clean.data.conflicts).toEqual([]);
+          expect(clean.data.writeAuthorized).toBe(true);
+          expect(clean.data.changedPaths).toContain(oldPath);
+          expect(clean.data.changedPaths).toContain(`.${target}/skills/${activeId}/SKILL.md`);
+          expect(clean.data.updatePlan.actions).toContainEqual(expect.objectContaining({
+            affectedPath: oldPath,
+            action: "update",
+            reason: "canonical-skill-renamed",
+            replacementCanonicalSkillId: activeId,
+          }));
+          const redirect = await readFile(path.join(tempRoot, oldPath), "utf8");
+          expect(redirect).toContain(`../${activeId}/SKILL.md`);
+          expect(redirect).toContain("only active implementation");
+          expect(redirect).not.toContain("historical installed package");
+          await expect(readFile(path.join(tempRoot, `.${target}/skills/${activeId}/SKILL.md`), "utf8"))
+            .resolves.toContain(`name: ${activeId}`);
+          const installedSkillIndex = JSON.parse(
+            await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
+          ) as { entries: Array<{ canonicalSkillId: string; renamedFromCanonicalSkillIds?: string[] }> };
+          expect(installedSkillIndex.entries.some((entry) => entry.canonicalSkillId === oldId)).toBe(false);
+          expect(installedSkillIndex.entries).toContainEqual(expect.objectContaining({
+            canonicalSkillId: activeId,
+            renamedFromCanonicalSkillIds: [oldId],
+          }));
+          const installedFilesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
+            entries: Array<{ path: string; hash: string }>;
+          };
+          expect(installedFilesIndex.entries).toContainEqual(expect.objectContaining({
+            path: oldPath,
+            hash: hashBytes(redirect),
+          }));
+          const stablePaths = [
+            oldPath,
+            `.${target}/skills/${activeId}/SKILL.md`,
+            "_speclite/_config/skill-index.json",
+            "_speclite/_config/files-index.json",
+          ];
+          const afterFirst = await captureFiles(tempRoot, stablePaths);
+          const repeated = UpdateCommandResultSchema.parse((await runUpdateCommand({
+            options: { yes: true },
+            runtime: { cwd: tempRoot, targetProject: "skill-rename-repeat" },
+          })).result);
+          expect(repeated.data.changedPaths).toEqual([]);
+          expect(repeated.data.conflicts.find((conflict) => conflict.affectedPath === oldPath)).toBeUndefined();
+          expect(repeated.data.updatePlan.actions.find((action) => action.affectedPath === oldPath))
+            .toEqual(expect.objectContaining({
+            affectedPath: oldPath,
+            action: "skip",
+            reason: "canonical-skill-renamed",
+            replacementCanonicalSkillId: activeId,
+          }));
+          await expectFilesUnchanged(tempRoot, afterFirst);
+        } finally {
+          await rm(tempRoot, { recursive: true, force: true });
+        }
+      }
+    }
+  }, 30_000);
+
+  it("blocks a modified historical package without projecting its replacement", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-skill-rename-drift-"));
+    const oldId = "speclite-check-implementation-readiness";
+    const oldPath = `.agents/skills/${oldId}/SKILL.md`;
+    try {
+      await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+      const indexedContents = "# indexed historical package\n";
+      await writeProjectFile(tempRoot, oldPath, indexedContents);
+      await writeGeneratedInstalledStateBaseline({
+        projectRoot: tempRoot,
+        installedModules: ["core", "sdlc"],
+        targetIds: ["agents"],
+        skillEntries: [{
+          schemaVersion: "speclite.skill-index.v1",
+          canonicalSkillId: oldId,
+          moduleId: "sdlc",
+          sourcePackagePath: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}`,
+          canonicalPackageHash: await hashPackageDirectory(path.join(tempRoot, path.dirname(oldPath))),
+          installedTargets: ["agents"],
+          phaseIds: ["solutioning"],
+        }],
+      });
+      const filesIndexPath = path.join(tempRoot, "_speclite/_config/files-index.json");
+      const filesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
+        entries: Array<Record<string, unknown>>;
+      };
+      filesIndex.entries.push(await filesIndexEntry(tempRoot, oldPath, indexedContents, {
+        ownership: "installer-owned",
+        sourceRef: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}/SKILL.md`,
+        artifactKind: "ide-skill-package",
+      }));
+      await writeFile(filesIndexPath, `${JSON.stringify(filesIndex, null, 2)}\n`, "utf8");
+      await writeFile(path.join(tempRoot, oldPath), "# user-modified historical package\n", "utf8");
+
+      const drifted = UpdateCommandResultSchema.parse((await runUpdateCommand({
+        options: { yes: true },
+        runtime: { cwd: tempRoot, targetProject: "skill-rename-drifted" },
+      })).result);
+      expect(drifted.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ issueId: "file-integrity.hash-mismatch", affectedPath: oldPath }),
+        expect.objectContaining({ issueId: "update.conflicts" }),
+      ]));
+      expect(drifted.data.conflicts).toContainEqual(expect.objectContaining({
+        affectedPath: oldPath,
+        reason: "installer-owned-drift",
+      }));
+      expect(drifted.data.changedPaths).toEqual([]);
+      await expect(lstat(path.join(tempRoot, ".agents/skills/speclite-implementation-readiness-check"))).rejects.toThrow();
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails all rename preconditions before any operation for content, mode, type and missing races", async () => {
+    for (const race of ["content", "mode", "type", "missing"] as const) {
+      const tempRoot = await mkdtemp(path.join(os.tmpdir(), `speclite-rename-precondition-${race}-`));
+      const oldPath = ".agents/skills/historical/SKILL.md";
+      const sentinelPath = ".agents/skills/active/SKILL.md";
+      try {
+        await writeProjectFile(tempRoot, oldPath, "old\n");
+        await writeProjectFile(tempRoot, sentinelPath, "before\n");
+        const precondition = {
+          absolutePath: path.join(tempRoot, oldPath),
+          affectedPath: oldPath,
+          hash: hashBytes("old\n"),
+          executable: false,
+        };
+        if (race === "content") await writeFile(precondition.absolutePath, "drift\n", "utf8");
+        if (race === "mode") await chmod(precondition.absolutePath, 0o755);
+        if (race === "type") {
+          await rm(precondition.absolutePath);
+          await mkdir(precondition.absolutePath);
+        }
+        if (race === "missing") await rm(precondition.absolutePath);
+        const result = await applyRecoverableUpdateTransaction({
+          projectRoot: tempRoot,
+          artifactRoot: "_speclite-output",
+          operations: [{
+            path: sentinelPath,
+            contents: "after\n",
+            executable: false,
+            oldHash: hashBytes("before\n"),
+          }],
+          preconditions: [precondition],
+        });
+        expect(result).toEqual(expect.objectContaining({
+          ok: false,
+          changedPaths: [],
+          issue: expect.objectContaining({
+            issueId: "file-integrity.recovery-blocked",
+            affectedPath: oldPath,
+            details: expect.objectContaining({
+              reason: race === "missing" ? "precondition-read-failed" : "precondition-changed",
+            }),
+          }),
+        }));
+        await expect(readFile(path.join(tempRoot, sentinelPath), "utf8")).resolves.toBe("before\n");
+        await expect(readFile(path.join(tempRoot, "_speclite/_config/.update-journal.json"), "utf8")).rejects.toThrow();
+      } finally {
+        await rm(tempRoot, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("keeps legacy readiness evidence byte-identical through install, update and repair", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-readiness-legacy-lifecycle-"));
+    const legacyRoot = "_speclite-output/2-planning-artifacts/ir-grill";
+    const legacyPaths = [
+      `${legacyRoot}/summary.md`,
+      `${legacyRoot}/goal-execute-records/round-1/PLAN.md`,
+      `${legacyRoot}/goal-execute-records/round-1/EXPERIMENTS.md`,
+      `${legacyRoot}/goal-execute-records/round-1/EXPERIMENT_NOTES.md`,
+    ];
+    try {
+      for (const legacyPath of legacyPaths) await writeProjectFile(tempRoot, legacyPath, `legacy:${legacyPath}\n`);
+      const before = await captureFiles(tempRoot, legacyPaths);
+      const beforeTree = await captureTree(tempRoot, legacyRoot);
+      const install = await runInstallCommand({
+        options: { yes: true, json: true },
+        runtime: { ...supportedRuntime, cwd: tempRoot, targetProject: "readiness-legacy-lifecycle" },
+      });
+      expect(install.exitCode).toBe(0);
+      expect(intersectPaths(install.installPlan?.plannedWrites.map((entry) => entry.path) ?? [], legacyPaths)).toEqual([]);
+      expect(intersectPaths(install.result.issues.map((issue) => issue.affectedPath), legacyPaths)).toEqual([]);
+      await expectFilesUnchanged(tempRoot, before);
+      expect(await captureTree(tempRoot, legacyRoot)).toEqual(beforeTree);
+      for (const target of ["agents", "claude"] as const) {
+        for (const oldId of ["speclite-check-implementation-readiness", "speclite-ir-grill-consistency-reviewer"] as const) {
+          await expect(lstat(path.join(tempRoot, `.${target}/skills/${oldId}`))).rejects.toThrow();
+        }
+      }
+
+      const update = UpdateCommandResultSchema.parse((await runUpdateCommand({
+        options: { yes: true },
+        runtime: { cwd: tempRoot, targetProject: "readiness-legacy-lifecycle" },
+      })).result);
+      expect(intersectPaths(update.data.updatePlan.actions.map((entry) => entry.affectedPath), legacyPaths)).toEqual([]);
+      expect(intersectPaths(update.data.changedPaths, legacyPaths)).toEqual([]);
+      expect(intersectPaths(update.data.conflicts.map((entry) => entry.affectedPath), legacyPaths)).toEqual([]);
+      expect(intersectPaths(update.issues.map((issue) => issue.affectedPath), legacyPaths)).toEqual([]);
+      await expectFilesUnchanged(tempRoot, before);
+      expect(await captureTree(tempRoot, legacyRoot)).toEqual(beforeTree);
+
+      await rm(path.join(tempRoot, ".agents/skills/speclite-implementation-readiness-check/SKILL.md"));
+      const repair = RepairCommandResultSchema.parse((await runUpdateCommand({
+        options: { repair: true, yes: true },
+        runtime: { cwd: tempRoot, targetProject: "readiness-legacy-lifecycle" },
+      })).result);
+      expect(intersectPaths(repair.data.repairPlan.actions.map((entry) => entry.affectedPath), legacyPaths)).toEqual([]);
+      expect(intersectPaths(repair.data.changedPaths, legacyPaths)).toEqual([]);
+      expect(intersectPaths(repair.data.conflicts.map((entry) => entry.affectedPath), legacyPaths)).toEqual([]);
+      expect(intersectPaths(repair.issues.map((issue) => issue.affectedPath), legacyPaths)).toEqual([]);
+      await expectFilesUnchanged(tempRoot, before);
+      expect(await captureTree(tempRoot, legacyRoot)).toEqual(beforeTree);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  }, 30_000);
 
   it("plans unchanged installer-owned files as skips and keeps apply result paths empty without authorization", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-unchanged-"));
@@ -1648,6 +1985,69 @@ async function writeGeneratedInstalledStateBaseline(input: {
     "_speclite/_config/files-index.json",
     `${JSON.stringify({ schemaVersion: "speclite.files-index.v1", entries }, null, 2)}\n`,
   );
+}
+
+async function captureFiles(projectRoot: string, relativePaths: string[]): Promise<Array<{
+  path: string;
+  bytes: Buffer;
+  hash: string;
+  executable: boolean;
+}>> {
+  return Promise.all(relativePaths.map(async (relativePath) => {
+    const absolutePath = path.join(projectRoot, relativePath);
+    const metadata = await lstat(absolutePath);
+    expect(metadata.isFile()).toBe(true);
+    expect(metadata.isSymbolicLink()).toBe(false);
+    const bytes = await readFile(absolutePath);
+    return {
+      path: relativePath,
+      bytes,
+      hash: await hashFile(absolutePath),
+      executable: (metadata.mode & 0o111) !== 0,
+    };
+  }));
+}
+
+async function expectFilesUnchanged(
+  projectRoot: string,
+  expected: Awaited<ReturnType<typeof captureFiles>>,
+): Promise<void> {
+  expect((await captureFiles(projectRoot, expected.map((entry) => entry.path))).map((entry) => ({
+    ...entry,
+    bytes: entry.bytes.toString("base64"),
+  }))).toEqual(expected.map((entry) => ({
+    ...entry,
+    bytes: entry.bytes.toString("base64"),
+  })));
+}
+
+async function captureTree(projectRoot: string, relativeRoot: string): Promise<Array<{
+  path: string;
+  type: "directory" | "file";
+}>> {
+  const entries: Array<{ path: string; type: "directory" | "file" }> = [];
+  async function visit(relativePath: string): Promise<void> {
+    const metadata = await lstat(path.join(projectRoot, relativePath));
+    expect(metadata.isSymbolicLink()).toBe(false);
+    if (metadata.isFile()) {
+      entries.push({ path: relativePath, type: "file" });
+      return;
+    }
+    expect(metadata.isDirectory()).toBe(true);
+    entries.push({ path: relativePath, type: "directory" });
+    for (const child of await readdir(path.join(projectRoot, relativePath))) {
+      await visit(path.posix.join(relativePath, child));
+    }
+  }
+  await visit(relativeRoot);
+  return entries.sort((left, right) => left.path.localeCompare(right.path));
+}
+
+function intersectPaths(candidates: Array<string | undefined>, protectedPaths: string[]): string[] {
+  const protectedSet = new Set(protectedPaths);
+  return candidates.filter((candidate): candidate is string =>
+    candidate !== undefined && protectedSet.has(candidate)
+  ).sort();
 }
 
 function localSourceDescriptor(): string {

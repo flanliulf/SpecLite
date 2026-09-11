@@ -1,0 +1,19 @@
+[core]
+project_name = ""
+user_name = ""
+communication_language = "Chinese"
+document_output_language = "Chinese"
+user_skill_level = "intermediate"
+output_folder = "{project-root}/_speclite-output"
+brainstorming_artifacts = "{project-root}/_speclite-output/0-brainstorming-artifacts"
+
+[modules.sdlc]
+analysis_artifacts = "{project-root}/_speclite-output/1-analysis-artifacts"
+planning_artifacts = "{project-root}/_speclite-output/2-planning-artifacts"
+solutioning_artifacts = "{project-root}/_speclite-output/3-solutioning-artifacts"
+implementation_artifacts = "{project-root}/_speclite-output/4-implementation-artifacts"
+devops_artifacts = "{project-root}/_speclite-output/5-devops-artifacts"
+project_knowledge = "{project-root}/_speclite-output/project-knowledge-base"
+
+# Runtime location: {project-root}/_speclite/config.toml
+# This file is a field-structure reference only and must not be used as runtime fallback.
