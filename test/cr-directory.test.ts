@@ -437,6 +437,59 @@ describe("Story 11.9 CR directory resolution", () => {
     });
   });
 
+  it("blocks with a stable issue when the boundary check itself hits ENOTDIR, ELOOP, or EACCES", async () => {
+    // implementation artifacts root is a regular file -> lstat(code-reviews) ENOTDIR
+    await withProject(async (projectRoot) => {
+      await put(projectRoot, IMPL, "not a directory");
+      const result = await resolveCrDirectory({ projectRoot, implementationArtifacts: IMPL, storyId: "11.9", reviewSeries: "restart" });
+      expect(result).toMatchObject({ ok: false, crDir: null, continuation: "block", legacyCrDirs: [] });
+      expect(result.issues[0]).toMatchObject({
+        issueId: "cr-directory.unreadable-candidate",
+        affectedPath: CODE_REVIEWS,
+        details: expect.objectContaining({ errorCode: "ENOTDIR" }),
+      });
+      expect(JSON.stringify(result)).not.toContain(projectRoot);
+      expect(() => ResolveCrDirectoryOutputSchema.parse(result)).not.toThrow();
+    });
+
+    // self-looping symlinks for code-reviews, the canonical dir, and a legacy dir -> realpath ELOOP
+    await withProject(async (projectRoot) => {
+      await mkdir(path.join(projectRoot, IMPL), { recursive: true });
+      await symlink("code-reviews", path.join(projectRoot, CODE_REVIEWS), "dir");
+      const result = await resolveCrDirectory({ projectRoot, implementationArtifacts: IMPL, storyId: "11.9", reviewSeries: "restart" });
+      expect(result.issues[0]).toMatchObject({ issueId: "cr-directory.unreadable-candidate", affectedPath: CODE_REVIEWS, details: expect.objectContaining({ errorCode: "ELOOP" }) });
+      expect(JSON.stringify(result)).not.toContain(projectRoot);
+    });
+    await withProject(async (projectRoot) => {
+      await mkdir(path.join(projectRoot, CODE_REVIEWS), { recursive: true });
+      await symlink("11-9-code-review", path.join(projectRoot, CANONICAL), "dir");
+      const result = await resolveCrDirectory({ projectRoot, implementationArtifacts: IMPL, storyId: "11.9", reviewSeries: "restart" });
+      expect(result.issues[0]).toMatchObject({ issueId: "cr-directory.unreadable-candidate", affectedPath: CANONICAL, details: expect.objectContaining({ errorCode: "ELOOP" }) });
+    });
+    await withProject(async (projectRoot) => {
+      const legacy = `${CODE_REVIEWS}/11-9-loop-code-review`;
+      await mkdir(path.join(projectRoot, CODE_REVIEWS), { recursive: true });
+      await symlink("11-9-loop-code-review", path.join(projectRoot, legacy), "dir");
+      const result = await resolveCrDirectory({ projectRoot, implementationArtifacts: IMPL, storyId: "11.9", reviewSeries: "restart" });
+      expect(result).toMatchObject({ ok: false, legacyCrDirs: [] });
+      expect(result.issues[0]).toMatchObject({ issueId: "cr-directory.unreadable-candidate", affectedPath: legacy, details: expect.objectContaining({ errorCode: "ELOOP" }) });
+    });
+
+    // implementation artifacts root without permissions -> lstat EACCES
+    if (typeof process.getuid === "function" && process.getuid() === 0) return;
+    await withProject(async (projectRoot) => {
+      await mkdir(path.join(projectRoot, CODE_REVIEWS), { recursive: true });
+      await chmod(path.join(projectRoot, IMPL), 0o000);
+      try {
+        const result = await resolveCrDirectory({ projectRoot, implementationArtifacts: IMPL, storyId: "11.9", reviewSeries: "restart" });
+        expect(result.issues[0]).toMatchObject({ issueId: "cr-directory.unreadable-candidate", affectedPath: CODE_REVIEWS, details: expect.objectContaining({ errorCode: "EACCES" }) });
+        expect(JSON.stringify(result)).not.toContain(projectRoot);
+      } finally {
+        await chmod(path.join(projectRoot, IMPL), 0o755);
+      }
+    });
+  });
+
   it("accepts symlinks that stay inside the project", async () => {
     await withProject(async (projectRoot) => {
       await mkdir(path.join(projectRoot, "real-code-reviews"), { recursive: true });

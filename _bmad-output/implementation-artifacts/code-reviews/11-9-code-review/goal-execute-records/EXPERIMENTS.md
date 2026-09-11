@@ -49,3 +49,17 @@
 - 验证（沙箱外）：`vitest` 726 passed / 0 failed / 4 todo；canonical strict ok；packaging-check PASS；docs:check PASS。
 - 观察：runner 调用串中资源上下文置于 `authorizationSource` 之后，以保持 `test/code-review-contract.test.ts:336` 既有断言不变（该测试不在 fixer 授权范围）。
 - 下一步判断：提交 fix commit，重新冻结 scope，fresh CR01 restart round 2。
+
+## 2026-09-11 — CR Reviewer / restart Round 2
+
+- 结果：`FINDINGS_REPORTED`；3/3 layers；scope 317 actual / 296 declared / 21 excluded / 0 exceptions；head `53195ae`。
+- 历史：R1-F1/F2/F3/F5/F9 resolved；R1-F4 recurred（fresh-session 重入子场景，blind+auditor 复现；edge 判 resolved，按 fingerprint 规则归 recurred）；R1-F6 deferred / R1-F7、F8 dismissed 未变。auditor 核对 round 1 修复 34 files 无越权。
+- 新增：R2-F1 `escapesProject` 路径 ELOOP / ENOTDIR / EACCES 未捕获（patch，与 R1-F1 同 invariant 的另一调用面）；R2-F2 别名 symlink 误报 ambiguity（defer）；R2-F3 symlink 产物被 `isFile()` 忽略（defer）。
+- counts：patch 2 / defer 3 / dismiss 2。artifact `11-9-code-review-summary-20260911-restart-round-2.md`（sha256 `3b824364…`）。
+- 下一步判断：fresh CR02 evaluator round 2。若裁决 FIX_REQUIRED，round 3 为 Restart Brief 规定的上限（≤3 轮）。
+
+## 2026-09-11 — CR Evaluator + Fixer / restart Round 2
+
+- Evaluator：`FIX_REQUIRED`；p1=2（R2-F1 new、R1-F4 recurred）/ deferred=2（R1-F6 T2、R2-F3 T3）/ dismissed=3（R1-F7、R1-F8、R2-F2）；convergence new 1 / recurred 1 / resolved 4 / churn false；evaluator 提示 round 3 若再出 new P1 即 STOP_LOSS。artifact `11-9-code-review-evaluation-20260911-restart-round-2.md`（reviewSourceHash `3b824364…`）。
+- Fixer：completed（patch）；`checkBoundary` 包装非 ENOENT 为 `unreadable-candidate`（+5 fixture）；runner Step 0 fresh-session 定位规则 + 契约 :66 扩展到 runner。沙箱外 `vitest` 727 passed / 0 failed；packaging / docs / canonical PASS。
+- 下一步判断：提交 fix commit；fresh CR01 restart round 3（≤3 轮上限），仅确认收敛。

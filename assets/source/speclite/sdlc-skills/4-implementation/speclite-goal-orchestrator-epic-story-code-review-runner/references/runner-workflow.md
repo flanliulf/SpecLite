@@ -14,7 +14,8 @@
 - 确认 cwd、branch、HEAD、用户目标和 git 状态。
 - 从 Epic、Story 与 sprint tracker 建立唯一 `storyId -> storyKey -> storyFile` 映射。
 - 调用一次 `speclite resolve cr-directory --story-id {storyId} --review-series {reviewSeries} --project-root .`，冻结 `crDir` / `canonicalCrDir` / `compatibilityMode` / `legacyArtifactPaths`（= `legacyCrDirs`）并传给 CR01–06；`continuation=block` 时 HALT，不得自行选择目录。slug/legacy 目录只读记录，不自动移动，也不作为新 run 目录；`compatibilityMode=legacy-resume` 时在 resolver 返回的 legacy `crDir` 原位续写。冻结值写入 goal records（`EXPERIMENTS.md` 当次 preflight 条目）。
-- 识别 current review series、最大 round、latest v2 artifacts、Flow Gate 和 tracker 状态。
+- Fresh session 定位规则：resolver 返回 `compatibilityMode=canonical` 但 canonical 目录没有 current series 的任何 v2 artifact，且 `roundEvidence` 中恰有一个 legacy 目录含该 series 的 finalizer 时，先读取该 legacy 目录的 finalizer report 与 `goal-execute-records/`：report 为 `HALTED` → 以该 legacy 目录覆盖冻结 `crDir` 并直接进入恢复矩阵的 HALTED 行，不得在 canonical 开新 round；report 为 `DONE` → 该 run 已完成，canonical 才是新 run。
+- 识别 current review series、最大 round、latest v2 artifacts（含上一条定位到的 legacy 目录）、Flow Gate 和 tracker 状态。
 - 续跑必须从最新合法结构化状态继续，不按 mtime 或 prose 猜测。
 
 按以下恢复矩阵选择唯一下一状态：
@@ -31,7 +32,7 @@
 | current CR04 report 就绪，无 current CR05 report | Step 10.2 TODO Tracker |
 | CR04/CR05 report 就绪，无 current/合法 completion gate | Step 10.3 Completion Gate |
 | completion gate 为 PASS 且新鲜，finalizer 未 DONE | Step 10.4 Finalizer |
-| finalizer 结构化 HALTED | Step 10.4 Finalizer（按 report 恢复动作重入，不回退 CR04/05；重入使用 goal records 冻结的 `crDir`，不重新解析——v2 finalizer 文件名不区分 DONE/HALTED，重解析会把 legacy-resume run 路由到 canonical） |
+| finalizer 结构化 HALTED | Step 10.4 Finalizer（按 report 恢复动作重入，不回退 CR04/05；重入使用 goal records 冻结的 `crDir`，不重新解析——v2 finalizer 文件名不区分 DONE/HALTED，重解析会把 legacy-resume run 路由到 canonical；fresh session 按 Step 0 的定位规则先找回该 `crDir`，不得因 canonical 为空而落入 Step 4） |
 | finalizer 为结构化 `DONE` | Step 11 Next Story |
 
 同一证据同时指向多个 current 状态、hash/round 冲突或缺少前序 artifact 时 HALT，不得重跑 development 作为 fallback。

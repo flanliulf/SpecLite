@@ -6,6 +6,7 @@
 
 - Story 11.9 restart：新增 CR Directory Resolution 章节；唯一派生点改为 `speclite resolve cr-directory`（`src/config/cr-directory.ts`），只按目录名与 v2 文件名判定归属，定义 `cr-directory.ambiguous-resume-root` 与威胁模型边界；不再随包投影 `scripts/resolve-cr-directory.mjs`，不引入 validate-context / ownership marker。
 - restart CR round 1 修复：调和 legacy 只读规则与 `legacy-resume` 原位续写；Invocation Parameter Matrix 增加 `crDir` / `compatibilityMode` / `legacyArtifactPaths`；明确 v2 finalizer 文件名不区分 DONE/HALTED，HALTED 重入使用冻结 `crDir`。
+- restart CR round 2 修复：HALTED finalizer 重入定位规则扩展到 runner（`roundEvidence` 唯一目录），canonical 为空时不作为新 run 目录。
 
 ## [1.0.0] - 2026-08-25
 

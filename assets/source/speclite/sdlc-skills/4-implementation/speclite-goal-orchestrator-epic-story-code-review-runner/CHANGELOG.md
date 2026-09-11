@@ -4,6 +4,7 @@
 
 - Story 11.9 restart：Step 0 调用一次 `speclite resolve cr-directory`，冻结 `crDir` / `canonicalCrDir` / `compatibilityMode` / `legacyArtifactPaths` 并传给 CR01–06；`continuation=block` 时 HALT。
 - restart CR round 1 修复：Step 5/6/9/10 调用串显式传递 `crDir` / `compatibilityMode` / `legacyArtifactPaths` / `orchestrationMode` / `handoffTarget`；Step 0 冻结值写入 goal records；HALTED finalizer 重入使用冻结 `crDir` 不重解析；legacy-resume 原位续写。
+- restart CR round 2 修复：Step 0 增加 fresh session 定位规则（canonical 无 current artifacts 且唯一 legacy 含该 series finalizer → 读 report / goal records，HALTED 则以该 legacy 目录重入），恢复矩阵 HALTED 行同步。
 
 ## [2.1.0] - 2026-08-25
 

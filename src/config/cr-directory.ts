@@ -149,11 +149,16 @@ export async function resolveCrDirectory(input: {
       details: { storyId, reviewSeries, canonicalCrDir, errorCode: code, reason: "unreadable-candidate" },
     });
 
+  const boundaryBlock = async (candidate: string): Promise<CrDirectoryIssue | undefined> => {
+    const outcome = await checkBoundary(input.projectRoot, candidate);
+    if (outcome === "inside") return undefined;
+    return outcome === "escape" ? symlinkEscape(candidate) : unreadable(candidate, outcome.errorCode);
+  };
+
   // Boundary check runs before any directory listing so an escaping `code-reviews`
   // never has its (outside) contents enumerated into the result.
-  if (await escapesProject(input.projectRoot, codeReviewsDir)) {
-    return blocked(base, symlinkEscape(codeReviewsDir));
-  }
+  const codeReviewsBlock = await boundaryBlock(codeReviewsDir);
+  if (codeReviewsBlock !== undefined) return blocked(base, codeReviewsBlock);
 
   const legacyPattern = new RegExp(`^${escapeRegExp(storyId)}-.+-code-review$`);
   const legacyCrDirs: string[] = [];
@@ -172,9 +177,8 @@ export async function resolveCrDirectory(input: {
     }
     if (!entry.isSymbolicLink()) continue;
     const candidate = `${codeReviewsDir}/${entry.name}`;
-    if (await escapesProject(input.projectRoot, candidate)) {
-      return blocked(base, symlinkEscape(candidate));
-    }
+    const candidateBlock = await boundaryBlock(candidate);
+    if (candidateBlock !== undefined) return blocked(base, candidateBlock);
     // A symlink only counts as a legacy directory when it points at a directory.
     try {
       if (!(await stat(path.join(input.projectRoot, candidate))).isDirectory()) continue;
@@ -186,9 +190,8 @@ export async function resolveCrDirectory(input: {
   legacyCrDirs.sort(compareBytewise);
   base.legacyCrDirs = legacyCrDirs;
 
-  if (await escapesProject(input.projectRoot, canonicalCrDir)) {
-    return blocked(base, symlinkEscape(canonicalCrDir));
-  }
+  const canonicalBlock = await boundaryBlock(canonicalCrDir);
+  if (canonicalBlock !== undefined) return blocked(base, canonicalBlock);
 
   const roundEvidence: CrDirectoryRoundEvidence[] = [];
   for (const crDir of [canonicalCrDir, ...legacyCrDirs]) {
@@ -337,8 +340,20 @@ function compareBytewise(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-async function escapesProject(projectRoot: string, relativePath: string): Promise<boolean> {
-  return (await findProjectBoundarySymlinkEscape({ projectRoot, relativePath })) !== undefined;
+/**
+ * Wraps the shared boundary helper so lstat / realpath failures other than ENOENT
+ * (ENOTDIR, ELOOP, EACCES, ...) surface as a structured block instead of an exception.
+ */
+async function checkBoundary(
+  projectRoot: string,
+  relativePath: string,
+): Promise<"inside" | "escape" | { errorCode: string }> {
+  try {
+    return (await findProjectBoundarySymlinkEscape({ projectRoot, relativePath })) === undefined ? "inside" : "escape";
+  } catch (error) {
+    if (isMissing(error)) return "inside";
+    return { errorCode: errorCode(error) };
+  }
 }
 
 function errorCode(error: unknown): string {
