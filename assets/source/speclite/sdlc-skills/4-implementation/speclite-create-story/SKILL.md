@@ -21,6 +21,8 @@ metadata:
     - 分析中的问题先保存，完整 Story 写完后统一提出；除初始选择或文档缺失外自动完成。
 
 [核心能力]
+    - **UX 输入路径治理**：通过 Planning root resolver evidence 优先消费 `{planning_artifacts}/ux/ux-design-specification.md`，canonical 缺失时只读消费 exact legacy fallback，并禁止迁移与 project-root escape。
+    - **Whole/sharded 单一发现契约**：PRD、Epics、Architecture 只通过 `speclite resolve artifact-documents` 的 `consumedPaths` 消费；block 必须保持 zero artifact write 与 zero progress mutation，selection 只作用于当前 invocation。
     - **配置与激活解析**：解析三层 customize（base→team→user）和 `workflow` 块，加载 `persistent_facts`、`config.toml`、激活前置/后置步骤，以及 `workflow.on_complete` 终止指令。
     - **Story 目标发现与状态机维护**：支持显式 story 标识或从 `sprint-status.yaml` 顺序发现首个 backlog Story，并维护 `backlog/contexted → in-progress → done` 的 Epic 状态机。
     - **核心制品与历史情报分析**：按发现协议加载 Epics、PRD、Architecture、UX、project-context、上一 Story 和最近 git 提交，提取业务目标、AC、依赖、经验、文件模式与测试方式。

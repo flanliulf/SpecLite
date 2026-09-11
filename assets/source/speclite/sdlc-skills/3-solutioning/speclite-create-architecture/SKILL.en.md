@@ -18,6 +18,8 @@ metadata:
     **Your Role**: facilitator, peer to the user. You bring structured thinking and architecture knowledge; the user brings domain and product vision. **Never** auto-generate in place of user decisions; **forbid** any time estimation.
 
 [Core Capabilities]
+    - **UX input path governance**: discover canonical `{planning_artifacts}/ux/ux-design-specification.md` or its read-only legacy fallback from Planning root resolver evidence, preserving `resolvedRoot`, `resolutionMode`, `actualConsumedPath`, and the no-migration boundary.
+    - **Single whole/sharded discovery contract**: consume PRD, Epics, and Architecture only from `speclite resolve artifact-documents` `consumedPaths`; blocking keeps zero artifact write and zero progress mutation, and selection is invocation-scoped.
     - **Micro-file workflow orchestration**: 8 step files + continuation handler; each self-contains rules, A/P/C menu, and `stepsCompleted` advancement. See `references/workflow-steps.md`.
     - **Three-tier configuration**: `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow` resolves the `workflow` block. Load `workflow.persistent_facts` and merged runtime config.
     - **Continuation detection**: Auto-detect existing `*architecture*.md` and choose fresh vs continue by `stepsCompleted`; menu `[R]/[C]/[O]/[X]`.
@@ -40,7 +42,7 @@ metadata:
     1. Confirm `speclite` is available, then resolve `workflow` via `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`
     2. Run `{workflow.activation_steps_prepend}` in order
     3. Load `{workflow.persistent_facts}` (`file:` entries loaded as path/glob under `{project-root}`)
-    4. Load merged runtime config (`user_name`, `communication_language`, `document_output_language`, `planning_artifacts`, `project_knowledge`)
+    4. Load merged runtime config and resolver-backed roots (`user_name`, `communication_language`, `document_output_language`, `planning_artifacts`, `solutioning_artifacts`, `project_knowledge`)
     5. Greet `{user_name}` in `{communication_language}`
     6. Run `{workflow.activation_steps_append}` in order
 
@@ -49,7 +51,7 @@ metadata:
 
     Full 8-step index (incl. Step 1b continuation handler), per-step A/P/C menus, frontmatter advancement rules, Step 8 terminal frontmatter, `on_complete` resolution, and the generation-footer rule are in `references/workflow-steps.md`.
 
-    Input artifacts (PRD required, others optional), output (`{planning_artifacts}/architecture.md`), and the resource inventory (`references/steps/`, `data/`, `customize.toml`, `assets/architecture-decision-template.md`) are in `references/inputs-outputs.md`.
+    Input artifacts (PRD required, others optional), output (`{solutioning_artifacts}/architecture/architecture.md`), and the resource inventory (`references/steps/`, `data/`, `customize.toml`, `assets/architecture-decision-template.md`) are in `references/inputs-outputs.md`.
 
     On completion, run `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`; if non-empty, execute as the final terminal directive.
 

@@ -45,11 +45,11 @@ SpecLite 的核心产物是本地项目中的方法论执行系统。local-first
 | `init`、`sync`、`uninstall` | 管理 config、source projections 和 installer-owned files。 | 否；写入/移除需要 `--yes`。 |
 | `doctor`、`governance-report` | 生成 richer diagnostics 或流程治理 evidence。 | 否。 |
 
-`resolve config` 和 `resolve customization` 属于 runtime support API surface，主要给 installed skills 和维护者排查使用。默认 `resolve` stdout 保持 pure JSON；只有显式 `--human` 时才渲染 support frame。
+`resolve config`、`resolve customization`、`resolve artifact-roots` 和 `resolve artifact-documents` 属于 runtime support API surface，主要给 installed skills 和维护者排查使用。默认 `resolve` stdout 保持 pure JSON；只有显式 `--human` 时才渲染 support frame。
 
 ## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
 
-安装后的 `_speclite/scripts/resolve_*.py` 是 legacy compatibility、migration aid 和 troubleshooting asset。它们属于 installer-owned compatibility projection，并通过 `files-index.json` 的 `runtime-compat-script` classification 管理。唯一默认 activation resolver 是 Node CLI 的 `speclite resolve config` 和 `speclite resolve customization`；这些 Python scripts 不构成默认 runtime dependency，也不应作为正常 workflow 激活入口。
+安装后的 `_speclite/scripts/resolve_*.py` 是 legacy compatibility、migration aid 和 troubleshooting asset。它们属于 installer-owned compatibility projection，并通过 `files-index.json` 的 `runtime-compat-script` classification 管理。唯一默认 activation resolver surface 是 Node CLI 的 `speclite resolve config`、`speclite resolve customization`、`speclite resolve artifact-roots` 和 `speclite resolve artifact-documents`；这些 Python scripts 不构成默认 runtime dependency，也不应作为正常 workflow 激活入口。
 
 ## Human Output Layer（人类输出层）
 

@@ -20,11 +20,13 @@ metadata:
     - This is a highly interactive workflow: do not skip steps, and always HALT at menu points until the user chooses an option.
 
 [Core Capabilities]
+    - **UX input path governance**: prefer `{planning_artifacts}/ux/ux-design-specification.md`, use the exact legacy fallback only when canonical is absent, and retain Planning root resolver evidence and the no-migration boundary.
+    - **Single whole/sharded discovery contract**: consume PRD, Epics, and Architecture only from `speclite resolve artifact-documents` `consumedPaths`; blocking keeps zero artifact write and zero progress mutation, and selection is invocation-scoped.
     - **Configuration and activation resolution**: resolve three-tier customize (base→team→user) and the `workflow` block; load `persistent_facts`, `config.toml`, activation prepend/append steps, and `workflow.on_complete`.
-    - **Input artifact discovery and requirement extraction**: discover PRD, Architecture, and optional UX Design under `{planning_artifacts}`, then extract FRs, NFRs, technical requirements, and UX Design Requirements.
+    - **Input artifact discovery and requirement extraction**: use the shared resolver for PRD under `{planning_artifacts}/prd/` and Architecture under `{solutioning_artifacts}/architecture/`, then discover optional UX Design under Planning and extract requirements.
     - **Collaborative epic design**: organize epics by user value rather than technical layers, with explicit FR coverage, natural dependencies, file-churn risk, and consolidation boundaries.
     - **Sequential story generation**: generate one epic and one story at a time; each story must fit a single dev agent and depend only on previous stories.
-    - **Templated output**: initialize `{planning_artifacts}/epics.md` from `assets/epics-template.md`, preserving `stepsCompleted` and `inputDocuments` frontmatter.
+    - **Templated output**: initialize `{planning_artifacts}/epics/epics.md` from `assets/epics-template.md`, preserving `stepsCompleted` and `inputDocuments` frontmatter.
     - **Final coverage validation**: validate all FRs, UX-DRs, architecture constraints, entity creation timing, epic independence, and forward dependency risks.
 
 [Execution Flow]
@@ -32,7 +34,7 @@ metadata:
     2. During activation, resolve `workflow`, three-tier customize, `workflow.persistent_facts`, and the target project's runtime merged runtime config; this Skill directory only keeps `config.toml.example` as a field reference.
     3. Initialize the output file from `assets/epics-template.md`, then proceed strictly through Step 1 → Step 4 in `references/workflow-steps.md`.
     4. Each step must be read completely, followed in order, and saved with state; at menus, HALT and proceed only when the user chooses `C`.
-    5. On completion, save `{planning_artifacts}/epics.md`, run `workflow.on_complete` if non-empty, and provide next-step guidance for development, Story creation, or review.
+    5. On completion, save `{planning_artifacts}/epics/epics.md`, run `workflow.on_complete` if non-empty, and provide next-step guidance for development, Story creation, or review.
 
 [Notes]
     - Directory name and YAML `name` must stay aligned in kebab-case: `speclite-create-epics-and-stories`.

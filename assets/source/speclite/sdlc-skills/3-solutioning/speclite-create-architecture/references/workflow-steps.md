@@ -16,14 +16,14 @@
 
 ### Step 1：架构工作流初始化（`references/steps/step-01-init.md`）
 
-- 检测既有工作流：扫描 `{planning_artifacts}/*architecture*.md`
+- 检测既有工作流：扫描 `{solutioning_artifacts}/architecture/architecture.md`
 - 若存在且 frontmatter 含 `stepsCompleted`：**立即停止**并加载 `references/steps/step-01b-continue.md`
 - 若不存在：进行新工作流初始化
-  - 输入文档发现：在 `{planning_artifacts}/**`、`{output_folder}/**`、`{project_knowledge}/**`、`{project-root}/docs/**` 范围内查找 `*brief*.md`、`*prd*.md`、`*ux-design*.md`、`*research*.md`、`**/project-context.md`，单文件未找到时回退查找 `*foo*/index.md` 分片目录
+  - 输入文档发现：PRD 必须通过 `speclite resolve artifact-documents --subject prd` 的 `consumedPaths` 加载；UX 必须通过 Planning root evidence 优先读取 `{planning_artifacts}/ux/ux-design-specification.md`，仅在 canonical 缺失时读取 exact legacy fallback，并记录 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`；其余 Product Brief、Research、Project Context 继续在对应配置根与 docs context 中发现
   - 必须与用户确认发现结果并询问是否补充
   - 加载规则：完整加载（无 offset/limit）；分片目录全量加载；index.md 优先；所有成功加载文件追踪到 frontmatter `inputDocuments`
   - 验证 PRD 必填，缺失则输出 "Architecture requires a PRD..." 并 HALT
-  - 复制 `assets/architecture-decision-template.md` 到 `{planning_artifacts}/architecture.md`
+  - 复制 `assets/architecture-decision-template.md` 到 `{solutioning_artifacts}/architecture/architecture.md`
   - 报告找到的文档数量，呈现 `[C] Continue` 菜单
 - 用户选 C → 加载 `references/steps/step-02-context.md`
 
@@ -39,7 +39,7 @@
 - 分析已加载文档（PRD、Epics、UX Spec）的架构含义
 - 计算项目复杂度（实时特性、多租户、合规、集成、交互、数据复杂度）
 - 把分析作为 "Project Context Analysis" 段落呈现并 A/P/C
-- 仅 C 才追加到 `{planning_artifacts}/architecture.md` 并更新 `stepsCompleted: [1, 2]`
+- 仅 C 才追加到 `{solutioning_artifacts}/architecture/architecture.md` 并更新 `stepsCompleted: [1, 2]`
 
 ### Step 3：起始模板评估（`references/steps/step-03-starter.md`）
 
@@ -117,7 +117,7 @@
 
 - Next Steps：提供中性的后续实施指引；提议回答有关架构文档的任何问题
 - 执行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`；如解析出的值非空，作为退出前的最终终端指令执行
-- 在 `{planning_artifacts}/architecture.md` 末尾追加生成标注：
+- 在 `{solutioning_artifacts}/architecture/architecture.md` 末尾追加生成标注：
 
   ```text
   ---
@@ -133,5 +133,5 @@
 - **P (Party Mode)**：执行本步骤的 Party Mode 分支引入多视角分析
 - **C (Continue)**：保存内容并进入下一步
 - A 或 P 完成后总是返回本步骤的 A/P/C 菜单；用户接受/拒绝协议变更后才能继续
-- 落盘时机：**仅 C 才**追加到 `{planning_artifacts}/architecture.md` 并更新 `stepsCompleted`
+- 落盘时机：**仅 C 才**追加到 `{solutioning_artifacts}/architecture/architecture.md` 并更新 `stepsCompleted`
 - 跳出步骤时机：**禁止**在当前步骤未确认 C 之前加载下一步 step 文件

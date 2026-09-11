@@ -57,15 +57,15 @@ Activation is complete. Begin the workflow below.
 - `project_key` = `NOKEY`
 - `story_location` = `{implementation_artifacts}/stories`
 - `story_location_absolute` = `{implementation_artifacts}/stories`
-- `epics_location` = `{planning_artifacts}`
-- `epics_pattern` = `*epic*.md`
+- `epics_location` = `{planning_artifacts}/epics`
+- `epics_pattern` = resolver `consumedPaths`
 - `status_file` = `{implementation_artifacts}/sprint-status.yaml`
 
 ## Input Files
 
 | Input | Path | Load Strategy |
 |-------|------|---------------|
-| Epics | `{planning_artifacts}/*epic*.md` (whole) or `{planning_artifacts}/*epic*/*.md` (sharded) | FULL_LOAD |
+| Epics | shared resolver subject `epics`; canonical `{planning_artifacts}/epics/` | FULL_LOAD |
 
 ## Execution
 
@@ -73,16 +73,18 @@ Activation is complete. Begin the workflow below.
 
 **Strategy**: Sprint planning needs ALL epics and stories to build complete status tracking.
 
+Before creating or updating `sprint-status.yaml`, run `speclite resolve artifact-documents --subject epics --project-root {project-root}`. Load only JSON `consumedPaths` and record the resolver evidence. On ambiguity, request current-invocation selection and rerun with `--selection whole|sharded`; any `continuation=block` HALTs with zero artifact write and zero progress mutation. Do not define local precedence, mix shapes, glob undeclared shards or migrate artifacts.
+
 **Epic Discovery Process:**
 
-1. **Search for whole document first** - Look for `epics.md`, `bmm-epics.md`, or any `*epic*.md` file
-2. **Check for sharded version** - If whole document not found, look for `epics/index.md`
+1. **Consume resolver evidence** - Use canonical `epics.md` or `index.md` selected by the shared resolver
+2. **Load exact paths** - Use only resolver `consumedPaths`
 3. **If sharded version found**:
    - Read `index.md` to understand the document structure
    - Read ALL epic section files listed in the index (e.g., `epic-1.md`, `epic-2.md`, etc.)
    - Process all epics and their stories from the combined content
    - This ensures complete sprint status coverage
-4. **Priority**: If both whole and sharded versions exist, use the whole document
+4. **Ambiguity**: If both shapes exist, do not proceed until the user supplies invocation-scoped selection
 
 **Fuzzy matching**: Be flexible with document names - users may use variations like `epics.md`, `bmm-epics.md`, `user-stories.md`, etc.
 
@@ -91,8 +93,8 @@ Activation is complete. Begin the workflow below.
 <step n="1" goal="Parse epic files and extract all work items">
 <action>Load {project_context} for project-wide patterns and conventions (if exists)</action>
 <action>Communicate in {communication_language} with {user_name}</action>
-<action>Look for all files matching `{epics_pattern}` in {epics_location}</action>
-<action>Could be a single `epics.md` file or multiple `epic-1.md`, `epic-2.md` files</action>
+<action>Load all exact files returned in `{epics_pattern}` from {epics_location}</action>
+<action>The resolver may return canonical `epics.md` or `index.md` plus its explicitly declared shards</action>
 
 <action>For each epic file found, extract:</action>
 

@@ -14,6 +14,7 @@ metadata:
     源入口说明：Create project-context.md with AI rules. Use when the user says "generate project context" or "create project context"
 
 [核心能力]
+    - **Whole/sharded 单一发现契约**：PRD、Epics、Architecture 只通过 `speclite resolve artifact-documents` 的 `consumedPaths` 消费；block 必须保持 zero artifact write 与 zero progress mutation，selection 只作用于当前 invocation。
     - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并通过 `speclite resolve config --project-root {project-root}` 加载 merged runtime config。
     - **源制品发现与上下文加载**：按 workflow 规约读取项目制品、配置字段、历史上下文和必要数据文件，保持源流程的输入发现语义。
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。

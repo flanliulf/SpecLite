@@ -36,7 +36,9 @@ Initialize the Architecture workflow by detecting continuation state, discoverin
 
 First, check if the output document already exists:
 
-- Look for existing {planning_artifacts}/`*architecture*.md`
+- Before any document/frontmatter write, run `speclite resolve artifact-documents --subject architecture --project-root {project-root}` when Architecture artifacts already exist. Load only `consumedPaths`; record `resolvedRoot`, `resolutionMode`, `actualConsumedPath`, `discoveryShape`, `ambiguityStatus`, selection source and continuation. For ambiguity, request a current-invocation choice and rerun with `--selection whole|sharded`. Any `continuation=block` HALTs with zero artifact write and zero progress mutation; never define local precedence or migrate artifacts.
+
+- Look for existing {solutioning_artifacts}/architecture/`architecture.md`
 - If exists, read the complete file(s) including frontmatter
 - If not exists, this is a fresh workflow
 
@@ -53,6 +55,8 @@ If the document exists and has frontmatter with `stepsCompleted`:
 If no document exists or no `stepsCompleted` in frontmatter:
 
 #### A. Input Document Discovery
+
+For PRD, run `speclite resolve artifact-documents --subject prd --project-root {project-root}` before initializing Architecture. Use only `consumedPaths`; ambiguity requires invocation-scoped `--selection whole|sharded`, and any blocking result HALTs before the template or `stepsCompleted` is written. UX and non-governed context documents retain their existing discovery rules.
 
 Discover and load context documents using smart discovery. Documents can be in the following locations:
 
@@ -76,9 +80,9 @@ Try to discover the following:
 
 **Loading Rules:**
 
-- Load ALL discovered files completely that the user confirmed or provided (no offset/limit)
+- Load ALL resolver-selected or user-provided files completely (no offset/limit)
 - If there is a project context, whatever is relevant should try to be biased in the remainder of this whole workflow process
-- For sharded folders, load ALL files to get complete picture, using the index first to potentially know the potential of each document
+- For governed sharded PRD, load only resolver `consumedPaths` (`index.md` plus explicitly declared shards)
 - index.md is a guide to what's relevant whenever available
 - Track all successfully loaded files in frontmatter `inputDocuments` array
 
@@ -97,7 +101,7 @@ Before proceeding, verify we have the essential inputs:
 
 #### C. Create Initial Document
 
-Copy the template from `../assets/architecture-decision-template.md` to `{planning_artifacts}/architecture.md`
+Copy the template from `../assets/architecture-decision-template.md` to `{solutioning_artifacts}/architecture/architecture.md`
 
 #### D. Complete Initialization and Report
 
@@ -105,7 +109,7 @@ Complete setup and report to user:
 
 **Document Setup:**
 
-- Created: `{planning_artifacts}/architecture.md` from template
+- Created: `{solutioning_artifacts}/architecture/architecture.md` from template
 - Initialized frontmatter with workflow state
 
 **Input Documents Discovered:**
@@ -130,7 +134,7 @@ Ready to begin architectural decision making. Do you have any other documents yo
 
 ✅ Existing workflow detected and handed off to step-01b correctly
 ✅ Fresh workflow initialized with template and frontmatter
-✅ Input documents discovered and loaded using sharded-first logic
+✅ Governed input documents discovered and loaded from resolver `consumedPaths`
 ✅ All discovered files tracked in frontmatter `inputDocuments`
 ✅ PRD requirement validated and communicated
 ✅ User confirmed document setup and can proceed
@@ -140,7 +144,7 @@ Ready to begin architectural decision making. Do you have any other documents yo
 ❌ Proceeding with fresh initialization when existing workflow exists
 ❌ Not updating frontmatter with discovered input documents
 ❌ Creating document without proper template
-❌ Not checking sharded folders first before whole files
+❌ Defining local whole/sharded precedence instead of using the shared resolver
 ❌ Not reporting what documents were found to user
 ❌ Proceeding without validating PRD requirement
 

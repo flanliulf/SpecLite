@@ -2,7 +2,7 @@
 # File references (ONLY variables used in this step)
 nextStepFile: './step-v-08-domain-compliance-validation.md'
 prdFile: '{prd_file_path}'
-validationReportPath: '{validation_report_path}'
+validationReportPath: '{validationReportPath}'
 ---
 
 # Step 7: Implementation Leakage Validation

@@ -3,7 +3,7 @@
 nextStepFile: './step-v-13-report-complete.md'
 prdFile: '{prd_file_path}'
 prdFrontmatter: '{prd_frontmatter}'
-validationReportPath: '{validation_report_path}'
+validationReportPath: '{validationReportPath}'
 ---
 
 # Step 12: Completeness Validation

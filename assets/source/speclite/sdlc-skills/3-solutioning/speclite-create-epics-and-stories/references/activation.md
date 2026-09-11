@@ -66,12 +66,12 @@ Treat every entry in `{workflow.persistent_facts}` as foundational context for t
 
 ### Step 4: Load Config
 
-Load runtime config from merged output of `speclite resolve config --project-root {project-root}` and resolve:
+Load non-root runtime config from merged output of `speclite resolve config --project-root {project-root}`, then load effective roots from `speclite resolve artifact-roots --project-root {project-root}` and resolve:
 
 - Use `{user_name}` for greeting.
 - Use `{communication_language}` for all communications.
 - Use `{document_output_language}` for output documents.
-- Use `{planning_artifacts}` for output location and artifact scanning.
+- Use `{planning_artifacts}` for PRD/Epics and `{solutioning_artifacts}` for Architecture; governed document discovery must use `speclite resolve artifact-documents`.
 - Use `{project_knowledge}` for additional context scanning.
 
 If the runtime config is missing or any required field is empty, HALT and ask the user to provide or fix merged runtime config. Do not use this skill package's `config.toml.example` as fallback.

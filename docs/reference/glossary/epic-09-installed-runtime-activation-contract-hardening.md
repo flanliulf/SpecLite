@@ -11,7 +11,7 @@
 | **installed runtime activation contract** | 已安装 Runtime 激活契约 | Installed Skill 在 target project 中启动时，如何检查 CLI、读取 merged config/customization 和加载本地资源的统一约定。 |
 | **activation contract hardening** | 激活契约收口 | 清除 legacy resolver、单文件 config 读取和 source checkout 依赖，让全部 canonical Skills 遵守同一 installed runtime 入口。 |
 | **default resolver entry** | 默认解析入口 | 所有 installed Skill 默认调用的唯一解析入口：`speclite resolve`。 |
-| **Node CLI resolver** | Node CLI 解析器 | 由 Node/TypeScript CLI 实现的 `resolve config` 和 `resolve customization` commands。 |
+| **Node CLI resolver** | Node CLI 解析器 | 由 Node/TypeScript CLI 实现的 `resolve config`、`resolve customization`、`resolve artifact-roots` 和 `resolve artifact-documents` commands。 |
 | **merged runtime config** | 合并运行时配置 | 按 config precedence 合并 base、user、team custom 和 user custom 后的最终项目配置。 |
 | **merged customization** | 合并自定义设置 | 按 Skill defaults、team custom 和 user custom 合并后的最终 persona 或 Workflow 设置。 |
 | **explicit project root** | 显式项目根目录 | 每次 resolve 调用都显式传入的 `--project-root`，避免依赖当前工作目录猜测 target project。 |

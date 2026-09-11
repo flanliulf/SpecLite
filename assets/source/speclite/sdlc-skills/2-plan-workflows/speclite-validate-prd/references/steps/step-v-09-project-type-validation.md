@@ -3,7 +3,7 @@
 nextStepFile: './step-v-10-smart-validation.md'
 prdFile: '{prd_file_path}'
 prdFrontmatter: '{prd_frontmatter}'
-validationReportPath: '{validation_report_path}'
+validationReportPath: '{validationReportPath}'
 projectTypesData: '../data/project-types.csv'
 ---
 

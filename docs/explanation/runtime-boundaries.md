@@ -57,19 +57,24 @@ IDE-specific discovery metadata 与 self-contained Skill 内容的区别见 [`id
 | `_speclite/hooks/` | installed Hook runners 与 metadata。 |
 | `_speclite/scripts/` | legacy compatibility、migration aid 与 troubleshooting scripts。 |
 
-已安装 Skill 的唯一默认 resolver 是 Node CLI：`speclite resolve config` 和 `speclite resolve customization`。`_speclite/scripts/resolve_*.py` 只属于 compatibility assets，不是默认 activation dependency。
+已安装 Skill 的唯一默认 resolver surface 是 Node CLI：`speclite resolve config`、`speclite resolve customization`、`speclite resolve artifact-roots` 和 `speclite resolve artifact-documents`。`_speclite/scripts/resolve_*.py` 只属于 compatibility assets，不是默认 activation dependency。
 
 ## Artifact Repository（产物仓库）
 
 `_speclite-output/` 是默认 workflow artifact repository。实际路径来自 `_speclite/config.toml`：
 
 - `core.output_folder`
+- `core.brainstorming_artifacts`
+- `modules.sdlc.analysis_artifacts`
 - `modules.sdlc.planning_artifacts`
+- `modules.sdlc.solutioning_artifacts`
 - `modules.sdlc.implementation_artifacts`
 - `modules.sdlc.devops_artifacts`
 - `modules.sdlc.project_knowledge`
 
-Artifact repository 回答“workflow 实际产生了什么”。其中的 Story、PRD、Architecture、review、Flow Gate 和 release report 记录真实过程，不参与 install/update 覆盖，也不会被 uninstall 自动删除。
+Fresh install 默认把这些字段解析为 `_speclite-output/0-brainstorming-artifacts`、`_speclite-output/1-analysis-artifacts`、`_speclite-output/2-planning-artifacts`、`_speclite-output/3-solutioning-artifacts`、`_speclite-output/4-implementation-artifacts`、`_speclite-output/5-devops-artifacts` 和 `_speclite-output/project-knowledge-base`。Artifact repository 回答“workflow 实际产生了什么”。其中的 Story、PRD、Architecture、review、Flow Gate、release report 和 Project Knowledge 记录真实过程，不参与 install/update 覆盖，也不会被 uninstall 自动删除。
+
+Public Documentation（公开文档）使用 `docs/` 信息架构；它可以发布或整理来自 Project Knowledge 的内容，但不是 fresh `project_knowledge` 默认路径。
 
 目录、producer 和生命周期分类见 [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md)。
 

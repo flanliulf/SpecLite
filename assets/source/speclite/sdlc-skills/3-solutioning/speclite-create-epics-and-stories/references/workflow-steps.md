@@ -34,7 +34,7 @@ Validate that required input documents exist and extract all requirements needed
 ### Execution Protocols
 
 - Extract requirements systematically from all documents.
-- Create and populate `{planning_artifacts}/epics.md` from `assets/epics-template.md`.
+- Create and populate `{planning_artifacts}/epics/epics.md` from `assets/epics-template.md`.
 - Update frontmatter with extraction progress.
 - Do not proceed to Step 2 until the user selects `C` and requirements are saved.
 
@@ -50,24 +50,28 @@ Validate these required or optional documents:
 
 ### 2. Document Discovery and Validation
 
-Search for required documents using these priority patterns. If both a whole document and a sharded folder exist, prefer the whole document.
+Before creating `{planning_artifacts}/epics/epics.md` or mutating `stepsCompleted`, inspect the canonical Epics subject directory. If no canonical whole, `index.md`, or shard candidate exists, this is a fresh producer run. Otherwise resolve the existing target with `speclite resolve artifact-documents --subject epics --project-root {project-root}` and apply the same selection/block rules below. Then run the shared read-only discovery surface for required governed inputs:
 
-PRD search priority:
+```bash
+speclite resolve artifact-documents --subject prd --project-root {project-root}
+speclite resolve artifact-documents --subject architecture --project-root {project-root}
+```
 
-1. `{planning_artifacts}/*prd*.md`
-2. `{planning_artifacts}/*prd*/index.md`
+Load only each result's `consumedPaths` and record `resolvedRoot`, `resolutionMode`, `actualConsumedPath`, `discoveryShape`, `ambiguityStatus`, selection source and continuation in `inputDocuments` evidence. On `artifact-path.ambiguous-subject-document-shape`, ask for a current-invocation choice and rerun with `--selection whole|sharded`. Any `continuation=block` must HALT with zero artifact write and zero progress mutation. Never define local precedence, mix shapes, glob undeclared shards or migrate artifacts.
 
-Architecture search priority:
+PRD canonical paths (selected only by the shared resolver):
 
-1. `{planning_artifacts}/*architecture*.md`
-2. `{planning_artifacts}/*architecture*/index.md`
+1. `{planning_artifacts}/prd/prd.md`
+2. `{planning_artifacts}/prd/index.md`
 
-UX Design search priority, optional:
+Architecture canonical paths (selected only by the shared resolver):
 
-1. `{planning_artifacts}/*ux*.md`
-2. `{planning_artifacts}/*ux*/index.md`
+1. `{solutioning_artifacts}/architecture/architecture.md`
+2. `{solutioning_artifacts}/architecture/index.md`
 
-Before proceeding, ask the user whether there are other documents to include and whether any found documents should be excluded. Wait for confirmation. Once confirmed, create `{planning_artifacts}/epics.md` from `assets/epics-template.md` and list the files in frontmatter `inputDocuments: []`.
+UX Design discovery, optional: consume Planning root evidence from `speclite resolve artifact-roots --project-root {project-root}`, then check `{planning_artifacts}/ux/ux-design-specification.md` first and exact legacy `{planning_artifacts}/ux-design-specification.md` only when canonical is absent. Record `resolvedRoot`, `resolutionMode`, and project-relative `actualConsumedPath`. Canonical wins if both exist; a legacy document is loaded in place without migration, copy, rename, delete, or config rewrite. Resolve any referenced HTML, design-system, screenshot, or asset path relative to the selected UX document directory and reject project-root escapes.
+
+Before proceeding, ask the user whether there are other documents to include and whether any found documents should be excluded. Wait for confirmation. Once confirmed, create `{planning_artifacts}/epics/epics.md` from `assets/epics-template.md` and list the files in frontmatter `inputDocuments: []`.
 
 ### 3. Extract Functional Requirements
 
@@ -149,7 +153,7 @@ Do not reduce UX requirements to vague summaries. Each UX-DR must be specific en
 
 ### 7. Load and Initialize Template
 
-Load `assets/epics-template.md` and initialize `{planning_artifacts}/epics.md`:
+Load `assets/epics-template.md` and initialize `{planning_artifacts}/epics/epics.md`:
 
 1. Copy the fenced markdown template content into the output file without the outer fence.
 2. Replace `{{project_name}}` with the configured project name.
@@ -177,7 +181,7 @@ Display: `**Confirm the Requirements are complete and correct to [C] continue:**
 
 Menu handling:
 
-- If `C`: save all requirements to `{planning_artifacts}/epics.md`, update frontmatter with Step 1 completion, then proceed to Step 2.
+- If `C`: save all requirements to `{planning_artifacts}/epics/epics.md`, update frontmatter with Step 1 completion, then proceed to Step 2.
 - If any other comment or query: respond, adjust if needed, then redisplay the menu.
 
 HALT after presenting the menu.
@@ -198,7 +202,7 @@ Design and get approval for the `epics_list` that organizes all requirements int
 
 ### 1. Review Extracted Requirements
 
-Load `{planning_artifacts}/epics.md` and review FRs, NFRs, additional technical requirements, and UX Design Requirements.
+Load `{planning_artifacts}/epics/epics.md` and review FRs, NFRs, additional technical requirements, and UX Design Requirements.
 
 ### 2. Explain Epic Design Principles
 
@@ -271,7 +275,7 @@ Menu handling:
 
 - If `A`: use the runtime's advanced elicitation capability if available; otherwise facilitate a structured challenge/reframe round manually.
 - If `P`: use the runtime's party-mode style collaborative ideation capability if available; otherwise facilitate a concise multi-perspective brainstorm manually.
-- If `C`: save the approved `epics_list` and coverage map to `{planning_artifacts}/epics.md`, update frontmatter with Step 2 completion, then proceed to Step 3.
+- If `C`: save the approved `epics_list` and coverage map to `{planning_artifacts}/epics/epics.md`, update frontmatter with Step 2 completion, then proceed to Step 3.
 - If any other comment or query: respond, adjust if needed, then redisplay the menu.
 
 HALT after presenting the menu.
@@ -292,7 +296,7 @@ Generate all epics with their stories based on the approved `epics_list`, follow
 
 ### 1. Load Approved Epic Structure
 
-Load `{planning_artifacts}/epics.md` and review approved `epics_list`, FR coverage map, all requirements, and the template structure.
+Load `{planning_artifacts}/epics/epics.md` and review approved `epics_list`, FR coverage map, all requirements, and the template structure.
 
 If UX Design Requirements were extracted in Step 1, ensure they are covered by stories either within relevant feature epics or a dedicated UX/design-system epic.
 
@@ -333,7 +337,7 @@ For each epic in the approved list:
 2. Work with the user to break the epic into stories.
 3. For each story, generate title, user story, and Given/When/Then acceptance criteria.
 4. After writing each story, ask whether it captures the requirement, fits a single dev session, and has complete testable ACs.
-5. When approved, append it to `{planning_artifacts}/epics.md` using correct numbering.
+5. When approved, append it to `{planning_artifacts}/epics/epics.md` using correct numbering.
 
 ### 4. Epic Completion
 
@@ -361,7 +365,7 @@ Menu handling:
 
 - If `A`: use advanced elicitation if available; otherwise facilitate a structured critique/refinement round manually.
 - If `P`: use party-mode ideation if available; otherwise facilitate concise multi-perspective review manually.
-- If `C`: save content to `{planning_artifacts}/epics.md`, update frontmatter with Step 3 completion, then proceed to Step 4.
+- If `C`: save content to `{planning_artifacts}/epics/epics.md`, update frontmatter with Step 3 completion, then proceed to Step 4.
 - If any other comment or query: respond and redisplay the menu.
 
 HALT after presenting the menu.
@@ -431,7 +435,7 @@ If all validations pass:
 1. Update remaining placeholders.
 2. Ensure proper formatting.
 3. Ensure the generated document ends with `*Generated by the speclite-create-epics-and-stories Skill*` or the configured output-language equivalent.
-4. Save final `{planning_artifacts}/epics.md`.
+4. Save final `{planning_artifacts}/epics/epics.md`.
 
 Display: `**All validations complete!** [C] Complete Workflow`
 

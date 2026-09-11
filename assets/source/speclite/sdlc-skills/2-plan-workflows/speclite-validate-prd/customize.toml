@@ -34,7 +34,9 @@ persistent_facts = [
   "file:{project-root}/**/project-context.md",
 ]
 
-# Scalar: executed when the workflow reaches Step 13 (Validation Report Complete) and
+# Scalar: executed when the workflow reaches Step 13 for the invocation-locked
+# {planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md and
+# (Validation Report Complete), then
 # the user exits via [X] Exit — not on [E] Use Edit Workflow (which chains to
 # speclite-edit-prd), [R] Review (which loops within), or [F] Fix (which loops within).
 # Override wins. Leave empty for no custom post-completion behavior.

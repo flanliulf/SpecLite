@@ -3,7 +3,7 @@
 nextStepFile: './step-v-05-measurability-validation.md'
 prdFile: '{prd_file_path}'
 productBrief: '{product_brief_path}'
-validationReportPath: '{validation_report_path}'
+validationReportPath: '{validationReportPath}'
 ---
 
 # Step 4: Product Brief Coverage Validation

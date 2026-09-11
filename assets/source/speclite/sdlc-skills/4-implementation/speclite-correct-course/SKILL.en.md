@@ -14,6 +14,8 @@ metadata:
     Source entry summary: Manage significant changes during sprint execution. Use when the user says "correct course" or "propose sprint change"
 
 [Core Capabilities]
+    - **UX input path governance**: load UX from `{planning_artifacts}/ux/ux-design-specification.md` or its read-only legacy fallback, recording Planning root `resolvedRoot`, `resolutionMode`, and `actualConsumedPath` while preventing migration and path escape.
+    - **Single whole/sharded discovery contract**: consume PRD, Epics, and Architecture only from `speclite resolve artifact-documents` `consumedPaths`; blocking keeps zero artifact write and zero progress mutation, and selection is invocation-scoped.
     - **Speclite activation**: Resolve three-tier customize, workflow.persistent_facts, workflow.on_complete, and runtime config from merged output of `speclite resolve config --project-root {project-root}`.
     - **Artifact discovery**: Load project artifacts, config fields, historical context, and data files according to the workflow specification.
     - **Step orchestration**: Follow `references/workflow-details.md` and related step files in order, preserving HALT conditions, menus, and state advancement.

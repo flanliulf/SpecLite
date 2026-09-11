@@ -3,7 +3,7 @@ name: speclite-validate-prd
 description: "执行 SpecLite Validate PRD workflow，检查产品需求文档的完整性与可实施性。用于用户要求 validate PRD、PRD validation、校验 PRD 或审查需求文档。核心能力：配置驱动激活、读取目标 `.md`、按步骤检查、输出验证结论。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -14,6 +14,8 @@ metadata:
     源入口说明：Validate a PRD against standards. Use when the user says "validate this PRD" or "run PRD validation"
 
 [核心能力]
+    - **Whole/sharded 单一发现契约**：PRD、Epics、Architecture 只通过 `speclite resolve artifact-documents` 的 `consumedPaths` 消费；block 必须保持 zero artifact write 与 zero progress mutation，selection 只作用于当前 invocation。
+    - **唯一 dated report 契约**：每次 invocation 只生成一次 `yyyy-MM-dd` 并锁定 `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`；通过 private `scripts/prd-validation-report-operation.mjs` 执行 exclusive create，target 已存在时使用 `artifact-path.prd-validation-report-exists` read-only block，不生成 suffix/temp 且不推进 progress。
     - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并通过 `speclite resolve config --project-root {project-root}` 加载 merged runtime config。
     - **源制品发现与上下文加载**：按 workflow 规约读取项目制品、配置字段、历史上下文和必要数据文件，保持源流程的输入发现语义。
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。
@@ -44,6 +46,7 @@ metadata:
     - `config.toml.example` 仅作字段结构参考，不作为 runtime fallback。
     - 当前运行规约不得依赖旧运行目录、旧 YAML 配置或旧命令命名空间。
     - 输出文档末尾必须追加 `*本文档由 speclite-validate-prd Skill 自动生成*` 标注。
+    - 新报告的 basename 仅允许 `prd-validate-report-{yyyy-MM-dd}.md`；legacy reports 只作 historical discovery，install/update/repair 不得迁移、改名、覆盖或删除。
 
 [生成信息]
     本 Skill 由 speclite-skill-creator 自动生成。

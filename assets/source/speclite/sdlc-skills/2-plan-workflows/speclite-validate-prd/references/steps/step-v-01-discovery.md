@@ -2,6 +2,7 @@
 # File references (ONLY variables used in this step)
 nextStepFile: './step-v-02-format-detection.md'
 prdPurpose: '../data/prd-purpose.md'
+reportOperation: '../../scripts/prd-validation-report-operation.mjs'
 ---
 
 # Step 1: Document Discovery & Confirmation
@@ -39,7 +40,7 @@ Handle fresh context validation by confirming PRD path, discovering and loading 
 
 - 🎯 Discover and confirm PRD to validate
 - 💾 Load PRD and all input documents from frontmatter
-- 📖 Initialize validation report next to PRD
+- 📖 Initialize the exact dated validation report under `{planning_artifacts}/prd/`
 - 🚫 FORBIDDEN to load next step until user confirms setup
 
 ## CONTEXT BOUNDARIES:
@@ -62,12 +63,30 @@ This file contains the Speclite PRD philosophy, standards, and validation criter
 
 ### 2. Discover PRD to Validate
 
+在本次 invocation 中只生成一次四位年、两位月、两位日的 runtime date，锁定为 `{validationInvocationDate}`。立即将 `{validationReportPath}` 锁定为 `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`，其中 placeholder 由 `{validationInvocationDate}` 替换。本 step 与后续 steps 不得再读取时钟或重算 target。
+
+在初始化 report template、写入 progress、创建 temp 或计算 suffix 前，先执行 exact read-only probe：
+
+```bash
+node "{skill-root}/scripts/prd-validation-report-operation.mjs" probe --project-root "{project-root}" --planning-root "{planning_artifacts}" --date "{validationInvocationDate}"
+```
+
+`{planning_artifacts}` 必须传入 resolver 返回的 project-relative Planning root，不得传 absolute path 或 unresolved token。stdout 必须恰为一个 JSON object；non-zero、invalid JSON 或 `ok !== true` 必须 HALT。当 target 已存在时，必须输出 `artifact-path.prd-validation-report-exists`、exact project-relative `affectedPath`、`reason: "prd-validation-report-exists"` 和精确建议“保留并移走或删除既有报告后重新运行”。无论既有内容相同或不同，都不得 reuse、overwrite、append、truncate、delete、生成 suffix/temp report 或更新 progress。
+
+在初始化 validation report 或更新任何 progress state 前，运行：
+
+```bash
+speclite resolve artifact-documents --subject prd --project-root {project-root}
+```
+
+默认只从 machine JSON 的 `consumedPaths` 加载 PRD，并把 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`、`discoveryShape`、`ambiguityStatus` 与 selection source 记录为本次 invocation evidence。若返回 `artifact-path.ambiguous-subject-document-shape`，先向用户请求当前 invocation 的 `whole` 或 `sharded` selection，再使用 `--selection whole|sharded` 重跑。任何 `continuation=block` 必须 HALT，保持 zero artifact write 和 zero progress mutation；不得自行 glob、定义 precedence 或迁移文件。
+
 **If PRD path provided as invocation parameter:**
-- Use provided path
+- 仅当路径精确匹配 canonical whole，或匹配 `index.md` / 该 index 声明的 shard 时，映射为当前 invocation 的 `whole` / `sharded` selection 并使用 shared resolver 重跑。
+- 若路径位于该 subject directory 之外、无法对应已声明 shape，或与 resolved root 不一致，使用 `artifact-path.config-artifact-mismatch` 阻塞；不得绕过 resolver 直接加载。
 
 **If no PRD path provided, auto-discover:**
-- Search `{planning_artifacts}` for files matching `*prd*.md`
-- Also check for sharded PRDs: `{planning_artifacts}/*prd*/*.md`
+- 使用上述 shared resolver 的 `consumedPaths`；canonical whole 为 `{planning_artifacts}/prd/prd.md`，sharded entry 为 `{planning_artifacts}/prd/index.md`。
 
 **If exactly ONE PRD found:**
 - Use it automatically
@@ -133,13 +152,19 @@ Please provide paths to any additional documents, or type 'none' to proceed."
 
 ### 7. Initialize Validation Report
 
-Create validation report at: `{validationReportPath}`
+Create validation report only at the invocation-locked `{validationReportPath}`. Build the following initial bytes in memory; do not write a source/temp report. Supply those bytes on stdin to:
+
+```bash
+node "{skill-root}/scripts/prd-validation-report-operation.mjs" create --project-root "{project-root}" --planning-root "{planning_artifacts}" --date "{validationInvocationDate}"
+```
+
+The private operation rechecks the exact target immediately before an exclusive `wx` create. stdout must be exactly one JSON object. Continue only when exit is zero, `ok === true`, and returned `targetPath` exactly equals `{validationReportPath}`. Otherwise HALT with zero progress mutation and apply the same stable conflict diagnostic and manual action from the early probe. Never create or reuse another basename.
 
 **Initialize with frontmatter:**
 ```yaml
 ---
 validationTarget: '{prd_path}'
-validationDate: '{current_date}'
+validationDate: '{validationInvocationDate}'
 inputDocuments: [list of all loaded documents]
 validationStepsCompleted: []
 validationStatus: IN_PROGRESS
@@ -151,7 +176,7 @@ validationStatus: IN_PROGRESS
 # PRD Validation Report
 
 **PRD Being Validated:** {prd_path}
-**Validation Date:** {current_date}
+**Validation Date:** {validationInvocationDate}
 
 ## Input Documents
 
@@ -215,6 +240,8 @@ Display: **Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Conti
 - Proceeding with non-existent PRD file
 - Not loading input documents from frontmatter
 - Creating validation report in wrong location
+- Recomputing the date after `{validationInvocationDate}` is locked
+- Reusing, replacing, appending, truncating, deleting, or suffixing an existing `{validationReportPath}`
 - Proceeding without user confirming setup
 - Not handling missing input documents gracefully
 

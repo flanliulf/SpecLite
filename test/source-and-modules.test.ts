@@ -399,7 +399,7 @@ describe("official module metadata parser", () => {
       canonicalSkillId: "speclite-create-prd",
       displayName: "Create PRD",
       phaseId: "2-planning",
-      outputLocation: "{planning_artifacts}",
+      outputLocation: "{planning_artifacts}/prd",
       outputArtifactType: "prd",
       required: true,
     });

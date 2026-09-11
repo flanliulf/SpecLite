@@ -21,6 +21,8 @@ metadata:
     - Save questions during analysis and ask them after the complete Story is written; automate the flow except for initial selection or missing documents.
 
 [Core Capabilities]
+    - **UX input path governance**: use Planning root resolver evidence to prefer `{planning_artifacts}/ux/ux-design-specification.md`, read the exact legacy fallback only when canonical is absent, and prohibit migration or project-root escape.
+    - **Single whole/sharded discovery contract**: consume PRD, Epics, and Architecture only from `speclite resolve artifact-documents` `consumedPaths`; blocking keeps zero artifact write and zero progress mutation, and selection is invocation-scoped.
     - **Configuration and activation resolution**: resolve three-tier customize (base→team→user) and the `workflow` block; load `persistent_facts`, `config.toml`, activation prepend/append steps, and `workflow.on_complete`.
     - **Story target discovery and state-machine maintenance**: support explicit Story identifiers or sequentially find the first backlog Story in `sprint-status.yaml`; maintain the `backlog/contexted → in-progress → done` Epic state machine.
     - **Core artifact and historical intelligence analysis**: load Epics, PRD, Architecture, UX, project-context, previous Story, and recent git commits; extract business goals, ACs, dependencies, learnings, file patterns, and testing approaches.

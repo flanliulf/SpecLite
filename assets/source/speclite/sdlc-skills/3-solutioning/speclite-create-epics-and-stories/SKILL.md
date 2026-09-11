@@ -20,11 +20,13 @@ metadata:
     - 这是强交互工作流：禁止跳步，必须在菜单点 HALT 并等待用户选择。
 
 [核心能力]
+    - **UX 输入路径治理**：优先读取 `{planning_artifacts}/ux/ux-design-specification.md`，canonical 缺失时才使用 exact legacy fallback，并记录 Planning root resolver evidence 与 no-migration 边界。
+    - **Whole/sharded 单一发现契约**：PRD、Epics、Architecture 只通过 `speclite resolve artifact-documents` 的 `consumedPaths` 消费；block 必须保持 zero artifact write 与 zero progress mutation，selection 只作用于当前 invocation。
     - **配置与激活解析**：解析三层 customize（base→team→user）和 `workflow` 块，加载 `persistent_facts`、`config.toml`、激活前置/后置步骤和 `workflow.on_complete`。
-    - **输入制品发现与需求抽取**：在 `{planning_artifacts}` 中按优先级发现 PRD、Architecture、可选 UX Design，抽取 FR、NFR、技术要求和 UX Design Requirements。
+    - **输入制品发现与需求抽取**：通过 shared resolver 从 `{planning_artifacts}/prd/` 与 `{solutioning_artifacts}/architecture/` 发现 PRD、Architecture，并从 Planning 发现可选 UX Design，抽取 FR、NFR、技术要求和 UX Design Requirements。
     - **Epic 设计协作**：按用户价值而非技术层组织 Epic，显式处理 FR 覆盖、自然依赖、文件反复改动风险和合并边界。
     - **Story 顺序生成**：逐个 Epic、逐个 Story 生成，确保每个 Story 可由单个开发智能体完成，且只依赖前置 Story。
-    - **模板化输出**：从 `assets/epics-template.md` 初始化 `{planning_artifacts}/epics.md`，用 frontmatter 记录 `stepsCompleted` 与 `inputDocuments`。
+    - **模板化输出**：从 `assets/epics-template.md` 初始化 `{planning_artifacts}/epics/epics.md`，用 frontmatter 记录 `stepsCompleted` 与 `inputDocuments`。
     - **最终覆盖校验**：校验全部 FR、UX-DR、架构约束、实体创建时机、Epic 独立性与 Story 前向依赖。
 
 [执行流程]
@@ -32,7 +34,7 @@ metadata:
     2. 激活时解析 `workflow`、三层 customize、`workflow.persistent_facts` 与运行项目根下的 merged runtime config；本 Skill 目录中的 `config.toml.example` 仅作字段结构参考。
     3. 使用 `assets/epics-template.md` 初始化输出文件，并严格按 `references/workflow-steps.md` 的 Step 1 → Step 4 顺序推进。
     4. 每个步骤必须完整读取、顺序执行、保存状态；遇到菜单必须 HALT，只有用户选择 `C` 才能进入下一步。
-    5. 完成时保存 `{planning_artifacts}/epics.md`，执行 `workflow.on_complete`（若非空），并给出后续开发、Story 创建或评审建议。
+    5. 完成时保存 `{planning_artifacts}/epics/epics.md`，执行 `workflow.on_complete`（若非空），并给出后续开发、Story 创建或评审建议。
 
 [注意事项]
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-create-epics-and-stories`。

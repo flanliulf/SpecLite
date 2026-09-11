@@ -74,10 +74,10 @@ Activation is complete. Begin the workflow below.
 
 | Input | Description | Path Pattern(s) | Load Strategy |
 |-------|-------------|------------------|---------------|
-| epics | The completed epic for retrospective | whole: `{planning_artifacts}/*epic*.md`, sharded_index: `{planning_artifacts}/*epic*/index.md`, sharded_single: `{planning_artifacts}/*epic*/epic-{{epic_num}}.md` | SELECTIVE_LOAD |
+| epics | The completed epic for retrospective | shared resolver subject `epics`; canonical `{planning_artifacts}/epics/` | SELECTIVE_LOAD |
 | previous_retrospective | Previous epic's retrospective (optional) | `{implementation_artifacts}/**/epic-{{prev_epic_num}}-retro-*.md` | SELECTIVE_LOAD |
-| architecture | System architecture for context | whole: `{planning_artifacts}/*architecture*.md`, sharded: `{planning_artifacts}/*architecture*/*.md` | FULL_LOAD |
-| prd | Product requirements for context | whole: `{planning_artifacts}/*prd*.md`, sharded: `{planning_artifacts}/*prd*/*.md` | FULL_LOAD |
+| architecture | System architecture for context | shared resolver subject `architecture`; canonical `{solutioning_artifacts}/architecture/` | FULL_LOAD |
+| prd | Product requirements for context | shared resolver subject `prd`; canonical `{planning_artifacts}/prd/` | FULL_LOAD |
 | document_project | Brownfield project documentation (optional) | sharded: `{planning_artifacts}/*.md` | INDEX_GUIDED |
 
 ## Required Inputs
@@ -85,6 +85,8 @@ Activation is complete. Begin the workflow below.
 - `agent_roster` = resolved via `speclite resolve config --project-root {project-root} --key agents` (merges four layers in order: `_speclite/config.toml`, `_speclite/config.user.toml`, `_speclite/custom/config.toml`, `_speclite/custom/config.user.toml`)
 
 ## Execution
+
+Before writing retrospective output or mutating progress, run `speclite resolve artifact-documents --subject <subject> --project-root {project-root}` separately with `<subject>` set to `epics`, `architecture`, and `prd`. Load only `consumedPaths` and record the resolver evidence. Ambiguity requires a current-invocation user selection followed by `--selection whole|sharded`; any `continuation=block` HALTs with zero artifact write and zero progress mutation. Do not define local precedence, mix whole/sharded content, glob undeclared shards or migrate artifacts.
 
 <workflow>
 
@@ -423,17 +425,17 @@ Alice (Product Owner): "Good thinking - helps us connect what we learned to what
 
 <action>Attempt to load next epic using selective loading strategy:</action>
 
-**Try sharded first (more specific):**
-<action>Check if file exists: {planning_artifacts}/epic*/epic-{{next_epic_num}}.md</action>
+**Use the already resolver-selected Epics shape:**
+<action>Inspect the Epics `consumedPaths` recorded at workflow start for an explicitly declared `epic-{{next_epic_num}}.md` shard.</action>
 
 <check if="sharded epic file found">
-  <action>Load {planning_artifacts}/*epic*/epic-{{next_epic_num}}.md</action>
+  <action>Load the matching exact shard path from resolver `consumedPaths`.</action>
   <action>Set {{next_epic_source}} = "sharded"</action>
 </check>
 
-**Fallback to whole document:**
+**Use selected whole document when the resolver selected whole:**
 <check if="sharded epic not found">
-<action>Check if file exists: {planning_artifacts}/epic*.md</action>
+<action>Check whether resolver `actualConsumedPath` is `{planning_artifacts}/epics/epics.md`.</action>
 
   <check if="whole epic file found">
     <action>Load entire epics document</action>

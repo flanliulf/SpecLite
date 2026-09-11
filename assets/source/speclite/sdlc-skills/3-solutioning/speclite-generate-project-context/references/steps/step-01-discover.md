@@ -44,7 +44,8 @@ Load and analyze project files to identify technologies:
 
 **Architecture Document:**
 
-- Look for `{planning_artifacts}/architecture.md`
+- Before initializing or updating project context, run `speclite resolve artifact-documents --subject architecture --project-root {project-root}`. Load only `consumedPaths` and record the resolver evidence fields. If ambiguity requires a user choice, rerun with invocation-scoped `--selection whole|sharded`; on any `continuation=block`, HALT with zero artifact write and zero progress mutation. Do not define local precedence or migrate artifacts.
+- Look for the resolver-selected `{solutioning_artifacts}/architecture/architecture.md` or `{solutioning_artifacts}/architecture/index.md`
 - Extract technology choices with specific versions
 - Note architectural decisions that affect implementation
 

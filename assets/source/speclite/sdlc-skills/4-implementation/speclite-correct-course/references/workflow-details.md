@@ -63,10 +63,11 @@ Activation is complete. Begin the workflow below.
 
 | Input | Path | Load Strategy |
 |-------|------|---------------|
-| PRD | `{planning_artifacts}/*prd*.md` (whole) or `{planning_artifacts}/*prd*/*.md` (sharded) | FULL_LOAD |
-| Epics | `{planning_artifacts}/*epic*.md` (whole) or `{planning_artifacts}/*epic*/*.md` (sharded) | FULL_LOAD |
-| Architecture | `{planning_artifacts}/*architecture*.md` (whole) or `{planning_artifacts}/*architecture*/*.md` (sharded) | FULL_LOAD |
-| UX Design | `{planning_artifacts}/*ux*.md` (whole) or `{planning_artifacts}/*ux*/*.md` (sharded) | FULL_LOAD |
+| PRD | shared resolver subject `prd`; canonical `{planning_artifacts}/prd/` | FULL_LOAD |
+| Epics | shared resolver subject `epics`; canonical `{planning_artifacts}/epics/` | FULL_LOAD |
+| Architecture | shared resolver subject `architecture`; canonical `{solutioning_artifacts}/architecture/` | FULL_LOAD |
+| UX Design | canonical `{planning_artifacts}/ux/ux-design-specification.md`; exact legacy fallback `{planning_artifacts}/ux-design-specification.md` | FULL_LOAD |
+| PRD Validation Evidence | canonical `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`; legacy historical names remain discoverable in the PRD directory | SELECTIVE_LOAD |
 | Spec | `{planning_artifacts}/*spec-*.md` (whole) | FULL_LOAD |
 | Document Project | `{project_knowledge}/index.md` (sharded) | INDEX_GUIDED |
 
@@ -76,15 +77,23 @@ Activation is complete. Begin the workflow below.
 
 **Strategy**: Course correction needs broad project context to assess change impact accurately. Load all available planning artifacts.
 
-**Discovery Process for FULL_LOAD documents (PRD, Epics, Architecture, UX Design, Spec):**
+Before writing the change proposal or mutating any source/progress state, run `speclite resolve artifact-documents --subject <subject> --project-root {project-root}` separately with `<subject>` set to `prd`, `epics`, and `architecture`. Load only each result's `consumedPaths` and record its evidence fields. If ambiguity is reported, ask for current-invocation selection and rerun the affected subject with `--selection whole|sharded`. Any `continuation=block` HALTs with zero artifact write and zero progress mutation. Do not define local precedence, combine shapes, load undeclared shards or migrate artifacts.
 
-1. **Search for whole document first** - Look for files matching the whole-document pattern (e.g., `*prd*.md`, `*epic*.md`, `*architecture*.md`, `*ux*.md`, `*spec-*.md`)
-2. **Check for sharded version** - If whole document not found, look for a directory with `index.md` (e.g., `prd/index.md`, `epics/index.md`)
+For UX, use Planning root evidence from `speclite resolve artifact-roots --project-root {project-root}`. Check canonical `{planning_artifacts}/ux/ux-design-specification.md` first and exact legacy `{planning_artifacts}/ux-design-specification.md` only when canonical is absent; record `resolvedRoot`, `resolutionMode`, and project-relative `actualConsumedPath`. Canonical wins when both exist. Load legacy in place without migration, copy, rename, delete, or config rewrite; resolve related local assets relative to the selected UX directory and reject project-root escapes. Spec and Document Project keep their current rules.
+
+For PRD validation evidence, enumerate `{planning_artifacts}/prd/` read-only. Recognize canonical historical `prd-validate-report-{yyyy-MM-dd}.md` with a valid calendar date and legacy historical `validation-report-*.md`, `prd-validation-report-*.md`, `prd-validation-*.md`, `validate-prd-report-*.md`, or undated `prd-validation-report.md`. Load only reports relevant to the change trigger, record project-relative consumed paths, and preserve every report in place; never rename, migrate, overwrite, delete, or reuse a legacy basename as a producer default.
+
+Before loading any canonical or legacy candidate, construct the logical Planning root and logical PRD owner from the portable project-relative resolver result; the logical PRD owner must be exactly `{planning_artifacts}/prd`. Require `realProject` to exist and be a directory. Require the logical Planning root to exist and resolve to a directory, then require `realPlanning` to be the same as or a descendant of `realProject`. Require the logical PRD owner to exist and pass a no-follow `lstat` as a directory or inspected entry, resolve it to the directory `realPrdOwner`, and require the normalized physical path of `realPrdOwner` to equal exactly `realPlanning/prd`; containment inside `realPlanning` alone is insufficient. Only then require the candidate to be a portable project-relative path, exist, have readable bytes, pass a no-follow `lstat` as a regular file and not a symlink, and have its `realpath` remain the same as or a descendant of `realPrdOwner`. Any failed owner-chain or candidate check, including a symlink, non-file, unreadable or missing candidate, external escape, or project-internal cross-space or redirect, must fail closed before content is loaded or parsed and record project-relative rejection evidence.
+
+**Discovery Process for FULL_LOAD documents (Spec only; PRD/Epics/Architecture and UX use the governed rules above):**
+
+1. **Search non-governed whole documents first** - This local pattern applies only to Spec (e.g., `*spec-*.md`)
+2. **Check for non-governed sharded version** - If a Spec whole document is absent, look for its `index.md`
 3. **If sharded version found**:
    - Read `index.md` to understand the document structure
    - Read ALL section files listed in the index
    - Process the combined content as a single document
-4. **Priority**: If both whole and sharded versions exist, use the whole document
+4. **Priority**: This legacy procedure does not apply to PRD/Epics/Architecture or UX; use their explicit resolver-backed contracts above.
 
 **Discovery Process for INDEX_GUIDED documents (Document Project):**
 

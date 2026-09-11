@@ -14,6 +14,7 @@ metadata:
     Source entry summary: Create project-context.md with AI rules. Use when the user says "generate project context" or "create project context"
 
 [Core Capabilities]
+    - **Single whole/sharded discovery contract**: consume PRD, Epics, and Architecture only from `speclite resolve artifact-documents` `consumedPaths`; blocking keeps zero artifact write and zero progress mutation, and selection is invocation-scoped.
     - **Speclite activation**: Resolve three-tier customize, workflow.persistent_facts, workflow.on_complete, and runtime config from merged output of `speclite resolve config --project-root {project-root}`.
     - **Artifact discovery**: Load project artifacts, config fields, historical context, and data files according to the workflow specification.
     - **Step orchestration**: Follow `references/workflow-details.md` and related step files in order, preserving HALT conditions, menus, and state advancement.

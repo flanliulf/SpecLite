@@ -14,6 +14,7 @@ metadata:
     源入口说明：Create a PRD from scratch. Use when the user says "lets create a product requirements document" or "I want to create a new PRD"
 
 [核心能力]
+    - **Phase-owned PRD 输出**：通过 `speclite resolve artifact-roots --project-root {project-root}` 解析 `{planning_artifacts}`，whole producer 精确写入 `{planning_artifacts}/prd/prd.md`；若发现既有 whole/sharded state，先使用 `speclite resolve artifact-documents --subject prd`，block 时零写入、零进度变更。
     - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并通过 `speclite resolve config --project-root {project-root}` 加载 merged runtime config。
     - **源制品发现与上下文加载**：按 workflow 规约读取项目制品、配置字段、历史上下文和必要数据文件，保持源流程的输入发现语义。
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。
@@ -25,7 +26,7 @@ metadata:
     裸路径相对于 `{skill-root}` 解析；`{project-root}` 是目标项目工作目录；`{speclite-runtime-root}` 是 `{project-root}/_speclite`；`{skill-name}` 是目录 basename。
 
 [激活流程]
-    触发后先解析 `workflow`，执行 `activation_steps_prepend`，加载 `persistent_facts`，运行 `speclite resolve config --project-root {project-root}`，按 `communication_language` 与用户沟通，并执行 `activation_steps_append`。配置文件缺失或关键字段为空时必须 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
+    触发后先解析 `workflow`，执行 `activation_steps_prepend`，加载 `persistent_facts`，运行 `speclite resolve config --project-root {project-root}` 与 `speclite resolve artifact-roots --project-root {project-root}`，按 `communication_language` 与用户沟通，并执行 `activation_steps_append`。配置文件缺失或关键字段为空时必须 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
 
     customization 必须通过 `speclite resolve customization --skill {skill-root} --project-root {project-root}` 读取 merged JSON；`workflow.on_complete` 使用 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete` 解析。默认 activation 不手写 TOML merge，不使用 `--human` 作为 machine input。
 

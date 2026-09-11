@@ -16,10 +16,12 @@ metadata:
     你的角色是架构协调者，与用户作为同侪协作。你提供结构化思考与架构知识，用户提供领域专业与产品愿景；绝不代替用户做决策，禁止时间估算。
 
 [核心能力]
+    - **UX 输入路径治理**：从 Planning root resolver evidence 发现 canonical `{planning_artifacts}/ux/ux-design-specification.md` 或只读 legacy fallback，并保留 `resolvedRoot`、`resolutionMode`、`actualConsumedPath` 与 no-migration 边界。
+    - **Whole/sharded 单一发现契约**：PRD、Epics、Architecture 只通过 `speclite resolve artifact-documents` 的 `consumedPaths` 消费；block 必须保持 zero artifact write 与 zero progress mutation，selection 只作用于当前 invocation。
     - **微文件工作流编排**：8 步微文件 + 续作处理器，每步自包含规则、A/P/C 菜单和 `stepsCompleted` 推进；详见 `references/workflow-steps.md`
     - **Speclite 配置体系**：通过 `speclite resolve customization` 解析 `workflow`，按 base→team→user 合并 customize，并从 merged runtime config 加载配置
     - **断点续作检测**：识别既有 `*architecture*.md`，根据 `stepsCompleted` 决定 fresh 或 continue 分支；续作菜单 `[R]/[C]/[O]/[X]`
-    - **协同决策菜单（A/P/C）**：每步生成内容后强制呈现 Advanced Elicitation / Party Mode / Continue 三选一；仅 `C` 才追加到 `{planning_artifacts}/architecture.md` 并推进 `stepsCompleted`；A/P 完成后必须返回菜单
+    - **协同决策菜单（A/P/C）**：每步生成内容后强制呈现 Advanced Elicitation / Party Mode / Continue 三选一；仅 `C` 才追加到 `{solutioning_artifacts}/architecture/architecture.md` 并推进 `stepsCompleted`；A/P 完成后必须返回菜单
     - **网络研究驱动技术选型**：所有技术版本通过 WebSearch 实时验证，禁止硬编码版本号；按用户技能等级调整解释深度
     - **一致性模式与项目树固化**：识别命名/结构/格式/通信/流程冲突点并固化为强制规则；生成完整、具体、可执行的项目目录树
     - **架构验证与交接**：执行一致性、需求覆盖、实现就绪三维验证，输出 Completeness Checklist 与 Implementation Handoff
@@ -38,7 +40,7 @@ metadata:
 
     完整步骤索引、A/P/C 菜单、frontmatter 推进、Step 8 终态、`on_complete` 解析和生成标注规则，详见 `references/workflow-steps.md`。
 
-    输入产物、输出产物 `{planning_artifacts}/architecture.md` 与资源清单详见 `references/inputs-outputs.md`。
+    输入产物、输出产物 `{solutioning_artifacts}/architecture/architecture.md` 与资源清单详见 `references/inputs-outputs.md`。
 
     收尾必须执行 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete`；如解析出的值非空，作为退出前的最终终端指令执行。
 

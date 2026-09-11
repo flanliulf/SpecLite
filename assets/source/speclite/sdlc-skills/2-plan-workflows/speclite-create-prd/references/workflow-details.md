@@ -68,7 +68,7 @@ Run `speclite resolve config --project-root {project-root}` and resolve merged r
 - Use `{user_name}` for greeting
 - Use `{communication_language}` for all communications
 - Use `{document_output_language}` for output documents
-- Use `{planning_artifacts}` for output location and artifact scanning
+- Resolve `{planning_artifacts}` from `speclite resolve artifact-roots --project-root {project-root}` and use `{planning_artifacts}/prd` for output
 - Use `{project_knowledge}` for additional context scanning
 
 ### Step 5: Greet the User
@@ -83,7 +83,9 @@ Activation is complete. Begin the workflow below.
 
 ## Paths
 
-- `outputFile` = `{planning_artifacts}/prd.md`
+- `outputFile` = `{planning_artifacts}/prd/prd.md`
+
+Before any output/progress write, inspect the canonical subject directory. If no canonical whole, `index.md`, or shard candidate exists, initialize the fresh whole `outputFile`. Otherwise run `speclite resolve artifact-documents --subject prd --project-root {project-root}`; use only `consumedPaths`, request invocation-scoped `--selection whole|sharded` on ambiguity, and HALT on every blocking result with zero artifact write and zero progress mutation. Never define local precedence or migrate artifacts.
 
 ## Execution
 

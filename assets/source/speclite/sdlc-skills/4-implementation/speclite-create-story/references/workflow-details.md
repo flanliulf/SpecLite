@@ -45,7 +45,7 @@
   - `[core]`：`project_name`、`user_name`
   - `[core]`：`communication_language`、`document_output_language`（实际值使用确定枚举，例如 `Chinese` 或 `English`，不要使用 `Chinese / English` 占位值）
   - `[core]`：`user_skill_level`、`output_folder`
-  - `[modules.sdlc]`：`planning_artifacts`、`implementation_artifacts`、`project_knowledge`
+  - `[modules.sdlc]`：`planning_artifacts`、`solutioning_artifacts`、`implementation_artifacts`、`project_knowledge`
   - `date`（系统当前日期时间）
 - 若 `project_knowledge` 存在且非空，把 `{project_knowledge}/**/*.md` 按 `file:` 持久事实格式加载为补充项目知识；默认值通常为 `{project-root}/docs`，与默认 `persistent_facts` 中的 docs glob 保持一致。
 
@@ -60,10 +60,10 @@
 ## 路径
 
 - `sprint_status` = `{implementation_artifacts}/sprint-status.yaml`
-- `epics_file` = `{planning_artifacts}/epics.md`
-- `prd_file` = `{planning_artifacts}/prd.md`
-- `architecture_file` = `{planning_artifacts}/architecture.md`
-- `ux_file` = `{planning_artifacts}/*ux*.md`
+- `epics_file` = resolver-selected `{planning_artifacts}/epics/epics.md` or `{planning_artifacts}/epics/index.md`
+- `prd_file` = resolver-selected `{planning_artifacts}/prd/prd.md` or `{planning_artifacts}/prd/index.md`
+- `architecture_file` = resolver-selected `{solutioning_artifacts}/architecture/architecture.md` or `{solutioning_artifacts}/architecture/index.md`
+- `ux_file` = canonical `{planning_artifacts}/ux/ux-design-specification.md` or exact legacy fallback `{planning_artifacts}/ux-design-specification.md`
 - `story_title` = ""（如果不能推断则向用户索取）
 - `story_root` = `{implementation_artifacts}/stories`
 - `default_output_file` = `{story_root}/{story_key}.md`
@@ -73,10 +73,12 @@
 
 | 输入 | 描述 | 路径模式 | 加载策略 |
 | --- | --- | --- | --- |
-| prd | PRD（兜底，epics 文件应已包含大部分内容） | 整文件 `{planning_artifacts}/*prd*.md`；分片 `{planning_artifacts}/*prd*/*.md` | SELECTIVE_LOAD |
-| architecture | 架构（兜底，epics 文件应已包含相关章节） | 整文件 `{planning_artifacts}/*architecture*.md`；分片 `{planning_artifacts}/*architecture*/*.md` | SELECTIVE_LOAD |
-| ux | UX 设计（兜底，epics 文件应已包含相关章节） | 整文件 `{planning_artifacts}/*ux*.md`；分片 `{planning_artifacts}/*ux*/*.md` | SELECTIVE_LOAD |
-| epics | 增强后的 epics+stories 文件（含 BDD 与 source hints） | 整文件 `{planning_artifacts}/*epic*.md`；分片 `{planning_artifacts}/*epic*/*.md` | SELECTIVE_LOAD |
+| prd | PRD（兜底，epics 文件应已包含大部分内容） | shared resolver subject `prd` 的 `consumedPaths` | SELECTIVE_LOAD |
+| architecture | 架构（兜底，epics 文件应已包含相关章节） | shared resolver subject `architecture` 的 `consumedPaths` | SELECTIVE_LOAD |
+| ux | UX 设计（兜底，epics 文件应已包含相关章节） | canonical `{planning_artifacts}/ux/ux-design-specification.md`；exact legacy fallback `{planning_artifacts}/ux-design-specification.md` | SELECTIVE_LOAD |
+| epics | 增强后的 epics+stories 文件（含 BDD 与 source hints） | shared resolver subject `epics` 的 `consumedPaths` | SELECTIVE_LOAD |
+
+UX discovery 必须复用 `speclite resolve artifact-roots --project-root {project-root}` 的 Planning root `resolvedRoot` 与 `resolutionMode`。优先消费 canonical UX document；仅当其缺失时才读取 exact legacy fallback，并把所选 project-relative path 记录为 `actualConsumedPath`。Canonical 与 legacy 同时存在时 canonical 胜出；legacy artifact 不得被迁移、复制、重命名、删除或触发 config rewrite。任何关联 HTML、design-system、screenshot 或 asset reference 必须相对所选 UX directory 解析并拒绝 project-root escape。
 
 ## 执行流程
 

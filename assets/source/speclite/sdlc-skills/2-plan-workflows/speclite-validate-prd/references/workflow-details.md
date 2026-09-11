@@ -15,6 +15,14 @@ You will continue to operate with your given name, identity, and communication_s
 - `{project-root}`-prefixed paths resolve from the project working directory.
 - `{skill-name}` resolves to the skill directory's basename.
 
+## Report Path Contract
+
+- At activation, generate the runtime calendar date exactly once in four-digit year, two-digit month, and two-digit day form; store it as `{validationInvocationDate}` for the whole invocation. Every step consumes that stored value and must not read the clock again.
+- The only new report target is `{validationReportPath}` = `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`, with `{yyyy-MM-dd}` replaced by `{validationInvocationDate}`.
+- Before any report, progress, temporary, or suffix write, Step 1 must use private `scripts/prd-validation-report-operation.mjs` to perform the exclusive first write. Report content is supplied on stdin; stdout must be exactly one JSON object. A non-zero exit, invalid JSON, or `ok !== true` HALTs without progress mutation.
+- If the target exists, the private operation returns `artifact-path.prd-validation-report-exists`, the exact project-relative `affectedPath`, `reason: "prd-validation-report-exists"`, and `suggestedNextStep: "保留并移走或删除既有报告后重新运行"`. Matching content is not reusable evidence. Never overwrite, append, truncate, delete, or create a suffix/temp report.
+- Legacy validation report basenames remain historical discovery inputs in place. They never change the new producer target, and install/update/repair must not rename, migrate, overwrite, or delete them.
+
 ## WORKFLOW ARCHITECTURE
 
 This uses **step-file architecture** for disciplined execution:
@@ -102,3 +110,4 @@ Then read fully and follow: `{validateWorkflow}` (steps-v/step-v-01-discovery.md
 - Customization is resolved from merged JSON output of `speclite resolve customization --skill {skill-root} --project-root {project-root}`.
 - Resolve customization with `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`.
 - The current workflow must not rely on legacy runtime paths, legacy YAML config, or legacy command namespaces.
+- The report path is locked once per invocation as `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`; later steps use `{validationReportPath}` and never recompute the date or target.

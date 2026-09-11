@@ -1,6 +1,6 @@
 # Story 11.5: Govern Planning And Solutioning Documents As Whole And Sharded Artifacts（治理 Planning 与 Solutioning 文档的整篇与分片产物）
 
-Status: ready-for-dev
+Status: done
 
 ## Story（故事）
 
@@ -37,12 +37,12 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 核验 11.1–11.4 evidence，运行 11.5 kickoff，预注册 discovery issues。
-- [ ] Task 2: 实现单一 discovery resolver/decision table 与 evidence model。
-- [ ] Task 3: 更新 PRD、Epics、Architecture whole producers 与 shard-doc 同目录 contract。
-- [ ] Task 4: 更新 downstream consumers，提供 invocation-scoped explicit selection；block 前零写入/零 progress mutation。
-- [ ] Task 5: 建立 fresh/existing/whole/sharded/ambiguity/broken/missing fixture matrix。
-- [ ] Task 6: 执行 canonical corpus negative scan、focused suites、build、`git diff --check` 与 completion Gate。
+- [x] Task 1: 核验 11.1–11.4 evidence，运行 11.5 kickoff，预注册 discovery issues。
+- [x] Task 2: 实现单一 discovery resolver/decision table 与 evidence model。
+- [x] Task 3: 更新 PRD、Epics、Architecture whole producers 与 shard-doc 同目录 contract。
+- [x] Task 4: 更新 downstream consumers，提供 invocation-scoped explicit selection；block 前零写入/零 progress mutation。
+- [x] Task 5: 建立 fresh/existing/whole/sharded/ambiguity/broken/missing fixture matrix。
+- [x] Task 6: 执行 canonical corpus negative scan、focused suites、build、`git diff --check` 与 completion Gate。
 
 ## Dev Notes（开发备注）
 
@@ -109,23 +109,69 @@ Status: ready-for-dev
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
-待实现 Agent 填写。
+GPT-5.5 (`gpt-5.5`)
 
 ### Completion Notes List（完成说明）
 - 终极上下文引擎分析已完成 —— 已创建完整开发者指南。
-- Story 尚未实现；decision table 与 evidence plan 不代表 verified behavior。
+- Owner 已明确批准 `确认 11.5 推荐方案`；kickoff 以 controlled correction 保留原 `DECISION_NEEDED` 历史并把 current result 更新为 `PASS`。
+- `SPEC 09` 已承载 AC5 唯一 decision table、evidence、blocking continuation、explicit selection、fallback/mismatch/no-migration；`SPEC 07` 已注册四个 stable issue IDs。
+- 已实现 `speclite resolve artifact-documents` 与共享只读 discovery model，覆盖 PRD/Epics/Architecture whole-only、sharded-only、whole+sharded、invalid/broken/missing、selection、legacy-compatible fallback 与 mismatch。
+- Whole producers、`speclite-shard-doc`、九个明确 consumer、ZH/EN/help/metadata/docs/fixtures 已同步；UX 与 Story 11.6+ 范围保持不变。
+- Focused matrix 17/17、isolated affected 86/86、isolated full 522 passed / 4 todo、build/docs/packaging/canonical strict 均通过。Live worktree 的固定数量失败仅由未授权 external drawer 造成，未据此改写 68-skill baseline。
+- CR Round 8 Reviewer/Evaluator 已形成 double-PASS，当前为 `0 P0 / 0 P1`；Round 7 Finding #2 已登记为 `TODO-016` 且保持 `open`。CR06 复跑 focused/related `123/123`、docs、canonical warn/strict 与 `git diff --check` 均通过；未把 external drawer 导致的 live full-suite fixed-count drift 表述为全量测试全绿。
 
 ### File List（文件清单）
 - `_bmad-output/implementation-artifacts/stories/11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/flow-gates/11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts-story-completion-gate.md`
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`
+- `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`
+- `src/config/artifact-document-discovery.ts`
+- `src/config/resolve-output-schema.ts`
+- `src/commands/resolve.ts`
+- `assets/source/speclite/core-skills/speclite-shard-doc/SKILL.md`
+- `assets/source/speclite/sdlc-skills/module-help.csv`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-prd/**`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/**`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/**`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/**`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories/**`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/**`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/**`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/**`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-retrospective/**`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-sprint-planning/**`
+- `docs/explanation/local-first-control-plane.md`
+- `docs/explanation/runtime-boundaries.md`
+- `docs/reference/cli-human-output-matrix.md`
+- `docs/reference/cli.md`
+- `docs/reference/command-result-json.md`
+- `docs/reference/config-and-customization.md`
+- `docs/reference/glossary/epic-09-installed-runtime-activation-contract-hardening.md`
+- `docs/reference/skills/sdlc-workflows.md`
+- `docs/reference/specs/command-result-json-contract.md`
+- `docs/reference/workflow-artifact-layout.md`
+- `release/packaging-manifest.json`
+- `test/artifact-document-discovery.test.ts`
+- `test/runtime-structure.test.ts`
+- `test/source-and-modules.test.ts`
+- `test/fixtures/resolve-parity/expected/human/config-invalid-input.txt`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/{manifest-full,skill-index-full,files-index-full,phase-coverage-full}.json`
 
 ## Anchor Evidence Summary（锚点证据摘要）
-- 待实现与 Flow Gates 填写。
+- `phase-owned roots + decision table`: PASS；fresh subject directories 与 whole producer paths 有 runtime/corpus/fixture evidence。
+- `stable ambiguity/missing/broken issues`: PASS；四个 stable IDs 已注册并由 executable matrix 验证。
+- `producer/consumer single resolver`: PASS；九个 consumer contract tests 均要求 command、`consumedPaths` 与 zero mutation。
+- `block read-only / no migration`: PASS；before/after snapshots、CLI block evidence 与 legacy fallback fixture 均通过。
+- `corpus closure`: PASS_EQUIVALENT；11.5 active negative scan 无违规，live full 仅受 external drawer fixed-count drift 影响，隔离 68-skill baseline full PASS。
 
 ## Change Log（变更记录）
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 phase-owned whole/sharded decision、producer/consumer 与 evidence 上下文。 | Fancyliu / Codex |
+| 2026-09-04 | 1.0 | 实现共享 whole/sharded resolver、producer/consumer 路由、稳定诊断、文档/fixture 与 completion evidence；移交 review。 | GPT-5.5 / Codex |
+| 2026-09-04 | 1.1 | Round 8 Reviewer/Evaluator double-PASS；CR04 规则与 CR05 `TODO-016` 已登记，完成 CR06 状态收尾。 | GPT-5.5 / Codex |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*

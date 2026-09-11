@@ -6,16 +6,16 @@
 
 | 输入 | 描述 | 路径模式 | 必填 |
 | ---- | ---- | -------- | ---- |
-| PRD | 产品需求文档 | `{planning_artifacts}/*prd*.md` 或 `{planning_artifacts}/*prd*/index.md` | **是** |
+| PRD | 产品需求文档 | shared resolver subject `prd`：`{planning_artifacts}/prd/prd.md` 或 `{planning_artifacts}/prd/index.md` 及声明 shards | **是** |
 | Product Brief | 产品简报 | `*brief*.md` | 否 |
-| UX Design | UX 设计 | `*ux-design*.md` | 否 |
+| UX Design | UX 设计 | canonical `{planning_artifacts}/ux/ux-design-specification.md`; exact legacy fallback `{planning_artifacts}/ux-design-specification.md` | 否 |
 | Research | 研究文档 | `*research*.md` | 否 |
 | Project Knowledge | 项目知识库 | `{project_knowledge}/**` 或 `{project-root}/docs/**` | 否 |
 | Project Context | 项目上下文（含技术偏好与规则） | `**/project-context.md` | 否 |
 
 ## 输出产物
 
-- 主输出：`{planning_artifacts}/architecture.md`（基于 `assets/architecture-decision-template.md` 创建）
+- 主输出：`{solutioning_artifacts}/architecture/architecture.md`（基于 `assets/architecture-decision-template.md` 创建）
 - 文档以 append-only 方式按步骤构建，frontmatter 持续追踪 `stepsCompleted`、`inputDocuments`、`lastStep`、`status`
 - 文档章节顺序：Project Context Analysis → Starter Template Evaluation → Core Architectural Decisions → Implementation Patterns & Consistency Rules → Project Structure & Boundaries → Architecture Validation Results
 - 末尾追加生成标注

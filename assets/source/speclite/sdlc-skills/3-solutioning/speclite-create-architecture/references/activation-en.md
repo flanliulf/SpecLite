@@ -27,12 +27,13 @@ This document spells out the 6 activation steps that must be executed before ent
 
 ## Activation Step 4: Load configuration
 
-Load and parse from merged output of `speclite resolve config --project-root {project-root}`:
+Load non-root fields from merged output of `speclite resolve config --project-root {project-root}`, then resolve effective artifact roots from `speclite resolve artifact-roots --project-root {project-root}`:
 
 - `[core].user_name` — for greeting
 - `[core].communication_language` — use this language for all communication
 - `[core].document_output_language` — use this language for all output documents
-- `[modules.sdlc].planning_artifacts` — output location and artifact-scan root
+- `planning_artifacts.resolvedRoot` / `resolutionMode` — PRD root evidence and canonical `{planning_artifacts}/ux/ux-design-specification.md` versus exact legacy UX fallback discovery evidence
+- `solutioning_artifacts.resolvedRoot` — Architecture output and discovery root
 - `[modules.sdlc].project_knowledge` — additional context-scan root
 
 If the config file is missing or any required field is empty, HALT and ask the user to create or repair merged runtime config. `config.toml.example` documents the expected structure only and must not be used as a runtime fallback.
