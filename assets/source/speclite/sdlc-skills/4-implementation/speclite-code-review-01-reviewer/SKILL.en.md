@@ -28,7 +28,7 @@ Perform a read-only three-layer review for one Story and emit `speclite.cr-revie
 
 ## Contract
 
-Resolve the current Skill directory parent as `{skills-root}`, fully read `{skills-root}/speclite-code-review-contract/references/cr-contract.md`, then run `speclite resolve config --project-root {project-root}`. HALT on any failure; never use a runner, old artifact, or historical default path as fallback.
+Resolve the current Skill directory parent as `{skills-root}`, fully read `{skills-root}/speclite-code-review-contract/references/cr-contract.md`, then run `speclite resolve config --project-root {project-root}`. Consume only the `crDir` passed by the runner or manual orchestrator from `speclite resolve cr-directory`; never re-derive the CR directory. HALT on any failure; never use a runner, old artifact, or historical default path as fallback.
 
 ## Inputs
 

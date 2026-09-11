@@ -20,6 +20,7 @@ Evidence
 - legal command: speclite resolve customization --skill <skillDir> [--project-root <projectRoot>] [--key <dottedKey>] [--human]
 - legal command: speclite resolve artifact-roots --project-root <projectRoot> [--lifecycle existing|fresh] [--human]
 - legal command: speclite resolve artifact-documents --subject <prd|epics|architecture> --project-root <projectRoot> [--selection whole|sharded] [--human]
+- legal command: speclite resolve cr-directory --story-id <N.N|N-N> --review-series <series> --project-root <projectRoot> [--human]
 - reason: runtime-path.missing-entry
 
 Issues:

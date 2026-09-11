@@ -4,7 +4,7 @@
 
 ## Step 1: Bind Current Evaluation（绑定 current evaluation）
 
-1. 定位同一 Story/series 最大 round 的 v2 evaluation。
+1. 在传入的 `crDir`（来自 `speclite resolve cr-directory`，不重推导）中定位同一 Story/series 最大 round 的 v2 evaluation。
 2. 重算 evaluation file hash、current scope hash 和 review source hash。
 3. `mode=patch` 只接受 `verdict=FIX_REQUIRED`；`mode=verify-only` 只接受 `verdict=VERIFY_REQUIRED`。
 4. hash/scope/round 不匹配、evaluation 非 current 或已有 completed fixRecord 时 HALT。

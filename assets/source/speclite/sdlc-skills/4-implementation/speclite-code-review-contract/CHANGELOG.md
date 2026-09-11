@@ -2,6 +2,10 @@
 
 本文件记录 `speclite-code-review-contract` 的版本变更历史。
 
+## [Unreleased] - 2026-09-11
+
+- Story 11.9 restart：新增 CR Directory Resolution 章节；唯一派生点改为 `speclite resolve cr-directory`（`src/config/cr-directory.ts`），只按目录名与 v2 文件名判定归属，定义 `cr-directory.ambiguous-resume-root` 与威胁模型边界；不再随包投影 `scripts/resolve-cr-directory.mjs`，不引入 validate-context / ownership marker。
+
 ## [1.0.0] - 2026-08-25
 
 ### Added（新增）

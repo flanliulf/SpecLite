@@ -27,6 +27,7 @@ speclite <command> [options] [target-directory]
 | `speclite governance-report [target-directory]` | 从 installed-state evidence 生成只读流程治理覆盖报告。 |
 | `speclite resolve config` | 输出 raw merged runtime config JSON，保留 `--key` 对 merged config 的选择语义。 |
 | `speclite resolve artifact-roots` | 输出 resolver-backed artifact root JSON，包含 `resolvedRoot`、`resolutionMode`、`provenance`/source evidence 和 stable diagnostics。 |
+| `speclite resolve cr-directory` | 输出 Story-ID-only Code Review 目录解析 JSON（`crDir`、`compatibilityMode`、`legacyCrDirs`）；只读，供 CR runner 与 CR01–06 消费。 |
 | `speclite resolve customization` | 输出解析后的 skill customization JSON。 |
 
 `resolve` 是 runtime support API surface，主要给已安装 skills 和工具调用使用。
@@ -226,6 +227,15 @@ speclite resolve artifact-documents --subject architecture --project-root /path/
 `index.md` 支持 inline 与 reference-style local Markdown links。Destination 会先剥离 query/fragment，再单次 percent-decode，并做 portable path、subject containment 和 readability 校验；external scheme 与 network links 不作为 shard。Malformed、undefined reference-style 或 unsupported local-ish destinations 会以 `artifact-path.broken-shard-reference` block，并在 details 中记录 `referenceKind`。Canonical whole 或 canonical `index.md` 自身 symlink escape 使用 `artifact-path.symlink-escape` block；index self-link 会被排除，不会重复出现在 `consumedPaths`。
 
 显式 `--selection whole` 仍校验 canonical `index.md` entry 的安全性，但不会读取或解析未选 index 的 shard graph；省略 selection 或选择 `sharded` 时仍完整验证该 graph。
+
+解析 Story 的 Code Review 目录：
+
+```sh
+speclite resolve cr-directory --story-id 11.9 --review-series main --project-root /path/to/project
+speclite resolve cr-directory --story-id 11-9 --review-series restart --project-root /path/to/project --human
+```
+
+`--story-id` 只接受规范 numeric identity `N.N` 或 `N-N`，统一输出 `N-N`；`--review-series` 必须匹配 `^[a-z0-9][a-z0-9-]{0,31}$`。Machine stdout 始终返回 `speclite.resolve.cr-directory.v1` evidence（`crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyCrDirs`、`roundEvidence`、`continuation`、`issues`），包括 block result；block 同时以 stderr CR-local issue JSON Line（如 `cr-directory.ambiguous-resume-root`）和 exit code `1` 表达。判定只看 `{implementation_artifacts}/code-reviews/` 下的目录名与候选目录直接子文件名，不读取产物内容；命令只读，不创建、迁移或修改任何目录。
 
 解析 skill customization：
 

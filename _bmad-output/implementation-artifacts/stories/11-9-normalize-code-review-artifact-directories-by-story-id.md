@@ -36,11 +36,11 @@ Status: in-progress
 
 ### Restart 2.0（2026-09-11 重启）
 
-- [ ] 回退 9 个 canonical CR 包与 `test/code-review-contract.test.ts` 到 `ff7528d`，删除 `resolve-cr-directory.mjs` / `test/cr-directory-resolution.test.ts` / title-bearing fixture，归档旧 CR 产物到 `superseded-main/`。
-- [ ] TDD：先写 `test/cr-directory.test.ts`（RED），再实现 `src/config/cr-directory.ts` 与 `speclite resolve cr-directory` 子命令（GREEN）。
-- [ ] 契约与 Skill 同步：`cr-contract.md` 增加 ≤15 行 "CR Directory Resolution"；runner Step 0 调用一次 CLI；CR01–06 只消费传入 `crDir`；8 包 CHANGELOG 写 restart 条目。
-- [ ] 人工复核混入 11.4 / 11.8 改动的文档行，只删 `directoryContext` / `validate-context` 表述。
-- [ ] 重新生成 fresh-install fixture 与 packaging manifest；`npx vitest run`、`npm run docs:check`、`npm run release:check` 通过。
+- [x] 回退 9 个 canonical CR 包与 `test/code-review-contract.test.ts` 到 `ff7528d`，删除 `resolve-cr-directory.mjs` / `test/cr-directory-resolution.test.ts` / title-bearing fixture，归档旧 CR 产物到 `superseded-main/`。
+- [x] TDD：先写 `test/cr-directory.test.ts`（RED），再实现 `src/config/cr-directory.ts` 与 `speclite resolve cr-directory` 子命令（GREEN）。
+- [x] 契约与 Skill 同步：`cr-contract.md` 增加 ≤15 行 "CR Directory Resolution"；runner Step 0 调用一次 CLI；CR01–06 只消费传入 `crDir`；8 包 CHANGELOG 写 restart 条目。
+- [x] 人工复核混入 11.4 / 11.8 改动的文档行，只删 `directoryContext` / `validate-context` 表述。
+- [x] 重新生成 fresh-install fixture 与 packaging manifest；`npx vitest run`、`npm run docs:check`、`npm run release:check` 通过。
 - [ ] CR 闭环 ≤3 轮（reviewSeries=`restart`），边界外 finding 按 Threat Model 归 `dismiss`。
 
 ### Historical（1.0 / 1.1，已由 restart 取代）
@@ -162,7 +162,17 @@ OpenAI GPT-5.6 Sol (medium)
 - Focused final `24 passed / 4 todo`；affected matrix `74 passed / 4 external fixed-count failures / 4 todo`；full suite `695 passed / 12 external fixed-count failures / 4 todo`。
 - `docs:check`、ESM/DTS build、packaging、canonical strict、skill density 与 `git diff --check` 均通过；completion gate 为 `PASS_EQUIVALENT`。
 
-### File List（文件清单）
+### Restart 2.0 File List（重启文件清单）
+- `src/config/cr-directory.ts`（新）、`src/commands/resolve.ts`（`resolve cr-directory` 子命令）、`src/config/resolve-output-schema.ts`（`ResolveCrDirectoryOutputSchema`）
+- `test/cr-directory.test.ts`（新）；`test/fixtures/fresh-install-empty-project/expected/installed-state/{files-index-full,skill-index-full}.json`、`test/fixtures/resolve-parity/expected/human/config-invalid-input.txt`、`release/packaging-manifest.json`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/cr-contract.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/runner-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-0{1..6}-*/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/*-workflow.md}`
+- `assets/source/speclite/{README.md,README.en.md}`、`assets/source/speclite/sdlc-skills/module-help.csv`、`docs/reference/cli.md`、`docs/reference/skills/sdlc-workflows.md`、`docs/reference/workflow-artifact-layout.md`
+- 删除：`speclite-code-review-contract/scripts/resolve-cr-directory.mjs`、`test/cr-directory-resolution.test.ts`、`test/fixtures/code-review-contract/title-bearing-path-ledger.json`
+- `_bmad-output/implementation-artifacts/{stories/11-9-*.md,sprint-status.yaml,cr-rules/cr-todo-backlog.md,flow-gates/11-9-*-story-kickoff-gate.md,code-reviews/11-9-code-review/**}`
+
+### File List（1.0 / 1.1 历史文件清单）
 - `_bmad-output/implementation-artifacts/stories/11-9-normalize-code-review-artifact-directories-by-story-id.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 - `_bmad-output/implementation-artifacts/flow-gates/11-9-normalize-code-review-artifact-directories-by-story-id-story-kickoff-gate.md`

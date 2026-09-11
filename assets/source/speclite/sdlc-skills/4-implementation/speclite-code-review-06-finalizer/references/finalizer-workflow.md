@@ -5,7 +5,7 @@
 ## Step 1: Resolve Identity（解析身份）
 
 1. 建立唯一 `storyId/storyKey/storyFile/reviewSeries`。
-2. CR 目录必须是 `{storyId}-code-review/`。
+2. CR 目录只消费传入的 `crDir`（来自 `speclite resolve cr-directory`），不重推导；`compatibilityMode=legacy-resume` 时原位收口，不迁移。
 3. legacy v1、slug 目录或 superseded series 只作历史 evidence。
 4. 由 Finalizer 自身按 shared contract 重算 current scope；runner/manual records 只可作为候选输入。
 

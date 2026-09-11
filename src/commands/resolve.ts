@@ -12,6 +12,7 @@ import {
   type ArtifactRootResolutionLifecycle,
 } from "../config/artifact-root-resolver.js";
 import { resolveProjectConfig } from "../config/config-reader.js";
+import { resolveCrDirectory, type CrDirectoryIssue } from "../config/cr-directory.js";
 import { resolveSkillCustomization, type ResolverResult } from "../config/customization-reader.js";
 import { createResolveIssue } from "../config/resolve-diagnostics.js";
 import { RESOLVE_ARTIFACT_ROOTS_SCHEMA_VERSION } from "../config/resolve-output-schema.js";
@@ -45,6 +46,14 @@ type ResolveArtifactRootsOptions = {
 type ResolveArtifactDocumentsOptions = ResolveArtifactRootsOptions & {
   subject?: string;
   selection?: string;
+};
+
+type ResolveCrDirectoryOptions = {
+  projectRoot?: string;
+  storyId?: string;
+  reviewSeries?: string;
+  human?: boolean;
+  locale?: string;
 };
 
 export function registerResolveCommand(program: Command, io: ResolveCommandIo): void {
@@ -277,6 +286,88 @@ export function registerResolveCommand(program: Command, io: ResolveCommandIo): 
       }
       io.setExitCode(result.ok ? 0 : 1);
     });
+
+  resolve
+    .command("cr-directory")
+    .description("Resolve the single Code Review directory for a Story and review series without writes.")
+    .option("--story-id <storyId>", "Canonical numeric Story id: N.N or N-N.")
+    .option("--review-series <reviewSeries>", "Review series token, for example main.")
+    .option("--project-root <projectRoot>", "Project root containing _speclite.")
+    .option("--human", "Render opt-in human-readable resolver support output.")
+    .option("--locale <locale>", "Render human-readable resolve output with locale: zh-CN or en-US.")
+    .action(async (options: ResolveCrDirectoryOptions) => {
+      const locale = resolveCliLocale({ flag: options.locale, env: process.env });
+      const context: ResolveHumanContext = {
+        human: options.human ?? false,
+        locale,
+        command: "cr-directory",
+        requestedKeys: [],
+        sourcePaths: [
+          "_speclite/config.toml",
+          "_speclite/config.user.toml",
+          "_speclite/custom/config.toml",
+          "_speclite/custom/config.user.toml",
+        ],
+        resolvedLayer: "shared CR contract directory resolver",
+      };
+      if (options.projectRoot === undefined) {
+        writeFailure(io, missingOptionIssue("--project-root"), context);
+        return;
+      }
+      if (options.storyId === undefined) {
+        writeFailure(io, missingOptionIssue("--story-id"), context);
+        return;
+      }
+      if (options.reviewSeries === undefined) {
+        writeFailure(io, missingOptionIssue("--review-series"), context);
+        return;
+      }
+
+      const rootResult = await resolveArtifactRootsFromProjectConfig({
+        projectRoot: options.projectRoot,
+        lifecycle: "existing",
+      });
+      const implementationRoot = rootResult.roots.find((candidate) => candidate.field === "implementation_artifacts");
+      if (!rootResult.ok || implementationRoot === undefined) {
+        writeResolveResult(io, {
+          value: {},
+          issues: rootResult.issues,
+          exitCode: 1,
+          sources: rootResult.configSources ?? {},
+        }, context);
+        return;
+      }
+
+      const result = await resolveCrDirectory({
+        projectRoot: options.projectRoot,
+        implementationArtifacts: implementationRoot.resolvedRoot,
+        storyId: options.storyId,
+        reviewSeries: options.reviewSeries,
+      });
+      if (options.human) {
+        writeResolveResult(io, {
+          // The human frame only counts and lists top-level keys of the value.
+          value: result as unknown as ResolverResult["value"],
+          issues: result.issues.map(toHumanRenderableIssue),
+          exitCode: result.ok ? 0 : 1,
+          sources: rootResult.configSources ?? {},
+        }, context);
+        return;
+      }
+      io.stdout(`${JSON.stringify(result, null, 2)}\n`);
+      if (result.issues.length > 0) {
+        io.stderr(`${result.issues.map((issue) => JSON.stringify(issue)).join("\n")}\n`);
+      }
+      io.setExitCode(result.ok ? 0 : 1);
+    });
+}
+
+/**
+ * CR-local continuation issues are owned by the shared CR contract, not SPEC 07, so
+ * they are only shaped like ValidationIssue for the human support frame renderer.
+ */
+function toHumanRenderableIssue(issue: CrDirectoryIssue): ValidationIssue {
+  return issue as unknown as ValidationIssue;
 }
 
 function writeResolveResult(
@@ -310,7 +401,7 @@ function writeFailure(io: ResolveCommandIo, issue: ValidationIssue, context: Res
   io.setExitCode(1);
 }
 
-function missingOptionIssue(optionName: "--project-root" | "--skill"): ValidationIssue {
+function missingOptionIssue(optionName: "--project-root" | "--skill" | "--story-id" | "--review-series"): ValidationIssue {
   return createResolveIssue({
     issueId: "runtime-path.missing-entry",
     severity: "error",
@@ -360,7 +451,7 @@ function collectKey(value: string, previous: string[]): string[] {
   return [...previous, value];
 }
 
-type ResolveHumanCommand = "config" | "customization" | "artifact-roots" | "artifact-documents";
+type ResolveHumanCommand = "config" | "customization" | "artifact-roots" | "artifact-documents" | "cr-directory";
 
 type ResolveHumanContext = {
   human: boolean;
@@ -439,6 +530,11 @@ function renderResolveHumanOutput(
         locale,
         "resolveLegalCommand",
         "speclite resolve artifact-documents --subject <prd|epics|architecture> --project-root <projectRoot> [--selection whole|sharded] [--human]",
+      ),
+      formatResolveBullet(
+        locale,
+        "resolveLegalCommand",
+        "speclite resolve cr-directory --story-id <N.N|N-N> --review-series <series> --project-root <projectRoot> [--human]",
       ),
     );
     for (const issue of result.issues) {

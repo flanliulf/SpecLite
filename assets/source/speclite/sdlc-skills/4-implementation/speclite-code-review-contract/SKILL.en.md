@@ -29,7 +29,7 @@ This Skill is read-only. It does not create review, evaluation, fix, TODO, or fi
 
 1. Fully read `references/cr-contract.md`; HALT if it is unavailable.
 2. Run `speclite resolve config --project-root {project-root}` and resolve merged `planning_artifacts` and `implementation_artifacts`; HALT on failure.
-3. Build a unique `storyId -> storyKey -> storyFile` mapping and locate the requested or current CR artifact.
+3. Build a unique `storyId -> storyKey -> storyFile` mapping; resolve the CR directory only through `speclite resolve cr-directory` (see CR Directory Resolution in `references/cr-contract.md`), then locate the requested or current CR artifact.
 4. Validate artifact schema, identity, path, series, round, hash, scope, verdict, freshness, and CR04–06 durable closeout binding against the shared contract.
 5. Return a read-only result containing `VALID | INVALID | INCOMPLETE`, itemized evidence, and an exact next step; do not modify inspected files.
 

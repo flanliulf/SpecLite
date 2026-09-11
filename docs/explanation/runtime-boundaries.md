@@ -57,7 +57,7 @@ IDE-specific discovery metadata 与 self-contained Skill 内容的区别见 [`id
 | `_speclite/hooks/` | installed Hook runners 与 metadata。 |
 | `_speclite/scripts/` | legacy compatibility、migration aid 与 troubleshooting scripts。 |
 
-已安装 Skill 的唯一默认 resolver surface 是 Node CLI：`speclite resolve config`、`speclite resolve customization`、`speclite resolve artifact-roots` 和 `speclite resolve artifact-documents`。`_speclite/scripts/resolve_*.py` 只属于 compatibility assets，不是默认 activation dependency。
+已安装 Skill 的唯一默认 resolver surface 是 Node CLI：`speclite resolve config`、`speclite resolve customization`、`speclite resolve artifact-roots`、`speclite resolve artifact-documents` 和 `speclite resolve cr-directory`。`_speclite/scripts/resolve_*.py` 只属于 compatibility assets，不是默认 activation dependency。
 
 ## Artifact Repository（产物仓库）
 

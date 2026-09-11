@@ -145,7 +145,7 @@ IR grill consistency review lives under `sdlc-skills/3-solutioning/`:
 Epic-level goal orchestration workflows live under `sdlc-skills/4-implementation/`:
 
 - `speclite-goal-orchestrator-epic-story-review-runner`: orchestrates strict-serial SR reviewer / evaluator / fixer loops for an Epic and keeps progress records under `story-reviews/.../goal-execute-records/`.
-- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops, resolves and freezes one `directoryContext` from numeric Story identity, requires CR01–06 to validate that context before writes, and keeps progress records under the same `goal-execute-records/`.
+- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops, resolves one `crDir` from numeric Story identity through `speclite resolve cr-directory` and passes it to CR01–06 (consumers never re-derive it), and keeps progress records under the same `goal-execute-records/`.
 
 The unnumbered `speclite-code-review` is no longer a canonical source skill entrypoint. Code review starts with `speclite-code-review-01-reviewer`, then continues through the numbered CR2/CR3/CR6 skills for evaluation, fixes, and finalization.
 

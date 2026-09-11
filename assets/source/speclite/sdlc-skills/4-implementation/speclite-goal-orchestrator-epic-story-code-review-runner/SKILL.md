@@ -59,7 +59,8 @@ metadata:
 2. 读取 merged `planning_artifacts`、`implementation_artifacts` 和 workflow tracker 配置。
 3. 将当前 Skill 目录父目录解析为 `{skills-root}`。
 4. 读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`。
-5. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
+5. 运行一次 `speclite resolve cr-directory --story-id {storyId} --review-series {reviewSeries} --project-root {projectRoot}`，冻结 `crDir` 并传给 CR01–06；`continuation=block` 时 HALT。
+6. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
 
 ## Workflow（工作流）
 

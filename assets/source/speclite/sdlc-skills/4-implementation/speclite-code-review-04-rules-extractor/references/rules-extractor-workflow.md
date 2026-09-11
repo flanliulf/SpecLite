@@ -4,7 +4,7 @@
 
 ## Step 1: Collect Eligible CR Records（收集合格记录）
 
-1. 解析 Story identity、current `reviewSeries`、round 和 CR canonical directory。
+1. 解析 Story identity、current `reviewSeries` 与 round；CR 目录只消费传入的 `crDir`（来自 `speclite resolve cr-directory`），不重推导。
 2. 读取同一 series 的 v2 review/evaluation/fix records，并按 current、historical、superseded 分类。
 3. legacy v1 只作背景，不能直接生成 candidate/global rule。
 4. 将 current evaluation source/hash 作为本次 report binding。

@@ -52,8 +52,9 @@ HALT when Epic, Story set, project root, or authorization is unclear.
 1. Run `speclite resolve config --project-root {projectRoot}`.
 2. Read merged artifact roots and workflow tracker config.
 3. Resolve the Skill parent as `{skills-root}` and read the shared contract.
-4. HALT on resolution failure, empty required paths, or identity conflicts.
-5. Never fall back to examples or historical default directories.
+4. Run `speclite resolve cr-directory --story-id {storyId} --review-series {reviewSeries} --project-root {projectRoot}` once, freeze `crDir`, and pass it to CR01–06; HALT when `continuation=block`.
+5. HALT on resolution failure, empty required paths, or identity conflicts.
+6. Never fall back to examples or historical default directories.
 
 ## Workflow
 

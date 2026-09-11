@@ -1,5 +1,9 @@
 # Changelog（变更记录）
 
+## [Unreleased] - 2026-09-11
+
+- Story 11.9 restart：Step 0 调用一次 `speclite resolve cr-directory`，冻结 `crDir` / `canonicalCrDir` / `compatibilityMode` / `legacyArtifactPaths` 并传给 CR01–06；`continuation=block` 时 HALT。
+
 ## [2.1.0] - 2026-08-25
 
 ### Changed（变更）

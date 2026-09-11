@@ -7,7 +7,7 @@
 1. 解析 runtime config、backlog path、Story/TODO identity 和 `mode`。
 2. `confirmationPolicy` 缺失时固定为 `explicit`。
 3. `preauthorized` 时验证 `authorizationSource` 指向 runner goal record、人工 orchestrator record 或当前用户明确授权。
-4. Story closeout 绑定 current evaluation source/hash、series 和 round；project utility 使用 `operationScope: project`。
+4. Story closeout 绑定 current evaluation source/hash、series 和 round，CR 目录只消费传入的 `crDir`（来自 `speclite resolve cr-directory`），不重推导；project utility 使用 `operationScope: project`。
 
 ## Mode A: Add（添加）
 

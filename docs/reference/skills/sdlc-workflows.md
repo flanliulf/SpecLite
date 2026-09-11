@@ -84,7 +84,7 @@
 | `speclite-flow-gate` | Workflow | `FG` | `{implementation_artifacts}/flow-gates` | 验证 Story / Epic flow gate。 |
 | `speclite-create-story` | Workflow | `CS` / `VS` | `{implementation_artifacts}` | 创建或校验上下文完整的 Story。 |
 | `speclite-dev-story` | Workflow | `DS` | - | 执行 Story 实现、测试和交付。 |
-| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 只解析 numeric identity/current candidate/物理安全，并在写前比较 frozen/consumer directory context；不承接 CR 审批。 |
+| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 拥有 CR v2 共享契约与 Story-ID-only 目录解析规则（`speclite resolve cr-directory`）；不承接 CR 审批。 |
 | `speclite-code-review-01-reviewer` | Workflow | `CR1` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在 resolved `crDir` 执行代码审查。 |
 | `speclite-code-review-02-evaluator` | Workflow | `CR2` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在同一 resolved `crDir` 评估 findings。 |
 | `speclite-code-review-03-fixer` | Workflow | `CR3` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 按评估结论修复并在同目录追加 fix record。 |
@@ -92,7 +92,7 @@
 | `speclite-code-review-05-todo-tracker` | Workflow | `CR5` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 维护 shared backlog，并在同目录写 Story TODO result。 |
 | `speclite-code-review-06-finalizer` | Workflow | `CR6` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 同步 Story/workflow 状态并在同目录写 finalizer report。 |
 | `speclite-goal-orchestrator-epic-story-review-runner` | Workflow | `ESR` | `{implementation_artifacts}/story-reviews` | 按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环和 goal execute records。 |
-| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews/{story-id}-code-review/goal-execute-records` | 单次冻结 `directoryContext`，由 CR01–06 写前调用 production validator，严格串行编排 Dev Story、CR 循环和 goal records。 |
+| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews/{story-id}-code-review/goal-execute-records` | 通过 `speclite resolve cr-directory` 单次解析 `crDir` 并传给 CR01–06，严格串行编排 Dev Story、CR 循环和 goal records。 |
 | `speclite-checkpoint-preview` | Workflow | `CK` | - | 帮助人工检查一次变更的目的、差异和风险。 |
 | `speclite-qa-generate-e2e-tests` | Workflow | `QA` | `{implementation_artifacts}` | 生成自动化 API / E2E 测试。 |
 | `speclite-qa-write-test-guide` | Workflow | `TG` | `{implementation_artifacts}` | 生成可执行 QA 测试指南。 |

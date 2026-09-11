@@ -13,7 +13,7 @@
 
 - 确认 cwd、branch、HEAD、用户目标和 git 状态。
 - 从 Epic、Story 与 sprint tracker 建立唯一 `storyId -> storyKey -> storyFile` 映射。
-- 只写 `{storyId}-code-review/`；slug/legacy 目录记录到 `legacyArtifactPaths`，不自动移动或继续写入。
+- 调用一次 `speclite resolve cr-directory --story-id {storyId} --review-series {reviewSeries} --project-root .`，冻结 `crDir` / `canonicalCrDir` / `compatibilityMode` / `legacyArtifactPaths`（= `legacyCrDirs`）并传给 CR01–06；`continuation=block` 时 HALT，不得自行选择目录。slug/legacy 目录只读记录，不自动移动或继续写入。
 - 识别 current review series、最大 round、latest v2 artifacts、Flow Gate 和 tracker 状态。
 - 续跑必须从最新合法结构化状态继续，不按 mtime 或 prose 猜测。
 

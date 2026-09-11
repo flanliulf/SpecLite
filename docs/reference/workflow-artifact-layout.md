@@ -182,7 +182,7 @@ Agent 写作、Mermaid、文档校验和部分 ecosystem auditor 的输出位置
 | `story-reviews/{scope}-story-review/*.md` | `speclite-story-review-01-reviewer`、`speclite-story-review-02-evaluator` 创建；`speclite-story-review-03-fixer` 追加修订记录 | Epic 或 Story 粒度的轮次化设计审查轨迹。 |
 | `code-reviews/{story-id}-code-review/*.md` | CR01–06 使用 orchestrator 单次解析或 manual shared resolver 返回的同一 `crDir` | Story 粒度的轮次化 review、evaluation、fix、rules、TODO result 与 finalizer 轨迹；新目录只含 numeric Story ID。 |
 | `story-reviews/**/goal-execute-records/` | `speclite-goal-orchestrator-epic-story-review-runner` | 严格串行 Story Review 的执行账本，固定包含 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。 |
-| `code-reviews/{story-id}-code-review/goal-execute-records/` | `speclite-goal-orchestrator-epic-story-code-review-runner` | 与 CR01–06 共用 frozen `directoryContext` 的严格串行执行账本；consumer 写前校验 context/path，固定包含 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。 |
+| `code-reviews/{story-id}-code-review/goal-execute-records/` | `speclite-goal-orchestrator-epic-story-code-review-runner` | 与 CR01–06 共用同一 resolved `crDir` 的严格串行执行账本；固定包含 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。 |
 | `cr-rules/cr-todo-backlog.md` | `speclite-code-review-05-todo-tracker` | 跨 Story 延迟事项账本，编号持续递增，状态从 Open 推进到 Resolved。 |
 | `tests/test-summary.md` | `speclite-qa-generate-e2e-tests` | 记录自动化测试生成结果；真实测试代码写入目标项目的测试目录。 |
 | `spec-{slug}.md` | `speclite-quick-dev` | Quick Dev 的 living spec，随实现流程推进状态。 |

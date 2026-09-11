@@ -30,7 +30,7 @@ Manage evaluator-accepted non-blocking items in `{implementation_artifacts}/cr-r
 
 ## Contract
 
-Resolve the current Skill directory parent as `{skills-root}`, fully read `{skills-root}/speclite-code-review-contract/references/cr-contract.md`, then run `speclite resolve config --project-root {project-root}`. HALT on failure; never depend on a runner.
+Resolve the current Skill directory parent as `{skills-root}`, fully read `{skills-root}/speclite-code-review-contract/references/cr-contract.md`, then run `speclite resolve config --project-root {project-root}`. Consume only the `crDir` passed by the runner or manual orchestrator from `speclite resolve cr-directory`; never re-derive the CR directory. HALT on failure; never depend on a runner.
 
 ## Inputs
 

@@ -4,7 +4,7 @@
 
 ## Step 1: Locate Current Review（定位 current review）
 
-1. 解析唯一 `storyId/storyKey/reviewSeries`。
+1. 解析唯一 `storyId/storyKey/reviewSeries`；CR 目录只消费传入的 `crDir`（来自 `speclite resolve cr-directory`），不重推导。
 2. 在 current series 中取最大 round 的 v2 review；不得按文件数量或 mtime 判断。
 3. review 为 `REVIEW_DEGRADED`、schema 无效、scope exception 非空或 quorum 不满足时 HALT，不生成可收口 evaluation。
 

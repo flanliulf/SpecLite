@@ -28,7 +28,7 @@ CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或�
 
 ## Contract（共享契约）
 
-将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再通过 `speclite resolve config --project-root {project-root}` 获取路径。失败时 HALT；不得依赖 runner 或旧 artifact。
+将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再通过 `speclite resolve config --project-root {project-root}` 获取路径。CR 目录只消费 runner 或人工 orchestrator 通过 `speclite resolve cr-directory` 传入的 `crDir`，不重推导。失败时 HALT；不得依赖 runner 或旧 artifact。
 
 ## Inputs（输入）
 

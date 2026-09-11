@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:7cb8f0a01dfbe1b29e3598e2fb6a96e73d657829d61d5386996588315a09721c",
+  "packageHash": "sha256:acc17a71246cf1a6b5bf8d50fd0d7ebccd642f23137f1b19c81e92d8271a3ac4",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",
@@ -584,7 +584,6 @@
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md",
-    "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/CHANGELOG.md",
@@ -1315,7 +1314,6 @@
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md",
-    "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md",
     "assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/CHANGELOG.md",

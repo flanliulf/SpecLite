@@ -167,7 +167,7 @@ IR grill consistency review 位于 `sdlc-skills/3-solutioning/`：
 Epic 级目标编排工作流位于 `sdlc-skills/4-implementation/`：
 
 - `speclite-goal-orchestrator-epic-story-review-runner`：按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环，并在 `story-reviews/.../goal-execute-records/` 下维护进度记录。
-- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环；从 numeric Story ID 单次解析并冻结 `directoryContext`，CR01–06 在写入前用 production validator 校验相同 context，并在同一 `goal-execute-records/` 下维护进度记录。
+- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环；通过 `speclite resolve cr-directory` 从 numeric Story ID 单次解析 `crDir` 并传给 CR01–06（下游不重推导），并在同一 `goal-execute-records/` 下维护进度记录。
 
 非编号 `speclite-code-review` 已不再作为 canonical skill 源头入口；代码审查链路从 `speclite-code-review-01-reviewer` 开始，并由 CR2/CR3/CR6 等编号 skill 完成评估、修复与收尾。
 

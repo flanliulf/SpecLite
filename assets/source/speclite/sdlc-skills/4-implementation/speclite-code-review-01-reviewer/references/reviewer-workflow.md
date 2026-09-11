@@ -5,7 +5,7 @@
 ## Step 1: Resolve Identity and Round（解析身份与轮次）
 
 1. 建立唯一 `storyId -> storyKey -> storyFile` 映射。
-2. CR 目录只使用 `{storyId}-code-review/`。
+2. CR 目录只消费 runner 或人工 orchestrator 通过 `speclite resolve cr-directory` 解析并传入的 `crDir`（连同 `compatibilityMode`、`legacyArtifactPaths`），不重推导；无传入值时自行调用该 CLI 一次，`continuation=block` 时 HALT。
 3. 扫描同一 `reviewSeries` 的 v2 summary，取最大 round + 1；不得按文件数量或 mtime 计算。
 4. legacy/其他 series 只作为 historical context。
 5. 建立 `orchestrationMode` 与 `handoffTarget`；人工模式不得等待 runner record。

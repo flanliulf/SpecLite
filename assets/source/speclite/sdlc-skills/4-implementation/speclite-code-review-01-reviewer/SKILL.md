@@ -28,7 +28,7 @@ metadata:
 
 ## Contract（共享契约）
 
-将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再运行 `speclite resolve config --project-root {project-root}`。任一解析失败即 HALT；不得使用 runner、旧 artifact 或历史默认路径作为 fallback。
+将当前 Skill 目录父目录解析为 `{skills-root}`，完整读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`，再运行 `speclite resolve config --project-root {project-root}`。CR 目录只消费 runner 或人工 orchestrator 通过 `speclite resolve cr-directory` 传入的 `crDir`，不重推导。任一解析失败即 HALT；不得使用 runner、旧 artifact 或历史默认路径作为 fallback。
 
 ## Inputs（输入）
 

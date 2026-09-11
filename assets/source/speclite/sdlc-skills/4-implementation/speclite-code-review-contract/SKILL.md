@@ -29,7 +29,7 @@ metadata:
 
 1. 完整读取 `references/cr-contract.md`；文件不可读时 HALT。
 2. 运行 `speclite resolve config --project-root {project-root}`，解析 merged `planning_artifacts` 与 `implementation_artifacts`；失败时 HALT。
-3. 根据输入建立唯一 `storyId -> storyKey -> storyFile`，并定位指定或 current CR artifact。
+3. 根据输入建立唯一 `storyId -> storyKey -> storyFile`；CR 目录只通过 `speclite resolve cr-directory` 解析（见 `references/cr-contract.md` 的 CR Directory Resolution），再定位指定或 current CR artifact。
 4. 按共享契约检查 artifact schema、identity、path、series、round、hash、scope、verdict、freshness 与 CR04–06 durable closeout binding。
 5. 输出只读验证结论：`VALID | INVALID | INCOMPLETE`、逐项证据和精确下一步；不得修改被检查文件。
 
