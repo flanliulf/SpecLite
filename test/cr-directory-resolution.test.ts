@@ -1,4 +1,4 @@
-import { access, lstat, mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
+import { access, link, lstat, mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
@@ -614,6 +614,129 @@ describe("CR directory-only resolution and production context validation", () =>
       });
     } finally {
       await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a non-exclusive closing delimiter instead of authenticating forged ownership", async () => {
+    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-delimiter-"));
+    const legacy = "state/code-reviews/11-9-delimiter-fixture-code-review";
+    try {
+      await mkdir(path.join(projectRoot, legacy), { recursive: true });
+      await writeFile(
+        path.join(projectRoot, legacy, "11-9-code-review-summary-20260909-directory-routing-round-1.md"),
+        `${currentArtifact().replace(/---\n$/u, "")}---not-a-delimiter\n`,
+      );
+      await expect(resolveCrDirectory({
+        projectRoot, implementationArtifacts: "state", storyId: "11-9", reviewSeries: "directory-routing",
+      })).resolves.toMatchObject({ ok: false, issue: expect.objectContaining({ issueId: "cr-directory.ambiguous-resume-root" }) });
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("reaches the same legacy-resume conclusion for a CRLF current artifact", async () => {
+    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-crlf-"));
+    const legacy = "state/code-reviews/11-9-crlf-fixture-code-review";
+    try {
+      await mkdir(path.join(projectRoot, legacy), { recursive: true });
+      await writeFile(
+        path.join(projectRoot, legacy, "11-9-code-review-summary-20260909-directory-routing-round-1.md"),
+        currentArtifact().replace(/\n/gu, "\r\n"),
+      );
+      await expect(resolveCrDirectory({
+        projectRoot, implementationArtifacts: "state", storyId: "11-9", reviewSeries: "directory-routing",
+      })).resolves.toMatchObject({ ok: true, crDir: legacy, compatibilityMode: "legacy-resume" });
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("lets a legal new reviewSeries start beside a prior-series ownership marker", async () => {
+    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-series-"));
+    const canonical = "state/code-reviews/11-9-code-review";
+    try {
+      await mkdir(path.join(projectRoot, canonical, ".tmp"), { recursive: true });
+      await writeFile(path.join(projectRoot, canonical, ".tmp/cr-directory-ownership.json"), JSON.stringify({
+        schemaVersion: "speclite.cr-directory-ownership.v1",
+        artifactType: "cr-directory-ownership",
+        storyId: "11-9",
+        reviewSeries: "evidence-v2",
+        crDir: canonical,
+      }));
+      await expect(resolveCrDirectory({
+        projectRoot, implementationArtifacts: "state", storyId: "11-9", reviewSeries: "directory-routing",
+      })).resolves.toMatchObject({ ok: true, crDir: canonical, compatibilityMode: "canonical" });
+      await expect(resolveCrDirectory({
+        projectRoot, implementationArtifacts: "state", storyId: "11-9", reviewSeries: "evidence-v2",
+      })).resolves.toMatchObject({ ok: true, crDir: canonical, compatibilityMode: "canonical" });
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails closed when an existing write target is hard-linked to a file outside the project", async () => {
+    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-hardlink-"));
+    const outsideRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-outside-"));
+    const context = frozenContext();
+    const writeSubpath = "11-9-code-review-summary-20260909-directory-routing-round-1.md";
+    try {
+      await mkdir(path.join(projectRoot, context.crDir), { recursive: true });
+      const outsideFile = path.join(outsideRoot, "external-evidence.md");
+      await writeFile(outsideFile, "external\n");
+      await link(outsideFile, path.join(projectRoot, context.crDir, writeSubpath));
+      await expect(validateCrDirectoryContext({
+        projectRoot,
+        implementationArtifacts: context.implementationArtifacts,
+        frozenContext: contextFields(context),
+        consumerContext: contextFields(context),
+        writeSubpath,
+      })).resolves.toEqual({ ok: false, reason: "unsafe-write-path" });
+      await expect(readFile(outsideFile, "utf8")).resolves.toBe("external\n");
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+      await rm(outsideRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("binds every write authorization to its own exact write-subpath", async () => {
+    const contract = await readFile(
+      path.join(IMPLEMENTATION_ROOT, "speclite-code-review-contract/references/cr-contract.md"),
+      "utf8",
+    );
+    expect(contract).toContain("每次实际写入都必须单独调用一次 validator");
+    expect(contract).toContain("一次 validator 调用只为它收到的那一个 `writeSubpath` 建立授权");
+
+    const reviewer = await readFile(
+      path.join(
+        IMPLEMENTATION_ROOT,
+        "speclite-code-review-01-reviewer",
+        LEAF_WORKFLOWS["speclite-code-review-01-reviewer"],
+      ),
+      "utf8",
+    );
+    expect(reviewer).toContain("不得以任一次校验结果覆盖其他写入目标");
+    expect(reviewer).toContain("{storyId}-code-review-summary-{YYYYMMDD}-{reviewSeries}-round-{round}.md");
+
+    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-binding-"));
+    const outsideRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-binding-outside-"));
+    const context = frozenContext();
+    const safeSubpath = ".tmp/directory-routing-round-1/review-input.diff";
+    const summarySubpath = "11-9-code-review-summary-20260909-directory-routing-round-1.md";
+    try {
+      await mkdir(path.join(projectRoot, context.crDir, ".tmp/directory-routing-round-1"), { recursive: true });
+      await symlink(path.join(outsideRoot, "external.md"), path.join(projectRoot, context.crDir, summarySubpath));
+      const validate = (writeSubpath: string) => validateCrDirectoryContext({
+        projectRoot,
+        implementationArtifacts: context.implementationArtifacts,
+        frozenContext: contextFields(context),
+        consumerContext: contextFields(context),
+        writeSubpath,
+      });
+      await expect(validate(safeSubpath)).resolves.toMatchObject({ ok: true });
+      await expect(validate(summarySubpath)).resolves.toEqual({ ok: false, reason: "unsafe-write-path" });
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+      await rm(outsideRoot, { recursive: true, force: true });
     }
   });
 });

@@ -72,6 +72,8 @@ stdout `ok=true` 后，orchestrator 冻结 `storyId`、`reviewSeries`、`crDir`�
 
 `node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{writeSubpath}"`
 
+每次实际写入都必须单独调用一次 validator，且 `--write-subpath` 必须逐字等于本次写入的目标路径；不得用任意一次写入（例如 `review-input.diff`）的校验结果覆盖其他写入目标（例如 summary、evaluation、ownership marker、goal record 或任何 pre-summary output）。一次 validator 调用只为它收到的那一个 `writeSubpath` 建立授权。
+
 validator 只比较两份 context 的六个冻结字段并检查 `crDir` / `writeSubpath` 的物理安全；它不重新选择目录，也不替代 consumer 原有的 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。unknown、duplicate、empty、partial 参数、context mismatch 或 unsafe path 均以 redacted JSON fail-close，并在写入前 HALT。
 
 orchestrator 首次解析并冻结一个 current run 后，必须在其他 pre-summary `.tmp` 或 goal record 写入前创建固定 ownership marker：`{crDir}/.tmp/cr-directory-ownership.json`。创建前先调用 production validator，并将 `writeSubpath` 精确设为 `.tmp/cr-directory-ownership.json`；验证成功后写入且重读以下唯一五字段 JSON：

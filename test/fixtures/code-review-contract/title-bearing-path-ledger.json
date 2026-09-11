@@ -68,5 +68,19 @@
     "token": "11-9-marker-conflict-code-review",
     "role": "legacy-fixture",
     "rationale": "Story 11.9 ownership marker conflict fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 622,
+    "token": "11-9-delimiter-fixture-code-review",
+    "role": "regression-assertion",
+    "rationale": "DR-R2-F2 non-exclusive closing delimiter must not authenticate ownership"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 639,
+    "token": "11-9-crlf-fixture-code-review",
+    "role": "legacy-fixture",
+    "rationale": "DR-R2-F5 CRLF current artifact must reach the same legacy-resume conclusion"
   }
 ]

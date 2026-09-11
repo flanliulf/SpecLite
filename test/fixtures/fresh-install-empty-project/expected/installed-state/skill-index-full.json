@@ -174,7 +174,7 @@
       "canonicalSkillId": "speclite-code-review-01-reviewer",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer",
-      "canonicalPackageHash": "sha256:3d8b8e05944732eb8b2cb9b54568d953934f88e3dabefcfea5af9f19331ebbe5",
+      "canonicalPackageHash": "sha256:6c534addcad718d3308d123f46dff3953250752fa93af5a45efce40666007603",
       "installedTargets": [
         "claude",
         "agents"
@@ -258,7 +258,7 @@
       "canonicalSkillId": "speclite-code-review-contract",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract",
-      "canonicalPackageHash": "sha256:ce88c7cc50e51dc53df95a5feafbe2751be9357776c6513fce8746f5314d5afb",
+      "canonicalPackageHash": "sha256:aacbda17c59a7e08488fc00bca558eb2f8c1da4da183b6d8b2e4e488e0c1f4fd",
       "installedTargets": [
         "claude",
         "agents"

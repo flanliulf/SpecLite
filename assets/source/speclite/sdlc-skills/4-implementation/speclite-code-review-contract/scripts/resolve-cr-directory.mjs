@@ -424,12 +424,16 @@ function classifyCurrentArtifact(name, storyId, reviewSeries) {
 }
 
 function readLeadingIdentity(content) {
-  if (typeof content !== "string" || !content.startsWith("---\n")) return null;
-  const end = content.indexOf("\n---", 4);
+  if (typeof content !== "string") return null;
+  // CRLF/CR checkouts must reach the same identity conclusion as LF (DR-R2-F5).
+  const lines = content.replace(/\r\n?/gu, "\n").split("\n");
+  if (lines[0] !== "---") return null;
+  // The closing delimiter must occupy its own line; `---not-a-delimiter` is not
+  // a frontmatter boundary and must not authenticate ownership (DR-R2-F2).
+  const end = lines.findIndex((line, index) => index > 0 && /^---[ \t]*$/u.test(line));
   if (end < 0) return null;
-  const block = content.slice(4, end);
   const values = new Map();
-  for (const line of block.split("\n")) {
+  for (const line of lines.slice(1, end)) {
     const match = line.match(/^(?:"([A-Za-z][A-Za-z0-9]*)"|'([A-Za-z][A-Za-z0-9]*)'|([A-Za-z][A-Za-z0-9]*))[ \t]*:[ \t]*(.*)$/u);
     if (!match) continue;
     const key = match[1] ?? match[2] ?? match[3];
@@ -484,7 +488,6 @@ async function inspectOwnershipMarker({
     || marker.schemaVersion !== "speclite.cr-directory-ownership.v1"
     || marker.artifactType !== "cr-directory-ownership"
     || marker.storyId !== storyId
-    || marker.reviewSeries !== reviewSeries
     || marker.crDir !== crDir) {
     return {
       ok: false,
@@ -492,6 +495,11 @@ async function inspectOwnershipMarker({
       currentResult: "IDENTITY_CONFLICT",
     };
   }
+  // A well-formed marker left by another series of the same Story is prior-series
+  // evidence, not a malformed identity: it must not permanently block a new legal
+  // series in this directory. Same-series dual-marker ambiguity is unaffected
+  // because only same-series markers are counted as current (DR-R2-F3).
+  if (marker.reviewSeries !== reviewSeries) return { ok: true, current: false };
   return { ok: true, current: true };
 }
 
@@ -659,6 +667,12 @@ async function inspectPath(projectRoot, relativePath, resolvedProjectRoot, {
       return { ok: false, reason: "unsafe-path" };
     }
     if (isFinal && finalKind === "file" && !metadata.isFile()) {
+      return { ok: false, reason: "unsafe-path" };
+    }
+    // realpath cannot see a hard link: an existing in-project regular file may share
+    // an inode with a file outside the project, so an in-place write would mutate it.
+    // Fail closed on any additional link to the final write target (DR-R2-F4).
+    if (isFinal && metadata.isFile() && metadata.nlink > 1) {
       return { ok: false, reason: "unsafe-path" };
     }
     let resolved;

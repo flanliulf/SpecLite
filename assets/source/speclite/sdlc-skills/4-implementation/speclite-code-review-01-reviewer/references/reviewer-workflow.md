@@ -6,6 +6,7 @@
 
 - runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
 - 任何 artifact、`.tmp` 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath ".tmp/{reviewSeries}-round-{round}/review-input.diff"`。
+- 上面的命令行只是示例。CR01 的每一次实际写入都必须用本次目标的精确 `--write-subpath` 单独调用一次 validator，至少覆盖：`.tmp/{reviewSeries}-round-{round}/` 下的 review input 与各 layer output、`.tmp/cr-directory-ownership.json`、`goal-execute-records/` 记录，以及 Step 7 的 summary `{storyId}-code-review-summary-{YYYYMMDD}-{reviewSeries}-round-{round}.md`。不得以任一次校验结果覆盖其他写入目标。
 - validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
 - 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
 
