@@ -3,7 +3,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { resolveProjectConfig } from "../config/config-reader.js";
+import type { ConfigTomlDocument } from "../config/config-schema.js";
 import { resolveSkillCustomization } from "../config/customization-reader.js";
+import { resolveArtifactRoots } from "../config/artifact-root-resolver.js";
 import type {
   RepairCommandData,
   UpdateCommandData,
@@ -33,15 +35,17 @@ import {
 import { classifyOwnership } from "./ownership-model.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry } from "../ide/adapter-registry.js";
 import { isCanonicalPackageHashFile } from "../validation/rules/ide-mirror.js";
-import { discoverOfficialModules } from "../modules/module-metadata.js";
+import { discoverOfficialModules, resolveCanonicalSkillIdentity } from "../modules/module-metadata.js";
 import { buildIdeMirrorProjection } from "../ide/target-writer.js";
 import {
   createFilesIndex,
+  createArtifactRootContext,
   createFilesIndexEntry,
   createHelpIndex,
   createInstalledManifest,
   createPhaseCoverage,
   createSkillIndex,
+  type ArtifactRootContext,
 } from "../manifest/manifest-generator.js";
 import {
   applyRecoverableUpdateTransaction,
@@ -75,10 +79,15 @@ export async function planUpdate(input: {
   }
 
   const actions: UpdateCommandData["updatePlan"]["actions"] = [];
+  const renameDriftIssues: ValidationIssue[] = [];
   const migration = await buildCanonicalMigrationProjection({
     ...context,
     projectRoot: input.projectRoot,
   });
+  const canonicalSourceRoot = resolveCanonicalSourceRoot({ ...context, projectRoot: input.projectRoot });
+  const renameTargetsByOldId = canonicalSourceRoot === undefined
+    ? new Map<string, string>()
+    : createRenameTargetsByOldId(await discoverOfficialModules({ sourceRoot: canonicalSourceRoot }));
   const contextConflicts = await filterResolvedIdeRootConflicts({
     projectRoot: input.projectRoot,
     conflicts: context.conflicts,
@@ -103,12 +112,20 @@ export async function planUpdate(input: {
     const currentState = await readCurrentState(input.projectRoot, entry.path);
     const currentHash = currentState?.hash;
     const desired = migration.files.get(entry.path);
+    const oldSkillId = entry.artifactKind === "ide-skill-package"
+      ? canonicalSkillIdFromIdeMirrorPath(entry.path)
+      : undefined;
+    const renamedEntrypointReplacement =
+      oldSkillId !== undefined && isIdeSkillEntryPointPath(entry.path, oldSkillId)
+        ? renameTargetsByOldId.get(oldSkillId)
+        : undefined;
     const recoveryState = recoveryHashes?.get(entry.path);
     const recoveringNewState = recoveryState?.hash === currentHash &&
       recoveryState.executable === currentState?.executable;
     const classification = classifyOwnership({
       relativePath: entry.path,
       artifactRoot: context.artifactRoot,
+      artifactRoots: context.artifactRoots,
     });
     const protectedOwnership = entry.ownership !== "installer-owned"
       ? entry.ownership
@@ -132,11 +149,34 @@ export async function planUpdate(input: {
       entry,
       currentHash,
       artifactRoot: context.artifactRoot,
+      artifactRoots: context.artifactRoots,
       repair: false,
     });
 
     if (conflict !== undefined) {
       conflicts.push(conflict);
+      if (
+        conflict.reason === "installer-owned-drift" &&
+        oldSkillId !== undefined &&
+        renameTargetsByOldId.has(oldSkillId) &&
+        currentHash !== undefined
+      ) {
+        renameDriftIssues.push({
+          issueId: "file-integrity.hash-mismatch",
+          category: "file-integrity",
+          severity: "error",
+          affectedPath: entry.path,
+          component: "update-planner",
+          details: {
+            ownership: entry.ownership,
+            artifactKind: entry.artifactKind,
+            expectedHashAlgorithm: "sha256",
+            reason: "renamed-package-content-drift",
+          },
+          impact: "A modified historical canonical Skill package cannot be safely reprojected.",
+          suggestedNextStep: "Review the historical package changes before retrying the canonical Skill rename update.",
+        });
+      }
       if (conflict.ownership === "installer-owned") {
         actions.push({
           affectedPath: entry.path,
@@ -150,6 +190,20 @@ export async function planUpdate(input: {
     }
 
     if (entry.artifactKind === "ide-skill-package" && desired === undefined) {
+      const oldSkillId = canonicalSkillIdFromIdeMirrorPath(entry.path);
+      const replacementId = oldSkillId === undefined ? undefined : renameTargetsByOldId.get(oldSkillId);
+      if (replacementId !== undefined) {
+        actions.push({
+          affectedPath: entry.path,
+          ownership: "installer-owned",
+          action: "skip",
+          ...(currentHash === undefined ? {} : { currentHash }),
+          expectedHash: entry.hash,
+          reason: "canonical-skill-renamed",
+          replacementCanonicalSkillId: replacementId,
+        });
+        continue;
+      }
       conflicts.push({
         affectedPath: entry.path,
         ownership: "installer-owned",
@@ -200,6 +254,12 @@ export async function planUpdate(input: {
         action: currentHash === undefined ? "create" : "update",
         ...(currentHash === undefined ? {} : { currentHash }),
         expectedHash: sourceHash,
+        ...(currentHash !== undefined && renamedEntrypointReplacement !== undefined
+          ? {
+              reason: "canonical-skill-renamed" as const,
+              replacementCanonicalSkillId: renamedEntrypointReplacement,
+            }
+          : {}),
       });
       continue;
     }
@@ -210,7 +270,12 @@ export async function planUpdate(input: {
       action: "skip",
       ...(currentHash === undefined ? {} : { currentHash }),
       expectedHash: entry.hash,
-      reason: "unchanged",
+      ...(renamedEntrypointReplacement === undefined
+        ? { reason: "unchanged" as const }
+        : {
+            reason: "canonical-skill-renamed" as const,
+            replacementCanonicalSkillId: renamedEntrypointReplacement,
+          }),
     });
   }
 
@@ -316,7 +381,7 @@ export async function planUpdate(input: {
       requiresConfirmation: requiresUpdateConfirmation({ actions, conflicts, writeAuthorized }),
       writeAuthorized,
     },
-    issues: [...context.issues, ...applyResult.issues],
+    issues: [...context.issues, ...renameDriftIssues, ...applyResult.issues],
     blocked: applyResult.blocked,
   };
 }
@@ -356,10 +421,28 @@ export async function planRepair(input: {
   for (const entry of context.filesIndex.entries) {
     if (isCoveredByIdePackageRepair(entry.path, ideRepairActionPaths)) continue;
     const currentHash = await readCurrentHash(input.projectRoot, entry.path);
+    const classification = classifyOwnership({
+      relativePath: entry.path,
+      artifactRoot: context.artifactRoot,
+      artifactRoots: context.artifactRoots,
+    });
+    if (entry.ownership === "installer-owned" && classification.ownership === "workflow-owned") {
+      actions.push({
+        affectedPath: entry.path,
+        ownership: "workflow-owned",
+        ...(currentHash === undefined ? {} : { currentHash }),
+        expectedHash: entry.hash,
+        action: "skip",
+        reason: "workflow-owned",
+      });
+      continue;
+    }
+
     const conflict = detectFilesIndexEntryConflict({
       entry,
       currentHash,
       artifactRoot: context.artifactRoot,
+      artifactRoots: context.artifactRoots,
       repair: true,
     });
 
@@ -391,10 +474,6 @@ export async function planRepair(input: {
       continue;
     }
 
-    const classification = classifyOwnership({
-      relativePath: entry.path,
-      artifactRoot: context.artifactRoot,
-    });
     if (entry.ownership === "installer-owned" && classification.ownership === "installer-owned") {
       actions.push({
         affectedPath: entry.path,
@@ -441,6 +520,8 @@ export async function planRepair(input: {
 async function readPlanningContext(projectRoot: string): Promise<{
   filesIndex: FilesIndex;
   artifactRoot: string;
+  artifactRoots?: string[];
+  artifactRootContext?: ArtifactRootContext;
   conflicts: UpdateCommandData["conflicts"];
   issues: ValidationIssue[];
   blocked: boolean;
@@ -460,6 +541,8 @@ async function readPlanningContext(projectRoot: string): Promise<{
         entries: [],
       },
       artifactRoot: "_speclite-output",
+      artifactRoots: undefined,
+      artifactRootContext: undefined,
       conflicts: [],
       issues,
       blocked: true,
@@ -493,6 +576,8 @@ async function readPlanningContext(projectRoot: string): Promise<{
     return {
       filesIndex,
       artifactRoot: manifestContext.artifactRoot,
+      artifactRoots: undefined,
+      artifactRootContext: undefined,
       conflicts,
       issues,
       blocked: true,
@@ -503,6 +588,28 @@ async function readPlanningContext(projectRoot: string): Promise<{
     };
   }
   const artifactRoot = manifestContext.artifactRoot;
+  const resolvedArtifactRootContext = await resolveExistingArtifactRootContext({
+    projectRoot,
+    config: configResult.value as ConfigTomlDocument,
+    fallbackOutputFolder: artifactRoot,
+  });
+  if (!resolvedArtifactRootContext.ok) {
+    issues.push(...resolvedArtifactRootContext.issues);
+    return {
+      filesIndex,
+      artifactRoot,
+      artifactRoots: undefined,
+      artifactRootContext: undefined,
+      conflicts,
+      issues,
+      blocked: true,
+      installedModules: manifestContext.installedModules,
+      sourceDescriptor: manifestContext.sourceDescriptor,
+      skillIndex: undefined,
+      targetIds: manifestContext.targetIds,
+      manifest: manifestContext.manifest,
+    };
+  }
   for (const skillDir of findInstalledSkillDirs(filesIndex)) {
     if (!(await fileExists(path.join(projectRoot, skillDir, "customize.toml")))) continue;
     const result = await resolveSkillCustomization({
@@ -520,6 +627,8 @@ async function readPlanningContext(projectRoot: string): Promise<{
   return {
     filesIndex,
     artifactRoot,
+    artifactRoots: resolvedArtifactRootContext.artifactRoots,
+    artifactRootContext: resolvedArtifactRootContext.artifactRootContext,
     conflicts,
     issues,
     blocked: hasBlockingResolverIssue(issues),
@@ -529,6 +638,60 @@ async function readPlanningContext(projectRoot: string): Promise<{
     targetIds: manifestContext.targetIds,
     manifest: manifestContext.manifest,
   };
+}
+
+async function resolveExistingArtifactRootContext(input: {
+  projectRoot: string;
+  config: ConfigTomlDocument;
+  fallbackOutputFolder: string;
+}): Promise<{
+  ok: true;
+  artifactRoots?: string[];
+  artifactRootContext: ArtifactRootContext;
+} | {
+  ok: false;
+  issues: ValidationIssue[];
+}> {
+  if (!hasConfiguredArtifactRoot(input.config)) {
+    return {
+      ok: true,
+      artifactRootContext: createLegacyArtifactRootContext(input.fallbackOutputFolder),
+    };
+  }
+  const rootResult = await resolveArtifactRoots({
+    projectRoot: input.projectRoot,
+    lifecycle: "existing",
+    config: input.config,
+  });
+  if (!rootResult.ok) return { ok: false, issues: rootResult.issues };
+
+  return {
+    ok: true,
+    artifactRoots: rootResult.roots.map((root) => root.resolvedRoot),
+    artifactRootContext: createArtifactRootContext({
+      outputFolder: readOutputFolder(input.config) ?? input.fallbackOutputFolder,
+      roots: rootResult.roots,
+    }),
+  };
+}
+
+function hasConfiguredArtifactRoot(config: ConfigTomlDocument): boolean {
+  const core = config.core ?? {};
+  const sdlc = config.modules?.sdlc ?? {};
+  return [
+    core.output_folder,
+    core.brainstorming_artifacts,
+    sdlc.analysis_artifacts,
+    sdlc.planning_artifacts,
+    sdlc.solutioning_artifacts,
+    sdlc.implementation_artifacts,
+    sdlc.devops_artifacts,
+    sdlc.project_knowledge,
+  ].some((value) => typeof value === "string");
+}
+
+function readOutputFolder(config: ConfigTomlDocument): string | undefined {
+  return typeof config.core?.output_folder === "string" ? config.core.output_folder : undefined;
 }
 
 async function readSkillIndexIfPresent(projectRoot: string) {
@@ -781,6 +944,19 @@ type DesiredMigrationFile = {
   contents: Buffer;
 };
 
+function createLegacyArtifactRootContext(artifactRoot: string): ArtifactRootContext {
+  return {
+    output_folder: artifactRoot,
+    brainstorming_artifacts: `${artifactRoot}/brainstorming`,
+    analysis_artifacts: `${artifactRoot}/planning-artifacts`,
+    planning_artifacts: `${artifactRoot}/planning-artifacts`,
+    solutioning_artifacts: `${artifactRoot}/planning-artifacts`,
+    implementation_artifacts: `${artifactRoot}/implementation-artifacts`,
+    devops_artifacts: `${artifactRoot}/devops-artifacts`,
+    project_knowledge: "docs",
+  };
+}
+
 async function buildCanonicalMigrationProjection(input: {
   filesIndex: FilesIndex;
   installedModules: string[];
@@ -790,6 +966,7 @@ async function buildCanonicalMigrationProjection(input: {
   skillIndex?: SkillIndex;
   targetIds: Array<"claude" | "agents">;
   artifactRoot: string;
+  artifactRootContext?: ArtifactRootContext;
 }): Promise<{
   files: Map<string, DesiredMigrationFile>;
   conflicts: UpdateCommandData["conflicts"];
@@ -836,9 +1013,14 @@ async function buildCanonicalMigrationProjection(input: {
     }
   }
   for (const oldSkill of input.skillIndex?.entries ?? []) {
-    const owners = modules.filter((module) =>
-      module.packageRoots.some((packageRoot) => path.posix.basename(packageRoot) === oldSkill.canonicalSkillId),
-    );
+    const identity = resolveCanonicalSkillIdentity(modules, oldSkill.canonicalSkillId);
+    const owners = identity === undefined
+      ? []
+      : modules.filter((module) =>
+          module.packageRoots.some(
+            (packageRoot) => path.posix.basename(packageRoot) === identity.canonicalSkillId,
+          ),
+        );
     if (owners.length !== 1) {
       conflicts.push({
         affectedPath: `_speclite/_config/skill-index.json`,
@@ -880,13 +1062,7 @@ async function buildCanonicalMigrationProjection(input: {
       : BUNDLED_SOURCE_DISPLAY_ROOT,
     selectedModules,
     targetAdapters: adapters,
-    artifactRoots: {
-      output_folder: input.artifactRoot,
-      planning_artifacts: `${input.artifactRoot}/planning-artifacts`,
-      implementation_artifacts: `${input.artifactRoot}/implementation-artifacts`,
-      devops_artifacts: `${input.artifactRoot}/devops-artifacts`,
-      project_knowledge: "docs",
-    },
+    artifactRoots: input.artifactRootContext ?? createLegacyArtifactRootContext(input.artifactRoot),
   });
   if (!projection.ok) {
     return {
@@ -901,6 +1077,34 @@ async function buildCanonicalMigrationProjection(input: {
 
   const desired = new Map<string, DesiredMigrationFile>();
   for (const file of projection.files) desired.set(file.entry.path, file);
+
+  const renameTargetsByOldId = createRenameTargetsByOldId(selectedModules);
+  for (const entry of input.filesIndex.entries) {
+    if (entry.artifactKind !== "ide-skill-package") continue;
+    const oldSkillId = canonicalSkillIdFromIdeMirrorPath(entry.path);
+    const replacementCanonicalSkillId = oldSkillId === undefined
+      ? undefined
+      : renameTargetsByOldId.get(oldSkillId);
+    if (
+      oldSkillId === undefined ||
+      replacementCanonicalSkillId === undefined ||
+      !isIdeSkillEntryPointPath(entry.path, oldSkillId)
+    ) {
+      continue;
+    }
+    const contents = createCanonicalSkillRedirect({ oldSkillId, replacementCanonicalSkillId });
+    desired.set(entry.path, {
+      contents,
+      entry: createFilesIndexEntry({
+        path: entry.path,
+        bytes: contents,
+        executable: false,
+        artifactKind: "ide-skill-package",
+        sourceRef: `installed-state:canonical-skill-redirect/${replacementCanonicalSkillId}`,
+        artifactRoot: input.artifactRoot,
+      }),
+    });
+  }
 
   const desiredSourceDescriptor = input.sourceDescriptor?.sourceType === "bundled"
     ? await discoverBundledSourceDescriptor({ projectRoot: PACKAGE_ROOT })
@@ -963,7 +1167,12 @@ async function buildCanonicalMigrationProjection(input: {
   }
 
   const regeneratedKinds = new Set(["ide-skill-package", "manifest", "skill-index", "help-index", "phase-coverage"]);
-  const retainedEntries = input.filesIndex.entries.filter((entry) => !regeneratedKinds.has(entry.artifactKind));
+  const retainedEntries = input.filesIndex.entries.filter((entry) => {
+    if (!regeneratedKinds.has(entry.artifactKind)) return true;
+    if (entry.artifactKind !== "ide-skill-package" || desired.has(entry.path)) return false;
+    const oldSkillId = canonicalSkillIdFromIdeMirrorPath(entry.path);
+    return oldSkillId !== undefined && renameTargetsByOldId.has(oldSkillId);
+  });
   const projectedFilesIndex = createFilesIndex([
     ...retainedEntries,
     ...[...desired.values()].map((file) => file.entry),
@@ -984,6 +1193,49 @@ async function buildCanonicalMigrationProjection(input: {
   });
 
   return { files: desired, conflicts };
+}
+
+function createRenameTargetsByOldId(modules: Awaited<ReturnType<typeof discoverOfficialModules>>): Map<string, string> {
+  const result = new Map<string, string>();
+  for (const module of modules) {
+    for (const [activeId, oldIds] of Object.entries(module.skillRenames)) {
+      for (const oldId of oldIds) result.set(oldId, activeId);
+    }
+  }
+  return result;
+}
+
+function canonicalSkillIdFromIdeMirrorPath(affectedPath: string): string | undefined {
+  for (const adapter of getIdeAdapterRegistry()) {
+    const prefix = `${adapter.targetDirectory}/`;
+    if (!affectedPath.startsWith(prefix)) continue;
+    return affectedPath.slice(prefix.length).split("/")[0];
+  }
+  return undefined;
+}
+
+function isIdeSkillEntryPointPath(affectedPath: string, canonicalSkillId: string): boolean {
+  return getIdeAdapterRegistry().some(
+    (adapter) => affectedPath === `${adapter.targetDirectory}/${canonicalSkillId}/SKILL.md`,
+  );
+}
+
+function createCanonicalSkillRedirect(input: {
+  oldSkillId: string;
+  replacementCanonicalSkillId: string;
+}): Buffer {
+  return Buffer.from([
+    "---",
+    `name: ${input.oldSkillId}`,
+    `description: \"Historical canonical Skill ID redirect to ${input.replacementCanonicalSkillId}.\"`,
+    "---",
+    "",
+    "# Canonical Skill Redirect（Canonical Skill 重定向）",
+    "",
+    "This historical entry contains no executable workflow.",
+    `Load \`../${input.replacementCanonicalSkillId}/SKILL.md\` as the only active implementation, then stop interpreting this file.`,
+    "",
+  ].join("\n"));
 }
 
 function resolveCanonicalSourceRoot(input: {
@@ -1072,7 +1324,10 @@ async function applyUpdateActions(input: {
         skippedPaths.push(action.affectedPath);
       }
       const indexed = input.filesIndex.entries.find((entry) => entry.path === action.affectedPath);
-      if (indexed?.ownership === "installer-owned" && action.reason === "unchanged") {
+      if (
+        indexed?.ownership === "installer-owned" &&
+        (action.reason === "unchanged" || action.reason === "canonical-skill-renamed")
+      ) {
         preconditions.push({
           absolutePath: resolveProjectRelativePath({ projectRoot: input.projectRoot, relativePath: indexed.path }).absolutePath,
           affectedPath: indexed.path,

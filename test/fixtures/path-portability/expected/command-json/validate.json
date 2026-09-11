@@ -30,17 +30,21 @@
       "suggestedNextStep": "Replace the symlink with a real project directory before release."
     },
     {
-      "issueId": "artifact-path.escapes-project",
+      "issueId": "artifact-path.config-artifact-mismatch",
       "category": "artifact-path",
       "severity": "error",
-      "affectedPath": "artifact:actualArtifactPath",
+      "affectedPath": "reports/outside-artifacts/review.md",
       "component": "path-portability-fixture",
       "details": {
-        "pathRole": "actualArtifactPath",
-        "reason": "path-escapes-project"
+        "actualConsumedPath": "reports/outside-artifacts/review.md",
+        "configuredRoot": "_speclite-output",
+        "field": "artifactRoot",
+        "reason": "config-artifact-mismatch",
+        "resolutionMode": "explicit-config",
+        "resolvedRoot": "_speclite-output"
       },
-      "impact": "A workflow artifact path is not safely contained inside the target project.",
-      "suggestedNextStep": "Use a project-relative POSIX artifact path inside the configured artifact root."
+      "impact": "A workflow-owned artifact was consumed from a path that does not match the resolved configured artifact root.",
+      "suggestedNextStep": "Use the configured artifact root as the workflow artifact location; do not migrate existing artifacts implicitly."
     },
     {
       "issueId": "file-integrity.unsafe-overwrite-risk",

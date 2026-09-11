@@ -1,6 +1,6 @@
 # Story 11.3: Existing Install Compatibility And Diagnostics（Existing Install 兼容与诊断）
 
-Status: ready-for-dev
+Status: done
 
 <!-- 仅创建上下文；必须等待 Story 11.1–11.2 完成后才能 kickoff。 -->
 
@@ -23,20 +23,20 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Predecessor 与 Kickoff Gate（AC: 1-8）
-  - [ ] 核验 Story 11.1–11.2 均 `done` 且 completion Gate current、target-matched、通过。
-  - [ ] 在 `story-kickoff` 中锁定 mismatch stable issue ID、actual-path evidence schema 与 read-only boundary。
-- [ ] Task 2: 先建立 Existing Compatibility Matrix（AC: 1-7）
-  - [ ] 覆盖 all-explicit、missing-new-fields、mixed modes、legacy story location、mismatch 与 artifact preservation。
-- [ ] Task 3: 接入 Existing Root Resolution（AC: 1-2, 6）
-  - [ ] 复用 Story 11.1 resolver；不得从 manifest、directory existence 或 fresh defaults 反推配置。
-- [ ] Task 4: 实现 Mismatch Diagnostics 与 Discovery Evidence（AC: 4-6）
-  - [ ] 在 `SPEC 07` 预注册 issue；producer 只输出 project-relative POSIX、确定性 details。
-- [ ] Task 5: 收口 Update / Repair No-migration（AC: 3, 7）
-  - [ ] 扩展 plan/ownership assertions，证明 workflow-owned paths 只读且不进入 changedPaths。
-- [ ] Task 6: Verification（AC: 1-8）
-  - [ ] 运行 focused compatibility、artifact-path、update-plan、existing-install fixtures、build 与 `git diff --check`。
-  - [ ] review 前运行 `story-completion` Gate，填写实际 Anchor Evidence Summary。
+- [x] Task 1: Predecessor 与 Kickoff Gate（AC: 1-8）
+  - [x] 核验 Story 11.1–11.2 均 `done` 且 completion Gate current、target-matched、通过。
+  - [x] 在 `story-kickoff` 中锁定 mismatch stable issue ID、actual-path evidence schema 与 read-only boundary。
+- [x] Task 2: 先建立 Existing Compatibility Matrix（AC: 1-7）
+  - [x] 覆盖 all-explicit、missing-new-fields、mixed modes、legacy story location、mismatch 与 artifact preservation。
+- [x] Task 3: 接入 Existing Root Resolution（AC: 1-2, 6）
+  - [x] 复用 Story 11.1 resolver；不得从 manifest、directory existence 或 fresh defaults 反推配置。
+- [x] Task 4: 实现 Mismatch Diagnostics 与 Discovery Evidence（AC: 4-6）
+  - [x] 在 `SPEC 07` 预注册 issue；producer 只输出 project-relative POSIX、确定性 details。
+- [x] Task 5: 收口 Update / Repair No-migration（AC: 3, 7）
+  - [x] 扩展 plan/ownership assertions，证明 workflow-owned paths 只读且不进入 changedPaths。
+- [x] Task 6: Verification（AC: 1-8）
+  - [x] 运行 focused compatibility、artifact-path、update-plan、existing-install fixtures、build 与 `git diff --check`。
+  - [x] review 前运行 `story-completion` Gate，填写实际 Anchor Evidence Summary。
 
 ## Dev Notes（开发备注）
 
@@ -117,24 +117,70 @@ Status: ready-for-dev
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
-待实现 Agent 填写。
+GPT-5.5 (gpt-5.5)
+
+### Debug Log References（调试日志引用）
+- Kickoff Gate: `_bmad-output/implementation-artifacts/flow-gates/11-3-existing-install-compatibility-and-diagnostics-story-kickoff-gate.md` -> `PASS`，已锁定 `artifact-path.config-artifact-mismatch`、actual-path evidence schema 与 read-only/no-migration proof strategy。
+- Completion Gate: `_bmad-output/implementation-artifacts/flow-gates/11-3-existing-install-compatibility-and-diagnostics-story-completion-gate.md` -> `PASS`，已验证 Contract / Functional / Evidence / Governance / Boundary anchors。
+- RED: `npx vitest run test/existing-install-compatibility.test.ts test/artifact-path-validation.test.ts --reporter=dot` -> 初始 4 failures，覆盖 status fresh-default drift、旧 escape issue、update/repair no-migration 缺口。
+- GREEN focused: `npx vitest run test/existing-install-compatibility.test.ts test/artifact-path-validation.test.ts --reporter=dot` -> 2 files / 13 tests passed。
+- Affected: `npx vitest run test/artifact-root-resolution.test.ts test/existing-install-compatibility.test.ts test/artifact-path-validation.test.ts test/update-planning.test.ts test/fixture-release-gates.test.ts test/runtime-structure.test.ts test/install-progress-ready-summary.test.ts --reporter=dot` -> 7 files / 86 tests passed。
+- Full: `npm test -- --reporter=dot` -> 62 files passed；485 passed / 4 todo。
+- Build: `npm run build` -> tsup ESM/DTS build success。
+- Canonical governance: warn/strict `check_canonical_source_change.mjs --project-root . --scope all --format json` -> `status=ok`, `findings=[]`, counts `core=18`, `sdlc=50`, `support=8`, `hooks=2`, `defaultInstall.total=68`。
+- Canonical focused: `npm test -- test/hook-artifact-install.test.ts test/config-initialization.test.ts test/runtime-structure.test.ts test/fixture-release-gates.test.ts test/story-6-4-path-portability.test.ts test/source-and-modules.test.ts --reporter=dot` -> 6 files / 61 tests passed。
+- Packaging: `npm run release:packaging-check` -> `Packaging acceptance passed: release/packaging-manifest.json and dist/packaging-manifest.json`。
+- Whitespace/docs: `git diff --check` -> passed；`npm run docs:check` -> 72 Markdown files, 5 drafts, links and governance rules valid。
+- CR06 Finalizer preflight: live 核验 Story 11.3 `Status: review`、sprint tracker `review`、completion gate `PASS`、唯一有效 Round 3 reviewer/evaluator 均通过、CR04 规则 `CR-API-37` / `CR-API-38` / `CR-API-39` / `CR-SEC-18`、CR05 `TODO-013` / `TODO-014` 为 `open` / P2 / Owner future。
+- CR06 Finalizer: `_bmad-output/implementation-artifacts/code-reviews/11-3-code-review/11-3-cr-finalizer-20260903-main-round-3.md` -> `DONE`；Story 与 sprint tracker 同步为 `done`，Epic 11 保持 `in-progress`，Story 11.4 保持 `ready-for-dev`。
 
 ### Completion Notes List（完成说明）
-- 终极上下文引擎分析已完成 —— 已创建完整开发者指南。
-- Story 尚未实现；本文件不构成 compatibility evidence。
+- Existing status 现在优先用 existing lifecycle config resolver 生成 `paths.artifactRoots`，因此 legacy-compatible fallback / explicit roots 不会被 manifest fresh defaults 覆盖；human JSON 与 status human output 共用相同 `resolvedRoot` / `resolutionMode` evidence。
+- `artifact-path.config-artifact-mismatch` 已在 `SPEC 07` 注册并由 validator 输出稳定、redacted、project-relative POSIX details：`field`、`configuredRoot`、`resolvedRoot`、`actualConsumedPath`、`resolutionMode`、`reason`。
+- Update / repair planning 已把 existing configured workflow root 下的 historical artifact 识别为 workflow-owned skip；ordinary update / `update --repair --yes` 不把该 artifact 写入 `changedPaths`，fixture 断言 before/after bytes 与 hash 不变。
+- Legacy `story_location` / whole-sharded discovery 以 canonical workflow contract test 证明仍可发现/消费；未实现 Story 11.5 precedence，也未执行 migration。
+- CR06 finalizer 已完成：Story 11.3 从 `review` 变更为 `done`，`sprint-status.yaml` 中 `11-3-existing-install-compatibility-and-diagnostics` 从 `review` 变更为 `done`。
+- `TODO-013` 与 `TODO-014` 保持 `open` / P2 / Owner future，均为 deferred non-blocking backlog；本 Story 未修复、未关闭，也不把它们描述为已实现。
+- `_bmad-output/planning-artifacts/bmm-workflow-status.yaml` 当前不存在；`speclite resolve config --project-root .` 未声明额外 required workflow tracker，按 finalizer Skill 记录 skipped，未创建。
+- Epic 11 保持 `in-progress`；Story 11.4 保持 `ready-for-dev`，不得在 Story 11.3 closeout 内启动。
+- 本次 CR06 仅生成 finalizer record 并同步 Story/tracker；未修改产品代码、tests、SPEC、completion gate、reviewer/evaluator artifact、CR04/CR05 内容、PLAN、EXPERIMENTS 或 EXPERIMENT_NOTES；未 commit、未 push。
 
 ### File List（文件清单）
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/output.ts`
+- `src/status/installed-state.ts`
+- `src/update/conflict-detector.ts`
+- `src/update/ownership-model.ts`
+- `src/update/update-plan.ts`
+- `src/validation/artifact-paths.ts`
+- `src/validation/rules/artifact-path.ts`
+- `src/validation/validate-project.ts`
+- `test/artifact-path-validation.test.ts`
+- `test/existing-install-compatibility.test.ts`
+- `test/story-6-4-path-portability.test.ts`
+- `test/fixtures/path-portability/expected/command-json/validate.json`
 - `_bmad-output/implementation-artifacts/stories/11-3-existing-install-compatibility-and-diagnostics.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/flow-gates/11-3-existing-install-compatibility-and-diagnostics-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-3-existing-install-compatibility-and-diagnostics-story-completion-gate.md`
+- `_bmad-output/implementation-artifacts/code-reviews/11-3-code-review/11-3-cr-finalizer-20260903-main-round-3.md`
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`
 
 ## Anchor Evidence Summary（锚点证据摘要）
 
-- Predecessor / Contract / Functional / Evidence anchors：待实际 Gate 与 tests 填写。
+- Contract anchors: `SPEC 09` existing explicit/fallback/no-migration owner 已由 Story 11.1 resolver 与 11.2 fresh projection predecessor gate 支撑；`SPEC 07` 注册 `artifact-path.config-artifact-mismatch`，无第二 issue contract。
+- Functional anchors: `src/status/installed-state.ts`、`src/validation/artifact-paths.ts`、`src/validation/rules/artifact-path.ts`、`src/validation/validate-project.ts`、`src/update/*` 已接入 existing resolved roots、stable mismatch diagnostic 与 update/repair no-migration skip。
+- Evidence anchors: focused suite 2 files / 13 tests passed；affected suite 7 files / 86 tests passed；full suite 62 files passed、485 passed / 4 todo；canonical warn/strict checker `status=ok` 且 `findings=[]`；packaging check 与 `git diff --check` passed。
+- Boundary anchors: no migration、no Story 11.4-11.10 routing/rename/inventory；legacy `story_location` 与 whole/sharded discovery 只作为 read-only compatibility evidence。
+- CR closeout anchor：唯一有效 Round 3 reviewer/evaluator 均通过；CR04 已沉淀 `CR-API-37`、`CR-API-38`、`CR-API-39`、`CR-SEC-18`；CR05 已登记 `TODO-013` / `TODO-014` 为 non-blocking P2 Owner future；CR06 只同步 Story/tracker 并生成 finalizer record。
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-09-03 | 1.1 | CR06 finalizer：核验 Round 3 reviewer/evaluator、CR04、CR05 与 story-completion gate 后，将 Story 11.3 和 sprint tracker 同步为 done；`TODO-013` / `TODO-014` 保持 deferred non-blocking。 | Codex |
+| 2026-09-03 | 1.0 | 完成 existing install compatibility、mismatch diagnostics、status/readout evidence 与 update/repair no-migration 实现和验证。 | Codex |
+| 2026-09-03 | 0.2 | 启动 Story 11.3，补齐 kickoff gate 并注册 `artifact-path.config-artifact-mismatch` stable issue。 | Codex |
 | 2026-09-02 | 0.1 | 创建 existing-install compatibility、mismatch diagnostics 与 no-migration 实施上下文。 | Fancyliu / Codex |
 
 ---

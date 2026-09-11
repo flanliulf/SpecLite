@@ -43,6 +43,30 @@ describe("ownership model path classifier", () => {
     }
   });
 
+  it("keeps installer-owned namespaces authoritative when configured artifact roots overlap", () => {
+    for (const input of [
+      {
+        relativePath: "_speclite/_config/manifest.yaml",
+        artifactRoots: ["_speclite"],
+      },
+      {
+        relativePath: ".claude/skills/speclite-help/SKILL.md",
+        artifactRoots: [".claude"],
+      },
+      {
+        relativePath: ".agents/skills/speclite-help/SKILL.md",
+        artifactRoots: [".agents"],
+      },
+    ]) {
+      expect(classifyOwnership(input)).toMatchObject({
+        relativePath: input.relativePath,
+        ownership: "installer-owned",
+        protected: false,
+        reason: "installer-owned",
+      });
+    }
+  });
+
   it("classifies default and configured artifact roots as protected workflow-owned files", () => {
     expect(classifyOwnership({ relativePath: "_speclite-output/review/report.md" })).toMatchObject({
       ownership: "workflow-owned",

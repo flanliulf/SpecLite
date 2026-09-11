@@ -124,11 +124,15 @@ describe("Story 6.4 path-portability fixture", () => {
       expect(validate.issues).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            issueId: "artifact-path.escapes-project",
-            affectedPath: "artifact:actualArtifactPath",
+            issueId: "artifact-path.config-artifact-mismatch",
+            affectedPath: "reports/outside-artifacts/review.md",
             details: expect.objectContaining({
-              pathRole: "actualArtifactPath",
-              reason: "path-escapes-project",
+              actualConsumedPath: "reports/outside-artifacts/review.md",
+              configuredRoot: "_speclite-output",
+              field: "artifactRoot",
+              reason: "config-artifact-mismatch",
+              resolutionMode: "explicit-config",
+              resolvedRoot: "_speclite-output",
             }),
           }),
         ]),
@@ -208,7 +212,7 @@ describe("Story 6.4 path-portability fixture", () => {
     expect(validate.data.issueCounts.error).toBe(4);
     expect(validate.issues.map((issue) => issue.issueId)).toEqual(
       expect.arrayContaining([
-        "artifact-path.escapes-project",
+        "artifact-path.config-artifact-mismatch",
         "artifact-path.symlink-escape",
         "file-integrity.case-conflict",
         "file-integrity.unsafe-overwrite-risk",
@@ -217,11 +221,15 @@ describe("Story 6.4 path-portability fixture", () => {
     expect(validate.issues).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          issueId: "artifact-path.escapes-project",
-          affectedPath: "artifact:actualArtifactPath",
+          issueId: "artifact-path.config-artifact-mismatch",
+          affectedPath: "reports/outside-artifacts/review.md",
           details: expect.objectContaining({
-            pathRole: "actualArtifactPath",
-            reason: "path-escapes-project",
+            actualConsumedPath: "reports/outside-artifacts/review.md",
+            configuredRoot: "_speclite-output",
+            field: "artifactRoot",
+            reason: "config-artifact-mismatch",
+            resolutionMode: "explicit-config",
+            resolvedRoot: "_speclite-output",
           }),
         }),
       ]),

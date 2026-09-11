@@ -2,6 +2,7 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { validateArtifactPaths } from "../src/validation/artifact-paths.js";
 import { validateArtifactPathContract } from "../src/validation/rules/artifact-path.js";
 
 describe("artifact path validation", () => {
@@ -27,6 +28,93 @@ describe("artifact path validation", () => {
           metadataLocation: "frontmatter",
         }),
       ).resolves.toEqual([]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts unknown future metadata keys from frontmatter, sidecar and directory metadata", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-future-metadata-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite-output/reports/directory-artifact"), {
+        recursive: true,
+      });
+      await writeFile(
+        path.join(tempRoot, "_speclite-output/reports/frontmatter.md"),
+        [
+          "---",
+          "workflowType: dev-story",
+          "sourceSkill: speclite-dev-story",
+          "generatedAt: 2026-05-27T06:00:00.000Z",
+          "futureKey: preserved-by-future-producer",
+          "---",
+          "# Report",
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempRoot, "_speclite-output/reports/sidecar.md"),
+        "# Report with sidecar metadata\n",
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempRoot, "_speclite-output/reports/sidecar.md.metadata.json"),
+        `${JSON.stringify(
+          {
+            workflowType: "dev-story",
+            sourceSkill: "speclite-dev-story",
+            generatedAt: "2026-05-27T06:00:00.000Z",
+            futureKey: "preserved-by-future-producer",
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempRoot, "_speclite-output/reports/directory-artifact/metadata.json"),
+        `${JSON.stringify(
+          {
+            workflowType: "dev-story",
+            sourceSkill: "speclite-dev-story",
+            generatedAt: "2026-05-27T06:00:00.000Z",
+            futureKey: "preserved-by-future-producer",
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const result = await validateArtifactPaths({
+        projectRoot: tempRoot,
+        configuredRoot: "_speclite-output/reports",
+        defaultOutputPaths: [
+          {
+            artifactType: "report",
+            defaultOutputPath: "_speclite-output/reports",
+          },
+        ],
+      });
+
+      expect(result.issues).toEqual([]);
+      expect(result.artifactChecks).toEqual([
+        {
+          artifactType: "report",
+          defaultOutputPath: "_speclite-output/reports",
+          present: true,
+          valid: true,
+          artifactPaths: [
+            "_speclite-output/reports/directory-artifact",
+            "_speclite-output/reports/frontmatter.md",
+            "_speclite-output/reports/sidecar.md",
+          ],
+          issueIds: [],
+        },
+      ]);
+      expect(JSON.stringify(result)).not.toContain(tempRoot);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }
@@ -171,7 +259,7 @@ describe("artifact path validation", () => {
     }
   });
 
-  it("reports actual artifact paths outside the configured artifact root with escape reason", async () => {
+  it("reports actual artifact paths outside the configured artifact root as config-artifact mismatch", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-path-root-"));
 
     try {
@@ -194,11 +282,15 @@ describe("artifact path validation", () => {
 
       expect(issues).toEqual([
         expect.objectContaining({
-          issueId: "artifact-path.escapes-project",
-          affectedPath: "artifact:actualArtifactPath",
+          issueId: "artifact-path.config-artifact-mismatch",
+          affectedPath: "_speclite-output/other/report.md",
           details: {
-            pathRole: "actualArtifactPath",
-            reason: "path-escapes-project",
+            actualConsumedPath: "_speclite-output/other/report.md",
+            configuredRoot: "_speclite-output/planning-artifacts",
+            field: "artifactRoot",
+            reason: "config-artifact-mismatch",
+            resolvedRoot: "_speclite-output/planning-artifacts",
+            resolutionMode: "explicit-config",
           },
         }),
       ]);

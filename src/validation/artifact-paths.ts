@@ -3,6 +3,7 @@ import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import { toProjectRelativePosixPath } from "../fs/path-normalizer.js";
+import type { ArtifactRootProjection } from "../manifest/manifest-schema.js";
 import { validateArtifactPathContract } from "./rules/artifact-path.js";
 
 export type ArtifactPathCheck = {
@@ -14,10 +15,22 @@ export type ArtifactPathCheck = {
   issueIds: string[];
 };
 
+export type ArtifactOutputPathContract = {
+  artifactType: string;
+  defaultOutputPath: string;
+};
+
+export type ActualOutputPathEvidence = ArtifactOutputPathContract & {
+  actualOutputPath: string;
+  actualArtifactPaths?: readonly string[];
+};
+
 export async function validateArtifactPaths(input: {
   projectRoot: string;
   configuredRoot: string;
-  defaultOutputPaths: Array<{ artifactType: string; defaultOutputPath: string }>;
+  artifactRoots?: readonly ArtifactRootProjection[];
+  defaultOutputPaths: ArtifactOutputPathContract[];
+  actualOutputPaths?: readonly ActualOutputPathEvidence[];
 }): Promise<{ issues: ValidationIssue[]; validatedPaths: string[]; artifactChecks: ArtifactPathCheck[] }> {
   const checks =
     input.defaultOutputPaths.length === 0
@@ -30,21 +43,41 @@ export async function validateArtifactPaths(input: {
       : input.defaultOutputPaths;
   const issues: ValidationIssue[] = [];
   const validatedPaths = new Set<string>([input.configuredRoot]);
+  for (const root of input.artifactRoots ?? []) validatedPaths.add(root.resolvedRoot);
   const artifactChecks: ArtifactPathCheck[] = [];
 
   for (const contract of checks) {
+    const artifactRootEvidence = findArtifactRootEvidence({
+      defaultOutputPath: contract.defaultOutputPath,
+      artifactRoots: input.artifactRoots,
+    });
+    const configuredRoot = artifactRootEvidence?.resolvedRoot ?? input.configuredRoot;
     validatedPaths.add(contract.defaultOutputPath);
     const artifacts = await discoverArtifacts({
       projectRoot: input.projectRoot,
       defaultOutputPath: contract.defaultOutputPath,
     });
+    for (const actualOutputPathEvidence of findActualOutputPathsForContract({
+      contract,
+      actualOutputPaths: input.actualOutputPaths,
+    })) {
+      validatedPaths.add(actualOutputPathEvidence.actualOutputPath);
+      artifacts.push(
+        ...(await discoverActualOutputArtifacts({
+          projectRoot: input.projectRoot,
+          actualOutputPathEvidence,
+        })),
+      );
+    }
+    const contractArtifacts = dedupeDiscoveredArtifacts(artifacts);
     const contractIssueStartIndex = issues.length;
 
-    if (artifacts.length === 0) {
+    if (contractArtifacts.length === 0) {
       const pathIssues = await validateArtifactPathContract({
         projectRoot: input.projectRoot,
-        configuredRoot: input.configuredRoot,
+        configuredRoot,
         defaultOutputPath: contract.defaultOutputPath,
+        ...(artifactRootEvidence === undefined ? {} : { artifactRootEvidence }),
         artifactType: contract.artifactType,
         metadataLocation: "frontmatter",
       });
@@ -53,14 +86,15 @@ export async function validateArtifactPaths(input: {
         issues.push(createMissingArtifactIssue(contract));
       }
     } else {
-      for (const artifact of artifacts) {
+      for (const artifact of contractArtifacts) {
         validatedPaths.add(artifact.relativePath);
         issues.push(
           ...(await validateArtifactPathContract({
             projectRoot: input.projectRoot,
-            configuredRoot: input.configuredRoot,
+            configuredRoot,
             defaultOutputPath: contract.defaultOutputPath,
             actualArtifactPath: artifact.relativePath,
+            ...(artifactRootEvidence === undefined ? {} : { artifactRootEvidence }),
             artifactType: contract.artifactType,
             metadata: artifact.metadata,
             ...(artifact.metadataParseFailureReason === undefined
@@ -76,9 +110,9 @@ export async function validateArtifactPaths(input: {
     artifactChecks.push({
       artifactType: contract.artifactType,
       defaultOutputPath: contract.defaultOutputPath,
-      present: artifacts.length > 0,
+      present: contractArtifacts.length > 0,
       valid: contractIssues.length === 0,
-      artifactPaths: artifacts.map((artifact) => artifact.relativePath),
+      artifactPaths: contractArtifacts.map((artifact) => artifact.relativePath),
       issueIds: [...new Set(contractIssues.map((issue) => issue.issueId))].sort(),
     });
   }
@@ -91,6 +125,67 @@ export async function validateArtifactPaths(input: {
       left.artifactType.localeCompare(right.artifactType),
     ),
   };
+}
+
+function findActualOutputPathsForContract(input: {
+  contract: ArtifactOutputPathContract;
+  actualOutputPaths?: readonly ActualOutputPathEvidence[];
+}): ActualOutputPathEvidence[] {
+  return (input.actualOutputPaths ?? [])
+    .filter(
+      (actual) =>
+        actual.artifactType === input.contract.artifactType &&
+        actual.defaultOutputPath === input.contract.defaultOutputPath &&
+        actual.actualOutputPath !== input.contract.defaultOutputPath,
+    )
+    .map((actual) => ({
+      ...actual,
+      ...(actual.actualArtifactPaths === undefined
+        ? {}
+        : {
+            actualArtifactPaths: [...new Set(actual.actualArtifactPaths)].sort((left, right) =>
+              left.localeCompare(right),
+            ),
+          }),
+    }))
+    .sort(
+      (left, right) =>
+        left.actualOutputPath.localeCompare(right.actualOutputPath) ||
+        (left.actualArtifactPaths ?? []).join("\0").localeCompare((right.actualArtifactPaths ?? []).join("\0")),
+    );
+}
+
+function dedupeDiscoveredArtifacts(artifacts: DiscoveredArtifact[]): DiscoveredArtifact[] {
+  const byRelativePath = new Map<string, DiscoveredArtifact>();
+  for (const artifact of artifacts) {
+    if (!byRelativePath.has(artifact.relativePath)) byRelativePath.set(artifact.relativePath, artifact);
+  }
+  return [...byRelativePath.values()].sort((left, right) => left.relativePath.localeCompare(right.relativePath));
+}
+
+function findArtifactRootEvidence(input: {
+  defaultOutputPath: string;
+  artifactRoots?: readonly ArtifactRootProjection[];
+}): {
+  field: ArtifactRootProjection["field"];
+  configuredRoot: string;
+  resolvedRoot: string;
+  resolutionMode: ArtifactRootProjection["resolutionMode"];
+} | undefined {
+  const root = input.artifactRoots
+    ?.filter((candidate) => isSameOrDescendantPath(input.defaultOutputPath, candidate.resolvedRoot))
+    .sort((left, right) => right.resolvedRoot.length - left.resolvedRoot.length)[0];
+  if (root === undefined) return undefined;
+  return {
+    field: root.field,
+    configuredRoot: root.resolvedRoot,
+    resolvedRoot: root.resolvedRoot,
+    resolutionMode: root.resolutionMode,
+  };
+}
+
+function isSameOrDescendantPath(candidatePath: string, containerPath: string): boolean {
+  return candidatePath === containerPath || candidatePath.startsWith(`${containerPath}/`);
 }
 
 type DiscoveredArtifact = {
@@ -127,6 +222,37 @@ async function discoverArtifacts(input: {
     artifacts.push({
       relativePath,
       ...(await readWorkflowArtifactMetadata(artifactPath)),
+    });
+  }
+
+  return artifacts.sort((left, right) => left.relativePath.localeCompare(right.relativePath));
+}
+
+async function discoverActualOutputArtifacts(input: {
+  projectRoot: string;
+  actualOutputPathEvidence: ActualOutputPathEvidence;
+}): Promise<DiscoveredArtifact[]> {
+  if (input.actualOutputPathEvidence.actualArtifactPaths === undefined) {
+    return discoverArtifacts({
+      projectRoot: input.projectRoot,
+      defaultOutputPath: input.actualOutputPathEvidence.actualOutputPath,
+    });
+  }
+
+  const artifacts: DiscoveredArtifact[] = [];
+  for (const relativeArtifactPath of input.actualOutputPathEvidence.actualArtifactPaths) {
+    const absoluteArtifactPath = path.join(input.projectRoot, relativeArtifactPath);
+    try {
+      await stat(absoluteArtifactPath);
+    } catch {
+      continue;
+    }
+    artifacts.push({
+      relativePath: toProjectRelativePosixPath({
+        projectRoot: input.projectRoot,
+        targetPath: absoluteArtifactPath,
+      }),
+      ...(await readWorkflowArtifactMetadata(absoluteArtifactPath)),
     });
   }
 

@@ -1,10 +1,19 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { CommandPathSummary, IdeTargetStatus, StatusCommandData } from "../diagnostics/command-result-schema.js";
+import type {
+  CommandPathSummary,
+  IdeTargetStatus,
+  StatusCommandData,
+  ValidationIssue,
+} from "../diagnostics/command-result-schema.js";
 import { createInstallPathSummary } from "../fs/path-normalizer.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry, type IdeTargetId } from "../ide/adapter-registry.js";
 import { ManifestSchema, SkillIndexSchema, type Manifest, type SkillIndex } from "../manifest/manifest-schema.js";
+import {
+  createArtifactRootProjections,
+  resolveArtifactRootsFromProjectConfig,
+} from "../config/artifact-root-resolver.js";
 
 export type StatusSummaryTargetHealth = IdeTargetStatus["status"];
 export type HighLevelHealth = StatusCommandData["highLevelHealth"];
@@ -19,6 +28,7 @@ export type HealthAggregationInput = {
 
 export type InstalledStateSummary = {
   data: StatusCommandData;
+  issues: ValidationIssue[];
   summary: string;
   nextActions: string[];
 };
@@ -56,6 +66,7 @@ export async function readInstalledStateSummary(input: {
 
     return {
       data,
+      issues: [],
       summary: "SpecLite is not configured in this project.",
       nextActions: ["Run speclite install to configure this project."],
     };
@@ -78,6 +89,7 @@ export async function readInstalledStateSummary(input: {
 
     return {
       data,
+      issues: [],
       summary: "SpecLite installed-state manifest is present but unreadable.",
       nextActions: ["Run speclite validate for complete installed-state issue details."],
     };
@@ -85,6 +97,10 @@ export async function readInstalledStateSummary(input: {
 
   const manifest = manifestResult.manifest;
   const skillIndexResult = await readSkillIndex(input.projectRoot);
+  const resolvedPathResult = await resolveExistingStatusPaths({
+    projectRoot: input.projectRoot,
+    manifestPaths: manifest.paths,
+  });
   const ideTargets = await summarizeIdeTargets({
     projectRoot: input.projectRoot,
     manifest,
@@ -92,15 +108,20 @@ export async function readInstalledStateSummary(input: {
   });
   const requiredPathsPresent = await requiredRuntimePathsPresent({
     projectRoot: input.projectRoot,
-    paths: manifest.paths,
+    paths: resolvedPathResult.paths,
   });
-  const highLevelHealth = aggregateStatusHealth({
-    manifestPresent: true,
-    manifestReadable: true,
-    installedModules: manifest.installedModules,
-    ideTargets,
-    requiredPathsPresent,
-  });
+  const hasBlockingRootResolutionIssue = hasBlockingStatusRootResolutionIssue(
+    resolvedPathResult.issues,
+  );
+  const highLevelHealth = hasBlockingRootResolutionIssue
+    ? "failed"
+    : aggregateStatusHealth({
+        manifestPresent: true,
+        manifestReadable: true,
+        installedModules: manifest.installedModules,
+        ideTargets,
+        requiredPathsPresent,
+      });
   const data: StatusCommandData = {
     sourceDescriptor: manifest.sourceDescriptor,
     manifestPresent: true,
@@ -108,13 +129,48 @@ export async function readInstalledStateSummary(input: {
     installedModules: manifest.installedModules,
     ideTargets,
     highLevelHealth,
-    paths: manifest.paths,
+    paths: resolvedPathResult.paths,
   };
 
   return {
     data,
+    issues: resolvedPathResult.issues,
     summary: createStatusSummary(highLevelHealth),
-    nextActions: createStatusNextActions(highLevelHealth),
+    nextActions: hasBlockingRootResolutionIssue
+      ? ["Fix the reported runtime config issue and rerun speclite status."]
+      : createStatusNextActions(highLevelHealth),
+  };
+}
+
+async function resolveExistingStatusPaths(input: {
+  projectRoot: string;
+  manifestPaths: CommandPathSummary;
+}): Promise<{ paths: CommandPathSummary; issues: ValidationIssue[] }> {
+  const rootResult = await resolveArtifactRootsFromProjectConfig({
+    projectRoot: input.projectRoot,
+    lifecycle: "existing",
+  });
+  if (!rootResult.ok) {
+    if (!hasBlockingStatusRootResolutionIssue(rootResult.issues)) {
+      return {
+        paths: input.manifestPaths,
+        issues: [],
+      };
+    }
+
+    const { artifactRoots: _artifactRoots, ...safeManifestPaths } = input.manifestPaths;
+    return {
+      paths: safeManifestPaths,
+      issues: rootResult.issues,
+    };
+  }
+
+  return {
+    paths: {
+      ...input.manifestPaths,
+      artifactRoots: createArtifactRootProjections(rootResult.roots),
+    },
+    issues: rootResult.issues,
   };
 }
 
@@ -289,6 +345,7 @@ async function requiredRuntimePathsPresent(input: {
     input.paths.artifactRoot,
     input.paths.manifestPath,
     CONFIG_ROOT,
+    ...(input.paths.artifactRoots ?? []).map((root) => root.resolvedRoot),
   ].filter((value): value is string => value !== undefined);
 
   for (const relativePath of required) {
@@ -329,6 +386,26 @@ function createStatusNextActions(health: HighLevelHealth): string[] {
     return ["Run speclite install to configure this project."];
   }
   return ["Run speclite validate for complete installed-state issue details."];
+}
+
+function hasBlockingIssue(issues: readonly ValidationIssue[]): boolean {
+  return issues.some((issue) => issue.severity === "error" || issue.severity === "critical");
+}
+
+function hasBlockingStatusRootResolutionIssue(issues: readonly ValidationIssue[]): boolean {
+  return issues.some((issue) => hasBlockingIssue([issue]) && !isNonBlockingStatusRootResolutionIssue(issue));
+}
+
+function isNonBlockingStatusRootResolutionIssue(issue: ValidationIssue): boolean {
+  return (
+    (issue.issueId === "runtime-path.missing-entry" &&
+      issue.component === "config-resolver" &&
+      issue.affectedPath === "_speclite/config.toml" &&
+      issue.details?.status === "missing") ||
+    (issue.issueId === "artifact-path.missing-required-artifact" &&
+      issue.component === "artifact-root-resolver" &&
+      issue.details?.reason === "missing-required-config")
+  );
 }
 
 function isMissingFileError(error: unknown): boolean {

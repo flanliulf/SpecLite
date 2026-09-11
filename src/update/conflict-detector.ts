@@ -15,11 +15,13 @@ export function detectFilesIndexEntryConflict(input: {
   entry: FilesIndexEntry;
   currentHash: string | undefined;
   artifactRoot: string;
+  artifactRoots?: readonly string[];
   repair: boolean;
 }): UpdateConflict | undefined {
   const classification = classifyOwnership({
     relativePath: input.entry.path,
     artifactRoot: input.artifactRoot,
+    artifactRoots: input.artifactRoots,
   });
   if (isProtectedOwnership(classification.ownership)) {
     return createConflict({
