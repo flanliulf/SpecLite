@@ -40,6 +40,8 @@ Review the frontmatter to understand:
 - `lastStep`: The most recently completed step number
 - `inputDocuments`: What context was already loaded
 - All other frontmatter variables
+- Discovery evidence `resolvedRoot`, `resolutionMode`, `actualConsumedPath`, `actualColorThemesPath`, and `actualDesignDirectionsPath`; these selected project-relative paths remain authoritative for every later write and completion report
+- Before every later write, revalidate the selected path against its original canonical UX or legacy Planning physical owner; owner drift or cross-space replacement HALTs with zero content/frontmatter/progress mutation
 
 ### 2. Load All Input Documents
 
@@ -108,7 +110,9 @@ After presenting current progress, ask:
 If `lastStep` indicates the final step is completed:
 "Great news! It looks like we've already completed the UX design workflow for {{project_name}}.
 
-The final UX design specification is ready at {planning_artifacts}/ux-design-specification.md with all sections completed through step {finalStepNumber}.
+The final UX design specification is ready at `{actualConsumedPath}` (`{planning_artifacts}/ux/ux-design-specification.md` for canonical workflows) with all sections completed through step {finalStepNumber}.
+
+Supporting artifacts remain selected at `{actualColorThemesPath}` and `{actualDesignDirectionsPath}`; report and update those exact paths without migrating any legacy sibling.
 
 The complete UX design includes visual foundations, user flows, and design specifications ready for implementation.
 

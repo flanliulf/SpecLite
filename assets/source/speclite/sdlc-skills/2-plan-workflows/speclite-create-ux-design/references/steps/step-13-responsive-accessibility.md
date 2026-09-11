@@ -226,7 +226,8 @@ Show the generated responsive and accessibility content and present choices:
 
 #### If 'C' (Continue):
 
-- Append the final content to `{planning_artifacts}/ux-design-specification.md`
+- Keep generated screenshots and auxiliary assets under `{planning_artifacts}/ux/`, use containing-artifact-relative references, and reject any normalized path that escapes `{project-root}`.
+- Append the final content to `{actualConsumedPath}` (`{planning_artifacts}/ux/ux-design-specification.md` for canonical workflows)
 - Update frontmatter: append step to end of stepsCompleted array
 - Load `./step-14-complete.md`
 

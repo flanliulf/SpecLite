@@ -1,6 +1,6 @@
 # Story 11.6: Consolidate UX Artifacts Under The Planning UX Space（将 UX Artifacts 归集到 Planning UX 空间）
 
-Status: ready-for-dev
+Status: done
 
 ## Story（故事）
 
@@ -24,12 +24,12 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] 核验 11.1–11.5 `done` + completion Gates，运行 11.6 kickoff。
-- [ ] 先建立 UX route/relative-link/legacy/negative-scan failing tests。
-- [ ] 更新 runtime precreate `ux/`，但保持 `design-system/` on-demand。
-- [ ] 更新 Create UX 全部 ZH/EN steps、resume/progress、三核心 files 与 asset/link references。
-- [ ] 更新 readiness/create-architecture/create-epics/correct-course/create-story consumers 与 metadata/docs。
-- [ ] 运行 focused fixtures、link traversal negatives、corpus scan、build、diff check 与 completion Gate。
+- [x] 核验 11.1–11.5 `done` + completion Gates，运行 11.6 kickoff。
+- [x] 先建立 UX route/relative-link/legacy/negative-scan failing tests。
+- [x] 更新 runtime precreate `ux/`，但保持 `design-system/` on-demand。
+- [x] 更新 Create UX 全部 ZH/EN steps、resume/progress、三核心 files 与 asset/link references。
+- [x] 更新 readiness/create-architecture/create-epics/correct-course/create-story consumers 与 metadata/docs。
+- [x] 运行 focused fixtures、link traversal negatives、corpus scan、build、diff check 与 completion Gate。
 
 ## Dev Notes（开发备注）
 
@@ -90,15 +90,82 @@ Status: ready-for-dev
 ## Dev Agent Record（开发代理记录）
 
 ### Agent Model Used（使用模型）
-待实现 Agent 填写。
+GPT-5.5（fresh Development Agent）
+
+### Implementation Plan（实现计划）
+- 先验证 predecessor completion evidence 并建立 11.6 kickoff gate，再以 focused RED tests 锁定 fresh-install parent、三个 exact outputs、on-demand directory、legacy no-migration、consumer parity、link boundary 与 negative scan。
+- 复用既有 Planning root resolver、diagnostic evidence 和 project-boundary guard，只调整 canonical UX workflow/consumer contract、metadata、docs 与生成态 manifest，不新增 public surface。
+- 以 focused/affected/full、build、docs、packaging、canonical normal/strict 和 diff checks 收口；将并发 drawer fixed-count drift 独立披露。
+
+### Debug Log References（调试日志引用）
+- RED 初始：focused suite `2 passed / 4 failed`；补齐测试 fixture setup 后，剩余失败均对应未实现的 UX contract。
+- GREEN final：focused `6/6`；affected matrix `47/47`；expanded matrix 仅有三项外部 drawer fixed-count drift。
+- Full：`598 passed / 12 failed / 4 todo`；十二项失败全部是范围外 drawer 引起的 `core=18 -> 19` / `total=68 -> 69` fixed-count expectations。
 
 ### Completion Notes List（完成说明）
-- 终极上下文引擎分析已完成 —— 已创建完整开发者指南。
-- Story 尚未实现；path/link/evidence 均为 planned requirements。
+- 11.1–11.5 tracker 与 exact completion gates 已验证；11.6 kickoff gate 为 `PASS`，completion gate 为 `PASS_EQUIVALENT`。
+- Fresh install 已由 canonical module projection 预创建 `{planning_artifacts}/ux/`，focused test 证明 `ux/design-system/` 保持 on-demand。
+- Create UX ZH/EN、全部 steps、progress/resume 与三个 exact outputs 已统一；Markdown/HTML links、screenshots/assets 相对 containing UX artifact 解析并拒绝 project-root escape。
+- Readiness、Architecture、Epics、IR grill、Correct Course、Create Story consumers 均采用 canonical-first、exact legacy fallback、resolver evidence 与 no-migration contract。
+- Public docs、module help 与 packaging manifest 已同步；canonical normal/strict 均 `status=ok`、`findings=[]`，`git diff --check` passed。
+- 未新增 public contract/stable issue，未处理 11.7+，未修改 drawer/mirrors/fixed counts/CR records/已完成 Story 历史，未 commit/push。
+- CR06 Finalizer 于 2026-09-04 完成：latest Reviewer Round 5 为 `PASS`（valid layers `3/3`、`0 P0 / 0 P1 / 0 new P2`），latest Evaluator Round 5 为 `PASS` 且 Owner Gate=`NONE`；completion gate 为明确隔离 external drawer fixed-count drift 的 `PASS_EQUIVALENT`；CR04 已完成，CR05 已登记 `TODO-017`（P2/open）。Story 与 sprint tracker 已同步为 `done`，Epic 11 保持 `in-progress`，Story 11.7 保持 `ready-for-dev`。
+
+### Finalization Summary（最终化摘要）
+- 状态变更：Story 11.6 `review -> done`；`sprint-status.yaml` 对应条目 `review -> done`。
+- 同步边界：`bmm-workflow-status.yaml` 不存在，按 CR06 Skill 跳过且不创建；未修改 source、tests、config、docs、rules、TODO、CR summaries/evaluations、gates、PLAN、EXPERIMENTS、EXPERIMENT_NOTES、11.7+ 或外部 drawer/mirrors/fixed counts，未 commit、未 push。
 
 ### File List（文件清单）
+- `_bmad-output/implementation-artifacts/flow-gates/11-6-consolidate-ux-artifacts-under-the-planning-ux-space-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-6-consolidate-ux-artifacts-under-the-planning-ux-space-story-completion-gate.md`
 - `_bmad-output/implementation-artifacts/stories/11-6-consolidate-ux-artifacts-under-the-planning-ux-space.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/SKILL.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/workflow-details.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-01-init.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-01b-continue.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-02-discovery.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-03-core-experience.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-04-emotional-response.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-05-inspiration.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-06-design-system.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-07-defining-experience.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-08-visual-foundation.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-09-design-directions.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-10-user-journeys.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-11-component-strategy.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-12-ux-patterns.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-13-responsive-accessibility.md`
+- `assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-14-complete.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/SKILL.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-01-document-discovery.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-04-ux-alignment.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/SKILL.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/references/activation-en.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/references/inputs-outputs.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/references/steps/step-01-init.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/references/workflow-steps.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories/SKILL.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-epics-and-stories/references/workflow-steps.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/workflow.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/SKILL.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/references/workflow-details.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/SKILL.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/SKILL.en.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/discover-inputs.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-create-story/references/workflow-details.md`
+- `assets/source/speclite/sdlc-skills/module-help.csv`
+- `docs/reference/skills/sdlc-workflows.md`
+- `docs/reference/workflow-artifact-layout.md`
+- `release/packaging-manifest.json`
+- `test/ux-artifact-routing.test.ts`
 
 ## Anchor Evidence Summary（锚点证据摘要）
 - 待实现与 Flow Gates 填写。
@@ -107,6 +174,8 @@ Status: ready-for-dev
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 UX root、relative assets、legacy discovery 与 corpus closure 上下文。 | Fancyliu / Codex |
+| 2026-09-04 | 1.0 | 完成 UX artifact consolidation、consumer discovery、link boundary、legacy evidence、tests 与 completion gate。 | GPT-5.5 |
+| 2026-09-04 | 1.1 | Round 5 Reviewer/Evaluator double-PASS；CR04 完成且 CR05 `TODO-017` 已登记，完成 CR06 状态收尾。 | Codex |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*

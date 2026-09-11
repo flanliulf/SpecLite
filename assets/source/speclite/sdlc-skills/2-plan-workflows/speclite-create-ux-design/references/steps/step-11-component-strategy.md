@@ -210,7 +210,8 @@ Show the generated component strategy content and present choices:
 
 #### If 'C' (Continue):
 
-- Append the final content to `{planning_artifacts}/ux-design-specification.md`
+- Keep any generated design-system artifact under `{planning_artifacts}/ux/design-system/`. For its first on-demand directory, run `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-directory --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{planning_artifacts}/ux/design-system"`. For each exclusive file create, place the exact bytes in `{source-file}` and run `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-file --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{target}" --source "{source-file}"`. Require exit `0`, exactly one JSON object, `ok: true`, exact `targetPath` and matching `operation`; non-zero, invalid JSON or `ok !== true` HALTs without append/frontmatter/progress advancement. This single Skill-private implementation revalidates the nearest existing ancestor inside the real canonical UX physical owner at commit time and immediately performs the filesystem operation. Any regular-file/FIFO parent, dangling symlink, cross-space/out-of-project symlink, `ENOTDIR`, unknown flag, or indeterminate owner fails closed with zero operation mutation.
+- Append the final content to `{actualConsumedPath}` (`{planning_artifacts}/ux/ux-design-specification.md` for canonical workflows)
 - Update frontmatter: append step to end of stepsCompleted array
 - Load `./step-12-ux-patterns.md`
 

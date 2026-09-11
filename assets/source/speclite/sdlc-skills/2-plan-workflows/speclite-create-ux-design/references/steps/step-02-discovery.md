@@ -153,7 +153,7 @@ Show the generated project understanding content and present choices:
 
 #### If 'C' (Continue):
 
-- Append the final content to `{planning_artifacts}/ux-design-specification.md`
+- Append the final content to `{actualConsumedPath}` (`{planning_artifacts}/ux/ux-design-specification.md` for canonical workflows)
 - Update frontmatter: `stepsCompleted: [1, 2]`
 - Load `./step-03-core-experience.md`
 

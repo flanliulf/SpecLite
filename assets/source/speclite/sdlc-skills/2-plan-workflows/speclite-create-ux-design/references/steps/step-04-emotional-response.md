@@ -181,7 +181,7 @@ Show the generated emotional response content and present choices:
 
 #### If 'C' (Continue):
 
-- Append the final content to `{planning_artifacts}/ux-design-specification.md`
+- Append the final content to `{actualConsumedPath}` (`{planning_artifacts}/ux/ux-design-specification.md` for canonical workflows)
 - Update frontmatter: append step to end of stepsCompleted array
 - Load `./step-05-inspiration.md`
 
