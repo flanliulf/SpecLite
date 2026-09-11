@@ -435,107 +435,112 @@ describe("update ownership planning", () => {
     }
   });
 
-  it("applies deterministic redirects for both historical IDs on both IDE targets", async () => {
-    const identities = [
-      ["speclite-check-implementation-readiness", "speclite-implementation-readiness-check"],
-      ["speclite-ir-grill-consistency-reviewer", "speclite-implementation-readiness-grill-consistency-reviewer"],
-    ] as const;
-    for (const target of ["agents", "claude"] as const) {
-      for (const [oldId, activeId] of identities) {
-        const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-skill-rename-"));
-        const oldPath = `.${target}/skills/${oldId}/SKILL.md`;
-        try {
-          await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
-          const oldContents = "# historical installed package\n";
-          await writeProjectFile(tempRoot, oldPath, oldContents);
-          await writeGeneratedInstalledStateBaseline({
-            projectRoot: tempRoot,
-            installedModules: ["core", "sdlc"],
-            targetIds: [target],
-            skillEntries: [{
-              schemaVersion: "speclite.skill-index.v1",
-              canonicalSkillId: oldId,
-              moduleId: "sdlc",
-              sourcePackagePath: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}`,
-              canonicalPackageHash: await hashPackageDirectory(path.join(tempRoot, path.dirname(oldPath))),
-              installedTargets: [target],
-              phaseIds: ["solutioning"],
-            }],
-          });
-          const filesIndexPath = path.join(tempRoot, "_speclite/_config/files-index.json");
-          const filesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
-            schemaVersion: string;
-            entries: Array<Record<string, unknown>>;
-          };
-          filesIndex.entries.push(await filesIndexEntry(tempRoot, oldPath, oldContents, {
-            ownership: "installer-owned",
-            sourceRef: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}/SKILL.md`,
-            artifactKind: "ide-skill-package",
-          }));
-          await writeFile(filesIndexPath, `${JSON.stringify(filesIndex, null, 2)}\n`, "utf8");
+  const renameIdentities = [
+    ["speclite-check-implementation-readiness", "speclite-implementation-readiness-check"],
+    ["speclite-ir-grill-consistency-reviewer", "speclite-implementation-readiness-grill-consistency-reviewer"],
+  ] as const;
 
-          const clean = UpdateCommandResultSchema.parse((await runUpdateCommand({
-            options: { yes: true },
-            runtime: { cwd: tempRoot, targetProject: "skill-rename-clean" },
-          })).result);
-          expect(clean.data.conflicts).toEqual([]);
-          expect(clean.data.writeAuthorized).toBe(true);
-          expect(clean.data.changedPaths).toContain(oldPath);
-          expect(clean.data.changedPaths).toContain(`.${target}/skills/${activeId}/SKILL.md`);
-          expect(clean.data.updatePlan.actions).toContainEqual(expect.objectContaining({
-            affectedPath: oldPath,
-            action: "update",
-            reason: "canonical-skill-renamed",
-            replacementCanonicalSkillId: activeId,
-          }));
-          const redirect = await readFile(path.join(tempRoot, oldPath), "utf8");
-          expect(redirect).toContain(`../${activeId}/SKILL.md`);
-          expect(redirect).toContain("only active implementation");
-          expect(redirect).not.toContain("historical installed package");
-          await expect(readFile(path.join(tempRoot, `.${target}/skills/${activeId}/SKILL.md`), "utf8"))
-            .resolves.toContain(`name: ${activeId}`);
-          const installedSkillIndex = JSON.parse(
-            await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
-          ) as { entries: Array<{ canonicalSkillId: string; renamedFromCanonicalSkillIds?: string[] }> };
-          expect(installedSkillIndex.entries.some((entry) => entry.canonicalSkillId === oldId)).toBe(false);
-          expect(installedSkillIndex.entries).toContainEqual(expect.objectContaining({
-            canonicalSkillId: activeId,
-            renamedFromCanonicalSkillIds: [oldId],
-          }));
-          const installedFilesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
-            entries: Array<{ path: string; hash: string }>;
-          };
-          expect(installedFilesIndex.entries).toContainEqual(expect.objectContaining({
-            path: oldPath,
-            hash: hashBytes(redirect),
-          }));
-          const stablePaths = [
-            oldPath,
-            `.${target}/skills/${activeId}/SKILL.md`,
-            "_speclite/_config/skill-index.json",
-            "_speclite/_config/files-index.json",
-          ];
-          const afterFirst = await captureFiles(tempRoot, stablePaths);
-          const repeated = UpdateCommandResultSchema.parse((await runUpdateCommand({
-            options: { yes: true },
-            runtime: { cwd: tempRoot, targetProject: "skill-rename-repeat" },
-          })).result);
-          expect(repeated.data.changedPaths).toEqual([]);
-          expect(repeated.data.conflicts.find((conflict) => conflict.affectedPath === oldPath)).toBeUndefined();
-          expect(repeated.data.updatePlan.actions.find((action) => action.affectedPath === oldPath))
-            .toEqual(expect.objectContaining({
-            affectedPath: oldPath,
-            action: "skip",
-            reason: "canonical-skill-renamed",
-            replacementCanonicalSkillId: activeId,
-          }));
-          await expectFilesUnchanged(tempRoot, afterFirst);
-        } finally {
-          await rm(tempRoot, { recursive: true, force: true });
-        }
+  it.each(
+    (["agents", "claude"] as const).flatMap((target) =>
+      renameIdentities.map(([oldId, activeId]) => [target, oldId, activeId] as const),
+    ),
+  )(
+    "applies deterministic redirects for %s target and historical ID %s",
+    async (target, oldId, activeId) => {
+      const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-skill-rename-"));
+      const oldPath = `.${target}/skills/${oldId}/SKILL.md`;
+      try {
+        await writeProjectFile(tempRoot, "_speclite/config.toml", "[core]\nproject_name = \"Base\"\n");
+        const oldContents = "# historical installed package\n";
+        await writeProjectFile(tempRoot, oldPath, oldContents);
+        await writeGeneratedInstalledStateBaseline({
+          projectRoot: tempRoot,
+          installedModules: ["core", "sdlc"],
+          targetIds: [target],
+          skillEntries: [{
+            schemaVersion: "speclite.skill-index.v1",
+            canonicalSkillId: oldId,
+            moduleId: "sdlc",
+            sourcePackagePath: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}`,
+            canonicalPackageHash: await hashPackageDirectory(path.join(tempRoot, path.dirname(oldPath))),
+            installedTargets: [target],
+            phaseIds: ["solutioning"],
+          }],
+        });
+        const filesIndexPath = path.join(tempRoot, "_speclite/_config/files-index.json");
+        const filesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
+          schemaVersion: string;
+          entries: Array<Record<string, unknown>>;
+        };
+        filesIndex.entries.push(await filesIndexEntry(tempRoot, oldPath, oldContents, {
+          ownership: "installer-owned",
+          sourceRef: `assets/source/speclite/sdlc-skills/3-solutioning/${oldId}/SKILL.md`,
+          artifactKind: "ide-skill-package",
+        }));
+        await writeFile(filesIndexPath, `${JSON.stringify(filesIndex, null, 2)}\n`, "utf8");
+
+        const clean = UpdateCommandResultSchema.parse((await runUpdateCommand({
+          options: { yes: true },
+          runtime: { cwd: tempRoot, targetProject: "skill-rename-clean" },
+        })).result);
+        expect(clean.data.conflicts).toEqual([]);
+        expect(clean.data.writeAuthorized).toBe(true);
+        expect(clean.data.changedPaths).toContain(oldPath);
+        expect(clean.data.changedPaths).toContain(`.${target}/skills/${activeId}/SKILL.md`);
+        expect(clean.data.updatePlan.actions).toContainEqual(expect.objectContaining({
+          affectedPath: oldPath,
+          action: "update",
+          reason: "canonical-skill-renamed",
+          replacementCanonicalSkillId: activeId,
+        }));
+        const redirect = await readFile(path.join(tempRoot, oldPath), "utf8");
+        expect(redirect).toContain(`../${activeId}/SKILL.md`);
+        expect(redirect).toContain("only active implementation");
+        expect(redirect).not.toContain("historical installed package");
+        await expect(readFile(path.join(tempRoot, `.${target}/skills/${activeId}/SKILL.md`), "utf8"))
+          .resolves.toContain(`name: ${activeId}`);
+        const installedSkillIndex = JSON.parse(
+          await readFile(path.join(tempRoot, "_speclite/_config/skill-index.json"), "utf8"),
+        ) as { entries: Array<{ canonicalSkillId: string; renamedFromCanonicalSkillIds?: string[] }> };
+        expect(installedSkillIndex.entries.some((entry) => entry.canonicalSkillId === oldId)).toBe(false);
+        expect(installedSkillIndex.entries).toContainEqual(expect.objectContaining({
+          canonicalSkillId: activeId,
+          renamedFromCanonicalSkillIds: [oldId],
+        }));
+        const installedFilesIndex = JSON.parse(await readFile(filesIndexPath, "utf8")) as {
+          entries: Array<{ path: string; hash: string }>;
+        };
+        expect(installedFilesIndex.entries).toContainEqual(expect.objectContaining({
+          path: oldPath,
+          hash: hashBytes(redirect),
+        }));
+        const stablePaths = [
+          oldPath,
+          `.${target}/skills/${activeId}/SKILL.md`,
+          "_speclite/_config/skill-index.json",
+          "_speclite/_config/files-index.json",
+        ];
+        const afterFirst = await captureFiles(tempRoot, stablePaths);
+        const repeated = UpdateCommandResultSchema.parse((await runUpdateCommand({
+          options: { yes: true },
+          runtime: { cwd: tempRoot, targetProject: "skill-rename-repeat" },
+        })).result);
+        expect(repeated.data.changedPaths).toEqual([]);
+        expect(repeated.data.conflicts.find((conflict) => conflict.affectedPath === oldPath)).toBeUndefined();
+        expect(repeated.data.updatePlan.actions.find((action) => action.affectedPath === oldPath))
+          .toEqual(expect.objectContaining({
+          affectedPath: oldPath,
+          action: "skip",
+          reason: "canonical-skill-renamed",
+          replacementCanonicalSkillId: activeId,
+        }));
+        await expectFilesUnchanged(tempRoot, afterFirst);
+      } finally {
+        await rm(tempRoot, { recursive: true, force: true });
       }
-    }
-  }, 30_000);
+    },
+    30_000,
+  );
 
   it("blocks a modified historical package without projecting its replacement", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-update-skill-rename-drift-"));
