@@ -3,6 +3,7 @@
 ## [Unreleased] - 2026-09-11
 
 - Story 11.9 restart：CR 目录只消费传入的 `crDir`（来自 `speclite resolve cr-directory`），不重推导；移除 2026-09-09 的 directoryContext / validate-context 依赖。
+- restart CR round 1 修复：Inputs 登记 `crDir` / `compatibilityMode` / `legacyArtifactPaths`（zh/en）。
 
 ## [2.1.1] - 2026-08-26
 

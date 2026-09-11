@@ -65,7 +65,7 @@ gate 缺失、stale 或 target mismatch 时 HALT，并要求 fresh `speclite-flo
 
 ## Step 7: Write Finalizer Report（写 Finalizer 报告）
 
-1. 一旦 `{crDir}` 已解析，所有 `DONE` 或 `HALTED` 退出均使用 `assets/output-template.md` 写 canonical report。
+1. 一旦 `{crDir}` 已解析，所有 `DONE` 或 `HALTED` 退出均使用 `assets/output-template.md` 写 canonical report。`HALTED` report 写入后该目录在 resolver 眼中已关闭，重入必须使用传入的同一 `crDir`，不得重新解析。
 2. 写 evaluation source/hash/verdict、独立重算 `scopeHash`、completion gate binding、tracker writes/reread 和 result。
 3. 写入后重读验证 schema、identity、hash、result 和 canonical filename。
 4. 如果 runtime/identity 失败导致 `{crDir}` 尚不可确定，只能返回 non-durable HALT，并明确“未生成 finalizer report”及原因。

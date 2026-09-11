@@ -28,11 +28,11 @@ runner 与人工 orchestrator 调用各 CR Skill 时必须传入下列参数；�
 
 | Skill | 必传参数 | 回落 |
 |---|---|---|
-| CR01 reviewer / CR02 evaluator | `reviewSeries`、`orchestrationMode`、`handoffTarget` | 只读，无授权参数 |
-| CR03 fixer | `mode`、`confirmationPolicy`、`authorizationSource`、`orchestrationMode`、`handoffTarget` | `confirmationPolicy` 缺失固定 `explicit` |
-| CR04 rules-extractor | `orchestrationMode`、`handoffTarget` | 修改全局文档另需显式授权 |
-| CR05 todo-tracker | `mode`、`confirmationPolicy`、`authorizationSource`、`orchestrationMode`、`handoffTarget` | 同 CR03 |
-| CR06 finalizer | `confirmationPolicy`、`authorizationSource`、`orchestrationMode`、`handoffTarget` | 同 CR03 |
+| CR01 reviewer / CR02 evaluator | `reviewSeries`、`crDir`、`compatibilityMode`、`legacyArtifactPaths`、`orchestrationMode`、`handoffTarget` | 只读，无授权参数；resolver 三字段缺失时 Skill 自行调用一次 `speclite resolve cr-directory` |
+| CR03 fixer | `mode`、`crDir`、`compatibilityMode`、`legacyArtifactPaths`、`confirmationPolicy`、`authorizationSource`、`orchestrationMode`、`handoffTarget` | `confirmationPolicy` 缺失固定 `explicit` |
+| CR04 rules-extractor | `crDir`、`compatibilityMode`、`legacyArtifactPaths`、`orchestrationMode`、`handoffTarget` | 修改全局文档另需显式授权 |
+| CR05 todo-tracker | `mode`、`crDir`、`compatibilityMode`、`legacyArtifactPaths`、`confirmationPolicy`、`authorizationSource`、`orchestrationMode`、`handoffTarget` | 同 CR03 |
+| CR06 finalizer | `crDir`、`compatibilityMode`、`legacyArtifactPaths`、`confirmationPolicy`、`authorizationSource`、`orchestrationMode`、`handoffTarget` | 同 CR03 |
 
 `preauthorized` 而缺 `authorizationSource` 时，写入/修复类 Skill（CR03/05/06）必须 HALT，不得静默改写。
 
@@ -55,7 +55,7 @@ CR01–06、runner 和人工 orchestrator 必须按以下顺序判定实现证�
 - `round`：同一 `storyId + reviewSeries` 内从 1 开始连续递增。
 - CR 目录固定为 `{implementation_artifacts}/code-reviews/{storyId}-code-review/`。
 - Goal records 固定为 `{crDir}/goal-execute-records/`；不得为同一 Story 创建带 slug 的第二个 CR 目录。
-- 发现 legacy 或带 slug 目录时只读记录到 `legacyArtifactPaths`，不得自动移动、删除或继续写入。
+- 发现 legacy 或带 slug 目录时只读记录到 `legacyArtifactPaths`，不得自动移动、删除或作为新 run 的目录；唯一例外是 resolver 判定 `compatibilityMode=legacy-resume` 的那一个未完成 run，必须在该 legacy 目录原位续写。
 
 ## CR Directory Resolution（CR 目录解析）
 
@@ -63,6 +63,7 @@ CR01–06、runner 和人工 orchestrator 必须按以下顺序判定实现证�
 - 输出 `crDir`、`canonicalCrDir`、`compatibilityMode`（`canonical` | `legacy-resume`）与 `legacyCrDirs`；`legacyCrDirs` 即传给下游的 `legacyArtifactPaths`。CR01–06 只消费传入的 `crDir`，不得重新推导、比较 mtime 或自行选择目录。
 - 判定只看 `code-reviews/` 下的目录名与候选目录的直接子文件名：legacy 目录 = `{storyId}-<非空文本>-code-review`；"目录含 series S 的未完成 run" ⇔ 存在 S 的 v2 summary 且不存在 S 的 v2 finalizer。不读取产物正文，不解析 frontmatter；round 有效性与审批继续由 runner 与 CR06 判定。
 - 恢复矩阵：无 legacy 未完成 run → `canonicalCrDir`；恰一个 legacy 含未完成 run 且 canonical 不含 → 原位 `legacy-resume`；canonical 与 ≥1 legacy 同时含，或 ≥2 legacy 含 → block。
+- v2 finalizer 文件名不区分 `DONE` / `HALTED`，resolver 一律视为该 series 在该目录已关闭。HALTED finalizer 的重入不是新 run：runner 必须以 goal records 冻结的 `crDir` 重入 CR06，人工 orchestrator 以 `roundEvidence` 中含该 series finalizer 的唯一目录重入；不得让 resolver 读取 report 内容判定。
 - Block 时输出 CR-local issue `cr-directory.ambiguous-resume-root`（`category=lifecycle`、`severity=error`、`continuation=block`），details 只含 `storyId`、`canonicalCrDir`、byte-wise 排序去重的 `legacyCrDirs`、`reviewSeries`、`roundEvidence`、`reason`，不含绝对路径；该 issue 由本契约拥有，不进入 `SPEC 07`。任何 round artifact、goal record、temp file 或 tracker 写入前必须停止。
 - 威胁模型：resolver 面向协作式本地文件系统，只做 numeric identity、目录归属与 symlink 越界检测。hard link、CRLF、TOCTOU、伪造 frontmatter、产物真伪认证、审批重放明示 out of scope；触及这些类别的 CR finding 按 Story `Threat Model & Non-Goals` 章节归 `dismiss`。
 

@@ -34,6 +34,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 
 ## Inputs
 
+- `crDir`, `compatibilityMode`, and `legacyArtifactPaths`: resolved by the runner or manual orchestrator through `speclite resolve cr-directory` and passed in; when omitted, call that CLI exactly once and never derive them any other way.
 - `mode=closeout | add | check | resolve | list | extract` plus the Story/TODO identity required by that mode. `closeout` is Story-closeout only; read-only `list`/`check` skip the durable result by default.
 - `confirmationPolicy: explicit | preauthorized`; default to `explicit` when omitted.
 - `authorizationSource`, `orchestrationMode`, and `handoffTarget`; authorization source is mandatory for `preauthorized`.

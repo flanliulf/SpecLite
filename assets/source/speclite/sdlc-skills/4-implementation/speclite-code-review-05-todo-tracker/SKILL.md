@@ -34,6 +34,7 @@ metadata:
 
 ## Inputs（输入）
 
+- `crDir`、`compatibilityMode` 与 `legacyArtifactPaths`：由 runner 或人工 orchestrator 通过 `speclite resolve cr-directory` 解析后传入；缺失时自行调用该 CLI 一次，不得以其他方式推导。
 - `mode=closeout | add | check | resolve | list | extract`，以及该 mode 所需的 Story/TODO identity。`closeout` 为 Story 收口专用，只读 `list`/`check` 默认不写 durable result。
 - `confirmationPolicy: explicit | preauthorized`；缺失时固定为 `explicit`。
 - `authorizationSource`、`orchestrationMode` 与 `handoffTarget`；`preauthorized` 时 authorization source 必填。

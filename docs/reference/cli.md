@@ -235,7 +235,7 @@ speclite resolve cr-directory --story-id 11.9 --review-series main --project-roo
 speclite resolve cr-directory --story-id 11-9 --review-series restart --project-root /path/to/project --human
 ```
 
-`--story-id` 只接受规范 numeric identity `N.N` 或 `N-N`，统一输出 `N-N`；`--review-series` 必须匹配 `^[a-z0-9][a-z0-9-]{0,31}$`。Machine stdout 始终返回 `speclite.resolve.cr-directory.v1` evidence（`crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyCrDirs`、`roundEvidence`、`continuation`、`issues`），包括 block result；block 同时以 stderr CR-local issue JSON Line（如 `cr-directory.ambiguous-resume-root`）和 exit code `1` 表达。判定只看 `{implementation_artifacts}/code-reviews/` 下的目录名与候选目录直接子文件名，不读取产物内容；命令只读，不创建、迁移或修改任何目录。
+`--story-id` 只接受规范 numeric identity `N.N` 或 `N-N`，统一输出 `N-N`；`--review-series` 必须匹配 `^[a-z0-9][a-z0-9-]{0,31}$`。Machine stdout 始终返回 `speclite.resolve.cr-directory.v1` evidence（`crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyCrDirs`、`roundEvidence`、`continuation`、`issues`），包括 block result；block 同时以 stderr CR-local issue JSON Line（`cr-directory.ambiguous-resume-root`、`cr-directory.invalid-story-id`、`cr-directory.invalid-review-series`、`cr-directory.invalid-implementation-artifacts`、`cr-directory.symlink-escape`、`cr-directory.unreadable-candidate`）和 exit code `1` 表达；候选路径不是可读目录时以 `unreadable-candidate` 阻断而非抛异常。判定只看 `{implementation_artifacts}/code-reviews/` 下的目录名与候选目录直接子文件名，不读取产物内容；命令只读，不创建、迁移或修改任何目录。
 
 解析 skill customization：
 

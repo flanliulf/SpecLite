@@ -1,5 +1,5 @@
 import type { Dirent } from "node:fs";
-import { readdir } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { findProjectBoundarySymlinkEscape, resolveProjectRelativePath } from "../fs/path-normalizer.js";
 
@@ -17,7 +17,8 @@ export type CrDirectoryIssueId =
   | "cr-directory.invalid-story-id"
   | "cr-directory.invalid-review-series"
   | "cr-directory.invalid-implementation-artifacts"
-  | "cr-directory.symlink-escape";
+  | "cr-directory.symlink-escape"
+  | "cr-directory.unreadable-candidate";
 
 export type CrDirectoryIssueCategory = "identity" | "lifecycle" | "path-safety";
 
@@ -133,36 +134,60 @@ export async function resolveCrDirectory(input: {
   const canonicalCrDir = `${codeReviewsDir}/${storyId}-code-review`;
   base.canonicalCrDir = canonicalCrDir;
 
+  const symlinkEscape = (candidate: string): CrDirectoryIssue =>
+    issue({
+      issueId: "cr-directory.symlink-escape",
+      category: "path-safety",
+      affectedPath: candidate,
+      details: { storyId, reviewSeries, canonicalCrDir, reason: "symlink-escape" },
+    });
+  const unreadable = (candidate: string, code: string): CrDirectoryIssue =>
+    issue({
+      issueId: "cr-directory.unreadable-candidate",
+      category: "path-safety",
+      affectedPath: candidate,
+      details: { storyId, reviewSeries, canonicalCrDir, errorCode: code, reason: "unreadable-candidate" },
+    });
+
+  // Boundary check runs before any directory listing so an escaping `code-reviews`
+  // never has its (outside) contents enumerated into the result.
+  if (await escapesProject(input.projectRoot, codeReviewsDir)) {
+    return blocked(base, symlinkEscape(codeReviewsDir));
+  }
+
   const legacyPattern = new RegExp(`^${escapeRegExp(storyId)}-.+-code-review$`);
   const legacyCrDirs: string[] = [];
   let entries: Dirent[];
   try {
     entries = await readdir(path.join(input.projectRoot, codeReviewsDir), { withFileTypes: true });
   } catch (error) {
-    if (!isMissing(error)) throw error;
+    if (!isMissing(error)) return blocked(base, unreadable(codeReviewsDir, errorCode(error)));
     entries = [];
   }
   for (const entry of entries) {
     if (!legacyPattern.test(entry.name)) continue;
-    if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
-    legacyCrDirs.push(`${codeReviewsDir}/${entry.name}`);
+    if (entry.isDirectory()) {
+      legacyCrDirs.push(`${codeReviewsDir}/${entry.name}`);
+      continue;
+    }
+    if (!entry.isSymbolicLink()) continue;
+    const candidate = `${codeReviewsDir}/${entry.name}`;
+    if (await escapesProject(input.projectRoot, candidate)) {
+      return blocked(base, symlinkEscape(candidate));
+    }
+    // A symlink only counts as a legacy directory when it points at a directory.
+    try {
+      if (!(await stat(path.join(input.projectRoot, candidate))).isDirectory()) continue;
+    } catch (error) {
+      if (!isMissing(error)) return blocked(base, unreadable(candidate, errorCode(error)));
+    }
+    legacyCrDirs.push(candidate);
   }
   legacyCrDirs.sort(compareBytewise);
   base.legacyCrDirs = legacyCrDirs;
 
-  for (const candidate of [codeReviewsDir, canonicalCrDir, ...legacyCrDirs]) {
-    const escape = await findProjectBoundarySymlinkEscape({
-      projectRoot: input.projectRoot,
-      relativePath: candidate,
-    });
-    if (escape !== undefined) {
-      return blocked(base, issue({
-        issueId: "cr-directory.symlink-escape",
-        category: "path-safety",
-        affectedPath: candidate,
-        details: { storyId, reviewSeries, canonicalCrDir, reason: "symlink-escape" },
-      }));
-    }
+  if (await escapesProject(input.projectRoot, canonicalCrDir)) {
+    return blocked(base, symlinkEscape(canonicalCrDir));
   }
 
   const roundEvidence: CrDirectoryRoundEvidence[] = [];
@@ -173,7 +198,9 @@ export async function resolveCrDirectory(input: {
       storyId,
       reviewSeries,
     });
-    if (evidence !== undefined) roundEvidence.push(evidence);
+    if (evidence === undefined) continue;
+    if ("errorCode" in evidence) return blocked(base, unreadable(crDir, evidence.errorCode));
+    roundEvidence.push(evidence);
   }
   base.roundEvidence = roundEvidence;
 
@@ -207,7 +234,7 @@ async function collectRoundEvidence(input: {
   crDir: string;
   storyId: string;
   reviewSeries: string;
-}): Promise<CrDirectoryRoundEvidence | undefined> {
+}): Promise<CrDirectoryRoundEvidence | { errorCode: string } | undefined> {
   const prefix = `${escapeRegExp(input.storyId)}-`;
   const series = escapeRegExp(input.reviewSeries);
   const summaryPattern = new RegExp(`^${prefix}code-review-summary-\\d{8}-${series}-round-([1-9]\\d*)\\.md$`);
@@ -218,7 +245,7 @@ async function collectRoundEvidence(input: {
     entries = await readdir(path.join(input.projectRoot, input.crDir), { withFileTypes: true });
   } catch (error) {
     if (isMissing(error)) return undefined;
-    throw error;
+    return { errorCode: errorCode(error) };
   }
 
   const summaryRounds: number[] = [];
@@ -283,6 +310,8 @@ const IMPACTS: Record<CrDirectoryIssueId, string> = {
     "The implementation artifacts root does not stay inside the project, so no CR directory can be derived safely.",
   "cr-directory.symlink-escape":
     "A CR directory candidate resolves outside the project boundary, so it cannot be used as a write root.",
+  "cr-directory.unreadable-candidate":
+    "A CR directory candidate is not a readable directory, so ownership cannot be judged from its entries.",
 };
 
 const NEXT_STEPS: Record<CrDirectoryIssueId, string> = {
@@ -296,6 +325,8 @@ const NEXT_STEPS: Record<CrDirectoryIssueId, string> = {
     "Fix modules.sdlc.implementation_artifacts so it is a project-relative POSIX path, then rerun the resolver.",
   "cr-directory.symlink-escape":
     "Replace the escaping symlink with an in-project directory, then rerun the resolver.",
+  "cr-directory.unreadable-candidate":
+    "Make the candidate a readable directory (or remove the stray file / symlink), then rerun the resolver.",
 };
 
 function escapeRegExp(value: string): string {
@@ -304,6 +335,15 @@ function escapeRegExp(value: string): string {
 
 function compareBytewise(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
+}
+
+async function escapesProject(projectRoot: string, relativePath: string): Promise<boolean> {
+  return (await findProjectBoundarySymlinkEscape({ projectRoot, relativePath })) !== undefined;
+}
+
+function errorCode(error: unknown): string {
+  const code = typeof error === "object" && error !== null && "code" in error ? (error as { code?: unknown }).code : undefined;
+  return typeof code === "string" && code.length > 0 ? code : "UNKNOWN";
 }
 
 function isMissing(error: unknown): boolean {

@@ -32,6 +32,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 
 ## Inputs
 
+- `crDir`, `compatibilityMode`, and `legacyArtifactPaths`: resolved by the runner or manual orchestrator through `speclite resolve cr-directory` and passed in; when omitted, call that CLI exactly once and never derive them any other way.
 - Story identity, `reviewSeries`, and the current evaluation, or enough information to locate it independently.
 - `confirmationPolicy`, `authorizationSource`, `orchestrationMode`, and `handoffTarget`; default missing confirmation policy to `explicit`, and HALT when `preauthorized` lacks an `authorizationSource`.
 

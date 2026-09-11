@@ -91,6 +91,7 @@ export const ResolveCrDirectoryIssueSchema = z
       "cr-directory.invalid-review-series",
       "cr-directory.invalid-implementation-artifacts",
       "cr-directory.symlink-escape",
+      "cr-directory.unreadable-candidate",
     ]),
     category: z.enum(["identity", "lifecycle", "path-safety"]),
     severity: z.literal("error"),

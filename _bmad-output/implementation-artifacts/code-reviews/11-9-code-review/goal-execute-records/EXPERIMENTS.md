@@ -25,3 +25,27 @@
 - 观察：沙箱内 `npm pack` 因 `~/.npm/_cacache` 权限失败会让 packaging writer 删除 `release/packaging-manifest.json`（与 1.1 记录的 manifest 丢失同源）；沙箱外重跑后恢复。
 - Boundary：未修改 report basename / round / 审批规则；未引入 marker / validator / frontmatter 解析；21 个非 Epic 11 文件未纳入。
 - 下一步判断：提交实现 commit，再运行 completion gate 与 CR01（`reviewSeries=restart`）。
+
+## 2026-09-11 — CR Reviewer / restart Round 1
+
+- 结果：`FINDINGS_REPORTED`；3/3 layers（blind / edge / auditor，均 claude-opus-5 fresh sub-agent）；scope 315 actual / 294 declared / 21 excluded / 0 exceptions；baseSha `7dc8197`（restart 前 HEAD）、headSha `6079257`。
+- Auditor：AC1–AC12 与 Threat Model 全 PASS。
+- 12 raw → 9 findings：patch 4（R1-F1 readdir 非 ENOENT 未捕获、R1-F2 契约 :58 与 legacy-resume 矛盾、R1-F3 runner 调用模板/Inputs 未承载 crDir、R1-F5 越界 symlink 先枚举后检测）；decision-needed 1（R1-F4 HALTED finalizer 使 unfinished 翻转）；verify-required 1（R1-F9 goal records 无断言）；defer 1（R1-F6 dangling symlink）；dismiss 建议 2（R1-F7 schema redaction 仓库级约定、R1-F8 config 失败 stdout 为空与 artifact-documents 同约定）。
+- 无 Threat Model out-of-scope 类 finding。artifact：`11-9-code-review-summary-20260911-restart-round-1.md`（sha256 `e7b8f68c…`）；`.tmp/restart-round-1/` 已清理。
+- 观察：审查层在沙箱内跑 packaging 测试两次删除 `release/packaging-manifest.json`，均已 `git checkout` 恢复；后续 fresh agent 提示中明示不要在沙箱内跑 packaging 测试。
+- 下一步判断：fresh CR02 evaluator Round 1。
+
+## 2026-09-11 — CR Evaluator / restart Round 1
+
+- 结果：`FIX_REQUIRED`；acceptedCounts p0=0 / p1=5 / deferred=1 / verifyRequired=1 / dismissed=2；convergence newBlocking=5，architectureCategories=[]。
+- 裁决：R1-F1/F2/F3/F5 accepted P1；R1-F4 accepted P1（evaluator 判定可由契约层 ≤2 行规则关闭，不改 resolver / basename，不触发 DECISION_NEEDED / ARCHITECTURE_TRIAGE）；R1-F9 VERIFY；R1-F6 deferred T2；R1-F7 / R1-F8 dismissed（仓库级约定）。
+- artifact：`11-9-code-review-evaluation-20260911-restart-round-1.md`（写入时 sha256 `2167d7bc…`，reviewSourceHash 绑定 `e7b8f68c…`）。
+- 下一步判断：CR03 fixer mode=patch（preauthorized，authorizationSource=Restart Brief Step 11 + 用户 2026-09-11 决定）。
+
+## 2026-09-11 — CR Fixer / restart Round 1
+
+- 结果：completed（patch）；5 条 P1 + R1-F9 VERIFY 修复；34 files changed；未触碰 deferred / dismissed。
+- 关键改动：`cr-directory.unreadable-candidate` issue（非 ENOENT readdir → block）、legacy symlink 目标须为目录、`code-reviews` escape 检测前置；契约调和 legacy-resume、Invocation Parameter Matrix + runner 六个调用串 + CR01–06 Inputs 携带 `crDir` 三字段；HALTED finalizer 重入规则；测试 22 → 25。
+- 验证（沙箱外）：`vitest` 726 passed / 0 failed / 4 todo；canonical strict ok；packaging-check PASS；docs:check PASS。
+- 观察：runner 调用串中资源上下文置于 `authorizationSource` 之后，以保持 `test/code-review-contract.test.ts:336` 既有断言不变（该测试不在 fixer 授权范围）。
+- 下一步判断：提交 fix commit，重新冻结 scope，fresh CR01 restart round 2。

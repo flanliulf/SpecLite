@@ -32,6 +32,7 @@ CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或�
 
 ## Inputs（输入）
 
+- `crDir`、`compatibilityMode` 与 `legacyArtifactPaths`：由 runner 或人工 orchestrator 通过 `speclite resolve cr-directory` 解析后传入；缺失时自行调用该 CLI 一次，不得以其他方式推导。
 - Story identity、`reviewSeries`、current evaluation 和 `mode=patch | verify-only`。
 - `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`。
 

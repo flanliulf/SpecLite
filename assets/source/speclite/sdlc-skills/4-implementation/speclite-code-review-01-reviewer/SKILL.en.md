@@ -32,6 +32,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 
 ## Inputs
 
+- `crDir`, `compatibilityMode`, and `legacyArtifactPaths`: resolved by the runner or manual orchestrator through `speclite resolve cr-directory` and passed in; when omitted, call that CLI exactly once and never derive them any other way.
 - Story path, `storyId`, or `storyKey`, plus `reviewSeries`.
 - A review scope manifest, or a development record/user-specified commit range sufficient to build it independently.
 - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.

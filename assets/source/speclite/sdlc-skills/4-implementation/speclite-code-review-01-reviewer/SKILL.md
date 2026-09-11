@@ -32,6 +32,7 @@ metadata:
 
 ## Inputs（输入）
 
+- `crDir`、`compatibilityMode` 与 `legacyArtifactPaths`：由 runner 或人工 orchestrator 通过 `speclite resolve cr-directory` 解析后传入；缺失时自行调用该 CLI 一次，不得以其他方式推导。
 - Story path、`storyId` 或 `storyKey`，以及 `reviewSeries`。
 - review scope manifest，或足够独立生成它的 development record/用户指定 commit range。
 - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。

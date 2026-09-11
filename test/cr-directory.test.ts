@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -306,6 +306,7 @@ describe("Story 11.9 CR directory resolution", () => {
       const outside = await mkdtemp(path.join(os.tmpdir(), "speclite-cr-outside-"));
       try {
         await mkdir(path.join(projectRoot, IMPL), { recursive: true });
+        await mkdir(path.join(outside, "11-9-outside-title-code-review"), { recursive: true });
         await symlink(outside, path.join(projectRoot, CODE_REVIEWS), "dir");
 
         const result = await resolveCrDirectory({
@@ -315,7 +316,7 @@ describe("Story 11.9 CR directory resolution", () => {
           reviewSeries: "restart",
         });
 
-        expect(result).toMatchObject({ ok: false, crDir: null, continuation: "block" });
+        expect(result).toMatchObject({ ok: false, crDir: null, continuation: "block", legacyCrDirs: [], roundEvidence: [] });
         expect(result.issues).toHaveLength(1);
         expect(result.issues[0]).toMatchObject({
           issueId: "cr-directory.symlink-escape",
@@ -323,6 +324,7 @@ describe("Story 11.9 CR directory resolution", () => {
           affectedPath: CODE_REVIEWS,
         });
         expect(JSON.stringify(result)).not.toContain(outside);
+        expect(JSON.stringify(result)).not.toContain("11-9-outside-title-code-review");
       } finally {
         await rm(outside, { recursive: true, force: true });
       }
@@ -348,6 +350,89 @@ describe("Story 11.9 CR directory resolution", () => {
         });
       } finally {
         await rm(outside, { recursive: true, force: true });
+      }
+    });
+  });
+
+  it("blocks with a stable issue instead of throwing when code-reviews or the canonical candidate is a regular file", async () => {
+    await withProject(async (projectRoot) => {
+      await put(projectRoot, CODE_REVIEWS, "not a directory");
+
+      const result = await resolveCrDirectory({
+        projectRoot,
+        implementationArtifacts: IMPL,
+        storyId: "11.9",
+        reviewSeries: "restart",
+      });
+
+      expect(result).toMatchObject({ ok: false, crDir: null, continuation: "block", legacyCrDirs: [] });
+      expect(result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "cr-directory.unreadable-candidate",
+          category: "path-safety",
+          affectedPath: CODE_REVIEWS,
+          details: expect.objectContaining({ errorCode: "ENOTDIR", reason: "unreadable-candidate" }),
+        }),
+      ]);
+      expect(JSON.stringify(result)).not.toContain(projectRoot);
+      expect(() => ResolveCrDirectoryOutputSchema.parse(result)).not.toThrow();
+    });
+
+    await withProject(async (projectRoot) => {
+      await put(projectRoot, CANONICAL, "not a directory");
+
+      const result = await resolveCrDirectory({
+        projectRoot,
+        implementationArtifacts: IMPL,
+        storyId: "11.9",
+        reviewSeries: "restart",
+      });
+
+      expect(result).toMatchObject({ ok: false, crDir: null, canonicalCrDir: CANONICAL, continuation: "block" });
+      expect(result.issues[0]).toMatchObject({ issueId: "cr-directory.unreadable-candidate", affectedPath: CANONICAL });
+      expect(JSON.stringify(result)).not.toContain(projectRoot);
+    });
+  });
+
+  it("ignores a legacy-named symlink that points at an in-project file instead of throwing ENOTDIR", async () => {
+    await withProject(async (projectRoot) => {
+      await put(projectRoot, `${CODE_REVIEWS}/notes.md`, "notes");
+      await symlink(path.join(projectRoot, `${CODE_REVIEWS}/notes.md`), path.join(projectRoot, `${CODE_REVIEWS}/11-9-linked-code-review`), "file");
+
+      const result = await resolveCrDirectory({
+        projectRoot,
+        implementationArtifacts: IMPL,
+        storyId: "11.9",
+        reviewSeries: "restart",
+      });
+
+      expect(result).toMatchObject({ ok: true, crDir: CANONICAL, compatibilityMode: "canonical", legacyCrDirs: [], issues: [] });
+    });
+  });
+
+  it("blocks with a stable issue when a legacy candidate directory is unreadable", async () => {
+    if (typeof process.getuid === "function" && process.getuid() === 0) return;
+    await withProject(async (projectRoot) => {
+      const legacy = `${CODE_REVIEWS}/11-9-locked-code-review`;
+      await mkdir(path.join(projectRoot, legacy), { recursive: true });
+      await chmod(path.join(projectRoot, legacy), 0o000);
+      try {
+        const result = await resolveCrDirectory({
+          projectRoot,
+          implementationArtifacts: IMPL,
+          storyId: "11.9",
+          reviewSeries: "restart",
+        });
+
+        expect(result).toMatchObject({ ok: false, crDir: null, continuation: "block", legacyCrDirs: [legacy] });
+        expect(result.issues[0]).toMatchObject({
+          issueId: "cr-directory.unreadable-candidate",
+          affectedPath: legacy,
+          details: expect.objectContaining({ errorCode: "EACCES" }),
+        });
+        expect(JSON.stringify(result)).not.toContain(projectRoot);
+      } finally {
+        await chmod(path.join(projectRoot, legacy), 0o755);
       }
     });
   });
@@ -501,9 +586,20 @@ describe("Story 11.9 canonical corpus closure", () => {
     const base = "assets/source/speclite/sdlc-skills/4-implementation";
     const runner = await readFile(path.join(base, "speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md"), "utf8");
     expect(runner).toContain("speclite resolve cr-directory");
+    // Every runner-side CR01-06 invocation must carry the frozen resolver context (AC4).
+    const invocations = [...runner.matchAll(/`\/speclite-code-review-0[1-6]-[a-z-]+ \{storyId\}[^`]*`/g)].map((m) => m[0]);
+    expect(invocations.length).toBeGreaterThanOrEqual(6);
+    for (const invocation of invocations) {
+      expect(invocation, invocation).toContain("crDir={crDir}");
+      expect(invocation, invocation).toContain("compatibilityMode={compatibilityMode}");
+      expect(invocation, invocation).toContain("legacyArtifactPaths={legacyArtifactPaths}");
+    }
+    expect(runner).toContain("{crDir}/goal-execute-records/");
+    for (const record of ["PLAN.md", "EXPERIMENTS.md", "EXPERIMENT_NOTES.md"]) expect(runner).toContain(record);
     const contract = await readFile(path.join(base, "speclite-code-review-contract/references/cr-contract.md"), "utf8");
     expect(contract).toContain("speclite resolve cr-directory");
     expect(contract).toContain("cr-directory.ambiguous-resume-root");
+    expect(contract).toContain("{crDir}/goal-execute-records/");
     expect(contract).not.toContain("validate-context");
     expect(contract).not.toContain("cr-directory-ownership");
     for (const consumer of [
@@ -517,6 +613,11 @@ describe("Story 11.9 canonical corpus closure", () => {
       const text = await readFile(path.join(base, consumer), "utf8");
       expect(text, consumer).toContain("crDir");
       expect(text, consumer).toMatch(/不得(?:重新|自行)推导|不重推导/);
+      const pkg = consumer.split("/")[0]!;
+      for (const entry of ["SKILL.md", "SKILL.en.md"]) {
+        const skill = await readFile(path.join(base, pkg, entry), "utf8");
+        expect(skill, `${pkg}/${entry}`).toMatch(/`crDir`[^\n]*`compatibilityMode`[^\n]*`legacyArtifactPaths`/);
+      }
     }
     await expect(
       readdir(path.join(base, "speclite-code-review-contract")),

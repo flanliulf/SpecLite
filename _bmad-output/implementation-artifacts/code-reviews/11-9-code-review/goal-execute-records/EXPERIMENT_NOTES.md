@@ -11,3 +11,8 @@
 
 - 实时判断：现存 182 个 summary 文件全部为 series-less legacy 命名（`-{YYYYMMDD}-round-{n}.md`），只有 3 个 finalizer 与 11.9 归档中的 evidence-v2 / directory-routing 系列使用 v2 命名。因此对既有 Story 目录，resolver 会判定「无 v2 未完成 run」→ canonical 新 run；这与契约 `:76` 一致，且不影响 AC12。
 - 用户介入点：无。
+
+## 2026-09-11 — Restart Round 1 Review Result（重启第一轮审查结果）
+
+- 实时判断：实现主体通过 AC 审计；4 条 patch 中 2 条为代码（R1-F1 fail-close 缺口、R1-F5 检测顺序）、2 条为契约文案（R1-F2、R1-F3），均在 Story in-scope。R1-F4 是"只看文件名"（决策 A）与"HALTED finalizer 也写 canonical basename"（AC12）的交叉边界，reviewer 不裁决。
+- 用户介入点：R1-F4 若 CR02 判 decision-needed，需 owner 在 (a) 重入使用 goal records 冻结 crDir / (b) HALTED 视为目录关闭需人工归档 / (c) TODO 三者中选择。
