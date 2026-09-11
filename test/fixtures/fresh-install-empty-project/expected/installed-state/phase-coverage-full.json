@@ -402,36 +402,6 @@
       "phaseId": "3-solutioning",
       "phaseLabel": "Solutioning",
       "moduleId": "sdlc",
-      "canonicalSkillId": "speclite-implementation-readiness-check",
-      "ideTargets": [
-        {
-          "targetId": "claude",
-          "entryPath": ".claude/skills/speclite-implementation-readiness-check",
-          "activationTarget": ".claude/skills/speclite-implementation-readiness-check/SKILL.md",
-          "status": "mapped"
-        },
-        {
-          "targetId": "agents",
-          "entryPath": ".agents/skills/speclite-implementation-readiness-check",
-          "activationTarget": ".agents/skills/speclite-implementation-readiness-check/SKILL.md",
-          "status": "mapped"
-        }
-      ],
-      "artifactContract": {
-        "artifactType": "readiness-report",
-        "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/implementation-readiness-report/grill-consistency",
-        "requiredMetadata": [
-          "workflowType",
-          "sourceSkill",
-          "generatedAt"
-        ]
-      }
-    },
-    {
-      "schemaVersion": "speclite.phase-coverage.v1",
-      "phaseId": "3-solutioning",
-      "phaseLabel": "Solutioning",
-      "moduleId": "sdlc",
       "canonicalSkillId": "speclite-create-architecture",
       "ideTargets": [
         {
@@ -510,6 +480,36 @@
       "artifactContract": {
         "artifactType": "technical-solution-document",
         "defaultOutputPath": "_speclite-output/project-knowledge-base/tsd",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "3-solutioning",
+      "phaseLabel": "Solutioning",
+      "moduleId": "sdlc",
+      "canonicalSkillId": "speclite-implementation-readiness-check",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-implementation-readiness-check",
+          "activationTarget": ".claude/skills/speclite-implementation-readiness-check/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-implementation-readiness-check",
+          "activationTarget": ".agents/skills/speclite-implementation-readiness-check/SKILL.md",
+          "status": "mapped"
+        }
+      ],
+      "artifactContract": {
+        "artifactType": "readiness-report",
+        "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/implementation-readiness-report/grill-consistency",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -791,7 +791,7 @@
       ],
       "artifactContract": {
         "artifactType": "review-rules",
-        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/cr-rules",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -818,16 +818,7 @@
           "activationTarget": ".agents/skills/speclite-code-review-05-todo-tracker/SKILL.md",
           "status": "mapped"
         }
-      ],
-      "artifactContract": {
-        "artifactType": "cr-todo-backlog",
-        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/cr-rules",
-        "requiredMetadata": [
-          "workflowType",
-          "sourceSkill",
-          "generatedAt"
-        ]
-      }
+      ]
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -850,8 +841,8 @@
         }
       ],
       "artifactContract": {
-        "artifactType": "updated-status-files",
-        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
+        "artifactType": "finalizer-report",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1341,6 +1332,27 @@
           "targetId": "agents",
           "entryPath": ".agents/skills/speclite-domain-modeling",
           "activationTarget": ".agents/skills/speclite-domain-modeling/SKILL.md",
+          "status": "mapped"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "speclite.phase-coverage.v1",
+      "phaseId": "anytime",
+      "phaseLabel": "Anytime",
+      "moduleId": "core",
+      "canonicalSkillId": "speclite-drawer-er-modeler",
+      "ideTargets": [
+        {
+          "targetId": "claude",
+          "entryPath": ".claude/skills/speclite-drawer-er-modeler",
+          "activationTarget": ".claude/skills/speclite-drawer-er-modeler/SKILL.md",
+          "status": "mapped"
+        },
+        {
+          "targetId": "agents",
+          "entryPath": ".agents/skills/speclite-drawer-er-modeler",
+          "activationTarget": ".agents/skills/speclite-drawer-er-modeler/SKILL.md",
           "status": "mapped"
         }
       ]

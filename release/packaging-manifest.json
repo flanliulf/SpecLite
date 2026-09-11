@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:5b47ae5d416c18e535d24b1fb558faf3e41a3cdaa6b1b32bc7dc5be5ba005172",
+  "packageHash": "sha256:e744c9238adf566b77f91a7fef1121be320f8a912c7f3d33b363778c4e517405",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",
@@ -63,7 +63,6 @@
     "assets/source/speclite/core-skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md",
     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.en.md",
     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.md",
-    "assets/source/speclite/core-skills/speclite-drawer-er-modeler.zip",
     "assets/source/speclite/core-skills/speclite-drawer-er-modeler/CHANGELOG.md",
     "assets/source/speclite/core-skills/speclite-drawer-er-modeler/references/er-drawing-rules.md",
     "assets/source/speclite/core-skills/speclite-drawer-er-modeler/SKILL.en.md",
@@ -795,7 +794,6 @@
     "assets/source/speclite/core-skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md",
     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.en.md",
     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.md",
-    "assets/source/speclite/core-skills/speclite-drawer-er-modeler.zip",
     "assets/source/speclite/core-skills/speclite-drawer-er-modeler/CHANGELOG.md",
     "assets/source/speclite/core-skills/speclite-drawer-er-modeler/references/er-drawing-rules.md",
     "assets/source/speclite/core-skills/speclite-drawer-er-modeler/SKILL.en.md",

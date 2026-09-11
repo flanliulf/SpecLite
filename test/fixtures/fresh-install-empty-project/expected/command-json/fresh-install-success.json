@@ -3,7 +3,7 @@
   "status": "success",
   "command": "install",
   "targetProject": "fresh-install-empty-project",
-  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=18, sdlc=50, total=68. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC Module 0.0.0). IDE targets: claude (68 skills at .claude/skills), agents (68 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Artifact roots: brainstorming=_speclite-output/0-brainstorming-artifacts (fresh-default), analysis=_speclite-output/1-analysis-artifacts (fresh-default), planning=_speclite-output/2-planning-artifacts (fresh-default), solutioning=_speclite-output/3-solutioning-artifacts (fresh-default), implementation=_speclite-output/4-implementation-artifacts (fresh-default), devops=_speclite-output/5-devops-artifacts (fresh-default), project-knowledge=_speclite-output/project-knowledge-base (fresh-default). Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
+  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=19, sdlc=50, total=69. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC Module 0.0.0). IDE targets: claude (69 skills at .claude/skills), agents (69 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Artifact roots: brainstorming=_speclite-output/0-brainstorming-artifacts (fresh-default), analysis=_speclite-output/1-analysis-artifacts (fresh-default), planning=_speclite-output/2-planning-artifacts (fresh-default), solutioning=_speclite-output/3-solutioning-artifacts (fresh-default), implementation=_speclite-output/4-implementation-artifacts (fresh-default), devops=_speclite-output/5-devops-artifacts (fresh-default), project-knowledge=_speclite-output/project-knowledge-base (fresh-default). Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
   "issues": [],
   "nextActions": [
     "Before activating installed skills, run command -v speclite in the AI session; if it fails, expose a global or local development speclite CLI on PATH and retry activation.",
@@ -37,13 +37,13 @@
         "id": "claude",
         "status": "configured",
         "targetPath": ".claude/skills",
-        "skillCount": 68
+        "skillCount": 69
       },
       {
         "id": "agents",
         "status": "configured",
         "targetPath": ".agents/skills",
-        "skillCount": 68
+        "skillCount": 69
       }
     ],
     "paths": {

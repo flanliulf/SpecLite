@@ -169,17 +169,6 @@
     {
       "schemaVersion": "speclite.help-index.v1",
       "phaseId": "3-solutioning",
-      "entryLabel": "Check Implementation Readiness",
-      "canonicalSkillId": "speclite-implementation-readiness-check",
-      "activationTarget": ".claude/skills/speclite-implementation-readiness-check/SKILL.md",
-      "targetIds": [
-        "claude",
-        "agents"
-      ]
-    },
-    {
-      "schemaVersion": "speclite.help-index.v1",
-      "phaseId": "3-solutioning",
       "entryLabel": "Create Architecture",
       "canonicalSkillId": "speclite-create-architecture",
       "activationTarget": ".claude/skills/speclite-create-architecture/SKILL.md",
@@ -205,6 +194,17 @@
       "entryLabel": "Create Technical Solution Document",
       "canonicalSkillId": "speclite-create-technical-solution-document",
       "activationTarget": ".claude/skills/speclite-create-technical-solution-document/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "3-solutioning",
+      "entryLabel": "Check Implementation Readiness",
+      "canonicalSkillId": "speclite-implementation-readiness-check",
+      "activationTarget": ".claude/skills/speclite-implementation-readiness-check/SKILL.md",
       "targetIds": [
         "claude",
         "agents"
@@ -623,6 +623,17 @@
       "entryLabel": "Domain Modeling",
       "canonicalSkillId": "speclite-domain-modeling",
       "activationTarget": ".claude/skills/speclite-domain-modeling/SKILL.md",
+      "targetIds": [
+        "claude",
+        "agents"
+      ]
+    },
+    {
+      "schemaVersion": "speclite.help-index.v1",
+      "phaseId": "anytime",
+      "entryLabel": "Drawer ER Modeler",
+      "canonicalSkillId": "speclite-drawer-er-modeler",
+      "activationTarget": ".claude/skills/speclite-drawer-er-modeler/SKILL.md",
       "targetIds": [
         "claude",
         "agents"

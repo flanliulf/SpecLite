@@ -15,7 +15,7 @@ const fixtureExpectedRoot = path.join(
   process.cwd(),
   "test/fixtures/fresh-install-empty-project/expected",
 );
-const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 68;
+const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 69;
 const EXPECTED_FRESH_ARTIFACT_ROOTS = [
   {
     field: "brainstorming_artifacts",

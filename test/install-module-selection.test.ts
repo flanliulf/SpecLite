@@ -58,7 +58,7 @@ describe("install official module selection orchestration", () => {
       expect(outcome.result.status).toBe("success");
       expect(outcome.result.summary).toContain("Selected modules: core");
       expect(outcome.result.summary).toContain("sdlc");
-      expect(outcome.result.summary).toContain("Canonical package roots: core=18, sdlc=50, total=68.");
+      expect(outcome.result.summary).toContain("Canonical package roots: core=19, sdlc=50, total=69.");
       expect(outcome.result.summary).toContain("Source: bundled assets/source/speclite");
       expect(outcome.result.summary).toContain("Final configuration summary");
       expect(outcome.result.data.sourceDescriptor).toMatchObject({
@@ -147,7 +147,7 @@ describe("install official module selection orchestration", () => {
           expect(input.targetAdapters.map((adapter) => adapter.targetId)).toEqual(["claude", "agents"]);
           expect(input.prompt).toContain("Selected modules: core");
           expect(input.prompt).toContain("sdlc");
-          expect(input.prompt).toContain("Canonical package roots: core=18, sdlc=50, total=68.");
+          expect(input.prompt).toContain("Canonical package roots: core=19, sdlc=50, total=69.");
           expect(input.prompt).toContain("Pending: runtime structure creation, IDE mirror creation, manifest/index generation, ReadyCheck and ready summary have not happened.");
           expect(input.prompt).toContain("No project files were changed.");
           await assertNoInstallWrites(tempRoot);
@@ -204,8 +204,8 @@ describe("install official module selection orchestration", () => {
           expect(input.prompt).toContain("Artifact root: _speclite-output");
           expect(input.prompt).toContain("core (SpecLite Core Module 0.0.0)");
           expect(input.prompt).not.toContain("Selected modules: core (SpecLite Core Module 0.0.0), sdlc");
-          expect(input.prompt).toContain("canonicalPackageRoots=core=18, total=18");
-          expect(input.prompt).not.toContain("canonicalPackageRoots=core=18, sdlc=50, total=68");
+          expect(input.prompt).toContain("canonicalPackageRoots=core=19, total=19");
+          expect(input.prompt).not.toContain("canonicalPackageRoots=core=19, sdlc=50, total=69");
           expect(input.prompt).toContain("capabilityScope=core:");
           expect(input.prompt).toContain("Planned writes");
           expect(input.prompt).toContain("_speclite/config.toml=create");
@@ -218,7 +218,7 @@ describe("install official module selection orchestration", () => {
       expect(outcome.exitCode).toBe(0);
       expect(outcome.installPlan?.selectedModules).toEqual(["core"]);
       expect(outcome.result.data.installedModules).toEqual(["core"]);
-      expect(outcome.result.summary).toContain("Canonical package roots: core=18, total=18.");
+      expect(outcome.result.summary).toContain("Canonical package roots: core=19, total=19.");
       expect(finalPrewritePrompt).toContain("core (SpecLite Core Module 0.0.0)");
       const configToml = await readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8");
       expect(configToml).toContain("[core]");
@@ -344,7 +344,7 @@ describe("install official module selection orchestration", () => {
         "sdlc",
       ]);
       expect(outcome.result.summary).toContain(
-        "Canonical package roots: core=18, ecosystem-backend-java-springboot=1, sdlc=50, total=69.",
+        "Canonical package roots: core=19, ecosystem-backend-java-springboot=1, sdlc=50, total=70.",
       );
 
       await expect(
@@ -457,7 +457,7 @@ describe("install official module selection orchestration", () => {
         "sdlc",
       ]);
       expect(outcome.result.summary).toContain(
-        "Canonical package roots: core=18, ecosystem-frontend-react=1, sdlc=50, total=69.",
+        "Canonical package roots: core=19, ecosystem-frontend-react=1, sdlc=50, total=70.",
       );
 
       await expect(
@@ -544,7 +544,7 @@ describe("install official module selection orchestration", () => {
         "sdlc",
       ]);
       expect(outcome.result.summary).toContain(
-        "Canonical package roots: core=18, ecosystem-frontend-vue=1, sdlc=50, total=69.",
+        "Canonical package roots: core=19, ecosystem-frontend-vue=1, sdlc=50, total=70.",
       );
 
       await expect(
@@ -626,7 +626,7 @@ describe("install official module selection orchestration", () => {
         "sdlc",
       ]);
       expect(outcome.result.summary).toContain(
-        "Canonical package roots: core=18, ecosystem-other-npm-package=1, sdlc=50, total=69.",
+        "Canonical package roots: core=19, ecosystem-other-npm-package=1, sdlc=50, total=70.",
       );
 
       await expect(
