@@ -1,6 +1,6 @@
 # Story 11.9: Normalize Code Review Artifact Directories By Story ID（按 Story ID 统一 Code Review Artifact 目录）
 
-Status: in-progress
+Status: done
 
 ## Story（故事）
 
@@ -41,7 +41,7 @@ Status: in-progress
 - [x] 契约与 Skill 同步：`cr-contract.md` 增加 ≤15 行 "CR Directory Resolution"；runner Step 0 调用一次 CLI；CR01–06 只消费传入 `crDir`；8 包 CHANGELOG 写 restart 条目。
 - [x] 人工复核混入 11.4 / 11.8 改动的文档行，只删 `directoryContext` / `validate-context` 表述。
 - [x] 重新生成 fresh-install fixture 与 packaging manifest；`npx vitest run`、`npm run docs:check`、`npm run release:check` 通过。
-- [ ] CR 闭环 ≤3 轮（reviewSeries=`restart`），边界外 finding 按 Threat Model 归 `dismiss`。
+- [x] CR 闭环 ≤3 轮（reviewSeries=`restart`），边界外 finding 按 Threat Model 归 `dismiss`。
 
 ### Historical（1.0 / 1.1，已由 restart 取代）
 
@@ -162,6 +162,23 @@ OpenAI GPT-5.6 Sol (medium)
 - Focused final `24 passed / 4 todo`；affected matrix `74 passed / 4 external fixed-count failures / 4 todo`；full suite `695 passed / 12 external fixed-count failures / 4 todo`。
 - `docs:check`、ESM/DTS build、packaging、canonical strict、skill density 与 `git diff --check` 均通过；completion gate 为 `PASS_EQUIVALENT`。
 
+### Restart 2.0 Completion Notes（重启完成说明）
+
+- 实现：`src/config/cr-directory.ts`（`normalizeCrStoryId` fail-close、`resolveCrDirectory` 只按目录名与直接子文件名判定、`checkBoundary` 复用 `findProjectBoundarySymlinkEscape` 并把非 ENOENT 归 `cr-directory.unreadable-candidate`）、`speclite resolve cr-directory` 子命令、`ResolveCrDirectoryOutputSchema`；无 marker / validator / frontmatter 解析。
+- 契约：`cr-contract.md` CR Directory Resolution（唯一派生点、恢复矩阵、`cr-directory.ambiguous-resume-root`、威胁模型、HALTED finalizer 重入规则）；runner Step 0 一次解析 + fresh-session 定位规则 + 六个调用串携带 `crDir` / `compatibilityMode` / `legacyArtifactPaths`；CR01–06 只消费传入 `crDir`。
+- CR 闭环（reviewSeries=`restart`，3 轮，commits `6079257` → `53195ae` → `bee8e07`）：round 1 FIX_REQUIRED（5 P1）→ round 2 FIX_REQUIRED（2 P1，其中 R1-F4 recurred）→ round 3 `PASS_WITH_DEFERRED_TODOS`（p1=0，累计 7 blocking 关闭，5 deferred 登记为 TODO-023~027，3 dismissed）。全部 finding 在 Threat Model in-scope；无 hard link / CRLF / TOCTOU / 伪造内容类 finding。
+- 验证：`npx vitest run` 727 passed / 0 failed / 4 todo（沙箱外）；`npm run docs:check`、`npm run release:check`、canonical strict、`git diff --check` PASS；`npx tsc --noEmit` 对本 Story 文件 0 新增错误（既有 136 个非 Story 错误不变）。
+- 边界：未修改 report basename / round / 审批规则（AC12）；21 个非 Epic 11 文件未纳入；`superseded-main/` 历史证据保留。
+
+### Restart 2.0 Anchor Evidence Summary（重启锚点证据摘要）
+
+- Normalization：`11.9` / `11-9` → `11-9-code-review`；12 类非法输入 fail-close（`test/cr-directory.test.ts:20-44`）。
+- Propagation：runner Step 0 一次 CLI，六个调用串 + Invocation Parameter Matrix + CR01–06 Inputs 携带冻结值；prose 断言 `test:638-679`。
+- Legacy / ambiguity：legacy-only 未完成 run 原位 `legacy-resume`；canonical+legacy / 多 legacy → `cr-directory.ambiguous-resume-root`（lifecycle / error / block）零 mutation、无绝对路径（`test:118-264`）。
+- Path safety：symlink 越界、非目录 / 不可读候选（ENOTDIR / ELOOP / EACCES）结构化 block（`test:265-491`）。
+- Scan / install：全量 corpus title-bearing 表达式 0 命中；fresh-install parity（runner / contract 含 CLI 引用，无 `scripts/`）。
+- Gates：restart kickoff `PASS`（2026-09-11）；completion gate 见 `flow-gates/…-story-completion-gate.md`（restart 重生成）。
+
 ### Restart 2.0 File List（重启文件清单）
 - `src/config/cr-directory.ts`（新）、`src/commands/resolve.ts`（`resolve cr-directory` 子命令）、`src/config/resolve-output-schema.ts`（`ResolveCrDirectoryOutputSchema`）
 - `test/cr-directory.test.ts`（新）；`test/fixtures/fresh-install-empty-project/expected/installed-state/{files-index-full,skill-index-full}.json`、`test/fixtures/resolve-parity/expected/human/config-invalid-input.txt`、`release/packaging-manifest.json`
@@ -208,6 +225,6 @@ OpenAI GPT-5.6 Sol (medium)
 | 2026-09-05 | 1.0 | 实现 numeric-only resolver、single `crDir` propagation、legacy resume、ambiguity pre-write stop，并完成回归与 Completion Gate。 | Codex |
 | 2026-09-09 | 1.1 | 以 directory-only resolver + production frozen-context validator 替换审批重放实现，保留原 CR owner，完成隔离验证并交接 fresh CR。 | Codex |
 | 2026-09-11 | 2.0 | Restart：依 Correct Course 裁决（A 威胁模型边界 / B 实现迁入 `src/` + CLI / C 历史产物归档）回退 1.0–1.1 实现到 `ff7528d`，新增 Threat Model 章节，AC9 改为按 v2 文件名判定未完成 run，TODO-018~022 标 `superseded-by-restart`。 | Fancyliu / Claude |
-
+| 2026-09-11 | 2.1 | Restart CR 闭环完成：restart round 1–3（FIX_REQUIRED → FIX_REQUIRED → PASS_WITH_DEFERRED_TODOS），TODO-023~027 登记，completion gate 重生成，CR06 收口。 | Claude |
 ---
 *本文档由 bmad-create-story Skill 自动生成*

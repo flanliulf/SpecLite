@@ -16,3 +16,9 @@
 
 - 实时判断：实现主体通过 AC 审计；4 条 patch 中 2 条为代码（R1-F1 fail-close 缺口、R1-F5 检测顺序）、2 条为契约文案（R1-F2、R1-F3），均在 Story in-scope。R1-F4 是"只看文件名"（决策 A）与"HALTED finalizer 也写 canonical basename"（AC12）的交叉边界，reviewer 不裁决。
 - 用户介入点：R1-F4 若 CR02 判 decision-needed，需 owner 在 (a) 重入使用 goal records 冻结 crDir / (b) HALTED 视为目录关闭需人工归档 / (c) TODO 三者中选择。
+
+## 2026-09-11 — Restart Closeout（重启收口）
+
+- 实时判断：三轮内收敛（5 P1 → 2 P1 → 0），无 Threat Model out-of-scope finding，无 STOP_LOSS；与 1.0/1.1 的 36 轮形成对照，根因判断（AC9 边界 + 威胁模型缺失）成立。
+- 残留：TODO-023 T1（反斜杠目录名绕过 boundary）建议在下次触及 `cr-directory.ts` 时一行 guard 关闭；TODO-024/025 同批处理 symlink 语义；TODO-026/027 docs-only。
+- 用户介入点：CR04 两条 global-rule-eligible 写入 `cr-rules-summary.md` 需授权；`_bmad-output/planning-artifacts` 中 Story 11.9 / Epic 11 文档未改，是否记录决策 A/B/C 由用户决定。

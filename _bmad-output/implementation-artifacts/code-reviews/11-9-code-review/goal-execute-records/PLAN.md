@@ -7,7 +7,7 @@
 ## Current Status（当前状态）
 
 - Story 11.1–11.8 与 tracker 均为 `done`；11.9 1.0 / 1.1 实现已回退到 `ff7528d` 表面（commit `523ab4e`），旧 CR 产物归档于 `../superseded-main/`。
-- Story 11.9 = `in-progress`；restart kickoff gate = `PASS`（2026-09-11），无 Owner decision。
+- Story 11.9 = `done`（2026-09-11 CR06）；restart kickoff / completion gate 均 `PASS`；TODO-023~027 登记。
 - TODO-018~022 标 `superseded-by-restart`。
 - 21 个非 Epic 11 未提交文件继续隔离。
 
@@ -18,7 +18,7 @@
 - [x] Step 2：TDD — `test/cr-directory.test.ts` RED → `src/config/cr-directory.ts` + `speclite resolve cr-directory` GREEN。
 - [x] Step 3：契约与 Skill 同步（`cr-contract.md` ≤15 行、runner Step 0、CR01–06 消费文案、8 包 CHANGELOG）+ 文档行人工复核 + canonical strict 检查。
 - [x] Step 4：重新生成 fresh-install fixture 与 packaging manifest；`vitest` 0 failed、`docs:check`、`release:check`。
-- [ ] Step 5：completion gate → CR01 → CR02 →（必要时 CR03）→ CR04 → CR05 → CR06。
+- [x] Step 5：CR01 → CR02 →（CR03）× 2 轮 → round 3 PASS_WITH_DEFERRED_TODOS → CR04 → CR05 → completion gate → CR06 DONE。
 
 ## Termination Conditions（终止条件）
 

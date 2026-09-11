@@ -7,7 +7,7 @@
 
 | 状态 | 数量 |
 |------|------|
-| 🔴 open | 9 |
+| 🔴 open | 14 |
 | ⏸ superseded-by-restart | 5 |
 | 🟡 in-progress | 0 |
 | ✅ resolved | 8 |
@@ -19,6 +19,66 @@
 <!-- 按优先级排序：P1 > P2 > P3 -->
 
 > 自 Story 11.9 起，新增条目使用 CR v2 的 `T1/T2/T3` 紧迫度；下列既有条目的 legacy `P2` 字段原样保留，不作机械迁移。`T1` 表示下次触及前必须处理，但仍是当前非阻塞项。
+
+### TODO-023: 使含反斜杠的 legacy 目录名在 boundary 检查前 fail-close
+
+- **来源**: 11-9 CR restart round 3 (2026-09-11)
+- **紧迫度**: T1
+- **发现指纹**: sha256:49d05a401da857b874a092cb54ad49ec081218dd4862a176c3c61fbde6b98433
+- **类别**: other
+- **描述**: `src/config/cr-directory.ts:180` 的 `boundaryBlock(candidate)` 经 `src/fs/path-normalizer.ts:65` `replaceAll("\\","/")` 归一化后检查的是另一条路径（ENOENT → inside），而 `:184` stat / `:198` readdir 使用原始条目名；POSIX 上 `code-reviews/11-9-a\b-code-review -> <项目外目录>`（含同 series 未完成 summary）被判为 `legacy-resume` 写根且输出不通过 `ResolveCrDirectoryOutputSchema`。对照组（无反斜杠）正确 `symlink-escape`。属 in-scope symlink 越界检测的确定性绕过，但触发需刻意构造（CR 工作流不产生此类目录名），evaluator restart round 3 判 deferred T1。
+- **涉及文件**: `src/config/cr-directory.ts`, `test/cr-directory.test.ts`
+- **建议时机**: 下次触及 `src/config/cr-directory.ts` 前必须处理：legacy 枚举循环对 `normalizeProjectRelativePosixPath(candidate) !== candidate`（或条目名含 `\`）的条目以 `cr-directory.unreadable-candidate` 阻断，并补一条 fixture；不修改 `src/fs/path-normalizer.ts`。关闭须由 fresh review/evaluation 将本 fingerprint 判为 resolved。
+- **状态**: open
+- **解决记录**:
+
+### TODO-024: 对 dangling symlink 候选做存在性校验而非报告可用 crDir
+
+- **来源**: 11-9 CR restart round 3 (2026-09-11)
+- **紧迫度**: T2
+- **发现指纹**: sha256:a5701f031269aa3734bbf19619ad083ae8deb586613cd4f7e3ebd028feccd224
+- **类别**: tech-debt
+- **描述**: `src/config/cr-directory.ts:181-184`：legacy symlink `stat` 遇 ENOENT 时落穿到 `legacyCrDirs.push`；canonical 为 dangling symlink（含指向项目外不存在路径）时 `findProjectBoundarySymlinkEscape` 把 realpath ENOENT 视为非 escape、`collectRoundEvidence` ENOENT 返回 undefined → `ok=true, continue`，consumer 首次 `mkdir -p <crDir>/.tmp` 才 ENOENT。无越界写入，但失败晚于 resolver 且无 stable issue。evaluator restart round 1–3 均 deferred T2。
+- **涉及文件**: `src/config/cr-directory.ts`, `src/fs/path-normalizer.ts`, `test/cr-directory.test.ts`
+- **建议时机**: 引入候选 symlink 存在性 / `stat` 校验时与 TODO-023、TODO-025 同批关闭（例如 dangling → `unreadable-candidate` 或 skip）；或任一 consumer 报告 resolver `continue` 后首次写入 ENOENT 时处理。
+- **状态**: open
+- **解决记录**:
+
+### TODO-025: 固定 symlink 形式产物文件在 unfinished run 判定中的语义
+
+- **来源**: 11-9 CR restart round 3 (2026-09-11)
+- **紧迫度**: T3
+- **发现指纹**: sha256:e492716502cf8f7580da8290b53cc8d5431ce6e1d888ead92f20ecb3c4384c05
+- **类别**: tech-debt
+- **描述**: `src/config/cr-directory.ts:257` `collectRoundEvidence` 用 `entry.isFile()` 过滤，symlink 形式的 v2 summary / finalizer 被静默忽略，与 `:178-184` 对 legacy 目录 symlink 的 stat 跟随语义不一致；镜像场景可把已关闭 run 判为 unfinished 或反之。CR01–06 不产生 symlink 产物，契约未明示该语义。evaluator restart round 2–3 deferred T3。
+- **涉及文件**: `src/config/cr-directory.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`, `test/cr-directory.test.ts`
+- **建议时机**: 处理 TODO-024 时一并裁决：契约 CR Directory Resolution 明示"symlink 产物不计入"或对 symlink 条目 stat 后按 isFile 计入，并补一条测试固定所选语义。
+- **状态**: open
+- **解决记录**:
+
+### TODO-026: 把 runner Step 0 的 goal records 写入移到 fresh-session 定位规则之后
+
+- **来源**: 11-9 CR restart round 3 (2026-09-11)
+- **紧迫度**: T3
+- **发现指纹**: sha256:bf3b4158f4e91bc04f8b3958d5ae7478f835f0ed17a5cfcbb5514dd1a53611e0
+- **类别**: other
+- **描述**: `speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md:16` 末句"冻结值写入 goal records"位于 `:17` fresh-session 定位规则之前；HALTED legacy run 的 fresh session 若按字面顺序执行，会先在 canonical `goal-execute-records/` 写 preflight（创建 canonical 目录）再以 legacy 覆盖 `crDir`，留下孤立记录。后续 `:17` 判定不受影响，无错误路由。evaluator restart round 3 deferred T3。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md`
+- **建议时机**: 下次修改 runner Step 0 时（与 TODO-027 同次，docs-only）：把"冻结值写入 goal records"移到 `:17` 之后，或在 `:17` 注明定位规则先于任何 goal records 写入。
+- **状态**: open
+- **解决记录**:
+
+### TODO-027: fresh-session 定位规则对 ≥2 个已关闭 legacy 目录显式 HALT
+
+- **来源**: 11-9 CR restart round 3 (2026-09-11)
+- **紧迫度**: T3
+- **发现指纹**: sha256:a8b153e483cb11369daebae96c3ae7c4b4601dfd3ed2d7988159e6222e86a4b2
+- **类别**: other
+- **描述**: `runner-workflow.md:17` 前提为"`roundEvidence` 中恰有一个 legacy 目录含该 series finalizer"；两个 legacy 目录各含同 series finalizer（均 HALTED）且 canonical 不存在时规则静默，恢复矩阵落入 Step 4 在 canonical 开新 round（第三个目录）。该状态要求同一 series 曾在两个 title 目录各自 finalize（契约 `:54` 规定 Correct Course 必须换 series），本仓库不可达。evaluator restart round 3 deferred T3。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md`
+- **建议时机**: 下次触及 `:17` 时（与 TODO-026 同次，docs-only）增加"≥2 个 legacy 含该 series finalizer → HALT 请求裁决"一句。
+- **状态**: open
+- **解决记录**:
 
 ### TODO-018: 补齐 unfinished current-v2 artifact authenticity 认证
 

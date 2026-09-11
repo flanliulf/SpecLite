@@ -63,3 +63,23 @@
 - Evaluator：`FIX_REQUIRED`；p1=2（R2-F1 new、R1-F4 recurred）/ deferred=2（R1-F6 T2、R2-F3 T3）/ dismissed=3（R1-F7、R1-F8、R2-F2）；convergence new 1 / recurred 1 / resolved 4 / churn false；evaluator 提示 round 3 若再出 new P1 即 STOP_LOSS。artifact `11-9-code-review-evaluation-20260911-restart-round-2.md`（reviewSourceHash `3b824364…`）。
 - Fixer：completed（patch）；`checkBoundary` 包装非 ENOENT 为 `unreadable-candidate`（+5 fixture）；runner Step 0 fresh-session 定位规则 + 契约 :66 扩展到 runner。沙箱外 `vitest` 727 passed / 0 failed；packaging / docs / canonical PASS。
 - 下一步判断：提交 fix commit；fresh CR01 restart round 3（≤3 轮上限），仅确认收敛。
+
+## 2026-09-11 — CR Reviewer / restart Round 3
+
+- 结果：`FINDINGS_REPORTED`；3/3 layers；scope 319 / 298 / 21 / 0；head `bee8e07`。R1-F4、R2-F1 三层一致 resolved（累计 7 blocking 关闭）；auditor AC1–12 全 PASS、无越权、0 finding。
+- 新增：R3-F1 legacy 条目名含 `\` 时 boundary 归一化错位绕过越界检测（in-scope、极低概率；edge patch / blind defer）；R3-F2 runner Step 0 goal records 写入顺序（非阻塞）；R3-F3 ≥2 legacy 含 finalizer 时定位规则静默（本仓库不可达）。counts：patch 2 / defer 3 / dismiss 3。
+- 本轮为 ≤3 轮上限；下一步判断：fresh CR02 evaluator round 3——若 R3-F1 判 new P1 → STOP_LOSS，回到 Restart Brief 汇报；否则进入 CR04/05 → completion gate → CR06。
+
+## 2026-09-11 — CR Evaluator / restart Round 3
+
+- 结果：`PASS_WITH_DEFERRED_TODOS`；p0=0 / p1=0 / deferred=5 / dismissed=3；convergence new 0 / recurred 0 / resolved 2（R1-F4、R2-F1）/ churn false。R3-F1 判 deferred T1（触发需 POSIX 目录名含字面 `\` + 越界 symlink，决策 A 协作式威胁模型之外；evaluator 明示不依赖轮次压力）。
+- Deferred：R3-F1 T1、R1-F6 T2、R2-F3 T3、R3-F2 T3、R3-F3 T3。artifact `11-9-code-review-evaluation-20260911-restart-round-3.md`（sha256 `fc332c89…`，reviewSourceHash `d22b4249…`）。
+- 下一步判断：CR04 rules-extractor → CR05 closeout（登记 5 条）→ completion gate → CR06。
+
+## 2026-09-11 — CR04 / CR05 / Completion Gate / CR06
+
+- CR04：`COMPLETED`；12 eligible fingerprints，5 candidate rules，2 global-rule-eligible（CR-11-9-R1 ↔ CR-API-15；CR-11-9-R2 ↔ CR-SEC-04 / CR-API-17）；全局文档未改，写入 `cr-rules-summary.md` 待用户授权。
+- CR05（closeout，preauthorized）：`COMPLETED`；新增 TODO-023（T1）~027（T3），backlog open 9 → 14。
+- Completion gate：`PASS`（restart 重生成，generatedAt ≥ freshness boundary）。
+- CR06：`DONE`；Story `in-progress → done`、`sprint-status.yaml:152 → done`，写前/写后 hash 重读一致；无 workflow tracker（config 未声明）。自举：`speclite resolve cr-directory` 对本目录返回 canonical / `finalizerRounds=[3]` / `unfinished=false`。
+- Epic handoff：Epic 11 剩余 Story 11.10；未更新 Epic 状态。
