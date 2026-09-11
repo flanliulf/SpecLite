@@ -1,6 +1,6 @@
 **Language:** Use `{communication_language}` for all output.
 **Output Language:** Use `{document_output_language}` for documents.
-**Output Location:** `{planning_artifacts}`
+**Output Location:** selected directory of `{product_brief_main_artifact}`
 **Paths:** Bare paths (e.g. `agents/foo.md`) resolve from the skill root.
 
 # Stage 2: Contextual Discovery

@@ -39,11 +39,11 @@
 | `speclite-brownfield-context-builder` | Workflow | `BB` | `{project_knowledge}/brownfield`、`{planning_artifacts}` | 把既有代码库恢复为证据化 baseline 和 planning handoff。 |
 | `speclite-brownfield-backend-tech-stack-digger` | Workflow | - | 用户指定 output dir | 通用后端技术栈分析，基于代码事实生成 Markdown 技术栈报告。 |
 | `speclite-document-project` | Workflow | `DP` | `{project_knowledge}` | 为既有项目生成面向规划的项目文档。 |
-| `speclite-domain-research` | Workflow | `DR` | `{planning_artifacts}`、`{project_knowledge}` | 领域研究和术语上下文。 |
-| `speclite-market-research` | Workflow | `MR` | `{planning_artifacts}`、`{project_knowledge}` | 市场、竞品和客户信号研究。 |
-| `speclite-prfaq` | Workflow | `WB` | `{planning_artifacts}` | Working Backwards PRFAQ 产品概念挑战。 |
-| `speclite-product-brief` | Workflow | `CB` | `{planning_artifacts}` | 创建或更新产品简报。 |
-| `speclite-technical-research` | Workflow | `TR` | `{planning_artifacts}`、`{project_knowledge}` | 技术可行性、架构选项和实现风险研究。 |
+| `speclite-domain-research` | Workflow | `DR` | `{analysis_artifacts}/research` | 领域研究和术语上下文；可读取 Project Knowledge 作为输入。 |
+| `speclite-market-research` | Workflow | `MR` | `{analysis_artifacts}/research` | 市场、竞品和客户信号研究；可读取 Project Knowledge 作为输入。 |
+| `speclite-prfaq` | Workflow | `WB` | `{analysis_artifacts}/prfaq` | Working Backwards PRFAQ 产品概念挑战。 |
+| `speclite-product-brief` | Workflow | `CB` | `{analysis_artifacts}/product-brief` | 创建或更新产品简报。 |
+| `speclite-technical-research` | Workflow | `TR` | `{analysis_artifacts}/research` | 技术可行性、架构选项和实现风险研究；可读取 Project Knowledge 作为输入。 |
 | `speclite-write-opensource-docs` | Workflow | `OSD` | `{project_knowledge}` | 编写、迁移、脚手架和校验开源项目 `docs/`。 |
 
 > Note: language / runtime specific backend tech-stack workflows 是 optional ecosystem modules，见 [`ecosystem-skills.md`](ecosystem-skills.md)。后续新增 SDLC package root 时，必须同步至少一条 help/menu row。
@@ -54,21 +54,21 @@
 |---|---|---|---|---|
 | `speclite-agent-pm` | Agent | `PM` | - | 激活 Paul 做产品规划和需求澄清。 |
 | `speclite-agent-ux-designer` | Agent | `UX` | - | 激活 Uma 做 UX 设计和用户体验约束。 |
-| `speclite-create-prd` | Workflow | `CP` | `{planning_artifacts}` | 创建产品需求文档。 |
-| `speclite-create-ux-design` | Workflow | `CU` | `{planning_artifacts}` | 创建 UX 设计规格。 |
+| `speclite-create-prd` | Workflow | `CP` | `{planning_artifacts}/prd` | 创建 canonical `prd/prd.md`。 |
+| `speclite-create-ux-design` | Workflow | `CU` | `{planning_artifacts}/ux` | 创建 `ux-design-specification.md` 与条件 HTML 视觉产物。Exclusive create 通过 private `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-file --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{target}" --source "{source-file}"` 执行；on-demand mkdir 使用同一 script 的 exact `create-directory` flags。该 binding 非 public CLI，并在 commit-time physical-owner/nearest-ancestor revalidation 后立即操作；stdout 只允许一个 JSON，non-zero、invalid JSON 或 `ok !== true` 均 HALT 且不推进状态。Markdown duplicate first-wins，local-ish HTML `&` fail closed；`design-system/` 按需创建。 |
 | `speclite-edit-prd` | Workflow | `EP` | `{planning_artifacts}` | 修订既有 PRD。 |
-| `speclite-validate-prd` | Workflow | `VP` | `{planning_artifacts}` | 校验 PRD 完整性与可实施性。 |
+| `speclite-validate-prd` | Workflow | `VP` | `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` | 通过 shared whole/sharded resolver 校验 PRD；invocation date 只生成一次并锁定 exact target。Private `scripts/prd-validation-report-operation.mjs` 在 report/progress write 前 probe 并以 `wx` exclusive create；target 已存在时使用 `artifact-path.prd-validation-report-exists` read-only block，给出“保留并移走或删除既有报告后重新运行”，不 overwrite/reuse/suffix/temp/progress mutation。Legacy report 仅原位 historical discovery，install/update/repair 不迁移。 |
 
 ## Solutioning（方案阶段）
 
 | Skill | Type | Menu | Output | Purpose |
 |---|---|---|---|---|
 | `speclite-agent-architect` | Agent | `ARCH` | - | 激活 Adam 做架构方案和 readiness 对齐。 |
-| `speclite-create-architecture` | Workflow | `CA` | `{planning_artifacts}` | 创建技术架构决策文档。 |
-| `speclite-create-epics-and-stories` | Workflow | `CE` | `{planning_artifacts}` | 从 PRD / Architecture / UX 拆解 Epic 和 Story。 |
+| `speclite-create-architecture` | Workflow | `CA` | `{solutioning_artifacts}/architecture` | 创建 canonical `architecture/architecture.md`。 |
+| `speclite-create-epics-and-stories` | Workflow | `CE` | `{planning_artifacts}/epics` | 从 resolver-selected PRD / Architecture 与 UX 拆解 Epic 和 Story。 |
 | `speclite-generate-project-context` | Workflow | `GPC` | `{output_folder}` | 生成 AI agent 使用的项目上下文。 |
-| `speclite-check-implementation-readiness` | Workflow | `IR` | `{planning_artifacts}` | 检查 PRD、UX、Architecture、Epics 和 Stories 是否可进入实现。 |
-| `speclite-ir-grill-consistency-reviewer` | Workflow | `IRG` | `{planning_artifacts}/ir-grill` | 对 PRD、UX、Architecture、Epics 和 Stories 做严格串行 implementation-readiness 一致性 grill。 |
+| `speclite-implementation-readiness-check` | Workflow | `IR` | `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/implementation-readiness-report-{yyyy-MM-dd}.md` | 检查 PRD、UX、Architecture、Epics 和 Stories 是否可进入实现；输出 root 只取自 artifact-root resolver。 |
+| `speclite-implementation-readiness-grill-consistency-reviewer` | Workflow | `IRG` | `{solutioning_artifacts}/implementation-readiness-report/grill-consistency` | 对 PRD、UX、Architecture、Epics 和 Stories 做严格串行 implementation-readiness 一致性 grill。 |
 | `speclite-create-technical-solution-document` | Workflow | `TSD` | `{project_knowledge}/tsd` | 在 implementation readiness 后综合规划产物与项目事实，生成面向人类评审和交付的技术方案说明文档。 |
 | `speclite-story-review-01-reviewer` | Workflow | `SR` | `{implementation_artifacts}/story-reviews` | 执行 Story 设计审查。 |
 | `speclite-story-review-02-evaluator` | Workflow | `SRE` | `{implementation_artifacts}/story-reviews` | 评估 Story Review findings。 |
@@ -84,15 +84,15 @@
 | `speclite-flow-gate` | Workflow | `FG` | `{implementation_artifacts}/flow-gates` | 验证 Story / Epic flow gate。 |
 | `speclite-create-story` | Workflow | `CS` / `VS` | `{implementation_artifacts}` | 创建或校验上下文完整的 Story。 |
 | `speclite-dev-story` | Workflow | `DS` | - | 执行 Story 实现、测试和交付。 |
-| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews` | 独立解析并验证 CR v2 共享契约及 artifact 绑定。 |
-| `speclite-code-review-01-reviewer` | Workflow | `CR1` | `{implementation_artifacts}/code-reviews` | 执行代码审查。 |
-| `speclite-code-review-02-evaluator` | Workflow | `CR2` | `{implementation_artifacts}/code-reviews` | 评估代码审查 findings。 |
-| `speclite-code-review-03-fixer` | Workflow | `CR3` | `{implementation_artifacts}/code-reviews` | 按评估结论执行代码修复。 |
-| `speclite-code-review-04-rules-extractor` | Workflow | `CR4` | `{implementation_artifacts}/cr-rules` | 从历史 CR 中提炼可复用规则。 |
-| `speclite-code-review-05-todo-tracker` | Workflow | `CR5` | `{implementation_artifacts}/cr-rules` | 维护 CR TODO backlog。 |
-| `speclite-code-review-06-finalizer` | Workflow | `CR6` | `{implementation_artifacts}` | 在 CR 通过后同步 Story 和 workflow 状态。 |
+| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 只解析 numeric identity/current candidate/物理安全，并在写前比较 frozen/consumer directory context；不承接 CR 审批。 |
+| `speclite-code-review-01-reviewer` | Workflow | `CR1` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在 resolved `crDir` 执行代码审查。 |
+| `speclite-code-review-02-evaluator` | Workflow | `CR2` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在同一 resolved `crDir` 评估 findings。 |
+| `speclite-code-review-03-fixer` | Workflow | `CR3` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 按评估结论修复并在同目录追加 fix record。 |
+| `speclite-code-review-04-rules-extractor` | Workflow | `CR4` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在同目录写 durable rules result。 |
+| `speclite-code-review-05-todo-tracker` | Workflow | `CR5` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 维护 shared backlog，并在同目录写 Story TODO result。 |
+| `speclite-code-review-06-finalizer` | Workflow | `CR6` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 同步 Story/workflow 状态并在同目录写 finalizer report。 |
 | `speclite-goal-orchestrator-epic-story-review-runner` | Workflow | `ESR` | `{implementation_artifacts}/story-reviews` | 按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环和 goal execute records。 |
-| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews` | 按 Epic Story 严格串行编排 Dev Story、CR 循环和 goal execute records。 |
+| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews/{story-id}-code-review/goal-execute-records` | 单次冻结 `directoryContext`，由 CR01–06 写前调用 production validator，严格串行编排 Dev Story、CR 循环和 goal records。 |
 | `speclite-checkpoint-preview` | Workflow | `CK` | - | 帮助人工检查一次变更的目的、差异和风险。 |
 | `speclite-qa-generate-e2e-tests` | Workflow | `QA` | `{implementation_artifacts}` | 生成自动化 API / E2E 测试。 |
 | `speclite-qa-write-test-guide` | Workflow | `TG` | `{implementation_artifacts}` | 生成可执行 QA 测试指南。 |

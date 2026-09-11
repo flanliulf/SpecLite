@@ -21,8 +21,8 @@ Installer 可以读取 human-owned customization 参与解析，但不能把它�
 
 | Section | Fields | Notes |
 |---|---|---|
-| `[core]` | `project_name`、`document_output_language`、`output_folder` | 共享项目标识、文档语言和默认 artifact root。 |
-| `[modules.sdlc]` | `planning_artifacts`、`implementation_artifacts`、`devops_artifacts`、`project_knowledge` | SDLC artifact 和长期知识目录。 |
+| `[core]` | `project_name`、`user_name`、`communication_language`、`document_output_language`、`output_folder`、`brainstorming_artifacts` | 共享项目标识、语言和 Core artifact root。 |
+| `[modules.sdlc]` | `user_skill_level`、`analysis_artifacts`、`planning_artifacts`、`solutioning_artifacts`、`implementation_artifacts`、`devops_artifacts`、`project_knowledge` | SDLC artifact roots 和 Project Knowledge 目录。 |
 | `[agents.<agent-id>]` | `module`、`team`、`name`、`title`、`icon`、`description` | 从 `module.yaml` Agent roster 生成的 runtime Agent descriptor。 |
 | `[hooks.<hook-id>]` | `module`、`source_skill`、`protected_skill` 或 `protected_surface`、`description`、`runtime_root`、`runner`、`events`、`platform_configs`、`trust_note` | 从 canonical hook source 生成的 runtime Hook descriptor。 |
 
@@ -84,15 +84,21 @@ Hook descriptor 只描述 installed runtime。是否真正执行，还取决于 
 
 ```sh
 speclite resolve config --project-root /path/to/project
+speclite resolve artifact-roots --project-root /path/to/project
 speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project
 ```
+
+`resolve config` 输出 raw merged config，并保留既有 `--key` 对 merged config 的选择语义；它不会为缺失的 artifact root 合成 fallback。需要消费 SPEC 09 root resolver 的 `resolvedRoot`、`resolutionMode`、`plane`、`ownership`、`contractRefs` 和 source/provenance evidence 时，使用 `resolve artifact-roots`；需要发现 PRD、Epics、Architecture 的 whole/sharded subject document 时，使用 `resolve artifact-documents` 并只消费其 `consumedPaths`。
 
 默认 stdout 是 JSON object。需要人工排查时才使用 `--human`：
 
 ```sh
 speclite resolve config --project-root /path/to/project --key core.project_name --human
+speclite resolve artifact-roots --project-root /path/to/project --human
 speclite resolve customization --skill /path/to/project/.agents/skills/speclite-help --project-root /path/to/project --key agent.menu --human
 ```
+
+Artifact-root resolver 的默认 lifecycle 是 `existing`；fresh install 或 fresh install fixture 校验可显式传入 `--lifecycle fresh`。Existing install 中新增 root 缺失时，resolver 可将符合 SPEC 09 的兼容解析标记为 `legacy-compatible`，但不得把 fallback 写回 config，也不表示 workflow-owned artifacts 已迁移。
 
 Legacy Python resolver scripts 可能存在于 `_speclite/scripts/`，但它们是 compatibility assets，不是默认 activation resolver。
 

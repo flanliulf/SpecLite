@@ -31,7 +31,7 @@ Human output 先按 command intent 选择 presentation profile，再按 outcome 
 |---|---|---|
 | Operation | `install`、`init`、`update`、`update --repair`、`sync`、`uninstall` | 优先展示 `Summary`、`Scope`、`State / Authorization`、`Plan / Evidence`、`Issues / Conflicts`、`Next Actions`，适合会写入或准备写入的命令。 |
 | Diagnostic | `status`、`validate`、`doctor` | `Issues` 靠近关键 state；存在 error/critical issue 时，不得把问题列表深埋在长 evidence 后。 |
-| Report / Support | `list`、`governance-report`、`resolve config --human`、`resolve customization --human` | 使用 `Results`、`Metrics`、`Gaps`、`Artifacts` 或 `Evidence` 中最贴近任务的主体 section，不强制输出空洞 `State`。 |
+| Report / Support | `list`、`governance-report`、`resolve config --human`、`resolve artifact-roots --human`、`resolve artifact-documents --human`、`resolve customization --human` | 使用 `Results`、`Metrics`、`Gaps`、`Artifacts` 或 `Evidence` 中最贴近任务的主体 section，不强制输出空洞 `State`。 |
 
 ## Install Migration Sample（Install 迁移样例）
 

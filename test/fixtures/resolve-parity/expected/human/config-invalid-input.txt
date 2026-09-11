@@ -18,6 +18,8 @@ Scope
 Evidence
 - legal command: speclite resolve config --project-root <projectRoot> [--key <dottedKey>] [--human]
 - legal command: speclite resolve customization --skill <skillDir> [--project-root <projectRoot>] [--key <dottedKey>] [--human]
+- legal command: speclite resolve artifact-roots --project-root <projectRoot> [--lifecycle existing|fresh] [--human]
+- legal command: speclite resolve artifact-documents --subject <prd|epics|architecture> --project-root <projectRoot> [--selection whole|sharded] [--human]
 - reason: runtime-path.missing-entry
 
 Issues:

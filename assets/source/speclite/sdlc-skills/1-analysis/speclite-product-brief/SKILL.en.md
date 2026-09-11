@@ -14,7 +14,7 @@ metadata:
     Source entry summary: Create or update product briefs through guided or autonomous discovery. Use when the user requests to create or update a Product Brief.
 
 [Core Capabilities]
-    - **Speclite activation**: Resolve three-tier customize, workflow.persistent_facts, workflow.on_complete, and runtime config from merged output of `speclite resolve config --project-root {project-root}`.
+    - **Speclite activation**: Resolve three-tier customize, `workflow.persistent_facts`, `workflow.on_complete`, non artifact-root runtime config from `speclite resolve config --project-root {project-root}`, and resolved artifact roots from `speclite resolve artifact-roots --project-root {project-root}`.
     - **Artifact discovery**: Load project artifacts, config fields, historical context, and data files according to the workflow specification.
     - **Step orchestration**: Follow `references/workflow-details.md` and related step files in order, preserving HALT conditions, menus, and state advancement.
     - **Templated output**: Use assets templates or examples to generate documents, reports, specifications, or delivery artifacts in `document_output_language`.
@@ -25,7 +25,7 @@ metadata:
     Bare paths resolve from `{skill-root}`; `{project-root}` is the target project working directory; `{speclite-runtime-root}` is `{project-root}/_speclite`; `{skill-name}` is the skill directory basename.
 
 [Activation]
-    Resolve `workflow`, execute prepend steps, load persistent facts, read merged runtime config, communicate in `communication_language`, and execute append steps. Missing config or empty required fields must HALT. `config.toml.example` is only a field-structure reference and must not be used as runtime fallback.
+    Resolve `workflow`, execute prepend steps, load persistent facts, run `speclite resolve config --project-root {project-root}` and `speclite resolve artifact-roots --project-root {project-root}`, communicate in `communication_language`, and execute append steps. Missing config, empty required fields, or missing required artifact roots must HALT. `config.toml.example` is only a field-structure reference and must not be used as runtime fallback.
 
 [Workflow]
     1. Fully read `references/workflow-details.md`; it is the authoritative migrated workflow specification. Related references include `references/workflow-details.md`, `references/agents/artifact-analyzer.md`, `references/agents/opportunity-reviewer.md`, `references/agents/skeptic-reviewer.md`, `references/agents/web-researcher.md`, `references/prompts/contextual-discovery.md`, and other reference files.
@@ -37,6 +37,7 @@ metadata:
 [Notes]
     - The directory name and YAML `name` must remain `speclite-product-brief`.
     - `references/workflow-details.md` and related references are executable instructions, not background reading.
+    - Product Brief outputs default to `{analysis_artifacts}/product-brief/`; legacy root-level discovery is enabled only when `analysis_artifacts.resolutionMode` is `legacy-compatible`, and the main brief and distillate keep their existing basenames in the selected same directory without migration.
     - `config.toml.example` is only a reference and is never a runtime fallback.
     - The current workflow must not depend on legacy runtime directories, YAML config, or command namespaces.
 

@@ -1,6 +1,6 @@
 **Language:** Use `{communication_language}` for all output.
 **Output Language:** Use `{document_output_language}` for documents.
-**Output Location:** `{planning_artifacts}`
+**Output Location:** selected directory of `{product_brief_main_artifact}` and `{product_brief_distillate_artifact}`
 **Paths:** Bare paths (e.g. `prompts/foo.md`) resolve from the skill root.
 
 # Stage 5: Finalize
@@ -9,7 +9,7 @@
 
 ## Step 1: Polish and Save
 
-Update the product brief document at `{planning_artifacts}/product-brief-{project_name}.md`:
+Update the product brief document at `{product_brief_main_artifact}`:
 - Update frontmatter `status` to `"complete"`
 - Update `updated` timestamp
 - Ensure formatting is clean and consistent
@@ -22,7 +22,7 @@ Throughout the discovery process, you likely captured detail that doesn't belong
 **Ask the user:**
 "Your product brief is complete. During our conversation, I captured additional detail that goes beyond the executive summary — things like [mention 2-3 specific examples of overflow you captured]. Would you like me to create a detail pack for PRD creation? It distills all that extra context into a concise, structured format optimized for the next phase."
 
-**If yes, create the distillate** at `{planning_artifacts}/product-brief-{project_name}-distillate.md`:
+**If yes, create the distillate** at `{product_brief_distillate_artifact}`:
 
 ```yaml
 ---
@@ -54,8 +54,8 @@ purpose: "Token-efficient context for downstream PRD creation"
 
 "Your product brief for {project_name} is complete!
 
-**Executive Brief:** `{planning_artifacts}/product-brief-{project_name}.md`
-[If distillate created:] **Detail Pack:** `{planning_artifacts}/product-brief-{project_name}-distillate.md`
+**Executive Brief:** `{product_brief_main_artifact}`
+[If distillate created:] **Detail Pack:** `{product_brief_distillate_artifact}`
 
 **Recommended next step:** Use the product brief (and detail pack) as input for PRD creation — tell your assistant 'create a PRD' and point it to these files."
 [If distillate created:] "The detail pack contains all the overflow context (requirements hints, rejected ideas, technical constraints) specifically structured for the PRD workflow to consume."
@@ -64,7 +64,7 @@ purpose: "Token-efficient context for downstream PRD creation"
 ```json
 {
   "status": "complete",
-  "brief": "{planning_artifacts}/product-brief-{project_name}.md",
+  "brief": "{product_brief_main_artifact}",
   "distillate": "{path or null}",
   "confidence": "high|medium|low",
   "open_questions": ["any unresolved items"]

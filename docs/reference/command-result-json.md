@@ -60,7 +60,11 @@ Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human re
 | `Next Actions` prose | 可帮助人和 agent 操作者，但不作为稳定状态机或 CI gate。 |
 | docs 示例 | 不是规范来源；公共语义以规范性说明为准，schema、focused tests 和 fixture policy 提供 executable evidence。 |
 
-`resolve config` 和 `resolve customization` 是例外的 runtime support surface：默认 stdout 是 resolved JSON object，而不是 `CommandResult` envelope。只有显式传入 `--human` 时，`resolve` 才渲染 human-readable support frame；此时仍不得改变默认 machine output contract。
+`resolve config`、`resolve artifact-roots`、`resolve artifact-documents` 和 `resolve customization` 是例外的 runtime support surface：默认 stdout 是 resolved JSON object，而不是 `CommandResult` envelope。只有显式传入 `--human` 时，`resolve` 才渲染 human-readable support frame；此时仍不得改变默认 machine output contract。
+
+`resolve config` 输出 raw merged config，并保留 `--key` 对 merged config 的选择语义。`resolve artifact-roots` 使用独立 `speclite.resolve.artifact-roots.v1` payload，顶层包含 `schemaVersion`、`lifecycle`、`roots[]` 与 `configSources`；每个 root 条目报告 `resolvedRoot`、`resolutionMode`、`plane`、`ownership`、`contractRefs` 和对应 config path。消费者需要 effective artifact roots、legacy-compatible mode 或 provenance 时应读取该 surface，不应从 raw config 自行补 fallback。
+
+`resolve artifact-documents` 使用 `speclite.resolve.artifact-documents.v1` payload，报告 PRD、Epics 或 Architecture 的 `actualConsumedPath`、`consumedPaths`、`discoveryShape`、`ambiguityStatus`、invocation selection 与 continuation。即使 continuation 为 `block`，stdout 仍保留完整只读 evidence，stderr 同时输出 stable `ValidationIssue`，exit code 为 `1`；block payload 的 `actualConsumedPath=null` 且 `consumedPaths=[]`。
 
 ## Issue Model（Issue 模型）
 

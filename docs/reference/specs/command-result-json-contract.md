@@ -40,7 +40,7 @@
 | `uninstall` | `speclite uninstall --json` |
 | `governance-report` | `speclite governance-report --json` |
 
-`speclite resolve` 是明确例外：默认 stdout 输出 pure resolve-result JSON，diagnostics 以 `ValidationIssue` 形状的 JSON Lines 写入 stderr。它不使用 `CommandResult` envelope。
+`speclite resolve` 是明确例外：默认 stdout 输出 pure resolve-result JSON，diagnostics 以 `ValidationIssue` 形状的 JSON Lines 写入 stderr。它不使用 `CommandResult` envelope。`resolve config` 输出 raw merged config；`resolve artifact-roots` 使用独立 `speclite.resolve.artifact-roots.v1` payload 暴露 SPEC 09 resolver-backed roots、`resolutionMode` 和 source/provenance evidence；`resolve artifact-documents` 使用 `speclite.resolve.artifact-documents.v1` payload 暴露 governed subject 的 whole/sharded discovery、invocation selection、`consumedPaths` 和 blocking continuation。
 
 ## Envelope（顶层结构）
 

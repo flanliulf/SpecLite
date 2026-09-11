@@ -11,7 +11,7 @@
       "preceded-by": ["brainstorming", "perform-research"],
       "followed-by": ["create-prd"],
       "is-required": true,
-      "output-location": "{planning_artifacts}"
+      "output-location": "{analysis_artifacts}/product-brief"
     }
   ]
 }

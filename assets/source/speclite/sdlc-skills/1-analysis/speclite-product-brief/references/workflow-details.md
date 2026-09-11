@@ -54,8 +54,17 @@ Run `speclite resolve config --project-root {project-root}` and resolve merged r
 - Use `{user_name}` for greeting
 - Use `{communication_language}` for all communications
 - Use `{document_output_language}` for output documents
-- Use `{planning_artifacts}` for output location and artifact scanning
-- Use `{project_knowledge}` for additional context scanning
+- Bind `{project_name}` from the raw merged config field `core.project_name`
+
+If `core.project_name` is missing, is not a string, or trims to an empty value, HALT before route selection. Continue to trim `{project_name}` before constructing route paths, and continue to apply the portable single filename segment rules in Product Brief Artifact Route Selection.
+
+Run `speclite resolve artifact-roots --project-root {project-root}` and resolve artifact root fields from the returned `roots[]` entries:
+- Use `analysis_artifacts.resolvedRoot` as `{analysis_artifacts}` for output location
+- Use `planning_artifacts.resolvedRoot` as `{planning_artifacts}` for optional planning context scanning
+- Use `project_knowledge.resolvedRoot` as `{project_knowledge}` for additional context scanning
+- Preserve each root's `resolutionMode` and provenance for audit notes
+
+If the artifact-root command exits non-zero, or a required root is missing, HALT. Do not hand-write fallback logic in this workflow.
 
 ### Step 5: Greet the User
 
@@ -66,6 +75,25 @@ If `{mode}` is not `autonomous`, greet `{user_name}` (if you have not already), 
 Execute each entry in `{workflow.activation_steps_append}` in order.
 
 Activation is complete. Begin the workflow at Stage 1 below.
+
+## Product Brief Artifact Route Selection
+
+After artifact roots resolve, bind these path variables before creating, resuming, updating, or finalizing the Product Brief:
+
+- `product_brief_new_main_artifact`: `{analysis_artifacts}/product-brief/product-brief-{project_name}.md`
+- `product_brief_legacy_main_artifact`: `{analysis_artifacts}/product-brief-{project_name}.md`
+- `product_brief_main_artifact`: selected main artifact path
+- `product_brief_distillate_artifact`: selected main artifact directory plus `product-brief-{project_name}-distillate.md`
+
+Before constructing these paths, trim `{project_name}`. The trimmed value must be a portable single filename segment: non-empty, not `.`, not `..`, not absolute, not drive-like, and containing no `/`, `\`, or NUL. Internal spaces and Unicode are allowed and must be preserved; do not slugify, normalize slashes, transliterate, or otherwise rewrite the trimmed project name. If `{project_name}` fails this check, HALT before any resume, write, or migration step.
+
+Selection policy:
+
+1. Check `product_brief_new_main_artifact` first. The candidate path must stay inside `{project-root}`. If it exists, it must be a regular non-symlink file; directory, non-file, symlink, symlink escape, unreadable candidate, or any non-`ENOENT` error must HALT. If it is a valid existing file, use it as `product_brief_main_artifact`.
+2. Else, if `analysis_artifacts.resolutionMode` is `legacy-compatible`, check `product_brief_legacy_main_artifact`. The candidate path must stay inside `{project-root}`. If it exists, it must be a regular non-symlink file; directory, non-file, symlink, symlink escape, unreadable candidate, or any non-`ENOENT` error must HALT. If it is a valid existing file, use that legacy root-level file as `product_brief_main_artifact` and continue writing it in place.
+3. Else, use `product_brief_new_main_artifact` as `product_brief_main_artifact`.
+
+Only `ENOENT` means a candidate is missing. This legacy root-level discovery is disabled unless `analysis_artifacts.resolutionMode` is exactly `legacy-compatible`. The workflow must not migrate, copy, delete, rename, or rewrite an existing Product Brief artifact just to change directories. The distillate always uses the same directory as the selected main artifact. This means a new subject artifact exists takes precedence over any legacy root-level artifact.
 
 ## Stage 1: Understand Intent
 
@@ -110,7 +138,8 @@ Activation is complete. Begin the workflow at Stage 1 below.
 
 ## Speclite Runtime Guardrails
 
-- Runtime config is read from merged output of `speclite resolve config --project-root {project-root}`.
+- Runtime config fields that are not artifact roots are read from merged output of `speclite resolve config --project-root {project-root}`.
+- Artifact roots are read from `speclite resolve artifact-roots --project-root {project-root}` and must use the command's `resolvedRoot`, `resolutionMode`, and provenance.
 - `config.toml.example` in this Skill package is a field-structure reference only and is not a runtime fallback.
 - Customization is resolved from merged JSON output of `speclite resolve customization --skill {skill-root} --project-root {project-root}`.
 - Resolve customization with `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`.

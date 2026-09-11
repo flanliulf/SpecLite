@@ -25,7 +25,8 @@ speclite <command> [options] [target-directory]
 | `speclite sync [target-directory]` | 对齐 installed source projections 和 IDE mirrors，不隐藏 repair 语义。 |
 | `speclite uninstall [target-directory]` | 移除 installer-owned SpecLite 文件，并保留 human-owned 与 workflow-owned 路径。 |
 | `speclite governance-report [target-directory]` | 从 installed-state evidence 生成只读流程治理覆盖报告。 |
-| `speclite resolve config` | 输出解析后的 runtime config JSON。 |
+| `speclite resolve config` | 输出 raw merged runtime config JSON，保留 `--key` 对 merged config 的选择语义。 |
+| `speclite resolve artifact-roots` | 输出 resolver-backed artifact root JSON，包含 `resolvedRoot`、`resolutionMode`、`provenance`/source evidence 和 stable diagnostics。 |
 | `speclite resolve customization` | 输出解析后的 skill customization JSON。 |
 
 `resolve` 是 runtime support API surface，主要给已安装 skills 和工具调用使用。
@@ -194,6 +195,38 @@ speclite resolve config --project-root /path/to/project --key core.project_name 
 | `--key <dottedKey>` | 选择 merged config 中的 dotted key。可重复。 |
 | `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
 
+`resolve config` 输出的是 raw merged config；它不会为缺失的 artifact root 合成 legacy fallback，也不会改变现有 `--key` 语义。需要消费 SPEC 09 root resolver 结果时，使用 `resolve artifact-roots`。
+
+解析 artifact roots：
+
+```sh
+speclite resolve artifact-roots --project-root /path/to/project
+speclite resolve artifact-roots --project-root /path/to/project --lifecycle existing
+speclite resolve artifact-roots --project-root /path/to/project --lifecycle fresh --human
+```
+
+| Option | Description |
+|---|---|
+| `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。 |
+| `--lifecycle <existing|fresh>` | 选择 artifact root resolver lifecycle；默认 `existing`。 |
+| `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+
+Machine stdout 使用 `speclite.resolve.artifact-roots.v1` payload，顶层包含 `schemaVersion`、`lifecycle`、`roots[]` 和 `configSources`。`roots[]` 条目直接来自 SPEC 09 resolver projection，包含 `field`、`configPath`、`placeholder`、`resolvedRoot`、`resolutionMode`、`plane`、`ownership` 和 `contractRefs`。Missing/invalid roots 仍通过 stderr `ValidationIssue` JSON Lines 报告，并保持 project-relative POSIX path 与 redaction 约束。
+
+解析 PRD、Epics 或 Architecture 的 whole/sharded document shape：
+
+```sh
+speclite resolve artifact-documents --subject prd --project-root /path/to/project
+speclite resolve artifact-documents --subject epics --project-root /path/to/project --selection sharded
+speclite resolve artifact-documents --subject architecture --project-root /path/to/project --human
+```
+
+`--subject` 必须是 `prd`、`epics` 或 `architecture`；`--selection whole|sharded` 只作用于当前 invocation。Machine stdout 始终返回 `speclite.resolve.artifact-documents.v1` evidence，包括 block result；block 同时以 stderr `ValidationIssue` JSON Line 和 exit code `1` 表达。Consumers 只加载 `consumedPaths`，不得自行定义 precedence。命令只读，不创建、迁移或修改 artifacts/progress。
+
+`index.md` 支持 inline 与 reference-style local Markdown links。Destination 会先剥离 query/fragment，再单次 percent-decode，并做 portable path、subject containment 和 readability 校验；external scheme 与 network links 不作为 shard。Malformed、undefined reference-style 或 unsupported local-ish destinations 会以 `artifact-path.broken-shard-reference` block，并在 details 中记录 `referenceKind`。Canonical whole 或 canonical `index.md` 自身 symlink escape 使用 `artifact-path.symlink-escape` block；index self-link 会被排除，不会重复出现在 `consumedPaths`。
+
+显式 `--selection whole` 仍校验 canonical `index.md` entry 的安全性，但不会读取或解析未选 index 的 shard graph；省略 selection 或选择 `sharded` 时仍完整验证该 graph。
+
 解析 skill customization：
 
 ```sh
@@ -209,11 +242,11 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 | `--key <dottedKey>` | 选择 merged customization 中的 dotted key。可重复。 |
 | `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
 
-默认 resolve output 是 runtime support machine contract：stdout 只包含 resolved JSON object，stderr 只包含 `ValidationIssue` JSON Lines diagnostics。Missing key 默认仍输出 `{}`、exit code 为 `0`、stderr 为空。Installed Skill 激活前必须确认当前 AI 会话 `PATH` 中存在 `speclite`；不可用时应 HALT 并暴露或安装 Node CLI 后重试，不得回退 Python resolver 或单独读取 `_speclite/config.toml`。`--human` 只用于人工排查，会把结果渲染为 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`；其中 `source path` 表示 selected dotted key 的 effective source，`unresolved` 只适用于显式 human mode。
+默认 resolve output 是 runtime support machine contract：stdout 只包含 resolved JSON object，stderr 只包含 `ValidationIssue` JSON Lines diagnostics。Missing key 默认仍输出 `{}`、exit code 为 `0`、stderr 为空。Installed Skill 激活前必须确认当前 AI 会话 `PATH` 中存在 `speclite`；不可用时应 HALT 并暴露或安装 Node CLI 后重试，不得回退 Python resolver 或单独读取 `_speclite/config.toml`。`--human` 只用于人工排查，会把结果渲染为 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`；其中 `source path` 表示 selected dotted key 或 resolver source 的 effective source，`unresolved` 只适用于显式 human mode。
 
 ## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
 
-`_speclite/scripts/resolve_*.py` 可能存在于已安装项目中，并以 `runtime-compat-script` 记录在 `files-index.json`。这些文件只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 activation resolver，也不是默认 CLI resolver runtime dependency。正常 installed Skill activation 的唯一默认 resolver 是 `speclite resolve config` 与 `speclite resolve customization`；文档和脚本不应建议用户在默认激活路径中运行 Python resolver。
+`_speclite/scripts/resolve_*.py` 可能存在于已安装项目中，并以 `runtime-compat-script` 记录在 `files-index.json`。这些文件只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 activation resolver，也不是默认 CLI resolver runtime dependency。正常 installed Skill activation 的唯一默认 resolver surface 是 Node CLI 的 `speclite resolve config`、`speclite resolve artifact-roots`、`speclite resolve artifact-documents` 与 `speclite resolve customization`；文档和脚本不应建议用户在默认激活路径中运行 Python resolver。
 
 ## Output Modes（输出模式）
 
@@ -221,7 +254,7 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 |---|---|---|
 | Human-readable | 默认 | 面向终端阅读。`install` 默认中文，支持 `--locale en-US`。 |
 | JSON | `--json` | 面向脚本和工具。使用 `CommandResult` contract。 |
-| Resolve support | `resolve ... --human` | 仅适用于 `resolve config/customization`。默认 resolve 不使用 `CommandResult`，stdout 保持 pure JSON。 |
+| Resolve support | `resolve ... --human` | 适用于 `resolve config`、`resolve artifact-roots`、`resolve artifact-documents` 和 `resolve customization`。默认 resolve 不使用 `CommandResult`，stdout 保持 pure JSON。 |
 
 Human-readable output 可以包含分阶段 heading、key-value block、summary 和 next actions。JSON output 不应被 locale 影响。
 
@@ -244,6 +277,7 @@ Human-readable output 会按 command intent 选择 presentation profile：
 | write-authorized | `NO_COLOR=1 speclite install "$PROJECT_ROOT" --yes` | 只在 gates 通过后写入。 |
 | repair-authorized | `NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes` | 只执行显式 repair writes。 |
 | resolve human mode | `NO_COLOR=1 speclite resolve config --project-root "$PROJECT_ROOT" --key core.project_name --human` | 人工排查 support frame；默认 resolve stdout 仍是 pure JSON。 |
+| artifact-root human mode | `NO_COLOR=1 speclite resolve artifact-roots --project-root "$PROJECT_ROOT" --human` | 人工排查 artifact root resolver mode/source；默认 machine output 使用 `speclite.resolve.artifact-roots.v1`。 |
 
 `install` prewrite preview 的 `Scope` 会展示目标项目、目标路径和命令执行目录。`Next Actions` 使用从原执行目录可复制的 target：绝对 target 保持绝对路径，`../project` 这类相对跨目录 target 保留相对参数，不降级为 basename。没有 issue 时，`Issues` section 显示 `- 无问题`；写入状态由 `Summary` / state 表达。
 
@@ -290,6 +324,7 @@ NO_COLOR=1 speclite update "$PROJECT_ROOT"
 NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair
 NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
 NO_COLOR=1 speclite resolve config --project-root "$PROJECT_ROOT" --key core.project_name --human
+NO_COLOR=1 speclite resolve artifact-roots --project-root "$PROJECT_ROOT" --human
 ```
 
 ## Related Documents（相关文档）

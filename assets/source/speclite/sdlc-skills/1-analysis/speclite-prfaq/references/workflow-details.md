@@ -45,8 +45,17 @@ Run `speclite resolve config --project-root {project-root}` and resolve merged r
 - Use `{user_name}` for greeting
 - Use `{communication_language}` for all communications
 - Use `{document_output_language}` for output documents
-- Use `{planning_artifacts}` for output location and artifact scanning
-- Use `{project_knowledge}` for additional context scanning
+- Bind `{project_name}` from the raw merged config field `core.project_name`
+
+If `core.project_name` is missing, is not a string, or trims to an empty value, HALT before route selection. Continue to trim `{project_name}` before constructing route paths, and continue to apply the portable single filename segment rules in PRFAQ Artifact Route Selection.
+
+Run `speclite resolve artifact-roots --project-root {project-root}` and resolve artifact root fields from the returned `roots[]` entries:
+- Use `analysis_artifacts.resolvedRoot` as `{analysis_artifacts}` for output location
+- Use `planning_artifacts.resolvedRoot` as `{planning_artifacts}` for optional planning context scanning
+- Use `project_knowledge.resolvedRoot` as `{project_knowledge}` for additional context scanning
+- Preserve each root's `resolutionMode` and provenance for audit notes
+
+If the artifact-root command exits non-zero, or a required root is missing, HALT. Do not hand-write fallback logic in this workflow.
 
 ### Step 5: Greet the User
 
@@ -60,10 +69,10 @@ Activation is complete. Continue below.
 
 ## Pre-workflow Setup
 
-1. **Resume detection:** Check if `{planning_artifacts}/prfaq-{project_name}.md` already exists. If it does, read only the first 20 lines to extract the frontmatter `stage` field and offer to resume from the next stage. Do not read the full document. If the user confirms, route directly to that stage's reference file.
+1. **Resume detection:** Bind `prfaq_main_artifact` using PRFAQ Artifact Route Selection below. Check if `prfaq_main_artifact` already exists. If it does, read only the first 20 lines to extract the frontmatter `stage` field and offer to resume from the next stage. Do not read the full document. If the user confirms, route directly to that stage's reference file.
 
 2. **Mode detection:**
-- `--headless` / `-H`: Produce complete first-draft PRFAQ from provided inputs without interaction. Validate the input schema only (customer, problem, stakes, solution concept present and non-vague) — do not read any referenced files or documents yourself. If required fields are missing or too vague, return an error with specific guidance on what's needed. Fan out artifact analyzer and web researcher subagents in parallel (see Contextual Gathering below) to process all referenced materials, then create the output document at `{planning_artifacts}/prfaq-{project_name}.md` using `./assets/prfaq-template.md` and route to `./references/press-release.md`.
+- `--headless` / `-H`: Produce complete first-draft PRFAQ from provided inputs without interaction. Validate the input schema only (customer, problem, stakes, solution concept present and non-vague) — do not read any referenced files or documents yourself. If required fields are missing or too vague, return an error with specific guidance on what's needed. Fan out artifact analyzer and web researcher subagents in parallel (see Contextual Gathering below) to process all referenced materials, then create the output document at `prfaq_main_artifact` using `./assets/prfaq-template.md` and route to `./references/press-release.md`.
 - Default: Full interactive coaching — the gauntlet.
 
 **Headless input schema:**
@@ -109,7 +118,7 @@ When the user gets stuck, offer concrete suggestions based on what they've share
 3. **Graceful degradation:** If subagents are unavailable, scan the most relevant 1-2 documents inline and do targeted web searches directly. Never block the workflow.
 4. **Merge findings** with what the user shared. Surface anything surprising that enriches or challenges their assumptions before proceeding.
 
-**Create the output document** at `{planning_artifacts}/prfaq-{project_name}.md` using `./assets/prfaq-template.md`. Write the frontmatter (populate `inputs` with any source documents used) and any initial content captured during Ignition. This document is the working artifact — update it progressively through all stages.
+**Create the output document** at `prfaq_main_artifact` using `./assets/prfaq-template.md`. Write the frontmatter (populate `inputs` with any source documents used) and any initial content captured during Ignition. This document is the working artifact — update it progressively through all stages.
 
 **Coaching Notes Capture:** Before moving on, append a `<!-- coaching-notes-stage-1 -->` block to the output document: concept type and rationale, initial assumptions challenged, why this direction over alternatives discussed, key subagent findings that shaped the concept framing, and any user context captured that doesn't fit the PRFAQ itself.
 
@@ -126,9 +135,29 @@ When the user gets stuck, offer concrete suggestions based on what they've share
 | 5 | The Verdict | Synthesis, strength assessment, final output | `./references/verdict.md` |
 
 
+## PRFAQ Artifact Route Selection
+
+After artifact roots resolve, bind these path variables before resuming, creating, updating, or finalizing the PRFAQ:
+
+- `prfaq_new_main_artifact`: `{analysis_artifacts}/prfaq/prfaq-{project_name}.md`
+- `prfaq_legacy_main_artifact`: `{analysis_artifacts}/prfaq-{project_name}.md`
+- `prfaq_main_artifact`: selected main artifact path
+- `prfaq_distillate_artifact`: selected main artifact directory plus `prfaq-{project_name}-distillate.md`
+
+Before constructing these paths, trim `{project_name}`. The trimmed value must be a portable single filename segment: non-empty, not `.`, not `..`, not absolute, not drive-like, and containing no `/`, `\`, or NUL. Internal spaces and Unicode are allowed and must be preserved; do not slugify, normalize slashes, transliterate, or otherwise rewrite the trimmed project name. If `{project_name}` fails this check, HALT before any resume, write, or migration step.
+
+Selection policy:
+
+1. Check `prfaq_new_main_artifact` first. The candidate path must stay inside `{project-root}`. If it exists, it must be a regular non-symlink file; directory, non-file, symlink, symlink escape, unreadable candidate, or any non-`ENOENT` error must HALT. If it is a valid existing file, use it as `prfaq_main_artifact`.
+2. Else, if `analysis_artifacts.resolutionMode` is `legacy-compatible`, check `prfaq_legacy_main_artifact`. The candidate path must stay inside `{project-root}`. If it exists, it must be a regular non-symlink file; directory, non-file, symlink, symlink escape, unreadable candidate, or any non-`ENOENT` error must HALT. If it is a valid existing file, use that legacy root-level file as `prfaq_main_artifact` and continue writing it in place.
+3. Else, use `prfaq_new_main_artifact` as `prfaq_main_artifact`.
+
+Only `ENOENT` means a candidate is missing. This legacy root-level discovery is disabled unless `analysis_artifacts.resolutionMode` is exactly `legacy-compatible`. The workflow must not migrate, copy, delete, rename, or rewrite an existing PRFAQ artifact just to change directories. Press release, customer FAQ, internal FAQ, verdict, stage/resume updates, and the distillate always use the same directory as the selected main artifact. This means a new subject artifact exists takes precedence over any legacy root-level artifact.
+
 ## Speclite Runtime Guardrails
 
-- Runtime config is read from merged output of `speclite resolve config --project-root {project-root}`.
+- Runtime config fields that are not artifact roots are read from merged output of `speclite resolve config --project-root {project-root}`.
+- Artifact roots are read from `speclite resolve artifact-roots --project-root {project-root}` and must use the command's `resolvedRoot`, `resolutionMode`, and provenance.
 - `config.toml.example` in this Skill package is a field-structure reference only and is not a runtime fallback.
 - Customization is resolved from merged JSON output of `speclite resolve customization --skill {skill-root} --project-root {project-root}`.
 - Resolve customization with `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`.

@@ -59,7 +59,7 @@ Architecture、Epic、Story、canonical skill 和 audit report 可以引用这�
 
 ## Runtime Artifact Roots（Runtime Artifact 根路径）
 
-Runtime config 中的 `[core]` 与 `[modules.sdlc]` 定义 workflow 使用的项目级 artifact roots。Skill 必须通过 installed runtime config 或 `speclite resolve config` 读取这些值，不得从 source checkout、Skill package 文案、hardcoded command path 或 manifest projection 反推。
+Runtime config 中的 `[core]` 与 `[modules.sdlc]` 定义 workflow 使用的项目级 artifact roots。`speclite resolve config` 是 raw merged config surface，并保留既有 `--key` 对 merged config 的选择语义；它不得为缺失 artifact root 合成 legacy fallback。Skill 需要 effective artifact roots 时必须通过 `speclite resolve artifact-roots --project-root {project-root}` 消费本 SPEC 的 resolver result，并读取每个 root 的 `resolvedRoot`、`resolutionMode`、`plane`、`ownership`、`contractRefs` 与 source/provenance evidence，不得从 source checkout、Skill package 文案、hardcoded command path、manifest projection 或手写 fallback 反推。
 
 | Runtime key | Placeholder | Meaning | Fresh-install default | Existing-install behavior |
 | --- | --- | --- | --- | --- |
@@ -71,7 +71,38 @@ Runtime config 中的 `[core]` 与 `[modules.sdlc]` 定义 workflow 使用的项
 | `modules.sdlc.devops_artifacts` | `{devops_artifacts}` | DevOps 与 release workflow artifacts 根目录。 | `{project-root}/_speclite-output/5-devops-artifacts` | 已有显式配置继续权威，不得因 fresh default 变化自动改写。 |
 | `modules.sdlc.project_knowledge` | `{project_knowledge}` | Workflow-generated project knowledge 与长期内部参考材料根目录。 | `{project-root}/_speclite-output/project-knowledge-base` | 已有显式配置继续权威，包括 legacy 显式 `{project-root}/docs`；不得因 fresh default 变化自动改写。 |
 
+### Controlled Correction 2026-09-03（受控修正 2026-09-03）
+
+Fresh install 的 `fresh-default` 语义只适用于未显式输入逐 field artifact root 的默认解析结果，包括 quick/default flow，以及仅显式设置 `core.output_folder` 后由 canonical defaults 派生出的七类 roots。
+
+Fresh detailed prompt 中，若用户对某个 artifact root field 输入非空值，该 field 的实际 root 继续作为 fresh install config 投影写入，但 `resolutionMode` 必须标记为 `explicit-config`。未显式输入的其它 artifact root fields 仍按 fresh defaults 或 `output_folder` 派生值解析，并逐 field 标记为 `fresh-default`。本修正保留 2026-09-02 Story 11.2 kickoff 中“fresh install all seven roots are `fresh-default`”的原始决策轨迹，并将其范围收窄为 quick/default 与未显式逐 field 覆盖的 fresh roots。
+
 Fresh install 的 phase-owned subject directories 必须保持单一 canonical producer root：PRD 与 Epics 分别使用 `{planning_artifacts}/prd/`、`{planning_artifacts}/epics/`，UX 使用 `{planning_artifacts}/ux/`，Architecture whole document、sharded `index.md` 与 shards 使用 `{solutioning_artifacts}/architecture/`。Whole/sharded producer 与 consumer 必须在对应 subject directory 内使用确定性发现规则，并记录实际消费路径。Existing install 若缺少 `solutioning_artifacts`，仍按下述 legacy fallback 解析；该 fallback 不改变 fresh canonical root，也不授权迁移既有 Architecture artifacts。
+
+### Controlled Correction 2026-09-04 — Whole/Sharded Document Discovery（整篇/分片文档发现）
+
+PRD、Epics 与 Architecture 的 canonical whole outputs 分别为 `{planning_artifacts}/prd/prd.md`、`{planning_artifacts}/epics/epics.md` 与 `{solutioning_artifacts}/architecture/architecture.md`。Sharded documents 必须与 whole document 位于同一 subject directory，使用 canonical `index.md` 及其明确声明的 shard links；不得新增 `shards/` 层，也不得通过 glob 自动混入未被 index 声明的 Markdown 文件。
+
+所有 producer continuation 与 downstream consumer discovery 必须调用同一个 resolver-backed public surface：`speclite resolve artifact-documents --subject <prd|epics|architecture> --project-root {project-root} [--selection whole|sharded]`。各 Skill 不得自行复制、改写或定义 precedence。`--selection` 只代表当前 invocation 的显式选择，不得持久化，不得删除、覆盖、修改或自动迁移未选版本。
+
+| Discovery State | Canonical Behavior | Continuation |
+| --- | --- | --- |
+| `whole-only` | 只消费 subject directory 中的 canonical whole document。 | Continue |
+| valid `sharded-only` | 只消费 `index.md` 及其明确声明的 shards。 | Continue |
+| `whole+sharded` 且无显式 selection | 不选择、不混合；报告 ambiguity 并请求人工选择。 | Block |
+| `whole+sharded` 且当前 invocation 显式选择 `whole` | Canonical whole 与 canonical `index.md` entry 均先通过安全校验；只读取并消费 whole，记录未选 `index.md`，不读取或解析其 shard graph。 | Continue |
+| `whole+sharded` 且当前 invocation 显式选择 `sharded` | 完整验证并消费 sharded index 及其声明 shards，记录未选 whole。 | Continue |
+| shards 存在但缺 `index.md` | 报告 invalid sharded shape。 | Block |
+| index 引用缺失、越出 subject directory（含 symlink escape）或不可读 shard | 报告 broken shard reference。 | Block |
+| whole 与有效 sharded input 均不存在 | 报告 subject document missing。 | Block |
+
+Canonical whole document 与 canonical `index.md` 自身必须先通过 `lstat`、readability、`realpath` subject containment 与 dereferenced target regular-file 校验；canonical whole entry 为 non-file/unreadable 时必须在 shape、selection、index graph 与 mismatch probe 处理前，以 `artifact-path.subject-document-missing` / `reason=canonical-whole-unreadable` block。若 symlink 指向 subject directory 外，必须使用既有 `artifact-path.symlink-escape` block，`actualConsumedPath=null`、`consumedPaths=[]`，不得读取或消费逃逸目标。位于 subject directory 内且最终 target 为 readable regular file 的 canonical entry symlink 可以继续按 normal whole/sharded discovery 处理；由合法 `index.md` 声明的 shard target 逃逸仍映射为 `artifact-path.broken-shard-reference`。显式 `selection=whole` 只豁免未选 `index.md` 内容及 shard graph 的读取与验证，不豁免 canonical index entry 自身的 entry safety；无 selection 或 `selection=sharded` 时仍须完整验证 index graph。Shard-candidate recursive scan 只允许在 canonical `index.md` 不存在、需要判定 `shards-without-index` 时执行；`index.md` 存在时不得扫描未声明 subtree。该必要 scan 的 root 或 nested directory 因 non-`ENOENT` failure 无法枚举时，必须使用 `artifact-path.invalid-sharded-document-shape` / `reason=shard-candidate-scan-unreadable`、`discoveryShape=invalid-sharded` block，并仅记录实际失败目录的 project-relative POSIX evidence；不得继续 mismatch probes、吞为空集合或泄露 raw filesystem error。
+
+`index.md` shard link grammar 采用 bounded CommonMark-compatible subset 且不得新增 runtime dependency：支持 inline local Markdown links 与 reference-style local Markdown links。Destination 必须按 `parse -> strip query/fragment -> single percent-decode -> portable/subject containment/readability` 顺序处理。External scheme 与 network-path links 不作为 shard。Malformed destination、undefined reference-style link、unsupported local-ish destination、越界或不可读 local Markdown destination 不得静默忽略，必须使用 `artifact-path.broken-shard-reference` block，并在 details 中记录 `referenceKind`。Declared shard consumption 必须保留 `index.md` 首次声明顺序并按首次出现去重；direct、normalized 或 repeated `index.md` self-link 必须确定性排除，不得重复加入 `declaredShardPaths` 或 `consumedPaths`。
+
+每次 discovery evidence 必须记录 `resolvedRoot`、`resolutionMode`、`subjectDirectory`、`actualConsumedPath`、`consumedPaths`、`declaredShardPaths`、`discoveryShape`、`ambiguityStatus`、invocation selection value/source、`unselectedPath`、`continuation` 与 stable issues。Block result 的 `actualConsumedPath` 必须为 `null`，`consumedPaths` 必须为空；对应 `SPEC 07` IDs 为 `artifact-path.ambiguous-subject-document-shape`、`artifact-path.invalid-sharded-document-shape`、`artifact-path.broken-shard-reference`、`artifact-path.subject-document-missing`，以及 canonical whole/index 自身逃逸时的 `artifact-path.symlink-escape`。Resolver 和 consumer 在 block 前后必须保持零 artifact write 与零 progress mutation。
+
+Existing explicit roots 继续权威；若 existing install 缺少 `solutioning_artifacts`，Architecture subject directory 使用 resolver 报告的 Planning fallback root 并标记 `legacy-compatible`。该兼容发现只读且不授权 migration、copy、rename、delete、config rewrite 或“迁移成功”声明。Config root 与实际 artifact location 不一致时使用 `artifact-path.config-artifact-mismatch` 诊断并 block，不得在 discovery 中搜索第二 root 作为隐式 fallback。允许的只读 diagnostic probes 仅限以下 bounded candidates：PRD 探测历史 `{planning_artifacts}/prd.md`；Epics 探测历史 `{planning_artifacts}/epics.md`；Architecture 探测历史 `{planning_artifacts}/architecture.md`，且当 `solutioning_artifacts` 为 explicit 配置时额外探测 Planning architecture subject 的 canonical whole 与 `index.md`。Probe 命中只产生 deterministic mismatch evidence，不授权消费、迁移、复制、删除、config rewrite 或 fallback continuation；若多候选命中，按本段声明顺序记录 `candidatePaths`。
 
 `{project-root}` 是 runtime config 中允许持久化的 portable token，不是 raw absolute path。七类 artifact placeholders 是 logical placeholders；它们可以在 runtime config 中展开为 `{project-root}/...`，但任何 filesystem I/O 前必须解析为当前 target project root 下的真实路径。Public report、manifest projection、audit result 和 fixture snapshot 中持久化路径时，必须记录 display-safe project-relative POSIX path，不得泄露真实 absolute path、home directory、drive letter 或 temporary/cache path。
 
@@ -81,6 +112,8 @@ Fresh install 的 phase-owned subject directories 必须保持单一 canonical p
 - Existing install 已显式配置的 `planning_artifacts`、`implementation_artifacts`、`devops_artifacts` 和 `project_knowledge` 继续权威。
 - Legacy fallback 只补足 existing install 缺少的新增 `brainstorming_artifacts`、`analysis_artifacts` 和 `solutioning_artifacts`，不得自动把 fallback value 回写到 config。
 - Fallback resolution 必须可报告为 `legacy-compatible`；它不得表示 artifact migration 已完成。
+- `analysis_artifacts.resolutionMode = legacy-compatible` 时，Product Brief 和 PRFAQ 可以发现旧配置时代已存在的 `{analysis_artifacts}/product-brief-{project_name}.md` 与 `{analysis_artifacts}/prfaq-{project_name}.md` root-level main artifact；若新的 subject-directory main artifact 已存在则必须优先使用新路径。只有 legacy root-level main artifact 存在且 new subject main 不存在时，workflow 才可 resume/write in place 到 legacy root-level main artifact。若两者都不存在，则创建新的 subject-directory main artifact。Product Brief distillate、PRFAQ stage/resume updates、distillate 和 verdict 必须跟随所选 main artifact 的同一目录。
+- 上述 Product Brief/PRFAQ legacy root-level discovery 只在 `analysis_artifacts.resolutionMode` 精确为 `legacy-compatible` 时启用；`fresh-default` 或 `explicit-config` 的 analysis root 不得启用 legacy root-level discovery。
 - 普通 install、update 和 repair 不得根据新 defaults 移动、复制、重命名、删除或重写 workflow-owned artifacts。
 - 仅修改 config root、但实际 artifacts 仍在旧路径时，validator 必须产生 config/artifact mismatch 诊断，不得报告 migration success。
 - Explicit artifact migration 属于未来独立能力，不属于本 SPEC 当前 install/update/repair contract。
@@ -90,7 +123,7 @@ Fresh install 的 phase-owned subject directories 必须保持单一 canonical p
 - `docs/` 是 Primary Public Document；它不是 fresh-install `{project_knowledge}` default、alias 或 fallback。
 - Existing install 若显式配置 `project_knowledge = "{project-root}/docs"`，该 explicit value 继续权威；这只是 legacy configured value，不改变 `docs/` 的 steady-state public-document 定位。
 - Workflow-generated project knowledge 的 fresh-install default 是 `_speclite-output/project-knowledge-base/`。
-- Domain、market、technical research 必须写入 `{analysis_artifacts}/research/`；Product Brief 写入 `{analysis_artifacts}/product-brief/`；PRFAQ 写入 `{analysis_artifacts}/prfaq/`。这些 workflows 不是 project knowledge producers。
+- Domain、market、technical research 必须写入 `{analysis_artifacts}/research/`。Product Brief 默认写入 `{analysis_artifacts}/product-brief/`，PRFAQ 默认写入 `{analysis_artifacts}/prfaq/`；existing install 的 legacy-compatible exception 仅限上文定义的 root-level main artifact resume/write-in-place policy。这些 workflows 不是 project knowledge producers。
 
 ## Story Lifecycle Artifact Paths（Story 生命周期产物路径）
 

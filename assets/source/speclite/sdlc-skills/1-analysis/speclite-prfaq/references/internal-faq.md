@@ -1,6 +1,6 @@
 **Language:** Use `{communication_language}` for all output.
 **Output Language:** Use `{document_output_language}` for documents.
-**Output Location:** `{planning_artifacts}`
+**Output Location:** selected directory of `{prfaq_main_artifact}`
 **Coaching stance:** Be direct, challenge vague thinking, but offer concrete alternatives when the user is stuck — tough love, not tough silence.
 **Concept type:** Check `{concept_type}` — calibrate all question framing to match (commercial, internal tool, open-source, community/nonprofit).
 
@@ -38,7 +38,7 @@ Generate questions calibrated to context and best-effort answers. Flag high-risk
 
 ## Updating the Document
 
-Append the Internal FAQ section to the output document. Update frontmatter: `status: "internal-faq"`, `stage: 4`, `updated` timestamp.
+Append the Internal FAQ section to the output document at `{prfaq_main_artifact}`. Update frontmatter: `status: "internal-faq"`, `stage: 4`, `updated` timestamp.
 
 ## Coaching Notes Capture
 

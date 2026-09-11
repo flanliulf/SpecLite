@@ -1,9 +1,20 @@
 import type { Command } from "commander";
 import process from "node:process";
 import { formatCliMessage, getCliMessage, resolveCliLocale, type CliLocale } from "../cli/messages.js";
+import {
+  resolveArtifactDocument,
+  type ArtifactDocumentSelection,
+  type ArtifactDocumentSubject,
+} from "../config/artifact-document-discovery.js";
+import {
+  createArtifactRootProjections,
+  resolveArtifactRootsFromProjectConfig,
+  type ArtifactRootResolutionLifecycle,
+} from "../config/artifact-root-resolver.js";
 import { resolveProjectConfig } from "../config/config-reader.js";
 import { resolveSkillCustomization, type ResolverResult } from "../config/customization-reader.js";
 import { createResolveIssue } from "../config/resolve-diagnostics.js";
+import { RESOLVE_ARTIFACT_ROOTS_SCHEMA_VERSION } from "../config/resolve-output-schema.js";
 import type { ResolveHumanOutcome } from "../config/resolve-output-schema.js";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 
@@ -22,6 +33,18 @@ type ResolveConfigOptions = {
 
 type ResolveCustomizationOptions = ResolveConfigOptions & {
   skill?: string;
+};
+
+type ResolveArtifactRootsOptions = {
+  projectRoot?: string;
+  lifecycle?: string;
+  human?: boolean;
+  locale?: string;
+};
+
+type ResolveArtifactDocumentsOptions = ResolveArtifactRootsOptions & {
+  subject?: string;
+  selection?: string;
 };
 
 export function registerResolveCommand(program: Command, io: ResolveCommandIo): void {
@@ -107,6 +130,153 @@ export function registerResolveCommand(program: Command, io: ResolveCommandIo): 
         fallbackWarning: options.projectRoot === undefined ? "project root search" : undefined,
       });
     });
+
+  resolve
+    .command("artifact-roots")
+    .description("Resolve SPEC 09 artifact roots with resolver modes and provenance.")
+    .option("--project-root <projectRoot>", "Project root containing _speclite.")
+    .option("--lifecycle <lifecycle>", "Artifact root lifecycle: existing or fresh.", "existing")
+    .option("--human", "Render opt-in human-readable resolver support output.")
+    .option("--locale <locale>", "Render human-readable resolve output with locale: zh-CN or en-US.")
+    .action(async (options: ResolveArtifactRootsOptions) => {
+      const locale = resolveCliLocale({ flag: options.locale, env: process.env });
+      if (options.projectRoot === undefined) {
+        writeFailure(io, missingOptionIssue("--project-root"), {
+          human: options.human ?? false,
+          locale,
+          command: "artifact-roots",
+          requestedKeys: [],
+        });
+        return;
+      }
+
+      const lifecycle = parseArtifactRootLifecycle(options.lifecycle);
+      if (lifecycle === undefined) {
+        writeFailure(io, invalidLifecycleIssue(), {
+          human: options.human ?? false,
+          locale,
+          command: "artifact-roots",
+          requestedKeys: [],
+        });
+        return;
+      }
+
+      const rootResult = await resolveArtifactRootsFromProjectConfig({
+        projectRoot: options.projectRoot,
+        lifecycle,
+      });
+      const value = rootResult.ok
+        ? {
+            schemaVersion: RESOLVE_ARTIFACT_ROOTS_SCHEMA_VERSION,
+            lifecycle,
+            roots: createArtifactRootProjections(rootResult.roots),
+            configSources: rootResult.configSources ?? {},
+          }
+        : {};
+
+      writeResolveResult(io, {
+        value,
+        issues: rootResult.issues,
+        exitCode: rootResult.ok ? 0 : 1,
+        sources: rootResult.configSources ?? {},
+      }, {
+        human: options.human ?? false,
+        locale,
+        command: "artifact-roots",
+        requestedKeys: [],
+        sourcePaths: [
+          "_speclite/config.toml",
+          "_speclite/config.user.toml",
+          "_speclite/custom/config.toml",
+          "_speclite/custom/config.user.toml",
+        ],
+        resolvedLayer: "SPEC 09 artifact-root resolver",
+      });
+    });
+
+  resolve
+    .command("artifact-documents")
+    .description("Resolve PRD, Epics, or Architecture whole/sharded discovery without writes.")
+    .option("--subject <subject>", "Document subject: prd, epics, or architecture.")
+    .option("--selection <selection>", "Invocation-scoped selection: whole or sharded.")
+    .option("--project-root <projectRoot>", "Project root containing _speclite.")
+    .option("--lifecycle <lifecycle>", "Artifact root lifecycle: existing or fresh.", "existing")
+    .option("--human", "Render opt-in human-readable resolver support output.")
+    .option("--locale <locale>", "Render human-readable resolve output with locale: zh-CN or en-US.")
+    .action(async (options: ResolveArtifactDocumentsOptions) => {
+      const locale = resolveCliLocale({ flag: options.locale, env: process.env });
+      const context: ResolveHumanContext = {
+        human: options.human ?? false,
+        locale,
+        command: "artifact-documents",
+        requestedKeys: [],
+        sourcePaths: [
+          "_speclite/config.toml",
+          "_speclite/config.user.toml",
+          "_speclite/custom/config.toml",
+          "_speclite/custom/config.user.toml",
+        ],
+        resolvedLayer: "SPEC 09 artifact-document discovery resolver",
+      };
+      if (options.projectRoot === undefined) {
+        writeFailure(io, missingOptionIssue("--project-root"), context);
+        return;
+      }
+      const subject = parseArtifactDocumentSubject(options.subject);
+      if (subject === undefined) {
+        writeFailure(io, invalidResolveOptionIssue("--subject"), context);
+        return;
+      }
+      const selection = parseArtifactDocumentSelection(options.selection);
+      if (options.selection !== undefined && selection === undefined) {
+        writeFailure(io, invalidResolveOptionIssue("--selection"), context);
+        return;
+      }
+      const lifecycle = parseArtifactRootLifecycle(options.lifecycle);
+      if (lifecycle === undefined) {
+        writeFailure(io, invalidLifecycleIssue(), context);
+        return;
+      }
+
+      const rootResult = await resolveArtifactRootsFromProjectConfig({
+        projectRoot: options.projectRoot,
+        lifecycle,
+      });
+      const rootField = subject === "architecture" ? "solutioning_artifacts" : "planning_artifacts";
+      const root = rootResult.roots.find((candidate) => candidate.field === rootField);
+      const planningRoot = rootResult.roots.find((candidate) => candidate.field === "planning_artifacts");
+      if (!rootResult.ok || root === undefined) {
+        writeResolveResult(io, {
+          value: {},
+          issues: rootResult.issues,
+          exitCode: 1,
+          sources: rootResult.configSources ?? {},
+        }, context);
+        return;
+      }
+
+      const result = await resolveArtifactDocument({
+        projectRoot: options.projectRoot,
+        subject,
+        root,
+        ...(planningRoot === undefined ? {} : { planningRoot }),
+        ...(selection === undefined ? {} : { selection }),
+      });
+      if (options.human) {
+        writeResolveResult(io, {
+          value: result,
+          issues: result.issues,
+          exitCode: result.ok ? 0 : 1,
+          sources: rootResult.configSources ?? {},
+        }, context);
+        return;
+      }
+      io.stdout(`${JSON.stringify(result, null, 2)}\n`);
+      if (result.issues.length > 0) {
+        io.stderr(`${result.issues.map((issue) => JSON.stringify(issue)).join("\n")}\n`);
+      }
+      io.setExitCode(result.ok ? 0 : 1);
+    });
 }
 
 function writeResolveResult(
@@ -150,11 +320,47 @@ function missingOptionIssue(optionName: "--project-root" | "--skill"): Validatio
   });
 }
 
+function invalidResolveOptionIssue(optionName: "--subject" | "--selection"): ValidationIssue {
+  return createResolveIssue({
+    issueId: "runtime-path.missing-entry",
+    severity: "error",
+    affectedPath: optionName,
+    component: "resolve-command",
+    status: "invalid-args",
+  });
+}
+
+function invalidLifecycleIssue(): ValidationIssue {
+  return createResolveIssue({
+    issueId: "runtime-path.missing-entry",
+    severity: "error",
+    affectedPath: "--lifecycle",
+    component: "resolve-command",
+    status: "invalid-args",
+  });
+}
+
+function parseArtifactRootLifecycle(value: string | undefined): ArtifactRootResolutionLifecycle | undefined {
+  if (value === undefined) return "existing";
+  if (value === "existing" || value === "fresh") return value;
+  return undefined;
+}
+
+function parseArtifactDocumentSubject(value: string | undefined): ArtifactDocumentSubject | undefined {
+  if (value === "prd" || value === "epics" || value === "architecture") return value;
+  return undefined;
+}
+
+function parseArtifactDocumentSelection(value: string | undefined): ArtifactDocumentSelection | undefined {
+  if (value === "whole" || value === "sharded") return value;
+  return undefined;
+}
+
 function collectKey(value: string, previous: string[]): string[] {
   return [...previous, value];
 }
 
-type ResolveHumanCommand = "config" | "customization";
+type ResolveHumanCommand = "config" | "customization" | "artifact-roots" | "artifact-documents";
 
 type ResolveHumanContext = {
   human: boolean;
@@ -223,6 +429,16 @@ function renderResolveHumanOutput(
         locale,
         "resolveLegalCommand",
         "speclite resolve customization --skill <skillDir> [--project-root <projectRoot>] [--key <dottedKey>] [--human]",
+      ),
+      formatResolveBullet(
+        locale,
+        "resolveLegalCommand",
+        "speclite resolve artifact-roots --project-root <projectRoot> [--lifecycle existing|fresh] [--human]",
+      ),
+      formatResolveBullet(
+        locale,
+        "resolveLegalCommand",
+        "speclite resolve artifact-documents --subject <prd|epics|architecture> --project-root <projectRoot> [--selection whole|sharded] [--human]",
       ),
     );
     for (const issue of result.issues) {

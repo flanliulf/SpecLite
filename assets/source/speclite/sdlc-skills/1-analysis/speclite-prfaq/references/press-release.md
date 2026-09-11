@@ -1,6 +1,6 @@
 **Language:** Use `{communication_language}` for all output.
 **Output Language:** Use `{document_output_language}` for documents.
-**Output Location:** `{planning_artifacts}`
+**Output Location:** selected directory of `{prfaq_main_artifact}`
 **Coaching stance:** Be direct, challenge vague thinking, but offer concrete alternatives when the user is stuck — tough love, not tough silence.
 
 # Stage 2: The Press Release
@@ -47,7 +47,7 @@ If running headless: draft the complete press release based on available inputs 
 
 ## Updating the Document
 
-After each section is refined, append it to the output document at `{planning_artifacts}/prfaq-{project_name}.md`. Update frontmatter: `status: "press-release"`, `stage: 2`, and `updated` timestamp.
+After each section is refined, append it to the output document at `{prfaq_main_artifact}`. Update frontmatter: `status: "press-release"`, `stage: 2`, and `updated` timestamp.
 
 ## Coaching Notes Capture
 

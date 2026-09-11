@@ -39,8 +39,13 @@ Run `speclite resolve config --project-root {project-root}` and resolve merged r
 - Use `{user_name}` for greeting
 - Use `{communication_language}` for all communications
 - Use `{document_output_language}` for output documents
-- Use `{planning_artifacts}` for output location and artifact scanning
-- Use `{project_knowledge}` for additional context scanning
+
+Run `speclite resolve artifact-roots --project-root {project-root}` and resolve artifact root fields from the returned `roots[]` entries:
+- Use `analysis_artifacts.resolvedRoot` as `{analysis_artifacts}` for output location
+- Use `project_knowledge.resolvedRoot` as `{project_knowledge}` for additional context scanning
+- Preserve each root's `resolutionMode` and provenance for audit notes
+
+If the artifact-root command exits non-zero, or either required root is missing, HALT. Do not hand-write fallback logic in this workflow.
 
 ### Step 5: Greet the User
 
@@ -79,7 +84,7 @@ After gathering the topic and goals:
 2. Set `research_topic = [discovered topic from discussion]`
 3. Set `research_goals = [discovered goals from discussion]`
 4. Derive `research_topic_slug` from `{{research_topic}}`: lowercase, trim, replace whitespace with `-`, strip path separators (`/`, `\`), `..`, and any character that is not alphanumeric, `-`, or `_`. Collapse repeated `-` and strip leading/trailing `-`. If the result is empty, use `untitled`.
-5. Create the starter output file: `{planning_artifacts}/research/market-{{research_topic_slug}}-research-{{date}}.md` with exact copy of the `./research.template.md` contents
+5. Create the starter output file: `{analysis_artifacts}/research/market-{{research_topic_slug}}-research-{{date}}.md` with exact copy of the `./research.template.md` contents
 6. Load: `./steps/step-01-init.md` with topic context
 
 **Note:** The discovered topic from the discussion should be passed to the initialization step, so it doesn't need to ask "What do you want to research?" again - it can focus on refining the scope for market research.
@@ -89,7 +94,8 @@ After gathering the topic and goals:
 
 ## Speclite Runtime Guardrails
 
-- Runtime config is read from merged output of `speclite resolve config --project-root {project-root}`.
+- Runtime config fields that are not artifact roots are read from merged output of `speclite resolve config --project-root {project-root}`.
+- Artifact roots are read from `speclite resolve artifact-roots --project-root {project-root}` and must use the command's `resolvedRoot`, `resolutionMode`, and provenance.
 - `config.toml.example` in this Skill package is a field-structure reference only and is not a runtime fallback.
 - Customization is resolved from merged JSON output of `speclite resolve customization --skill {skill-root} --project-root {project-root}`.
 - Resolve customization with `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow`.

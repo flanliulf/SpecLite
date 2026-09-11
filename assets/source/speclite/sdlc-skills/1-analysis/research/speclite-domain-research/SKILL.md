@@ -14,7 +14,7 @@ metadata:
     源入口说明：Conduct domain and industry research. Use when the user says wants to do domain research for a topic or industry
 
 [核心能力]
-    - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并通过 `speclite resolve config --project-root {project-root}` 加载 merged runtime config。
+    - **Speclite 激活解析**：解析三层 customize（base→team→user）、`workflow.persistent_facts` 和 `workflow.on_complete`，并通过 `speclite resolve config --project-root {project-root}` 加载非 artifact-root runtime config，通过 `speclite resolve artifact-roots --project-root {project-root}` 加载 resolved artifact roots。
     - **源制品发现与上下文加载**：按 workflow 规约读取项目制品、配置字段、历史上下文和必要数据文件，保持源流程的输入发现语义。
     - **步骤化工作流执行**：按 `references/workflow-details.md` 与拆分后的 reference/step 文件逐步执行，遵守顺序、HALT 条件、菜单等待和状态推进规则。
     - **模板化输出生成**：使用 assets 中的模板或示例骨架生成文档、报告、规格或交付产物，输出语言服从 `document_output_language`。
@@ -25,7 +25,7 @@ metadata:
     裸路径相对于 `{skill-root}` 解析；`{project-root}` 是目标项目工作目录；`{speclite-runtime-root}` 是 `{project-root}/_speclite`；`{skill-name}` 是目录 basename。
 
 [激活流程]
-    触发后先解析 `workflow`，执行 `activation_steps_prepend`，加载 `persistent_facts`，运行 `speclite resolve config --project-root {project-root}`，按 `communication_language` 与用户沟通，并执行 `activation_steps_append`。配置文件缺失或关键字段为空时必须 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
+    触发后先解析 `workflow`，执行 `activation_steps_prepend`，加载 `persistent_facts`，运行 `speclite resolve config --project-root {project-root}` 与 `speclite resolve artifact-roots --project-root {project-root}`，按 `communication_language` 与用户沟通，并执行 `activation_steps_append`。配置文件缺失、关键字段为空或必需 artifact root 缺失时必须 HALT；`config.toml.example` 只说明字段结构，不作为 runtime fallback。
 
     customization 必须通过 `speclite resolve customization --skill {skill-root} --project-root {project-root}` 读取 merged JSON；`workflow.on_complete` 使用 `speclite resolve customization --skill {skill-root} --project-root {project-root} --key workflow.on_complete` 解析。默认 activation 不手写 TOML merge，不使用 `--human` 作为 machine input。
 
@@ -40,7 +40,8 @@ metadata:
     - 名称、目录与 YAML `name` 字段保持 kebab-case 一致：`speclite-domain-research`。
     - `references/workflow-details.md` 和配套 reference 文件均为有效执行规约，不是背景资料。
     - 模板或示例骨架位于 `assets/research.template.md`。
-    - 如工作流需要项目配置，必须读取目标项目运行时配置。
+    - 研究输出默认写入 `{analysis_artifacts}/research/`；可读取 `{project_knowledge}` 作为上下文，但不得把 research 输出写入 `{project_knowledge}` 或 `docs/`。
+    - 如工作流需要项目配置，必须读取目标项目运行时配置与 resolved artifact roots。
     - `config.toml.example` 仅作字段结构参考，不作为 runtime fallback。
     - 当前运行规约不得依赖旧运行目录、旧 YAML 配置或旧命令命名空间。
     - 输出文档末尾必须追加 `*本文档由 speclite-domain-research Skill 自动生成*` 标注。
