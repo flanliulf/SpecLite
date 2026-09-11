@@ -265,6 +265,9 @@ Reserved MVP issue ids:
 - `artifact-path.fixture-write-failed`
 - `artifact-path.missing-required-metadata`
 - `artifact-path.invalid-required-metadata`
+- `artifact-path.prd-validation-report-exists`
+
+`artifact-path.prd-validation-report-exists` is the blocking issue for an existing same-day `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` before the first PRD validation report or progress write. Severity is `error`, continuation is `block`, `affectedPath` is the exact project-relative target, details use `reason: "prd-validation-report-exists"`, and `suggestedNextStep` is exactly `保留并移走或删除既有报告后重新运行`. The producer must not reuse matching content, overwrite, append, truncate, delete, create suffix/temp reports, or mutate progress.
 
 ### `file-integrity`
 

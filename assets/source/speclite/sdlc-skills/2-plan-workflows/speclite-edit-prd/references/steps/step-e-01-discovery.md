@@ -84,10 +84,10 @@ Once PRD path is provided:
 
 **Check if validation report exists in the PRD folder:**
 
-```bash
-# Look for most recent validation report in the PRD folder
-ls -t {prd_folder_path}/validation-report-*.md 2>/dev/null | head -1
-```
+- Enumerate the PRD subject directory read-only. Recognize canonical historical evidence whose basename is exactly `prd-validate-report-{yyyy-MM-dd}.md` with a valid calendar date.
+- Legacy historical discovery must also recognize existing `validation-report-*.md`, `prd-validation-report-*.md`, `prd-validation-*.md`, `validate-prd-report-*.md`, and undated `prd-validation-report.md` files.
+- Before loading any canonical or legacy candidate, construct the logical Planning root and logical PRD owner from the portable project-relative resolver result; the logical PRD owner must be exactly `{planning_artifacts}/prd`. Require `realProject` to exist and be a directory. Require the logical Planning root to exist and resolve to a directory, then require `realPlanning` to be the same as or a descendant of `realProject`. Require the logical PRD owner to exist and pass a no-follow `lstat` as a directory or inspected entry, resolve it to the directory `realPrdOwner`, and require the normalized physical path of `realPrdOwner` to equal exactly `realPlanning/prd`; containment inside `realPlanning` alone is insufficient. Only then require the candidate to be a portable project-relative path, exist, have readable bytes, pass a no-follow `lstat` as a regular file and not a symlink, and have its `realpath` remain the same as or a descendant of `realPrdOwner`. Any failed owner-chain or candidate check, including a symlink, non-file, unreadable or missing candidate, external escape, or project-internal cross-space or redirect, must fail closed before content is loaded or parsed and record project-relative rejection evidence.
+- Sort discovered evidence deterministically by the date encoded in a canonical basename when available, then by project-relative path. Do not rename, migrate, overwrite, delete, or treat a legacy basename as a new producer default.
 
 **If validation report found:**
 
