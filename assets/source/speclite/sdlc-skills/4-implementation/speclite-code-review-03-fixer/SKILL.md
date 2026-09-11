@@ -19,8 +19,6 @@ CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或�
 - 用于执行 evaluator 已接受且已限定范围的修复或验证义务。
 - 不用于自行评估 finding、吸收 deferred/TODO 项、改变需求边界、更新 Story/tracker 或授权 finalizer。
 
-- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
-
 ## Core Capabilities（核心能力）
 
 - **授权范围**：只消费 current evaluation 明确批准的 obligations。
@@ -35,7 +33,6 @@ CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或�
 ## Inputs（输入）
 
 - Story identity、`reviewSeries`、current evaluation 和 `mode=patch | verify-only`。
-- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
 - `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`。
 
 ## Workflow（工作流）

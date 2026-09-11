@@ -19,8 +19,6 @@ Mark a Story done only when the current CR v2 state, fresh completion gate, and 
 - Use it to validate final CR/gate/tracker eligibility and apply minimal Story state synchronization.
 - Do not use it to apply fixes, add tests, register TODOs, infer prose approval, commit Git changes, or close an Epic automatically.
 
-- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
-
 ## Core Capabilities
 
 - **Exact eligibility**: Accept only a current, exactly bound, closable v2 verdict.
@@ -35,7 +33,6 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - Story identity, `reviewSeries`, and the current evaluation, or enough information to locate it independently.
-- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
 - `confirmationPolicy`, `authorizationSource`, `orchestrationMode`, and `handoffTarget`; default missing confirmation policy to `explicit`, and HALT when `preauthorized` lacks an `authorizationSource`.
 
 ## Workflow

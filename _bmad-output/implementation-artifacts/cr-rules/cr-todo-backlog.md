@@ -7,7 +7,8 @@
 
 | 状态 | 数量 |
 |------|------|
-| 🔴 open | 14 |
+| 🔴 open | 9 |
+| ⏸ superseded-by-restart | 5 |
 | 🟡 in-progress | 0 |
 | ✅ resolved | 8 |
 
@@ -25,10 +26,10 @@
 - **紧迫度**: T1（原技术等级 P1；用户显式接受当前交付风险，未修复、未验证关闭）
 - **发现指纹**: sha256:3efe0732e9f9a20aa9940913efe212d59102bf583c2ffbe8a551e123e5bacb20
 - **类别**: other
-- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:291-311,485-537` 对 unfinished current v2 artifact 仅验证 identity 五字段，identity-only 残片仍可能把 title-bearing legacy directory 选为后续写入 root。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:291-311,485-537` 对 unfinished current v2 artifact 仅验证 identity 五字段，identity-only 残片仍可能把 title-bearing legacy directory 选为后续写入 root。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。所指 `resolve-cr-directory.mjs` 已随 2026-09-11 Story 11.9 restart 删除（决策 C：历史产物归档于 `11-9-code-review/superseded-main/`）。
 - **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
 - **建议时机**: 下次触及 unfinished current-v2 authenticity、legacy-resume 认证或相应 classifier 前必须处理。关闭证据须包含与 artifact family/current state 相称的最小 v2 authenticity 实现、合法 `FINDINGS_REPORTED`/`FIX_REQUIRED` unfinished recovery control、identity-only 残片 fail-close 与 zero-write focused regression，并由后续 fresh review/evaluation 将本 fingerprint 判为 resolved；不得复用 terminal-only DONE 条件。
-- **状态**: open
+- **状态**: superseded-by-restart
 - **解决记录**:
 
 ### TODO-019: 使非法 `~round` near-current delimiter fail-close
@@ -37,10 +38,10 @@
 - **紧迫度**: T1（原技术等级 P1；用户显式接受当前交付风险，未修复、未验证关闭）
 - **发现指纹**: sha256:6a902447d67688642c6465da4fe74e1914a6011c0a9214b3346d734836dbfdc8
 - **类别**: other
-- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:445-458` 的 artifact basename classifier 未把 selected series 后的非法 `~round` 识别为 `malformed-current-intent`，因此 near-current evidence 可能被静默归为 unrelated。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:445-458` 的 artifact basename classifier 未把 selected series 后的非法 `~round` 识别为 `malformed-current-intent`，因此 near-current evidence 可能被静默归为 unrelated。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。所指 `resolve-cr-directory.mjs` 已随 2026-09-11 Story 11.9 restart 删除（决策 C：历史产物归档于 `11-9-code-review/superseded-main/`）。
 - **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
 - **建议时机**: 下次触及 artifact basename classifier、round delimiter 或 `malformed-current-intent` 认证前必须处理。关闭证据须证明 exact Story/family/date/selected-series 下的非法 `~round` fail-close，并以 canonical、legacy、合法 other-series、ordinary-note、无分隔合法 series 与 zero-write focused regressions约束 matcher；还须由后续 fresh review/evaluation 将本 fingerprint 判为 resolved。
-- **状态**: open
+- **状态**: superseded-by-restart
 - **解决记录**:
 
 ### TODO-020: 拒绝 bounded inline list 中的 unquoted flow mapping
@@ -49,10 +50,10 @@
 - **紧迫度**: T1（原技术等级 P1；用户显式接受当前交付风险，未修复、未验证关闭）
 - **发现指纹**: sha256:dd07435baba8abce70cb0f54bdf7a7a43c42b020c7c42cb8dbe5325983813ddc
 - **类别**: other
-- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:695-715,780-854` 的 bounded inline-list grammar 会把 `declaredFiles: [src/a.ts: injected]` 这一 YAML flow mapping item 当作 path scalar，使非规范 predecessor 参与 DONE authentication。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:695-715,780-854` 的 bounded inline-list grammar 会把 `declaredFiles: [src/a.ts: injected]` 这一 YAML flow mapping item 当作 path scalar，使非规范 predecessor 参与 DONE authentication。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。所指 `resolve-cr-directory.mjs` 已随 2026-09-11 Story 11.9 restart 删除（决策 C：历史产物归档于 `11-9-code-review/superseded-main/`）。
 - **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
 - **建议时机**: 下次触及 predecessor inline-list grammar、artifact authentication 或相关 classifier 前必须处理。关闭证据须在既有 bounded grammar 中拒绝 unquoted colon+ASCII-whitespace flow-mapping item，同时保留 bare colon、quoted colon-space、authentic predecessor、ordinary producer list 与 zero-write controls；不得扩大为 whole-document YAML 或 quoted tracker key治理，并须由后续 fresh review/evaluation 将本 fingerprint 判为 resolved。
-- **状态**: open
+- **状态**: superseded-by-restart
 - **解决记录**:
 
 ### TODO-021: 保留 RFC3339 freshness 比较的完整小数秒精度
@@ -61,10 +62,10 @@
 - **紧迫度**: T2
 - **发现指纹**: sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244
 - **类别**: tech-debt
-- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:620-648,681-692` 接受任意长度 RFC3339 小数秒，却以 `Date.parse()` 的毫秒值比较 freshness；例如 `.9001Z` 与 `.9000Z` 可能被截为相同毫秒并错误通过。当前 producer 尚无超过毫秒精度的实证，故保持 evaluator 原 T2 处置，未修复、未验证关闭。
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:620-648,681-692` 接受任意长度 RFC3339 小数秒，却以 `Date.parse()` 的毫秒值比较 freshness；例如 `.9001Z` 与 `.9000Z` 可能被截为相同毫秒并错误通过。当前 producer 尚无超过毫秒精度的实证，故保持 evaluator 原 T2 处置，未修复、未验证关闭。所指 `resolve-cr-directory.mjs` 已随 2026-09-11 Story 11.9 restart 删除（决策 C：历史产物归档于 `11-9-code-review/superseded-main/`）。
 - **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
 - **建议时机**: 下次修改 freshness comparator、RFC3339 timestamp schema 或 timestamp producer 精度时处理。关闭证据须由 owner 明确保留完整允许精度或同步收窄 schema/producer，并以不同小数秒精度的先后、相等、时区等价及现有毫秒 producer focused regressions证明比较器与 contract 一致；随后由 fresh review/evaluation确认本 fingerprint resolved。
-- **状态**: open
+- **状态**: superseded-by-restart
 - **解决记录**:
 
 ### TODO-022: 定义并认证 superseded ordinal lineage
@@ -73,10 +74,10 @@
 - **紧迫度**: T2
 - **发现指纹**: sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483
 - **类别**: tech-debt
-- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:275-303,421-438` 当前只验证 superseded suffix 为正整数及 frontmatter identity，未认证 ordinal 连续性；缺口或重编号时历史 ordinal identity 可能变化。现有 contract 尚未定义缺口恢复、不可重编号或持久 registry，且该问题不影响 current artifact 唯一性、round 连续性或 current completion authentication，故保持 evaluator 原 T2 处置，未修复、未验证关闭。
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:275-303,421-438` 当前只验证 superseded suffix 为正整数及 frontmatter identity，未认证 ordinal 连续性；缺口或重编号时历史 ordinal identity 可能变化。现有 contract 尚未定义缺口恢复、不可重编号或持久 registry，且该问题不影响 current artifact 唯一性、round 连续性或 current completion authentication，故保持 evaluator 原 T2 处置，未修复、未验证关闭。所指 `resolve-cr-directory.mjs` 已随 2026-09-11 Story 11.9 restart 删除（决策 C：历史产物归档于 `11-9-code-review/superseded-main/`）。
 - **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
 - **建议时机**: 下次修改 supersession lineage/authentication 或需要把 ordinal 作为审计身份前处理。关闭证据须先由 owner 明确定义 gap、replacement、不可重编号或 registry 语义，再同步 resolver 与 focused tests 覆盖连续、缺口、重编号、合法历史副本及 current uniqueness；后续 fresh review/evaluation须确认本 fingerprint resolved。若 owner 决定 ordinal 仅为文件名 suffix，则须以明确 contract 决策关闭，不能冒充实现修复。
-- **状态**: open
+- **状态**: superseded-by-restart
 - **解决记录**:
 
 ### TODO-009: 对齐 `speclite-npm-publisher` fixture hash

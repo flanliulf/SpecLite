@@ -19,8 +19,6 @@ metadata:
 - 用于冻结一个 Story 的 current review scope、执行三层审查并生成 reviewer artifact。
 - 不用于评估 finding、执行修复、登记 TODO、同步 Story 状态或编排整个 Epic；这些任务分别交给 CR02–06 或 runner。
 
-- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
-
 ## Core Capabilities（核心能力）
 
 - **精确范围**：冻结并核对 declared、actual、excluded files 与 `scopeHash`。
@@ -35,7 +33,6 @@ metadata:
 ## Inputs（输入）
 
 - Story path、`storyId` 或 `storyKey`，以及 `reviewSeries`。
-- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
 - review scope manifest，或足够独立生成它的 development record/用户指定 commit range。
 - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
 

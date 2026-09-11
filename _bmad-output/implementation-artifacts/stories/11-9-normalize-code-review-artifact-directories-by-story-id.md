@@ -1,6 +1,6 @@
 # Story 11.9: Normalize Code Review Artifact Directories By Story ID（按 Story ID 统一 Code Review Artifact 目录）
 
-Status: review
+Status: in-progress
 
 ## Story（故事）
 
@@ -18,12 +18,32 @@ Status: review
 6. Goal records 固定在 `$cr_dir/goal-execute-records/`，继续使用 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。
 7. 审计并同步 orchestrator、CR01–06、shared contract/config、templates、help、metadata/contracts、scripts/hooks/fixtures/docs 及全部 `$cr_dir` expressions。
 8. Existing title-bearing CR directories 不自动迁移、重命名或删除。
-9. Legacy-only unfinished run 必须诊断并在一个目录内恢复；canonical+legacy 无法唯一判定 current round 时 stable conflict + stop，不猜测、不拆轮。
+9. Legacy-only unfinished run 必须诊断并在一个目录内恢复；"目录存在 series S 的未完成 run" 仅按 v2 文件名判定（直接子文件中存在 S 的 review summary 且不存在 S 的 finalizer 产物），不读取产物内容；canonical+legacy 同时含未完成 run 而无法唯一判定时 stable conflict + stop，不猜测、不拆轮。
 10. Negative scan 排除 active title-bearing patterns；仅 legacy fixtures/明确 compatibility docs 可分类保留。
 11. Tests 覆盖纯编号、任意 title 不影响、CR01–06 同 `$cr_dir`、goal records、legacy-only、dual-dir ambiguity 与 title traversal 无法越界。
 12. 不修改 report basenames、CR algorithm、round numbering 或 approval rules。
 
+## Threat Model & Non-Goals（威胁模型与非目标）
+
+> 2026-09-11 项目负责人裁决（决策 A），是本 Story restart 的前提；CR 各层不得重开。
+
+- 目录 resolver 面向**协作式本地文件系统**：使用者是同一仓库的开发者与 Skill 运行时，不是对抗方。
+- **In scope**：Story ID 数字归一化与 fail-close；canonical / legacy 目录归属；symlink 越界检测（复用 `src/fs/path-normalizer.ts` 的 `findProjectBoundarySymlinkEscape`）；按 v2 文件名判定未完成 run；ambiguity 稳定诊断且零 mutation。
+- **Out of scope（明示）**：hard link、CRLF / 行尾变体、TOCTOU 竞争、伪造 frontmatter 或正文伪字段、产物真伪认证、审批历史重放、tracker 认证、freshness 比较。resolver 只看文件名，不读文件内容；审批与 round 有效性继续归 runner 与 CR06（AC12）。
+- **CR 契约**：命中上述 out-of-scope 类别的 finding 一律按契约归 `dismiss`，引用本章节即可，不得为其编写代码或测试。
+
 ## Tasks / Subtasks（任务 / 子任务）
+
+### Restart 2.0（2026-09-11 重启）
+
+- [ ] 回退 9 个 canonical CR 包与 `test/code-review-contract.test.ts` 到 `ff7528d`，删除 `resolve-cr-directory.mjs` / `test/cr-directory-resolution.test.ts` / title-bearing fixture，归档旧 CR 产物到 `superseded-main/`。
+- [ ] TDD：先写 `test/cr-directory.test.ts`（RED），再实现 `src/config/cr-directory.ts` 与 `speclite resolve cr-directory` 子命令（GREEN）。
+- [ ] 契约与 Skill 同步：`cr-contract.md` 增加 ≤15 行 "CR Directory Resolution"；runner Step 0 调用一次 CLI；CR01–06 只消费传入 `crDir`；8 包 CHANGELOG 写 restart 条目。
+- [ ] 人工复核混入 11.4 / 11.8 改动的文档行，只删 `directoryContext` / `validate-context` 表述。
+- [ ] 重新生成 fresh-install fixture 与 packaging manifest；`npx vitest run`、`npm run docs:check`、`npm run release:check` 通过。
+- [ ] CR 闭环 ≤3 轮（reviewSeries=`restart`），边界外 finding 按 Threat Model 归 `dismiss`。
+
+### Historical（1.0 / 1.1，已由 restart 取代）
 
 - [x] 核验 11.1–11.8 completion Gates，运行 11.9 kickoff，冻结 canonical/legacy directory contract。
 - [x] 先建立 normalization、propagation、legacy recovery、dual-directory conflict 与 traversal failing tests。
@@ -42,6 +62,14 @@ Status: review
 - [x] 完成 build、focused/full tests、docs、canonical strict、scoped lint、diff audit 和隔离 fixed-input packaging，记录真实失败与基线对照后交接 fresh CR。
 
 ## Dev Notes（开发备注）
+
+### Restart Implementation Location（重启实现位置，决策 B）
+
+- 与 Story 11.1 / 11.5 同构：可执行逻辑放在 `src/config/cr-directory.ts`，通过 `speclite resolve cr-directory --story-id <N.N|N-N> --review-series <series> --project-root <root> [--human]` 暴露，输出 SPEC 01 CommandResult；schema 登记在 `src/config/resolve-output-schema.ts`；`docs/reference/cli.md` 补一行。
+- Skill 只调用 CLI：runner Step 0 解析一次，把 `crDir` / `canonicalCrDir` / `compatibilityMode` / `legacyArtifactPaths` 传给 CR01–06；canonical Skill 包**不再**随包投影 `.mjs` 脚本。
+- 不引入新状态：无 ownership marker、无 per-write validator、无 frontmatter 解析器；`implementationArtifacts` 来自 11.1 的 `resolveArtifactRootsFromProjectConfig`。
+- Ambiguity issue 沿用 kickoff gate 已冻结定义：`cr-directory.ambiguous-resume-root` / `lifecycle` / `error` / `block`，details 只含 `storyId`、`canonicalCrDir`、byte-wise 排序去重的 `legacyCrDirs`、`reviewSeries`、`roundEvidence`、`reason`，不含绝对路径。
+- 1.0 / 1.1 的 Dev Agent Record 与 File List 保留为历史，不再是当前实现事实。
 
 ### Current Verified Baseline（当前已验证基线）
 
@@ -169,6 +197,7 @@ OpenAI GPT-5.6 Sol (medium)
 | 2026-09-02 | 0.1 | 创建 CR Story-ID-only root、single propagation、legacy/ambiguity 与 evidence 上下文。 | Fancyliu / Codex |
 | 2026-09-05 | 1.0 | 实现 numeric-only resolver、single `crDir` propagation、legacy resume、ambiguity pre-write stop，并完成回归与 Completion Gate。 | Codex |
 | 2026-09-09 | 1.1 | 以 directory-only resolver + production frozen-context validator 替换审批重放实现，保留原 CR owner，完成隔离验证并交接 fresh CR。 | Codex |
+| 2026-09-11 | 2.0 | Restart：依 Correct Course 裁决（A 威胁模型边界 / B 实现迁入 `src/` + CLI / C 历史产物归档）回退 1.0–1.1 实现到 `ff7528d`，新增 Threat Model 章节，AC9 改为按 v2 文件名判定未完成 run，TODO-018~022 标 `superseded-by-restart`。 | Fancyliu / Claude |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*

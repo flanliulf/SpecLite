@@ -20,8 +20,6 @@ Extract candidate rules from evaluator-accepted v2 CR evidence and write a durab
 - Do not modify global documents by default; apply suggestions only after the user separately authorizes exact target files.
 - Do not reevaluate findings, apply fixes, register TODOs, or advance Story state.
 
-- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
-
 ## Core Capabilities
 
 - **CR history analysis**: Read Story review, evaluation, and fix records.
@@ -39,7 +37,6 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - Story identity, `reviewSeries`, and the current evaluation, or enough information to locate it independently.
-- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
 - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
 
 ## Workflow

@@ -1,9 +1,5 @@
 # Changelog（变更记录）
 
-## [Unreleased] - 2026-09-09
-
-- finalizer 消费 frozen `directoryContext`，tracker/finalizer report 写入前调用 production validator；原 coordinated-write 与 approval 检查不变。
-
 ## [2.1.1] - 2026-08-26
 
 ### Changed（变更）

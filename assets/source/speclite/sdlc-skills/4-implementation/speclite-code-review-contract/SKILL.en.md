@@ -16,8 +16,6 @@ This Skill owns the shared contract consumed by SpecLite CR01–06 and related r
 
 This Skill is read-only. It does not create review, evaluation, fix, TODO, or finalizer artifacts and does not modify source code, Stories, or trackers.
 
-- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
-
 ## Core Capabilities
 
 - **Single contract source**: Treats `references/cr-contract.md` as the only normative CR v2 definition.
@@ -25,14 +23,13 @@ This Skill is read-only. It does not create review, evaluation, fix, TODO, or fi
 - **Structural validation**: Validates schemas, exact verdicts, Story identity, series, round, scope, and source hashes.
 - **Freshness validation**: Checks freshness relationships across reviews, evaluations, fix records, and Flow Gates.
 - **Closeout validation**: Validates canonical paths, schemas, and binding for rules-extraction, TODO-result, and finalizer durable reports.
-- **CR directory routing**: Limits resolution to numeric identity, current-candidate ownership, and physical safety; the production validator compares frozen and consumer contexts before writes without owning approval or tracker rules.
 - **Read-only diagnostics**: Reports exact inconsistencies and next steps without replacing reviewer, evaluator, fixer, or finalizer behavior.
 
 ## Workflow
 
 1. Fully read `references/cr-contract.md`; HALT if it is unavailable.
 2. Run `speclite resolve config --project-root {project-root}` and resolve merged `planning_artifacts` and `implementation_artifacts`; HALT on failure.
-3. Build a unique `storyId -> storyKey -> storyFile` mapping, resolve one verified `crDir` through `scripts/resolve-cr-directory.mjs`, and locate the requested or current CR artifact.
+3. Build a unique `storyId -> storyKey -> storyFile` mapping and locate the requested or current CR artifact.
 4. Validate artifact schema, identity, path, series, round, hash, scope, verdict, freshness, and CR04–06 durable closeout binding against the shared contract.
 5. Return a read-only result containing `VALID | INVALID | INCOMPLETE`, itemized evidence, and an exact next step; do not modify inspected files.
 

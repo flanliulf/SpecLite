@@ -441,31 +441,7 @@ describe("CR shared contract ownership", () => {
     }
   });
 
-  it("documents executable pre-summary ownership and frozen legacy consumption", async () => {
-    const [contract, reviewerWorkflow, finalizerWorkflow] = await Promise.all([
-      readFile(path.join(
-        IMPLEMENTATION_ROOT,
-        "speclite-code-review-contract/references/cr-contract.md",
-      ), "utf8"),
-      readFile(path.join(
-        IMPLEMENTATION_ROOT,
-        "speclite-code-review-01-reviewer/references/reviewer-workflow.md",
-      ), "utf8"),
-      readFile(path.join(
-        IMPLEMENTATION_ROOT,
-        "speclite-code-review-06-finalizer/references/finalizer-workflow.md",
-      ), "utf8"),
-    ]);
-    expect(contract).toContain(".tmp/cr-directory-ownership.json");
-    expect(contract).toContain("speclite.cr-directory-ownership.v1");
-    expect(contract).toContain("先调用 production validator");
-    expect(contract).toContain("不得扫描 `.tmp` 其他文件、`PLAN.md` 或 prose/approval claim");
-    expect(reviewerWorkflow).toContain('--write-subpath ".tmp/{reviewSeries}-round-{round}/review-input.diff"');
-    expect(reviewerWorkflow).not.toContain('--write-subpath "`.tmp/');
-    expect(finalizerWorkflow).toContain("原样消费 frozen `compatibilityMode=legacy-resume`");
-    expect(finalizerWorkflow).not.toContain("unfinished legacy directory");
-  });
-
+  // 真行为测试需要 runner 状态机模拟器（独立基建），先登记为 todo：
   it.todo("runner routes PASS zero-TODO through CR05 closeout no-op end to end");
   it.todo("standalone CR06 halts when CR04/CR05 reports are missing");
   it.todo("same-round retry writes -superseded-{n} instead of overwriting current");

@@ -2,13 +2,6 @@
 
 本文档承载 CR05 的详细模式流程。共享 TODO eligibility、execution context、Story closeout path 和 result schema 以 CR shared contract 为准。
 
-## Directory Preflight（目录预检）
-
-- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。无 Story identity 的 project utility mode 不解析或验证 `crDir`。
-- 任何 Story-mode backlog、result 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-cr-todo-result-{date}-{reviewSeries}-round-{round}.md"`。
-- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
-- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
-
 ## Common Preflight（共同预检）
 
 1. 解析 runtime config、backlog path、Story/TODO identity 和 `mode`。

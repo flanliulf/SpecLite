@@ -19,8 +19,6 @@ Independently evaluate the current `speclite.cr-review.v2` finding by finding an
 - Use it to validate reviewer findings, counterevidence, severity, disposition, and convergence.
 - Do not use it to modify source/tests, run the fixer, register TODOs, update Stories/trackers, or replace the reviewer.
 
-- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
-
 ## Core Capabilities
 
 - **One-to-one binding**: Bind Story, series, round, scope, and review hash exactly.
@@ -35,7 +33,6 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - Story identity, `reviewSeries`, and the current v2 review, or enough information to locate it independently.
-- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
 - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
 
 ## Workflow
