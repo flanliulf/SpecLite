@@ -6,6 +6,11 @@ export const SKILL_INDEX_SCHEMA_VERSION = "speclite.skill-index.v1" as const;
 export const HELP_INDEX_SCHEMA_VERSION = "speclite.help-index.v1" as const;
 export const FILES_INDEX_SCHEMA_VERSION = "speclite.files-index.v1" as const;
 export const PHASE_COVERAGE_SCHEMA_VERSION = "speclite.phase-coverage.v1" as const;
+const ARTIFACT_CONTRACT_REQUIRED_METADATA_FIELDS = [
+  "workflowType",
+  "sourceSkill",
+  "generatedAt",
+] as const;
 
 export function isProjectRelativePosixPath(value: string): boolean {
   const trimmed = value.trim();
@@ -93,6 +98,50 @@ export const WorkflowArtifactMetadataSchema = z
         return Number.isFinite(parsed) && new Date(parsed).toISOString() === value;
       }, "generatedAt must be a canonical UTC ISO string produced by Date.toISOString()"),
   })
+  .passthrough();
+export const ArtifactRootFieldSchema = z.enum([
+  "brainstorming_artifacts",
+  "analysis_artifacts",
+  "planning_artifacts",
+  "solutioning_artifacts",
+  "implementation_artifacts",
+  "devops_artifacts",
+  "project_knowledge",
+]);
+export const ArtifactRootConfigPathSchema = z.enum([
+  "core.brainstorming_artifacts",
+  "modules.sdlc.analysis_artifacts",
+  "modules.sdlc.planning_artifacts",
+  "modules.sdlc.solutioning_artifacts",
+  "modules.sdlc.implementation_artifacts",
+  "modules.sdlc.devops_artifacts",
+  "modules.sdlc.project_knowledge",
+]);
+export const ArtifactRootProjectionSchema = z
+  .object({
+    field: ArtifactRootFieldSchema,
+    configPath: ArtifactRootConfigPathSchema,
+    placeholder: z
+      .string()
+      .min(1)
+      .regex(/^\{[a-z_]+\}$/),
+    resolvedRoot: z
+      .string()
+      .min(1)
+      .refine(isProjectRelativePosixPath, "resolvedRoot must be project-relative POSIX"),
+    resolutionMode: z.enum(["fresh-default", "explicit-config", "legacy-compatible"]),
+    plane: z.enum([
+      "brainstorming",
+      "analysis",
+      "planning",
+      "solutioning",
+      "implementation",
+      "devops",
+      "project-knowledge",
+    ]),
+    ownership: z.literal("workflow-owned"),
+    contractRefs: z.array(z.string().min(1)),
+  })
   .strict();
 export const ArtifactContractSchema = z
   .object({
@@ -102,10 +151,10 @@ export const ArtifactContractSchema = z
       .min(1)
       .refine(isProjectRelativePosixPath, "defaultOutputPath must be project-relative POSIX"),
     requiredMetadata: z
-      .array(z.enum(["workflowType", "sourceSkill", "generatedAt"]))
+      .array(z.enum(ARTIFACT_CONTRACT_REQUIRED_METADATA_FIELDS))
       .refine(
         (fields) =>
-          ["workflowType", "sourceSkill", "generatedAt"].every((field) => fields.includes(field)),
+          ARTIFACT_CONTRACT_REQUIRED_METADATA_FIELDS.every((field) => fields.includes(field)),
         "artifactContract.requiredMetadata must include workflowType, sourceSkill and generatedAt",
       ),
   })
@@ -132,6 +181,7 @@ export const ManifestSchema = z
           .string()
           .min(1)
           .refine(isProjectRelativePosixPath, "manifestPath must be project-relative POSIX"),
+        artifactRoots: z.array(ArtifactRootProjectionSchema).optional(),
       })
       .strict(),
   })
@@ -141,6 +191,7 @@ export const SkillIndexEntrySchema = z
   .object({
     schemaVersion: z.literal(SKILL_INDEX_SCHEMA_VERSION),
     canonicalSkillId: z.string().min(1),
+    renamedFromCanonicalSkillIds: z.array(z.string().min(1)).optional(),
     moduleId: z.string().min(1),
     sourcePackagePath: z
       .string()
@@ -187,7 +238,23 @@ export const SkillIndexSchema = z
     schemaVersion: z.literal(SKILL_INDEX_SCHEMA_VERSION),
     entries: z.array(SkillIndexEntrySchema),
   })
-  .strict();
+  .strict()
+  .superRefine((index, context) => {
+    const activeIds = new Set(index.entries.map((entry) => entry.canonicalSkillId));
+    const oldIds = new Set<string>();
+    for (const [entryIndex, entry] of index.entries.entries()) {
+      for (const oldId of entry.renamedFromCanonicalSkillIds ?? []) {
+        if (oldId === entry.canonicalSkillId || activeIds.has(oldId) || oldIds.has(oldId)) {
+          context.addIssue({
+            code: "custom",
+            path: ["entries", entryIndex, "renamedFromCanonicalSkillIds"],
+            message: "renamed canonical skill ids must be distinct, globally unique, and inactive",
+          });
+        }
+        oldIds.add(oldId);
+      }
+    }
+  });
 
 export const HelpIndexSchema = z
   .object({
@@ -232,6 +299,7 @@ export const PhaseCoverageSchema = z
   .strict();
 
 export type Manifest = z.infer<typeof ManifestSchema>;
+export type ArtifactRootProjection = z.infer<typeof ArtifactRootProjectionSchema>;
 export type SkillIndexEntry = z.infer<typeof SkillIndexEntrySchema>;
 export type HelpIndexEntry = z.infer<typeof HelpIndexEntrySchema>;
 export type FilesIndexEntry = z.infer<typeof FilesIndexEntrySchema>;

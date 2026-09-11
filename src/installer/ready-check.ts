@@ -7,12 +7,14 @@ import type {
   ValidationIssue,
 } from "../diagnostics/command-result-schema.js";
 import { CANONICAL_TARGET_ORDER, type IdeTargetId } from "../ide/adapter-registry.js";
+import { ARTIFACT_ROOT_REGISTRY } from "../config/artifact-root-resolver.js";
 import {
   FilesIndexSchema,
   HelpIndexSchema,
   ManifestSchema,
   PhaseCoverageSchema,
   SkillIndexSchema,
+  type ArtifactRootProjection,
   type HelpIndex,
   type Manifest,
   type PhaseCoverage,
@@ -29,7 +31,7 @@ export type ReadyCheckResult =
       manifestVersion: string;
       installedModules: string[];
       ideTargets: IdeTargetStatus[];
-      paths: Required<CommandPathSummary>;
+      paths: ReadyPathSummary;
       completedSteps: InstallLifecycleStepId[];
       pendingSteps: InstallLifecycleStepId[];
     }
@@ -39,6 +41,26 @@ export type ReadyCheckResult =
       completedSteps: InstallLifecycleStepId[];
       pendingSteps: InstallLifecycleStepId[];
     };
+
+type ReadyPathSummary = {
+  projectRoot: ".";
+  specliteRoot: string;
+  artifactRoot: string;
+  manifestPath: string;
+  artifactRoots?: ArtifactRootProjection[];
+};
+
+const ARTIFACT_ROOT_PROJECTION_FIELDS = ARTIFACT_ROOT_REGISTRY.map((definition) => definition.field);
+const ARTIFACT_ROOT_PROJECTION_COMPARISON_KEYS = [
+  "field",
+  "configPath",
+  "placeholder",
+  "resolvedRoot",
+  "resolutionMode",
+  "plane",
+  "ownership",
+  "contractRefs",
+] as const satisfies readonly (keyof ArtifactRootProjection)[];
 
 export async function runReadyCheck(input: {
   projectRoot: string;
@@ -89,6 +111,13 @@ export async function runReadyCheck(input: {
   const manifestResult = await readManifest(projectRootPath(input.projectRoot, paths.manifestPath));
   if (!manifestResult.ok) return createReadyCheckFailure(manifestResult.issue);
 
+  const manifest = manifestResult.manifest;
+  const artifactRootsIssue = validateArtifactRootProjectionReconciliation({
+    expectedArtifactRoots: paths.artifactRoots,
+    manifestArtifactRoots: manifest.paths.artifactRoots,
+  });
+  if (artifactRootsIssue !== undefined) return createReadyCheckFailure(artifactRootsIssue);
+
   const indexesResult = await readRequiredIndexes(input.projectRoot);
   if (!indexesResult.ok) return createReadyCheckFailure(indexesResult.issue);
   const menuTargetIssues = validateMenuTargets({
@@ -115,11 +144,18 @@ export async function runReadyCheck(input: {
     return createReadyCheckFailure(expectedSkillIssue);
   }
 
+  const readyPaths: ReadyPathSummary = {
+    ...paths,
+    ...(manifest.paths.artifactRoots === undefined
+      ? {}
+      : { artifactRoots: manifest.paths.artifactRoots }),
+  };
   const runtimePaths = [
-    paths.specliteRoot,
+    readyPaths.specliteRoot,
     "_speclite/_config",
-    paths.artifactRoot,
-    paths.manifestPath,
+    readyPaths.artifactRoot,
+    readyPaths.manifestPath,
+    ...(readyPaths.artifactRoots ?? []).map((root) => root.resolvedRoot),
   ];
   for (const runtimePath of runtimePaths) {
     if (!(await pathExists(projectRootPath(input.projectRoot, runtimePath)))) {
@@ -127,7 +163,6 @@ export async function runReadyCheck(input: {
     }
   }
 
-  const manifest = manifestResult.manifest;
   if (!SourceDescriptorSchema.safeParse(manifest.sourceDescriptor).success) {
     return createReadyCheckFailure({
       issueId: "source-integrity.unsupported-source",
@@ -210,7 +245,7 @@ export async function runReadyCheck(input: {
     manifestVersion: manifest.schemaVersion,
     installedModules: manifest.installedModules,
     ideTargets: orderIdeTargets(input.ideTargets),
-    paths,
+    paths: readyPaths,
     completedSteps: ["ready-check"],
     pendingSteps: ["ready-summary"],
   };
@@ -258,7 +293,7 @@ function validateExpectedSkillEntries(input: {
   return createMissingSkillIndexEntryIssue(missing);
 }
 
-function normalizeReadyPaths(paths: CommandPathSummary): Required<CommandPathSummary> | undefined {
+function normalizeReadyPaths(paths: CommandPathSummary): ReadyPathSummary | undefined {
   if (
     paths.specliteRoot === undefined ||
     paths.artifactRoot === undefined ||
@@ -272,6 +307,7 @@ function normalizeReadyPaths(paths: CommandPathSummary): Required<CommandPathSum
     specliteRoot: paths.specliteRoot,
     artifactRoot: paths.artifactRoot,
     manifestPath: paths.manifestPath,
+    ...(paths.artifactRoots === undefined ? {} : { artifactRoots: paths.artifactRoots }),
   };
 }
 
@@ -282,6 +318,14 @@ async function readManifest(
     const raw = await readFile(absolutePath, "utf8");
     const parsed = ManifestSchema.safeParse(parseYaml(raw));
     if (!parsed.success) {
+      const artifactRootsIssue = createArtifactRootsSchemaIssue(parsed.error.issues);
+      if (artifactRootsIssue !== undefined) {
+        return {
+          ok: false,
+          issue: artifactRootsIssue,
+        };
+      }
+
       return {
         ok: false,
         issue: {
@@ -311,6 +355,147 @@ async function readManifest(
       },
     };
   }
+}
+
+function validateArtifactRootProjectionReconciliation(input: {
+  expectedArtifactRoots: ArtifactRootProjection[] | undefined;
+  manifestArtifactRoots: ArtifactRootProjection[] | undefined;
+}): ValidationIssue | undefined {
+  if (input.expectedArtifactRoots !== undefined && input.manifestArtifactRoots === undefined) {
+    return createArtifactRootsMalformedIssue({
+      reason: "missing-fresh-projection",
+      expectedCount: input.expectedArtifactRoots.length,
+      actualCount: 0,
+    });
+  }
+
+  if (input.manifestArtifactRoots === undefined) return undefined;
+
+  const manifestShapeIssue = validateArtifactRootProjectionShape(
+    input.manifestArtifactRoots,
+    "manifest",
+  );
+  if (manifestShapeIssue !== undefined) return manifestShapeIssue;
+
+  if (input.expectedArtifactRoots === undefined) return undefined;
+
+  const expectedShapeIssue = validateArtifactRootProjectionShape(
+    input.expectedArtifactRoots,
+    "expected",
+  );
+  if (expectedShapeIssue !== undefined) return expectedShapeIssue;
+
+  for (let index = 0; index < input.expectedArtifactRoots.length; index += 1) {
+    const expectedRoot = input.expectedArtifactRoots[index];
+    const manifestRoot = input.manifestArtifactRoots[index];
+    if (expectedRoot === undefined || manifestRoot === undefined) {
+      return createArtifactRootsMalformedIssue({
+        reason: "artifact-roots-count-mismatch",
+        expectedCount: input.expectedArtifactRoots.length,
+        actualCount: input.manifestArtifactRoots.length,
+      });
+    }
+
+    const mismatchedFields = ARTIFACT_ROOT_PROJECTION_COMPARISON_KEYS.filter((field) =>
+      !artifactRootProjectionValueEqual(expectedRoot[field], manifestRoot[field]),
+    );
+    if (mismatchedFields.length > 0) {
+      return createArtifactRootsMalformedIssue({
+        reason: "artifact-root-entry-mismatch",
+        index,
+        artifactRootField: expectedRoot.field,
+        mismatchedFields,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function validateArtifactRootProjectionShape(
+  artifactRoots: readonly ArtifactRootProjection[],
+  projection: "expected" | "manifest",
+): ValidationIssue | undefined {
+  if (artifactRoots.length !== ARTIFACT_ROOT_PROJECTION_FIELDS.length) {
+    return createArtifactRootsMalformedIssue({
+      reason: "artifact-roots-count-mismatch",
+      projection,
+      expectedCount: ARTIFACT_ROOT_PROJECTION_FIELDS.length,
+      actualCount: artifactRoots.length,
+    });
+  }
+
+  const uniqueFields = new Set(artifactRoots.map((artifactRoot) => artifactRoot.field));
+  const seenFields = new Set<string>();
+  for (const artifactRoot of artifactRoots) {
+    if (seenFields.has(artifactRoot.field)) {
+      return createArtifactRootsMalformedIssue({
+        reason: "duplicate-artifact-root-field",
+        projection,
+        duplicateField: artifactRoot.field,
+        actualCount: artifactRoots.length,
+        uniqueCount: uniqueFields.size,
+      });
+    }
+    seenFields.add(artifactRoot.field);
+  }
+
+  for (let index = 0; index < ARTIFACT_ROOT_PROJECTION_FIELDS.length; index += 1) {
+    const expectedField = ARTIFACT_ROOT_PROJECTION_FIELDS[index];
+    const artifactRoot = artifactRoots[index];
+    if (expectedField === undefined || artifactRoot === undefined) continue;
+    if (artifactRoot.field !== expectedField) {
+      return createArtifactRootsMalformedIssue({
+        reason: "artifact-roots-order-mismatch",
+        projection,
+        index,
+        expectedField,
+        actualField: artifactRoot.field,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function createArtifactRootsSchemaIssue(
+  schemaIssues: Array<{ path: PropertyKey[] }>,
+): ValidationIssue | undefined {
+  const artifactRootsIssue = schemaIssues.find((issue) =>
+    issue.path[0] === "paths" && issue.path[1] === "artifactRoots"
+  );
+  if (artifactRootsIssue === undefined) return undefined;
+
+  return createArtifactRootsMalformedIssue({
+    reason: "invalid-field",
+    invalidFieldPath: artifactRootsIssue.path.map(String).join("."),
+    issueCount: schemaIssues.length,
+  });
+}
+
+function artifactRootProjectionValueEqual(left: unknown, right: unknown): boolean {
+  if (Array.isArray(left) && Array.isArray(right)) {
+    if (left.length !== right.length) return false;
+    return left.every((value, index) => value === right[index]);
+  }
+
+  return left === right;
+}
+
+function createArtifactRootsMalformedIssue(details: Record<string, unknown>): ValidationIssue {
+  return {
+    issueId: "manifest-schema.malformed-field",
+    category: "manifest-schema",
+    severity: "error",
+    affectedPath: "_speclite/_config/manifest.yaml",
+    component: "ReadyCheck",
+    details: {
+      field: "paths.artifactRoots",
+      ...details,
+    },
+    impact: "Installed manifest artifact root projection does not match the install path projection.",
+    suggestedNextStep: "Regenerate the installed manifest and artifact root directories by rerunning speclite install --yes.",
+  };
 }
 
 async function readRequiredIndexes(

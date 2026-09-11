@@ -32,30 +32,55 @@ user_skill_level:
     - value: "expert"
       label: "Expert - Be direct and technical"
 
+brainstorming_artifacts:
+  prompt: "Where should brainstorming artifacts be stored?"
+  default: "{output_folder}/0-brainstorming-artifacts"
+  result: "{project-root}/{value}"
+
+analysis_artifacts:
+  prompt: "Where should analysis artifacts be stored? (Research, Product Briefs, PRFAQs)"
+  default: "{output_folder}/1-analysis-artifacts"
+  result: "{project-root}/{value}"
+
 planning_artifacts:
-  prompt: "Where should planning artifacts be stored? (Brainstorming, Briefs, PRDs, UX Designs, Architecture, Epics)"
-  default: "{output_folder}/planning-artifacts"
+  prompt: "Where should planning artifacts be stored? (PRDs, UX Designs, Epics)"
+  default: "{output_folder}/2-planning-artifacts"
+  result: "{project-root}/{value}"
+
+solutioning_artifacts:
+  prompt: "Where should solutioning artifacts be stored? (Architecture, Specs, Implementation Readiness)"
+  default: "{output_folder}/3-solutioning-artifacts"
   result: "{project-root}/{value}"
 
 implementation_artifacts:
   prompt: "Where should implementation artifacts be stored? (Sprint status, stories, reviews, retrospectives, Quick Flow output)"
-  default: "{output_folder}/implementation-artifacts"
+  default: "{output_folder}/4-implementation-artifacts"
   result: "{project-root}/{value}"
 
 devops_artifacts:
   prompt: "Where should DevOps artifacts be stored? (CI/CD, release gates, deployment plans, publishing reports)"
-  default: "{output_folder}/devops-artifacts"
+  default: "{output_folder}/5-devops-artifacts"
   result: "{project-root}/{value}"
 
 project_knowledge:
-  prompt: "Where should long-term project knowledge be stored? (docs, research, references)"
-  default: "docs"
+  prompt: "Where should workflow-generated project knowledge be stored? (Internal knowledge base, brownfield evidence, references)"
+  default: "{output_folder}/project-knowledge-base"
   result: "{project-root}/{value}"
 
 # Directories to create during installation (declarative, no code execution)
 directories:
-  - "{planning_artifacts}"
+  - "{brainstorming_artifacts}"
+  - "{analysis_artifacts}"
+  - "{analysis_artifacts}/research"
+  - "{analysis_artifacts}/product-brief"
+  - "{analysis_artifacts}/prfaq"
   - "{planning_artifacts}/epics"
+  - "{planning_artifacts}/prd"
+  - "{planning_artifacts}/ux"
+  - "{solutioning_artifacts}"
+  - "{solutioning_artifacts}/architecture"
+  - "{solutioning_artifacts}/specs"
+  - "{solutioning_artifacts}/implementation-readiness-report/grill-consistency"
   - "{implementation_artifacts}"
   - "{implementation_artifacts}/stories"
   - "{implementation_artifacts}/flow-gates"
@@ -75,6 +100,12 @@ directories:
   - "{project_knowledge}/brownfield/deep-dives"
   - "{project_knowledge}/brownfield/planning"
   - "{project_knowledge}/brownfield/validation"
+
+skill_renames:
+  speclite-implementation-readiness-check:
+    - speclite-check-implementation-readiness
+  speclite-implementation-readiness-grill-consistency-reviewer:
+    - speclite-ir-grill-consistency-reviewer
 
 # Agent roster - essence only. Full persona and menu behavior live in each
 # agent's customize.toml. `team` defaults to this module when omitted; users can

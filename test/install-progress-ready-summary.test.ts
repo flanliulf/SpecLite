@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import { describe, expect, it } from "vitest";
 import { runInstallCommand } from "../src/commands/install.js";
 import { InstallCommandResultSchema } from "../src/diagnostics/command-result-schema.js";
@@ -115,6 +116,187 @@ describe("ReadyCheck minimal local gate", () => {
       expect(readyCheck.manifestVersion).toBe("speclite.manifest.v1");
       expect(readyCheck.ideTargets.map((target) => target.id)).toEqual(["claude", "agents"]);
       expect(readyCheck.installedModules).toEqual(["core", "sdlc"]);
+      expect(readyCheck.completedSteps).toEqual(["ready-check"]);
+      expect(readyCheck.pendingSteps).toEqual(["ready-summary"]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails fresh ReadyCheck when manifest omits the expected artifact root projection", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-missing-artifact-roots-"));
+
+    try {
+      const installed = await installReadyCheckFixture(tempRoot);
+      await updateManifestPaths(tempRoot, (manifestPaths) => {
+        delete manifestPaths.artifactRoots;
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: installed.sourceDescriptor,
+        installedModules: installed.installedModules,
+        ideTargets: installed.ideTargets,
+        paths: installed.paths,
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        severity: "error",
+        details: {
+          field: "paths.artifactRoots",
+          reason: "missing-fresh-projection",
+          expectedCount: 7,
+          actualCount: 0,
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails fresh ReadyCheck when manifest artifact root order differs while directories exist", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-artifact-root-order-"));
+
+    try {
+      const installed = await installReadyCheckFixture(tempRoot);
+      await updateManifestPaths(tempRoot, (manifestPaths) => {
+        const artifactRoots = requireArtifactRootRecords(manifestPaths);
+        const first = artifactRoots[0];
+        const second = artifactRoots[1];
+        if (first === undefined || second === undefined) throw new Error("artifactRoots fixture is incomplete");
+        manifestPaths.artifactRoots = [second, first, ...artifactRoots.slice(2)];
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: installed.sourceDescriptor,
+        installedModules: installed.installedModules,
+        ideTargets: installed.ideTargets,
+        paths: installed.paths,
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        details: {
+          field: "paths.artifactRoots",
+          reason: "artifact-roots-order-mismatch",
+          index: 0,
+          expectedField: "brainstorming_artifacts",
+          actualField: "analysis_artifacts",
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails fresh ReadyCheck when manifest resolvedRoot differs from expected projection while the directory exists", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-artifact-root-path-"));
+
+    try {
+      const installed = await installReadyCheckFixture(tempRoot);
+      await updateManifestPaths(tempRoot, (manifestPaths) => {
+        const artifactRoots = requireArtifactRootRecords(manifestPaths);
+        const first = artifactRoots[0];
+        const second = artifactRoots[1];
+        if (first === undefined || second === undefined) throw new Error("artifactRoots fixture is incomplete");
+        first.resolvedRoot = second.resolvedRoot;
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: installed.sourceDescriptor,
+        installedModules: installed.installedModules,
+        ideTargets: installed.ideTargets,
+        paths: installed.paths,
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        details: {
+          field: "paths.artifactRoots",
+          reason: "artifact-root-entry-mismatch",
+          index: 0,
+          artifactRootField: "brainstorming_artifacts",
+          mismatchedFields: ["resolvedRoot"],
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails when manifest artifact root fields are not unique", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-artifact-root-duplicate-"));
+
+    try {
+      const installed = await installReadyCheckFixture(tempRoot);
+      await updateManifestPaths(tempRoot, (manifestPaths) => {
+        const artifactRoots = requireArtifactRootRecords(manifestPaths);
+        const first = artifactRoots[0];
+        if (first === undefined) throw new Error("artifactRoots fixture is incomplete");
+        manifestPaths.artifactRoots = [{ ...first }, { ...first }, ...artifactRoots.slice(2)];
+      });
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: installed.sourceDescriptor,
+        installedModules: installed.installedModules,
+        ideTargets: installed.ideTargets,
+        paths: installed.paths,
+      });
+
+      expect(readyCheck.ok).toBe(false);
+      if (readyCheck.ok) return;
+      expect(readyCheck.issue).toMatchObject({
+        issueId: "manifest-schema.malformed-field",
+        category: "manifest-schema",
+        details: {
+          field: "paths.artifactRoots",
+          reason: "duplicate-artifact-root-field",
+          duplicateField: "brainstorming_artifacts",
+          actualCount: 7,
+        },
+      });
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps legacy compatibility when caller and manifest both omit artifact root projection", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-ready-legacy-no-artifact-roots-"));
+
+    try {
+      const installed = await installReadyCheckFixture(tempRoot);
+      await updateManifestPaths(tempRoot, (manifestPaths) => {
+        delete manifestPaths.artifactRoots;
+      });
+      const legacyPaths = {
+        ...installed.paths,
+      };
+      delete legacyPaths.artifactRoots;
+
+      const readyCheck = await runReadyCheck({
+        projectRoot: tempRoot,
+        sourceDescriptor: installed.sourceDescriptor,
+        installedModules: installed.installedModules,
+        ideTargets: installed.ideTargets,
+        paths: legacyPaths,
+      });
+
+      expect(readyCheck.ok).toBe(true);
+      if (!readyCheck.ok) return;
+      expect(readyCheck.paths.artifactRoots).toBeUndefined();
       expect(readyCheck.completedSteps).toEqual(["ready-check"]);
       expect(readyCheck.pendingSteps).toEqual(["ready-summary"]);
     } finally {
@@ -521,6 +703,50 @@ describe("ReadyCheck minimal local gate", () => {
   });
 });
 
+async function installReadyCheckFixture(tempRoot: string) {
+  await writeFile(path.join(tempRoot, "README.md"), "project notes\n", "utf8");
+
+  const outcome = await runInstallCommand({
+    options: { json: true, yes: true },
+    runtime: {
+      ...supportedRuntime,
+      cwd: tempRoot,
+    },
+  });
+
+  expect(outcome.exitCode).toBe(0);
+  return outcome.result.data;
+}
+
+async function updateManifestPaths(
+  tempRoot: string,
+  update: (manifestPaths: Record<string, unknown>) => void,
+): Promise<void> {
+  const manifestPath = path.join(tempRoot, "_speclite/_config/manifest.yaml");
+  const parsedManifest = parseYaml(await readFile(manifestPath, "utf8"));
+  if (!isRecord(parsedManifest) || !isRecord(parsedManifest.paths)) {
+    throw new Error("manifest fixture is missing paths");
+  }
+
+  update(parsedManifest.paths);
+  await writeFile(manifestPath, stringifyYaml(parsedManifest), "utf8");
+}
+
+function requireArtifactRootRecords(manifestPaths: Record<string, unknown>): Record<string, unknown>[] {
+  if (!Array.isArray(manifestPaths.artifactRoots)) {
+    throw new Error("manifest fixture is missing artifactRoots");
+  }
+
+  return manifestPaths.artifactRoots.map((artifactRoot) => {
+    if (!isRecord(artifactRoot)) throw new Error("artifactRoots fixture entry is invalid");
+    return artifactRoot;
+  });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 async function writeReadyCheckIndex(tempRoot: string, fileName: string, data: unknown): Promise<void> {
   await writeFile(
     path.join(tempRoot, "_speclite/_config", fileName),
@@ -603,6 +829,15 @@ describe("install ready summary rendering", () => {
       expect(output).toContain("metadata/control hub");
       expect(output).toContain("IDE execution plane");
       expect(output).toContain("artifact repository");
+      expect(output).toContain("Filesystem planes");
+      expect(output).toContain("brainstorming: _speclite-output/0-brainstorming-artifacts");
+      expect(output).toContain("analysis: _speclite-output/1-analysis-artifacts");
+      expect(output).toContain("planning: _speclite-output/2-planning-artifacts");
+      expect(output).toContain("solutioning: _speclite-output/3-solutioning-artifacts");
+      expect(output).toContain("implementation: _speclite-output/4-implementation-artifacts");
+      expect(output).toContain("devops: _speclite-output/5-devops-artifacts");
+      expect(output).toContain("project-knowledge: _speclite-output/project-knowledge-base");
+      expect(output).toContain("Public documentation: docs");
       expect(output).toContain("installed-state projection");
       expect(output).toContain("ready-check");
       expect(output).toContain("ready-summary");
@@ -612,6 +847,10 @@ describe("install ready summary rendering", () => {
       expect(output).toContain("speclite validate");
       expect(output).not.toMatch(/\u001b\[[0-9;]*m/);
       expect(output).not.toContain(tempRoot);
+      expect(JSON.stringify(outcome.result.data.paths.artifactRoots)).toContain(
+        "_speclite-output/project-knowledge-base",
+      );
+      expect(JSON.stringify(outcome.result.data.paths.artifactRoots)).not.toContain(tempRoot);
     } finally {
       if (previousNoColor === undefined) {
         delete process.env.NO_COLOR;

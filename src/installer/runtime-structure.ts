@@ -5,11 +5,20 @@ import {
   TEAM_CUSTOM_CONFIG_TOML_HEADER,
   serializeConfigToml,
 } from "../config/config-writer.js";
-import type { ProjectConfigModel } from "../config/config-schema.js";
 import { appendUserConfigGitignoreRules } from "../config/user-config-gitignore.js";
 import { ensureSafeDirectory, acquireProjectOperationLock, safeWriteFile } from "../fs/safe-write.js";
-import { createConfiguredIdeTargets, createFilesIndex, createHelpIndex, createInstalledManifest, createPhaseCoverage, createSkillIndex, type ArtifactRootContext } from "../manifest/manifest-generator.js";
+import {
+  createArtifactRootContext,
+  createConfiguredIdeTargets,
+  createFilesIndex,
+  createHelpIndex,
+  createInstalledManifest,
+  createPhaseCoverage,
+  createSkillIndex,
+  type ArtifactRootContext,
+} from "../manifest/manifest-generator.js";
 import { hashBytes, hashFile } from "../manifest/hash.js";
+import type { ArtifactRootProjection } from "../manifest/manifest-schema.js";
 import type { FilesIndexEntry } from "../manifest/manifest-schema.js";
 import type { OfficialModule } from "../modules/module-metadata.js";
 import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
@@ -33,6 +42,7 @@ export type ApplyInstallPlanResult =
         projectRoot: ".";
         specliteRoot: "_speclite";
         artifactRoot: string;
+        artifactRoots: ArtifactRootProjection[];
         manifestPath: "_speclite/_config/manifest.yaml";
       };
     }
@@ -110,13 +120,17 @@ export async function applyInstallPlan(input: {
   const fileEntries: FilesIndexEntry[] = [];
   const completedSteps: string[] = [];
   const changedPaths: string[] = [];
+  const artifactRootContext = createArtifactRootContext({
+    outputFolder: input.configPlan.model.core.output_folder,
+    roots: input.configPlan.artifactRoots,
+  });
   const paths = {
     projectRoot: "." as const,
     specliteRoot: "_speclite" as const,
     artifactRoot: input.configPlan.model.core.output_folder,
+    artifactRoots: artifactRootContext.projections ?? [],
     manifestPath: "_speclite/_config/manifest.yaml" as const,
   };
-  const artifactRoots = createArtifactRootContext(input.configPlan.model);
   const canonicalSourceRoot =
     input.sourceRoot ?? `${input.packageRoot}/assets/source/speclite`;
   const canonicalSourceRefRoot = input.sourceRefRoot ?? "assets/source/speclite";
@@ -125,7 +139,11 @@ export async function applyInstallPlan(input: {
     for (const directory of [
       "_speclite/_config",
       "_speclite/custom",
-      ...createArtifactDirectories(input.configPlan.model, input.selectedModules),
+      ...createArtifactDirectories({
+        artifactRoots: input.configPlan.artifactRoots,
+        artifactRootContext,
+        modules: input.selectedModules,
+      }),
     ]) {
       const created = await ensureSafeDirectory({
         projectRoot: input.targetRoot,
@@ -260,7 +278,7 @@ export async function applyInstallPlan(input: {
       ...(input.sourceRefRoot === undefined ? {} : { sourceRefRoot: input.sourceRefRoot }),
       selectedModules: input.selectedModules,
       targetAdapters: input.installPlan.targetAdapters,
-      artifactRoots,
+      artifactRoots: artifactRootContext,
       onChangedPath: (relativePath) => {
         changedPaths.push(relativePath);
       },
@@ -423,18 +441,19 @@ function createApplyPendingSteps(completedSteps: string[]): string[] {
   ].filter((step) => !completed.has(step));
 }
 
-function createArtifactDirectories(model: ProjectConfigModel, modules: OfficialModule[]): string[] {
-  const values = createArtifactRootContext(model);
+function createArtifactDirectories(input: {
+  artifactRoots: Extract<ConfigInitializationResult, { ok: true }>["artifactRoots"];
+  artifactRootContext: ArtifactRootContext;
+  modules: OfficialModule[];
+}): string[] {
   const directories = [
-    model.core.output_folder,
-    values.planning_artifacts,
-    values.implementation_artifacts,
-    values.devops_artifacts,
-    values.project_knowledge,
-    ...modules.flatMap((module) => module.directories),
+    ...input.artifactRoots.map((root) => root.resolvedRoot),
+    ...input.modules.flatMap((module) => module.directories),
   ];
 
-  return [...new Set(directories.map((directory) => interpolateDirectory(directory, values)))].sort();
+  return uniqueInOrder(
+    directories.map((directory) => interpolateDirectory(directory, input.artifactRootContext)),
+  );
 }
 
 async function readCompatibilityScript(input: {
@@ -462,35 +481,40 @@ async function readCompatibilityScript(input: {
   };
 }
 
-function createArtifactRootContext(model: ProjectConfigModel): ArtifactRootContext {
-  return {
-    output_folder: model.core.output_folder,
-    planning_artifacts:
-      model.modules.sdlc?.planning_artifacts ?? `${model.core.output_folder}/planning-artifacts`,
-    implementation_artifacts:
-      model.modules.sdlc?.implementation_artifacts ?? `${model.core.output_folder}/implementation-artifacts`,
-    devops_artifacts:
-      model.modules.sdlc?.devops_artifacts ?? `${model.core.output_folder}/devops-artifacts`,
-    project_knowledge: model.modules.sdlc?.project_knowledge ?? "docs",
-  };
-}
-
 function interpolateDirectory(
   template: string,
-  values: {
-    output_folder: string;
-    planning_artifacts: string;
-    implementation_artifacts: string;
-    devops_artifacts: string;
-    project_knowledge: string;
-  },
+  values: ArtifactRootContext,
 ): string {
   return template
     .replaceAll("{output_folder}", values.output_folder)
+    .replaceAll(
+      "{brainstorming_artifacts}",
+      values.brainstorming_artifacts ?? `${values.output_folder}/brainstorming`,
+    )
+    .replaceAll(
+      "{analysis_artifacts}",
+      values.analysis_artifacts ?? values.planning_artifacts,
+    )
     .replaceAll("{planning_artifacts}", values.planning_artifacts)
+    .replaceAll(
+      "{solutioning_artifacts}",
+      values.solutioning_artifacts ?? values.planning_artifacts,
+    )
     .replaceAll("{implementation_artifacts}", values.implementation_artifacts)
     .replaceAll("{devops_artifacts}", values.devops_artifacts)
     .replaceAll("{project_knowledge}", values.project_knowledge);
+}
+
+function uniqueInOrder(values: string[]): string[] {
+  const seen = new Set<string>();
+  const uniqueValues: string[] = [];
+  for (const value of values) {
+    if (seen.has(value)) continue;
+    seen.add(value);
+    uniqueValues.push(value);
+  }
+
+  return uniqueValues;
 }
 
 function createHumanStubContents(relativePath: string): string {

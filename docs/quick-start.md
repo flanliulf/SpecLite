@@ -156,9 +156,15 @@ speclite install /path/to/project --yes --interactive
 | `communication_language` | `Chinese` |
 | `document_output_language` | `Chinese` |
 | `output_folder` | `_speclite-output` |
-| `planning_artifacts` | `_speclite-output/planning-artifacts` |
-| `implementation_artifacts` | `_speclite-output/implementation-artifacts` |
-| `project_knowledge` | `docs` |
+| `brainstorming_artifacts` | `_speclite-output/0-brainstorming-artifacts` |
+| `analysis_artifacts` | `_speclite-output/1-analysis-artifacts` |
+| `planning_artifacts` | `_speclite-output/2-planning-artifacts` |
+| `solutioning_artifacts` | `_speclite-output/3-solutioning-artifacts` |
+| `implementation_artifacts` | `_speclite-output/4-implementation-artifacts` |
+| `devops_artifacts` | `_speclite-output/5-devops-artifacts` |
+| `project_knowledge` | `_speclite-output/project-knowledge-base` |
+
+Fresh install 会把这些七个 workflow-owned filesystem planes 写入 manifest `paths.artifactRoots[]`。`docs/` 仍是 Public Documentation（公开文档）面；它不再是 fresh `project_knowledge` 的默认目录。
 
 ### Optional Ecosystem Selection（可选生态选择）
 

@@ -16,6 +16,92 @@ const fixtureExpectedRoot = path.join(
   "test/fixtures/fresh-install-empty-project/expected",
 );
 const EXPECTED_CANONICAL_PACKAGE_ROOT_COUNT = 68;
+const EXPECTED_FRESH_ARTIFACT_ROOTS = [
+  {
+    field: "brainstorming_artifacts",
+    configPath: "core.brainstorming_artifacts",
+    placeholder: "{brainstorming_artifacts}",
+    resolvedRoot: "_speclite-output/0-brainstorming-artifacts",
+    resolutionMode: "fresh-default",
+    plane: "brainstorming",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+  {
+    field: "analysis_artifacts",
+    configPath: "modules.sdlc.analysis_artifacts",
+    placeholder: "{analysis_artifacts}",
+    resolvedRoot: "_speclite-output/1-analysis-artifacts",
+    resolutionMode: "fresh-default",
+    plane: "analysis",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+  {
+    field: "planning_artifacts",
+    configPath: "modules.sdlc.planning_artifacts",
+    placeholder: "{planning_artifacts}",
+    resolvedRoot: "_speclite-output/2-planning-artifacts",
+    resolutionMode: "fresh-default",
+    plane: "planning",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+  {
+    field: "solutioning_artifacts",
+    configPath: "modules.sdlc.solutioning_artifacts",
+    placeholder: "{solutioning_artifacts}",
+    resolvedRoot: "_speclite-output/3-solutioning-artifacts",
+    resolutionMode: "fresh-default",
+    plane: "solutioning",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+  {
+    field: "implementation_artifacts",
+    configPath: "modules.sdlc.implementation_artifacts",
+    placeholder: "{implementation_artifacts}",
+    resolvedRoot: "_speclite-output/4-implementation-artifacts",
+    resolutionMode: "fresh-default",
+    plane: "implementation",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+  {
+    field: "devops_artifacts",
+    configPath: "modules.sdlc.devops_artifacts",
+    placeholder: "{devops_artifacts}",
+    resolvedRoot: "_speclite-output/5-devops-artifacts",
+    resolutionMode: "fresh-default",
+    plane: "devops",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+  {
+    field: "project_knowledge",
+    configPath: "modules.sdlc.project_knowledge",
+    placeholder: "{project_knowledge}",
+    resolvedRoot: "_speclite-output/project-knowledge-base",
+    resolutionMode: "fresh-default",
+    plane: "project-knowledge",
+    ownership: "workflow-owned",
+    contractRefs: [
+      "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots",
+    ],
+  },
+] as const;
 const REQUIRED_METHOD_LOOP_SKILL_IDS = [
   "speclite-advanced-elicitation",
   "speclite-review-acceptance-auditor",
@@ -65,6 +151,8 @@ describe("runtime structure and IDE mirror creation", () => {
       expect(outcome.result.data.completedSteps).toContain("ready-check");
       expect(outcome.result.data.completedSteps).toContain("ready-summary");
       expect(outcome.result.data.pendingSteps).toEqual([]);
+      expect(outcome.result.data.paths.artifactRoot).toBe("_speclite-output");
+      expect(outcome.result.data.paths.artifactRoots).toEqual(EXPECTED_FRESH_ARTIFACT_ROOTS);
       await expect(readJson(path.join(fixtureExpectedRoot, "command-json/fresh-install-success.json"))).resolves.toEqual(
         outcome.result,
       );
@@ -156,6 +244,8 @@ describe("runtime structure and IDE mirror creation", () => {
       );
 
       expect(manifest).toMatchObject(expectedManifest);
+      expect(manifest.paths.artifactRoot).toBe("_speclite-output");
+      expect(manifest.paths.artifactRoots).toEqual(EXPECTED_FRESH_ARTIFACT_ROOTS);
       expect(compatScriptEntries).toEqual([
         expect.objectContaining({
           path: "_speclite/scripts/resolve_config.py",
@@ -214,7 +304,7 @@ describe("runtime structure and IDE mirror creation", () => {
         canonicalSkillId: "speclite-create-prd",
         artifactContract: {
           artifactType: "prd",
-          defaultOutputPath: "_speclite-output/planning-artifacts",
+          defaultOutputPath: "_speclite-output/2-planning-artifacts/prd",
           requiredMetadata: ["workflowType", "sourceSkill", "generatedAt"],
         },
       });
@@ -223,7 +313,7 @@ describe("runtime structure and IDE mirror creation", () => {
         phaseLabel: "Solutioning",
         artifactContract: {
           artifactType: "story-review-summary",
-          defaultOutputPath: "_speclite-output/implementation-artifacts/story-reviews",
+          defaultOutputPath: "_speclite-output/4-implementation-artifacts/story-reviews",
         },
       });
       expect(customizePhaseRow).not.toHaveProperty("artifactContract");
@@ -290,10 +380,16 @@ describe("runtime structure and IDE mirror creation", () => {
       );
 
       for (const directory of [
-        "_speclite-output/planning-artifacts",
-        "_speclite-output/implementation-artifacts/stories",
-        "_speclite-output/implementation-artifacts/code-reviews",
-        "docs/brownfield/evidence",
+        "_speclite-output/0-brainstorming-artifacts",
+        "_speclite-output/1-analysis-artifacts",
+        "_speclite-output/2-planning-artifacts",
+        "_speclite-output/3-solutioning-artifacts",
+        "_speclite-output/4-implementation-artifacts",
+        "_speclite-output/4-implementation-artifacts/stories",
+        "_speclite-output/4-implementation-artifacts/code-reviews",
+        "_speclite-output/5-devops-artifacts",
+        "_speclite-output/project-knowledge-base",
+        "_speclite-output/project-knowledge-base/brownfield/evidence",
       ]) {
         await expect(lstat(path.join(tempRoot, directory))).resolves.toMatchObject({
           isDirectory: expect.any(Function),
@@ -719,13 +815,14 @@ describe("runtime structure and IDE mirror creation", () => {
       });
 
       expect(outcome.exitCode).toBe(1);
-      expect(outcome.result.issues).toEqual([
+      expect(outcome.result.issues).toEqual(expect.arrayContaining([
         expect.objectContaining({
           issueId: "artifact-path.symlink-escape",
           category: "artifact-path",
           severity: "error",
         }),
-      ]);
+      ]));
+      expect(outcome.result.issues).toHaveLength(7);
       await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).rejects.toMatchObject({
         code: "ENOENT",
       });
@@ -800,7 +897,7 @@ describe("runtime structure and IDE mirror creation", () => {
         await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toContain(
           "[core]",
         );
-        await expect(lstat(path.join(tempRoot, "_speclite-output/planning-artifacts"))).resolves.toBeDefined();
+        await expect(lstat(path.join(tempRoot, "_speclite-output/2-planning-artifacts"))).resolves.toBeDefined();
         await expect(lstat(path.join(outsideRoot, "skills"))).rejects.toMatchObject({
           code: "ENOENT",
         });

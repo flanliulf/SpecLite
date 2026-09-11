@@ -1,8 +1,13 @@
 import path from "node:path";
 import type { CommandPathSummary, IdeTargetStatus } from "../diagnostics/command-result-schema.js";
+import {
+  createArtifactRootProjections,
+  type ArtifactRootResolution,
+} from "../config/artifact-root-resolver.js";
 import { CANONICAL_TARGET_ORDER, getIdeAdapterRegistry, type IdeTargetId } from "../ide/adapter-registry.js";
 import type { SourceDescriptor } from "../source/source-descriptor-schema.js";
 import type {
+  ArtifactRootProjection,
   PhaseCoverageRow,
   FilesIndex,
   FilesIndexEntry,
@@ -23,7 +28,12 @@ export function createInstalledManifest(input: {
   sourceDescriptor: SourceDescriptor;
   installedModules: string[];
   targetIds: Array<"claude" | "agents">;
-  paths: Required<CommandPathSummary>;
+  paths: CommandPathSummary & {
+    projectRoot: ".";
+    specliteRoot: string;
+    artifactRoot: string;
+    manifestPath: string;
+  };
 }): Manifest {
   return {
     schemaVersion: "speclite.manifest.v1",
@@ -128,11 +138,32 @@ export function choosePrimaryInstalledSkillActivationTarget(input: {
 
 export type ArtifactRootContext = {
   output_folder: string;
+  brainstorming_artifacts?: string;
+  analysis_artifacts?: string;
   planning_artifacts: string;
+  solutioning_artifacts?: string;
   implementation_artifacts: string;
   devops_artifacts: string;
   project_knowledge: string;
+  projections?: ArtifactRootProjection[];
 };
+
+export function createArtifactRootContext(input: {
+  outputFolder: string;
+  roots: readonly ArtifactRootResolution[];
+}): ArtifactRootContext {
+  return {
+    output_folder: input.outputFolder,
+    brainstorming_artifacts: requireArtifactRoot(input.roots, "brainstorming_artifacts"),
+    analysis_artifacts: requireArtifactRoot(input.roots, "analysis_artifacts"),
+    planning_artifacts: requireArtifactRoot(input.roots, "planning_artifacts"),
+    solutioning_artifacts: requireArtifactRoot(input.roots, "solutioning_artifacts"),
+    implementation_artifacts: requireArtifactRoot(input.roots, "implementation_artifacts"),
+    devops_artifacts: requireArtifactRoot(input.roots, "devops_artifacts"),
+    project_knowledge: requireArtifactRoot(input.roots, "project_knowledge"),
+    projections: createArtifactRootProjections(input.roots),
+  };
+}
 
 export function getPhaseLabel(phaseId: string): string {
   const labels: Record<string, string> = {
@@ -187,7 +218,19 @@ function normalizeArtifactOutputPath(
 
   const resolved = outputLocation
     .replaceAll("{output_folder}", artifactRoots.output_folder)
+    .replaceAll(
+      "{brainstorming_artifacts}",
+      artifactRoots.brainstorming_artifacts ?? `${artifactRoots.output_folder}/brainstorming`,
+    )
+    .replaceAll(
+      "{analysis_artifacts}",
+      artifactRoots.analysis_artifacts ?? artifactRoots.planning_artifacts,
+    )
     .replaceAll("{planning_artifacts}", artifactRoots.planning_artifacts)
+    .replaceAll(
+      "{solutioning_artifacts}",
+      artifactRoots.solutioning_artifacts ?? artifactRoots.planning_artifacts,
+    )
     .replaceAll("{implementation_artifacts}", artifactRoots.implementation_artifacts)
     .replaceAll("{devops_artifacts}", artifactRoots.devops_artifacts)
     .replaceAll("{project_knowledge}", artifactRoots.project_knowledge);
@@ -203,10 +246,15 @@ function normalizeArtifactOutputPath(
 
   const eligibleRoots = [
     artifactRoots.output_folder,
+    artifactRoots.brainstorming_artifacts,
+    artifactRoots.analysis_artifacts,
     artifactRoots.planning_artifacts,
+    artifactRoots.solutioning_artifacts,
     artifactRoots.implementation_artifacts,
     artifactRoots.devops_artifacts,
+    artifactRoots.project_knowledge,
   ]
+    .filter((root): root is string => root !== undefined)
     .map(normalizeProjectRelativePosixPath)
     .filter((root): root is string => root !== undefined);
 
@@ -219,6 +267,18 @@ function normalizeArtifactOutputPath(
   }
 
   return undefined;
+}
+
+function requireArtifactRoot(
+  roots: readonly ArtifactRootResolution[],
+  field: ArtifactRootResolution["field"],
+): string {
+  const root = roots.find((candidate) => candidate.field === field);
+  if (root === undefined) {
+    throw new Error(`Missing resolved artifact root for ${field}`);
+  }
+
+  return root.resolvedRoot;
 }
 
 function normalizeProjectRelativePosixPath(value: string): string | undefined {

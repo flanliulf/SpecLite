@@ -14,6 +14,57 @@ const supportedRuntime = {
   platform: "darwin",
   platformRelease: "23.0.0",
 } as const;
+const EXPECTED_FRESH_ARTIFACT_ROOTS = [
+  {
+    field: "brainstorming_artifacts",
+    configPath: "core.brainstorming_artifacts",
+    placeholder: "{brainstorming_artifacts}",
+    resolvedRoot: "_speclite-output/0-brainstorming-artifacts",
+    resolutionMode: "fresh-default",
+  },
+  {
+    field: "analysis_artifacts",
+    configPath: "modules.sdlc.analysis_artifacts",
+    placeholder: "{analysis_artifacts}",
+    resolvedRoot: "_speclite-output/1-analysis-artifacts",
+    resolutionMode: "fresh-default",
+  },
+  {
+    field: "planning_artifacts",
+    configPath: "modules.sdlc.planning_artifacts",
+    placeholder: "{planning_artifacts}",
+    resolvedRoot: "_speclite-output/2-planning-artifacts",
+    resolutionMode: "fresh-default",
+  },
+  {
+    field: "solutioning_artifacts",
+    configPath: "modules.sdlc.solutioning_artifacts",
+    placeholder: "{solutioning_artifacts}",
+    resolvedRoot: "_speclite-output/3-solutioning-artifacts",
+    resolutionMode: "fresh-default",
+  },
+  {
+    field: "implementation_artifacts",
+    configPath: "modules.sdlc.implementation_artifacts",
+    placeholder: "{implementation_artifacts}",
+    resolvedRoot: "_speclite-output/4-implementation-artifacts",
+    resolutionMode: "fresh-default",
+  },
+  {
+    field: "devops_artifacts",
+    configPath: "modules.sdlc.devops_artifacts",
+    placeholder: "{devops_artifacts}",
+    resolvedRoot: "_speclite-output/5-devops-artifacts",
+    resolutionMode: "fresh-default",
+  },
+  {
+    field: "project_knowledge",
+    configPath: "modules.sdlc.project_knowledge",
+    placeholder: "{project_knowledge}",
+    resolvedRoot: "_speclite-output/project-knowledge-base",
+    resolutionMode: "fresh-default",
+  },
+] as const;
 
 describe("project config initialization", () => {
   it("builds quick config from module metadata defaults with trim and empty fallback", async () => {
@@ -43,22 +94,34 @@ describe("project config initialization", () => {
         communication_language: "Chinese",
         document_output_language: "Chinese",
         output_folder: "custom-output",
+        brainstorming_artifacts: "custom-output/0-brainstorming-artifacts",
       });
       expect(result.model.modules.sdlc).toMatchObject({
         user_skill_level: "intermediate",
-        planning_artifacts: "custom-output/planning-artifacts",
-        implementation_artifacts: "custom-output/implementation-artifacts",
-        devops_artifacts: "custom-output/devops-artifacts",
-        project_knowledge: "docs",
+        analysis_artifacts: "custom-output/1-analysis-artifacts",
+        planning_artifacts: "custom-output/2-planning-artifacts",
+        solutioning_artifacts: "custom-output/3-solutioning-artifacts",
+        implementation_artifacts: "custom-output/4-implementation-artifacts",
+        devops_artifacts: "custom-output/5-devops-artifacts",
+        project_knowledge: "custom-output/project-knowledge-base",
       });
+      expect(result.artifactRoots).toEqual(
+        EXPECTED_FRESH_ARTIFACT_ROOTS.map((root) => ({
+          ...root,
+          resolvedRoot: root.resolvedRoot.replace("_speclite-output", "custom-output"),
+        })),
+      );
       expect(result.configToml.core).toMatchObject({
         output_folder: "{project-root}/custom-output",
+        brainstorming_artifacts: "{project-root}/custom-output/0-brainstorming-artifacts",
       });
       expect(result.configToml.modules?.sdlc).toMatchObject({
-        planning_artifacts: "{project-root}/custom-output/planning-artifacts",
-        implementation_artifacts: "{project-root}/custom-output/implementation-artifacts",
-        devops_artifacts: "{project-root}/custom-output/devops-artifacts",
-        project_knowledge: "{project-root}/docs",
+        analysis_artifacts: "{project-root}/custom-output/1-analysis-artifacts",
+        planning_artifacts: "{project-root}/custom-output/2-planning-artifacts",
+        solutioning_artifacts: "{project-root}/custom-output/3-solutioning-artifacts",
+        implementation_artifacts: "{project-root}/custom-output/4-implementation-artifacts",
+        devops_artifacts: "{project-root}/custom-output/5-devops-artifacts",
+        project_knowledge: "{project-root}/custom-output/project-knowledge-base",
       });
       expect(result.configToml.core).not.toHaveProperty("user_name");
       expect(result.configUserToml.core).toMatchObject({
@@ -117,6 +180,19 @@ describe("project config initialization", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    expect(result.artifactRoots.map(({ field, resolvedRoot, resolutionMode }) => ({
+      field,
+      resolvedRoot,
+      resolutionMode,
+    }))).toEqual([
+      { field: "brainstorming_artifacts", resolvedRoot: "_speclite-output/0-brainstorming-artifacts", resolutionMode: "fresh-default" },
+      { field: "analysis_artifacts", resolvedRoot: "_speclite-output/1-analysis-artifacts", resolutionMode: "fresh-default" },
+      { field: "planning_artifacts", resolvedRoot: "_speclite-output/plans", resolutionMode: "explicit-config" },
+      { field: "solutioning_artifacts", resolvedRoot: "_speclite-output/3-solutioning-artifacts", resolutionMode: "fresh-default" },
+      { field: "implementation_artifacts", resolvedRoot: "_speclite-output/4-implementation-artifacts", resolutionMode: "fresh-default" },
+      { field: "devops_artifacts", resolvedRoot: "_speclite-output/5-devops-artifacts", resolutionMode: "fresh-default" },
+      { field: "project_knowledge", resolvedRoot: "_speclite-output/project-knowledge-base", resolutionMode: "fresh-default" },
+    ]);
 
     const parsedConfig = parseConfigToml(serializeConfigToml(result.configToml));
     const parsedUserConfig = parseConfigToml(serializeConfigToml(result.configUserToml));
@@ -129,10 +205,12 @@ describe("project config initialization", () => {
       },
       modules: {
         sdlc: {
+          analysis_artifacts: "{project-root}/_speclite-output/1-analysis-artifacts",
           planning_artifacts: "{project-root}/_speclite-output/plans",
-          implementation_artifacts: "{project-root}/_speclite-output/implementation-artifacts",
-          devops_artifacts: "{project-root}/_speclite-output/devops-artifacts",
-          project_knowledge: "{project-root}/docs",
+          solutioning_artifacts: "{project-root}/_speclite-output/3-solutioning-artifacts",
+          implementation_artifacts: "{project-root}/_speclite-output/4-implementation-artifacts",
+          devops_artifacts: "{project-root}/_speclite-output/5-devops-artifacts",
+          project_knowledge: "{project-root}/_speclite-output/project-knowledge-base",
         },
       },
       agents: {
@@ -262,6 +340,31 @@ describe("project config initialization", () => {
 	    ]);
 	    expect(result.plannedWrites).toEqual([]);
 	  });
+
+  it("rejects invalid fresh artifact root overrides before any planned writes", async () => {
+    const selectedModules = await discoverOfficialModules({ projectRoot: process.cwd() });
+    const result = await createConfigInitializationPlan({
+      targetRoot: process.cwd(),
+      targetProject: "invalid-fresh-root",
+      mode: "detailed",
+      selectedModules,
+      values: {
+        analysis_artifacts: "{planning_artifacts}/research",
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues).toEqual([
+      expect.objectContaining({
+        issueId: "artifact-path.unresolved-token",
+        category: "artifact-path",
+        severity: "error",
+        affectedPath: "project-config:modules.sdlc.analysis_artifacts",
+      }),
+    ]);
+    expect(result.plannedWrites).toEqual([]);
+  });
 
 	  it("redacts rejected sensitive artifact paths from public JSON and human output", async () => {
 	    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-config-redaction-"));
@@ -470,7 +573,13 @@ describe("project config initialization", () => {
 
       expect(configToml).toContain("# 该文件需要提交到代码仓库，适用于项目中的每位开发者。");
       expect(configToml).toContain('output_folder = "{project-root}/_speclite-output"');
-      expect(configToml).toContain('planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"');
+      expect(configToml).toContain('brainstorming_artifacts = "{project-root}/_speclite-output/0-brainstorming-artifacts"');
+      expect(configToml).toContain('analysis_artifacts = "{project-root}/_speclite-output/1-analysis-artifacts"');
+      expect(configToml).toContain('planning_artifacts = "{project-root}/_speclite-output/2-planning-artifacts"');
+      expect(configToml).toContain('solutioning_artifacts = "{project-root}/_speclite-output/3-solutioning-artifacts"');
+      expect(configToml).toContain('implementation_artifacts = "{project-root}/_speclite-output/4-implementation-artifacts"');
+      expect(configToml).toContain('devops_artifacts = "{project-root}/_speclite-output/5-devops-artifacts"');
+      expect(configToml).toContain('project_knowledge = "{project-root}/_speclite-output/project-knowledge-base"');
       expect(configToml).toContain("[agents.speclite-agent-analyst]");
       expect(configToml).toContain('title = "业务分析师"');
       expect(configToml).toContain("[hooks.canonical-source-change-check]");

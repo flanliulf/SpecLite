@@ -128,10 +128,18 @@ speclite validate /path/to/project --json
 | Path | Purpose |
 |---|---|
 | `_speclite/` | SpecLite metadata/control hub。 |
-| `_speclite-output/` | planning、implementation、devops 等 workflow artifacts 默认输出位置。 |
+| `_speclite-output/0-brainstorming-artifacts/` | brainstorming workflow artifacts 默认输出面。 |
+| `_speclite-output/1-analysis-artifacts/` | product brief、research、PRFAQ 等 analysis artifacts 默认输出面。 |
+| `_speclite-output/2-planning-artifacts/` | PRD、UX、Epics 等 planning artifacts 默认输出面。 |
+| `_speclite-output/3-solutioning-artifacts/` | Architecture、Specs、implementation readiness 等 solutioning artifacts 默认输出面。 |
+| `_speclite-output/4-implementation-artifacts/` | Stories、Flow Gates、Reviews、Retrospectives 等 implementation artifacts 默认输出面。 |
+| `_speclite-output/5-devops-artifacts/` | CI/CD、deployment、npm release 等 devops artifacts 默认输出面。 |
+| `_speclite-output/project-knowledge-base/` | Brownfield baseline、长期项目知识和 TSD 等 Project Knowledge 默认输出面。 |
 | `.claude/skills/` | Claude Code skill mirror。 |
 | `.agents/skills/` | Generic agent skill mirror。 |
-| `_speclite/_config/manifest.yaml` | installed-state projection。 |
+| `_speclite/_config/manifest.yaml` | installed-state projection，包含 `paths.artifactRoots[]` 七 root manifest projection。 |
+
+Public Documentation（公开文档）仍使用目标项目的 `docs/` 信息架构，由 docs workflow 按需维护；它与 Project Knowledge（`project_knowledge`）默认输出面分离。
 
 ## Examples（示例）
 

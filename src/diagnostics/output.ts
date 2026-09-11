@@ -66,6 +66,7 @@ export type HumanOutputCommand =
   | "list"
   | "governance-report"
   | "resolve.config"
+  | "resolve.artifact-roots"
   | "resolve.customization";
 
 export const HUMAN_OUTPUT_PRESENTATION_PROFILES: Record<HumanOutputCommand, HumanOutputPresentationProfile> = {
@@ -81,6 +82,7 @@ export const HUMAN_OUTPUT_PRESENTATION_PROFILES: Record<HumanOutputCommand, Huma
   list: "report-support",
   "governance-report": "report-support",
   "resolve.config": "report-support",
+  "resolve.artifact-roots": "report-support",
   "resolve.customization": "report-support",
 };
 
@@ -479,6 +481,7 @@ export function renderStatusHumanOutput(
       `- projectRoot: ${result.data.paths.projectRoot}`,
       `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"}`,
       `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"}`,
+      ...formatStatusArtifactRootPlaneLines(result, locale),
       `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
       `manifestPath=${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}`,
     ],
@@ -962,6 +965,7 @@ function formatInstallReadyKeyPathLines(result: InstallCommandResult, locale: Cl
       `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"} (metadata/control hub)`,
       "- .claude/skills and .agents/skills (IDE execution plane)",
       `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"} (artifact repository)`,
+      ...formatInstallArtifactRootPlaneLines(result, locale),
       `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"} (installed-state projection)`,
     ];
   }
@@ -972,7 +976,66 @@ function formatInstallReadyKeyPathLines(result: InstallCommandResult, locale: Cl
     `- specliteRoot: ${result.data.paths.specliteRoot ?? "_speclite"}（metadata 与控制目录）`,
     "- .claude/skills and .agents/skills（IDE 执行目录）",
     `- artifactRoot: ${result.data.paths.artifactRoot ?? "_speclite-output"}（artifact 仓库）`,
+    ...formatInstallArtifactRootPlaneLines(result, locale),
     `- manifestPath: ${result.data.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}（installed-state 投影）`,
+  ];
+}
+
+function formatInstallArtifactRootPlaneLines(
+  result: InstallCommandResult,
+  locale: CliLocale,
+): string[] {
+  const artifactRoots = result.data.paths.artifactRoots ?? [];
+  if (artifactRoots.length === 0) return [];
+
+  const contractSuffix = (contractRefs: string[]): string =>
+    contractRefs.length === 0 ? "" : `, contractRefs=${contractRefs.join("|")}`;
+
+  if (locale === "en-US") {
+    return [
+      "Filesystem planes",
+      ...artifactRoots.map((root) =>
+        `- ${root.plane}: ${root.resolvedRoot} (mode=${root.resolutionMode}, ownership=${root.ownership}${contractSuffix(root.contractRefs)})`
+      ),
+      "- Public documentation: docs (public documentation plane)",
+    ];
+  }
+
+  return [
+    "Filesystem planes（文件系统平面）",
+    ...artifactRoots.map((root) =>
+      `- ${root.plane}: ${root.resolvedRoot}（mode=${root.resolutionMode}, ownership=${root.ownership}${contractSuffix(root.contractRefs)}）`
+    ),
+    "- Public Documentation: docs（Public Documentation plane）",
+  ];
+}
+
+function formatStatusArtifactRootPlaneLines(
+  result: StatusCommandResult,
+  locale: CliLocale,
+): string[] {
+  const artifactRoots = result.data.paths.artifactRoots ?? [];
+  if (artifactRoots.length === 0) return [];
+
+  const contractSuffix = (contractRefs: string[]): string =>
+    contractRefs.length === 0 ? "" : `, contractRefs=${contractRefs.join("|")}`;
+
+  if (locale === "en-US") {
+    return [
+      "Filesystem planes",
+      ...artifactRoots.map((root) =>
+        `- ${root.plane}: ${root.resolvedRoot} (mode=${root.resolutionMode}, ownership=${root.ownership}${contractSuffix(root.contractRefs)})`
+      ),
+      "- Public documentation: docs (public documentation plane)",
+    ];
+  }
+
+  return [
+    "Filesystem planes（文件系统平面）",
+    ...artifactRoots.map((root) =>
+      `- ${root.plane}: ${root.resolvedRoot}（mode=${root.resolutionMode}, ownership=${root.ownership}${contractSuffix(root.contractRefs)}）`
+    ),
+    "- Public Documentation: docs（Public Documentation plane）",
   ];
 }
 

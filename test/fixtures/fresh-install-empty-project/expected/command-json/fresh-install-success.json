@@ -3,7 +3,7 @@
   "status": "success",
   "command": "install",
   "targetProject": "fresh-install-empty-project",
-  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=18, sdlc=50, total=68. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC Module 0.0.0). IDE targets: claude (68 skills at .claude/skills), agents (68 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
+  "summary": "Source: bundled assets/source/speclite. Final configuration summary confirmed. Config mode: quick. Project name: fresh-install-empty-project. User display name: SpecLite. Languages: communication=Chinese, document=Chinese. Selected modules: core, sdlc. Canonical package roots: core=18, sdlc=50, total=68. Installed modules: core (SpecLite Core Module 0.0.0), sdlc (SpecLite SDLC Module 0.0.0). IDE targets: claude (68 skills at .claude/skills), agents (68 skills at .agents/skills). Runtime path: _speclite. Artifact root: _speclite-output. Artifact roots: brainstorming=_speclite-output/0-brainstorming-artifacts (fresh-default), analysis=_speclite-output/1-analysis-artifacts (fresh-default), planning=_speclite-output/2-planning-artifacts (fresh-default), solutioning=_speclite-output/3-solutioning-artifacts (fresh-default), implementation=_speclite-output/4-implementation-artifacts (fresh-default), devops=_speclite-output/5-devops-artifacts (fresh-default), project-knowledge=_speclite-output/project-knowledge-base (fresh-default). Manifest path: _speclite/_config/manifest.yaml. Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
   "issues": [],
   "nextActions": [
     "Before activating installed skills, run command -v speclite in the AI session; if it fails, expose a global or local development speclite CLI on PATH and retry activation.",
@@ -50,7 +50,93 @@
       "projectRoot": ".",
       "specliteRoot": "_speclite",
       "artifactRoot": "_speclite-output",
-      "manifestPath": "_speclite/_config/manifest.yaml"
+      "manifestPath": "_speclite/_config/manifest.yaml",
+      "artifactRoots": [
+        {
+          "field": "brainstorming_artifacts",
+          "configPath": "core.brainstorming_artifacts",
+          "placeholder": "{brainstorming_artifacts}",
+          "resolvedRoot": "_speclite-output/0-brainstorming-artifacts",
+          "resolutionMode": "fresh-default",
+          "plane": "brainstorming",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        },
+        {
+          "field": "analysis_artifacts",
+          "configPath": "modules.sdlc.analysis_artifacts",
+          "placeholder": "{analysis_artifacts}",
+          "resolvedRoot": "_speclite-output/1-analysis-artifacts",
+          "resolutionMode": "fresh-default",
+          "plane": "analysis",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        },
+        {
+          "field": "planning_artifacts",
+          "configPath": "modules.sdlc.planning_artifacts",
+          "placeholder": "{planning_artifacts}",
+          "resolvedRoot": "_speclite-output/2-planning-artifacts",
+          "resolutionMode": "fresh-default",
+          "plane": "planning",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        },
+        {
+          "field": "solutioning_artifacts",
+          "configPath": "modules.sdlc.solutioning_artifacts",
+          "placeholder": "{solutioning_artifacts}",
+          "resolvedRoot": "_speclite-output/3-solutioning-artifacts",
+          "resolutionMode": "fresh-default",
+          "plane": "solutioning",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        },
+        {
+          "field": "implementation_artifacts",
+          "configPath": "modules.sdlc.implementation_artifacts",
+          "placeholder": "{implementation_artifacts}",
+          "resolvedRoot": "_speclite-output/4-implementation-artifacts",
+          "resolutionMode": "fresh-default",
+          "plane": "implementation",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        },
+        {
+          "field": "devops_artifacts",
+          "configPath": "modules.sdlc.devops_artifacts",
+          "placeholder": "{devops_artifacts}",
+          "resolvedRoot": "_speclite-output/5-devops-artifacts",
+          "resolutionMode": "fresh-default",
+          "plane": "devops",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        },
+        {
+          "field": "project_knowledge",
+          "configPath": "modules.sdlc.project_knowledge",
+          "placeholder": "{project_knowledge}",
+          "resolvedRoot": "_speclite-output/project-knowledge-base",
+          "resolutionMode": "fresh-default",
+          "plane": "project-knowledge",
+          "ownership": "workflow-owned",
+          "contractRefs": [
+            "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+          ]
+        }
+      ]
     },
     "completedSteps": [
       "source-discovery",

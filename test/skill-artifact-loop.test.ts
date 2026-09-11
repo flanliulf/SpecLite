@@ -134,11 +134,11 @@ describe("skill artifact loop activation fixture", () => {
 
       expect(codeReviewRow.artifactContract).toEqual({
         artifactType: "code-review-summary",
-        defaultOutputPath: "_speclite-output/implementation-artifacts/code-reviews",
+        defaultOutputPath: "_speclite-output/4-implementation-artifacts/code-reviews",
         requiredMetadata: ["workflowType", "sourceSkill", "generatedAt"],
       });
       const artifactPath =
-        "_speclite-output/implementation-artifacts/code-reviews/skill-artifact-loop.md";
+        "_speclite-output/4-implementation-artifacts/code-reviews/skill-artifact-loop.md";
       const generatedAt = "2026-05-27T06:00:00.000Z";
       const artifactMetadata = createWorkflowArtifactMetadata({
         workflowType: "code-review",
@@ -165,7 +165,7 @@ describe("skill artifact loop activation fixture", () => {
       await expect(
         validateArtifactPathContract({
           projectRoot: tempRoot,
-          configuredRoot: "_speclite-output/implementation-artifacts",
+          configuredRoot: "_speclite-output/4-implementation-artifacts",
           defaultOutputPath: codeReviewRow.artifactContract.defaultOutputPath,
           actualArtifactPath: artifactPath,
           artifactType: codeReviewRow.artifactContract.artifactType,

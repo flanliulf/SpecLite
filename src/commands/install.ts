@@ -1315,6 +1315,7 @@ function createInstalledReadySummary(input: {
     `IDE targets: ${input.ideTargets.map((target) => `${target.id} (${target.skillCount ?? 0} skills at ${target.targetPath ?? "not-configured"})`).join(", ")}.`,
     `Runtime path: ${input.paths.specliteRoot ?? "_speclite"}.`,
     `Artifact root: ${input.paths.artifactRoot ?? "_speclite-output"}.`,
+    `Artifact roots: ${formatArtifactRootProjectionSummary(input.paths.artifactRoots)}.`,
     `Manifest path: ${input.paths.manifestPath ?? "_speclite/_config/manifest.yaml"}.`,
     "Runtime structure, artifact directories, IDE mirrors, manifest/index projections and ReadyCheck passed.",
   ].join(" ");
@@ -1420,6 +1421,15 @@ function formatModulePackageRootCounts(modules: OfficialModule[]): string {
     .join(", ");
 
   return `${perModule}, total=${total}`;
+}
+
+function formatArtifactRootProjectionSummary(
+  artifactRoots: CommandPathSummary["artifactRoots"],
+): string {
+  if (artifactRoots === undefined || artifactRoots.length === 0) return "none";
+  return artifactRoots
+    .map((root) => `${root.plane}=${root.resolvedRoot} (${root.resolutionMode})`)
+    .join(", ");
 }
 
 function shouldStopBeforeSourceSelection(

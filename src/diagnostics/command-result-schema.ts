@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { IdeTargetIdSchema, isProjectRelativePosixPath } from "../manifest/manifest-schema.js";
+import {
+  ArtifactRootProjectionSchema,
+  IdeTargetIdSchema,
+  isProjectRelativePosixPath,
+} from "../manifest/manifest-schema.js";
 import { SourceDescriptorSchema } from "../source/source-descriptor-schema.js";
 import { ExternalAccessSchema } from "../installer/install-plan-schema.js";
 import {
@@ -102,6 +106,7 @@ export const CommandPathSummarySchema = z
       .min(1)
       .refine(isProjectRelativePosixPath, "manifestPath must be project-relative POSIX")
       .optional(),
+    artifactRoots: z.array(ArtifactRootProjectionSchema).optional(),
   })
   .strict();
 
@@ -266,6 +271,7 @@ export const UpdatePlanActionSchema = z
     currentHash: z.string().min(1).optional(),
     expectedHash: z.string().min(1).optional(),
     reason: UpdateReasonCodeSchema.optional(),
+    replacementCanonicalSkillId: z.string().min(1).optional(),
   })
   .strict()
   .superRefine((action, ctx) => {
@@ -276,11 +282,31 @@ export const UpdatePlanActionSchema = z
         message: "skip actions must include a producer reason code",
       });
     }
-    if (action.action !== "skip" && action.reason !== undefined) {
+    const isCanonicalRenameAction =
+      (action.action === "skip" || action.action === "update") &&
+      action.reason === "canonical-skill-renamed";
+    if (action.action !== "skip" && action.reason !== undefined && !isCanonicalRenameAction) {
       ctx.addIssue({
         code: "custom",
         path: ["reason"],
         message: "non-skip update actions must omit reason",
+      });
+    }
+    if (
+      action.replacementCanonicalSkillId !== undefined &&
+      !isCanonicalRenameAction
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["replacementCanonicalSkillId"],
+        message: "replacementCanonicalSkillId is reserved for canonical-skill-renamed updates and skips",
+      });
+    }
+    if (action.reason === "canonical-skill-renamed" && action.replacementCanonicalSkillId === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["replacementCanonicalSkillId"],
+        message: "canonical-skill-renamed actions must identify the active replacement",
       });
     }
   });
@@ -288,7 +314,7 @@ export const UpdatePlanActionSchema = z
 export const RepairPlanActionSchema = z
   .object({
     affectedPath: z.string().min(1).refine(isProjectRelativePosixPath),
-    ownership: z.literal("installer-owned"),
+    ownership: OwnershipSchema,
     currentHash: z.string().min(1).optional(),
     expectedHash: z.string().min(1),
     action: z.enum(["restore-canonical", "regenerate", "skip"]),

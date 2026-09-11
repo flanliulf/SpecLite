@@ -649,8 +649,11 @@ async function collectConfigInitializationSelection(
 
   if (selectedModuleIds.includes("sdlc")) {
     for (const field of [
+      "brainstorming_artifacts",
       "user_skill_level",
+      "analysis_artifacts",
       "planning_artifacts",
+      "solutioning_artifacts",
       "implementation_artifacts",
       "devops_artifacts",
       "project_knowledge",

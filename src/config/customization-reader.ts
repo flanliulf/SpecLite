@@ -142,8 +142,7 @@ async function loadTomlLayer(input: {
   component: "config-resolver" | "customization-resolver";
   layerKind: "config" | "customization";
 }):
-  | Promise<{ ok: true; value: TomlDocument }>
-  | Promise<{ ok: false; issue: ValidationIssue }> {
+  Promise<{ ok: true; value: TomlDocument } | { ok: false; issue: ValidationIssue }> {
   let contents: string;
   try {
     contents = await readFile(input.path, "utf8");
@@ -246,14 +245,19 @@ function selectSourceMetadata(
   selectedValue: TomlDocument,
 ): Record<string, ResolverSourceMetadata> {
   const selectedSources: Record<string, ResolverSourceMetadata> = {};
-  const keys = requestedKeys.length === 0 ? Object.keys(selectedValue) : requestedKeys;
+  const isFullRead = requestedKeys.length === 0;
+  const keys = isFullRead ? collectTomlLeafKeys(selectedValue) : requestedKeys;
   for (const key of keys) {
     const source = sources.get(key);
-    if (source !== undefined && key in selectedValue) {
+    if (source !== undefined && hasSelectedKey(selectedValue, key, isFullRead)) {
       selectedSources[key] = source;
     }
   }
   return selectedSources;
+}
+
+function hasSelectedKey(selectedValue: TomlDocument, key: string, isFullRead: boolean): boolean {
+  return isFullRead ? extractDottedKey(selectedValue, key) !== undefined : key in selectedValue;
 }
 
 function collectTomlLeafKeys(value: TomlDocument, prefix = ""): string[] {

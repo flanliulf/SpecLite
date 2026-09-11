@@ -66,6 +66,85 @@ MVP versions：
 
 Backward-compatible additive changes 可以添加 optional fields。删除 fields、重命名 fields、改变 field meaning、收窄 enum values、不兼容地改变 field types，或添加 required fields，都需要新的 schema version。
 
+## Manifest Path Projection（Manifest 路径投影）
+
+Manifest `paths` 是 installed-state 中对 runtime path 和 workflow artifact roots 的 stable projection。Minimum shape：
+
+```ts
+type ArtifactRootProjection = {
+  field:
+    | "brainstorming_artifacts"
+    | "analysis_artifacts"
+    | "planning_artifacts"
+    | "solutioning_artifacts"
+    | "implementation_artifacts"
+    | "devops_artifacts"
+    | "project_knowledge";
+  configPath:
+    | "core.brainstorming_artifacts"
+    | "modules.sdlc.analysis_artifacts"
+    | "modules.sdlc.planning_artifacts"
+    | "modules.sdlc.solutioning_artifacts"
+    | "modules.sdlc.implementation_artifacts"
+    | "modules.sdlc.devops_artifacts"
+    | "modules.sdlc.project_knowledge";
+  placeholder:
+    | "{brainstorming_artifacts}"
+    | "{analysis_artifacts}"
+    | "{planning_artifacts}"
+    | "{solutioning_artifacts}"
+    | "{implementation_artifacts}"
+    | "{devops_artifacts}"
+    | "{project_knowledge}";
+  resolvedRoot: string;
+  resolutionMode: "fresh-default" | "explicit-config" | "legacy-compatible";
+  plane:
+    | "brainstorming"
+    | "analysis"
+    | "planning"
+    | "solutioning"
+    | "implementation"
+    | "devops"
+    | "project-knowledge";
+  ownership: "workflow-owned";
+  contractRefs: string[];
+};
+
+type ManifestPaths = {
+  projectRoot: ".";
+  specliteRoot: string;
+  artifactRoot: string;
+  manifestPath: string;
+  artifactRoots?: ArtifactRootProjection[];
+};
+```
+
+`artifactRoot` 保留 `_speclite-output` 兼容 display 和 existing consumer contract。`artifactRoots` 是 `speclite.manifest.v1` 的 optional additive field，因此不要求 schema version bump。
+
+当 `artifactRoots` 存在时，数组顺序必须固定为：
+
+1. `brainstorming_artifacts`
+2. `analysis_artifacts`
+3. `planning_artifacts`
+4. `solutioning_artifacts`
+5. `implementation_artifacts`
+6. `devops_artifacts`
+7. `project_knowledge`
+
+Fresh install default resolved roots 必须分别为：
+
+- `_speclite-output/0-brainstorming-artifacts`
+- `_speclite-output/1-analysis-artifacts`
+- `_speclite-output/2-planning-artifacts`
+- `_speclite-output/3-solutioning-artifacts`
+- `_speclite-output/4-implementation-artifacts`
+- `_speclite-output/5-devops-artifacts`
+- `_speclite-output/project-knowledge-base`
+
+这些 paths 是 workflow-owned artifact filesystem planes，不是 Public Documentation plane。Public documentation 仍保留在 project root 下的 `docs/`，不得通过 `project_knowledge` 投影伪装为 public docs。
+
+每个 `resolvedRoot` 必须是 project-relative POSIX path，必须已通过 path escape 和 symlink escape 检查，且不得包含 absolute path、temporary extraction directory、home directory、credential 或 checkout-root-dependent path。`contractRefs[]` 必须引用 owning artifact-root contract，例如 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots`。
+
 ## Canonical Target Identity（目标标识）
 
 MVP IDE target ids 是 physical execution targets，不是 branded IDE claims：

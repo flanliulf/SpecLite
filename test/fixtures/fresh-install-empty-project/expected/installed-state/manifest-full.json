@@ -26,6 +26,92 @@
     "projectRoot": ".",
     "specliteRoot": "_speclite",
     "artifactRoot": "_speclite-output",
+    "artifactRoots": [
+      {
+        "field": "brainstorming_artifacts",
+        "configPath": "core.brainstorming_artifacts",
+        "placeholder": "{brainstorming_artifacts}",
+        "resolvedRoot": "_speclite-output/0-brainstorming-artifacts",
+        "resolutionMode": "fresh-default",
+        "plane": "brainstorming",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      },
+      {
+        "field": "analysis_artifacts",
+        "configPath": "modules.sdlc.analysis_artifacts",
+        "placeholder": "{analysis_artifacts}",
+        "resolvedRoot": "_speclite-output/1-analysis-artifacts",
+        "resolutionMode": "fresh-default",
+        "plane": "analysis",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      },
+      {
+        "field": "planning_artifacts",
+        "configPath": "modules.sdlc.planning_artifacts",
+        "placeholder": "{planning_artifacts}",
+        "resolvedRoot": "_speclite-output/2-planning-artifacts",
+        "resolutionMode": "fresh-default",
+        "plane": "planning",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      },
+      {
+        "field": "solutioning_artifacts",
+        "configPath": "modules.sdlc.solutioning_artifacts",
+        "placeholder": "{solutioning_artifacts}",
+        "resolvedRoot": "_speclite-output/3-solutioning-artifacts",
+        "resolutionMode": "fresh-default",
+        "plane": "solutioning",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      },
+      {
+        "field": "implementation_artifacts",
+        "configPath": "modules.sdlc.implementation_artifacts",
+        "placeholder": "{implementation_artifacts}",
+        "resolvedRoot": "_speclite-output/4-implementation-artifacts",
+        "resolutionMode": "fresh-default",
+        "plane": "implementation",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      },
+      {
+        "field": "devops_artifacts",
+        "configPath": "modules.sdlc.devops_artifacts",
+        "placeholder": "{devops_artifacts}",
+        "resolvedRoot": "_speclite-output/5-devops-artifacts",
+        "resolutionMode": "fresh-default",
+        "plane": "devops",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      },
+      {
+        "field": "project_knowledge",
+        "configPath": "modules.sdlc.project_knowledge",
+        "placeholder": "{project_knowledge}",
+        "resolvedRoot": "_speclite-output/project-knowledge-base",
+        "resolutionMode": "fresh-default",
+        "plane": "project-knowledge",
+        "ownership": "workflow-owned",
+        "contractRefs": [
+          "_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots"
+        ]
+      }
+    ],
     "manifestPath": "_speclite/_config/manifest.yaml"
   }
 }

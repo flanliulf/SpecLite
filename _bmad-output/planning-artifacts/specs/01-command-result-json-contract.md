@@ -72,7 +72,7 @@ Covered commands：
 
 Explicit exception：
 
-- `speclite resolve` 不使用 `CommandResult`。它是 installed skills 的 runtime support command。它的 stdout 必须保持为 pure resolve-result JSON；diagnostics 使用 `ValidationIssue` shape，以 JSON Lines 输出到 stderr。
+- `speclite resolve` 不使用 `CommandResult`。它是 installed skills 的 runtime support command。它的 stdout 必须保持为 pure resolve-result JSON；diagnostics 使用 `ValidationIssue` shape，以 JSON Lines 输出到 stderr。`resolve config` 输出 raw merged config，并保留 `--key` 对 merged config 的既有选择语义；`resolve artifact-roots` 使用独立 `speclite.resolve.artifact-roots.v1` payload 暴露 SPEC 09 resolver-backed roots、`resolutionMode` 和 source/provenance evidence。
 
 ## MVP CLI Flag Matrix（MVP CLI Flag 矩阵）
 
@@ -89,7 +89,8 @@ Explicit exception：
 | `speclite sync` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<SyncCommandData>`。 | Write-capable；只做 source-to-mirror / control-state reconciliation，不把 ordinary update conflicts 转成 hidden repair。 |
 | `speclite uninstall` | `--json`、`--yes`、`--dry-run` | `--json` 输出 `CommandResult<UninstallCommandData>`。 | Write-capable；只移除 installer-owned files，human-owned custom files、workflow-owned artifacts 和 unknown ownership 必须保留或提示 manual action。 |
 | `speclite governance-report` | `--json` | `--json` 输出 `CommandResult<GovernanceReportData>`，payload 由 `10-process-governance-report-contract.md` 负责。 | Read-only；只消费 manifest/index、phase coverage、artifact contract 和 validate output，不改变 install/status/validate/update 核心契约。 |
-| `speclite resolve config` | `--project-root`、`--key` | 不使用 `CommandResult`；stdout 只输出 resolve-result JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command。 |
+| `speclite resolve config` | `--project-root`、`--key` | 不使用 `CommandResult`；stdout 只输出 raw merged config JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command；不得合成 artifact-root fallback。 |
+| `speclite resolve artifact-roots` | `--project-root`、`--lifecycle` | 不使用 `CommandResult`；stdout 输出 `speclite.resolve.artifact-roots.v1` JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command；消费 SPEC 09 artifact-root resolver result。 |
 | `speclite resolve customization` | `--project-root`、`--skill`、`--key` | 不使用 `CommandResult`；stdout 只输出 resolve-result JSON，stderr 输出 JSON Lines diagnostics。 | Read-only runtime support command。 |
 
 新增 MVP flag、改变 flag meaning、或让某个 flag 影响 public JSON 字段时，必须先更新对应 owning SPEC，再更新 executable parser/schema 和 fixture expected outputs。
@@ -570,10 +571,50 @@ type IdeTargetStatus = {
   skillCount?: number;
 };
 
+type ArtifactRootProjection = {
+  field:
+    | "brainstorming_artifacts"
+    | "analysis_artifacts"
+    | "planning_artifacts"
+    | "solutioning_artifacts"
+    | "implementation_artifacts"
+    | "devops_artifacts"
+    | "project_knowledge";
+  configPath:
+    | "core.brainstorming_artifacts"
+    | "modules.sdlc.analysis_artifacts"
+    | "modules.sdlc.planning_artifacts"
+    | "modules.sdlc.solutioning_artifacts"
+    | "modules.sdlc.implementation_artifacts"
+    | "modules.sdlc.devops_artifacts"
+    | "modules.sdlc.project_knowledge";
+  placeholder:
+    | "{brainstorming_artifacts}"
+    | "{analysis_artifacts}"
+    | "{planning_artifacts}"
+    | "{solutioning_artifacts}"
+    | "{implementation_artifacts}"
+    | "{devops_artifacts}"
+    | "{project_knowledge}";
+  resolvedRoot: string;
+  resolutionMode: "fresh-default" | "explicit-config" | "legacy-compatible";
+  plane:
+    | "brainstorming"
+    | "analysis"
+    | "planning"
+    | "solutioning"
+    | "implementation"
+    | "devops"
+    | "project-knowledge";
+  ownership: "workflow-owned";
+  contractRefs: string[];
+};
+
 type CommandPathSummary = {
   projectRoot: ".";
   specliteRoot?: string;
   artifactRoot?: string;
+  artifactRoots?: ArtifactRootProjection[];
   manifestPath?: string;
 };
 
@@ -631,6 +672,24 @@ type UninstallPlan = {
   }>;
 };
 ```
+
+`CommandPathSummary.artifactRoot` 保留为 backward-compatible legacy top-level artifact root display，不得重命名、删除或改变含义。
+
+`CommandPathSummary.artifactRoots` 是 optional additive projection，用于 fresh install 和 Ready Summary 展示七个 workflow-owned artifact filesystem planes。它不替代 `artifactRoot`，也不改变 existing consumers 对 `artifactRoot` 的读取。
+
+当 `artifactRoots` 存在时，数组顺序必须固定为：
+
+1. `brainstorming_artifacts`
+2. `analysis_artifacts`
+3. `planning_artifacts`
+4. `solutioning_artifacts`
+5. `implementation_artifacts`
+6. `devops_artifacts`
+7. `project_knowledge`
+
+每个 `resolvedRoot` 必须是 project-relative POSIX path，必须已通过 path escape 和 symlink escape 检查，且不得包含 absolute path、temporary extraction directory、home directory、credential 或 checkout-root-dependent path。`contractRefs[]` 必须引用 owning artifact-root contract，例如 `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md#Runtime-Artifact-Roots`。
+
+Human-readable install Ready Summary 必须在 `Key paths` 中展示 legacy `Artifact root`，并在其后展示 `Filesystem planes`。Filesystem planes 至少包含七个 `plane: resolvedRoot` 行以及单独的 `Public documentation: docs` 行，用于明确 project knowledge plane 与 public documentation plane 分离。Human output 可以展示 `resolutionMode`、`ownership` 和 `contractRefs`，但不得泄漏本地 absolute path。
 
 `SourceDescriptor.contentHash` 只对 content-addressable source artifacts required，例如 local tarballs、offline bundles 和 local source snapshots。Registry 和 Git sources 不得虚构 `contentHash`。
 
@@ -835,6 +894,7 @@ Required behavior：
 - stdout 只包含 resolve-result JSON。
 - stderr 以 JSON Lines 输出 diagnostics。
 - 每一行 diagnostic 使用 `ValidationIssue` shape。
+- `resolve config` 保持 raw merged config output 和既有 `--key` 语义；effective artifact roots、legacy-compatible mode 和 provenance 必须由 `resolve artifact-roots` 提供。
 - 如果 parsing 成功，warning diagnostics 不会使 resolve fail。
 - error 或 critical diagnostics 产生 non-zero exit code。
 

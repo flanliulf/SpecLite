@@ -1,6 +1,6 @@
 # Story 11.2: Fresh Install Artifact Root Projection（Fresh Install Artifact Root 投影）
 
-Status: ready-for-dev
+Status: done
 
 <!-- 本 Story 可预先创建，但只能在 Story 11.1 已完成并通过 current story-completion Gate 后 kickoff。 -->
 
@@ -20,7 +20,8 @@ Status: ready-for-dev
 3. **Directory Plan 由 Canonical Metadata 驱动**
    - 目录集合与稳定顺序必须来自 canonical module metadata 和 Story 11.1 resolved model；command 层不得维护第二份硬编码列表。
 4. **Manifest / Index 投影实际 Resolved Roots**
-   - 投影实际 `resolvedRoot`、`resolutionMode: fresh-default`、ownership 与 artifact contract references；manifest/index 不是第二套 config 真源。
+   - 投影实际 `resolvedRoot`、逐 field `resolutionMode`、ownership 与 artifact contract references；manifest/index 不是第二套 config 真源。
+   - **Controlled Correction 2026-09-03**：2026-09-02 kickoff 原决策将 fresh install 七 roots 全部写为 `fresh-default`。该决策现收窄为 quick/default flow、未显式输入的 artifact root fields，以及仅设置 `output_folder` 后派生的七 roots。Fresh detailed prompt 中某个 artifact root field 的非空逐 field 输入必须在 projection 中标记为 `explicit-config`。
 5. **Ready Summary 展示实际 Filesystem Planes**
    - 展示实际 root、plane/phase、resolution mode 与 ownership；`docs/`（Public Documentation）与 `{project_knowledge}`（Project Knowledge）必须分开。
 6. **Fresh-install Fixtures 验证 Projection**
@@ -30,25 +31,25 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: Contract Preflight 与 Kickoff Gate（AC: 1-7）
-  - [ ] 验证 Story 11.1 已 `done` 且 current story-completion Gate 为 `PASS` / `PASS_EQUIVALENT`；否则停止。
-  - [ ] 运行 Story 11.2 `story-kickoff` Gate，锁定七字段 registry、projection schema、write authorization 与 bounded files。
-- [ ] Task 2: 先建立失败的 Projection Tests（AC: 1-6）
-  - [ ] 覆盖 config TOML、directory plan、manifest/index、Ready Summary 与 human/JSON parity。
-  - [ ] 覆盖未授权、lock failure、resolver failure 时零 filesystem mutation。
-- [ ] Task 3: 接入 Fresh Config Projection（AC: 1, 3）
-  - [ ] 让 `createConfigInitializationPlan()` 消费 Story 11.1 resolver/model，不复制 defaults。
-  - [ ] 序列化七类 portable `{project-root}` values；保留 quick/detailed、TOML ownership 与四层 override 行为。
-- [ ] Task 4: 接入 Runtime Directory Plan（AC: 2-3）
-  - [ ] 让 `createArtifactRootContext()` / `createArtifactDirectories()` 消费同一 resolved registry。
-  - [ ] 保持 plan-before-write、operation lock、safe-write、partial-failure diagnostics。
-- [ ] Task 5: 扩展 Manifest / Index / Ready Summary（AC: 4-5）
-  - [ ] 投影逐 root 的 path、mode、plane/phase、ownership 与 contract reference，并保持 deterministic ordering。
-  - [ ] 不改变既有 `CommandResult` envelope；不得泄露 absolute path。
-- [ ] Task 6: Fixture 与 Regression Verification（AC: 1-7）
-  - [ ] 更新 fresh-install expected config/tree/manifest/index/summary snapshots。
-  - [ ] 运行 focused tests、install/ready regressions、`npm run build` 与 `git diff --check`。
-  - [ ] 进入 `review` 前生成 Story 11.2 `story-completion` Gate，并用实际输出填写 Evidence Summary。
+- [x] Task 1: Contract Preflight 与 Kickoff Gate（AC: 1-7）
+  - [x] 验证 Story 11.1 已 `done` 且 current story-completion Gate 为 `PASS` / `PASS_EQUIVALENT`；否则停止。
+  - [x] 运行 Story 11.2 `story-kickoff` Gate，锁定七字段 registry、projection schema、write authorization 与 bounded files。
+- [x] Task 2: 先建立失败的 Projection Tests（AC: 1-6）
+  - [x] 覆盖 config TOML、directory plan、manifest/index、Ready Summary 与 human/JSON parity。
+  - [x] 覆盖未授权、lock failure、resolver failure 时零 filesystem mutation。
+- [x] Task 3: 接入 Fresh Config Projection（AC: 1, 3）
+  - [x] 让 `createConfigInitializationPlan()` 消费 Story 11.1 resolver/model，不复制 defaults。
+  - [x] 序列化七类 portable `{project-root}` values；保留 quick/detailed、TOML ownership 与四层 override 行为。
+- [x] Task 4: 接入 Runtime Directory Plan（AC: 2-3）
+  - [x] 让 `createArtifactRootContext()` / `createArtifactDirectories()` 消费同一 resolved registry。
+  - [x] 保持 plan-before-write、operation lock、safe-write、partial-failure diagnostics。
+- [x] Task 5: 扩展 Manifest / Index / Ready Summary（AC: 4-5）
+  - [x] 投影逐 root 的 path、mode、plane/phase、ownership 与 contract reference，并保持 deterministic ordering。
+  - [x] 不改变既有 `CommandResult` envelope；不得泄露 absolute path。
+- [x] Task 6: Fixture 与 Regression Verification（AC: 1-7）
+  - [x] 更新 fresh-install expected config/tree/manifest/index/summary snapshots。
+  - [x] 运行 focused tests、install/ready regressions、`npm run build` 与 `git diff --check`。
+  - [x] 进入 `review` 前生成 Story 11.2 `story-completion` Gate，并用实际输出填写 Evidence Summary。
 
 ## Dev Notes（开发备注）
 
@@ -109,6 +110,7 @@ Status: ready-for-dev
 ## Equivalent Implementation Policy（等价实现策略）
 
 - Helper/file split 可调整，但不得改变七个 config keys/defaults、目录集合与顺序、`fresh-default`、plane separation、write authorization 或 stable evidence。
+- Controlled correction 2026-09-03 后，`fresh-default` 的不可变要求仅覆盖 quick/default、未显式逐 field 输入与 `output_folder` 派生 defaults；fresh detailed 非空逐 field artifact root input 的 expected mode 是 `explicit-config`。
 - 现有 schema 可扩展或增加 adjacent projection model；不得用重复常量或 snapshot-only 伪造 resolver consumption。
 
 ## Evidence Plan（证据计划）
@@ -162,33 +164,95 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现 Agent 填写。
+Codex GPT-5
 
 ### Debug Log References（调试日志引用）
 
-待实现 Agent 填写。
+- Kickoff Gate: `_bmad-output/implementation-artifacts/flow-gates/11-2-fresh-install-artifact-root-projection-story-kickoff-gate.md` -> `PASS`。
+- RED evidence: `npx vitest run test/config-initialization.test.ts test/runtime-structure.test.ts test/install-progress-ready-summary.test.ts` 先失败，暴露 missing seven-root config/TOML、Ready Summary planes 与 `paths.artifactRoots` projection。
+- Focused evidence: `npx vitest run test/config-initialization.test.ts test/runtime-structure.test.ts test/install-progress-ready-summary.test.ts` -> 3 files / 31 tests passed。
+- Affected regression evidence: `npx vitest run test/fixture-release-gates.test.ts test/fixture-contract.test.ts test/artifact-root-resolution.test.ts test/resolve-readers.test.ts test/artifact-path-validation.test.ts test/manifest-discovery.test.ts test/ide-target-writer.test.ts test/cli-smoke.test.ts test/status-command.test.ts` -> 9 files / 81 tests passed。
+- Canonical source check: `node assets/source/speclite/support-skills/speclite-check-canonical-source-change/scripts/check_canonical_source_change.mjs --project-root . --scope all --format json --mode strict` -> `status: ok`, `findings: []`, `decisionRecordRequired: false`。
+- Packaging evidence: `npm run release:packaging-check` -> packaging acceptance passed for `release/packaging-manifest.json` and `dist/packaging-manifest.json`。
+- Full evidence: `npm test` -> 61 files passed, 475 tests passed, 4 todo。
+- Build evidence: `npm run build` -> ESM and DTS build success。
+- Whitespace evidence: `git diff --check` -> exit 0。
+- Completion Gate: `_bmad-output/implementation-artifacts/flow-gates/11-2-fresh-install-artifact-root-projection-story-completion-gate.md` -> `PASS`。
+- CR Round 3 Reviewer: `_bmad-output/implementation-artifacts/code-reviews/11-2-code-review/11-2-code-review-summary-20260903-round-3.md` -> 通过，0 new findings，`Model Used: GPT-5.5 (gpt-5.5)`。
+- CR Round 3 Evaluator: `_bmad-output/implementation-artifacts/code-reviews/11-2-code-review/11-2-code-review-evaluation-20260903-round-3.md` -> 通过，无需 fixer 或新 owner decision，`Model Used: GPT-5.5 (gpt-5.5)`。
+- CR04 Rules: `_bmad-output/implementation-artifacts/cr-rules/cr-rules-summary.md` 已记录 `CR-API-35`、`CR-API-36`、`CR-PROCESS-02`。
+- CR05 TODO: `_bmad-output/implementation-artifacts/cr-rules/cr-todo-backlog.md` 已登记 `TODO-012`，状态 `open`，P2 / future-story，deferred non-blocking，不阻塞 Story 11.2。
+- CR06 Finalizer: live 核验 Story 11.1 predecessor gate、Story 11.2 kickoff/completion gate、Round 3 reviewer/evaluator、CR04/CR05 记录后，将 Story 与 sprint tracker 同步为 `done`；`bmm-workflow-status.yaml` 不存在，按 Skill 记录 skipped，未创建。
+- CR06 verification: focused status/gate reread -> PASS；canonical source checker warn/strict -> `status: ok`、`findings: []`、`decisionRecordRequired: false`；skill density checks -> no warnings；focused tests -> 8 files / 67 tests passed；`npm run build` -> PASS；`npm test` -> 61 files, 481 passed, 4 todo；`npm run release:packaging-check` -> PASS；`git diff --check` -> PASS。
 
 ### Completion Notes List（完成说明）
 
-- 终极上下文引擎分析已完成 —— 已创建完整开发者指南。
-- Story 尚未实现；tasks 与 Evidence Plan 不代表 verified evidence。
+- 已验证 Story 11.1 live completion identity/API：Story `Status: done`，completion gate `target/storyKey=11-1-executable-artifact-root-resolution-contract` 且 `result: PASS`。
+- Kickoff owner decision 已关闭：`SPEC 01` / `SPEC 04` 采用 bounded additive public schema update，保留 legacy `artifactRoot`，新增 optional ordered `artifactRoots[]` projection，不 bump `speclite.command-result.v1` / `speclite.manifest.v1`。
+- Fresh install config、directory plan、manifest/index、Ready Summary、human/JSON fixture 已统一消费 Story 11.1 `ARTIFACT_ROOT_REGISTRY` / resolver output。
+- Controlled correction 2026-09-03 已补充 fresh detailed per-root explicit mode：非空逐 field artifact root input 投影为 `explicit-config`，其余 fresh defaults 仍为 `fresh-default`。
+- `docs/` 作为 Public Documentation plane 独立呈现；fresh `{project_knowledge}` default 已投影到 `_speclite-output/project-knowledge-base`。
+- 未授权、lock failure、resolver failure 路径保持首个 write 前失败和零 filesystem mutation。
+- 未实现 existing fallback/mismatch/migration，也未修改 Analysis/Planning/UX/Readiness/CR workflow routing。
+- CR06 finalizer 已完成：Story 11.2 从 `review` 变更为 `done`，`sprint-status.yaml` 中 `11-2-fresh-install-artifact-root-projection` 从 `review` 变更为 `done`。
+- `TODO-012` 是已登记的 deferred non-blocking P2 future-story backlog，归属 Story 11.4+ / 后续 owner decision；本 Story 未修复该 TODO，也不把它作为 blocker。
+- `_bmad-output/planning-artifacts/bmm-workflow-status.yaml` 当前不存在；按 finalizer Skill 容错记录 skipped，未创建臆造 workflow tracker。
+- Epic 11 保持 `in-progress`；Story 11.3-11.10 仍为 `ready-for-dev`，不得在 Story 11.2 closeout 内自动推进。
+- 本次 CR06 未修改源码、tests、SPEC、canonical source、reviewer/evaluator artifact、rules summary 或 TODO backlog；未 commit、未 push。
 
 ### File List（文件清单）
 
-- `_bmad-output/implementation-artifacts/stories/11-2-fresh-install-artifact-root-projection.md`（create-story output）
-- `_bmad-output/implementation-artifacts/sprint-status.yaml`（tracker update）
+- `_bmad-output/implementation-artifacts/stories/11-2-fresh-install-artifact-root-projection.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/flow-gates/11-2-fresh-install-artifact-root-projection-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-2-fresh-install-artifact-root-projection-story-completion-gate.md`
+- `_bmad-output/planning-artifacts/specs/01-command-result-json-contract.md`
+- `_bmad-output/planning-artifacts/specs/04-manifest-index-contract.md`
+- `assets/source/speclite/sdlc-skills/module.yaml`
+- `release/packaging-manifest.json`
+- `src/bin/speclite.ts`
+- `src/commands/install.ts`
+- `src/config/artifact-root-resolver.ts`
+- `src/config/config-schema.ts`
+- `src/config/customization-reader.ts`
+- `src/diagnostics/command-result-schema.ts`
+- `src/diagnostics/output.ts`
+- `src/fs/path-normalizer.ts`
+- `src/installer/config-initialization.ts`
+- `src/installer/ready-check.ts`
+- `src/installer/runtime-structure.ts`
+- `src/manifest/manifest-generator.ts`
+- `src/manifest/manifest-schema.ts`
+- `test/config-initialization.test.ts`
+- `test/fixture-release-gates.test.ts`
+- `test/install-progress-ready-summary.test.ts`
+- `test/runtime-structure.test.ts`
+- `test/skill-artifact-loop.test.ts`
+- `test/fixtures/fresh-install-empty-project/expected/command-json/fresh-install-success.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/files-index-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/manifest-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/manifest.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-state/phase-coverage-full.json`
+- `test/fixtures/fresh-install-empty-project/expected/installed-tree.txt`
 
 ## Anchor Evidence Summary（锚点证据摘要）
 
-- Predecessor completion identity：待 kickoff 填写。
-- Contract / functional / evidence anchors：待实现后填写。
-- Equivalent implementation decisions：待 Gate 记录。
+- Predecessor completion identity：Story 11.1 completion gate frontmatter 已核验，`schemaVersion: speclite.flow-gate-report.v2`、`mode: story-completion`、`target/storyKey: 11-1-executable-artifact-root-resolution-contract`、`result: PASS`。
+- Owner decision：`SPEC 01` 与 `SPEC 04` 同变更声明 optional ordered `artifactRoots[]` projection；entry fields 为 `field/configPath/placeholder/resolvedRoot/resolutionMode/plane/ownership/contractRefs`；container optional、entry complete；ordering 固定为七 root registry 顺序；legacy `artifactRoot` 保留。
+- Functional anchor：fresh config initialization、runtime directory creation、manifest generation、ReadyCheck / Ready Summary 均消费同一 resolved root projection；`CommandResult` envelope 未改变；public paths 保持 project-relative POSIX。
+- Evidence anchor：focused tests、affected regressions、canonical source strict check、packaging check、full `npm test`、`npm run build`、`git diff --check` 全部通过。
+- Equivalent implementation decisions：无 `PASS_EQUIVALENT`；completion gate 为直接 `PASS`。
+- CR closeout anchor：最新 Round 3 reviewer/evaluator 均为 `GPT-5.5 (gpt-5.5)` 且结论通过；CR04 已沉淀三条规则；CR05 已把 `workflow-artifact-layout.md` generic route strings 作为 `TODO-012` deferred non-blocking backlog；CR06 只同步 Story/tracker 与编排记录。
+- Finalizer verification anchor：CR06 后已重跑 focused status/gate check、canonical warn/strict checker、support skill density checks、focused tests、build、full test、packaging check 与 `git diff --check`，全部通过。
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 Story 11.2 implementation context，定义 fresh config、directory、manifest/index、Ready Summary 与 fixture projection。 | Fancyliu / Codex |
+| 2026-09-03 | 1.0 | 完成 fresh-install 七 artifact roots 投影、SPEC 01/04 additive schema、fixtures 与验证收口，Story 进入 review。 | Codex |
+| 2026-09-03 | 1.1 | Controlled correction：修正 fresh detailed 非空逐 field artifact root input 的 `resolutionMode` 为 `explicit-config`，保留 quick/default 与 `output_folder` 派生 roots 的 `fresh-default`。 | Codex |
+| 2026-09-03 | 1.2 | CR06 finalizer：核验 Round 3 reviewer/evaluator、CR04、CR05 与 story-completion gate 后，将 Story 11.2 和 sprint tracker 同步为 done；`TODO-012` 保持 deferred non-blocking。 | Codex |
 
 ---
 

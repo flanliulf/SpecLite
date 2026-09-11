@@ -46,18 +46,21 @@ Module 会把配置写入目标项目的 `_speclite/config.toml`。`core` 写入
 | `communication_language` | `Chinese` | Agent 与用户对话使用的语言。 |
 | `document_output_language` | `Chinese` | 文档产物默认输出语言。 |
 | `output_folder` | `_speclite-output` | workflow artifact 的默认根目录。 |
+| `brainstorming_artifacts` | `{output_folder}/0-brainstorming-artifacts` | 存放 Brainstorming session 与发散探索产物。 |
 
 `SpecLite SDLC Module` 提供 SDLC 配置：
 
 | 配置项 | 默认值 | 作用 |
 |---|---|---|
 | `user_skill_level` | `intermediate` | 影响 Agent 在对话中解释概念的细致程度。 |
-| `planning_artifacts` | `{output_folder}/planning-artifacts` | 存放 Brainstorming、Brief、PRD、UX、Architecture、Epics 等规划产物。 |
-| `implementation_artifacts` | `{output_folder}/implementation-artifacts` | 存放 Sprint、Story、Review、Retrospective 和 Quick Flow 产物。 |
-| `devops_artifacts` | `{output_folder}/devops-artifacts` | 存放 CI/CD、release gate、deployment 和 publishing report。 |
-| `project_knowledge` | `docs` | 存放长期项目知识、研究资料和 reference。 |
+| `analysis_artifacts` | `{output_folder}/1-analysis-artifacts` | 存放 Product Brief、Research、PRFAQ 等 analysis 产物。 |
+| `planning_artifacts` | `{output_folder}/2-planning-artifacts` | 存放 PRD、UX、Epics 等 planning 产物。 |
+| `solutioning_artifacts` | `{output_folder}/3-solutioning-artifacts` | 存放 Architecture、Specs 和 implementation readiness 产物。 |
+| `implementation_artifacts` | `{output_folder}/4-implementation-artifacts` | 存放 Sprint、Story、Review、Retrospective 和 Quick Flow 产物。 |
+| `devops_artifacts` | `{output_folder}/5-devops-artifacts` | 存放 CI/CD、release gate、deployment 和 publishing report。 |
+| `project_knowledge` | `{output_folder}/project-knowledge-base` | 存放 Brownfield baseline、长期项目知识、研究资料和 reference。 |
 
-Module 还声明安装时要创建的目录，包括 `planning-artifacts/epics`、`implementation-artifacts/stories`、`implementation-artifacts/code-reviews`、`implementation-artifacts/story-reviews`、`implementation-artifacts/flow-gates` 和 `devops-artifacts/npm-releases` 等。
+Module 还声明安装时要创建的目录，包括 `0-brainstorming-artifacts`、`1-analysis-artifacts/{product-brief,prfaq,research}`、`2-planning-artifacts/{epics,prd,ux}`、`3-solutioning-artifacts/{architecture,implementation-readiness,specs}`、`4-implementation-artifacts/{stories,code-reviews,story-reviews,flow-gates,cr-rules,retrospectives}`、`5-devops-artifacts/{ci-cd,deployments,npm-releases}` 和 `project-knowledge-base/{brownfield,tsd}` 等。Public Documentation（公开文档）仍使用 `docs/` 信息架构，不等同于 fresh `project_knowledge` 默认目录。
 
 ## Installation Model（安装模型）
 

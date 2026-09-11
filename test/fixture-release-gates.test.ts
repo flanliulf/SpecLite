@@ -56,6 +56,8 @@ describe("fresh-install-empty-project release gate fixture", () => {
       expect(humanOutput).toContain("Installed modules");
       expect(humanOutput).toContain("IDE targets");
       expect(humanOutput).toContain("Key paths");
+      expect(humanOutput).toContain("Filesystem planes");
+      expect(humanOutput).toContain("Public documentation: docs");
       expect(humanOutput).not.toContain(firstRoot);
 
       await expect(readFile(path.join(firstRoot, "_speclite/_config/manifest.yaml"), "utf8")).resolves.toContain(
@@ -74,9 +76,13 @@ describe("fresh-install-empty-project release gate fixture", () => {
         "speclite.phase-coverage.v1",
       );
       await expect(readdir(path.join(firstRoot, "_speclite-output"))).resolves.toEqual([
-        "devops-artifacts",
-        "implementation-artifacts",
-        "planning-artifacts",
+        "0-brainstorming-artifacts",
+        "1-analysis-artifacts",
+        "2-planning-artifacts",
+        "3-solutioning-artifacts",
+        "4-implementation-artifacts",
+        "5-devops-artifacts",
+        "project-knowledge-base",
       ]);
 
       const skillIndex = JSON.parse(

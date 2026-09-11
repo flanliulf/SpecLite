@@ -83,7 +83,16 @@
           "activationTarget": ".agents/skills/speclite-domain-research/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "research-documents",
+        "defaultOutputPath": "_speclite-output/1-analysis-artifacts/research",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -104,7 +113,16 @@
           "activationTarget": ".agents/skills/speclite-market-research/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "research-documents",
+        "defaultOutputPath": "_speclite-output/1-analysis-artifacts/research",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -128,7 +146,7 @@
       ],
       "artifactContract": {
         "artifactType": "prfaq-document",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/1-analysis-artifacts/prfaq",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -158,7 +176,7 @@
       ],
       "artifactContract": {
         "artifactType": "product-brief",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/1-analysis-artifacts/product-brief",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -185,7 +203,16 @@
           "activationTarget": ".agents/skills/speclite-technical-research/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "research-documents",
+        "defaultOutputPath": "_speclite-output/1-analysis-artifacts/research",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -251,7 +278,7 @@
       ],
       "artifactContract": {
         "artifactType": "prd",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts/prd",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -281,7 +308,7 @@
       ],
       "artifactContract": {
         "artifactType": "ux-design",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts/ux",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -311,7 +338,7 @@
       ],
       "artifactContract": {
         "artifactType": "updated-prd",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -341,7 +368,7 @@
       ],
       "artifactContract": {
         "artifactType": "prd-validation-report",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts/prd",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -375,24 +402,24 @@
       "phaseId": "3-solutioning",
       "phaseLabel": "Solutioning",
       "moduleId": "sdlc",
-      "canonicalSkillId": "speclite-check-implementation-readiness",
+      "canonicalSkillId": "speclite-implementation-readiness-check",
       "ideTargets": [
         {
           "targetId": "claude",
-          "entryPath": ".claude/skills/speclite-check-implementation-readiness",
-          "activationTarget": ".claude/skills/speclite-check-implementation-readiness/SKILL.md",
+          "entryPath": ".claude/skills/speclite-implementation-readiness-check",
+          "activationTarget": ".claude/skills/speclite-implementation-readiness-check/SKILL.md",
           "status": "mapped"
         },
         {
           "targetId": "agents",
-          "entryPath": ".agents/skills/speclite-check-implementation-readiness",
-          "activationTarget": ".agents/skills/speclite-check-implementation-readiness/SKILL.md",
+          "entryPath": ".agents/skills/speclite-implementation-readiness-check",
+          "activationTarget": ".agents/skills/speclite-implementation-readiness-check/SKILL.md",
           "status": "mapped"
         }
       ],
       "artifactContract": {
         "artifactType": "readiness-report",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/implementation-readiness-report/grill-consistency",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -422,7 +449,7 @@
       ],
       "artifactContract": {
         "artifactType": "architecture",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/architecture",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -452,7 +479,7 @@
       ],
       "artifactContract": {
         "artifactType": "epics-and-stories",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts/epics",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -479,31 +506,40 @@
           "activationTarget": ".agents/skills/speclite-create-technical-solution-document/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "technical-solution-document",
+        "defaultOutputPath": "_speclite-output/project-knowledge-base/tsd",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
       "phaseId": "3-solutioning",
       "phaseLabel": "Solutioning",
       "moduleId": "sdlc",
-      "canonicalSkillId": "speclite-ir-grill-consistency-reviewer",
+      "canonicalSkillId": "speclite-implementation-readiness-grill-consistency-reviewer",
       "ideTargets": [
         {
           "targetId": "claude",
-          "entryPath": ".claude/skills/speclite-ir-grill-consistency-reviewer",
-          "activationTarget": ".claude/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+          "entryPath": ".claude/skills/speclite-implementation-readiness-grill-consistency-reviewer",
+          "activationTarget": ".claude/skills/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.md",
           "status": "mapped"
         },
         {
           "targetId": "agents",
-          "entryPath": ".agents/skills/speclite-ir-grill-consistency-reviewer",
-          "activationTarget": ".agents/skills/speclite-ir-grill-consistency-reviewer/SKILL.md",
+          "entryPath": ".agents/skills/speclite-implementation-readiness-grill-consistency-reviewer",
+          "activationTarget": ".agents/skills/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.md",
           "status": "mapped"
         }
       ],
       "artifactContract": {
         "artifactType": "ir-grill-records",
-        "defaultOutputPath": "_speclite-output/planning-artifacts/ir-grill",
+        "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/implementation-readiness-report/grill-consistency",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -533,7 +569,7 @@
       ],
       "artifactContract": {
         "artifactType": "story-review-summary",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/story-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -563,7 +599,7 @@
       ],
       "artifactContract": {
         "artifactType": "story-review-evaluation",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/story-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -593,7 +629,7 @@
       ],
       "artifactContract": {
         "artifactType": "updated-story-documents",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/story-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -665,7 +701,7 @@
       ],
       "artifactContract": {
         "artifactType": "code-review-summary",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -695,7 +731,7 @@
       ],
       "artifactContract": {
         "artifactType": "code-review-evaluation",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -725,7 +761,7 @@
       ],
       "artifactContract": {
         "artifactType": "fix-summary",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -755,7 +791,7 @@
       ],
       "artifactContract": {
         "artifactType": "review-rules",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/cr-rules",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/cr-rules",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -785,7 +821,7 @@
       ],
       "artifactContract": {
         "artifactType": "cr-todo-backlog",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/cr-rules",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/cr-rules",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -815,7 +851,7 @@
       ],
       "artifactContract": {
         "artifactType": "updated-status-files",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -845,7 +881,7 @@
       ],
       "artifactContract": {
         "artifactType": "contract-validation-report",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -875,7 +911,7 @@
       ],
       "artifactContract": {
         "artifactType": "story",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/stories",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/stories",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -905,7 +941,7 @@
       ],
       "artifactContract": {
         "artifactType": "story-validation-report",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -956,7 +992,7 @@
       ],
       "artifactContract": {
         "artifactType": "flow-gate-report",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/flow-gates",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/flow-gates",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -986,7 +1022,7 @@
       ],
       "artifactContract": {
         "artifactType": "epic-story-code-review-goal-records",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/code-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/code-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1016,7 +1052,7 @@
       ],
       "artifactContract": {
         "artifactType": "epic-story-review-goal-records",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts/story-reviews",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/story-reviews",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1046,7 +1082,7 @@
       ],
       "artifactContract": {
         "artifactType": "test-suite",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1076,7 +1112,7 @@
       ],
       "artifactContract": {
         "artifactType": "qa-test-guide",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1106,7 +1142,7 @@
       ],
       "artifactContract": {
         "artifactType": "retrospective",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1136,7 +1172,7 @@
       ],
       "artifactContract": {
         "artifactType": "sprint-status",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1187,7 +1223,7 @@
       ],
       "artifactContract": {
         "artifactType": "npm-release-report",
-        "defaultOutputPath": "_speclite-output/devops-artifacts/npm-releases",
+        "defaultOutputPath": "_speclite-output/5-devops-artifacts/npm-releases",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1601,7 +1637,16 @@
           "activationTarget": ".agents/skills/speclite-agent-docs-steward/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "docs-architecture-guidance",
+        "defaultOutputPath": "_speclite-output/project-knowledge-base",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -1622,7 +1667,16 @@
           "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "explanation",
+        "defaultOutputPath": "_speclite-output/project-knowledge-base",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -1646,7 +1700,7 @@
       ],
       "artifactContract": {
         "artifactType": "mermaid-diagram",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1697,7 +1751,7 @@
       ],
       "artifactContract": {
         "artifactType": "validation-report",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1724,7 +1778,16 @@
           "activationTarget": ".agents/skills/speclite-agent-tech-writer/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "document",
+        "defaultOutputPath": "_speclite-output/project-knowledge-base",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",
@@ -1748,7 +1811,7 @@
       ],
       "artifactContract": {
         "artifactType": "change-proposal",
-        "defaultOutputPath": "_speclite-output/planning-artifacts",
+        "defaultOutputPath": "_speclite-output/2-planning-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1829,7 +1892,7 @@
       ],
       "artifactContract": {
         "artifactType": "spec-and-project-implementation",
-        "defaultOutputPath": "_speclite-output/implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1856,7 +1919,16 @@
           "activationTarget": ".agents/skills/speclite-write-opensource-docs/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "open-source-docs",
+        "defaultOutputPath": "_speclite-output/project-knowledge-base",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     }
   ]
 }

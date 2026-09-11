@@ -71,10 +71,10 @@ git status --short --untracked-files=all
 
 最后一条命令应没有输出。若存在任何 tracked change 或 untracked file，先停止实验。
 
-再确认第一次扫描尚未开始。默认 quick config 会把状态文件写到 `docs/brownfield/project-scan-report.json`：
+再确认第一次扫描尚未开始。默认 quick config 中，`project_knowledge` 解析为 `_speclite-output/project-knowledge-base`，brownfield 状态文件会位于该 root 下：
 
 ```sh
-test ! -e "$PROJECT_ROOT/docs/brownfield/project-scan-report.json"
+test ! -e "$PROJECT_ROOT/_speclite-output/project-knowledge-base/brownfield/project-scan-report.json"
 ```
 
 如果该文件已经存在，不要手工删除。Skill 会根据状态进入 resume、`full_rescan`、`targeted_deep_dive` 或 `planning_generation`；为了获得可重复的第一次实验结果，请改用新的训练仓库。
@@ -146,10 +146,10 @@ Skill 应先运行 `speclite resolve config --project-root {project-root}`，再
 
 ## Step 5: Inspect the Outputs（检查产物）
 
-默认 quick config 中，`project_knowledge` 是 `{project-root}/docs`，因此主要产物位于：
+默认 quick config 中，`project_knowledge` 是 `{project-root}/_speclite-output/project-knowledge-base`，因此主要产物位于：
 
 ```text
-docs/brownfield/
+_speclite-output/project-knowledge-base/brownfield/
 ├── project-scan-report.json
 ├── evidence/
 ├── baseline/
@@ -168,7 +168,7 @@ docs/brownfield/
 | Validation | `validation/` 下的报告 | 检查完整性、anchor 和 grounding。 |
 | Handoff | `brownfield-planning-brief.md`，以及按运行模式生成的 `candidate-change-slices.md`、`feature-entry-points.md` | 把已验证事实交给后续规划 Workflow。 |
 
-Planning handoff 可以出现在 `_speclite-output/planning-artifacts/`，也可以按 Skill 解析结果写入 `docs/brownfield/planning/`。路径由配置决定，不要因为文件未出现在默认示例位置就复制一份。
+Planning handoff 可以出现在 `_speclite-output/2-planning-artifacts/`，也可以按 Skill 解析结果写入 `_speclite-output/project-knowledge-base/brownfield/planning/`。路径由配置决定，不要因为文件未出现在默认示例位置就复制一份。
 
 如果项目使用了非默认路径，可用下面的 runtime support 命令排查 effective config：
 
@@ -191,10 +191,11 @@ git status --short --untracked-files=all
 
 预期只看到配置解析出的 brownfield 与 planning artifact 路径。默认 quick config 中，`brownfield-planning-brief.md` 是主要 handoff；另外两份辅助文档是否出现取决于 effective planning mode。允许的路径通常是：
 
-- `docs/brownfield/**`
-- `_speclite-output/planning-artifacts/brownfield-planning-brief.md`
-- `_speclite-output/planning-artifacts/candidate-change-slices.md`
-- `_speclite-output/planning-artifacts/feature-entry-points.md`
+- `_speclite-output/project-knowledge-base/brownfield/**`
+- `_speclite-output/2-planning-artifacts/brownfield-planning-brief.md`
+- `_speclite-output/2-planning-artifacts/candidate-change-slices.md`
+- `_speclite-output/2-planning-artifacts/feature-entry-points.md`
+- 若 Skill/effective config 明确将 planning handoff 解析到 brownfield output，则可出现 `_speclite-output/project-knowledge-base/brownfield/planning/**`
 
 以下任一情况都表示本实验没有通过：
 

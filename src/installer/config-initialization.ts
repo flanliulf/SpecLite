@@ -1,7 +1,6 @@
 import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
 import {
-  createArtifactPathIssue,
   interpolateConfigDefault,
   normalizeProjectRelativeConfigPath,
   toPortableProjectPath,
@@ -13,6 +12,12 @@ import {
   type ProjectConfigModel,
   type RuntimeAgentDescriptor,
 } from "../config/config-schema.js";
+import {
+  ARTIFACT_ROOT_REGISTRY,
+  resolveArtifactRoots,
+  type ArtifactRootField,
+  type ArtifactRootResolution,
+} from "../config/artifact-root-resolver.js";
 import { hasUserConfigGitignoreCoverage } from "../config/user-config-gitignore.js";
 import type { ValidationIssue } from "../diagnostics/command-result-schema.js";
 import type { OfficialModule } from "../modules/module-metadata.js";
@@ -44,6 +49,7 @@ export type ConfigInitializationResult =
       ok: true;
       mode: ConfigCollectionMode;
       model: ProjectConfigModel;
+      artifactRoots: ArtifactRootResolution[];
       configToml: ConfigTomlDocument;
       configUserToml: ConfigTomlDocument;
       plannedWrites: PlannedWrite[];
@@ -115,6 +121,20 @@ export async function createConfigInitializationPlan(input: {
     ),
     output_folder: outputFolder.path,
   };
+  const artifactRootResolution = await resolveArtifactRoots({
+    projectRoot: input.targetRoot,
+    lifecycle: "fresh",
+    config: createFreshArtifactRootConfig({
+      outputFolder: outputFolder.path,
+      values,
+    }),
+  });
+
+  if (!artifactRootResolution.ok) {
+    return createConfigInitializationFailure(artifactRootResolution.issues);
+  }
+
+  const artifactRoots = artifactRootResolution.roots;
 
   const sdlcConfig =
     input.selectedModules.some((module) => module.code === "sdlc")
@@ -123,6 +143,7 @@ export async function createConfigInitializationPlan(input: {
           targetProject: input.targetProject,
           outputFolder: outputFolder.path,
           values,
+          artifactRoots,
         })
       : undefined;
 
@@ -131,15 +152,14 @@ export async function createConfigInitializationPlan(input: {
   }
 
   const model: ProjectConfigModel = {
-    core,
+    core: {
+      ...core,
+      brainstorming_artifacts: requireArtifactRoot(artifactRoots, "brainstorming_artifacts"),
+    },
     modules: {
       ...(sdlcConfig === undefined ? {} : { sdlc: sdlcConfig.config }),
     },
   };
-  const symlinkIssue = await findArtifactSymlinkIssue(input.targetRoot, model);
-  if (symlinkIssue !== undefined) {
-    return createConfigInitializationFailure([symlinkIssue]);
-  }
 
   const configToml = createInstallerConfigToml(model, input.selectedModules);
   const configUserToml = createInstallerUserConfigToml(model);
@@ -164,12 +184,14 @@ export async function createConfigInitializationPlan(input: {
     ok: true,
     mode,
     model,
+    artifactRoots,
     configToml,
     configUserToml,
     plannedWrites,
     summary: createFinalConfigSummary({
       mode,
       model,
+      artifactRoots,
       plannedWrites,
       selectedModules: input.selectedModules,
       selectedModuleIds:
@@ -212,6 +234,7 @@ function createSdlcConfig(input: {
   targetProject: string;
   outputFolder: string;
   values: ConfigInputValues;
+  artifactRoots: ArtifactRootResolution[];
 }):
   | {
       ok: true;
@@ -221,59 +244,6 @@ function createSdlcConfig(input: {
       ok: false;
       issue: ValidationIssue;
     } {
-  const planningArtifacts = normalizeFieldPath({
-    field: "planning_artifacts",
-    value: trimOrDefault(
-      input.values.planning_artifacts,
-      promptDefault(input.selectedModules, "planning_artifacts", `${input.outputFolder}/planning-artifacts`, {
-        directory_name: input.targetProject,
-        output_folder: input.outputFolder,
-      }),
-    ),
-  });
-  if (!planningArtifacts.ok) return planningArtifacts;
-
-  const implementationArtifacts = normalizeFieldPath({
-    field: "implementation_artifacts",
-    value: trimOrDefault(
-      input.values.implementation_artifacts,
-      promptDefault(
-        input.selectedModules,
-        "implementation_artifacts",
-        `${input.outputFolder}/implementation-artifacts`,
-        {
-          directory_name: input.targetProject,
-          output_folder: input.outputFolder,
-        },
-      ),
-    ),
-  });
-  if (!implementationArtifacts.ok) return implementationArtifacts;
-
-  const devopsArtifacts = normalizeFieldPath({
-    field: "devops_artifacts",
-    value: trimOrDefault(
-      input.values.devops_artifacts,
-      promptDefault(input.selectedModules, "devops_artifacts", `${input.outputFolder}/devops-artifacts`, {
-        directory_name: input.targetProject,
-        output_folder: input.outputFolder,
-      }),
-    ),
-  });
-  if (!devopsArtifacts.ok) return devopsArtifacts;
-
-  const projectKnowledge = normalizeFieldPath({
-    field: "project_knowledge",
-    value: trimOrDefault(
-      input.values.project_knowledge,
-      promptDefault(input.selectedModules, "project_knowledge", "docs", {
-        directory_name: input.targetProject,
-        output_folder: input.outputFolder,
-      }),
-    ),
-  });
-  if (!projectKnowledge.ok) return projectKnowledge;
-
   return {
     ok: true,
     config: {
@@ -284,10 +254,12 @@ function createSdlcConfig(input: {
           output_folder: input.outputFolder,
         }),
       ),
-      planning_artifacts: planningArtifacts.path,
-      implementation_artifacts: implementationArtifacts.path,
-      devops_artifacts: devopsArtifacts.path,
-      project_knowledge: projectKnowledge.path,
+      analysis_artifacts: requireArtifactRoot(input.artifactRoots, "analysis_artifacts"),
+      planning_artifacts: requireArtifactRoot(input.artifactRoots, "planning_artifacts"),
+      solutioning_artifacts: requireArtifactRoot(input.artifactRoots, "solutioning_artifacts"),
+      implementation_artifacts: requireArtifactRoot(input.artifactRoots, "implementation_artifacts"),
+      devops_artifacts: requireArtifactRoot(input.artifactRoots, "devops_artifacts"),
+      project_knowledge: requireArtifactRoot(input.artifactRoots, "project_knowledge"),
     },
   };
 }
@@ -301,13 +273,18 @@ function createInstallerConfigToml(
       project_name: model.core.project_name,
       document_output_language: model.core.document_output_language,
       output_folder: toPortableProjectPath(model.core.output_folder),
+      ...(model.core.brainstorming_artifacts === undefined
+        ? {}
+        : { brainstorming_artifacts: toPortableProjectPath(model.core.brainstorming_artifacts) }),
     },
   };
 
   if (model.modules.sdlc !== undefined) {
     document.modules = {
       sdlc: {
+        analysis_artifacts: toPortableProjectPath(model.modules.sdlc.analysis_artifacts),
         planning_artifacts: toPortableProjectPath(model.modules.sdlc.planning_artifacts),
+        solutioning_artifacts: toPortableProjectPath(model.modules.sdlc.solutioning_artifacts),
         implementation_artifacts: toPortableProjectPath(model.modules.sdlc.implementation_artifacts),
         devops_artifacts: toPortableProjectPath(model.modules.sdlc.devops_artifacts),
         project_knowledge: toPortableProjectPath(model.modules.sdlc.project_knowledge),
@@ -406,6 +383,7 @@ async function createGitignorePlan(targetRoot: string): Promise<PlannedWrite> {
 function createFinalConfigSummary(input: {
   mode: ConfigCollectionMode;
   model: ProjectConfigModel;
+  artifactRoots: ArtifactRootResolution[];
   plannedWrites: PlannedWrite[];
   selectedModules: OfficialModule[];
   selectedModuleIds: string[];
@@ -423,6 +401,7 @@ function createFinalConfigSummary(input: {
     `User display name: ${input.model.core.user_name}.`,
     `Languages: communication=${input.model.core.communication_language}, document=${input.model.core.document_output_language}.`,
     `Artifact root: ${input.model.core.output_folder}.`,
+    `Artifact roots: ${formatArtifactRoots(input.artifactRoots)}.`,
     `Selected modules: ${formatList(input.selectedModuleIds)}.`,
     `Canonical package roots: ${formatModulePackageRootCounts(input.selectedModules)}.`,
     `IDE targets: ${formatList(input.ideTargetIds)}.`,
@@ -441,6 +420,44 @@ function formatModulePackageRootCounts(modules: OfficialModule[]): string {
     .join(", ");
 
   return `${perModule}, total=${total}`;
+}
+
+function createFreshArtifactRootConfig(input: {
+  outputFolder: string;
+  values: ConfigInputValues;
+}): ConfigTomlDocument {
+  return {
+    core: {
+      output_folder: input.outputFolder,
+      ...(input.values.brainstorming_artifacts === undefined
+        ? {}
+        : { brainstorming_artifacts: input.values.brainstorming_artifacts }),
+    },
+    modules: {
+      sdlc: Object.fromEntries(
+        ARTIFACT_ROOT_REGISTRY.filter((definition) => definition.field !== "brainstorming_artifacts")
+          .flatMap((definition) => {
+            const value = input.values[definition.field];
+            return value === undefined ? [] : [[definition.field, value]];
+          }),
+      ),
+    },
+  };
+}
+
+function requireArtifactRoot(roots: readonly ArtifactRootResolution[], field: ArtifactRootField): string {
+  const root = roots.find((candidate) => candidate.field === field);
+  if (root === undefined) {
+    throw new Error(`Missing resolved artifact root for ${field}`);
+  }
+
+  return root.resolvedRoot;
+}
+
+function formatArtifactRoots(roots: readonly ArtifactRootResolution[]): string {
+  return roots
+    .map((root) => `${root.field}=${root.resolvedRoot} (${root.resolutionMode})`)
+    .join(", ");
 }
 
 function createConfigInitializationFailure(issues: ValidationIssue[]): ConfigInitializationResult {
@@ -482,49 +499,6 @@ function normalizeFieldPath(input: {
       issue: ValidationIssue;
     } {
   return normalizeProjectRelativeConfigPath(input);
-}
-
-async function findArtifactSymlinkIssue(
-  targetRoot: string,
-  model: ProjectConfigModel,
-): Promise<ValidationIssue | undefined> {
-  for (const artifactPath of [
-    model.core.output_folder,
-    model.modules.sdlc?.planning_artifacts,
-    model.modules.sdlc?.implementation_artifacts,
-    model.modules.sdlc?.devops_artifacts,
-    model.modules.sdlc?.project_knowledge,
-  ]) {
-    if (artifactPath === undefined) continue;
-    if (await hasSymlinkSegment(targetRoot, artifactPath)) {
-      return createArtifactPathIssue("artifact-path.symlink-escape", artifactPath, {
-        reason: "existing-path-segment-is-symlink",
-      });
-    }
-  }
-
-  return undefined;
-}
-
-async function hasSymlinkSegment(targetRoot: string, relativePath: string): Promise<boolean> {
-  let current = targetRoot;
-
-  for (const segment of relativePath.split("/")) {
-    current = path.join(current, segment);
-    try {
-      const stat = await lstat(current);
-      if (stat.isSymbolicLink()) {
-        return true;
-      }
-    } catch (error) {
-      if (isMissingPathError(error)) {
-        return false;
-      }
-      throw error;
-    }
-  }
-
-  return false;
 }
 
 async function pathExists(targetPath: string): Promise<boolean> {

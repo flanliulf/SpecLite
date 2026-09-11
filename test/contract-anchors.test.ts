@@ -376,8 +376,15 @@ describe("owning SPEC executable anchors", () => {
         },
         issues: [],
         exitCode: 0,
-        sources: {},
+        sources: {
+          "core.project_name": {
+            key: "core.project_name",
+            affectedPath: "_speclite/config.toml",
+            role: "required-config",
+          },
+        },
       });
+      expect(result.sources).not.toHaveProperty("core");
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

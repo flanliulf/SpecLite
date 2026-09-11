@@ -1,6 +1,11 @@
 import process from "node:process";
 import { COMMAND_RESULT_SCHEMA_VERSION, type StatusCommandResult } from "../diagnostics/command-result-schema.js";
-import { resolveTargetProjectDisplayName } from "../diagnostics/command-result.js";
+import {
+  deriveCommandStatus,
+  getExitCodeForStatus,
+  resolveTargetProjectDisplayName,
+  sortValidationIssues,
+} from "../diagnostics/command-result.js";
 import { normalizeTargetDirectory } from "../fs/path-normalizer.js";
 import { readInstalledStateSummary } from "../status/installed-state.js";
 
@@ -35,19 +40,21 @@ export async function runStatusCommand(input: {
     targetRoot: normalizedTarget.targetRoot,
     ...(input.runtime?.targetProject === undefined ? {} : { explicitName: input.runtime.targetProject }),
   });
+  const issues = sortValidationIssues(installedState.issues);
+  const status = deriveCommandStatus({ issues });
   const result: StatusCommandResult = {
     schemaVersion: COMMAND_RESULT_SCHEMA_VERSION,
-    status: "success",
+    status,
     command: "status",
     targetProject,
     summary: installedState.summary,
-    issues: [],
+    issues,
     nextActions: installedState.nextActions,
     data: installedState.data,
   };
 
   return {
     result,
-    exitCode: 0,
+    exitCode: getExitCodeForStatus(status),
   };
 }
