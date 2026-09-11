@@ -251,6 +251,7 @@ Reserved MVP issue ids：
 Examples（示例）：
 
 - configured output path escapes project boundary
+- configured output path still contains an unresolved placeholder token
 - configured output path escapes project boundary through a symlink
 - `_speclite-output` missing when required
 - expected artifact directory unwritable
@@ -264,6 +265,8 @@ Default severity（默认严重级别）：
 Reserved MVP issue ids：
 
 - `artifact-path.escapes-project`
+- `artifact-path.unresolved-token`
+- `artifact-path.config-artifact-mismatch`
 - `artifact-path.symlink-escape`
 - `artifact-path.missing-required-directory`
 - `artifact-path.unwritable-directory`
@@ -271,6 +274,26 @@ Reserved MVP issue ids：
 - `artifact-path.missing-required-artifact`
 - `artifact-path.missing-required-metadata`
 - `artifact-path.invalid-required-metadata`
+- `artifact-path.ambiguous-subject-document-shape`
+- `artifact-path.invalid-sharded-document-shape`
+- `artifact-path.broken-shard-reference`
+- `artifact-path.subject-document-missing`
+- `artifact-path.prd-validation-report-exists`
+
+`artifact-path.unresolved-token` details 必须使用 deterministic fields，例如 `field` 和 `reason: "unresolved-token"`；不得包含 raw path value、absolute path、home directory、drive letter、temporary/cache path、credential-bearing URL、timestamp、stack trace 或随机值。
+
+`artifact-path.config-artifact-mismatch` 用于已解析 config root 与实际发现的 workflow-owned artifact path 不一致，但 artifact path 仍位于 target project 内的场景。Producer 必须保持 read-only，只报告 diagnostic，不得移动、复制、重命名、删除、重写 config 或 artifact，也不得宣称 migration。Details 必须至少包含 `field`、`configuredRoot`、`resolvedRoot`、`actualConsumedPath`、`resolutionMode` 和 `reason: "config-artifact-mismatch"`；当 bounded diagnostic probes 发现多个候选时，必须按 owner contract 声明顺序记录 `candidatePaths`，不得把任何候选作为 fallback 消费。PRD/Epics/Architecture subject-document discovery 的 probe set 由 `SPEC 09` 限定。这些 path 必须是 project-relative POSIX path，不得包含 absolute path、home directory、drive letter、temporary/cache path、credential-bearing URL、timestamp、stack trace 或随机值。
+
+PRD、Epics 与 Architecture 的 whole/sharded discovery blocking states 必须使用以下 stable IDs：
+
+- `artifact-path.ambiguous-subject-document-shape`：whole 与有效 sharded shape 共存，但当前 invocation 未提供显式 selection。
+- `artifact-path.invalid-sharded-document-shape`：subject directory 中存在 shard candidates 但缺少 canonical `index.md`，或 canonical index 缺失时的必要 shard-candidate enumeration 无法完成。后者必须使用稳定 `reason=shard-candidate-scan-unreadable`、`discoveryShape=invalid-sharded`、`entryKind=shard-candidate-scan` 与 `entryState=unreadable`，只记录实际失败目录的 project-relative POSIX evidence。
+- `artifact-path.broken-shard-reference`：`index.md` 声明的 shard 缺失、不可读或越出 authoritative subject directory，包括通过 symlink 越界；也用于 bounded Markdown link grammar 中 malformed destination、undefined reference-style link 或 unsupported local-ish destination，details 必须记录 `referenceKind`。
+- `artifact-path.subject-document-missing`：canonical whole 与有效 sharded input 均不存在，invocation 显式选择的 shape 不存在，或 canonical whole entry 存在但为 non-file/unreadable（稳定 `reason=canonical-whole-unreadable`）。
+
+这些 discovery issues 的 severity 必须为 `error`，continuation 必须为 `block`，且 resolver/consumer 在返回 issue 前后必须保持零 artifact write 与零 progress mutation。Details 必须使用 project-relative POSIX evidence，并至少记录 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`（block 时为安全的 subject/index evidence path）、`discoveryShape`、`ambiguityStatus`、`selectionSource` 与 stable `reason`；`artifact-path.broken-shard-reference` 还必须记录 `referenceKind`。Canonical whole document 或 canonical `index.md` 自身通过 symlink 越出 authoritative subject directory 时，必须使用既有 `artifact-path.symlink-escape`，不得映射为 `broken-shard-reference`。不得包含 absolute path、home directory、drive letter、temporary/cache path、credential-bearing URL、timestamp、stack trace 或随机值。
+
+`artifact-path.prd-validation-report-exists` 用于 `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` 在本次 PRD validation 首次 report/progress write 前已存在的同日冲突。Severity 必须为 `error`，continuation 必须为 `block`，`affectedPath` 必须是该 exact project-relative target，details 必须使用 `reason: "prd-validation-report-exists"`，`suggestedNextStep` 必须精确为“保留并移走或删除既有报告后重新运行”。Producer 不得读取内容后复用、overwrite、append、truncate、delete、产生 suffix/temp report 或更新 progress；即使内容看似相同也必须阻断。
 
 ### `file-integrity`（file-integrity 类别）
 

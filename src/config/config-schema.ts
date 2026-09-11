@@ -9,6 +9,8 @@ export const CORE_CONFIG_FIELDS = [
   "output_folder",
 ] as const;
 
+export const CORE_ARTIFACT_ROOT_CONFIG_FIELDS = ["brainstorming_artifacts"] as const;
+
 export const SDLC_CONFIG_FIELDS = [
   "user_skill_level",
   "planning_artifacts",
@@ -17,13 +19,34 @@ export const SDLC_CONFIG_FIELDS = [
   "project_knowledge",
 ] as const;
 
+export const SDLC_ARTIFACT_ROOT_CONFIG_FIELDS = [
+  "analysis_artifacts",
+  "planning_artifacts",
+  "solutioning_artifacts",
+  "implementation_artifacts",
+  "devops_artifacts",
+  "project_knowledge",
+] as const;
+
 export type CoreConfigField = (typeof CORE_CONFIG_FIELDS)[number];
+export type CoreArtifactRootConfigField = (typeof CORE_ARTIFACT_ROOT_CONFIG_FIELDS)[number];
 export type SdlcConfigField = (typeof SDLC_CONFIG_FIELDS)[number];
-export type ProjectConfigField = CoreConfigField | SdlcConfigField;
+export type SdlcArtifactRootConfigField = (typeof SDLC_ARTIFACT_ROOT_CONFIG_FIELDS)[number];
+export type ProjectConfigField =
+  | CoreConfigField
+  | CoreArtifactRootConfigField
+  | SdlcConfigField
+  | SdlcArtifactRootConfigField;
 export type ConfigCollectionMode = "quick" | "detailed";
 
-export type CoreProjectConfig = Record<CoreConfigField, string>;
-export type SdlcProjectConfig = Record<SdlcConfigField, string>;
+export type CoreProjectConfig = Record<CoreConfigField, string> &
+  Partial<Record<CoreArtifactRootConfigField, string>>;
+export type SdlcProjectConfig = Record<"user_skill_level", string> &
+  Record<SdlcArtifactRootConfigField, string>;
+export type CoreConfigTomlSection = Partial<CoreProjectConfig> &
+  Partial<Record<CoreArtifactRootConfigField, string>>;
+export type SdlcConfigTomlSection = Partial<SdlcProjectConfig> &
+  Partial<Record<SdlcArtifactRootConfigField, string>>;
 
 export type ProjectConfigModel = {
   core: CoreProjectConfig;
@@ -55,9 +78,9 @@ export type RuntimeHookDescriptor = {
 };
 
 export type ConfigTomlDocument = {
-  core?: Partial<CoreProjectConfig>;
+  core?: CoreConfigTomlSection;
   modules?: {
-    sdlc?: Partial<SdlcProjectConfig>;
+    sdlc?: SdlcConfigTomlSection;
   };
   agents?: Record<string, RuntimeAgentDescriptor>;
   hooks?: Record<string, RuntimeHookDescriptor>;
@@ -99,6 +122,16 @@ export function normalizeProjectRelativeConfigPath(input: {
   const normalizedSeparators = stripProjectRootToken(input.value).replaceAll("\\", "/");
   const normalized = path.posix.normalize(normalizedSeparators);
   const rejectedAffectedPath = createRejectedArtifactAffectedPath(input.field);
+
+  if (hasUnresolvedTokenShape(normalizedSeparators)) {
+    return {
+      ok: false,
+      issue: createArtifactPathIssue("artifact-path.unresolved-token", rejectedAffectedPath, {
+        field: input.field,
+        reason: "unresolved-token",
+      }),
+    };
+  }
 
   if (
     normalized.length === 0 ||
@@ -154,8 +187,15 @@ function hasCredentialBearingUrlShape(value: string): boolean {
   return /^[A-Za-z][A-Za-z0-9+.-]*:\/\/[^/\s]*@/.test(value);
 }
 
+function hasUnresolvedTokenShape(value: string): boolean {
+  return /\{[^}]+\}/.test(value);
+}
+
 export function createArtifactPathIssue(
-  issueId: "artifact-path.escapes-project" | "artifact-path.symlink-escape",
+  issueId:
+    | "artifact-path.escapes-project"
+    | "artifact-path.symlink-escape"
+    | "artifact-path.unresolved-token",
   affectedPath: string,
   details: Record<string, unknown>,
 ): ValidationIssue {

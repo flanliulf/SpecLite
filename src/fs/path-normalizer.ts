@@ -1,5 +1,6 @@
 import path from "node:path";
 import process from "node:process";
+import { lstat, realpath } from "node:fs/promises";
 import type { CommandPathSummary } from "../diagnostics/command-result-schema.js";
 
 export type PathFlavor = "native" | "posix" | "win32";
@@ -103,6 +104,39 @@ export function resolveProjectRelativePath(input: {
   };
 }
 
+export async function findProjectBoundarySymlinkEscape(input: {
+  projectRoot: string;
+  relativePath: string;
+}): Promise<{ relativePath: string } | undefined> {
+  const relativePath = normalizeProjectRelativePosixPath(input.relativePath);
+  let realProjectRoot: string;
+  try {
+    realProjectRoot = await realpath(input.projectRoot);
+  } catch (error) {
+    if (isMissingPathError(error)) return undefined;
+    throw error;
+  }
+  let current = input.projectRoot;
+
+  for (const segment of relativePath.split("/")) {
+    current = path.join(current, segment);
+    try {
+      const stat = await lstat(current);
+      if (!stat.isSymbolicLink()) continue;
+
+      const realSegment = await realpath(current);
+      if (isSameOrDescendantNativePath(realSegment, realProjectRoot)) continue;
+
+      return { relativePath };
+    } catch (error) {
+      if (isMissingPathError(error)) return undefined;
+      throw error;
+    }
+  }
+
+  return undefined;
+}
+
 function getDisplayPath(input: {
   cwd: string;
   targetRoot: string;
@@ -133,6 +167,20 @@ function getSafeBasename(value: string, flavor: PathFlavor): string {
 function toPosixPath(value: string, flavor: PathFlavor): string {
   const normalized = getPathApi(flavor).normalize(value);
   return normalized.split(/[\\/]+/).filter(Boolean).join("/") || ".";
+}
+
+function isSameOrDescendantNativePath(candidatePath: string, containerPath: string): boolean {
+  const relative = path.relative(containerPath, candidatePath);
+  return relative.length === 0 || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function isMissingPathError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "ENOENT"
+  );
 }
 
 function getPathApi(flavor: PathFlavor): typeof path {

@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-09-02 15:55:16 CST
+# last_updated: 2026-09-09 15:08 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -38,7 +38,7 @@
 # - Each Epic 11 story requires SPEC 09 story-kickoff and story-completion Flow Gates.
 
 generated: 2026-05-24 17:39:27 CST
-last_updated: 2026-09-02 15:55:16 CST
+last_updated: 2026-09-09 16:38 CST
 project: SpecLite
 project_key: NOKEY
 tracking_system: file-system
@@ -141,14 +141,14 @@ development_status:
 
   # Phase-aligned workflow artifact governance. Strict serial: Story 11.1 -> 11.10.
   epic-11: in-progress
-  11-1-executable-artifact-root-resolution-contract: ready-for-dev
-  11-2-fresh-install-artifact-root-projection: ready-for-dev
-  11-3-existing-install-compatibility-and-diagnostics: ready-for-dev
-  11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories: ready-for-dev
-  11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts: ready-for-dev
-  11-6-consolidate-ux-artifacts-under-the-planning-ux-space: ready-for-dev
-  11-7-standardize-the-prd-validation-report-filename: ready-for-dev
-  11-8-rename-and-relocate-implementation-readiness-skills: ready-for-dev
-  11-9-normalize-code-review-artifact-directories-by-story-id: ready-for-dev
+  11-1-executable-artifact-root-resolution-contract: done
+  11-2-fresh-install-artifact-root-projection: done
+  11-3-existing-install-compatibility-and-diagnostics: done
+  11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories: done
+  11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts: done
+  11-6-consolidate-ux-artifacts-under-the-planning-ux-space: done
+  11-7-standardize-the-prd-validation-report-filename: done
+  11-8-rename-and-relocate-implementation-readiness-skills: done
+  11-9-normalize-code-review-artifact-directories-by-story-id: review
   11-10-inventory-all-grill-related-skill-references-for-human-confirmation: ready-for-dev
   epic-11-retrospective: optional

@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { access, lstat, realpath } from "node:fs/promises";
+import { access, lstat } from "node:fs/promises";
 import path from "node:path";
 import type { ValidationIssue } from "../../diagnostics/command-result-schema.js";
 import {
@@ -7,10 +7,15 @@ import {
   WorkflowArtifactMetadataSchema,
   type WorkflowArtifactMetadata,
 } from "../../manifest/manifest-schema.js";
-import { resolveProjectRelativePath } from "../../fs/path-normalizer.js";
+import type {
+  ArtifactRootField,
+  ArtifactRootResolutionMode,
+} from "../../config/artifact-root-resolver.js";
+import { findProjectBoundarySymlinkEscape, resolveProjectRelativePath } from "../../fs/path-normalizer.js";
 
 export type ArtifactPathIssueId =
   | "artifact-path.escapes-project"
+  | "artifact-path.config-artifact-mismatch"
   | "artifact-path.symlink-escape"
   | "artifact-path.missing-required-directory"
   | "artifact-path.unwritable-directory"
@@ -21,12 +26,19 @@ export type ArtifactPathIssueId =
 type ArtifactPathRole = "configuredRoot" | "defaultOutputPath" | "actualArtifactPath";
 type MetadataLocation = "frontmatter" | "sidecar" | "directory";
 type MetadataParseFailureReason = "malformed-frontmatter";
+type ArtifactRootEvidence = {
+  field: ArtifactRootField | "artifactRoot";
+  configuredRoot: string;
+  resolvedRoot: string;
+  resolutionMode: ArtifactRootResolutionMode;
+};
 
 export async function validateArtifactPathContract(input: {
   projectRoot: string;
   configuredRoot: string;
   defaultOutputPath: string;
   actualArtifactPath?: string;
+  artifactRootEvidence?: ArtifactRootEvidence;
   artifactType: string;
   metadata?: Partial<WorkflowArtifactMetadata> | Record<string, unknown>;
   metadataParseFailureReason?: MetadataParseFailureReason;
@@ -71,11 +83,10 @@ export async function validateArtifactPathContract(input: {
     issues.push(...actualArtifactPath.issues);
     if (configuredRoot.relativePath !== undefined && actualArtifactPath.relativePath !== undefined) {
       issues.push(
-        ...validateContainedArtifactPath({
+        ...validateActualArtifactRootMatch({
           containerPath: configuredRoot.relativePath,
           containedPath: actualArtifactPath.relativePath,
-          pathRole: "actualArtifactPath",
-          reason: "path-escapes-project",
+          artifactRootEvidence: input.artifactRootEvidence,
         }),
       );
     }
@@ -224,6 +235,32 @@ function validateContainedArtifactPath(input: {
   ];
 }
 
+function validateActualArtifactRootMatch(input: {
+  containerPath: string;
+  containedPath: string;
+  artifactRootEvidence?: ArtifactRootEvidence;
+}): ValidationIssue[] {
+  if (isSameOrDescendantPath(input.containedPath, input.containerPath)) return [];
+
+  const evidence = input.artifactRootEvidence;
+  return [
+    createArtifactPathIssue({
+      issueId: "artifact-path.config-artifact-mismatch",
+      affectedPath: input.containedPath,
+      details: {
+        field: evidence?.field ?? "artifactRoot",
+        configuredRoot: evidence?.configuredRoot ?? input.containerPath,
+        resolvedRoot: evidence?.resolvedRoot ?? input.containerPath,
+        actualConsumedPath: input.containedPath,
+        resolutionMode: evidence?.resolutionMode ?? "explicit-config",
+        reason: "config-artifact-mismatch",
+      },
+      impact: "A workflow-owned artifact was consumed from a path that does not match the resolved configured artifact root.",
+      suggestedNextStep: "Use the configured artifact root as the workflow artifact location; do not migrate existing artifacts implicitly.",
+    }),
+  ];
+}
+
 function isSameOrDescendantPath(candidatePath: string, containerPath: string): boolean {
   return candidatePath === containerPath || candidatePath.startsWith(`${containerPath}/`);
 }
@@ -323,41 +360,22 @@ async function findSymlinkSegment(input: {
   relativePath: string;
   pathRole: ArtifactPathRole;
 }): Promise<ValidationIssue | undefined> {
-  const realProjectRoot = await realpath(input.projectRoot);
-  const segments = input.relativePath.split("/");
-  let current = input.projectRoot;
+  const symlinkEscape = await findProjectBoundarySymlinkEscape({
+    projectRoot: input.projectRoot,
+    relativePath: input.relativePath,
+  });
+  if (symlinkEscape === undefined) return undefined;
 
-  for (const segment of segments) {
-    current = path.join(current, segment);
-    try {
-      const stat = await lstat(current);
-      if (stat.isSymbolicLink()) {
-        const realSegment = await realpath(current);
-        if (isSameOrDescendantNativePath(realSegment, realProjectRoot)) continue;
-
-        return createArtifactPathIssue({
-          issueId: "artifact-path.symlink-escape",
-          affectedPath: `artifact:${input.pathRole}`,
-          details: {
-            pathRole: input.pathRole,
-            reason: "symlink-escape",
-          },
-          impact: "A workflow artifact path crosses a symlink and cannot be proven to stay inside the target project.",
-          suggestedNextStep: "Replace the symlinked path segment with a real project directory before continuing.",
-        });
-      }
-    } catch (error) {
-      if (isMissingPathError(error)) return undefined;
-      throw error;
-    }
-  }
-
-  return undefined;
-}
-
-function isSameOrDescendantNativePath(candidatePath: string, containerPath: string): boolean {
-  const relative = path.relative(containerPath, candidatePath);
-  return relative.length === 0 || (!relative.startsWith("..") && !path.isAbsolute(relative));
+  return createArtifactPathIssue({
+    issueId: "artifact-path.symlink-escape",
+    affectedPath: `artifact:${input.pathRole}`,
+    details: {
+      pathRole: input.pathRole,
+      reason: "symlink-escape",
+    },
+    impact: "A workflow artifact path crosses a symlink and cannot be proven to stay inside the target project.",
+    suggestedNextStep: "Replace the symlinked path segment with a real project directory before continuing.",
+  });
 }
 
 function createArtifactPathIssue(input: {

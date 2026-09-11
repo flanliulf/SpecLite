@@ -1,6 +1,6 @@
 # Story 11.1: Executable Artifact Root Resolution Contract（可执行 Artifact Root 解析契约）
 
-Status: ready-for-dev
+Status: done
 
 <!-- EPIC 11 strict-serial 起点。本 Story 只建立 executable resolution contract；不得提前实施 Story 11.2/11.3。 -->
 
@@ -34,6 +34,8 @@ Status: ready-for-dev
    - `_speclite-output/project-knowledge-base`
 
    **并且** command、manifest 或 workflow 不得建立与该 executable registry 竞争的第二套 canonical defaults。
+
+   **Controlled Correction 2026-09-03**：上述 `fresh-default` 要求适用于 fresh config 尚不存在、quick/default flow，以及仅显式设置 `core.output_folder` 后由 canonical defaults 派生七类 roots 的场景。Fresh detailed prompt 中某个 artifact root field 的非空逐 field 输入必须在该 field 上标记为 `explicit-config`；未显式输入的其它 fields 仍为 `fresh-default`。该修正保留原 AC2 的默认解析决策轨迹，并补足 fresh detailed explicit override 的 field-level mode 语义。
 
 3. **Existing Explicit Config 继续权威**
 
@@ -78,47 +80,47 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] Task 1: 完成 Contract Preflight 与 Kickoff Gate（AC: 1-8）
-  - [ ] 读取 Story 11.1、`SPEC 09`、`SPEC 07`、IR 2026-09-02、Architecture artifact-root patterns 与 UX Artifact Evidence 要求。
-  - [ ] 生成 `story-kickoff` Flow Gate；只有 frontmatter `mode: story-kickoff`、完整 `target/storyKey` 匹配且 `result` 为 `PASS` 或 `PASS_EQUIVALENT` 才进入 `in-progress`。
-  - [ ] 在 Gate 中关闭 unresolved token issue-id 决策：优先在 `SPEC 07` 注册 `artifact-path.unresolved-token`；若复用既有 issue ID，必须先记录与 taxonomy 语义一致的 contract rationale，禁止实现者临场生成自由文本 ID。
-  - [ ] 确认阶段边界：Story 11.1 只建立唯一 registry/resolver；现有 consumer defaults 的迁移属于 Story 11.2/11.3，不得为了字面消除全部旧投影而越界。
+- [x] Task 1: 完成 Contract Preflight 与 Kickoff Gate（AC: 1-8）
+  - [x] 读取 Story 11.1、`SPEC 09`、`SPEC 07`、IR 2026-09-02、Architecture artifact-root patterns 与 UX Artifact Evidence 要求。
+  - [x] 生成 `story-kickoff` Flow Gate；只有 frontmatter `mode: story-kickoff`、完整 `target/storyKey` 匹配且 `result` 为 `PASS` 或 `PASS_EQUIVALENT` 才进入 `in-progress`。
+  - [x] 在 Gate 中关闭 unresolved token issue-id 决策：优先在 `SPEC 07` 注册 `artifact-path.unresolved-token`；若复用既有 issue ID，必须先记录与 taxonomy 语义一致的 contract rationale，禁止实现者临场生成自由文本 ID。
+  - [x] 确认阶段边界：Story 11.1 只建立唯一 registry/resolver；现有 consumer defaults 的迁移属于 Story 11.2/11.3，不得为了字面消除全部旧投影而越界。
 
-- [ ] Task 2: 先增加失败的 Focused Contract Tests（AC: 1-7）
-  - [ ] 建立七字段/placeholder exhaustive table 与固定字段顺序断言。
-  - [ ] 覆盖 fresh、all-explicit existing、missing-new-fields existing、mixed per-field mode、Project Knowledge/Public Docs separation。
-  - [ ] 覆盖 `{project-root}`、Windows separators、unresolved token、`../`、absolute path、Windows drive path、internal/external symlink boundary 与 public redaction。
-  - [ ] 断言 repeated resolution 结果确定一致，且 resolver 不写文件、不改 config、不创建目录。
+- [x] Task 2: 先增加失败的 Focused Contract Tests（AC: 1-7）
+  - [x] 建立七字段/placeholder exhaustive table 与固定字段顺序断言。
+  - [x] 覆盖 fresh、all-explicit existing、missing-new-fields existing、mixed per-field mode、Project Knowledge/Public Docs separation。
+  - [x] 覆盖 `{project-root}`、Windows separators、unresolved token、`../`、absolute path、Windows drive path、internal/external symlink boundary 与 public redaction。
+  - [x] 断言 repeated resolution 结果确定一致，且 resolver 不写文件、不改 config、不创建目录。
 
-- [ ] Task 3: 建立唯一 Artifact Root Registry 与 Result Model（AC: 1, 5, 7）
-  - [ ] 在 `src/config/` 中建立唯一 registry；字段、config key、placeholder、fresh default、legacy fallback policy 与稳定顺序必须集中定义。
-  - [ ] 定义 `resolutionMode` 精确枚举：`fresh-default`、`explicit-config`、`legacy-compatible`。
-  - [ ] 定义逐 field result，至少包含 `field`、`placeholder`、`resolvedRoot`、`resolutionMode`；不得持久化 raw absolute path。
-  - [ ] 显式输入 lifecycle context（fresh/existing）；不得仅凭某个 field 缺失猜测 install state。
+- [x] Task 3: 建立唯一 Artifact Root Registry 与 Result Model（AC: 1, 5, 7）
+  - [x] 在 `src/config/` 中建立唯一 registry；字段、config key、placeholder、fresh default、legacy fallback policy 与稳定顺序必须集中定义。
+  - [x] 定义 `resolutionMode` 精确枚举：`fresh-default`、`explicit-config`、`legacy-compatible`。
+  - [x] 定义逐 field result，至少包含 `field`、`placeholder`、`resolvedRoot`、`resolutionMode`；不得持久化 raw absolute path。
+  - [x] 显式输入 lifecycle context（fresh/existing）；不得仅凭某个 field 缺失猜测 install state。
 
-- [ ] Task 4: 实现 Fresh 与 Existing Resolution Semantics（AC: 2-4, 7）
-  - [ ] Fresh context 返回七个 canonical defaults 与 `fresh-default`，其中 Project Knowledge 不得回退 `docs/`。
-  - [ ] Existing context 保留所有显式值并逐 field 标记 `explicit-config`，包括显式 `project_knowledge=docs`。
-  - [ ] Existing context 只对新增的 `brainstorming_artifacts`、`analysis_artifacts`、`solutioning_artifacts` 应用 `SPEC 09` fallback，并标记 `legacy-compatible`。
-  - [ ] 复用既有 TOML four-layer merge；不得复制 merge logic，不得回写任何 layer。
+- [x] Task 4: 实现 Fresh 与 Existing Resolution Semantics（AC: 2-4, 7）
+  - [x] Fresh context 返回七个 canonical defaults 与 `fresh-default`，其中 Project Knowledge 不得回退 `docs/`。
+  - [x] Existing context 保留所有显式值并逐 field 标记 `explicit-config`，包括显式 `project_knowledge=docs`。
+  - [x] Existing context 只对新增的 `brainstorming_artifacts`、`analysis_artifacts`、`solutioning_artifacts` 应用 `SPEC 09` fallback，并标记 `legacy-compatible`。
+  - [x] 复用既有 TOML four-layer merge；不得复制 merge logic，不得回写任何 layer。
 
-- [ ] Task 5: 复用 Project Boundary 与 Diagnostic Contract（AC: 5-6）
-  - [ ] 复用或抽取现有 project-relative POSIX normalization 与 symlink boundary guard；不得创建第二套 path sanitizer。
-  - [ ] unresolved/path/symlink failures 使用 kickoff 已关闭的 `SPEC 07` issue-id contract，并保持 `artifact-path` category 与 deterministic details。
-  - [ ] 验证 internal symlink 仍在 project boundary 内时可继续，external symlink 必须阻断。
-  - [ ] 所有失败输出不得泄露 absolute/home/temp/cache/credential-bearing path。
+- [x] Task 5: 复用 Project Boundary 与 Diagnostic Contract（AC: 5-6）
+  - [x] 复用或抽取现有 project-relative POSIX normalization 与 symlink boundary guard；不得创建第二套 path sanitizer。
+  - [x] unresolved/path/symlink failures 使用 kickoff 已关闭的 `SPEC 07` issue-id contract，并保持 `artifact-path` category 与 deterministic details。
+  - [x] 验证 internal symlink 仍在 project boundary 内时可继续，external symlink 必须阻断。
+  - [x] 所有失败输出不得泄露 absolute/home/temp/cache/credential-bearing path。
 
-- [ ] Task 6: 提供 Consumer Handoff，不实施 Projection（AC: 5, 8）
-  - [ ] 导出稳定 resolver API/model，供 Story 11.2 的 config/directory/manifest projection 与 Story 11.3 的 compatibility diagnostics 消费。
-  - [ ] 记录 current downstream duplicate-default surfaces，但本 Story 不修改其 observable projection、fixtures 或 installed output。
-  - [ ] 增加 compile-time 或 focused consumer-shape proof，证明后续 consumers 无需重新定义 field/default/fallback 即可消费结果。
+- [x] Task 6: 提供 Consumer Handoff，不实施 Projection（AC: 5, 8）
+  - [x] 导出稳定 resolver API/model，供 Story 11.2 的 config/directory/manifest projection 与 Story 11.3 的 compatibility diagnostics 消费。
+  - [x] 记录 current downstream duplicate-default surfaces，但本 Story 不修改其 observable projection、fixtures 或 installed output。
+  - [x] 增加 compile-time 或 focused consumer-shape proof，证明后续 consumers 无需重新定义 field/default/fallback 即可消费结果。
 
-- [ ] Task 7: Verification（AC: 1-8）
-  - [ ] 运行 focused artifact-root resolution 与 resolve reader tests。
-  - [ ] 运行受影响的 config/path validation regression tests。
-  - [ ] 运行 `npm run build`。
-  - [ ] 运行 `git diff --check`，并确认 diff 未包含 Story 11.2+ scope。
-  - [ ] 在进入 `review` 前运行 `story-completion` Flow Gate，并以实际 test/command 输出填写 `Anchor Evidence Summary`；不得把本 Evidence Plan 当成 verified evidence。
+- [x] Task 7: Verification（AC: 1-8）
+  - [x] 运行 focused artifact-root resolution 与 resolve reader tests。
+  - [x] 运行受影响的 config/path validation regression tests。
+  - [x] 运行 `npm run build`。
+  - [x] 运行 `git diff --check`，并确认 diff 未包含 Story 11.2+ scope。
+  - [x] 在进入 `review` 前运行 `story-completion` Flow Gate，并以实际 test/command 输出填写 `Anchor Evidence Summary`；不得把本 Evidence Plan 当成 verified evidence。
 
 ## Dev Notes（开发备注）
 
@@ -212,6 +214,7 @@ Status: ready-for-dev
 ## Evidence Plan（证据计划）
 
 - Fresh matrix：7 rows、精确 defaults、全部 `fresh-default`。
+- Fresh detailed explicit matrix：非空逐 field artifact root 输入标记 `explicit-config`；未显式输入的 fields、quick/default flow、仅设置 `output_folder` 后派生的七 roots 仍标记 `fresh-default`。
 - Existing explicit matrix：7 rows 保留显式值、全部 `explicit-config`，不写 config。
 - Existing legacy matrix：仅缺失 brainstorming/analysis/solutioning 时使用 exact fallback 与 `legacy-compatible`；旧四项显式值不变。
 - Mixed matrix：每个 field 的 mode 独立正确，字段顺序稳定。
@@ -285,35 +288,55 @@ Status: ready-for-dev
 
 ### Agent Model Used（使用模型）
 
-待实现 Agent 填写。
+Codex GPT-5
 
 ### Debug Log References（调试日志引用）
 
-待实现 Agent 填写。
+- `story-kickoff` Flow Gate：`_bmad-output/implementation-artifacts/flow-gates/11-1-executable-artifact-root-resolution-contract-story-kickoff-gate.md`，frontmatter 校验通过，`result: PASS`。
+- RED：`npx vitest run test/artifact-root-resolution.test.ts` 首次失败于缺少 `../src/config/artifact-root-resolver.js`，证明 focused tests 先于实现创建。
+- GREEN / regression：`npx vitest run test/artifact-root-resolution.test.ts` -> 7/7 passed；`npx vitest run test/resolve-readers.test.ts` -> 4/4 passed；`npx vitest run test/artifact-path-validation.test.ts` -> 9/9 passed。
+- Affected regression：`npx vitest run test/config-initialization.test.ts test/runtime-structure.test.ts test/story-6-4-path-portability.test.ts` -> 26/26 passed。
+- Full regression：`npm test` -> 61 files passed, 473 tests passed, 4 todo。
+- Build：`npm run build` -> tsup ESM/DTS build success。
+- Diff checks：`git diff --check` passed；deferred Story 11.2+ surfaces diff check returned no changes。
+- `story-completion` Flow Gate：`_bmad-output/implementation-artifacts/flow-gates/11-1-executable-artifact-root-resolution-contract-story-completion-gate.md`，`result: PASS`。
 
 ### Completion Notes List（完成说明）
 
-- 终极上下文引擎分析已完成 —— 已创建完整的开发者指南。
-- Story 尚未实现；本文件中的 tasks 与 Evidence Plan 均为计划，不是 verified completion evidence。
+- Story 11.1 已实现。新增 `src/config/artifact-root-resolver.ts`，集中定义七类 artifact root registry、fresh defaults、legacy fallback policy、稳定字段顺序、逐 field `resolutionMode`、`field/configPath/placeholder/resolvedRoot` result model，以及 `resolveArtifactRootsFromProjectConfig()` consumer handoff。
+- `src/config/config-schema.ts` 已扩展为可表达新增 artifact root fields，并注册 unresolved-token path diagnostic helper；旧 config initialization 的 prompt/default projection 未被切换。
+- `src/fs/path-normalizer.ts` 抽取 project-boundary symlink escape helper，`src/validation/rules/artifact-path.ts` 改为复用该 helper；现有 artifact-path validation 行为由回归测试保持。
+- `SPEC 07` 已注册 `artifact-path.unresolved-token`，并约束 details 为 deterministic/redacted；focused test 覆盖 issue id、category、affectedPath、details 与 raw value/temp path 不泄露。
+- Story 11.2+ 范围保持未实施：未修改 installer config projection、runtime structure directory creation、manifest projection、module metadata defaults、workflow routing 或 fresh-install snapshots。
 
 ### File List（文件清单）
 
-- `_bmad-output/implementation-artifacts/stories/11-1-executable-artifact-root-resolution-contract.md`（create-story output）
-- `_bmad-output/implementation-artifacts/sprint-status.yaml`（tracker update）
+- `_bmad-output/implementation-artifacts/flow-gates/11-1-executable-artifact-root-resolution-contract-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-1-executable-artifact-root-resolution-contract-story-completion-gate.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/11-1-executable-artifact-root-resolution-contract.md`
+- `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`
+- `src/config/artifact-root-resolver.ts`
+- `src/config/config-schema.ts`
+- `src/fs/path-normalizer.ts`
+- `src/validation/rules/artifact-path.ts`
+- `test/artifact-root-resolution.test.ts`
 
 ## Anchor Evidence Summary（锚点证据摘要）
 
-- Flow gate result：待 `story-kickoff` / `story-completion` Gate 填写。
-- Contract anchors verified：待实现后填写；不得以本 Story 文档存在代替验证。
-- Functional anchors verified：待实现后填写。
-- Evidence anchors verified：待实际 tests/commands 完成后填写。
-- Equivalent implementation decisions：待实现或 Gate 记录。
+- Flow gate result：`story-kickoff` Gate `PASS`；`story-completion` Gate `PASS`。两份报告均为 `speclite.flow-gate-report.v2`，target/storyKey 均为 `11-1-executable-artifact-root-resolution-contract`。
+- Contract anchors verified：`SPEC 09` 七 roots/defaults/fallback/modes/Project Knowledge/Public Docs boundary 被 `ARTIFACT_ROOT_REGISTRY` 和 resolver tests 覆盖；`SPEC 07` 已注册 `artifact-path.unresolved-token`，并由 focused negative assertion 验证。
+- Functional anchors verified：`resolveArtifactRoots()` 提供 stable ordered resolver model；`resolveArtifactRootsFromProjectConfig()` 复用 `resolveProjectConfig()` / `resolveTomlLayers()`；`findProjectBoundarySymlinkEscape()` 提供共享 boundary helper；resolver 不写 config、不创建目录、不迁移 artifacts。
+- Evidence anchors verified：focused resolver 7/7、resolve reader 4/4、artifact-path validation 9/9、affected regression 26/26、full regression 473 passed / 4 todo、build passed、`git diff --check` passed。
+- Equivalent implementation decisions：无需 `PASS_EQUIVALENT`；采用 Story 推荐的 `src/config/artifact-root-resolver.ts` 与 `test/artifact-root-resolution.test.ts`，并保持 deferred surfaces 无 diff。
 
 ## Change Log（变更记录）
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 Story 11.1 implementation context，定义 executable artifact-root resolver、contract decision、scope boundary、Flow Gate 与 evidence plan。 | Fancyliu / Codex |
+| 2026-09-02 | 1.0 | 实现 executable artifact-root resolver contract，注册 `artifact-path.unresolved-token`，补 focused/resolution/path boundary tests，并通过 completion gate。 | Codex GPT-5 |
+| 2026-09-03 | 1.1 | Controlled correction：明确 fresh detailed 非空逐 field artifact root 输入为 `explicit-config`；quick/default 与仅设置 `output_folder` 派生 roots 仍为 `fresh-default`。 | Codex GPT-5 |
 
 ---
 
