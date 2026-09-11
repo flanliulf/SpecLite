@@ -19,6 +19,8 @@ Perform a read-only three-layer review for one Story and emit `speclite.cr-revie
 - Use it to freeze one Story's current review scope, run the three layers, and create the reviewer artifact.
 - Do not use it to evaluate findings, apply fixes, register TODOs, finalize a Story, or orchestrate an Epic; use CR02–06 or the runner for those tasks.
 
+- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
+
 ## Core Capabilities
 
 - **Exact scope**: Freeze declared, actual, and excluded files with `scopeHash` validation.
@@ -33,6 +35,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - Story path, `storyId`, or `storyKey`, plus `reviewSeries`.
+- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
 - A review scope manifest, or a development record/user-specified commit range sufficient to build it independently.
 - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
 

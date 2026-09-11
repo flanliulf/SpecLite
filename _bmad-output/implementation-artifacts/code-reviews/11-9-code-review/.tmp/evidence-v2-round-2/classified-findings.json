@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "speclite.cr-classified-findings.v1",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 2,
+  "generatedAt": "2026-09-07T10:29:15.008Z",
+  "canonicalization": "NFC + LF + trim line/file trailing whitespace; fingerprints hash LF-joined seed fields; findingSetHash hashes code-point-key-sorted compact JSON findings array",
+  "findingSetHash": "sha256:3c8754e1e6bae0712bfbcdf5dfaaca67581c9bb63a7df62d8bbde660481852fa",
+  "counts": {
+    "decisionNeeded": 0,
+    "patch": 6,
+    "verifyRequired": 0,
+    "defer": 1,
+    "dismiss": 0
+  },
+  "findings": [
+    {
+      "findingId": "EVIDENCE-V2-R2-F1",
+      "title": "延期 TODO backlog 未被 current hash 认证",
+      "category": "provenance",
+      "invariant": "`PASS_WITH_DEFERRED_TODOS` 只有在每个 mapped fingerprint 均持久存在于实际 backlog，且 backlog 当前内容匹配 CR05 报告的 `backlogSourceHash` 时，才能认证 `DONE`。",
+      "concreteFailureScenario": "evaluation 含 deferred fingerprint，CR05 在 `mappedFingerprints` 列出它并填入任意语法合法的 64-hex `backlogSourceHash`，但 `cr-rules/cr-todo-backlog.md` 不存在或不含该项；resolver 只校验字段与 hash 语法，仍可把该轮判为 DONE，使延期义务丢失。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:719",
+      "sourceLayers": ["blind"],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "provenance\n`PASS_WITH_DEFERRED_TODOS` 只有在每个 mapped fingerprint 均持久存在于实际 backlog，且 backlog 当前内容匹配 CR05 报告的 `backlogSourceHash` 时，才能认证 `DONE`。\nevaluation 含 deferred fingerprint，CR05 在 `mappedFingerprints` 列出它并填入任意语法合法的 64-hex `backlogSourceHash`，但 `cr-rules/cr-todo-backlog.md` 不存在或不含该项；resolver 只校验字段与 hash 语法，仍可把该轮判为 DONE，使延期义务丢失。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:719",
+      "fingerprint": "sha256:4b9c617b38f75a104c3cd08fbce260af490fd72d0722f0ff353bf1075a374ac9",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F2",
+      "title": "结构无效的 YAML tracker 可授权完成",
+      "category": "authority",
+      "invariant": "Required sprint/workflow tracker 的 terminal state 必须来自结构有效 YAML 中唯一、可解析的真实 mapping scalar。",
+      "concreteFailureScenario": "tracker 内容为 `]\\nimplementation: done\\n`，finalizer `afterHash` 同步绑定该内容；首行使 YAML 文档无效，但 scanner 把它当普通 visible line并接受唯一 `implementation: done`，从而认证无效 tracker 的终态。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1274",
+      "sourceLayers": ["blind"],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "authority\nRequired sprint/workflow tracker 的 terminal state 必须来自结构有效 YAML 中唯一、可解析的真实 mapping scalar。\ntracker 内容为 `]\\nimplementation: done\\n`，finalizer `afterHash` 同步绑定该内容；首行使 YAML 文档无效，但 scanner 把它当普通 visible line并接受唯一 `implementation: done`，从而认证无效 tracker 的终态。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1274",
+      "fingerprint": "sha256:f113580e33ce900c8f1516e7cd540b7bac96b7ceafdc5907d243c0ecbaebf1e4",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F3",
+      "title": "未识别的合法 YAML duplicate-key 形式可伪造 DONE",
+      "category": "artifact-authentication",
+      "invariant": "用于恢复目录和认证 DONE 的 leading YAML frontmatter 必须拒绝任何语义重复或冲突的 authority key，包括 bounded parser 未识别的 YAML 合法等价 key 形式。",
+      "concreteFailureScenario": "一个 otherwise-authentic finalizer 已有 `result: DONE`，再加入 `result : HALTED`，或显式 mapping `? result` / `: HALTED`；YAML 中它们与 bare `result` 是同一 key，但 parser 静默忽略额外形式并保留 DONE，resolver 因而错误认证 completed run。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440",
+      "sourceLayers": ["blind", "edge"],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "artifact-authentication\n用于恢复目录和认证 DONE 的 leading YAML frontmatter 必须拒绝任何语义重复或冲突的 authority key，包括 bounded parser 未识别的 YAML 合法等价 key 形式。\n一个 otherwise-authentic finalizer 已有 `result: DONE`，再加入 `result : HALTED`，或显式 mapping `? result` / `: HALTED`；YAML 中它们与 bare `result` 是同一 key，但 parser 静默忽略额外形式并保留 DONE，resolver 因而错误认证 completed run。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440",
+      "fingerprint": "sha256:6c2824d6e2d973a0d1e630d4d84bf21b9f46b53ed0c95594f0ad4974c06bd7ca",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F4",
+      "title": "Reviewer finding 与 Evaluator disposition 未完整闭合",
+      "category": "completeness",
+      "invariant": "Evaluator 的 PASS 认证 `DONE` 前，每个 reviewer finding 必须有且只有一个 evaluator disposition，review 与 evaluation 计数必须完整闭合。",
+      "concreteFailureScenario": "review=`FINDINGS_REPORTED` 且 `findingCounts.patch: 2`，evaluation=`PASS` 但 `acceptedCounts.dismissed: 1`、其余为零；重绑所有 artifact hashes 后，resolver 未核对总数或逐 finding disposition，仍可接受该链，导致一个 patch finding 无声消失。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:540",
+      "sourceLayers": ["blind"],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "completeness\nEvaluator 的 PASS 认证 `DONE` 前，每个 reviewer finding 必须有且只有一个 evaluator disposition，review 与 evaluation 计数必须完整闭合。\nreview=`FINDINGS_REPORTED` 且 `findingCounts.patch: 2`，evaluation=`PASS` 但 `acceptedCounts.dismissed: 1`、其余为零；重绑所有 artifact hashes 后，resolver 未核对总数或逐 finding disposition，仍可接受该链，导致一个 patch finding 无声消失。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:540",
+      "fingerprint": "sha256:12d668827d3f339bd533356fc7f8b68a88e33fbd4150dafea1ade6debeacb29b",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F5",
+      "title": "RFC3339 小数秒精度被 Date.parse 截断",
+      "category": "freshness",
+      "invariant": "CR artifact freshness 顺序必须按 RFC3339 的完整小数秒精度比较，不能丢弃超过毫秒的有效精度。",
+      "concreteFailureScenario": "review `generatedAt` 为 `.9001Z`，evaluation 为更早的 `.9000Z`；`validTimestamp()` 接受任意长度小数秒，但 `Date.parse()` 将二者截为同一毫秒，`evaluationTime >= reviewTime` 错误通过；fixRecord 与 gate 顺序存在同类路径。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:650",
+      "sourceLayers": ["edge"],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "freshness\nCR artifact freshness 顺序必须按 RFC3339 的完整小数秒精度比较，不能丢弃超过毫秒的有效精度。\nreview `generatedAt` 为 `.9001Z`，evaluation 为更早的 `.9000Z`；`validTimestamp()` 接受任意长度小数秒，但 `Date.parse()` 将二者截为同一毫秒，`evaluationTime >= reviewTime` 错误通过；fixRecord 与 gate 顺序存在同类路径。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:650",
+      "fingerprint": "sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F6",
+      "title": "Reserved CR subpath symlink 可将写入导向目录外",
+      "category": "filesystem-containment",
+      "invariant": "所有 temporary artifacts 与 goal records 必须物理保持在同一 resolved `crDir` 内；reserved subpath 在任何 consumer 写入前不得是 symlink、非目录节点或逃逸路径。",
+      "concreteFailureScenario": "canonical `11-9-code-review/` 内预置 `.tmp -> /outside` symlink且无 current artifacts；resolver 将 `.tmp` 分类为 unrelated 并返回 ok，CR01 写 `{crDir}/.tmp/review-input.diff` 时实际修改 `/outside`。将 `goal-execute-records` 替换为 symlink时，三个 goal records 同样可写出目录。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:271",
+      "sourceLayers": ["auditor"],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "filesystem-containment\n所有 temporary artifacts 与 goal records 必须物理保持在同一 resolved `crDir` 内；reserved subpath 在任何 consumer 写入前不得是 symlink、非目录节点或逃逸路径。\ncanonical `11-9-code-review/` 内预置 `.tmp -> /outside` symlink且无 current artifacts；resolver 将 `.tmp` 分类为 unrelated 并返回 ok，CR01 写 `{crDir}/.tmp/review-input.diff` 时实际修改 `/outside`。将 `goal-execute-records` 替换为 symlink时，三个 goal records 同样可写出目录。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:271",
+      "fingerprint": "sha256:4ac82b8bd024bfb5ba610fa75e3eba2230a93105fbbee4caf6de478cf629030a",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F7",
+      "title": "supersededIndex identity/continuity",
+      "category": "lifecycle",
+      "invariant": "同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。",
+      "concreteFailureScenario": "当同一 current artifact 的合法 superseded文件出现suffix缺口、重复或重编号时，resolver只验证suffix为正整数且supersededBy指向current，不验证supersededIndex连续性或不可重编号身份；历史lineage可在仍通过结构验证时失去稳定ordinal identity。该缺口不改变current artifact唯一性，故当前为非阻塞延期项。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "sourceLayers": ["historical-provenance"],
+      "bucket": "defer",
+      "disposition": "deferred",
+      "seedText": "lifecycle\n同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。\n当同一 current artifact 的合法 superseded文件出现suffix缺口、重复或重编号时，resolver只验证suffix为正整数且supersededBy指向current，不验证supersededIndex连续性或不可重编号身份；历史lineage可在仍通过结构验证时失去稳定ordinal identity。该缺口不改变current artifact唯一性，故当前为非阻塞延期项。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "fingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"]
+    }
+  ],
+  "aggregationCaveats": [
+    "Blind 与 Edge 的 duplicate-key 候选违反同一 authority uniqueness invariant、落在同一 parser、产生同一 DONE 认证绕过，故合并为一个 finding；spaced simple key 与 explicit mapping 两种触发均保留。",
+    "Round 1 F1-F6 已有 completed fixRecord 且本轮 focused regression 103 passed / 4 todo，三层未复现其原具体场景；作为 resolved historical fingerprints 记录，不计当前 findingCounts。",
+    "Round 2 F3 与 Round 1 F1 属同一问题家族，但本轮使用 spaced simple key / explicit mapping 的新具体语法路径，fingerprint seed 与原 quoted-key scenario 不同，故标为 new 而非 recurred。",
+    "各层的 blocking/P1 用语仅是候选建议；Reviewer 不裁定 P0/P1，交由 fresh CR02 Evaluator。",
+    "F7 完整沿用 Round 1 canonical wording 与 fingerprint，仅保持 nonblocking deferred，不升级、不改写。"
+  ]
+}

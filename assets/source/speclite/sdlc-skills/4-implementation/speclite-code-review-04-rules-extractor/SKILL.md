@@ -20,6 +20,8 @@ metadata:
 - 默认不修改全局文档；只有用户另行明确授权具体目标文件后才能应用建议。
 - 不用于重新裁决 finding、执行修复、登记 TODO 或推进 Story 状态。
 
+- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
+
 ## Core Capabilities（核心能力）
 
 - **CR 历史分析**：读取 Story 的 review、evaluation 与 fix 记录。
@@ -37,6 +39,7 @@ metadata:
 ## Inputs（输入）
 
 - Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
+- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
 - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
 
 ## Workflow（工作流）

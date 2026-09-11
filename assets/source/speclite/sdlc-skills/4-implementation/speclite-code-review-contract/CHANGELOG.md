@@ -2,6 +2,12 @@
 
 本文件记录 `speclite-code-review-contract` 的版本变更历史。
 
+## [Unreleased] - 2026-09-09
+
+### Added（新增）
+
+- 将 resolver 收窄为 numeric identity、current candidate 归属与物理安全；增加 frozen-vs-consumer production context validator，删除 tracker/approval replay。
+
 ## [1.0.0] - 2026-08-25
 
 ### Added（新增）

@@ -1,0 +1,173 @@
+{
+  "schemaVersion": "speclite.cr-classified-findings.v1",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 1,
+  "generatedAt": "2026-09-07T08:39:17.025Z",
+  "canonicalization": "NFC + LF + trim line/file trailing whitespace; fingerprints hash LF-joined seed fields; findingSetHash hashes code-point-key-sorted compact JSON findings array",
+  "findingSetHash": "sha256:18534aedefae8aae86e9bebb48c520c776477ab75782d0ac6b54d1a70f9aeb4d",
+  "counts": {
+    "decisionNeeded": 0,
+    "patch": 6,
+    "verifyRequired": 0,
+    "defer": 1,
+    "dismiss": 0
+  },
+  "findings": [
+    {
+      "findingId": "EVIDENCE-V2-R1-F1",
+      "title": "quoted/unquoted semantic duplicate key 可伪造完成证据",
+      "category": "artifact-authentication",
+      "invariant": "用于恢复目录和认证 DONE 的 v2 leading YAML frontmatter 必须拒绝任何语义重复或冲突的 authority key。",
+      "concreteFailureScenario": "一个其他方面完整且 hash 已重绑的 legacy finalizer 同时包含 bare `result: DONE` 与 quoted `\"result\": HALTED`；`parseLeadingFrontmatter()` 只匹配 bare key并静默忽略 quoted key，`validDoneFinalizer()` 仍把该轮加入 doneRounds，resolver 因而错误选择 canonical 新 run，而不是以 current-series evidence invalid 阻断。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440",
+      "sourceLayers": [
+        "blind",
+        "edge"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "artifact-authentication\n用于恢复目录和认证 DONE 的 v2 leading YAML frontmatter 必须拒绝任何语义重复或冲突的 authority key。\n一个其他方面完整且 hash 已重绑的 legacy finalizer 同时包含 bare `result: DONE` 与 quoted `\"result\": HALTED`；`parseLeadingFrontmatter()` 只匹配 bare key并静默忽略 quoted key，`validDoneFinalizer()` 仍把该轮加入 doneRounds，resolver 因而错误选择 canonical 新 run，而不是以 current-series evidence invalid 阻断。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440",
+      "fingerprint": "sha256:73633336ba59334e4fde265d3285ea644006ffba00f60151c0505f5fc5cf70a3",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R1-F2",
+      "title": "runner leaf invocation 遗漏 execution context",
+      "category": "contract-propagation",
+      "invariant": "Runner 调用 CR01–06 时必须显式传入 orchestrationMode=runner 与 handoffTarget=runner，使 leaf 消费同一 runner-frozen context且不得落入 standalone fallback。",
+      "concreteFailureScenario": "runner 严格按 Step 5/6/9/10 命令模板调用 CR01–06时，模板只传 reviewSeries 和 frozen directory fields，遗漏 orchestrationMode/handoffTarget；CR01、CR02、CR04 对缺失值按 manual standalone 处理并再次调用 resolver，可能在目录状态变化后观察到不同 canonical/legacy state，直接违反每 Story 单次解析不变量，其他写入 leaf 也失去契约规定的 handoff target。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md:72",
+      "sourceLayers": [
+        "edge"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "contract-propagation\nRunner 调用 CR01–06 时必须显式传入 orchestrationMode=runner 与 handoffTarget=runner，使 leaf 消费同一 runner-frozen context且不得落入 standalone fallback。\nrunner 严格按 Step 5/6/9/10 命令模板调用 CR01–06时，模板只传 reviewSeries 和 frozen directory fields，遗漏 orchestrationMode/handoffTarget；CR01、CR02、CR04 对缺失值按 manual standalone 处理并再次调用 resolver，可能在目录状态变化后观察到不同 canonical/legacy state，直接违反每 Story 单次解析不变量，其他写入 leaf 也失去契约规定的 handoff target。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md:72",
+      "fingerprint": "sha256:62aae5375ba25b302bb7c61b873c177ea16e0225d99738d79b3d51f6c6e9de46",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R1-F3",
+      "title": "document-root 多行 quoted scalar 可冒充 tracker terminal state",
+      "category": "tracker-authentication",
+      "invariant": "Required YAML tracker 的 terminal state 必须来自真实 mapping key，不能来自 quoted scalar中的文本行。",
+      "concreteFailureScenario": "required workflow tracker 是合法 document-root 多行 quoted scalar `\"example\\nimplementation: done\\nending\"`，并不存在 implementation mapping key；`yamlQuotedScalarOpening()` 对裸 document-root quote 不进入 quoted state，中间物理行被暴露给 exact-key scanner，content hash 又可正确绑定，otherwise-authentic finalizer 因而可把不存在真实 terminal mapping 的 tracker认证为 done。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1548",
+      "sourceLayers": [
+        "blind"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "tracker-authentication\nRequired YAML tracker 的 terminal state 必须来自真实 mapping key，不能来自 quoted scalar中的文本行。\nrequired workflow tracker 是合法 document-root 多行 quoted scalar `\"example\\nimplementation: done\\nending\"`，并不存在 implementation mapping key；`yamlQuotedScalarOpening()` 对裸 document-root quote 不进入 quoted state，中间物理行被暴露给 exact-key scanner，content hash 又可正确绑定，otherwise-authentic finalizer 因而可把不存在真实 terminal mapping 的 tracker认证为 done。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1548",
+      "fingerprint": "sha256:4138442f8dd2099c06169b78bc322543a1d75ab903e6f24be4c0019410777717",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R1-F4",
+      "title": "resolver requirements 与 canonical producer schemas/templates 不闭合",
+      "category": "artifact-schema-compatibility",
+      "invariant": "Canonical CR artifact schemas/templates 必须产出 executable resolver认证 current v2 artifacts所要求的全部字段。",
+      "concreteFailureScenario": "CR01/02/04/05/06 按 canonical schema/template生成 artifact时不产出 `disposition: current`，CR06 schema/template还不产出 `reviewSource`/`reviewSourceHash`；下一次 resolver 读取该产物时，`validArtifactIdentity()` 或 finalizer exactSources 检查将其判 invalid，导致正常 review/evaluation/closeout链无法恢复。focused synthetic fixtures自行注入这些字段，未覆盖真实 producer compatibility。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md:293",
+      "sourceLayers": [
+        "auditor"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "artifact-schema-compatibility\nCanonical CR artifact schemas/templates 必须产出 executable resolver认证 current v2 artifacts所要求的全部字段。\nCR01/02/04/05/06 按 canonical schema/template生成 artifact时不产出 `disposition: current`，CR06 schema/template还不产出 `reviewSource`/`reviewSourceHash`；下一次 resolver 读取该产物时，`validArtifactIdentity()` 或 finalizer exactSources 检查将其判 invalid，导致正常 review/evaluation/closeout链无法恢复。focused synthetic fixtures自行注入这些字段，未覆盖真实 producer compatibility。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md:293",
+      "fingerprint": "sha256:297c0f72c9f7a1633dd0cdfae83f5870220fcb60b20556fbbcdd5b89afc77adf",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R1-F5",
+      "title": "resolver 将 reviewer PASS_RECOMMENDED 变成额外 finalization 条件",
+      "category": "approval-semantics",
+      "invariant": "完成资格由绑定 evaluator 的 PASS 或 PASS_WITH_DEFERRED_TODOS 及其 TODO义务决定；reviewer finding可被 evaluator dismiss/defer。",
+      "concreteFailureScenario": "reviewer合法输出 FINDINGS_REPORTED，evaluator将全部 finding反证后输出 PASS，或接受 deferred finding并完成TODO映射后输出 PASS_WITH_DEFERRED_TODOS；即使CR06其余绑定均合法，resolver仍因 review verdict不是PASS_RECOMMENDED拒绝completed run，覆盖evaluator的最终裁决权并改变approval rules。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:649",
+      "sourceLayers": [
+        "auditor"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "approval-semantics\n完成资格由绑定 evaluator 的 PASS 或 PASS_WITH_DEFERRED_TODOS 及其 TODO义务决定；reviewer finding可被 evaluator dismiss/defer。\nreviewer合法输出 FINDINGS_REPORTED，evaluator将全部 finding反证后输出 PASS，或接受 deferred finding并完成TODO映射后输出 PASS_WITH_DEFERRED_TODOS；即使CR06其余绑定均合法，resolver仍因 review verdict不是PASS_RECOMMENDED拒绝completed run，覆盖evaluator的最终裁决权并改变approval rules。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:649",
+      "fingerprint": "sha256:b0f57b0ce8e8c9559dbf743e83fab533ef45be8f6dfa2268fc5e9144efe59aac",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R1-F6",
+      "title": "completion gate认证遗漏 mandatory owner fields",
+      "category": "completion-gate-authentication",
+      "invariant": "只有携带合法 v2 handoff、foundation prerequisite 与 closure-owner checks 的 completion gate 才能认证 DONE。",
+      "concreteFailureScenario": "completion gate缺少 `handoffContractVersion`、`foundationPrerequisiteStatus`、`closureOwnerCheckStatus`，但其hash在finalizer中正确重绑；resolver只检查schema/mode/target/storyKey/result/time，仍可把该run认定completed并允许canonical新run，测试的 currentGateArtifact正缺少这些字段仍通过focused suite。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:565",
+      "sourceLayers": [
+        "auditor"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "seedText": "completion-gate-authentication\n只有携带合法 v2 handoff、foundation prerequisite 与 closure-owner checks 的 completion gate 才能认证 DONE。\ncompletion gate缺少 `handoffContractVersion`、`foundationPrerequisiteStatus`、`closureOwnerCheckStatus`，但其hash在finalizer中正确重绑；resolver只检查schema/mode/target/storyKey/result/time，仍可把该run认定completed并允许canonical新run，测试的 currentGateArtifact正缺少这些字段仍通过focused suite。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:565",
+      "fingerprint": "sha256:3ce32b8329eee5ff252253e6cf68cfd6da3529f73a7f3b5a383b28de06fe66ce",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    },
+    {
+      "findingId": "EVIDENCE-V2-R1-F7",
+      "title": "supersededIndex identity/continuity",
+      "category": "lifecycle",
+      "invariant": "同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。",
+      "concreteFailureScenario": "当同一 current artifact 的合法 superseded文件出现suffix缺口、重复或重编号时，resolver只验证suffix为正整数且supersededBy指向current，不验证supersededIndex连续性或不可重编号身份；历史lineage可在仍通过结构验证时失去稳定ordinal identity。该缺口不改变current artifact唯一性，故当前为非阻塞延期项。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "sourceLayers": [
+        "historical-provenance"
+      ],
+      "bucket": "defer",
+      "disposition": "deferred",
+      "historicalFingerprint": null,
+      "seedText": "lifecycle\n同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。\n当同一 current artifact 的合法 superseded文件出现suffix缺口、重复或重编号时，resolver只验证suffix为正整数且supersededBy指向current，不验证supersededIndex连续性或不可重编号身份；历史lineage可在仍通过结构验证时失去稳定ordinal identity。该缺口不改变current artifact唯一性，故当前为非阻塞延期项。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "fingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "seedOrder": [
+        "category",
+        "invariant",
+        "concreteFailureScenario",
+        "primaryLocation"
+      ]
+    }
+  ],
+  "aggregationCaveats": [
+    "首次 Blind attempt 因误读一个 scope 外 unchanged template被标记 FAILED_PROCESS_SCOPE_DEVIATION，不计 quorum；其候选仅作 provenance。",
+    "三层实际 spawn配置均继承 OpenAI GPT-5.6 Sol (high)；layer原文中的 GPT-5 自报标签不作为cross-model声明。",
+    "Auditor对 legacy main series的 live resolver probe受孤立Round24等历史状态混杂，不作为F4独立因果证据；F4仅采用code/schema/template直接不一致与synthetic fixture偏离证据。"
+  ]
+}
+

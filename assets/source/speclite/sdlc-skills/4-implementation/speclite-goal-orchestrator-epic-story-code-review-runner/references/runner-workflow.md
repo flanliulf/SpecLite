@@ -8,12 +8,15 @@
 - 固定源码路径、fixture、schema 或 command 只有 owning SPEC 明确要求时才是 hard gate；否则按 contract 的 equivalent implementation policy，以测试、fixture、snapshot 或 command evidence 判断功能等价。
 - 当前状态只能来自合法的 v2 frontmatter、artifact hash、scope hash 和 tracker 重读结果，不得按文件 mtime、文件数量或 prose 关键词猜测。
 - 任一 state transition 失败、产物无效或授权不足时 HALT；不得自动跳过、降级或扩大修改范围。
+- 一个 Story 的 CR 闭环只允许一次 directory resolution；后续 review/evaluation/fix/rules/TODO/finalizer、`{crDir}/.tmp/` 与 `{crDir}/goal-execute-records/` 必须消费同一个 verified `crDir`。
 
 ## Step 0: Preflight（前置审计）
 
 - 确认 cwd、branch、HEAD、用户目标和 git 状态。
-- 从 Epic、Story 与 sprint tracker 建立唯一 `storyId -> storyKey -> storyFile` 映射。
-- 只写 `{storyId}-code-review/`；slug/legacy 目录记录到 `legacyArtifactPaths`，不自动移动或继续写入。
+- 从 Epic、Story、sprint tracker、项目 workflow 配置的同一 merged runtime context 建立唯一 `storyId -> storyKey -> storyFile` 映射，并冻结三类 tracker binding。Story/sprint 均为 `required=true`，分别冻结 exact project-relative `path`、exact `key` 与 owner-defined `expectedTerminalState`；workflow 只能由 merged context 明确冻结为同样完整的 `required=true` binding，或恰为 `required=false`。禁止根据默认路径、文件是否存在或 resolver fallback 猜测 requiredness/key/终态。
+- 仅在本 Step 调用一次 `node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode resolve --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --story-id "{storyId}" --review-series "{reviewSeries}" [--directory-choice "{directoryChoice}"]`。stdout 必须是恰一个 JSON；`ok=true` 时把 `storyId`、`reviewSeries` 与返回的 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths` 冻结为同一 `directoryContext`。unknown/duplicate/partial/empty 参数、non-zero、invalid JSON 或 `ok!=true` 时在任何 artifact/goal/progress/tracker write 前 HALT。
+- 新 run 只写 canonical `{storyId}-code-review/`；恰一个 current legacy-only run 即使包含 `DONE` claim，也按 resolver 返回的 `legacy-resume` 原位绑定，由正常 approval owner 判断是否完成。多个 current candidate 只有用户显式 `directoryChoice` 才能消除归属歧义；它不得绕过物理安全、移动 artifacts、合并目录或拆分同轮。
+- 将同一个 `directoryContext` 连同四个目录字段原样传给 CR01–06。每个 consumer 必须在任何实际写入前调用 production `--mode validate-context`，比较其收到的 context 与 orchestrator 冻结 context 并验证 write path；不得重跑 resolver 或选择替代目录。该 validator 不替代各 owner 的 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
 - 识别 current review series、最大 round、latest v2 artifacts、Flow Gate 和 tracker 状态。
 - 续跑必须从最新合法结构化状态继续，不按 mtime 或 prose 猜测。
 
@@ -67,11 +70,11 @@ fresh sub-agent 执行 `/speclite-dev-story story {storyKey}`。等待完成并�
 
 ## Step 5: Reviewer（审查）
 
-fresh sub-agent 执行 `/speclite-code-review-01-reviewer {storyId} reviewSeries={reviewSeries}`。验证 v2 schema、identity、round、scope hash、3/3 quorum 和 counts；无效时 HALT。记录 review path/hash、verdict、finding counts、failed layers 和下一状态。
+fresh sub-agent 执行 `/speclite-code-review-01-reviewer {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`。四字段均来自本 Story 唯一 resolver result 且冻结不变。验证 v2 schema、identity、resolved directory evidence、round、scope hash、3/3 quorum 和 counts；无效时 HALT。记录 review path/hash、verdict、finding counts、failed layers 和下一状态。
 
 ## Step 6: Evaluator（评估）
 
-另一个 fresh sub-agent 执行 `/speclite-code-review-02-evaluator {storyId} reviewSeries={reviewSeries}`。要求 read-only、review hash 一对一绑定、同 round、fingerprint disposition、精确 verdict 和 convergence 数据。记录 evaluation path/hash、accepted counts、verdict、收敛输入和下一状态。
+另一个 fresh sub-agent 执行 `/speclite-code-review-02-evaluator {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`。要求 read-only、review hash 一对一绑定、同 round、fingerprint disposition、精确 verdict 和 convergence 数据。记录 evaluation path/hash、accepted counts、verdict、收敛输入和下一状态。
 
 ## Step 7: Convergence（收敛）
 
@@ -93,16 +96,16 @@ State Gate 和任何 fixer 之前，按 fingerprint 计算 `newBlocking`、`recu
 
 ## Step 9: Fixer（修复）
 
-fresh sub-agent 执行 `/speclite-code-review-03-fixer {storyId} mode={patch|verify-only} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource}`。patch 只修 evaluator accepted P0/P1；verify-only 只补测试/断言/fixture/机械证据。完成后回到 Step 4，必须 fresh review/evaluate。
+fresh sub-agent 执行 `/speclite-code-review-03-fixer {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} mode={patch|verify-only} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource} orchestrationMode=runner handoffTarget=runner`。patch 只修 evaluator accepted P0/P1；verify-only 只补测试/断言/fixture/机械证据。完成后回到 Step 4，必须 fresh review/evaluate。
 
 ## Step 10: Closeout（收口）
 
 按编号 strict serial 执行；每个 Skill 使用独立 fresh outer sub-agent，等待其完成、验证结构化输出并更新三个 goal records 后，才能启动下一项：
 
-1. `/speclite-code-review-04-rules-extractor {storyId}`
-2. `/speclite-code-review-05-todo-tracker {storyId} mode=closeout confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource}`
+1. `/speclite-code-review-04-rules-extractor {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`
+2. `/speclite-code-review-05-todo-tracker {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} mode=closeout confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource} orchestrationMode=runner handoffTarget=runner`
 3. `/speclite-flow-gate mode=story-completion target={storyKey}`
-4. `/speclite-code-review-06-finalizer {storyId} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource}`
+4. `/speclite-code-review-06-finalizer {storyId} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`
 
 CR04 必须返回 current `speclite.cr-rules-extraction.v2` report，CR05 必须返回 current `speclite.cr-todo-result.v2` report，CR06 必须返回 current `speclite.cr-finalizer.v2` report。步骤 3 由 runner 生成 current story-completion gate（result 必须为 `PASS`/`PASS_EQUIVALENT`，`generatedAt` 不早于 evaluation/最后 fixRecord 的 `sourceMutationAt`）；finalizer 只验证不生成 gate。延期裁决必须完成 finding fingerprint 到 TODO 的映射；finalizer 自身重新计算 scope，并验证该 gate 与 required tracker 一致性。任一 closeout Skill 失败、gate 非 PASS、缺少 durable report 或返回非 current 产物时 HALT，不得跳过后继续 finalizer。
 

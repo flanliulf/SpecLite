@@ -1,5 +1,9 @@
 # Changelog（变更记录）
 
+## [Unreleased] - 2026-09-09
+
+- durable rules report 消费 frozen `directoryContext`，实际写入前调用 production validator。
+
 ## [2.1.0] - 2026-08-25
 
 ### Changed（变更）

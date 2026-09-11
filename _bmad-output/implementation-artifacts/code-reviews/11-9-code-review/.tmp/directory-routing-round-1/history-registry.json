@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "speclite.cr-history-registry.v1",
+  "storyId": "11-9",
+  "reviewSeries": "directory-routing",
+  "currentSeriesReports": [],
+  "currentSeriesFindings": [],
+  "round": 1,
+  "historicalSeriesExcludedFromCurrentDisposition": [
+    "main",
+    "evidence-v2"
+  ],
+  "note": "当前 series 无既有 review；旧 series 只作历史背景，不继承 PASS、风险接受、stop-loss 或 finding disposition。"
+}

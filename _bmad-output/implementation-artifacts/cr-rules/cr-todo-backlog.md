@@ -7,7 +7,7 @@
 
 | 状态 | 数量 |
 |------|------|
-| 🔴 open | 3 |
+| 🔴 open | 14 |
 | 🟡 in-progress | 0 |
 | ✅ resolved | 8 |
 
@@ -16,6 +16,68 @@
 ## Open Items
 
 <!-- 按优先级排序：P1 > P2 > P3 -->
+
+> 自 Story 11.9 起，新增条目使用 CR v2 的 `T1/T2/T3` 紧迫度；下列既有条目的 legacy `P2` 字段原样保留，不作机械迁移。`T1` 表示下次触及前必须处理，但仍是当前非阻塞项。
+
+### TODO-018: 补齐 unfinished current-v2 artifact authenticity 认证
+
+- **来源**: 11-9 CR round 6 (2026-09-08)
+- **紧迫度**: T1（原技术等级 P1；用户显式接受当前交付风险，未修复、未验证关闭）
+- **发现指纹**: sha256:3efe0732e9f9a20aa9940913efe212d59102bf583c2ffbe8a551e123e5bacb20
+- **类别**: other
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:291-311,485-537` 对 unfinished current v2 artifact 仅验证 identity 五字段，identity-only 残片仍可能把 title-bearing legacy directory 选为后续写入 root。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
+- **建议时机**: 下次触及 unfinished current-v2 authenticity、legacy-resume 认证或相应 classifier 前必须处理。关闭证据须包含与 artifact family/current state 相称的最小 v2 authenticity 实现、合法 `FINDINGS_REPORTED`/`FIX_REQUIRED` unfinished recovery control、identity-only 残片 fail-close 与 zero-write focused regression，并由后续 fresh review/evaluation 将本 fingerprint 判为 resolved；不得复用 terminal-only DONE 条件。
+- **状态**: open
+- **解决记录**:
+
+### TODO-019: 使非法 `~round` near-current delimiter fail-close
+
+- **来源**: 11-9 CR round 6 (2026-09-08)
+- **紧迫度**: T1（原技术等级 P1；用户显式接受当前交付风险，未修复、未验证关闭）
+- **发现指纹**: sha256:6a902447d67688642c6465da4fe74e1914a6011c0a9214b3346d734836dbfdc8
+- **类别**: other
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:445-458` 的 artifact basename classifier 未把 selected series 后的非法 `~round` 识别为 `malformed-current-intent`，因此 near-current evidence 可能被静默归为 unrelated。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
+- **建议时机**: 下次触及 artifact basename classifier、round delimiter 或 `malformed-current-intent` 认证前必须处理。关闭证据须证明 exact Story/family/date/selected-series 下的非法 `~round` fail-close，并以 canonical、legacy、合法 other-series、ordinary-note、无分隔合法 series 与 zero-write focused regressions约束 matcher；还须由后续 fresh review/evaluation 将本 fingerprint 判为 resolved。
+- **状态**: open
+- **解决记录**:
+
+### TODO-020: 拒绝 bounded inline list 中的 unquoted flow mapping
+
+- **来源**: 11-9 CR round 6 (2026-09-08)
+- **紧迫度**: T1（原技术等级 P1；用户显式接受当前交付风险，未修复、未验证关闭）
+- **发现指纹**: sha256:dd07435baba8abce70cb0f54bdf7a7a43c42b020c7c42cb8dbe5325983813ddc
+- **类别**: other
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:695-715,780-854` 的 bounded inline-list grammar 会把 `declaredFiles: [src/a.ts: injected]` 这一 YAML flow mapping item 当作 path scalar，使非规范 predecessor 参与 DONE authentication。该 finding 原技术等级为 P1，当前仍成立且未修复；依据 `_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/evidence-v2-authorization.md` 的 `R6 User-directed Risk Acceptance`，仅将当前交付处置改为 T1，不表示 fixed、resolved 或误报，也不改变全局 P1/TODO 规则。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
+- **建议时机**: 下次触及 predecessor inline-list grammar、artifact authentication 或相关 classifier 前必须处理。关闭证据须在既有 bounded grammar 中拒绝 unquoted colon+ASCII-whitespace flow-mapping item，同时保留 bare colon、quoted colon-space、authentic predecessor、ordinary producer list 与 zero-write controls；不得扩大为 whole-document YAML 或 quoted tracker key治理，并须由后续 fresh review/evaluation 将本 fingerprint 判为 resolved。
+- **状态**: open
+- **解决记录**:
+
+### TODO-021: 保留 RFC3339 freshness 比较的完整小数秒精度
+
+- **来源**: 11-9 CR round 6 (2026-09-08)
+- **紧迫度**: T2
+- **发现指纹**: sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244
+- **类别**: tech-debt
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:620-648,681-692` 接受任意长度 RFC3339 小数秒，却以 `Date.parse()` 的毫秒值比较 freshness；例如 `.9001Z` 与 `.9000Z` 可能被截为相同毫秒并错误通过。当前 producer 尚无超过毫秒精度的实证，故保持 evaluator 原 T2 处置，未修复、未验证关闭。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
+- **建议时机**: 下次修改 freshness comparator、RFC3339 timestamp schema 或 timestamp producer 精度时处理。关闭证据须由 owner 明确保留完整允许精度或同步收窄 schema/producer，并以不同小数秒精度的先后、相等、时区等价及现有毫秒 producer focused regressions证明比较器与 contract 一致；随后由 fresh review/evaluation确认本 fingerprint resolved。
+- **状态**: open
+- **解决记录**:
+
+### TODO-022: 定义并认证 superseded ordinal lineage
+
+- **来源**: 11-9 CR round 6 (2026-09-08)
+- **紧迫度**: T2
+- **发现指纹**: sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483
+- **类别**: tech-debt
+- **描述**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:275-303,421-438` 当前只验证 superseded suffix 为正整数及 frontmatter identity，未认证 ordinal 连续性；缺口或重编号时历史 ordinal identity 可能变化。现有 contract 尚未定义缺口恢复、不可重编号或持久 registry，且该问题不影响 current artifact 唯一性、round 连续性或 current completion authentication，故保持 evaluator 原 T2 处置，未修复、未验证关闭。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs`, `test/code-review-contract.test.ts`, `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md`
+- **建议时机**: 下次修改 supersession lineage/authentication 或需要把 ordinal 作为审计身份前处理。关闭证据须先由 owner 明确定义 gap、replacement、不可重编号或 registry 语义，再同步 resolver 与 focused tests 覆盖连续、缺口、重编号、合法历史副本及 current uniqueness；后续 fresh review/evaluation须确认本 fingerprint resolved。若 owner 决定 ordinal 仅为文件名 suffix，则须以明确 contract 决策关闭，不能冒充实现修复。
+- **状态**: open
+- **解决记录**:
 
 ### TODO-009: 对齐 `speclite-npm-publisher` fixture hash
 
@@ -47,6 +109,72 @@
 - **描述**: Story 7-2 Round 1 Finding #2 指出 `sync` / `uninstall` human output 在失败时未展示 `Step State`，Round 2 evaluator 确认该项有效但非阻塞。当前数据层已携带 `completedSteps`、`failedStep`、`pendingSteps` lifecycle fields，但 `src/diagnostics/output.ts` 中 `renderSyncHumanOutput` 与 `renderUninstallHumanOutput` 仍未输出与 update renderer 等价的 `Step State` block，导致非 JSON 用户看不到完整失败步骤状态；应补齐 renderer 行为并增加 human output focused tests。
 - **涉及文件**: `src/diagnostics/output.ts`, `test/sync-command.test.ts`, `test/uninstall-command.test.ts`
 - **建议时机**: Epic 7 内下次触及 `sync` / `uninstall` human output renderer、失败诊断展示或相关 human output regression tests 时处理；为失败场景输出 `Completed steps`、`Failed step`、`Pending steps`，并覆盖 `sync` safe-write failure 与 `uninstall` remove failure。
+- **状态**: open
+- **解决记录**:
+
+### TODO-012: 收口 `workflow-artifact-layout.md` generic route strings
+
+- **来源**: 11-2 CR round 3 (2026-09-03)
+- **优先级**: P2
+- **类别**: other
+- **描述**: Story 11.2 Round 3 reviewer/evaluator 均确认 `docs/reference/workflow-artifact-layout.md:133-146`、`:189`、`:223` 仍含 generic producer / updater route strings，属于 Story 11.4+ future-story 范围，不阻塞 Story 11.2 fresh-install projection。CR05 去重核验显示当前 backlog 无 `workflow-artifact-layout.md`、generic workflow routing、`planning-artifacts/research`、`speclite-workflow-status.yaml` 或相关 producer route 条目；Story 11.4、11.5、11.6、11.7、11.8、11.9 分别覆盖 Analysis、PRD/Epics/Architecture、UX、PRD validation、Implementation Readiness 与 CR routing，但尚无单一 owner Story/AC 充分覆盖该表中全部残留 generic rows（包括 brainstorming、project-context、brownfield planning handoff、correct-course proposal、updater-only workflow status 与 current-differences 说明）。需要保留一条跨 Story backlog，避免后续分段实施时遗漏残留 docs / canonical Skill alignment。
+- **涉及文件**: `docs/reference/workflow-artifact-layout.md`, `_bmad-output/implementation-artifacts/stories/11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories.md`, `_bmad-output/implementation-artifacts/stories/11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts.md`, `_bmad-output/implementation-artifacts/stories/11-6-consolidate-ux-artifacts-under-the-planning-ux-space.md`, `_bmad-output/implementation-artifacts/stories/11-7-standardize-the-prd-validation-report-filename.md`, `_bmad-output/implementation-artifacts/stories/11-8-rename-and-relocate-implementation-readiness-skills.md`, `_bmad-output/implementation-artifacts/stories/11-9-normalize-code-review-artifact-directories-by-story-id.md`
+- **建议时机**: Epic 11 Story 11.4-11.9 执行或收口时逐项分类并更新；若发现 brainstorming、project-context、brownfield handoff、correct-course proposal 或 updater-only workflow status 不属于任一已授权 Story 的 acceptance criteria，应创建后续受控 Story/owner decision 后再关闭本 TODO。
+- **状态**: open
+- **解决记录**:
+
+### TODO-013: 决策 protected namespace artifact root 是否由 resolver 拒绝
+
+- **来源**: 11-3 CR round 1-3 (2026-09-03 ~ 2026-09-03)
+- **优先级**: P2
+- **类别**: other
+- **描述**: Story 11.3 Round 1/2/3 reviewer/evaluator 与 CR04 均确认当前实现只修复 ownership precedence：`_speclite`、`.claude`、`.agents` 等 installer/control namespace 与 configured artifact roots overlap 时，installer-owned namespace 优先于 workflow-owned root。Config resolver 层是否应直接拒绝这些 namespace 作为 artifact root 仍没有 `SPEC 09` owner contract 或 `SPEC 07`/resolver-local stable diagnostic；Round 3 evaluator 还独立确认 `implementation_artifacts = "_speclite"` 当前仍可解析为 `ok=true`、`issues=[]`、`resolutionMode="explicit-config"`。该项是 Owner future 决策，不是 Story 11.3 当前缺陷、已批准需求或已实现承诺。
+- **涉及文件**: `src/config/artifact-root-resolver.ts`, `src/config/config-schema.ts`, `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`, `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`, `test/artifact-root-resolution.test.ts`, `test/existing-install-compatibility.test.ts`
+- **建议时机**: Epic 11 artifact root owner contract 收口或新增 protected namespace policy Story 前处理；先由 Owner 决定 `_speclite`、`.claude`、`.agents` 等 namespace 是否属于 invalid artifact root，再定义 stable issue owner/id/details 与 focused regressions。
+- **状态**: open
+- **解决记录**:
+
+### TODO-014: 决策 single-file `story_location` 与 metadata-only legacy Story 是否支持
+
+- **来源**: 11-3 CR round 2-3 (2026-09-03 ~ 2026-09-03)
+- **优先级**: P2
+- **类别**: other
+- **描述**: Story 11.3 Round 2/3 reviewer/evaluator 与 CR04 均确认 `SPEC 09` 当前将 `story_location` 定义为 Story 文件所在目录，合法 Story artifact 为 `{story_root}/{story_key}.md`；当前 implementation 因此只消费目录下 direct child story-key `.md`，并排除 README、notes、metadata sidecar、hidden/temp、recursive child 以及 single-file `story_location`。若要兼容 single-file `story_location` 或 metadata-only `legacy.md`，必须先更新 `SPEC 09` / consumer discovery owner contract。该项是 Owner future 决策，不是 Story 11.3 当前缺陷、已批准需求或已实现承诺。
+- **涉及文件**: `src/validation/validate-project.ts`, `src/validation/artifact-paths.ts`, `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`, `_bmad-output/implementation-artifacts/sprint-status.yaml`, `test/existing-install-compatibility.test.ts`
+- **建议时机**: Epic 11 legacy Story compatibility 收口或 Owner 明确需要扩展 legacy input shape 时处理；先决定 single-file / metadata-only 是否进入 contract，再同步 discovery、diagnostic 与 regression tests。
+- **状态**: open
+- **解决记录**:
+
+### TODO-015: 补齐 Story 11.4 broad scan `575` 可复现证据
+
+- **来源**: 11-4 CR round 2-7 (2026-09-03 ~ 2026-09-04)
+- **优先级**: P2
+- **类别**: other
+- **描述**: Story 11.4 Round 2 reviewer/evaluator 确认 `_bmad-output/implementation-artifacts/flow-gates/11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories-story-completion-gate.md:59-64` 与 `_bmad-output/implementation-artifacts/stories/11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories.md:157-166` 声称 broad repo scan found `575` legacy-pattern hits，但未记录原始 command、regex、include/exclude glob 或 per-bucket input source。Round 2 summary 记录不同 regex 得到 `126`、`154`、`599`、`605`，aggregator 复跑得到 `123` 与 `154`，因此 exact `575` 不可独立复现；Round 7 evaluator 仍将该项维持为 P2 / CR TODO / evidence hygiene defer，且不阻塞 `EVALUATION_PASS`。
+- **涉及文件**: `_bmad-output/implementation-artifacts/flow-gates/11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories-story-completion-gate.md`, `_bmad-output/implementation-artifacts/stories/11-4-route-analysis-workflows-into-dedicated-artifact-subdirectories.md`, `_bmad-output/implementation-artifacts/code-reviews/11-4-code-review/11-4-code-review-summary-20260903-round-2.md`, `_bmad-output/implementation-artifacts/code-reviews/11-4-code-review/11-4-code-review-evaluation-20260903-round-2.md`, `_bmad-output/implementation-artifacts/code-reviews/11-4-code-review/11-4-code-review-evaluation-20260904-round-7.md`
+- **建议时机**: Epic 11 evidence governance 收口、future completion gate rerun 或下次触及 Story 11.4 completion evidence 时处理；关闭条件是补充可复现 command、regex、scope、include/exclude glob 与 per-bucket counts，或重新生成一份带同等可复现输入来源的 broad legacy-pattern audit，并明确旧 `575` 是否仍被采用、替换或作废。
+- **状态**: open
+- **解决记录**:
+
+### TODO-016: 定义 missing-index `.md` symlink candidate 语义
+
+- **来源**: 11-5 CR round 7 (2026-09-04)
+- **优先级**: P2
+- **类别**: other
+- **描述**: Story 11.5 Round 7 reviewer/evaluator 确认 `src/config/artifact-document-discovery.ts:776-809` 的 missing-index candidate scan 只收集 `Dirent.isFile()` 的 lexical `.md` entry，因此会忽略 `.md` symlink；至少在 subject 内 symlink 指向 subject 内 readable regular file 时，当前行为可能把真实 shard candidate 从 `artifact-path.invalid-sharded-document-shape` / `shards-without-index` 错报为 `artifact-path.subject-document-missing`。Round 8 reviewer/evaluator 复核该行为仍存在并维持 P2 defer：当前 resolver 仍 structured block、`actualConsumedPath=null`、`consumedPaths=[]` 且零 mutation，不构成 Story 11.5 blocker；但 owning contract 尚未唯一规定 in-bound regular、outbound、broken、directory/FIFO 或其它 non-regular target 应按 lexical existence 计为 candidate，还是先按安全 target eligibility 分类，因此不得把该项写成已解决，也不得在缺少 Owner 决策时猜测实现。
+- **涉及文件**: `src/config/artifact-document-discovery.ts`, `test/artifact-document-discovery.test.ts`, `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md`, `_bmad-output/planning-artifacts/specs/09-sdlc-workflow-lifecycle-contract.md`
+- **建议时机**: Epic 11 artifact-document discovery contract 收口或下次触及 missing-index candidate scan 前处理；Owner 须先逐项决定 subject 内 readable regular、outbound、broken、directory/FIFO 与其它 non-regular `.md` symlink 的 candidate semantics、stable diagnostic 与 mismatch precedence。后续 acceptance 必须证明 index-present 时不扫描 undeclared subtree、missing-index 分支只判断不消费、结果保持 structured block、safe project-relative evidence 与零 mutation；除非 Owner contract 明确要求，不新增 stable issue ID，也不扩展为通用 filesystem 异常治理。
+- **状态**: open
+- **解决记录**:
+
+### TODO-017: 收口 inactive Architecture duplicate 的 UX wildcard
+
+- **来源**: 11-6 CR round 1-5 (2026-09-04 ~ 2026-09-04)
+- **优先级**: P2
+- **类别**: duplication
+- **描述**: Story 11.6 Round 1 reviewer/evaluator 发现 shipped duplicate `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/steps/step-01-init.md:74` 仍以 `*ux-design*.md` 搜索 UX 输入；Round 2-5 持续复核并维持 P2 defer。当前 active source `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/references/steps/step-01-init.md:59,74` 已采用 canonical `{planning_artifacts}/ux/ux-design-specification.md` 优先、exact legacy `{planning_artifacts}/ux-design-specification.md` fallback、canonical wins 与 no-migration contract，因此该项是 inactive duplicate ownership / maintenance drift，不是 Story 11.6 active producer、consumer、installed operation 或验收 blocker。不得把本 TODO 解释为 active source 未实现，也不得在未明确 duplicate ownership 前删除文件或扩大为 Architecture workflow 重构。
+- **涉及文件**: `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/steps/step-01-init.md`, `assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/references/steps/step-01-init.md`
+- **建议时机**: 下次触及 `speclite-create-architecture` step source ownership、package duplicate cleanup 或 Architecture input discovery 时处理；先确认 `steps/` duplicate 的保留、生成或删除责任，再仅将 retained source 对齐 active exact UX contract，并验证 package/install projection 不会重新激活 wildcard。
 - **状态**: open
 - **解决记录**:
 

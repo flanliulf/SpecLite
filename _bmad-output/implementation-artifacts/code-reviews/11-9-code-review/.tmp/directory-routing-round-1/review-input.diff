@@ -1,0 +1,2628 @@
+diff --git a/assets/source/speclite/README.en.md b/assets/source/speclite/README.en.md
+index 9e7c1e8..0e5aa72 100644
+--- a/assets/source/speclite/README.en.md
++++ b/assets/source/speclite/README.en.md
+@@ -140,19 +140,19 @@ The Story Review workflow lives under `sdlc-skills/3-solutioning/` and uses the
+ 
+ IR grill consistency review lives under `sdlc-skills/3-solutioning/`:
+ 
+-- `speclite-ir-grill-consistency-reviewer`: runs strict-serial implementation-readiness consistency grill across PRD, UX, Architecture, and Epics / Stories, and writes process records under `{planning_artifacts}/ir-grill`.
++- `speclite-implementation-readiness-grill-consistency-reviewer`: runs strict-serial implementation-readiness consistency grill across PRD, UX, Architecture, and Epics / Stories, and writes process records under `{solutioning_artifacts}/implementation-readiness-report/grill-consistency`.
+ 
+ Epic-level goal orchestration workflows live under `sdlc-skills/4-implementation/`:
+ 
+ - `speclite-goal-orchestrator-epic-story-review-runner`: orchestrates strict-serial SR reviewer / evaluator / fixer loops for an Epic and keeps progress records under `story-reviews/.../goal-execute-records/`.
+-- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops for every Story in an Epic and keeps progress records under `code-reviews/.../goal-execute-records/`.
++- `speclite-goal-orchestrator-epic-story-code-review-runner`: orchestrates strict-serial Dev Story and CR loops, resolves and freezes one `directoryContext` from numeric Story identity, requires CR01–06 to validate that context before writes, and keeps progress records under the same `goal-execute-records/`.
+ 
+ The unnumbered `speclite-code-review` is no longer a canonical source skill entrypoint. Code review starts with `speclite-code-review-01-reviewer`, then continues through the numbered CR2/CR3/CR6 skills for evaluation, fixes, and finalization.
+ 
+ Review artifact directories are:
+ 
+ - `stories/`: Story spec files.
+-- `code-reviews/`: CR summaries, evaluations, and fix records.
++- `code-reviews/{story-id}-code-review/`: all review, evaluation, fix, rules, TODO-result, finalizer, `.tmp/`, and goal records for one Story. Titles/slugs never name a new directory; one unfinished legacy-only run resumes in place, while dual/multi ambiguity blocks before writes without migration.
+ - `story-reviews/`: SR summaries, evaluations, and revision records.
+ - `cr-rules/`: CR backlog, extracted rules, and cross-Story TODOs.
+ - `retrospectives/`: Epic/Sprint retrospective summaries.
+diff --git a/assets/source/speclite/README.md b/assets/source/speclite/README.md
+index 3cf45cc..a2ec2e1 100644
+--- a/assets/source/speclite/README.md
++++ b/assets/source/speclite/README.md
+@@ -162,19 +162,19 @@ Story Review 工作流位于 `sdlc-skills/3-solutioning/`，采用 01-03 编号
+ 
+ IR grill consistency review 位于 `sdlc-skills/3-solutioning/`：
+ 
+-- `speclite-ir-grill-consistency-reviewer`：对 PRD、UX、Architecture、Epics / Stories 做严格串行 implementation-readiness 一致性 grill，并把过程记录写入 `{planning_artifacts}/ir-grill`。
++- `speclite-implementation-readiness-grill-consistency-reviewer`：对 PRD、UX、Architecture、Epics / Stories 做严格串行 implementation-readiness 一致性 grill，并把过程记录写入 `{solutioning_artifacts}/implementation-readiness-report/grill-consistency`。
+ 
+ Epic 级目标编排工作流位于 `sdlc-skills/4-implementation/`：
+ 
+ - `speclite-goal-orchestrator-epic-story-review-runner`：按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环，并在 `story-reviews/.../goal-execute-records/` 下维护进度记录。
+-- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环，并在 `code-reviews/.../goal-execute-records/` 下维护进度记录。
++- `speclite-goal-orchestrator-epic-story-code-review-runner`：按 Epic 下每个 Story 严格串行编排 Dev Story 和 CR 循环；从 numeric Story ID 单次解析并冻结 `directoryContext`，CR01–06 在写入前用 production validator 校验相同 context，并在同一 `goal-execute-records/` 下维护进度记录。
+ 
+ 非编号 `speclite-code-review` 已不再作为 canonical skill 源头入口；代码审查链路从 `speclite-code-review-01-reviewer` 开始，并由 CR2/CR3/CR6 等编号 skill 完成评估、修复与收尾。
+ 
+ Review 产物目录约定如下：
+ 
+ - `stories/`：Story spec 文件。
+-- `code-reviews/`：CR summary、evaluation 和修复记录。
++- `code-reviews/{story-id}-code-review/`：同一 Story 的 CR summary、evaluation、fix、rules、TODO result、finalizer、`.tmp/` 与 goal records；title/slug 不参与新目录名。唯一 unfinished legacy-only run 原位续写，dual/multi ambiguity 在写入前阻断，且不自动迁移 legacy。
+ - `story-reviews/`：SR summary、evaluation 和修订记录。
+ - `cr-rules/`：CR backlog、规则提炼和跨 Story TODO。
+ - `retrospectives/`：Epic/Sprint 回顾总结。
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/CHANGELOG.md
+index 11e6b3d..a7a5c3b 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- runner mode 消费 frozen `directoryContext`；`.tmp`、summary 等实际写入前调用 production validator。
++
+ ## [2.1.0] - 2026-08-25
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.en.md
+index aa5edef..43e1367 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.en.md
+@@ -19,6 +19,8 @@ Perform a read-only three-layer review for one Story and emit `speclite.cr-revie
+ - Use it to freeze one Story's current review scope, run the three layers, and create the reviewer artifact.
+ - Do not use it to evaluate findings, apply fixes, register TODOs, finalize a Story, or orchestrate an Epic; use CR02–06 or the runner for those tasks.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **Exact scope**: Freeze declared, actual, and excluded files with `scopeHash` validation.
+@@ -33,6 +35,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
+ ## Inputs
+ 
+ - Story path, `storyId`, or `storyKey`, plus `reviewSeries`.
++- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
+ - A review scope manifest, or a development record/user-specified commit range sufficient to build it independently.
+ - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.md
+index d33117d..b8d1e00 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/SKILL.md
+@@ -19,6 +19,8 @@ metadata:
+ - 用于冻结一个 Story 的 current review scope、执行三层审查并生成 reviewer artifact。
+ - 不用于评估 finding、执行修复、登记 TODO、同步 Story 状态或编排整个 Epic；这些任务分别交给 CR02–06 或 runner。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **精确范围**：冻结并核对 declared、actual、excluded files 与 `scopeHash`。
+@@ -33,6 +35,7 @@ metadata:
+ ## Inputs（输入）
+ 
+ - Story path、`storyId` 或 `storyKey`，以及 `reviewSeries`。
++- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
+ - review scope manifest，或足够独立生成它的 development record/用户指定 commit range。
+ - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md
+index 4098427..0c44480 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md
+@@ -2,10 +2,17 @@
+ 
+ 本文档承载 CR01 的详细顺序流程。共享 identity、scope、schema、round、quorum 和 standalone execution context 以 `{skills-root}/speclite-code-review-contract/references/cr-contract.md` 为准。
+ 
++## Directory Preflight（目录预检）
++
++- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
++- 任何 artifact、`.tmp` 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "`.tmp/{reviewSeries}-round-{round}/review-input.diff`"`。
++- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
++- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
++
+ ## Step 1: Resolve Identity and Round（解析身份与轮次）
+ 
+ 1. 建立唯一 `storyId -> storyKey -> storyFile` 映射。
+-2. CR 目录只使用 `{storyId}-code-review/`。
++2. 验证本次 resolved `crDir` 与 numeric `storyId` / compatibility evidence 一致。
+ 3. 扫描同一 `reviewSeries` 的 v2 summary，取最大 round + 1；不得按文件数量或 mtime 计算。
+ 4. legacy/其他 series 只作为 historical context。
+ 5. 建立 `orchestrationMode` 与 `handoffTarget`；人工模式不得等待 runner record。
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/CHANGELOG.md
+index 8ec429f..28ce081 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- evaluation 消费 frozen `directoryContext`，写入前调用 production validator；原 review binding 与 approval 检查不变。
++
+ ## [2.1.0] - 2026-08-25
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.en.md
+index 59e257c..6d317bc 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.en.md
+@@ -19,6 +19,8 @@ Independently evaluate the current `speclite.cr-review.v2` finding by finding an
+ - Use it to validate reviewer findings, counterevidence, severity, disposition, and convergence.
+ - Do not use it to modify source/tests, run the fixer, register TODOs, update Stories/trackers, or replace the reviewer.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **One-to-one binding**: Bind Story, series, round, scope, and review hash exactly.
+@@ -33,6 +35,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
+ ## Inputs
+ 
+ - Story identity, `reviewSeries`, and the current v2 review, or enough information to locate it independently.
++- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
+ - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
+ 
+ ## Workflow
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.md
+index e2a5737..08df99b 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/SKILL.md
+@@ -19,6 +19,8 @@ metadata:
+ - 用于验证 reviewer findings、反证、severity、disposition 和 convergence。
+ - 不用于修改 source/test、执行 fixer、登记 TODO、更新 Story/tracker 或替代 reviewer。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **一对一绑定**：按 Story、series、round、scope 和 review hash 精确绑定。
+@@ -33,6 +35,7 @@ metadata:
+ ## Inputs（输入）
+ 
+ - Story identity、`reviewSeries` 和 current v2 review，或足够独立定位它的信息。
++- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
+ - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
+ 
+ ## Workflow（工作流）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/references/evaluator-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/references/evaluator-workflow.md
+index 7e7a1c7..db53255 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/references/evaluator-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/references/evaluator-workflow.md
+@@ -2,6 +2,13 @@
+ 
+ 本文档承载 CR02 的详细 read-only 评估流程。共享 schema、round binding、verdict 和 execution context 以 CR shared contract 为准。
+ 
++## Directory Preflight（目录预检）
++
++- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
++- 任何 evaluation、`.tmp` 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-code-review-evaluation-{date}-{reviewSeries}-round-{round}.md"`。
++- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
++- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
++
+ ## Step 1: Locate Current Review（定位 current review）
+ 
+ 1. 解析唯一 `storyId/storyKey/reviewSeries`。
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/CHANGELOG.md
+index ad5b219..4be5bed 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- fixer 消费 frozen `directoryContext`，source/fixRecord 写入前调用 production validator；原 evaluator authorization 不变。
++
+ ## [2.1.0] - 2026-08-25
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.en.md
+index 9f3f3d0..06d302e 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.en.md
+@@ -19,6 +19,8 @@ This is the only CR01–06 step allowed to modify source or tests. It supports r
+ - Use it to execute evaluator-accepted and explicitly bounded fixes or verification obligations.
+ - Do not use it to evaluate findings, absorb deferred/TODO items, change requirements, update Stories/trackers, or authorize finalization.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **Authorized scope**: Consume only obligations explicitly approved by the current evaluation.
+@@ -33,6 +35,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
+ ## Inputs
+ 
+ - Story identity, `reviewSeries`, current evaluation, and `mode=patch | verify-only`.
++- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
+ - `confirmationPolicy`, `authorizationSource`, `orchestrationMode`, and `handoffTarget`; default missing confirmation policy to `explicit`.
+ 
+ ## Workflow
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.md
+index a6478f1..b0473c3 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/SKILL.md
+@@ -19,6 +19,8 @@ CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或
+ - 用于执行 evaluator 已接受且已限定范围的修复或验证义务。
+ - 不用于自行评估 finding、吸收 deferred/TODO 项、改变需求边界、更新 Story/tracker 或授权 finalizer。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **授权范围**：只消费 current evaluation 明确批准的 obligations。
+@@ -33,6 +35,7 @@ CR01–06 中唯一允许修改源码或测试的环节。它可由 runner 或
+ ## Inputs（输入）
+ 
+ - Story identity、`reviewSeries`、current evaluation 和 `mode=patch | verify-only`。
++- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
+ - `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`。
+ 
+ ## Workflow（工作流）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/references/fixer-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/references/fixer-workflow.md
+index ee27ccc..0377c11 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/references/fixer-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/references/fixer-workflow.md
+@@ -2,6 +2,13 @@
+ 
+ 本文档承载 CR03 的详细有界修改流程。共享 evaluation binding、fixRecord、execution context 和 state machine 以 CR shared contract 为准。
+ 
++## Directory Preflight（目录预检）
++
++- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
++- 任何 artifact、`.tmp`、source 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-code-review-evaluation-{date}-{reviewSeries}-round-{round}.md"`。
++- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
++- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
++
+ ## Step 1: Bind Current Evaluation（绑定 current evaluation）
+ 
+ 1. 定位同一 Story/series 最大 round 的 v2 evaluation。
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/CHANGELOG.md
+index b09a15f..e9c3ea7 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- durable rules report 消费 frozen `directoryContext`，实际写入前调用 production validator。
++
+ ## [2.1.0] - 2026-08-25
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.en.md
+index 517f6b7..f8de60d 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.en.md
+@@ -20,6 +20,8 @@ Extract candidate rules from evaluator-accepted v2 CR evidence and write a durab
+ - Do not modify global documents by default; apply suggestions only after the user separately authorizes exact target files.
+ - Do not reevaluate findings, apply fixes, register TODOs, or advance Story state.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **CR history analysis**: Read Story review, evaluation, and fix records.
+@@ -37,6 +39,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
+ ## Inputs
+ 
+ - Story identity, `reviewSeries`, and the current evaluation, or enough information to locate it independently.
++- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
+ - `orchestrationMode` and `handoffTarget`; default to manual standalone invocation when omitted.
+ 
+ ## Workflow
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.md
+index 32bd3f1..5552041 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/SKILL.md
+@@ -20,6 +20,8 @@ metadata:
+ - 默认不修改全局文档；只有用户另行明确授权具体目标文件后才能应用建议。
+ - 不用于重新裁决 finding、执行修复、登记 TODO 或推进 Story 状态。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **CR 历史分析**：读取 Story 的 review、evaluation 与 fix 记录。
+@@ -37,6 +39,7 @@ metadata:
+ ## Inputs（输入）
+ 
+ - Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
++- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
+ - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
+ 
+ ## Workflow（工作流）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/references/rules-extractor-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/references/rules-extractor-workflow.md
+index bac3bc2..d13668e 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/references/rules-extractor-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/references/rules-extractor-workflow.md
+@@ -2,9 +2,16 @@
+ 
+ 本文档承载 CR04 的详细分析与 durable output 流程。共享 identity、path、schema、finding eligibility 和 execution context 以 CR shared contract 为准。
+ 
++## Directory Preflight（目录预检）
++
++- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
++- 任何 rules report、`.tmp` 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-cr-rules-extraction-{date}-{reviewSeries}-round-{round}.md"`。
++- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
++- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
++
+ ## Step 1: Collect Eligible CR Records（收集合格记录）
+ 
+-1. 解析 Story identity、current `reviewSeries`、round 和 CR canonical directory。
++1. 解析 Story identity、current `reviewSeries`、round 和本次 resolved CR directory。
+ 2. 读取同一 series 的 v2 review/evaluation/fix records，并按 current、historical、superseded 分类。
+ 3. legacy v1 只作背景，不能直接生成 candidate/global rule。
+ 4. 将 current evaluation source/hash 作为本次 report binding。
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/CHANGELOG.md
+index daef7b1..4d50ff4 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- Story-mode TODO result 消费 frozen `directoryContext` 并在写入前调用 production validator；project utility mode 不变。
++
+ ## [2.1.1] - 2026-08-26
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.en.md
+index 22ee96f..cb49cb1 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.en.md
+@@ -20,6 +20,8 @@ Manage evaluator-accepted non-blocking items in `{implementation_artifacts}/cr-r
+ - Backlog utility: check, resolve, list, or extract items on user request; these operations never change the original evaluation verdict.
+ - Do not record P0/P1, `VERIFY_REQUIRED`, dismissed, or superseded findings.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **Add items**: Extract and confirm non-blocking deferred candidates from the current evaluation.
+@@ -35,6 +37,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
+ ## Inputs
+ 
+ - `mode=closeout | add | check | resolve | list | extract` plus the Story/TODO identity required by that mode. `closeout` is Story-closeout only; read-only `list`/`check` skip the durable result by default.
++- Runner Story mode requires the frozen `directoryContext` and all four verified directory fields; manual Story mode invokes the shared resolver once. Call the production context validator before Story-mode writes; project utility mode does not resolve `crDir`.
+ - `confirmationPolicy: explicit | preauthorized`; default to `explicit` when omitted.
+ - `authorizationSource`, `orchestrationMode`, and `handoffTarget`; authorization source is mandatory for `preauthorized`.
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.md
+index a621911..10e4fb7 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/SKILL.md
+@@ -20,6 +20,8 @@ metadata:
+ - Backlog utility：按用户要求 check、resolve、list 或 extract；这些操作不得反向改变原 evaluation verdict。
+ - 不用于记录 P0/P1、`VERIFY_REQUIRED`、dismissed 或 superseded finding。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **添加条目**：从 current evaluation 提取并确认非阻塞延期项。
+@@ -35,6 +37,7 @@ metadata:
+ ## Inputs（输入）
+ 
+ - `mode=closeout | add | check | resolve | list | extract`，以及该 mode 所需的 Story/TODO identity。`closeout` 为 Story 收口专用，只读 `list`/`check` 默认不写 durable result。
++- Story mode 的 runner 调用必传冻结的 `directoryContext` 与四个 verified 目录字段；manual Story mode 使用 shared resolver 单次解析；任何 Story-mode 实际写入前调用 production context validator。project utility mode 不解析 `crDir`。
+ - `confirmationPolicy: explicit | preauthorized`；缺失时固定为 `explicit`。
+ - `authorizationSource`、`orchestrationMode` 与 `handoffTarget`；`preauthorized` 时 authorization source 必填。
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/references/todo-tracker-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/references/todo-tracker-workflow.md
+index e6361a0..5aa8a09 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/references/todo-tracker-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/references/todo-tracker-workflow.md
+@@ -2,6 +2,13 @@
+ 
+ 本文档承载 CR05 的详细模式流程。共享 TODO eligibility、execution context、Story closeout path 和 result schema 以 CR shared contract 为准。
+ 
++## Directory Preflight（目录预检）
++
++- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。无 Story identity 的 project utility mode 不解析或验证 `crDir`。
++- 任何 Story-mode backlog、result 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-cr-todo-result-{date}-{reviewSeries}-round-{round}.md"`。
++- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
++- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
++
+ ## Common Preflight（共同预检）
+ 
+ 1. 解析 runtime config、backlog path、Story/TODO identity 和 `mode`。
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/CHANGELOG.md
+index e2d254f..1b9a55f 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- finalizer 消费 frozen `directoryContext`，tracker/finalizer report 写入前调用 production validator；原 coordinated-write 与 approval 检查不变。
++
+ ## [2.1.1] - 2026-08-26
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.en.md
+index a34792c..a38c68b 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.en.md
+@@ -19,6 +19,8 @@ Mark a Story done only when the current CR v2 state, fresh completion gate, and
+ - Use it to validate final CR/gate/tracker eligibility and apply minimal Story state synchronization.
+ - Do not use it to apply fixes, add tests, register TODOs, infer prose approval, commit Git changes, or close an Epic automatically.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **Exact eligibility**: Accept only a current, exactly bound, closable v2 verdict.
+@@ -33,6 +35,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
+ ## Inputs
+ 
+ - Story identity, `reviewSeries`, and the current evaluation, or enough information to locate it independently.
++- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
+ - `confirmationPolicy`, `authorizationSource`, `orchestrationMode`, and `handoffTarget`; default missing confirmation policy to `explicit`, and HALT when `preauthorized` lacks an `authorizationSource`.
+ 
+ ## Workflow
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md
+index d059b5e..45cbf1b 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md
+@@ -19,6 +19,8 @@ metadata:
+ - 用于验证最终 CR/gate/tracker eligibility 并执行最小 Story 状态同步。
+ - 不用于执行修复、补测试、登记 TODO、推断 prose approval、提交 Git 或自动关闭 Epic。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **精确资格判断**：只接受 current、精确绑定且可收口的 v2 verdict。
+@@ -33,6 +35,7 @@ metadata:
+ ## Inputs（输入）
+ 
+ - Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
++- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
+ - `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`，`preauthorized` 缺 `authorizationSource` 时 HALT。
+ 
+ ## Workflow（工作流）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md
+index cb19922..71b4a1b 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md
+@@ -2,11 +2,18 @@
+ 
+ 本文档承载 CR06 的详细 fail-closed closeout 流程。共享 identity、scope、freshness、tracker 和 finalizer report schema 以 CR shared contract 为准。
+ 
++## Directory Preflight（目录预检）
++
++- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
++- 任何 finalizer report、`.tmp`、tracker 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-cr-finalizer-{date}-{reviewSeries}-round-{round}.md"`。
++- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
++- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
++
+ ## Step 1: Resolve Identity（解析身份）
+ 
+ 1. 建立唯一 `storyId/storyKey/storyFile/reviewSeries`。
+-2. CR 目录必须是 `{storyId}-code-review/`。
+-3. legacy v1、slug 目录或 superseded series 只作历史 evidence。
++2. 验证 resolved `crDir` 与 numeric `storyId`、canonical/legacy compatibility evidence 一致。
++3. legacy v1 或 superseded series 只作历史 evidence；仅 resolver 判定的单一 unfinished legacy directory 可作为 `legacy-resume` current directory。
+ 4. 由 Finalizer 自身按 shared contract 重算 current scope；runner/manual records 只可作为候选输入。
+ 
+ ## Step 2: Validate Current Evaluation（验证 current evaluation）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md
+index 9664077..8e4414f 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md
+@@ -2,6 +2,12 @@
+ 
+ 本文件记录 `speclite-code-review-contract` 的版本变更历史。
+ 
++## [Unreleased] - 2026-09-09
++
++### Added（新增）
++
++- 将 resolver 收窄为 numeric identity、current candidate 归属与物理安全；增加 frozen-vs-consumer production context validator，删除 tracker/approval replay。
++
+ ## [1.0.0] - 2026-08-25
+ 
+ ### Added（新增）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md
+index ac66f04..440a3aa 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md
+@@ -16,6 +16,8 @@ This Skill owns the shared contract consumed by SpecLite CR01–06 and related r
+ 
+ This Skill is read-only. It does not create review, evaluation, fix, TODO, or finalizer artifacts and does not modify source code, Stories, or trackers.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
+ - **Single contract source**: Treats `references/cr-contract.md` as the only normative CR v2 definition.
+@@ -23,13 +25,14 @@ This Skill is read-only. It does not create review, evaluation, fix, TODO, or fi
+ - **Structural validation**: Validates schemas, exact verdicts, Story identity, series, round, scope, and source hashes.
+ - **Freshness validation**: Checks freshness relationships across reviews, evaluations, fix records, and Flow Gates.
+ - **Closeout validation**: Validates canonical paths, schemas, and binding for rules-extraction, TODO-result, and finalizer durable reports.
++- **CR directory routing**: Limits resolution to numeric identity, current-candidate ownership, and physical safety; the production validator compares frozen and consumer contexts before writes without owning approval or tracker rules.
+ - **Read-only diagnostics**: Reports exact inconsistencies and next steps without replacing reviewer, evaluator, fixer, or finalizer behavior.
+ 
+ ## Workflow
+ 
+ 1. Fully read `references/cr-contract.md`; HALT if it is unavailable.
+ 2. Run `speclite resolve config --project-root {project-root}` and resolve merged `planning_artifacts` and `implementation_artifacts`; HALT on failure.
+-3. Build a unique `storyId -> storyKey -> storyFile` mapping and locate the requested or current CR artifact.
++3. Build a unique `storyId -> storyKey -> storyFile` mapping, resolve one verified `crDir` through `scripts/resolve-cr-directory.mjs`, and locate the requested or current CR artifact.
+ 4. Validate artifact schema, identity, path, series, round, hash, scope, verdict, freshness, and CR04–06 durable closeout binding against the shared contract.
+ 5. Return a read-only result containing `VALID | INVALID | INCOMPLETE`, itemized evidence, and an exact next step; do not modify inspected files.
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md
+index 52105f3..ccd4f17 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md
+@@ -16,6 +16,8 @@ metadata:
+ 
+ 本 Skill 只读，不创建 review、evaluation、fix、TODO 或 finalizer artifact，也不修改源码、Story 或 tracker。
+ 
++- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **契约唯一来源**：以 `references/cr-contract.md` 作为 CR v2 唯一规范性定义。
+@@ -23,13 +25,14 @@ metadata:
+ - **结构校验**：验证 schema、exact verdict、Story identity、series、round、scope 和 source hash。
+ - **时效校验**：检查 review、evaluation、fixRecord 与 Flow Gate 的 freshness 关系。
+ - **Closeout 校验**：验证 rules extraction、TODO result 与 finalizer durable report 的 canonical path、schema 和 binding。
++- **CR 目录路由**：resolver 只判断 numeric identity、current candidate 归属与物理安全；production validator 在写前比较 frozen/consumer context，不承接审批或 tracker 规则。
+ - **只读诊断**：输出具体不一致项和下一步，不替代 reviewer、evaluator、fixer 或 finalizer。
+ 
+ ## Workflow（工作流）
+ 
+ 1. 完整读取 `references/cr-contract.md`；文件不可读时 HALT。
+ 2. 运行 `speclite resolve config --project-root {project-root}`，解析 merged `planning_artifacts` 与 `implementation_artifacts`；失败时 HALT。
+-3. 根据输入建立唯一 `storyId -> storyKey -> storyFile`，并定位指定或 current CR artifact。
++3. 根据输入建立唯一 `storyId -> storyKey -> storyFile`；使用 `scripts/resolve-cr-directory.mjs` 一次解析 verified `crDir`，再定位指定或 current CR artifact。
+ 4. 按共享契约检查 artifact schema、identity、path、series、round、hash、scope、verdict、freshness 与 CR04–06 durable closeout binding。
+ 5. 输出只读验证结论：`VALID | INVALID | INCOMPLETE`、逐项证据和精确下一步；不得修改被检查文件。
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md
+index 5b70586..f593e86 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md
+@@ -55,7 +55,50 @@ CR01–06、runner 和人工 orchestrator 必须按以下顺序判定实现证
+ - `round`：同一 `storyId + reviewSeries` 内从 1 开始连续递增。
+ - CR 目录固定为 `{implementation_artifacts}/code-reviews/{storyId}-code-review/`。
+ - Goal records 固定为 `{crDir}/goal-execute-records/`；不得为同一 Story 创建带 slug 的第二个 CR 目录。
+-- 发现 legacy 或带 slug 目录时只读记录到 `legacyArtifactPaths`，不得自动移动、删除或继续写入。
++- `storyId` 只接受规范 numeric identity `N.N` 或 `N-N`，且每段必须为无前导零的正整数；不得从 title、slug、filename remainder、中文、空格、标点或其他文本提取、截断或 fallback。
++- 发现 legacy 或带 slug 目录时记录到 `legacyArtifactPaths`；不得自动移动、复制、重命名或删除。
++
++### CR Directory Resolution（CR 目录解析）
++
++`speclite-code-review-contract/scripts/resolve-cr-directory.mjs` 同时提供唯一 executable directory resolver 与 production context validator。resolver 只负责 numeric identity、current candidate 归属和物理路径安全，不拥有或复放 approval、tracker、gate、scope/hash、freshness、round 连续性或 supersession；这些检查仍由 runner、Flow Gate 与 CR01–06 的原 owner 执行。
++
++orchestrator 在一个 Story 的 CR 闭环开始时只调用一次：
++
++`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode resolve --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --story-id "{storyId}" --review-series "{reviewSeries}" [--directory-choice "{directoryChoice}"]`
++
++stdout `ok=true` 后，orchestrator 冻结 `storyId`、`reviewSeries`、`crDir`、`canonicalCrDir`、`compatibilityMode` 与 `legacyArtifactPaths` 为同一个 `directoryContext`，并原样传给 CR01–06。runner mode consumer 不得再次调用 resolver；manual mode standalone Skill 必须独立调用 resolver 一次并冻结同样 context。任何 consumer 都不得根据 title、slug、filename 或 tracker 重新推导目录。
++
++每个 consumer 在任何实际写入前必须调用同一脚本的 production validator，并同时提供 orchestrator 冻结 context 与本次 consumer 收到的 context：
++
++`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{writeSubpath}"`
++
++validator 只比较两份 context 的六个冻结字段并检查 `crDir` / `writeSubpath` 的物理安全；它不重新选择目录，也不替代 consumer 原有的 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。unknown、duplicate、empty、partial 参数、context mismatch 或 unsafe path 均以 redacted JSON fail-close，并在写入前 HALT。
++
++Resolver 是 read-only preflight，不创建目录、临时文件、goal record 或 progress mutation。归属矩阵固定为：
++
++| On-disk state | `crDir` | Continuation |
++|---|---|---|
++| 无既有 current run | canonical `{storyId}-code-review/` | Continue；后续获得写入授权后才创建 |
++| canonical-only | canonical directory | Continue |
++| 恰一个 current legacy（即使包含 `DONE` claim） | 该 legacy directory | Continue with `compatibilityMode=legacy-resume`；完成性由正常 approval owner 判断 |
++| 多个 current candidate | none | Block；仅显式 `directoryChoice` 可选择其中一个 current candidate |
++| candidate symlink、non-directory、escape 或 evidence 无法唯一绑定 current series/round | none | Block before write |
++
++legacy-only unfinished resume 是 existing run continuation，不是新 CR run；不得在 resume 中创建 canonical sibling 或把同一轮拆分到新旧目录。Review、evaluation、fix record、rules、TODO result、finalizer、`.tmp/` 与 goal records 全部使用 resolved `crDir`。
++
++`directoryChoice` 只能解决多个安全 current candidate 的归属歧义；不得绕过 symlink/non-directory/escape/identity conflict，不得搬迁 artifacts、合并目录或把同一 round 拆到两个目录。resolver 只读取 current-family artifact 开头的少量 identity 字段以确认 Story/series 归属；ordinary notes、其他 Story、其他 series 与历史 superseded 文件不参与归属。完整 round/supersession lineage 与 approval validity 继续由 runner 和各 CR owner 检查。
++
++Ambiguity 由本 shared CR workflow-local contract 拥有，不进入 `SPEC 07` project validation taxonomy。Stable diagnostic 固定为：
++
++- `issueId: cr-directory.ambiguous-resume-root`
++- `category: lifecycle`
++- `severity: error`
++- `continuation: block`
++- `details`: `storyId`、project-relative POSIX `canonicalCrDir`、byte-wise 排序且去重的 `legacyCrDirs`、`reviewSeries`、每个候选的结构化 `roundEvidence`、稳定 `reason`
++
++`roundEvidence` 只记录本次实际检查的 canonical/legacy current-candidate ownership 与安全结果，按 byte-wise 排序且不得读取或伪造尚未检查 candidate 的状态。
++
++Details 禁止 absolute/home/temp path、raw artifact content、stack trace、随机值或非规范时间。该 diagnostic 必须先于任何 round artifact、goal record、temporary file、Story/tracker 或 progress mutation 返回。
+ 
+ ## Canonical Paths（规范路径）
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md
+index a3ab293..db17a9b 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog（变更记录）
+ 
++## [Unreleased] - 2026-09-09
++
++- 每个 Story 只 resolve 一次并冻结 `directoryContext`；向 CR01–06 传递四字段并要求任何实际写入前调用 production validator。
++
+ ## [2.1.0] - 2026-08-25
+ 
+ ### Changed（变更）
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.en.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.en.md
+index e422c89..9eb4780 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.en.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.en.md
+@@ -22,8 +22,12 @@ Use for an Epic or Story set requiring a full CR loop, fresh outer agents, goal
+ 
+ Do not use for isolated Story development, one CR role, read-only status, parallel Story execution, or SR work.
+ 
++- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
++
+ ## Core Capabilities
+ 
++Hard gate: resolve and freeze one `directoryContext` (Story/series/four directory fields); CR01–06 call the production validator before any actual write and never re-derive the directory from title, slug, filename, or tracker state.
++
+ - **Strict-serial orchestration**: Advance one Story and one outer state transition at a time.
+ - **Structured CR v2 routing**: Route by exact schema, verdict, scope hash, and round binding.
+ - **Bounded convergence**: Use finding fingerprints, quorum, churn, and stop-loss limits.
+@@ -52,8 +56,9 @@ HALT when Epic, Story set, project root, or authorization is unclear.
+ 1. Run `speclite resolve config --project-root {projectRoot}`.
+ 2. Read merged artifact roots and workflow tracker config.
+ 3. Resolve the Skill parent as `{skills-root}` and read the shared contract.
+-4. HALT on resolution failure, empty required paths, or identity conflicts.
+-5. Never fall back to examples or historical default directories.
++4. Invoke shared `scripts/resolve-cr-directory.mjs` exactly once per Story, freeze the verified `crDir`, and pass it explicitly to CR01–06; any ambiguity HALTs before goal, artifact, or progress writes.
++5. HALT on resolution failure, empty required paths, or identity conflicts.
++6. Never fall back to examples or historical default directories.
+ 
+ ## Workflow
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md
+index 9cc895b..d4d5516 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md
+@@ -28,6 +28,8 @@ metadata:
+ - 用户明确要求并行推进多个 Story；
+ - 任务属于 Story Review，应使用对应 SR runner。
+ 
++- Hard gate：只解析一次并冻结 `directoryContext`（Story/series/四目录字段）；CR01–06 任何实际写入前调用 production validator，禁止依据 title、slug、filename 或 tracker 重推导目录。
++
+ ## Core Capabilities（核心能力）
+ 
+ - **严格串行编排**：每次只推进一个 Story 和一个外层状态迁移。
+@@ -59,7 +61,8 @@ metadata:
+ 2. 读取 merged `planning_artifacts`、`implementation_artifacts` 和 workflow tracker 配置。
+ 3. 将当前 Skill 目录父目录解析为 `{skills-root}`。
+ 4. 读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`。
+-5. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
++5. 对每个 Story 仅调用一次 shared `scripts/resolve-cr-directory.mjs`，冻结 verified `crDir` 并显式传给 CR01–06；任何 ambiguity 必须在 goal/artifact/progress write 前 HALT。
++6. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
+ 
+ ## Workflow（工作流）
+ 
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md
+index 00adcac..b14178f 100644
+--- a/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md
+@@ -8,12 +8,15 @@
+ - 固定源码路径、fixture、schema 或 command 只有 owning SPEC 明确要求时才是 hard gate；否则按 contract 的 equivalent implementation policy，以测试、fixture、snapshot 或 command evidence 判断功能等价。
+ - 当前状态只能来自合法的 v2 frontmatter、artifact hash、scope hash 和 tracker 重读结果，不得按文件 mtime、文件数量或 prose 关键词猜测。
+ - 任一 state transition 失败、产物无效或授权不足时 HALT；不得自动跳过、降级或扩大修改范围。
++- 一个 Story 的 CR 闭环只允许一次 directory resolution；后续 review/evaluation/fix/rules/TODO/finalizer、`{crDir}/.tmp/` 与 `{crDir}/goal-execute-records/` 必须消费同一个 verified `crDir`。
+ 
+ ## Step 0: Preflight（前置审计）
+ 
+ - 确认 cwd、branch、HEAD、用户目标和 git 状态。
+-- 从 Epic、Story 与 sprint tracker 建立唯一 `storyId -> storyKey -> storyFile` 映射。
+-- 只写 `{storyId}-code-review/`；slug/legacy 目录记录到 `legacyArtifactPaths`，不自动移动或继续写入。
++- 从 Epic、Story、sprint tracker、项目 workflow 配置的同一 merged runtime context 建立唯一 `storyId -> storyKey -> storyFile` 映射，并冻结三类 tracker binding。Story/sprint 均为 `required=true`，分别冻结 exact project-relative `path`、exact `key` 与 owner-defined `expectedTerminalState`；workflow 只能由 merged context 明确冻结为同样完整的 `required=true` binding，或恰为 `required=false`。禁止根据默认路径、文件是否存在或 resolver fallback 猜测 requiredness/key/终态。
++- 仅在本 Step 调用一次 `node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode resolve --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --story-id "{storyId}" --review-series "{reviewSeries}" [--directory-choice "{directoryChoice}"]`。stdout 必须是恰一个 JSON；`ok=true` 时把 `storyId`、`reviewSeries` 与返回的 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths` 冻结为同一 `directoryContext`。unknown/duplicate/partial/empty 参数、non-zero、invalid JSON 或 `ok!=true` 时在任何 artifact/goal/progress/tracker write 前 HALT。
++- 新 run 只写 canonical `{storyId}-code-review/`；恰一个 current legacy-only run 即使包含 `DONE` claim，也按 resolver 返回的 `legacy-resume` 原位绑定，由正常 approval owner 判断是否完成。多个 current candidate 只有用户显式 `directoryChoice` 才能消除归属歧义；它不得绕过物理安全、移动 artifacts、合并目录或拆分同轮。
++- 将同一个 `directoryContext` 连同四个目录字段原样传给 CR01–06。每个 consumer 必须在任何实际写入前调用 production `--mode validate-context`，比较其收到的 context 与 orchestrator 冻结 context 并验证 write path；不得重跑 resolver 或选择替代目录。该 validator 不替代各 owner 的 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
+ - 识别 current review series、最大 round、latest v2 artifacts、Flow Gate 和 tracker 状态。
+ - 续跑必须从最新合法结构化状态继续，不按 mtime 或 prose 猜测。
+ 
+@@ -67,11 +70,11 @@ fresh sub-agent 执行 `/speclite-dev-story story {storyKey}`。等待完成并
+ 
+ ## Step 5: Reviewer（审查）
+ 
+-fresh sub-agent 执行 `/speclite-code-review-01-reviewer {storyId} reviewSeries={reviewSeries}`。验证 v2 schema、identity、round、scope hash、3/3 quorum 和 counts；无效时 HALT。记录 review path/hash、verdict、finding counts、failed layers 和下一状态。
++fresh sub-agent 执行 `/speclite-code-review-01-reviewer {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`。四字段均来自本 Story 唯一 resolver result 且冻结不变。验证 v2 schema、identity、resolved directory evidence、round、scope hash、3/3 quorum 和 counts；无效时 HALT。记录 review path/hash、verdict、finding counts、failed layers 和下一状态。
+ 
+ ## Step 6: Evaluator（评估）
+ 
+-另一个 fresh sub-agent 执行 `/speclite-code-review-02-evaluator {storyId} reviewSeries={reviewSeries}`。要求 read-only、review hash 一对一绑定、同 round、fingerprint disposition、精确 verdict 和 convergence 数据。记录 evaluation path/hash、accepted counts、verdict、收敛输入和下一状态。
++另一个 fresh sub-agent 执行 `/speclite-code-review-02-evaluator {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`。要求 read-only、review hash 一对一绑定、同 round、fingerprint disposition、精确 verdict 和 convergence 数据。记录 evaluation path/hash、accepted counts、verdict、收敛输入和下一状态。
+ 
+ ## Step 7: Convergence（收敛）
+ 
+@@ -93,16 +96,16 @@ State Gate 和任何 fixer 之前，按 fingerprint 计算 `newBlocking`、`recu
+ 
+ ## Step 9: Fixer（修复）
+ 
+-fresh sub-agent 执行 `/speclite-code-review-03-fixer {storyId} mode={patch|verify-only} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource}`。patch 只修 evaluator accepted P0/P1；verify-only 只补测试/断言/fixture/机械证据。完成后回到 Step 4，必须 fresh review/evaluate。
++fresh sub-agent 执行 `/speclite-code-review-03-fixer {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} mode={patch|verify-only} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource} orchestrationMode=runner handoffTarget=runner`。patch 只修 evaluator accepted P0/P1；verify-only 只补测试/断言/fixture/机械证据。完成后回到 Step 4，必须 fresh review/evaluate。
+ 
+ ## Step 10: Closeout（收口）
+ 
+ 按编号 strict serial 执行；每个 Skill 使用独立 fresh outer sub-agent，等待其完成、验证结构化输出并更新三个 goal records 后，才能启动下一项：
+ 
+-1. `/speclite-code-review-04-rules-extractor {storyId}`
+-2. `/speclite-code-review-05-todo-tracker {storyId} mode=closeout confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource}`
++1. `/speclite-code-review-04-rules-extractor {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`
++2. `/speclite-code-review-05-todo-tracker {storyId} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} mode=closeout confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource} orchestrationMode=runner handoffTarget=runner`
+ 3. `/speclite-flow-gate mode=story-completion target={storyKey}`
+-4. `/speclite-code-review-06-finalizer {storyId} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource}`
++4. `/speclite-code-review-06-finalizer {storyId} confirmationPolicy={confirmationPolicy} authorizationSource={authorizationSource} reviewSeries={reviewSeries} directoryContext={directoryContext} crDir={crDir} canonicalCrDir={canonicalCrDir} compatibilityMode={compatibilityMode} legacyArtifactPaths={legacyArtifactPaths} orchestrationMode=runner handoffTarget=runner`
+ 
+ CR04 必须返回 current `speclite.cr-rules-extraction.v2` report，CR05 必须返回 current `speclite.cr-todo-result.v2` report，CR06 必须返回 current `speclite.cr-finalizer.v2` report。步骤 3 由 runner 生成 current story-completion gate（result 必须为 `PASS`/`PASS_EQUIVALENT`，`generatedAt` 不早于 evaluation/最后 fixRecord 的 `sourceMutationAt`）；finalizer 只验证不生成 gate。延期裁决必须完成 finding fingerprint 到 TODO 的映射；finalizer 自身重新计算 scope，并验证该 gate 与 required tracker 一致性。任一 closeout Skill 失败、gate 非 PASS、缺少 durable report 或返回非 current 产物时 HALT，不得跳过后继续 finalizer。
+ 
+diff --git a/assets/source/speclite/sdlc-skills/module-help.csv b/assets/source/speclite/sdlc-skills/module-help.csv
+index 07b437c..e7cdbe7 100644
+--- a/assets/source/speclite/sdlc-skills/module-help.csv
++++ b/assets/source/speclite/sdlc-skills/module-help.csv
+@@ -12,28 +12,28 @@ SpecLite SDLC,speclite-agent-tech-writer,Mermaid Generate,MG,Create a Mermaid di
+ SpecLite SDLC,speclite-agent-tech-writer,Validate Document,VD,Review the specified document against documentation standards and best practices. Returns specific actionable improvement suggestions organized by priority.,validate,[path],anytime,,,false,{planning_artifacts},validation report
+ SpecLite SDLC,speclite-agent-tech-writer,Explain Concept,EC,Create clear technical explanations with examples and diagrams for complex concepts.,explain,[topic],anytime,,,false,{project_knowledge},explanation
+ SpecLite SDLC,speclite-agent-analyst,Business Analyst,BA,Activate Alice for analysis phase requirements research and product discovery guidance.,,,1-analysis,,,false,,
+-SpecLite SDLC,speclite-market-research,Market Research,MR,Market analysis competitive landscape customer needs and trends.,,,1-analysis,,,false,{planning_artifacts}|{project_knowledge},research documents
+-SpecLite SDLC,speclite-domain-research,Domain Research,DR,Industry domain deep dive subject matter expertise and terminology.,,,1-analysis,,,false,{planning_artifacts}|{project_knowledge},research documents
+-SpecLite SDLC,speclite-technical-research,Technical Research,TR,Technical feasibility architecture options and implementation approaches.,,,1-analysis,,,false,{planning_artifacts}|{project_knowledge},research documents
++SpecLite SDLC,speclite-market-research,Market Research,MR,Market analysis competitive landscape customer needs and trends.,,,1-analysis,,,false,{analysis_artifacts}/research,research documents
++SpecLite SDLC,speclite-domain-research,Domain Research,DR,Industry domain deep dive subject matter expertise and terminology.,,,1-analysis,,,false,{analysis_artifacts}/research,research documents
++SpecLite SDLC,speclite-technical-research,Technical Research,TR,Technical feasibility architecture options and implementation approaches.,,,1-analysis,,,false,{analysis_artifacts}/research,research documents
+ SpecLite SDLC,speclite-brownfield-context-builder,Brownfield Baseline,BB,Recover an existing codebase into evidence-backed as-is baseline and planning handoff context for downstream Speclite workflows.,,,1-analysis,,,false,{project_knowledge}/brownfield|{planning_artifacts},brownfield baseline and planning brief
+ SpecLite SDLC,speclite-brownfield-backend-tech-stack-digger,Backend Tech Stack,BTS,Analyze brownfield backend projects from code facts and write an evidence-linked technology stack report.,,,1-analysis,,,false,{project_knowledge}/brownfield|{planning_artifacts},backend tech stack report
+-SpecLite SDLC,speclite-product-brief,Create Brief,CB,An expert guided experience to nail down your product idea in a brief. A gentler approach than PRFAQ when you are already sure of your concept and nothing will sway you.,,-A,1-analysis,,,false,{planning_artifacts},product brief
+-SpecLite SDLC,speclite-prfaq,PRFAQ Challenge,WB,Working Backwards guided experience to forge and stress-test your product concept to ensure you have a great product that users will love and need through the PRFAQ gauntlet to determine feasibility and alignment with user needs. Alternative to product brief.,,-H,1-analysis,,,false,{planning_artifacts},prfaq document
+-SpecLite SDLC,speclite-create-prd,Create PRD,CP,Expert led facilitation to produce your Product Requirements Document.,,,2-planning,,,true,{planning_artifacts},prd
+-SpecLite SDLC,speclite-validate-prd,Validate PRD,VP,,,[path],2-planning,speclite-create-prd,,false,{planning_artifacts},prd validation report
++SpecLite SDLC,speclite-product-brief,Create Brief,CB,An expert guided experience to nail down your product idea in a brief. A gentler approach than PRFAQ when you are already sure of your concept and nothing will sway you.,,-A,1-analysis,,,false,{analysis_artifacts}/product-brief,product brief
++SpecLite SDLC,speclite-prfaq,PRFAQ Challenge,WB,Working Backwards guided experience to forge and stress-test your product concept to ensure you have a great product that users will love and need through the PRFAQ gauntlet to determine feasibility and alignment with user needs. Alternative to product brief.,,-H,1-analysis,,,false,{analysis_artifacts}/prfaq,prfaq document
++SpecLite SDLC,speclite-create-prd,Create PRD,CP,Expert led facilitation to produce your Product Requirements Document.,,,2-planning,,,true,{planning_artifacts}/prd,prd
++SpecLite SDLC,speclite-validate-prd,Validate PRD,VP,"Writes the exact dated prd-validate-report-{yyyy-MM-dd}.md and blocks an existing same-day target without suffix or overwrite.",,[path],2-planning,speclite-create-prd,,false,{planning_artifacts}/prd,prd validation report
+ SpecLite SDLC,speclite-edit-prd,Edit PRD,EP,,,[path],2-planning,speclite-validate-prd,,false,{planning_artifacts},updated prd
+-SpecLite SDLC,speclite-create-ux-design,Create UX,CU,"Guidance through realizing the plan for your UX, strongly recommended if a UI is a primary piece of the proposed project.",,,2-planning,speclite-create-prd,,false,{planning_artifacts},ux design
++SpecLite SDLC,speclite-create-ux-design,Create UX,CU,"Guidance through realizing the plan for your UX, strongly recommended if a UI is a primary piece of the proposed project.",,,2-planning,speclite-create-prd,,false,{planning_artifacts}/ux,ux design
+ SpecLite SDLC,speclite-agent-pm,Product Manager,PM,Activate Paul for PRD requirements discovery and planning guidance.,,,2-planning,,,false,,
+ SpecLite SDLC,speclite-agent-ux-designer,UX Designer,UX,Activate Uma for UX design interface planning and user-centered constraints.,,,2-planning,,,false,,
+ SpecLite SDLC,speclite-agent-architect,Solution Architect,ARCH,Activate Adam for architecture solutioning tradeoffs and readiness alignment.,,,3-solutioning,,,false,,
+-SpecLite SDLC,speclite-create-architecture,Create Architecture,CA,Guided workflow to document technical decisions.,,,3-solutioning,,,true,{planning_artifacts},architecture
+-SpecLite SDLC,speclite-create-epics-and-stories,Create Epics and Stories,CE,,,,3-solutioning,speclite-create-architecture,,true,{planning_artifacts},epics and stories
++SpecLite SDLC,speclite-create-architecture,Create Architecture,CA,Guided workflow to document technical decisions.,,,3-solutioning,,,true,{solutioning_artifacts}/architecture,architecture
++SpecLite SDLC,speclite-create-epics-and-stories,Create Epics and Stories,CE,,,,3-solutioning,speclite-create-architecture,,true,{planning_artifacts}/epics,epics and stories
+ SpecLite SDLC,speclite-story-review-01-reviewer,Story Review,SR,Run numbered Story Review round for an epic or story and save structured review results.,,,3-solutioning,speclite-create-epics-and-stories,speclite-story-review-02-evaluator,false,{implementation_artifacts}/story-reviews,story review summary
+ SpecLite SDLC,speclite-story-review-02-evaluator,Story Review Evaluate,SRE,Evaluate a numbered Story Review result and generate an assessment document.,,,3-solutioning,speclite-story-review-01-reviewer,speclite-story-review-03-fixer,false,{implementation_artifacts}/story-reviews,story review evaluation
+ SpecLite SDLC,speclite-story-review-03-fixer,Story Review Fix,SRF,Apply approved Story Review fixes to story documents and record the fix summary.,,,3-solutioning,speclite-story-review-02-evaluator,,false,{implementation_artifacts}/story-reviews,updated story documents
+-SpecLite SDLC,speclite-check-implementation-readiness,Check Implementation Readiness,IR,Ensure PRD UX Architecture and Epics Stories are aligned.,,,3-solutioning,speclite-create-epics-and-stories,,true,{planning_artifacts},readiness report
+-SpecLite SDLC,speclite-ir-grill-consistency-reviewer,IR Grill,IRG,Strict-serial implementation-readiness consistency grill across PRD UX Architecture Epics and Stories.,,,3-solutioning,speclite-check-implementation-readiness,,false,{planning_artifacts}/ir-grill,ir grill records
+-SpecLite SDLC,speclite-create-technical-solution-document,Create Technical Solution Document,TSD,Generate an evidence-grounded human-readable technical solution document from verified planning artifacts and project facts.,,,3-solutioning,speclite-check-implementation-readiness,speclite-sprint-planning,false,{project_knowledge}/tsd,technical solution document
++SpecLite SDLC,speclite-implementation-readiness-check,Check Implementation Readiness,IR,Ensure PRD UX Architecture and Epics Stories are aligned.,,,3-solutioning,speclite-create-epics-and-stories,,true,{solutioning_artifacts}/implementation-readiness-report/grill-consistency,readiness report
++SpecLite SDLC,speclite-implementation-readiness-grill-consistency-reviewer,IR Grill,IRG,Strict-serial implementation-readiness consistency grill across PRD UX Architecture Epics and Stories.,,,3-solutioning,speclite-implementation-readiness-check,,false,{solutioning_artifacts}/implementation-readiness-report/grill-consistency,ir grill records
++SpecLite SDLC,speclite-create-technical-solution-document,Create Technical Solution Document,TSD,Generate an evidence-grounded human-readable technical solution document from verified planning artifacts and project facts.,,,3-solutioning,speclite-implementation-readiness-check,speclite-sprint-planning,false,{project_knowledge}/tsd,technical solution document
+ SpecLite SDLC,speclite-sprint-planning,Sprint Planning,SP,Kicks off implementation by producing a plan the implementation agents will follow in sequence for every story.,,,4-implementation,,,true,{implementation_artifacts},sprint status
+ SpecLite SDLC,speclite-sprint-status,Sprint Status,SS,Anytime: Summarize sprint status and route to next workflow.,,,4-implementation,speclite-sprint-planning,,false,,
+ SpecLite SDLC,speclite-flow-gate,Flow Gate,FG,Validate Story and Epic flow gates before state transitions.,,,4-implementation,speclite-sprint-status,speclite-dev-story,true,{implementation_artifacts}/flow-gates,flow gate report
+@@ -41,15 +41,15 @@ SpecLite SDLC,speclite-agent-dev,Developer Agent,DEV,Activate David for Story im
+ SpecLite SDLC,speclite-create-story,Create Story,CS,Story cycle start: Prepare first found story in the sprint plan that is next or a specific epic/story designation.,create,,4-implementation,speclite-sprint-planning,speclite-create-story:validate,true,{implementation_artifacts}/stories,story
+ SpecLite SDLC,speclite-create-story,Validate Story,VS,Validates story readiness and completeness before development work begins.,validate,,4-implementation,speclite-create-story:create,speclite-dev-story,false,{implementation_artifacts},story validation report
+ SpecLite SDLC,speclite-dev-story,Dev Story,DS,Story cycle: Execute story implementation tasks and tests then CR1/CR2 and CR3 if fixes are needed.,,,4-implementation,speclite-create-story:validate,,true,,
+-SpecLite SDLC,speclite-code-review-contract,Code Review Contract,CRC,Resolve and validate the shared CR v2 contract and artifact bindings independently from any runner.,,,4-implementation,speclite-dev-story,speclite-code-review-01-reviewer,false,{implementation_artifacts}/code-reviews,contract validation report
+-SpecLite SDLC,speclite-code-review-01-reviewer,Code Review Round,CR1,Run numbered cross-LLM code review for a Story and save structured review results.,,,4-implementation,speclite-dev-story,speclite-code-review-02-evaluator,false,{implementation_artifacts}/code-reviews,code review summary
+-SpecLite SDLC,speclite-code-review-02-evaluator,Code Review Evaluate,CR2,Evaluate numbered code review findings and produce a structured evaluation document.,,,4-implementation,speclite-code-review-01-reviewer,speclite-code-review-03-fixer,false,{implementation_artifacts}/code-reviews,code review evaluation
+-SpecLite SDLC,speclite-code-review-03-fixer,Code Review Fix,CR3,Apply approved fixes from a code review evaluation and record the repair summary.,,,4-implementation,speclite-code-review-02-evaluator,speclite-code-review-01-reviewer,false,{implementation_artifacts}/code-reviews,fix summary
+-SpecLite SDLC,speclite-code-review-04-rules-extractor,Code Review Rules,CR4,Extract reusable development rules from historical code review records.,,,4-implementation,speclite-code-review-02-evaluator,,false,{implementation_artifacts}/cr-rules,review rules
+-SpecLite SDLC,speclite-code-review-05-todo-tracker,Code Review TODO,CR5,Maintain cross-story CR todo backlog from deferred review findings.,,,4-implementation,speclite-code-review-02-evaluator,,false,{implementation_artifacts}/cr-rules,cr todo backlog
+-SpecLite SDLC,speclite-code-review-06-finalizer,Code Review Finalize,CR6,Finalize approved Story code review by syncing story and workflow status.,,,4-implementation,speclite-code-review-02-evaluator,speclite-create-story,false,{implementation_artifacts},updated status files
++SpecLite SDLC,speclite-code-review-contract,Code Review Contract,CRC,Resolve numeric Story ownership and validate frozen consumer directory context without replaying CR approval.,,,4-implementation,speclite-dev-story,speclite-code-review-01-reviewer,false,{implementation_artifacts}/code-reviews,contract validation report
++SpecLite SDLC,speclite-code-review-01-reviewer,Code Review Round,CR1,Run numbered cross-LLM code review using the resolved Story-ID-only CR directory.,,,4-implementation,speclite-dev-story,speclite-code-review-02-evaluator,false,{implementation_artifacts}/code-reviews,code review summary
++SpecLite SDLC,speclite-code-review-02-evaluator,Code Review Evaluate,CR2,Evaluate findings in the same resolved Story-ID-only CR directory.,,,4-implementation,speclite-code-review-01-reviewer,speclite-code-review-03-fixer,false,{implementation_artifacts}/code-reviews,code review evaluation
++SpecLite SDLC,speclite-code-review-03-fixer,Code Review Fix,CR3,Apply approved fixes and append the record in the same resolved CR directory.,,,4-implementation,speclite-code-review-02-evaluator,speclite-code-review-01-reviewer,false,{implementation_artifacts}/code-reviews,fix summary
++SpecLite SDLC,speclite-code-review-04-rules-extractor,Code Review Rules,CR4,Write the durable rules result in the same resolved CR directory.,,,4-implementation,speclite-code-review-02-evaluator,,false,{implementation_artifacts}/code-reviews,review rules
++SpecLite SDLC,speclite-code-review-05-todo-tracker,Code Review TODO,CR5,Maintain the shared backlog and write Story closeout result in the resolved CR directory.,,,4-implementation,speclite-code-review-02-evaluator,,false,{implementation_artifacts}/code-reviews|{implementation_artifacts}/cr-rules/cr-todo-backlog.md,cr todo result
++SpecLite SDLC,speclite-code-review-06-finalizer,Code Review Finalize,CR6,Sync Story status and write finalization evidence in the resolved CR directory.,,,4-implementation,speclite-code-review-02-evaluator,speclite-create-story,false,{implementation_artifacts}/code-reviews,finalizer report
+ SpecLite SDLC,speclite-goal-orchestrator-epic-story-review-runner,Epic Story Review Runner,ESR,Strict-serial Epic-level Story Review orchestration with SR reviewer evaluator fixer loops and goal execute records.,,,4-implementation,speclite-create-epics-and-stories,,false,{implementation_artifacts}/story-reviews,epic story review goal records
+-SpecLite SDLC,speclite-goal-orchestrator-epic-story-code-review-runner,Epic Story Code Review Runner,ECR,Strict-serial Epic Story implementation and Code Review orchestration with dev CR loops and goal execute records.,,,4-implementation,speclite-sprint-planning,,false,{implementation_artifacts}/code-reviews,epic story code review goal records
++SpecLite SDLC,speclite-goal-orchestrator-epic-story-code-review-runner,Epic Story Code Review Runner,ECR,Freeze one directory context and validate it before each strict-serial CR consumer write.,,,4-implementation,speclite-sprint-planning,,false,{implementation_artifacts}/code-reviews,epic story code review goal records
+ SpecLite SDLC,speclite-checkpoint-preview,Checkpoint,CK,Guided walkthrough of a change from purpose and context into details. Use for human review of commits branches or PRs.,,,4-implementation,,,false,,
+ SpecLite SDLC,speclite-qa-generate-e2e-tests,QA Automation Test,QA,Generate automated API and E2E tests for implemented code. NOT for code review or story validation - start with CR1 for that.,,,4-implementation,speclite-dev-story,,false,{implementation_artifacts},test suite
+ SpecLite SDLC,speclite-qa-write-test-guide,QA Test Guide,TG,Create execution-ready QA test guides from specs implementation notes code facts or prior discussion.,,,4-implementation,speclite-dev-story,,false,{implementation_artifacts},qa test guide
+diff --git a/docs/reference/skills/sdlc-workflows.md b/docs/reference/skills/sdlc-workflows.md
+index a130481..f46e939 100644
+--- a/docs/reference/skills/sdlc-workflows.md
++++ b/docs/reference/skills/sdlc-workflows.md
+@@ -39,11 +39,11 @@
+ | `speclite-brownfield-context-builder` | Workflow | `BB` | `{project_knowledge}/brownfield`、`{planning_artifacts}` | 把既有代码库恢复为证据化 baseline 和 planning handoff。 |
+ | `speclite-brownfield-backend-tech-stack-digger` | Workflow | - | 用户指定 output dir | 通用后端技术栈分析，基于代码事实生成 Markdown 技术栈报告。 |
+ | `speclite-document-project` | Workflow | `DP` | `{project_knowledge}` | 为既有项目生成面向规划的项目文档。 |
+-| `speclite-domain-research` | Workflow | `DR` | `{planning_artifacts}`、`{project_knowledge}` | 领域研究和术语上下文。 |
+-| `speclite-market-research` | Workflow | `MR` | `{planning_artifacts}`、`{project_knowledge}` | 市场、竞品和客户信号研究。 |
+-| `speclite-prfaq` | Workflow | `WB` | `{planning_artifacts}` | Working Backwards PRFAQ 产品概念挑战。 |
+-| `speclite-product-brief` | Workflow | `CB` | `{planning_artifacts}` | 创建或更新产品简报。 |
+-| `speclite-technical-research` | Workflow | `TR` | `{planning_artifacts}`、`{project_knowledge}` | 技术可行性、架构选项和实现风险研究。 |
++| `speclite-domain-research` | Workflow | `DR` | `{analysis_artifacts}/research` | 领域研究和术语上下文；可读取 Project Knowledge 作为输入。 |
++| `speclite-market-research` | Workflow | `MR` | `{analysis_artifacts}/research` | 市场、竞品和客户信号研究；可读取 Project Knowledge 作为输入。 |
++| `speclite-prfaq` | Workflow | `WB` | `{analysis_artifacts}/prfaq` | Working Backwards PRFAQ 产品概念挑战。 |
++| `speclite-product-brief` | Workflow | `CB` | `{analysis_artifacts}/product-brief` | 创建或更新产品简报。 |
++| `speclite-technical-research` | Workflow | `TR` | `{analysis_artifacts}/research` | 技术可行性、架构选项和实现风险研究；可读取 Project Knowledge 作为输入。 |
+ | `speclite-write-opensource-docs` | Workflow | `OSD` | `{project_knowledge}` | 编写、迁移、脚手架和校验开源项目 `docs/`。 |
+ 
+ > Note: language / runtime specific backend tech-stack workflows 是 optional ecosystem modules，见 [`ecosystem-skills.md`](ecosystem-skills.md)。后续新增 SDLC package root 时，必须同步至少一条 help/menu row。
+@@ -54,21 +54,21 @@
+ |---|---|---|---|---|
+ | `speclite-agent-pm` | Agent | `PM` | - | 激活 Paul 做产品规划和需求澄清。 |
+ | `speclite-agent-ux-designer` | Agent | `UX` | - | 激活 Uma 做 UX 设计和用户体验约束。 |
+-| `speclite-create-prd` | Workflow | `CP` | `{planning_artifacts}` | 创建产品需求文档。 |
+-| `speclite-create-ux-design` | Workflow | `CU` | `{planning_artifacts}` | 创建 UX 设计规格。 |
++| `speclite-create-prd` | Workflow | `CP` | `{planning_artifacts}/prd` | 创建 canonical `prd/prd.md`。 |
++| `speclite-create-ux-design` | Workflow | `CU` | `{planning_artifacts}/ux` | 创建 `ux-design-specification.md` 与条件 HTML 视觉产物。Exclusive create 通过 private `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-file --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{target}" --source "{source-file}"` 执行；on-demand mkdir 使用同一 script 的 exact `create-directory` flags。该 binding 非 public CLI，并在 commit-time physical-owner/nearest-ancestor revalidation 后立即操作；stdout 只允许一个 JSON，non-zero、invalid JSON 或 `ok !== true` 均 HALT 且不推进状态。Markdown duplicate first-wins，local-ish HTML `&` fail closed；`design-system/` 按需创建。 |
+ | `speclite-edit-prd` | Workflow | `EP` | `{planning_artifacts}` | 修订既有 PRD。 |
+-| `speclite-validate-prd` | Workflow | `VP` | `{planning_artifacts}` | 校验 PRD 完整性与可实施性。 |
++| `speclite-validate-prd` | Workflow | `VP` | `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` | 通过 shared whole/sharded resolver 校验 PRD；invocation date 只生成一次并锁定 exact target。Private `scripts/prd-validation-report-operation.mjs` 在 report/progress write 前 probe 并以 `wx` exclusive create；target 已存在时使用 `artifact-path.prd-validation-report-exists` read-only block，给出“保留并移走或删除既有报告后重新运行”，不 overwrite/reuse/suffix/temp/progress mutation。Legacy report 仅原位 historical discovery，install/update/repair 不迁移。 |
+ 
+ ## Solutioning（方案阶段）
+ 
+ | Skill | Type | Menu | Output | Purpose |
+ |---|---|---|---|---|
+ | `speclite-agent-architect` | Agent | `ARCH` | - | 激活 Adam 做架构方案和 readiness 对齐。 |
+-| `speclite-create-architecture` | Workflow | `CA` | `{planning_artifacts}` | 创建技术架构决策文档。 |
+-| `speclite-create-epics-and-stories` | Workflow | `CE` | `{planning_artifacts}` | 从 PRD / Architecture / UX 拆解 Epic 和 Story。 |
++| `speclite-create-architecture` | Workflow | `CA` | `{solutioning_artifacts}/architecture` | 创建 canonical `architecture/architecture.md`。 |
++| `speclite-create-epics-and-stories` | Workflow | `CE` | `{planning_artifacts}/epics` | 从 resolver-selected PRD / Architecture 与 UX 拆解 Epic 和 Story。 |
+ | `speclite-generate-project-context` | Workflow | `GPC` | `{output_folder}` | 生成 AI agent 使用的项目上下文。 |
+-| `speclite-check-implementation-readiness` | Workflow | `IR` | `{planning_artifacts}` | 检查 PRD、UX、Architecture、Epics 和 Stories 是否可进入实现。 |
+-| `speclite-ir-grill-consistency-reviewer` | Workflow | `IRG` | `{planning_artifacts}/ir-grill` | 对 PRD、UX、Architecture、Epics 和 Stories 做严格串行 implementation-readiness 一致性 grill。 |
++| `speclite-implementation-readiness-check` | Workflow | `IR` | `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/implementation-readiness-report-{yyyy-MM-dd}.md` | 检查 PRD、UX、Architecture、Epics 和 Stories 是否可进入实现；输出 root 只取自 artifact-root resolver。 |
++| `speclite-implementation-readiness-grill-consistency-reviewer` | Workflow | `IRG` | `{solutioning_artifacts}/implementation-readiness-report/grill-consistency` | 对 PRD、UX、Architecture、Epics 和 Stories 做严格串行 implementation-readiness 一致性 grill。 |
+ | `speclite-create-technical-solution-document` | Workflow | `TSD` | `{project_knowledge}/tsd` | 在 implementation readiness 后综合规划产物与项目事实，生成面向人类评审和交付的技术方案说明文档。 |
+ | `speclite-story-review-01-reviewer` | Workflow | `SR` | `{implementation_artifacts}/story-reviews` | 执行 Story 设计审查。 |
+ | `speclite-story-review-02-evaluator` | Workflow | `SRE` | `{implementation_artifacts}/story-reviews` | 评估 Story Review findings。 |
+@@ -84,15 +84,15 @@
+ | `speclite-flow-gate` | Workflow | `FG` | `{implementation_artifacts}/flow-gates` | 验证 Story / Epic flow gate。 |
+ | `speclite-create-story` | Workflow | `CS` / `VS` | `{implementation_artifacts}` | 创建或校验上下文完整的 Story。 |
+ | `speclite-dev-story` | Workflow | `DS` | - | 执行 Story 实现、测试和交付。 |
+-| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews` | 独立解析并验证 CR v2 共享契约及 artifact 绑定。 |
+-| `speclite-code-review-01-reviewer` | Workflow | `CR1` | `{implementation_artifacts}/code-reviews` | 执行代码审查。 |
+-| `speclite-code-review-02-evaluator` | Workflow | `CR2` | `{implementation_artifacts}/code-reviews` | 评估代码审查 findings。 |
+-| `speclite-code-review-03-fixer` | Workflow | `CR3` | `{implementation_artifacts}/code-reviews` | 按评估结论执行代码修复。 |
+-| `speclite-code-review-04-rules-extractor` | Workflow | `CR4` | `{implementation_artifacts}/cr-rules` | 从历史 CR 中提炼可复用规则。 |
+-| `speclite-code-review-05-todo-tracker` | Workflow | `CR5` | `{implementation_artifacts}/cr-rules` | 维护 CR TODO backlog。 |
+-| `speclite-code-review-06-finalizer` | Workflow | `CR6` | `{implementation_artifacts}` | 在 CR 通过后同步 Story 和 workflow 状态。 |
++| `speclite-code-review-contract` | Workflow | `CRC` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 只解析 numeric identity/current candidate/物理安全，并在写前比较 frozen/consumer directory context；不承接 CR 审批。 |
++| `speclite-code-review-01-reviewer` | Workflow | `CR1` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在 resolved `crDir` 执行代码审查。 |
++| `speclite-code-review-02-evaluator` | Workflow | `CR2` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在同一 resolved `crDir` 评估 findings。 |
++| `speclite-code-review-03-fixer` | Workflow | `CR3` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 按评估结论修复并在同目录追加 fix record。 |
++| `speclite-code-review-04-rules-extractor` | Workflow | `CR4` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 在同目录写 durable rules result。 |
++| `speclite-code-review-05-todo-tracker` | Workflow | `CR5` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 维护 shared backlog，并在同目录写 Story TODO result。 |
++| `speclite-code-review-06-finalizer` | Workflow | `CR6` | `{implementation_artifacts}/code-reviews/{story-id}-code-review` | 同步 Story/workflow 状态并在同目录写 finalizer report。 |
+ | `speclite-goal-orchestrator-epic-story-review-runner` | Workflow | `ESR` | `{implementation_artifacts}/story-reviews` | 按 Epic 严格串行编排 SR reviewer / evaluator / fixer 循环和 goal execute records。 |
+-| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews` | 按 Epic Story 严格串行编排 Dev Story、CR 循环和 goal execute records。 |
++| `speclite-goal-orchestrator-epic-story-code-review-runner` | Workflow | `ECR` | `{implementation_artifacts}/code-reviews/{story-id}-code-review/goal-execute-records` | 单次冻结 `directoryContext`，由 CR01–06 写前调用 production validator，严格串行编排 Dev Story、CR 循环和 goal records。 |
+ | `speclite-checkpoint-preview` | Workflow | `CK` | - | 帮助人工检查一次变更的目的、差异和风险。 |
+ | `speclite-qa-generate-e2e-tests` | Workflow | `QA` | `{implementation_artifacts}` | 生成自动化 API / E2E 测试。 |
+ | `speclite-qa-write-test-guide` | Workflow | `TG` | `{implementation_artifacts}` | 生成可执行 QA 测试指南。 |
+diff --git a/docs/reference/workflow-artifact-layout.md b/docs/reference/workflow-artifact-layout.md
+index 45ccc45..7931941 100644
+--- a/docs/reference/workflow-artifact-layout.md
++++ b/docs/reference/workflow-artifact-layout.md
+@@ -2,7 +2,7 @@
+ 
+ 本文介绍 SpecLite 安装到目标项目后，Skills 在 runtime 执行过程中如何形成 `_speclite-output/` 目录。它回答“哪些目录由安装器预创建、哪些文件由 Workflow 按需生成、谁负责维护，以及哪些路径只是输入或保留位”。
+ 
+-本文中的路径均为默认值。目标项目可以通过 runtime config 修改输出根目录，因此执行时应以 `speclite resolve config --project-root <project-root>` 的结果为准。
++本文中的路径均为默认值。目标项目可以通过 runtime config 修改输出根目录。执行时，非 artifact-root runtime fields 以 `speclite resolve config --project-root <project-root>` 的 raw merged config 为准；effective artifact roots 以 `speclite resolve artifact-roots --project-root <project-root>` 返回的 `resolvedRoot`、`resolutionMode` 与 provenance 为准。
+ 
+ ## Scope and Boundaries（范围与边界）
+ 
+@@ -12,7 +12,8 @@ SpecLite 的 source、runtime projection 和 workflow artifacts 分属三个层
+ |---|---|---|
+ | Canonical source | `assets/source/speclite/` | 定义 Module、Skill、Hook、默认配置和输出契约。 |
+ | Runtime projection | `_speclite/`、`.agents/skills/`、`.claude/skills/` | 由 installer 写入目标项目，供 CLI、Hook 和 AI IDE 执行。 |
+-| Workflow artifacts | `_speclite-output/` | 由已安装 Skill 在研发过程中创建和维护，记录规划、实现、评审与发布证据。 |
++| Workflow artifacts | `_speclite-output/{0..5}-*-artifacts/`、`_speclite-output/project-knowledge-base/` | 由已安装 Skill 在研发过程中创建和维护，按七个 workflow-owned filesystem planes 记录规划、实现、评审、发布证据和长期项目知识。 |
++| Public Documentation | `docs/` | 面向读者的公开文档信息架构；它不是 fresh `project_knowledge` 默认目录。 |
+ 
+ `_speclite-output/` 不是 canonical source mirror，也不是 SpecLite 源仓库自身的 `_bmad-output/`。只有方法论或 Skill 契约本身需要修订时，才应回到 `assets/source/speclite/`；目标项目的执行产物应保留在目标项目中。
+ 
+@@ -20,7 +21,7 @@ SpecLite 的 source、runtime projection 和 workflow artifacts 分属三个层
+ 
+ 目录结构由多个契约共同形成，应按以下顺序理解：
+ 
+-1. 目标项目解析后的 runtime config 决定实际根路径。
++1. 目标项目通过 `speclite resolve artifact-roots --project-root <project-root>` 解析出的 artifact-root resolver result 决定实际根路径。
+ 2. `core-skills/module.yaml` 和 `sdlc-skills/module.yaml` 定义默认路径与安装时预创建目录。
+ 3. 各 Skill 的 `SKILL.md`、`references/` 和 `assets/` 定义实际写入时机、动态子目录与文件名。
+ 4. `module-help.csv` 提供面向用户的输出位置 catalog，但不替代单个 Skill 的写入规约。
+@@ -33,13 +34,16 @@ SpecLite 的 source、runtime projection 和 workflow artifacts 分属三个层
+ 
+ | Config Key | Default Value | Purpose |
+ |---|---|---|
+-| `core.output_folder` | `{project-root}/_speclite-output` | Core Workflow 的默认输出根；三类 SDLC artifact root 默认从该路径派生。长期知识、用户指定输出和存在差异的 Workflow 可以写入其他路径。 |
+-| `modules.sdlc.planning_artifacts` | `{output_folder}/planning-artifacts` | 分析、产品、UX、架构与 readiness 产物。 |
+-| `modules.sdlc.implementation_artifacts` | `{output_folder}/implementation-artifacts` | Sprint、Story、Flow Gate、Review、QA 与 Retrospective 产物。 |
+-| `modules.sdlc.devops_artifacts` | `{output_folder}/devops-artifacts` | CI/CD、deployment 与 release 产物。 |
+-| `modules.sdlc.project_knowledge` | `{project-root}/docs` | 长期项目知识；默认不在 `_speclite-output/` 中。 |
++| `core.output_folder` | `{project-root}/_speclite-output` | 兼容 display root 和 fresh artifact root 默认值的共同前缀。 |
++| `core.brainstorming_artifacts` | `{output_folder}/0-brainstorming-artifacts` | Brainstorming session 与发散探索产物。 |
++| `modules.sdlc.analysis_artifacts` | `{output_folder}/1-analysis-artifacts` | Product Brief、Research、PRFAQ 等 analysis 产物。 |
++| `modules.sdlc.planning_artifacts` | `{output_folder}/2-planning-artifacts` | PRD、UX、Epics 等 planning 产物。 |
++| `modules.sdlc.solutioning_artifacts` | `{output_folder}/3-solutioning-artifacts` | Architecture、Specs、implementation readiness 等 solutioning 产物。 |
++| `modules.sdlc.implementation_artifacts` | `{output_folder}/4-implementation-artifacts` | Sprint、Story、Flow Gate、Review、QA 与 Retrospective 产物。 |
++| `modules.sdlc.devops_artifacts` | `{output_folder}/5-devops-artifacts` | CI/CD、deployment 与 release 产物。 |
++| `modules.sdlc.project_knowledge` | `{output_folder}/project-knowledge-base` | Brownfield baseline、长期项目知识和 TSD 等 Project Knowledge 产物。 |
+ 
+-> Note: `{project_knowledge}` 与 `_speclite-output/` 是不同的持久化面。Brownfield baseline、公开文档或其他长期知识可能写入 `docs/`，不应为了目录整齐强制迁入 artifact root。
++> Note: Fresh install 中 `{project_knowledge}` 默认解析到 `_speclite-output/project-knowledge-base/`。`docs/` 是 Public Documentation plane；公开文档可以引用 Project Knowledge，但二者不是同一个默认目录。
+ 
+ ## Default Directory Tree（默认目录树）
+ 
+@@ -47,38 +51,46 @@ SpecLite 的 source、runtime projection 和 workflow artifacts 分属三个层
+ 
+ ```text
+ _speclite-output/
+-├── brainstorming/
++├── 0-brainstorming-artifacts/                 # 安装时预创建
+ │   └── brainstorming-session-{date}-{time}.md
+-├── project-context.md
+-├── planning-artifacts/                         # 安装时预创建
++├── 1-analysis-artifacts/                       # 安装时预创建
++│   ├── product-brief/                          # 安装时预创建
++│   │   ├── product-brief-{project_name}.md
++│   │   └── product-brief-{project_name}-distillate.md
++│   ├── prfaq/                                  # 安装时预创建
++│   │   ├── prfaq-{project_name}.md
++│   │   └── prfaq-{project_name}-distillate.md
++│   └── research/                               # 安装时预创建
++│       ├── domain-{topic}-research-{date}.md
++│       ├── market-{topic}-research-{date}.md
++│       └── technical-{topic}-research-{date}.md
++├── 2-planning-artifacts/                       # 安装时预创建
+ │   ├── epics/                                  # 安装时预创建；也可承载 epics shards
+-│   ├── research/
+-│   │   ├── domain-{research_topic_slug}-research-{date}.md
+-│   │   ├── market-{research_topic_slug}-research-{date}.md
+-│   │   └── technical-{research_topic_slug}-research-{date}.md
+-│   ├── ir-grill/
+-│   │   ├── summary.md
+-│   │   └── goal-execute-records/
+-│   │       └── round-{N}/
+-│   │           ├── PLAN.md
+-│   │           ├── EXPERIMENTS.md
+-│   │           └── EXPERIMENT_NOTES.md
+-│   ├── product-brief-{project_name}.md
+-│   ├── product-brief-{project_name}-distillate.md
+-│   ├── prfaq-{project_name}.md
+-│   ├── prfaq-{project_name}-distillate.md
+-│   ├── brownfield-planning-brief.md
+-│   ├── candidate-change-slices.md
+-│   ├── feature-entry-points.md
+-│   ├── prd.md
+-│   ├── ux-design-specification.md
+-│   ├── ux-color-themes.html
+-│   ├── ux-design-directions.html
+-│   ├── architecture.md
+-│   ├── epics.md
+-│   ├── implementation-readiness-report-{date}.md
++│   │   ├── epics.md                            # canonical whole
++│   │   ├── index.md                            # sharded entry（与 whole 可共存）
++│   │   └── epic-*.md                           # 仅 index 明确声明的 shards
++│   ├── prd/                                    # 安装时预创建
++│   │   ├── prd.md                              # canonical whole
++│   │   ├── index.md                            # sharded entry（与 whole 可共存）
++│   │   └── *.md                                # 仅 index 明确声明的 shards
++│   ├── ux/                                     # 安装时预创建
++│   │   ├── ux-design-specification.md
++│   │   ├── ux-color-themes.html
++│   │   ├── ux-design-directions.html
++│   │   └── design-system/                      # workflow 首次需要时按需创建
+ │   └── sprint-change-proposal-{date}.md
+-├── implementation-artifacts/                  # 安装时预创建
++├── 3-solutioning-artifacts/                    # 安装时预创建
++│   ├── architecture/                           # 安装时预创建
++│   │   ├── architecture.md                     # canonical whole
++│   │   ├── index.md                            # sharded entry（与 whole 可共存）
++│   │   └── *.md                                # 仅 index 明确声明的 shards
++│   ├── specs/                                  # 安装时预创建
++│   └── implementation-readiness-report/        # 安装时预创建
++│       └── grill-consistency/                  # 安装时预创建
++│           ├── implementation-readiness-report-{yyyy-MM-dd}.md
++│           ├── summary.md
++│           └── goal-execute-records/
++├── 4-implementation-artifacts/                 # 安装时预创建
+ │   ├── sprint-status.yaml
+ │   ├── stories/                                # 安装时预创建
+ │   │   └── {story-key}.md
+@@ -100,8 +112,12 @@ _speclite-output/
+ │   │       └── {story-id}-story-review-evaluation-{YYYYMMDD}-round-{m}.md
+ │   ├── code-reviews/                           # 安装时预创建
+ │   │   └── {story-id}-code-review/
+-│   │       ├── {story-id}-code-review-summary-{YYYYMMDD}-round-{n}.md
+-│   │       ├── {story-id}-code-review-evaluation-{YYYYMMDD}-round-{m}.md
++│   │       ├── {story-id}-code-review-summary-{YYYYMMDD}-{review-series}-round-{n}.md
++│   │       ├── {story-id}-code-review-evaluation-{YYYYMMDD}-{review-series}-round-{n}.md
++│   │       ├── {story-id}-cr-rules-extraction-{YYYYMMDD}-{review-series}-round-{n}.md
++│   │       ├── {story-id}-cr-todo-result-{YYYYMMDD}-{review-series}-round-{n}.md
++│   │       ├── {story-id}-cr-finalizer-{YYYYMMDD}-{review-series}-round-{n}.md
++│   │       ├── .tmp/
+ │   │       └── goal-execute-records/
+ │   │           ├── PLAN.md
+ │   │           ├── EXPERIMENTS.md
+@@ -115,13 +131,25 @@ _speclite-output/
+ │   ├── deferred-work.md
+ │   ├── epic-{N}-context.md
+ │   └── epic-{N}-retro-{date}.md
+-└── devops-artifacts/                           # 安装时预创建
+-    ├── ci-cd/                                  # 安装时预创建的保留目录
+-    ├── deployments/                            # 安装时预创建的保留目录
+-    └── npm-releases/                           # 安装时预创建；见“当前差异”
++├── 5-devops-artifacts/                         # 安装时预创建
++│   ├── ci-cd/                                  # 安装时预创建的保留目录
++│   ├── deployments/                            # 安装时预创建的保留目录
++│   └── npm-releases/                           # 安装时预创建；见“当前差异”
++└── project-knowledge-base/                     # 安装时预创建
++    ├── brownfield/                             # 安装时预创建
++    │   ├── baseline/                           # 安装时预创建
++    │   ├── deep-dives/                         # 安装时预创建
++    │   ├── evidence/                           # 安装时预创建
++    │   ├── planning/                           # 安装时预创建
++    │   └── validation/                         # 安装时预创建
++    └── tsd/                                    # 安装时预创建
+ ```
+ 
+-`speclite-shard-doc` 可以把 `prd.md`、`architecture.md`、`ux-design-specification.md`、`epics.md` 或其他大文档转换为同级的 `*/index.md` 与 shard 文件。该转换由目标文件和用户选择决定，因此 `prd/`、`architecture/`、`ux-design-specification/`、`epics/` 以及可能的 `archive/` 都属于合法派生结构，但不是首次运行基础 Workflow 时必然存在的目录。
++`speclite-shard-doc` 对 canonical `prd/prd.md`、`epics/epics.md` 与 `architecture/architecture.md` 必须把 `index.md` 和 shards 直接生成在同一个 subject directory，不增加 `shards/` 层。Whole 与 sharded 可以共存，但 consumer 必须调用 `speclite resolve artifact-documents`；无当前 invocation selection 时 resolver 会阻塞，绝不自动择一或混合。其它大文档保留通用目标目录选择规则。
++
++`resolve artifact-documents` 的 machine evidence 包含 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`、`consumedPaths`、`declaredShardPaths`、`discoveryShape`、`ambiguityStatus`、selection source、`unselectedPath` 和 `continuation`。Canonical whole/index entry（包括 symlink）只有在最终 target 为 subject 内 readable regular file 时才可继续；`index.md` 只授权其明确声明且位于 subject directory 内的可读 shards。Resolver 支持 inline 与 reference-style local Markdown links，按 parse、strip query/fragment、single percent-decode、portable/subject containment/readability 的顺序处理。Missing index、broken/outside/unreadable reference、malformed/undefined/unsupported local-ish reference、missing subject 或 unresolved coexistence 都使用 `SPEC 07` stable issue 并以零写入、零 progress mutation 阻塞；missing-index 所必需的 shard-candidate scan 若无法读取 root/nested directory，则以 `artifact-path.invalid-sharded-document-shape` / `shard-candidate-scan-unreadable` 阻塞并只报告失败目录的 project-relative evidence；`index.md` self-link 只排除，不重复消费。Existing Architecture 缺 `solutioning_artifacts` 时只在 resolver 报告的 Planning fallback subject directory 读取并标记 `legacy-compatible`，不迁移文件；explicit `solutioning_artifacts` 配置下发现 Planning history candidates 时仅报告 `config-artifact-mismatch`，不 fallback 消费。
++
++显式 `selection=whole` 时，resolver 仍安全校验 canonical `index.md` entry，但不读取或解析未选 index 的 shard graph；无 selection 或 `selection=sharded` 时完整验证该 graph。
+ 
+ ## Root and Planning Artifacts（根目录与规划产物）
+ 
+@@ -129,17 +157,17 @@ _speclite-output/
+ |---|---|---|
+ | `brainstorming/brainstorming-session-{date}-{time}.md` | `speclite-brainstorming` | 每次 session 按时间创建或续写，不属于 `planning-artifacts/`。 |
+ | `project-context.md` | `speclite-generate-project-context` | 在输出根目录创建，跨迭代持续维护 AI agent 需要的项目规则。 |
+-| `planning-artifacts/research/*.md` | `speclite-domain-research`、`speclite-market-research`、`speclite-technical-research` | 按研究类型、主题和日期新增。 |
+-| `planning-artifacts/product-brief-*.md` | `speclite-product-brief` | 主 brief 分阶段增量维护；distillate 按用户选择创建。 |
+-| `planning-artifacts/prfaq-*.md` | `speclite-prfaq` | 主 PRFAQ 跨 stage 增量维护；完成时生成 distillate。 |
++| `1-analysis-artifacts/research/*.md` | `speclite-domain-research`、`speclite-market-research`、`speclite-technical-research` | 按研究类型、主题和日期新增；可读取 `{project_knowledge}`，但不把 research 输出写入 Project Knowledge 或 Public Documentation。 |
++| `1-analysis-artifacts/product-brief/product-brief-*.md` | `speclite-product-brief` | 主 brief 分阶段增量维护；distillate 按用户选择创建在同一 subject directory。 |
++| `1-analysis-artifacts/prfaq/prfaq-*.md` | `speclite-prfaq` | 主 PRFAQ 跨 stage 增量维护；完成时生成 distillate 到同一 subject directory。 |
+ | `planning-artifacts/brownfield-planning-brief.md`、`candidate-change-slices.md`、`feature-entry-points.md` | `speclite-brownfield-context-builder` | 条件生成 planning handoff，也可按配置写入 `{brownfield_output}/planning/`；主要 baseline 默认位于 `{project_knowledge}/brownfield/`。 |
+-| `planning-artifacts/prd.md` | `speclite-create-prd`、`speclite-edit-prd` | 创建后原位增量维护，是下游 Architecture 与 Epics 的 living contract。 |
+-| PRD 邻接 validation report | `speclite-validate-prd` | 写在被校验 PRD 旁边；当前 canonical source 未固定文件名构造规则。 |
+-| `planning-artifacts/ux-design-specification.md` | `speclite-create-ux-design` | 增量维护 UX 主规格；两个 HTML 文件是条件生成的视觉化派生产物。 |
+-| `planning-artifacts/architecture.md` | `speclite-create-architecture` | 只有用户选择 Continue 后才追加并推进 frontmatter。 |
+-| `planning-artifacts/epics.md` | `speclite-create-epics-and-stories` | 逐步写入 Epic 与 Story 规划；可在后续 shard。 |
+-| `planning-artifacts/implementation-readiness-report-{date}.md` | `speclite-check-implementation-readiness` | 日期化 readiness snapshot。 |
+-| `planning-artifacts/ir-grill/**` | `speclite-ir-grill-consistency-reviewer` | 每轮新增 `round-{N}` 记录，`summary.md` 用于阶段性汇总。 |
++| `planning-artifacts/prd/prd.md` | `speclite-create-prd`、`speclite-edit-prd` | Canonical whole PRD；sharded shape 使用同目录 `index.md` 与声明 shards。 |
++| `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` | `speclite-validate-prd` | 每次 invocation 仅生成一次标准日期并锁定 exact path。Private `scripts/prd-validation-report-operation.mjs` 在任何 report/progress/temp/suffix write 前做 read-only probe，并在 commit-time 重验后以 `wx` 创建。Existing target 使用 `artifact-path.prd-validation-report-exists` 阻断，无论内容相同与否都不 overwrite、append、truncate、delete、reuse 或 suffix，不更新 progress；人工处置为“保留并移走或删除既有报告后重新运行”。Legacy names 仅原位 historical discovery，install/update/repair 不迁移。 |
++| `{planning_artifacts}/ux/ux-design-specification.md` | `speclite-create-ux-design` | 增量维护 UX 主规格；`{planning_artifacts}/ux/ux-color-themes.html` 与 `{planning_artifacts}/ux/ux-design-directions.html` 是条件生成的视觉化派生产物，`{planning_artifacts}/ux/design-system/` 按需创建。Canonical existing/new target 必须物理落在 real UX owner。每次 exclusive create 使用 private `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-file --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{target}" --source "{source-file}"`，on-demand mkdir 使用同一 script 的 exact `create-directory` flags；该 binding 不是 public `speclite` CLI。它在 commit-time 检查 physical owner 与 nearest existing ancestor 后立即执行。stdout 必须恰一个 JSON；non-zero、invalid JSON 或 `ok !== true` 必须 HALT，且不得推进 frontmatter/progress/append target。Existing legacy `{planning_artifacts}/ux-design-specification.md` 及 sibling 仅在 real Planning owner 内只读发现并原位继续，不由 install/update/repair 迁移。Markdown duplicate definition 采用 first-definition-wins；local-ish HTML attribute raw value 含 `&` 时在 strip/decode 前 fail closed，external scheme 与 literal fragment/query-only 除外。任一 resolver/candidate/frontmatter/reference 门禁失败时保持空消费、空 append target 与零 artifact/progress mutation。 |
++| `solutioning-artifacts/architecture/architecture.md` | `speclite-create-architecture` | Canonical whole Architecture；只有用户选择 Continue 后才追加并推进 frontmatter。 |
++| `planning-artifacts/epics/epics.md` | `speclite-create-epics-and-stories` | Canonical whole Epics；sharded shape 使用同目录 `index.md` 与声明 shards。 |
++| `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/implementation-readiness-report-{yyyy-MM-dd}.md` | `speclite-implementation-readiness-check` | 日期化 readiness snapshot；`{solutioning_artifacts}` 只取 artifact-root resolver 的 `resolvedRoot`，basename 保持不变。 |
++| `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/**` | `speclite-implementation-readiness-grill-consistency-reviewer` | 每轮新增 `round-{N}` 记录，`summary.md` 用于阶段性汇总。`explicit-config` 与 `legacy-compatible` 均服从 resolver；resolver block/error 时 HALT 且 zero artifact write。旧 Planning readiness / `ir-grill/` artifacts 只读原位发现，不迁移。 |
+ | `planning-artifacts/sprint-change-proposal-{date}.md` | `speclite-correct-course` | 日期化重大变更提案。 |
+ 
+ Agent 写作、Mermaid、文档校验和部分 ecosystem auditor 的输出位置可由用户指定。它们可以写入 `{planning_artifacts}`，但没有统一固定文件名，不应据此增加虚构的必选子目录。
+@@ -152,9 +180,9 @@ Agent 写作、Mermaid、文档校验和部分 ecosystem auditor 的输出位置
+ | `stories/{story-key}.md` | `speclite-create-story` 创建；`speclite-dev-story`、`speclite-story-review-03-fixer`、`speclite-code-review-06-finalizer` 更新 | Story 的 living execution contract。 |
+ | `flow-gates/*.md` | `speclite-flow-gate` | 针对 Story / Epic transition 创建 gate snapshot；YAML frontmatter 是下游 machine contract。 |
+ | `story-reviews/{scope}-story-review/*.md` | `speclite-story-review-01-reviewer`、`speclite-story-review-02-evaluator` 创建；`speclite-story-review-03-fixer` 追加修订记录 | Epic 或 Story 粒度的轮次化设计审查轨迹。 |
+-| `code-reviews/{story-id}-code-review/*.md` | `speclite-code-review-01-reviewer`、`speclite-code-review-02-evaluator` 创建；`speclite-code-review-03-fixer` 追加修复记录 | Story 粒度的轮次化代码审查轨迹。 |
++| `code-reviews/{story-id}-code-review/*.md` | CR01–06 使用 orchestrator 单次解析或 manual shared resolver 返回的同一 `crDir` | Story 粒度的轮次化 review、evaluation、fix、rules、TODO result 与 finalizer 轨迹；新目录只含 numeric Story ID。 |
+ | `story-reviews/**/goal-execute-records/` | `speclite-goal-orchestrator-epic-story-review-runner` | 严格串行 Story Review 的执行账本，固定包含 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。 |
+-| `code-reviews/**/goal-execute-records/` | `speclite-goal-orchestrator-epic-story-code-review-runner` | 严格串行 Story 实现与 Code Review 的执行账本，固定包含 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。 |
++| `code-reviews/{story-id}-code-review/goal-execute-records/` | `speclite-goal-orchestrator-epic-story-code-review-runner` | 与 CR01–06 共用 frozen `directoryContext` 的严格串行执行账本；consumer 写前校验 context/path，固定包含 `PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。 |
+ | `cr-rules/cr-todo-backlog.md` | `speclite-code-review-05-todo-tracker` | 跨 Story 延迟事项账本，编号持续递增，状态从 Open 推进到 Resolved。 |
+ | `tests/test-summary.md` | `speclite-qa-generate-e2e-tests` | 记录自动化测试生成结果；真实测试代码写入目标项目的测试目录。 |
+ | `spec-{slug}.md` | `speclite-quick-dev` | Quick Dev 的 living spec，随实现流程推进状态。 |
+@@ -162,7 +190,7 @@ Agent 写作、Mermaid、文档校验和部分 ecosystem auditor 的输出位置
+ | `epic-{N}-context.md` | `speclite-quick-dev` | 可重建 cache；planning artifacts 更新后可能失效。 |
+ | `epic-{N}-retro-{date}.md` | `speclite-retrospective` | Epic 完成后的日期化复盘 snapshot。 |
+ 
+-SR / CR 目录中的 `.tmp/` 只保存审查中间数据，并应在审查完成时清理。它是 transient runtime path，不属于需要长期提交的 artifact。
++SR / CR 目录中的 `.tmp/` 只保存审查中间数据，并应在审查完成时清理。CR `.tmp/` 必须位于同一 resolved `code-reviews/{story-id}-code-review/` 内，不得按 title/slug 建第二目录。唯一 unfinished legacy-only run 使用 `legacy-resume` 原位续写；canonical+unfinished legacy 或多个 unfinished legacy 使用 shared `cr-directory.ambiguous-resume-root` 在任何 artifact/goal/progress/tracker write 前阻断。Legacy directory 不自动迁移、重命名或删除。
+ 
+ `speclite-qa-write-test-guide` 由用户指定或根据仓库事实推导目标路径；无法确定时 Workflow 应停止并询问，因此当前没有固定的 `test-guides/` 子目录契约。
+ 
+@@ -214,10 +242,9 @@ Selected ecosystem modules 可能把审计报告写入 `{devops_artifacts}` 或
+ |---|---|---|
+ | Retrospective | `module.yaml` 预创建 `implementation-artifacts/retrospectives/`，CR / SR config 也引用该目录。 | `speclite-retrospective` 当前写入 `implementation-artifacts/epic-{N}-retro-{date}.md` 根目录。 |
+ | npm release report | `module.yaml` 与 `module-help.csv` 声明 `devops-artifacts/npm-releases/`。 | `speclite-npm-publisher` 当前仍写入 legacy `.specskills/output/devops/speclite-npm-publisher/<package-name>-<version>-release-report.md`，因此 `npm-releases/` 暂无已对齐的 canonical writer。 |
+-| CR rules | Catalog 将 `speclite-code-review-04-rules-extractor` 输出定位到 `implementation-artifacts/cr-rules/`。 | CR4 当前只输出分析与建议，等待确认后更新项目文档；稳定落盘者是 CR5 的 `cr-todo-backlog.md`。 |
+-| PRD validation | Catalog 将报告归入 planning artifacts。 | Workflow 要求报告与 PRD 相邻，但未静态定义 `validationReportPath` 的文件名规则。 |
++| PRD validation historical compatibility | Catalog 与 producer 已将新报告固定为 `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`。 | 旧 basename 仅作 historical evidence 可发现且原位保留，不是 active producer default。 |
+ 
+-`review-artifacts/` 和 `research-artifacts/` 有时用于描述概念分类，但它们不是当前 `module.yaml` 声明的默认顶层目录。默认实际结构是：research 位于 `planning-artifacts/research/`，SR / CR 位于 `implementation-artifacts/` 下。
++`review-artifacts/` 和 `research-artifacts/` 有时用于描述概念分类，但它们不是当前 `module.yaml` 声明的默认顶层目录。默认实际结构是：research、Product Brief 和 PRFAQ 位于 `1-analysis-artifacts/` 的对应 subject directory，SR / CR 位于 `implementation-artifacts/` 下。
+ 
+ ## Related Documents（相关文档）
+ 
+diff --git a/release/packaging-manifest.json b/release/packaging-manifest.json
+index 4ca7623..f705c80 100644
+--- a/release/packaging-manifest.json
++++ b/release/packaging-manifest.json
+@@ -19,7 +19,7 @@
+       "README.md"
+     ]
+   },
+-  "packageHash": "sha256:9695c01bcb51e91145bdd2dc49abf90c5f12eb47ea18570f70457996d21b1ee7",
++  "packageHash": "sha256:143d04dc22b6ab4dfe2248352841588a696baa7c7146efc8197a28c6ed2c2335",
+   "files": [
+     "assets/source/README.md",
+     "assets/source/speclite/canonical-data-variant-policy.json",
+@@ -63,6 +63,11 @@
+     "assets/source/speclite/core-skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md",
+     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.en.md",
+     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler.zip",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/CHANGELOG.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/references/er-drawing-rules.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/SKILL.en.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/SKILL.md",
+     "assets/source/speclite/core-skills/speclite-editorial-review-prose/CHANGELOG.md",
+     "assets/source/speclite/core-skills/speclite-editorial-review-prose/SKILL.md",
+     "assets/source/speclite/core-skills/speclite-editorial-review-structure/CHANGELOG.md",
+@@ -403,6 +408,7 @@
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-13-responsive-accessibility.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-14-complete.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/workflow-details.md",
++    "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/scripts/ux-artifact-operation.mjs",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/SKILL.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/CHANGELOG.md",
+@@ -439,25 +445,13 @@
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/references/steps/step-v-12-completeness-validation.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/references/steps/step-v-13-report-complete.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/references/workflow-details.md",
++    "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/scripts/prd-validation-report-operation.mjs",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/SKILL.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/config.toml.example",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/customize.toml",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/SKILL.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/assets/readiness-report-template.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/CHANGELOG.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/config.toml.example",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/customize.toml",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-01-document-discovery.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-02-prd-analysis.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-03-epic-coverage-validation.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-04-ux-alignment.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-05-epic-quality-review.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-06-final-assessment.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/workflow-details.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/SKILL.en.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/SKILL.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/assets/architecture-decision-template.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/config.toml.example",
+@@ -510,14 +504,27 @@
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/references/workflow-details.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/SKILL.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/CHANGELOG.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/prompt-library.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/record-output-spec.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/review-dimensions.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/testing-scenarios.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/workflow.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.en.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/assets/readiness-report-template.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/CHANGELOG.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/config.toml.example",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/customize.toml",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-01-document-discovery.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-02-prd-analysis.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-03-epic-coverage-validation.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-04-ux-alignment.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-05-epic-quality-review.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-06-final-assessment.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/workflow-details.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.en.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/CHANGELOG.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/prompt-library.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/record-output-spec.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/review-dimensions.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/testing-scenarios.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/workflow.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.en.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/assets/output-template.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/references/review-engine.md",
+@@ -578,6 +585,7 @@
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md",
++    "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/CHANGELOG.md",
+@@ -729,7 +737,10 @@
+     "assets/source/speclite/support-skills/speclite-skill-lint/CHANGELOG.md",
+     "assets/source/speclite/support-skills/speclite-skill-lint/references/check-rules.md",
+     "assets/source/speclite/support-skills/speclite-skill-lint/references/lint-workflow.md",
++    "assets/source/speclite/support-skills/speclite-skill-lint/references/rule-registry.json",
+     "assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py",
++    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/list_rules.py",
++    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/test_skill_tools.py",
+     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.en.md",
+     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.md",
+     "dist/bin/speclite.d.ts",
+@@ -784,6 +795,11 @@
+     "assets/source/speclite/core-skills/speclite-domain-modeling/references/CONTEXT-FORMAT.md",
+     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.en.md",
+     "assets/source/speclite/core-skills/speclite-domain-modeling/SKILL.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler.zip",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/CHANGELOG.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/references/er-drawing-rules.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/SKILL.en.md",
++    "assets/source/speclite/core-skills/speclite-drawer-er-modeler/SKILL.md",
+     "assets/source/speclite/core-skills/speclite-editorial-review-prose/CHANGELOG.md",
+     "assets/source/speclite/core-skills/speclite-editorial-review-prose/SKILL.md",
+     "assets/source/speclite/core-skills/speclite-editorial-review-structure/CHANGELOG.md",
+@@ -1124,6 +1140,7 @@
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-13-responsive-accessibility.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/steps/step-14-complete.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/references/workflow-details.md",
++    "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/scripts/ux-artifact-operation.mjs",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-create-ux-design/SKILL.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-edit-prd/CHANGELOG.md",
+@@ -1160,25 +1177,13 @@
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/references/steps/step-v-12-completeness-validation.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/references/steps/step-v-13-report-complete.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/references/workflow-details.md",
++    "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/scripts/prd-validation-report-operation.mjs",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/2-plan-workflows/speclite-validate-prd/SKILL.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/config.toml.example",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/customize.toml",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-agent-architect/SKILL.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/assets/readiness-report-template.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/CHANGELOG.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/config.toml.example",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/customize.toml",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-01-document-discovery.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-02-prd-analysis.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-03-epic-coverage-validation.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-04-ux-alignment.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-05-epic-quality-review.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/steps/step-06-final-assessment.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/references/workflow-details.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/SKILL.en.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-check-implementation-readiness/SKILL.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/assets/architecture-decision-template.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-create-architecture/config.toml.example",
+@@ -1231,14 +1236,27 @@
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/references/workflow-details.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-generate-project-context/SKILL.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/CHANGELOG.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/prompt-library.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/record-output-spec.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/review-dimensions.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/testing-scenarios.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/references/workflow.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.en.md",
+-    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer/SKILL.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/assets/readiness-report-template.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/CHANGELOG.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/config.toml.example",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/customize.toml",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-01-document-discovery.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-02-prd-analysis.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-03-epic-coverage-validation.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-04-ux-alignment.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-05-epic-quality-review.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/steps/step-06-final-assessment.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/references/workflow-details.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.en.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-check/SKILL.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/CHANGELOG.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/prompt-library.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/record-output-spec.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/review-dimensions.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/testing-scenarios.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/references/workflow.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.en.md",
++    "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer/SKILL.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/assets/output-template.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/3-solutioning/speclite-story-review-01-reviewer/references/review-engine.md",
+@@ -1299,6 +1317,7 @@
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/SKILL.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/CHANGELOG.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md",
++    "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.en.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/SKILL.md",
+     "assets/source/speclite/sdlc-skills/4-implementation/speclite-correct-course/CHANGELOG.md",
+@@ -1450,7 +1469,10 @@
+     "assets/source/speclite/support-skills/speclite-skill-lint/CHANGELOG.md",
+     "assets/source/speclite/support-skills/speclite-skill-lint/references/check-rules.md",
+     "assets/source/speclite/support-skills/speclite-skill-lint/references/lint-workflow.md",
++    "assets/source/speclite/support-skills/speclite-skill-lint/references/rule-registry.json",
+     "assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py",
++    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/list_rules.py",
++    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/test_skill_tools.py",
+     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.en.md",
+     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.md",
+     "dist/bin/speclite.d.ts",
+diff --git a/test/code-review-contract.test.ts b/test/code-review-contract.test.ts
+index 0551c0b..651b1e3 100644
+--- a/test/code-review-contract.test.ts
++++ b/test/code-review-contract.test.ts
+@@ -441,7 +441,6 @@ describe("CR shared contract ownership", () => {
+     }
+   });
+ 
+-  // 真行为测试需要 runner 状态机模拟器（独立基建），先登记为 todo：
+   it.todo("runner routes PASS zero-TODO through CR05 closeout no-op end to end");
+   it.todo("standalone CR06 halts when CR04/CR05 reports are missing");
+   it.todo("same-round retry writes -superseded-{n} instead of overwriting current");
+
+diff --git a/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs
+new file mode 100755
+index 0000000..919a9fc
+--- /dev/null
++++ b/assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs
+@@ -0,0 +1,757 @@
++#!/usr/bin/env node
++
++import { lstat, readFile, readdir, realpath } from "node:fs/promises";
++import path from "node:path";
++
++const AMBIGUITY_ISSUE_ID = "cr-directory.ambiguous-resume-root";
++const STORY_ID_PATTERN = /^[1-9][0-9]*[.-][1-9][0-9]*$/u;
++const REVIEW_SERIES_PATTERN = /^[a-z0-9][a-z0-9-]{0,31}$/u;
++const CURRENT_ARTIFACTS = [
++  ["code-review-summary", "speclite.cr-review.v2", "code-review-summary"],
++  ["code-review-evaluation", "speclite.cr-evaluation.v2", "code-review-evaluation"],
++  ["cr-rules-extraction", "speclite.cr-rules-extraction.v2", "cr-rules-extraction"],
++  ["cr-todo-result", "speclite.cr-todo-result.v2", "cr-todo-result"],
++  ["cr-finalizer", "speclite.cr-finalizer.v2", "cr-finalizer"],
++];
++const RESERVED_CR_SUBPATHS = new Set([".tmp", "goal-execute-records"]);
++const CONTEXT_FIELDS = [
++  "storyId",
++  "reviewSeries",
++  "crDir",
++  "canonicalCrDir",
++  "compatibilityMode",
++  "legacyArtifactPaths",
++];
++
++export function normalizeStoryId(value) {
++  if (typeof value !== "string" || !STORY_ID_PATTERN.test(value)) {
++    return { ok: false, reason: "invalid-story-id" };
++  }
++  return { ok: true, storyId: value.replace(".", "-") };
++}
++
++export async function resolveCrDirectory({
++  projectRoot,
++  implementationArtifacts,
++  storyId,
++  reviewSeries = "main",
++  directoryChoice,
++}) {
++  const inputs = validateResolverInputs({
++    projectRoot,
++    implementationArtifacts,
++    storyId,
++    reviewSeries,
++    directoryChoice,
++  });
++  if (!inputs.ok) return inputs;
++
++  const project = await inspectProjectRoot(projectRoot);
++  if (!project.ok) return { ok: false, reason: "invalid-project-root" };
++
++  const { normalizedStoryId, canonicalCrDir, codeReviewRootRelative } = inputs;
++  const rootState = await inspectPath(
++    projectRoot,
++    codeReviewRootRelative,
++    project.resolved,
++    { missingAllowed: true, finalKind: "directory" },
++  );
++  if (!rootState.ok) {
++    return directoryFailure({
++      storyId: normalizedStoryId,
++      canonicalCrDir,
++      legacyCrDirs: [],
++      reviewSeries,
++      roundEvidence: [],
++      reason: rootState.reason,
++    });
++  }
++  if (rootState.missing) {
++    if (directoryChoice !== undefined && directoryChoice !== canonicalCrDir) {
++      return { ok: false, reason: "invalid-directory-choice" };
++    }
++    return directorySuccess(
++      normalizedStoryId,
++      reviewSeries,
++      canonicalCrDir,
++      canonicalCrDir,
++      "canonical",
++      [],
++    );
++  }
++
++  const codeReviewRoot = toAbsolute(projectRoot, codeReviewRootRelative);
++  const entries = await safeReadDirectory(codeReviewRoot);
++  if (!entries.ok) {
++    return directoryFailure({
++      storyId: normalizedStoryId,
++      canonicalCrDir,
++      legacyCrDirs: [],
++      reviewSeries,
++      roundEvidence: [],
++      reason: "inspection-io-failure",
++    });
++  }
++
++  const canonicalName = `${normalizedStoryId}-code-review`;
++  const candidates = entries.entries
++    .filter((entry) => entry.name === canonicalName || isLegacyDirectoryName(entry.name, normalizedStoryId))
++    .sort((left, right) => compareBytes(left.name, right.name));
++  const legacyCrDirs = candidates
++    .filter((entry) => entry.name !== canonicalName)
++    .map((entry) => `${codeReviewRootRelative}/${entry.name}`);
++  const inspected = [];
++
++  for (const entry of candidates) {
++    const crDir = `${codeReviewRootRelative}/${entry.name}`;
++    const result = await inspectDirectoryCandidate({
++      projectRoot,
++      resolvedProjectRoot: project.resolved,
++      crDir,
++      storyId: normalizedStoryId,
++      reviewSeries,
++    });
++    inspected.push(result.evidence);
++    if (!result.ok) {
++      return directoryFailure({
++        storyId: normalizedStoryId,
++        canonicalCrDir,
++        legacyCrDirs,
++        reviewSeries,
++        roundEvidence: inspected,
++        reason: result.reason,
++      });
++    }
++  }
++
++  const currentCandidates = inspected
++    .filter((evidence) => evidence.currentResult === "CURRENT")
++    .map((evidence) => evidence.crDir);
++  let selected;
++  if (currentCandidates.length === 0) {
++    selected = canonicalCrDir;
++  } else if (currentCandidates.length === 1) {
++    selected = currentCandidates[0];
++  } else if (directoryChoice !== undefined && currentCandidates.includes(directoryChoice)) {
++    selected = directoryChoice;
++  } else {
++    return directoryFailure({
++      storyId: normalizedStoryId,
++      canonicalCrDir,
++      legacyCrDirs,
++      reviewSeries,
++      roundEvidence: inspected,
++      reason: "multiple-current-directory-candidates",
++    });
++  }
++
++  if (directoryChoice !== undefined && selected !== directoryChoice) {
++    return { ok: false, reason: "invalid-directory-choice" };
++  }
++  const compatibilityMode = selected === canonicalCrDir ? "canonical" : "legacy-resume";
++  return directorySuccess(
++    normalizedStoryId,
++    reviewSeries,
++    canonicalCrDir,
++    selected,
++    compatibilityMode,
++    legacyCrDirs,
++  );
++}
++
++export async function validateCrDirectoryContext({
++  projectRoot,
++  implementationArtifacts,
++  frozenContext,
++  consumerContext,
++  writeSubpath,
++}) {
++  if (typeof projectRoot !== "string" || !path.isAbsolute(projectRoot)) {
++    return { ok: false, reason: "invalid-project-root" };
++  }
++  if (!isPortableProjectRelativePath(implementationArtifacts)) {
++    return { ok: false, reason: "invalid-implementation-artifacts" };
++  }
++  if (!isPortableProjectRelativePath(writeSubpath) || writeSubpath === ".") {
++    return { ok: false, reason: "invalid-write-subpath" };
++  }
++
++  const frozen = normalizeContext(frozenContext, implementationArtifacts);
++  const consumer = normalizeContext(consumerContext, implementationArtifacts);
++  if (!frozen.ok || !consumer.ok || !sameContext(frozen.value, consumer.value)) {
++    return { ok: false, reason: "frozen-cr-context-mismatch" };
++  }
++
++  const project = await inspectProjectRoot(projectRoot);
++  if (!project.ok) return { ok: false, reason: "invalid-project-root" };
++  const selectedState = await inspectPath(
++    projectRoot,
++    frozen.value.crDir,
++    project.resolved,
++    {
++      missingAllowed: frozen.value.compatibilityMode === "canonical",
++      finalKind: "directory",
++    },
++  );
++  if (!selectedState.ok) return { ok: false, reason: "unsafe-cr-directory" };
++
++  const writePath = `${frozen.value.crDir}/${writeSubpath}`;
++  const writeState = await inspectPath(
++    projectRoot,
++    writePath,
++    project.resolved,
++    { missingAllowed: true, finalKind: "file" },
++  );
++  if (!writeState.ok) return { ok: false, reason: "unsafe-write-path" };
++
++  return {
++    ok: true,
++    storyId: frozen.value.storyId,
++    reviewSeries: frozen.value.reviewSeries,
++    crDir: frozen.value.crDir,
++    writePath,
++  };
++}
++
++function validateResolverInputs({
++  projectRoot,
++  implementationArtifacts,
++  storyId,
++  reviewSeries,
++  directoryChoice,
++}) {
++  const normalized = normalizeStoryId(storyId);
++  if (!normalized.ok) return normalized;
++  if (typeof projectRoot !== "string" || !path.isAbsolute(projectRoot)) {
++    return { ok: false, reason: "invalid-project-root" };
++  }
++  if (!isPortableProjectRelativePath(implementationArtifacts)) {
++    return { ok: false, reason: "invalid-implementation-artifacts" };
++  }
++  if (typeof reviewSeries !== "string" || !REVIEW_SERIES_PATTERN.test(reviewSeries)) {
++    return { ok: false, reason: "invalid-review-series" };
++  }
++  if (directoryChoice !== undefined && !isPortableProjectRelativePath(directoryChoice)) {
++    return { ok: false, reason: "invalid-directory-choice" };
++  }
++  const codeReviewRootRelative = `${implementationArtifacts}/code-reviews`;
++  const canonicalCrDir = `${codeReviewRootRelative}/${normalized.storyId}-code-review`;
++  if (directoryChoice !== undefined
++    && directoryChoice !== canonicalCrDir
++    && !isLegacyCrDir(directoryChoice, codeReviewRootRelative, normalized.storyId)) {
++    return { ok: false, reason: "invalid-directory-choice" };
++  }
++  return {
++    ok: true,
++    normalizedStoryId: normalized.storyId,
++    canonicalCrDir,
++    codeReviewRootRelative,
++  };
++}
++
++async function inspectDirectoryCandidate({
++  projectRoot,
++  resolvedProjectRoot,
++  crDir,
++  storyId,
++  reviewSeries,
++}) {
++  const directoryState = await inspectPath(
++    projectRoot,
++    crDir,
++    resolvedProjectRoot,
++    { missingAllowed: false, finalKind: "directory" },
++  );
++  if (!directoryState.ok) {
++    return {
++      ok: false,
++      reason: directoryState.reason === "unsafe-path"
++        ? "unsafe-cr-directory-entry"
++        : directoryState.reason,
++      evidence: { crDir, maxRound: null, currentResult: "UNSAFE" },
++    };
++  }
++
++  const absolute = toAbsolute(projectRoot, crDir);
++  const entries = await safeReadDirectory(absolute);
++  if (!entries.ok) {
++    return {
++      ok: false,
++      reason: "inspection-io-failure",
++      evidence: { crDir, maxRound: null, currentResult: "UNSAFE" },
++    };
++  }
++
++  let maxRound = null;
++  let currentCount = 0;
++  for (const entry of entries.entries.sort((left, right) => compareBytes(left.name, right.name))) {
++    const entryAbsolute = path.join(absolute, entry.name);
++    if (entry.isSymbolicLink()) {
++      return {
++        ok: false,
++        reason: "unsafe-cr-artifact-entry",
++        evidence: { crDir, maxRound, currentResult: "UNSAFE" },
++      };
++    }
++    if (entry.isDirectory()) {
++      const nestedState = await inspectExistingDirectory(entryAbsolute, resolvedProjectRoot);
++      if (!nestedState.ok) {
++        return {
++          ok: false,
++          reason: "unsafe-cr-artifact-entry",
++          evidence: { crDir, maxRound, currentResult: "UNSAFE" },
++        };
++      }
++      if (RESERVED_CR_SUBPATHS.has(entry.name)) continue;
++      continue;
++    }
++    if (!entry.isFile()) {
++      return {
++        ok: false,
++        reason: "unsafe-cr-artifact-entry",
++        evidence: { crDir, maxRound, currentResult: "UNSAFE" },
++      };
++    }
++
++    const classification = classifyCurrentArtifact(entry.name, storyId, reviewSeries);
++    if (classification.kind === "unrelated") continue;
++    if (classification.kind === "identity-conflict") {
++      return {
++        ok: false,
++        reason: "current-directory-identity-conflict",
++        evidence: { crDir, maxRound, currentResult: "IDENTITY_CONFLICT" },
++      };
++    }
++
++    let content;
++    try {
++      content = await readFile(entryAbsolute, "utf8");
++    } catch {
++      return {
++        ok: false,
++        reason: "inspection-io-failure",
++        evidence: { crDir, maxRound, currentResult: "UNSAFE" },
++      };
++    }
++    const identity = readLeadingIdentity(content);
++    if (!identity
++      || identity.storyId !== storyId
++      || identity.reviewSeries !== reviewSeries
++      || identity.round !== classification.round
++      || (identity.artifactType !== undefined && identity.artifactType !== classification.artifactType)
++      || (identity.schemaVersion !== undefined && identity.schemaVersion !== classification.schemaVersion)) {
++      return {
++        ok: false,
++        reason: "current-directory-identity-conflict",
++        evidence: { crDir, maxRound, currentResult: "IDENTITY_CONFLICT" },
++      };
++    }
++    currentCount += 1;
++    maxRound = Math.max(maxRound ?? 0, classification.round);
++  }
++
++  return {
++    ok: true,
++    evidence: {
++      crDir,
++      maxRound,
++      currentResult: currentCount > 0 ? "CURRENT" : "NO_CURRENT_SERIES_EVIDENCE",
++    },
++  };
++}
++
++function classifyCurrentArtifact(name, storyId, reviewSeries) {
++  const escapedStoryId = escapeRegExp(storyId);
++  const escapedSeries = escapeRegExp(reviewSeries);
++  for (const [basename, schemaVersion, artifactType] of CURRENT_ARTIFACTS) {
++    const exact = name.match(new RegExp(
++      `^${escapedStoryId}-${escapeRegExp(basename)}-[0-9]{8}-${escapedSeries}-round-([1-9][0-9]*)\\.md$`,
++      "u",
++    ));
++    if (exact) {
++      const round = Number(exact[1]);
++      if (Number.isSafeInteger(round)) {
++        return { kind: "current", round, schemaVersion, artifactType };
++      }
++    }
++    const completeOtherSeries = name.match(new RegExp(
++      `^${escapedStoryId}-${escapeRegExp(basename)}-[0-9]{8}-([a-z0-9][a-z0-9-]{0,31})-round-[1-9][0-9]*(?:-superseded-[1-9][0-9]*)?\\.md$`,
++      "u",
++    ));
++    if (completeOtherSeries) return { kind: "unrelated" };
++    if (name.startsWith(`${storyId}-${basename}-`) && name.includes(reviewSeries)) {
++      return { kind: "identity-conflict" };
++    }
++  }
++  return { kind: "unrelated" };
++}
++
++function readLeadingIdentity(content) {
++  if (typeof content !== "string" || !content.startsWith("---\n")) return null;
++  const end = content.indexOf("\n---", 4);
++  if (end < 0) return null;
++  const block = content.slice(4, end);
++  const values = new Map();
++  for (const line of block.split("\n")) {
++    const match = line.match(/^([A-Za-z][A-Za-z0-9]*):[ \t]*(.*)$/u);
++    if (!match) continue;
++    if (values.has(match[1])) return null;
++    values.set(match[1], unquote(match[2].trim()));
++  }
++  const roundText = values.get("round");
++  const round = typeof roundText === "string" && /^[1-9][0-9]*$/u.test(roundText)
++    ? Number(roundText)
++    : null;
++  if (!Number.isSafeInteger(round)) return null;
++  return {
++    storyId: values.get("storyId"),
++    reviewSeries: values.get("reviewSeries"),
++    round,
++    artifactType: values.get("artifactType"),
++    schemaVersion: values.get("schemaVersion"),
++  };
++}
++
++function unquote(value) {
++  if (value.length >= 2
++    && ((value.startsWith('"') && value.endsWith('"'))
++      || (value.startsWith("'") && value.endsWith("'")))) {
++    return value.slice(1, -1);
++  }
++  return value;
++}
++
++function normalizeContext(context, implementationArtifacts) {
++  if (!context || typeof context !== "object" || Array.isArray(context)) {
++    return { ok: false };
++  }
++  if (Object.keys(context).some((key) => !CONTEXT_FIELDS.includes(key))
++    || CONTEXT_FIELDS.some((key) => !Object.hasOwn(context, key))) {
++    return { ok: false };
++  }
++  const normalized = normalizeStoryId(context.storyId);
++  if (!normalized.ok || normalized.storyId !== context.storyId) return { ok: false };
++  if (typeof context.reviewSeries !== "string" || !REVIEW_SERIES_PATTERN.test(context.reviewSeries)) {
++    return { ok: false };
++  }
++  const canonicalCrDir = `${implementationArtifacts}/code-reviews/${context.storyId}-code-review`;
++  if (context.canonicalCrDir !== canonicalCrDir
++    || !isPortableProjectRelativePath(context.crDir)
++    || !["canonical", "legacy-resume"].includes(context.compatibilityMode)
++    || !Array.isArray(context.legacyArtifactPaths)) {
++    return { ok: false };
++  }
++  const legacyArtifactPaths = [...context.legacyArtifactPaths];
++  if (legacyArtifactPaths.some((entry) => !isLegacyCrDir(
++    entry,
++    `${implementationArtifacts}/code-reviews`,
++    context.storyId,
++  ))) {
++    return { ok: false };
++  }
++  const sorted = [...new Set(legacyArtifactPaths)].sort(compareBytes);
++  if (sorted.length !== legacyArtifactPaths.length
++    || sorted.some((entry, index) => entry !== legacyArtifactPaths[index])) {
++    return { ok: false };
++  }
++  if (context.compatibilityMode === "canonical" && context.crDir !== canonicalCrDir) {
++    return { ok: false };
++  }
++  if (context.compatibilityMode === "legacy-resume"
++    && !legacyArtifactPaths.includes(context.crDir)) {
++    return { ok: false };
++  }
++  return {
++    ok: true,
++    value: {
++      storyId: context.storyId,
++      reviewSeries: context.reviewSeries,
++      crDir: context.crDir,
++      canonicalCrDir,
++      compatibilityMode: context.compatibilityMode,
++      legacyArtifactPaths,
++    },
++  };
++}
++
++function sameContext(left, right) {
++  return CONTEXT_FIELDS.every((field) => JSON.stringify(left[field]) === JSON.stringify(right[field]));
++}
++
++function directorySuccess(storyId, reviewSeries, canonicalCrDir, crDir, compatibilityMode, legacyArtifactPaths) {
++  return {
++    ok: true,
++    storyId,
++    reviewSeries,
++    crDir,
++    canonicalCrDir,
++    compatibilityMode,
++    legacyArtifactPaths,
++    issue: null,
++  };
++}
++
++function directoryFailure({
++  storyId,
++  canonicalCrDir,
++  legacyCrDirs,
++  reviewSeries,
++  roundEvidence,
++  reason,
++}) {
++  return {
++    ok: false,
++    storyId,
++    reviewSeries,
++    crDir: null,
++    canonicalCrDir,
++    compatibilityMode: null,
++    legacyArtifactPaths: legacyCrDirs,
++    issue: {
++      issueId: AMBIGUITY_ISSUE_ID,
++      category: "lifecycle",
++      severity: "error",
++      continuation: "block",
++      details: {
++        storyId,
++        canonicalCrDir,
++        legacyCrDirs,
++        reviewSeries,
++        roundEvidence,
++        reason,
++      },
++    },
++  };
++}
++
++async function inspectProjectRoot(projectRoot) {
++  try {
++    const metadata = await lstat(projectRoot);
++    if (metadata.isSymbolicLink() || !metadata.isDirectory()) return { ok: false };
++    return { ok: true, resolved: await realpath(projectRoot) };
++  } catch {
++    return { ok: false };
++  }
++}
++
++async function inspectPath(projectRoot, relativePath, resolvedProjectRoot, {
++  missingAllowed,
++  finalKind,
++}) {
++  let current = projectRoot;
++  const segments = relativePath.split("/");
++  for (let index = 0; index < segments.length; index += 1) {
++    current = path.join(current, segments[index]);
++    let metadata;
++    try {
++      metadata = await lstat(current);
++    } catch (error) {
++      if (error?.code === "ENOENT" && missingAllowed) return { ok: true, missing: true };
++      return { ok: false, reason: error?.code === "ENOENT" ? "missing-path" : "inspection-io-failure" };
++    }
++    if (metadata.isSymbolicLink()) return { ok: false, reason: "unsafe-path" };
++    const isFinal = index === segments.length - 1;
++    if ((!isFinal || finalKind === "directory") && !metadata.isDirectory()) {
++      return { ok: false, reason: "unsafe-path" };
++    }
++    if (isFinal && finalKind === "file" && !metadata.isFile()) {
++      return { ok: false, reason: "unsafe-path" };
++    }
++    let resolved;
++    try {
++      resolved = await realpath(current);
++    } catch {
++      return { ok: false, reason: "inspection-io-failure" };
++    }
++    if (!isWithin(resolvedProjectRoot, resolved)) return { ok: false, reason: "unsafe-path" };
++  }
++  return { ok: true, missing: false };
++}
++
++async function inspectExistingDirectory(absolute, resolvedProjectRoot) {
++  try {
++    const metadata = await lstat(absolute);
++    const resolved = await realpath(absolute);
++    return {
++      ok: metadata.isDirectory()
++        && !metadata.isSymbolicLink()
++        && isWithin(resolvedProjectRoot, resolved),
++    };
++  } catch {
++    return { ok: false };
++  }
++}
++
++async function safeReadDirectory(directory) {
++  try {
++    return { ok: true, entries: await readdir(directory, { withFileTypes: true }) };
++  } catch {
++    return { ok: false };
++  }
++}
++
++function isLegacyDirectoryName(name, storyId) {
++  return name.startsWith(`${storyId}-`)
++    && name.endsWith("-code-review")
++    && name !== `${storyId}-code-review`;
++}
++
++function isLegacyCrDir(value, codeReviewRoot, storyId) {
++  if (!isPortableProjectRelativePath(value)) return false;
++  const prefix = `${codeReviewRoot}/`;
++  return value.startsWith(prefix)
++    && !value.slice(prefix.length).includes("/")
++    && isLegacyDirectoryName(value.slice(prefix.length), storyId);
++}
++
++function isPortableProjectRelativePath(value) {
++  if (typeof value !== "string"
++    || value.length === 0
++    || path.posix.isAbsolute(value)
++    || value.includes("\\")) {
++    return false;
++  }
++  return value.split("/").every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
++}
++
++function toAbsolute(projectRoot, relativePath) {
++  return path.join(projectRoot, ...relativePath.split("/"));
++}
++
++function isWithin(parent, candidate) {
++  const relative = path.relative(parent, candidate);
++  return relative === ""
++    || (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative));
++}
++
++function compareBytes(left, right) {
++  return Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8"));
++}
++
++function escapeRegExp(value) {
++  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
++}
++
++async function runCli() {
++  const parsed = parseArguments(process.argv.slice(2));
++  if (!parsed.ok) {
++    writeCli({ ok: false, reason: "invalid-arguments" });
++    return;
++  }
++  let outcome;
++  try {
++    outcome = parsed.mode === "resolve"
++      ? await resolveCrDirectory(parsed.options)
++      : await validateCrDirectoryContext(parsed.options);
++  } catch {
++    outcome = { ok: false, reason: parsed.mode === "resolve" ? "inspection-io-failure" : "context-validation-failure" };
++  }
++  writeCli(outcome);
++}
++
++function writeCli(outcome) {
++  process.stdout.write(`${JSON.stringify(outcome)}\n`);
++  process.exitCode = outcome.ok ? 0 : 2;
++}
++
++function parseArguments(args) {
++  if (args.length % 2 !== 0) return { ok: false };
++  const values = {};
++  for (let index = 0; index < args.length; index += 2) {
++    const key = args[index];
++    const value = args[index + 1];
++    const name = key?.startsWith("--") ? key.slice(2) : "";
++    if (!name || value === undefined || value.length === 0 || Object.hasOwn(values, name)) {
++      return { ok: false };
++    }
++    values[name] = value;
++  }
++
++  const mode = values.mode ?? "resolve";
++  if (mode === "resolve") {
++    const known = new Set([
++      "mode",
++      "project-root",
++      "implementation-artifacts",
++      "story-id",
++      "review-series",
++      "directory-choice",
++    ]);
++    if (Object.keys(values).some((key) => !known.has(key))
++      || !["project-root", "implementation-artifacts", "story-id"].every((key) => Object.hasOwn(values, key))) {
++      return { ok: false };
++    }
++    return {
++      ok: true,
++      mode,
++      options: {
++        projectRoot: values["project-root"],
++        implementationArtifacts: values["implementation-artifacts"],
++        storyId: values["story-id"],
++        reviewSeries: values["review-series"] ?? "main",
++        directoryChoice: values["directory-choice"],
++      },
++    };
++  }
++
++  if (mode !== "validate-context") return { ok: false };
++  const known = new Set([
++    "mode",
++    "project-root",
++    "implementation-artifacts",
++    "frozen-context",
++    "story-id",
++    "review-series",
++    "cr-dir",
++    "canonical-cr-dir",
++    "compatibility-mode",
++    "legacy-artifact-paths",
++    "write-subpath",
++  ]);
++  if (Object.keys(values).some((key) => !known.has(key))
++    || ![
++      "project-root",
++      "implementation-artifacts",
++      "frozen-context",
++      "story-id",
++      "review-series",
++      "cr-dir",
++      "canonical-cr-dir",
++      "compatibility-mode",
++      "legacy-artifact-paths",
++      "write-subpath",
++    ].every((key) => Object.hasOwn(values, key))) {
++    return { ok: false };
++  }
++
++  let frozenContext;
++  let legacyArtifactPaths;
++  try {
++    frozenContext = JSON.parse(values["frozen-context"]);
++    legacyArtifactPaths = JSON.parse(values["legacy-artifact-paths"]);
++  } catch {
++    return { ok: false };
++  }
++  return {
++    ok: true,
++    mode,
++    options: {
++      projectRoot: values["project-root"],
++      implementationArtifacts: values["implementation-artifacts"],
++      frozenContext,
++      consumerContext: {
++        storyId: values["story-id"],
++        reviewSeries: values["review-series"],
++        crDir: values["cr-dir"],
++        canonicalCrDir: values["canonical-cr-dir"],
++        compatibilityMode: values["compatibility-mode"],
++        legacyArtifactPaths,
++      },
++      writeSubpath: values["write-subpath"],
++    },
++  };
++}
++
++if (process.argv[1] && path.basename(process.argv[1]) === "resolve-cr-directory.mjs") {
++  await runCli();
++}
+
+diff --git a/test/cr-directory-resolution.test.ts b/test/cr-directory-resolution.test.ts
+new file mode 100644
+index 0000000..683f540
+--- /dev/null
++++ b/test/cr-directory-resolution.test.ts
+@@ -0,0 +1,439 @@
++import { access, lstat, mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
++import { spawnSync } from "node:child_process";
++import os from "node:os";
++import path from "node:path";
++import { describe, expect, it } from "vitest";
++import { runInstallCommand } from "../src/commands/install.js";
++// @ts-expect-error Canonical Skill runtime scripts intentionally live outside the TS build graph.
++import {
++  normalizeStoryId,
++  resolveCrDirectory,
++  validateCrDirectoryContext,
++} from "../assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs";
++
++const IMPLEMENTATION_ROOT = path.join(
++  process.cwd(),
++  "assets/source/speclite/sdlc-skills/4-implementation",
++);
++const RESOLVER = path.join(
++  IMPLEMENTATION_ROOT,
++  "speclite-code-review-contract/scripts/resolve-cr-directory.mjs",
++);
++const LEAF_WORKFLOWS = {
++  "speclite-code-review-01-reviewer": "references/reviewer-workflow.md",
++  "speclite-code-review-02-evaluator": "references/evaluator-workflow.md",
++  "speclite-code-review-03-fixer": "references/fixer-workflow.md",
++  "speclite-code-review-04-rules-extractor": "references/rules-extractor-workflow.md",
++  "speclite-code-review-05-todo-tracker": "references/todo-tracker-workflow.md",
++  "speclite-code-review-06-finalizer": "references/finalizer-workflow.md",
++} as const;
++
++function currentArtifact(storyId = "11-9", reviewSeries = "directory-routing", round = 1): string {
++  return `---\nschemaVersion: speclite.cr-review.v2\nartifactType: code-review-summary\nstoryId: ${storyId}\nreviewSeries: ${reviewSeries}\nround: ${round}\n---\n`;
++}
++
++async function writeCurrent(
++  projectRoot: string,
++  crDir: string,
++  options: { storyId?: string; reviewSeries?: string; round?: number; doneClaim?: boolean } = {},
++): Promise<void> {
++  const storyId = options.storyId ?? "11-9";
++  const reviewSeries = options.reviewSeries ?? "directory-routing";
++  const round = options.round ?? 1;
++  await mkdir(path.join(projectRoot, crDir), { recursive: true });
++  await writeFile(
++    path.join(projectRoot, crDir, `${storyId}-code-review-summary-20260909-${reviewSeries}-round-${round}.md`),
++    currentArtifact(storyId, reviewSeries, round),
++  );
++  if (options.doneClaim) {
++    await writeFile(
++      path.join(projectRoot, crDir, `${storyId}-cr-finalizer-20260909-${reviewSeries}-round-${round}.md`),
++      `---\nschemaVersion: speclite.cr-finalizer.v2\nartifactType: cr-finalizer\nstoryId: ${storyId}\nreviewSeries: ${reviewSeries}\nround: ${round}\nresult: DONE\n---\n`,
++    );
++  }
++}
++
++function frozenContext(
++  crDir = "state/code-reviews/11-9-code-review",
++  compatibilityMode: "canonical" | "legacy-resume" = "canonical",
++) {
++  const legacyArtifactPaths = compatibilityMode === "legacy-resume" ? [crDir] : [];
++  return {
++    projectRoot: "",
++    implementationArtifacts: "state",
++    storyId: "11-9",
++    reviewSeries: "directory-routing",
++    crDir,
++    canonicalCrDir: "state/code-reviews/11-9-code-review",
++    compatibilityMode,
++    legacyArtifactPaths,
++  };
++}
++
++function contextFields(context: ReturnType<typeof frozenContext>) {
++  return {
++    storyId: context.storyId,
++    reviewSeries: context.reviewSeries,
++    crDir: context.crDir,
++    canonicalCrDir: context.canonicalCrDir,
++    compatibilityMode: context.compatibilityMode,
++    legacyArtifactPaths: context.legacyArtifactPaths,
++  };
++}
++
++function resolveArgs(projectRoot: string): string[] {
++  return [
++    "--mode", "resolve",
++    "--project-root", projectRoot,
++    "--implementation-artifacts", "state",
++    "--story-id", "11.9",
++    "--review-series", "directory-routing",
++  ];
++}
++
++function validateArgs(projectRoot: string, context: ReturnType<typeof frozenContext>, writeSubpath: string): string[] {
++  return [
++    "--mode", "validate-context",
++    "--project-root", projectRoot,
++    "--implementation-artifacts", context.implementationArtifacts,
++    "--frozen-context", JSON.stringify(contextFields(context)),
++    "--story-id", context.storyId,
++    "--review-series", context.reviewSeries,
++    "--cr-dir", context.crDir,
++    "--canonical-cr-dir", context.canonicalCrDir,
++    "--compatibility-mode", context.compatibilityMode,
++    "--legacy-artifact-paths", JSON.stringify(context.legacyArtifactPaths),
++    "--write-subpath", writeSubpath,
++  ];
++}
++
++describe("CR directory-only resolution and production context validation", () => {
++  it("normalizes numeric identity only and never accepts title or traversal text", () => {
++    expect(normalizeStoryId("11.9")).toEqual({ ok: true, storyId: "11-9" });
++    expect(normalizeStoryId("11-9")).toEqual({ ok: true, storyId: "11-9" });
++    for (const invalid of ["11-9-title", "11.9 中文", "../11.9", "11/9", "01.9", "11.09", ""]) {
++      expect(normalizeStoryId(invalid)).toEqual({ ok: false, reason: "invalid-story-id" });
++    }
++  });
++
++  it("routes a new run to the numeric canonical root without mutation or title input", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-new-"));
++    try {
++      await mkdir(path.join(projectRoot, "state/code-reviews"), { recursive: true });
++      const before = await readdir(path.join(projectRoot, "state/code-reviews"));
++      await expect(resolveCrDirectory({
++        projectRoot,
++        implementationArtifacts: "state",
++        storyId: "11.9",
++        reviewSeries: "directory-routing",
++      })).resolves.toEqual({
++        ok: true,
++        storyId: "11-9",
++        reviewSeries: "directory-routing",
++        crDir: "state/code-reviews/11-9-code-review",
++        canonicalCrDir: "state/code-reviews/11-9-code-review",
++        compatibilityMode: "canonical",
++        legacyArtifactPaths: [],
++        issue: null,
++      });
++      await expect(readdir(path.join(projectRoot, "state/code-reviews"))).resolves.toEqual(before);
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++    }
++  });
++
++  it("binds the one current legacy run in place even when it contains a DONE claim", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-legacy-"));
++    const legacy = "state/code-reviews/11-9-old-title-code-review";
++    try {
++      await writeCurrent(projectRoot, legacy, { doneClaim: true });
++      await expect(resolveCrDirectory({
++        projectRoot,
++        implementationArtifacts: "state",
++        storyId: "11-9",
++        reviewSeries: "directory-routing",
++      })).resolves.toMatchObject({
++        ok: true,
++        crDir: legacy,
++        compatibilityMode: "legacy-resume",
++        legacyArtifactPaths: [legacy],
++      });
++      await expect(access(path.join(projectRoot, "state/code-reviews/11-9-code-review"))).rejects.toThrow();
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++    }
++  });
++
++  it("fails multiple current candidates closed, while an explicit safe choice resolves ownership only", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-choice-"));
++    const canonical = "state/code-reviews/11-9-code-review";
++    const legacy = "state/code-reviews/11-9-old-title-code-review";
++    try {
++      await writeCurrent(projectRoot, canonical);
++      await writeCurrent(projectRoot, legacy);
++      const before = await Promise.all([canonical, legacy].map(async (relative) => ({
++        relative,
++        entries: await readdir(path.join(projectRoot, relative)),
++      })));
++      const blocked = await resolveCrDirectory({
++        projectRoot,
++        implementationArtifacts: "state",
++        storyId: "11-9",
++        reviewSeries: "directory-routing",
++      });
++      expect(blocked).toMatchObject({
++        ok: false,
++        crDir: null,
++        issue: {
++          issueId: "cr-directory.ambiguous-resume-root",
++          category: "lifecycle",
++          continuation: "block",
++          details: { reason: "multiple-current-directory-candidates" },
++        },
++      });
++      expect(JSON.stringify(blocked)).not.toContain(projectRoot);
++      await expect(resolveCrDirectory({
++        projectRoot,
++        implementationArtifacts: "state",
++        storyId: "11-9",
++        reviewSeries: "directory-routing",
++        directoryChoice: legacy,
++      })).resolves.toMatchObject({ ok: true, crDir: legacy, compatibilityMode: "legacy-resume" });
++      await expect(Promise.all([canonical, legacy].map(async (relative) => ({
++        relative,
++        entries: await readdir(path.join(projectRoot, relative)),
++      })))).resolves.toEqual(before);
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++    }
++  });
++
++  it("never lets directoryChoice bypass a symlink, escape, non-directory, or contradictory identity", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-unsafe-"));
++    const external = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-external-"));
++    const legacy = "state/code-reviews/11-9-old-title-code-review";
++    try {
++      await mkdir(path.join(projectRoot, "state/code-reviews"), { recursive: true });
++      await symlink(external, path.join(projectRoot, legacy), "dir");
++      await expect(resolveCrDirectory({
++        projectRoot,
++        implementationArtifacts: "state",
++        storyId: "11-9",
++        reviewSeries: "directory-routing",
++        directoryChoice: legacy,
++      })).resolves.toMatchObject({ ok: false, issue: { details: { reason: "unsafe-cr-directory-entry" } } });
++      await rm(path.join(projectRoot, legacy));
++      await writeCurrent(projectRoot, legacy, { storyId: "11-8" });
++      await writeFile(
++        path.join(projectRoot, legacy, "11-9-code-review-summary-20260909-directory-routing-round-2.md"),
++        currentArtifact("11-8", "directory-routing", 2),
++      );
++      await expect(resolveCrDirectory({
++        projectRoot,
++        implementationArtifacts: "state",
++        storyId: "11-9",
++        reviewSeries: "directory-routing",
++        directoryChoice: legacy,
++      })).resolves.toMatchObject({ ok: false, issue: { details: { reason: "current-directory-identity-conflict" } } });
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++      await rm(external, { recursive: true, force: true });
++    }
++  });
++
++  it("validates frozen context and every CR write plane without rediscovering a directory", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-context-"));
++    const context = { ...frozenContext(), projectRoot };
++    const writeSubpaths = [
++      "11-9-code-review-summary-20260909-directory-routing-round-1.md",
++      "11-9-code-review-evaluation-20260909-directory-routing-round-1.md",
++      "11-9-cr-rules-extraction-20260909-directory-routing-round-1.md",
++      "11-9-cr-todo-result-20260909-directory-routing-round-1.md",
++      "11-9-cr-finalizer-20260909-directory-routing-round-1.md",
++      ".tmp/directory-routing-round-1/review-input.diff",
++      "goal-execute-records/PLAN.md",
++      "goal-execute-records/EXPERIMENTS.md",
++      "goal-execute-records/EXPERIMENT_NOTES.md",
++    ];
++    try {
++      await mkdir(path.join(projectRoot, context.crDir), { recursive: true });
++      for (const writeSubpath of writeSubpaths) {
++        await expect(validateCrDirectoryContext({
++          projectRoot,
++          implementationArtifacts: context.implementationArtifacts,
++          frozenContext: contextFields(context),
++          consumerContext: contextFields(context),
++          writeSubpath,
++        })).resolves.toEqual({
++          ok: true,
++          storyId: "11-9",
++          reviewSeries: "directory-routing",
++          crDir: context.crDir,
++          writePath: `${context.crDir}/${writeSubpath}`,
++        });
++      }
++      for (const writeSubpath of ["../escape.md", "/tmp/escape", "nested\\escape.md", "", "."]) {
++        await expect(validateCrDirectoryContext({
++          projectRoot,
++          implementationArtifacts: context.implementationArtifacts,
++          frozenContext: contextFields(context),
++          consumerContext: contextFields(context),
++          writeSubpath,
++        })).resolves.toEqual({
++          ok: false,
++          reason: "invalid-write-subpath",
++        });
++      }
++      await symlink(projectRoot, path.join(projectRoot, context.crDir, ".tmp"), "dir");
++      await expect(validateCrDirectoryContext({
++        projectRoot,
++        implementationArtifacts: context.implementationArtifacts,
++        frozenContext: contextFields(context),
++        consumerContext: contextFields(context),
++        writeSubpath: ".tmp/directory-routing-round-1/input.diff",
++      })).resolves.toEqual({ ok: false, reason: "unsafe-write-path" });
++      await expect(validateCrDirectoryContext({
++        projectRoot,
++        implementationArtifacts: context.implementationArtifacts,
++        frozenContext: contextFields(context),
++        consumerContext: { ...contextFields(context), crDir: "state/code-reviews/11-9-replaced-code-review" },
++        writeSubpath: "11-9-code-review-summary-20260909-directory-routing-round-1.md",
++      })).resolves.toEqual({ ok: false, reason: "frozen-cr-context-mismatch" });
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++    }
++  });
++
++  it("exposes resolve and validate-context through one strict production CLI without tracker arguments", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-cli-"));
++    try {
++      await mkdir(path.join(projectRoot, "state/code-reviews"), { recursive: true });
++      const resolved = spawnSync(process.execPath, [RESOLVER, ...resolveArgs(projectRoot)], { encoding: "utf8" });
++      expect(resolved.status).toBe(0);
++      const context = { ...frozenContext(), projectRoot };
++      const validated = spawnSync(
++        process.execPath,
++        [RESOLVER, ...validateArgs(projectRoot, context, "goal-execute-records/PLAN.md")],
++        { encoding: "utf8", cwd: projectRoot },
++      );
++      expect(validated.status).toBe(0);
++      expect(JSON.parse(validated.stdout)).toMatchObject({
++        ok: true,
++        writePath: "state/code-reviews/11-9-code-review/goal-execute-records/PLAN.md",
++      });
++      const rejected = spawnSync(
++        process.execPath,
++        [RESOLVER, ...resolveArgs(projectRoot), "--story-tracker-required", "true"],
++        { encoding: "utf8" },
++      );
++      expect(rejected.status).toBe(2);
++      expect(JSON.parse(rejected.stdout)).toEqual({ ok: false, reason: "invalid-arguments" });
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++    }
++  });
++
++  it("requires runner single resolution and all six real consumers to invoke production validation before writes", async () => {
++    const runner = await readFile(
++      path.join(IMPLEMENTATION_ROOT, "speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md"),
++      "utf8",
++    );
++    expect(runner.match(/--mode "?resolve"?/gu)).toHaveLength(1);
++    for (const [leafId, workflow] of Object.entries(LEAF_WORKFLOWS)) {
++      const content = await readFile(path.join(IMPLEMENTATION_ROOT, leafId, workflow), "utf8");
++      expect(content, leafId).toContain("--mode validate-context");
++      expect(content, leafId).toContain("--write-subpath");
++      expect(content, leafId).toContain("任何写入前");
++      expect(content, leafId).not.toContain("runLeafFrozenContextPreflight");
++    }
++    for (const field of ["crDir", "canonicalCrDir", "compatibilityMode", "legacyArtifactPaths"]) {
++      expect(runner).toContain(`${field}={${field}}`);
++    }
++  });
++
++  it("projects byte-identical production resolver and validator consumption to both IDE installs", async () => {
++    const projectRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-dir-install-"));
++    try {
++      const outcome = await runInstallCommand({
++        options: { json: true, yes: true },
++        runtime: {
++          nodeVersion: "v22.12.0",
++          platform: "darwin",
++          platformRelease: "23.0.0",
++          cwd: projectRoot,
++          targetProject: "directory-routing-contract",
++        },
++      });
++      expect(outcome.exitCode).toBe(0);
++      const sourceBytes = await readFile(RESOLVER);
++      for (const ideRoot of [".agents/skills", ".claude/skills"]) {
++        const installed = path.join(
++          projectRoot,
++          ideRoot,
++          "speclite-code-review-contract/scripts/resolve-cr-directory.mjs",
++        );
++        await expect(readFile(installed)).resolves.toEqual(sourceBytes);
++        expect((await stat(installed)).mode & 0o777).toBe(0o755);
++        const resolveProbe = spawnSync(process.execPath, [installed, ...resolveArgs(projectRoot)], {
++          cwd: projectRoot,
++          encoding: "utf8",
++        });
++        expect(resolveProbe.status).toBe(0);
++        const resolved = JSON.parse(resolveProbe.stdout);
++        const context = {
++          ...frozenContext(resolved.crDir, resolved.compatibilityMode),
++          projectRoot,
++          canonicalCrDir: resolved.canonicalCrDir,
++          legacyArtifactPaths: resolved.legacyArtifactPaths,
++        };
++        const validateProbe = spawnSync(
++          process.execPath,
++          [installed, ...validateArgs(projectRoot, context, ".tmp/directory-routing-round-1/review-input.diff")],
++          { cwd: projectRoot, encoding: "utf8" },
++        );
++        expect(validateProbe.status).toBe(0);
++        expect(JSON.parse(validateProbe.stdout)).toMatchObject({ ok: true, crDir: resolved.crDir });
++      }
++    } finally {
++      await rm(projectRoot, { recursive: true, force: true });
++    }
++  });
++
++  it("keeps active title-bearing patterns negative while retaining classified legacy compatibility examples", async () => {
++    const activeFiles = [
++      "speclite-code-review-contract/SKILL.md",
++      "speclite-code-review-contract/SKILL.en.md",
++      "speclite-code-review-contract/references/cr-contract.md",
++      "speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.md",
++      "speclite-goal-orchestrator-epic-story-code-review-runner/SKILL.en.md",
++      "speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md",
++      ...Object.entries(LEAF_WORKFLOWS).flatMap(([leafId, workflow]) => [
++        `${leafId}/SKILL.md`,
++        `${leafId}/SKILL.en.md`,
++        `${leafId}/${workflow}`,
++      ]),
++    ];
++    for (const relative of activeFiles) {
++      const content = await readFile(path.join(IMPLEMENTATION_ROOT, relative), "utf8");
++      expect(content, relative).not.toMatch(/\{story(?:Id|_id)\}-\{story(?:Key|_key|Slug|_slug|Name|_name)\}-code-review/gu);
++      expect(content, relative).not.toContain("trackerBindings");
++    }
++    const ledger = JSON.parse(await readFile(
++      path.join(process.cwd(), "test/fixtures/code-review-contract/title-bearing-path-ledger.json"),
++      "utf8",
++    )) as Array<{ path: string; line: number; token: string; role: string }>;
++    expect(ledger.every((entry) => entry.path === "test/cr-directory-resolution.test.ts")).toBe(true);
++    expect(ledger.every((entry) => ["legacy-fixture", "regression-assertion"].includes(entry.role))).toBe(true);
++    const regressionSource = await readFile(path.join(process.cwd(), "test/cr-directory-resolution.test.ts"), "utf8");
++    const regressionLines = regressionSource.split("\n");
++    for (const entry of ledger) {
++      expect(regressionLines[entry.line - 1], `${entry.path}:${entry.line}`).toContain(entry.token);
++    }
++    const observed = [...regressionSource.matchAll(/11-9-[a-z-]+-code-review/gu)].map((match) => ({
++      line: regressionSource.slice(0, match.index).split("\n").length,
++      token: match[0],
++    }));
++    expect(observed).toEqual(ledger.map(({ line, token }) => ({ line, token })));
++    await expect(lstat(RESOLVER)).resolves.toMatchObject({ mode: expect.any(Number) });
++  });
++});
+
+diff --git a/test/fixtures/code-review-contract/title-bearing-path-ledger.json b/test/fixtures/code-review-contract/title-bearing-path-ledger.json
+new file mode 100644
+index 0000000..763a830
+--- /dev/null
++++ b/test/fixtures/code-review-contract/title-bearing-path-ledger.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "path": "test/cr-directory-resolution.test.ts",
++    "line": 147,
++    "token": "11-9-old-title-code-review",
++    "role": "legacy-fixture",
++    "rationale": "Story 11.9 resolver compatibility regression fixture"
++  },
++  {
++    "path": "test/cr-directory-resolution.test.ts",
++    "line": 170,
++    "token": "11-9-old-title-code-review",
++    "role": "legacy-fixture",
++    "rationale": "Story 11.9 sticky legacy ownership regression fixture"
++  },
++  {
++    "path": "test/cr-directory-resolution.test.ts",
++    "line": 214,
++    "token": "11-9-old-title-code-review",
++    "role": "legacy-fixture",
++    "rationale": "Story 11.9 physical safety regression fixture"
++  },
++  {
++    "path": "test/cr-directory-resolution.test.ts",
++    "line": 299,
++    "token": "11-9-replaced-code-review",
++    "role": "regression-assertion",
++    "rationale": "Story 11.9 consumer context replacement rejection"
++  }
++]
+

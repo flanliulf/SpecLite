@@ -1,0 +1,57 @@
+{
+  "layer": "edge",
+  "layerName": "Edge Case Hunter",
+  "status": "COMPLETED",
+  "verdict": "FINDINGS_REPORTED",
+  "storyId": "11-9",
+  "storyKey": "11-9-normalize-code-review-artifact-directories-by-story-id",
+  "reviewSeries": "evidence-v2",
+  "round": 1,
+  "modelUsed": "OpenAI GPT-5.6 Sol",
+  "completedAt": "2026-09-07T16:16:05+08:00",
+  "independence": {
+    "fresh": true,
+    "otherLayerOutputsRead": false,
+    "filesModified": false
+  },
+  "scope": {
+    "baseSha": "ff7528d3f9ec34072bb669ee79f7569345c23d47",
+    "headSha": "ff7528d3f9ec34072bb669ee79f7569345c23d47",
+    "approvedDeclaredCount": 41,
+    "excludedSurfacesTested": false
+  },
+  "commands": [
+    {"command": "npm test -- test/code-review-contract.test.ts", "result": "PASS: 97 passed; 4 todo"},
+    {"command": "isolated inline Node fixture importing resolve-cr-directory.mjs", "result": "COUNTEREXAMPLE: baseline and quotedDuplicate both returned ok=true with canonical continuation"},
+    {"command": "JSON.parse ledger and release manifest; scoped git diff --check", "result": "PASS"}
+  ],
+  "findingCount": 2,
+  "findings": [
+    {
+      "findingId": "EDGE-001",
+      "category": "contract-propagation",
+      "invariant": "Runner 调用 CR01–06 时必须显式传入 orchestrationMode 与 handoffTarget，使所有 leaf 消费同一 runner-frozen context，且不得落入 standalone fallback 或再次解析目录。",
+      "concreteFailureScenario": "Runner 按 Step 5/6/9/10 的命令模板调用 CR01–06；这些模板均未携带 orchestrationMode=runner 与 handoffTarget=runner。CR01、CR02、CR04 的入口明确把缺失值按 manual standalone 处理，于是会走 manual resolver 路径，再次解析目录；实际结果是同一 Story 不再保证只解析一次 crDir，并可能在两次解析之间的文件系统变化下观察不同 canonical/legacy state，或因 mode/context 不一致 HALT。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/references/runner-workflow.md:72",
+      "suggestedBucket": "patch",
+      "blocking": true,
+      "suggestedDisposition": "new-candidate",
+      "layerFingerprint": "sha256:c80ecdca69761275319f136bed12541cfcd7dbc23cd25c49cb2a5836617eb70c"
+    },
+    {
+      "findingId": "EDGE-002",
+      "category": "artifact-authentication",
+      "invariant": "Resolver 在把 legacy run 认证为 DONE 前，必须拒绝 leading YAML frontmatter 中任何语义重复或冲突的 authority 字段。",
+      "concreteFailureScenario": "一个其他方面完全 authentic 的 legacy finalizer 同时包含 quoted key \"result\": HALTED 与 bare key result: DONE。YAML 中两者是同一键的冲突定义，但 parseLeadingFrontmatter 只匹配裸键并静默跳过 quoted key，因此 validDoneFinalizer 仍看到 result=DONE。隔离 fixture 实测 resolver 返回 ok=true、compatibilityMode=canonical，并允许启动 canonical sibling。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440",
+      "suggestedBucket": "patch",
+      "blocking": true,
+      "suggestedDisposition": "new-candidate",
+      "layerFingerprint": "sha256:bbe9fc5ade1ff3d311c5d70890a4893c27da658a0a0bee24ca229a17f8dbc783"
+    }
+  ],
+  "nonFindings": [
+    "focused suite 全绿不抵消两个具体失败。",
+    "未测试外部 drawer、installed mirrors、固定数量或其他明确排除 surface。"
+  ]
+}

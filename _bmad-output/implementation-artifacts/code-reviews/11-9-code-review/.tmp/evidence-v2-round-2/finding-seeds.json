@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "speclite.cr-finding-seeds.v1",
+  "status": "CANONICAL",
+  "canonicalSource": "classified-findings.json",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 2,
+  "generatedAt": "2026-09-07T10:29:15.008Z",
+  "canonicalization": "Unicode NFC; LF separators; trim line trailing whitespace and file trailing whitespace; UTF-8 SHA-256",
+  "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"],
+  "fingerprints": [
+    {"findingId":"EVIDENCE-V2-R2-F1","fingerprint":"sha256:4b9c617b38f75a104c3cd08fbce260af490fd72d0722f0ff353bf1075a374ac9"},
+    {"findingId":"EVIDENCE-V2-R2-F2","fingerprint":"sha256:f113580e33ce900c8f1516e7cd540b7bac96b7ceafdc5907d243c0ecbaebf1e4"},
+    {"findingId":"EVIDENCE-V2-R2-F3","fingerprint":"sha256:6c2824d6e2d973a0d1e630d4d84bf21b9f46b53ed0c95594f0ad4974c06bd7ca"},
+    {"findingId":"EVIDENCE-V2-R2-F4","fingerprint":"sha256:12d668827d3f339bd533356fc7f8b68a88e33fbd4150dafea1ade6debeacb29b"},
+    {"findingId":"EVIDENCE-V2-R2-F5","fingerprint":"sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244"},
+    {"findingId":"EVIDENCE-V2-R2-F6","fingerprint":"sha256:4ac82b8bd024bfb5ba610fa75e3eba2230a93105fbbee4caf6de478cf629030a"},
+    {"findingId":"EVIDENCE-V2-R2-F7","fingerprint":"sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483"}
+  ]
+}

@@ -13,7 +13,7 @@
 | CR-SEC-01 | Target 与 installed-state 边界检查必须使用 no-follow 路径判断 | 1-2 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-01 | 写入确认前的 human output 必须展示可审计 target summary | 1-2 | 6/12 | rules-summary | 已写入规则总结 |
 | CR-DOC-02 | Final pre-write install scope summary 必须绑定最终 selected module set | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
-| CR-TEST-01 | No-write 回归断言必须覆盖全部禁止写入路径并支持既有路径排除 | 1-2 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-01 | No-write 回归断言必须覆盖全部禁止写入路径并支持既有路径排除 | 1-2, 11-9 | 10/12 | rules-summary | 已写入规则总结 |
 | CR-API-03 | 用户可见交互能力必须接入 command path 而非停留在 pure model | 1-3, 1-4, 10-1 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-API-04 | Internal InstallPlan 必须记录 selectedModules 且不得泄露到 public CommandResult | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-05 | Module required_dependencies 必须在 metadata discovery 阶段确定性校验 | 1-3 | 7/12 | rules-summary | 已写入规则总结 |
@@ -26,7 +26,7 @@
 | CR-API-10 | Help/phase mapped target 必须反查 `skill-index.installedTargets` | 2-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-11 | ReadyCheck 可读 index 的 target 语义错误必须保留 reserved `menu-target.*` 诊断 | 2-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-12 | Installed activation path basename 必须绑定对应 `canonicalSkillId` | 2-3 | 7/12 | rules-summary | 已写入规则总结 |
-| CR-API-13 | Resolver schema anchor 必须解析真实 runtime result shape | 2-4 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-13 | Resolver schema anchor 必须解析真实 runtime result shape | 2-4, 11-1 | 9/12 | rules-summary | 已写入规则总结 |
 | CR-API-14 | Installed activation 必须通过 `speclite resolve` runtime entry 获取配置与 customization | 2-4 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-04 | Artifact path public contract 必须先严格校验 POSIX-style 再做 filesystem normalization | 2-5 | 6/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-05 | `actualArtifactPath` containment 必须以 configured artifact root 为边界 | 2-5 | 7/12 | rules-summary | 已写入规则总结 |
@@ -41,7 +41,7 @@
 | CR-SEC-09 | Protected path classifier 结果必须优先于 files-index ownership | 4-1, 4-5 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-10 | File integrity ownership 检查必须使用 configured artifact root | 4-1 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-20 | Source trust evidence 缺失或 malformed 时 update planning 必须 fail closed | 4-3 | 8/12 | rules-summary | 已写入规则总结 |
-| CR-TEST-02 | Command fixture 必须显式满足被测 gate 之前的前置 evidence | 4-3 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-02 | Command fixture 必须显式满足被测 gate 之前的前置 evidence | 4-3, 11-6, 11-8 | 10/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-11 | Safe-write stale temp 诊断必须覆盖同目录受控 roots | 4-4 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-12 | Safe-write cleanup failure 必须返回稳定 issue 而不是 raw error | 4-4 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-13 | Existing overwrite 必须执行 apply-time ownership/hash baseline preflight | 4-4 | 8/12 | rules-summary | 已写入规则总结 |
@@ -70,6 +70,29 @@
 | CR-API-33 | Canonical governance map 必须覆盖 ecosystem source classification 与 ecosystem-only impact rule | 10-6 | 10/12 | rules-summary | 已写入规则总结 |
 | CR-TEST-07 | Release packaging source assertion 必须动态覆盖全部 nested ecosystem modules | 10-5 | 9/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-17 | Release package inventory gate 必须排除 cache/temp/build/source-local dist 输出 | 10-5 | 9/12 | rules-summary | 已写入规则总结 |
+| CR-API-34 | Artifact-root resolver handoff 必须保留 leaf dotted-key provenance | 11-1 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-API-35 | Fresh ReadyCheck 必须对 caller 与 manifest 的 optional additive projection 做 fail-closed reconciliation | 11-2 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-API-36 | `resolutionMode` 必须表达 field-level 来源语义而非 lifecycle 标签 | 11-2 | 9/12 | rules-summary | 已写入规则总结 |
+| CR-PROCESS-02 | Owner correction 必须用 dated controlled correction 保留原决策轨迹 | 11-2 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-API-37 | Existing-state consumer 必须将 blocking artifact-root resolver issue fail closed | 11-3, 11-8 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-API-38 | Config/artifact mismatch 必须消费 consumer-filtered actual path evidence | 11-3 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-18 | Installer-owned namespace 必须优先于 overlapping artifact roots | 11-3 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-API-39 | Workflow artifact metadata schema 必须兼容 unknown future keys 且保持 required keys strict | 11-3 | 8/12 | rules-summary | 已写入规则总结 |
+| CR-API-40 | Public resolver surfaces 必须区分 raw config 与 effective artifact-root resolution | 11-4 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-19 | Analysis artifact route selection 必须验证 portable basename 与 project-local readable regular candidate | 11-4 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-05 | Installed Markdown workflow 与 executable implementation 必须形成可定位、同源的双向 binding | 11-4, 11-6, 11-8, 11-9 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-API-41 | Whole/sharded selection 必须分离 canonical entry safety 与 selected graph validation | 11-5 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-20 | Artifact discovery 必须以 dereferenced regular-file 与 containment 证据决定消费资格 | 11-5, 11-7 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-06 | Bounded Markdown shard parser 必须 post-decode 分类、fail closed 并保持声明顺序 | 11-5 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-21 | Filesystem write 必须在 operation 内重验 physical owner 与 nearest existing ancestor | 11-6 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-07 | Bounded markup validator 必须与 renderer 的 precedence 和 character-reference 语义一致 | 11-6 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-API-42 | 多步骤 artifact producer 必须锁定单一 invocation identity 并复用 exact target | 11-7 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-08 | Contract corpus gate 必须按 surface role 分类 whole semantic candidate | 11-7, 11-8, 11-9 | 10/12 | rules-summary | 已写入规则总结 |
+| CR-TEST-09 | 静态 evidence oracle 必须用稳定 mutant 证明 fail-closed reachability | 11-7 | 9/12 | rules-summary | 已写入规则总结 |
+| CR-API-43 | Canonical identity rename 必须由实际 mutation action 承载 typed replacement 并保持幂等 | 11-8 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-API-44 | CR 目录身份必须单次解析并以 caller-frozen context 贯穿所有 leaf | 11-9 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-PROCESS-03 | CR 完成证据必须绑定同轮 predecessor graph 与 source freshness | 11-9 | 11/12 | rules-summary | 已写入规则总结 |
+| CR-DOC-08 | 机器终态字段解析必须限定结构区域并对歧义语法 fail closed | 11-9 | 10/12 | rules-summary | 已写入规则总结 |
 
 ---
 
@@ -443,11 +466,14 @@
 
 #### CR-TEST-01：No-write 回归断言必须覆盖全部禁止写入路径并支持既有路径排除
 
-- **来源问题**: no-write 测试只检查部分路径，未覆盖 `_speclite`、operation lock、safe-write temp、manifest/index 等 Story 禁止写入路径，也未完整覆盖边界分支。
+- **来源问题**: no-write 测试只检查部分路径，未覆盖 `_speclite`、operation lock、safe-write temp、manifest/index 等 Story 禁止写入路径，也未完整覆盖边界分支。Story 11.9 Round 1-3 再次暴露同根因：ambiguity/unbound/invalid-context blocker 的 zero-mutation 证明只覆盖单个 synthetic case 或 filesystem subset，没有同时冻结 runner progress、round artifact、goal record、temp、Story 与 trackers 的全部 mutation surface。
 - **CR 证据**:
   - `1-2-code-review-summary-20260526-round-1.md`: Finding #5 指出 no-write 与边界测试覆盖不足。
   - `1-2-code-review-evaluation-20260526-round-1.md`: evaluator 确认该测试缺口为 P2，建议同轮修复并注意 preexisting paths 排除。
   - `1-2-code-review-evaluation-20260526-round-2.md`: evaluator 确认 no-write assertion 覆盖 `_speclite`、`_speclite-output`、IDE mirrors、operation lock、temp/safe-write paths、manifest/index，并支持 preexisting paths。
+  - `11-9-code-review-evaluation-20260905-round-1.md`: Findings #5/#6 确认 I/O/ambiguity block 必须返回 stable redacted single JSON，并证明 CR artifacts、runner progress、Story 与 trackers 均零 mutation。
+  - `11-9-code-review-evaluation-20260905-round-2.md`: Finding #4 确认 runner-wide zero-mutation 不能只覆盖单一 synthetic unbound case，必须覆盖完整 blocked reason matrix。
+  - `11-9-code-review-evaluation-20260905-round-3.md`: Finding #5 确认每类 blocker 的 stable reason 与 zero-mutation surface 必须一一绑定；后续 Round 24 双 PASS 确认闭合。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -458,24 +484,25 @@
 
   | 维度 | 分数 | 理由 |
   |------|------|------|
-  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认并复审关闭。 |
-  | 影响范围 | 1 | 影响 install pre-confirmation、failure 和 existing-install branches 的测试门禁。 |
-  | 风险等级 | 1 | 测试漏报可能让后续 mutation 回归进入 pre-confirmation 阶段。 |
-  | 根因稳定性 | 1 | no-write helper 容易随新增 forbidden path 漏更新。 |
+  | 复现频次 | 2 | Story 1.2 与 11.9 均出现仅检查部分禁止写入面导致 zero-mutation 证明不足。 |
+  | 影响范围 | 2 | 影响 install/update 类写入门禁以及 CR runner 的 artifact、progress、Story、tracker 与临时状态。 |
+  | 风险等级 | 2 | 阻断路径漏写检查可能让歧义或无效 identity 在失败前留下可被后续恢复误认的持久状态。 |
+  | 根因稳定性 | 2 | mutation surface 随工作流扩展时，共享 no-write helper 和 blocked matrix 很容易遗漏新路径或新状态面。 |
   | 可执行性 | 2 | 可通过共享 assertion helper、preexisting path whitelist 和 focused branch tests 检查。 |
   | 文档缺口 | 1 | 全局 no-write/writeAuthorized 语义存在，但测试 helper 覆盖策略未充分细化。 |
 
-- **总分**: 7/12
+- **总分**: 10/12
 - **建议去向**: rules-summary
-- **适用范围**: install/update/repair 等存在 pre-confirmation、dry-run 或 no-write gate 的 tests。
+- **适用范围**: install/update/repair 等 pre-confirmation/dry-run gate，以及 CR runner 的 ambiguity、invalid identity、invalid context 与 filesystem failure blocker tests。
 - **规避指南**:
   - 不得只断言一两个 output directory 未创建，就宣称 no-write gate 已被测试覆盖。
 - **最佳实践**:
   - no-write helper 应列出全部 forbidden paths，并允许 existing-install fixture 标记 preexisting paths，避免把已有状态误判为本次命令写入。
+  - 多阶段 runner 还应在每个 stable blocker 前后 snapshot round artifacts、goal records、temp、progress、Story 与 trackers，并对完整 reason matrix 逐类证明零 mutation。
 - **全局文档建议**:
   - 不建议本次升格；该规则更偏测试实践，暂记录到 CR rules summary，后续多 Story 重复出现后再考虑进入 test guideline。
 - **本次落地**:
-  - Round 1 fixer 已修复，Round 2 evaluator 确认关闭。
+  - Story 1.2 Round 1 fixer 已修复，Round 2 evaluator 确认关闭；Story 11.9 Round 1-3 fixer 扩展 runner-wide blocked matrix 与全 mutation surface，Round 24 Reviewer/Evaluator 确认保持关闭。
 - **同步状态**: 已写入规则总结
 
 ### Story 1-4 / 2026-05-26
@@ -1814,11 +1841,16 @@
 
 #### CR-TEST-02：Command fixture 必须显式满足被测 gate 之前的前置 evidence
 
-- **来源问题**: Story 4.3 Round 3 暴露 `test/update-command.test.ts` 仍使用缺 manifest fixture 断言 missing files-index conflict；但当前 source descriptor gate 应先于 files-index conflict 生效，导致全量 `npm test` 失败，也让测试目标与实际 gate 顺序不一致。
+- **来源问题**: Story 4.3 Round 3 暴露 `test/update-command.test.ts` 仍使用缺 manifest fixture 断言 missing files-index conflict；但当前 source descriptor gate 应先于 files-index conflict 生效，导致全量 `npm test` 失败，也让测试目标与实际 gate 顺序不一致。Story 11.6 Round 2 再次出现同根因：legacy no-migration fixture 在 install 完成后才创建 legacy tree，因此只能证明 update/repair 后未改变，不能证明 install 面对 already-existing legacy artifacts 时的行为。Story 11.8 Round 1 又发现测试只匹配 legacy 文案，没有在第一条 write-capable command 前创建真实 legacy readiness tree，也没有逐阶段验证 discovery 与原位保护；三次都属于 fixture 未建立目标 gate 所要求的前置世界状态。
 - **CR 证据**:
   - `4-3-code-review-summary-20260531-round-3.md`: reviewer 指出 missing files-index conflict 测试没有创建 `_speclite/_config/manifest.yaml`，实际先返回 `source-integrity.missing-source-descriptor`。
   - `4-3-code-review-evaluation-20260531-round-3.md`: evaluator 确认该测试断言问题为 P1，需要补齐 trusted manifest/source descriptor fixture 或改成 missing manifest gate 断言。
   - `4-3-code-review-evaluation-20260531-round-4.md`: evaluator 确认 `writeTrustedManifest()` 已让测试越过 source descriptor gate 后继续覆盖 missing files-index conflict，全量 `npm test` 通过。
+  - `11-6-code-review-summary-20260904-round-2.md`: Finding #4 确认 legacy fixture 的 setup 顺序无法证明 install-existing no-migration，且 completion gate 的旧 evidence 超过实际覆盖。
+  - `11-6-code-review-evaluation-20260904-round-2.md`: evaluator 将该 finding 确认为 P1，要求 install 前创建并 snapshot legacy main、supporting HTML 与 asset tree，并逐阶段断言 command success、source invariants、`changedPaths` 和 canonical counterpart absence。
+  - `11-6-code-review-evaluation-20260904-round-5.md`: evaluator 确认六类 legacy entries 已在 install 前建立，install/update/repair 后逐阶段保持 path/type/hash/symlink text 且 canonical counterparts 不存在，该缺口已关闭。
+  - `11-8-code-review-evaluation-20260905-round-1.md`: Finding #6 确认只验证 Markdown 中的 legacy/no-migration 措辞不能证明真实 discovery 与 lifecycle preservation；Fix Summary 在 install/update/repair 前建立真实 `{planning_artifacts}/ir-grill/` tree，并逐阶段比较 path、no-follow type、bytes、hash、tree 与 mutation-set 零交集。
+  - `11-8-code-review-evaluation-20260905-round-4.md`: evaluator 确认真实 legacy tree 的原位 discovery 与 install/update/repair preservation 持续关闭。
 - **硬性门槛**:
   - 有证据: 是
   - 可规则化: 是
@@ -1829,24 +1861,26 @@
 
   | 维度 | 分数 | 理由 |
   |------|------|------|
-  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator 均确认，并由 Round 4 复审验证关闭。 |
-  | 影响范围 | 1 | 影响 command-level update/repair regression、source descriptor gate 与 files-index conflict 的测试分层。 |
+  | 复现频次 | 2 | Story 4.3、11.6 与 11.8 均出现 fixture 未先满足目标 gate 前置状态、从而证明错误阶段、错误命令语义或仅证明文案的问题，并分别经后续复审关闭。 |
+  | 影响范围 | 2 | 影响 install/update/repair 多阶段 lifecycle、source descriptor/files-index gate、legacy compatibility 与 completion evidence 的可信度。 |
   | 风险等级 | 1 | 错误 fixture 会让回归套件失败或误测为错误 gate，削弱测试对 public contract 的信号质量。 |
-  | 根因稳定性 | 1 | 多 gate command flow 中，测试 fixture 未显式满足前置 evidence 是容易复现的测试编写缺口。 |
+  | 根因稳定性 | 2 | 多 gate、多 lifecycle command flow 中，fixture 未显式满足前置 evidence、或用文案存在替代行为世界状态，是跨 Story 稳定复现的测试编写缺口。 |
   | 可执行性 | 2 | 可要求每个 command fixture 写明目标 gate，并补齐前置 trusted manifest/source descriptor 或明确断言前置 gate。 |
   | 文档缺口 | 1 | 现有测试规则未细化多 gate command fixture 的前置 evidence 要求。 |
 
-- **总分**: 7/12
+- **总分**: 10/12
 - **建议去向**: rules-summary
-- **适用范围**: update/repair/status/validate 等存在 source trust、manifest/index、ownership、conflict 多层 gate 的 command-level tests。
+- **适用范围**: install/update/repair/status/validate 等存在 source trust、manifest/index、ownership、compatibility、conflict 多层 gate 的 command-level tests。
 - **规避指南**:
   - 不得用缺失前置 evidence 的 fixture 去断言后置 gate；例如要测试 files-index conflict 时，必须先提供可信 manifest/source descriptor。
+  - 不得在 lifecycle 首阶段之后才创建“already-existing”输入，再用后续阶段 invariants 代替首阶段 no-migration/no-copy 证据。
 - **最佳实践**:
   - 测试 fixture 应显式服务一个 gate：若目标是后置 conflict，则补齐前置 gate 所需 evidence；若目标是前置 blocker，则断言前置 issue、空 plan 和禁止写入授权。
+  - 多阶段 compatibility fixture 应在第一条命令前建立完整输入并 snapshot；每一阶段分别断言 command success/failure、path/type/content/hash/symlink text、changed paths 与目标侧 absence/presence，不能只比较最终状态。
 - **全局文档建议**:
   - 不建议本次升格；该规则偏 command regression 编写实践，本次按用户授权 record-only 沉淀。
 - **本次落地**:
-  - Round 3 fixer 已修复，Round 4 evaluator 确认关闭。
+  - Story 4.3 Round 3 fixer 已修复，Round 4 evaluator 确认关闭。Story 11.6 Round 2/3 fixer 补齐 install-before-existing 与逐阶段证据，Round 5 reviewer/evaluator 确认保持关闭。Story 11.8 Round 1 fixer 补齐真实 legacy readiness tree、discovery 与逐阶段原位保护，Round 4 reviewer/evaluator 确认保持关闭；本次不新增重复规则编号。
 - **同步状态**: 已写入规则总结
 
 #### 05 TODO Tracker 交接
@@ -3136,6 +3170,1435 @@
 #### 05 TODO Tracker 交接
 
 - **无需新增 TODO backlog**: Round 1 evaluation 未降级任何 CR TODO，Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 11-9 / 2026-09-07
+
+- **Story**: 11-9
+- **分析来源**:
+  - `11-9-code-review-summary-20260905-round-1.md` 至 `11-9-code-review-summary-20260905-round-17.md`
+  - `11-9-code-review-summary-20260907-round-18.md` 至 `11-9-code-review-summary-20260907-round-24.md`
+  - `11-9-code-review-evaluation-20260905-round-1.md` 至 `11-9-code-review-evaluation-20260905-round-16.md`
+  - `11-9-code-review-evaluation-20260907-round-17.md` 至 `11-9-code-review-evaluation-20260907-round-24.md`
+- **模型使用时间线**:
+  - Round 1-7 Reviewer 记录为 `GPT-5.6`，Round 8-19 记录为 `OpenAI GPT-5.6 Sol (gpt-5.6-sol)`，Round 20-24 记录为 `GPT-5.6Sol`。
+  - Round 1 Evaluator 记录为 `GPT-5.6 (gpt-5.6)`，Round 2-19 主要记录为 `OpenAI GPT-5.6 Sol (gpt-5.6-sol)`，Round 20-24 记录为 `GPT-5.6Sol`；Fixer 身份保留在各轮 evaluation 的 `Fix Execution Record`。
+  - 本次 CR04 Rules Extractor 使用 `GPT-5.6Sol`。
+- **结论概览**:
+  - Round 1-23 的 accepted blocking findings 反复集中在五类根因：单一 CR root/context 传播、artifact identity/round/predecessor authenticity、machine-owned tracker/parser totality、runner-wide zero mutation、contract corpus/detector completeness；各轮 authorized Fixer 已逐步关闭。
+  - Round 24 Reviewer 三层 `3/3 PASS`、Aggregator `PASS / PASS_RECOMMENDED` 且 blocker=`0`；Evaluator 精确结论为 `PASS_WITH_DEFERRED_TODOS`，review/evaluation SHA-256 分别为 `e6cca13cd4ecaedbe5e7489b34b8f49a37188e5f2f5fc7b52009084e73d47354` 与 `71664453b8898ee7024c77719dda03b220af1a6a40c462c27a82d67bb410cf39`。
+  - 本次 CR04 按 outer orchestrator 的默认推荐授权执行 `record-only`：新增 3 条规则，更新 `CR-TEST-01`、`CR-TEST-08`、`CR-DOC-05` 的跨 Story 证据；不修改 project-context、Architecture、SPEC、source、tests、Story、tracker、completion gate 或 TODO backlog。
+  - 唯一未解决项是 Round 5 首次确认、Round 24 carried 的 `supersededIndex` identity/continuity P2；状态不明确为已解决，因此不进入 rules summary，交由 CR05 去重登记。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| CR 目录身份必须单次解析并以 caller-frozen context 贯穿所有 leaf | 通过 | 11/12 | rules-summary | outer orchestrator 已授权 record-only，新增 CR-API-44 |
+| CR 完成证据必须绑定同轮 predecessor graph 与 source freshness | 通过 | 11/12 | rules-summary | outer orchestrator 已授权 record-only，新增 CR-PROCESS-03 |
+| 机器终态字段解析必须限定结构区域并对歧义语法 fail closed | 通过 | 10/12 | rules-summary | outer orchestrator 已授权 record-only，新增 CR-DOC-08 |
+| 阻断路径 no-write 证据必须覆盖 runner 全部 mutation surface | 通过；与既有规则同根 | 10/12 | rules-summary | 更新 CR-TEST-01，不创建重复规则 |
+| Contract corpus gate 必须冻结独立 control plane 并做双向分类 | 通过；与既有规则同根 | 10/12 | rules-summary | 更新 CR-TEST-08，不创建重复规则 |
+| CR04/CR05 durable output 必须同步 active docs/help | 通过；与既有规则同根 | 11/12 | rules-summary | 更新 CR-DOC-05，不创建重复规则 |
+| `supersededIndex` identity/continuity | 未通过：状态未解决 | N/A | todo-tracker | 交由 CR05；不得在 CR04 双重管理或实现 |
+
+### 提炼规则
+
+#### CR-API-44：CR 目录身份必须单次解析并以 caller-frozen context 贯穿所有 leaf
+
+- **来源问题**: Round 1-4 连续发现 runner 只传播部分 resolver 值、真实 CLI 无法携带 required tracker bindings、leaf 仅靠 prose/substring 断言且仍可重新从 title/name/slug/filename 推导目录，导致同一 Story 的 review/evaluation/fix/rules/TODO/finalizer/goal records 可能分叉到多个 root 或在歧义状态下继续写入。
+- **CR 证据**:
+  - `11-9-code-review-evaluation-20260905-round-1.md`: Findings #2/#4/#7 确认 orchestrator 必须一次解析完整 `crDir/canonicalCrDir/compatibilityMode/legacyArtifactPaths` 与 tracker bindings，并传给 CR01-06；fresh installed runner/contract/leaves 必须消费同一 context。
+  - `11-9-code-review-evaluation-20260905-round-2.md`: Findings #3/#5 确认 leaf 要有 executable exact-context fail-close oracle，ZH/EN installed entrypoints 均不得重推导。
+  - `11-9-code-review-evaluation-20260905-round-4.md`: Findings #1/#6/#7 关闭真实 CLI reachability、leaf exact `ok/issue` schema 与 title-bearing 全变量族；Round 24 evaluator 确认保持关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于任何 orchestrator 解析 canonical identity 后委派多个 leaf 的工作流
+  - 不重复: 是；`CR-API-42` 约束 artifact producer invocation identity，本规则补充 orchestration root、compatibility mode、tracker bindings 与全部 leaf 的 caller-frozen context
+  - 状态明确: 是；已修复并由 Round 24 双 PASS 确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 1-4 从 runner、CLI、leaf、installed parity 与 detector 多面连续复现。 |
+  | 影响范围 | 2 | 影响 CR01-06、goal records、review/evaluation/fix/rules/TODO/finalizer 与 tracker binding。 |
+  | 风险等级 | 2 | identity 分叉或歧义后写入会拆轮、污染历史并让错误 tracker 被认证。 |
+  | 根因稳定性 | 2 | 多 leaf 工作流若允许各自从 display metadata 重算 identity，会随入口增加稳定复现。 |
+  | 可执行性 | 2 | 可由唯一 resolver、typed CLI args、leaf exact schema、fresh installed invocation 与 mismatch-before-write matrix 检查。 |
+  | 文档缺口 | 1 | Story/contract 已拥有 CR root 语义，但跨工作流可复用的 caller-frozen orchestration 检查点尚未独立沉淀。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: 多 leaf agent workflow、canonical identity resolver、legacy resume、tracker binding、installed Skill entrypoint 与 durable artifact root。
+- **规避指南**:
+  - 不得让下游 leaf 从 title、slug、filename 或默认路径重新推导 root，也不得只传播 `storyId` 后让 leaf 自行补齐 compatibility/tracker context。
+- **最佳实践**:
+  - orchestrator 只调用一次 owning resolver，冻结完整 typed context；每个 leaf 在任何写入前核对 exact schema/value，并用真实 CLI 与 installed entrypoint 证明同一对象贯穿全链路。
+- **全局文档建议**:
+  - 不建议本次升格；该规则集中于 CR orchestration 技术域，且用户明确授权 record-only，不修改全局上下文或 Architecture。
+- **本次落地**:
+  - Round 1-4 authorized Fixer 已完成 single resolution、typed propagation、leaf executable oracle 与 installed parity；Round 24 双 PASS 确认保持关闭。
+- **同步状态**: 已写入规则总结
+
+#### CR-PROCESS-03：CR 完成证据必须绑定同轮 predecessor graph 与 source freshness
+
+- **来源问题**: Round 2-23 多次出现 finalizer/CR04/CR05 只凭 `DONE/COMPLETED` prose、basename 或部分 hash 即认证完成，未同时绑定 current Story/series/round、review/evaluation source hash、finding/scope/count 语义、fixRecord authority、completion mutation source 与 higher-round review 的 source mutation，导致 stale 或错代 evidence 可能被误认成 current closeout。
+- **CR 证据**:
+  - `11-9-code-review-evaluation-20260905-round-2.md`: Finding #2 确认 finalizer 必须验证完整 v2 状态、predecessor 文件与真实 hash。
+  - `11-9-code-review-evaluation-20260907-round-19.md` 至 `round-23.md`: 连续关闭 current disposition、predecessor schema/calendar、scope/count/finding-set、fixRecord authority、higher-round generated/source mutation freshness 与 recursive hash rebinding。
+  - `11-9-code-review-evaluation-20260907-round-24.md`: 确认 stale/equal/after/no-prior-fix authentic single-variable matrix、latest prior fix 聚合与 recursive predecessor hash rebinding 均闭合。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于任何由多份 durable reports 决定终态的工作流
+  - 不重复: 是；既有规则覆盖 single invocation identity、partial progress 与 owner correction，本规则补充 completion predecessor graph 和 source freshness
+  - 状态明确: 是；已修复并由 Round 24 双 PASS 确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 2、3、5、19-23 从多个 predecessor 与 freshness 面反复复现。 |
+  | 影响范围 | 2 | 跨 Reviewer、Evaluator、Fixer、CR04、CR05、completion gate、CR06 与 trackers。 |
+  | 风险等级 | 2 | stale/错代 evidence 可错误推进 Story done，破坏状态机与审计真实性。 |
+  | 根因稳定性 | 2 | 只检查 prose 状态或局部 hash 是多报告工作流中稳定的 incomplete-authenticity 模式。 |
+  | 可执行性 | 2 | 可由 exact predecessor schema/hash/round/source、scope/finding set、calendar 与 stale/equal/after/no-prior matrix机械验证。 |
+  | 文档缺口 | 1 | owning CR contract 已有专属语义，但规则总结尚未沉淀通用 predecessor graph/freshness 检查点。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: CR durable report state machine、multi-round review/fix、completion gate、finalizer、tracker terminal transition 与其它多产物完成协议。
+- **规避指南**:
+  - 不得仅凭文件存在、basename、`PASS/DONE/COMPLETED` prose 或单个 hash 推进终态；不得让 higher-round review 早于 latest prior fix 的 source mutation。
+- **最佳实践**:
+  - 终态消费者应验证完整 current predecessor graph，并把 review/evaluation/rules/TODO/gate 的 identity、hash、series、round、scope、finding/count 与 source mutation freshness递归绑定；变更上游后必须重算全部 dependent hashes。
+- **全局文档建议**:
+  - 不建议本次升格；该规则属于 CR lifecycle 专属流程域，本次只做 record-only。
+- **本次落地**:
+  - Round 2-23 authorized Fixer 已逐层关闭 predecessor authenticity 与 freshness；Round 24 双 PASS 确认当前 graph 成立。
+- **同步状态**: 已写入规则总结
+
+#### CR-DOC-08：机器终态字段解析必须限定结构区域并对歧义语法 fail closed
+
+- **来源问题**: Round 5-21 的 tracker/Story parser 多次把 YAML block scalar、multiline quoted/flow content、tag/anchor/property、Markdown fence、HTML comment/raw `pre/code` body 或 bold `**Status**` 中的伪字段认证为真实 machine-owned terminal，也曾因 comment/quote/property state 错误遮蔽真实 owner；局部 regex 与不完整 lexer 会同时产生 false accept 与 false reject。
+- **CR 证据**:
+  - `11-9-code-review-evaluation-20260905-round-5.md` 至 `round-16.md`: 连续确认缩进 terminal grammar、block scalar、fence/raw region、flow/property/tag 与 exact key 边界的 accepted findings 和 fixes。
+  - `11-9-code-review-evaluation-20260907-round-17.md` 至 `round-21.md`: 关闭 named tag authority、document-root property/rejected state、plain remainder 与 raw Story exact key 的剩余 totality 缺口。
+  - `11-9-code-review-evaluation-20260907-round-24.md`: latest evaluator 确认相关 parser/terminal predecessor evidence 保持关闭且无新 blocker。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于从 Markdown/YAML 文档读取 machine-owned 状态字段的 bounded parser
+  - 不重复: 是；`CR-DOC-06/07`覆盖 shard/markup语义，本规则补充跨 Markdown/YAML 的 terminal-field region 与 fail-closed totality
+  - 状态明确: 是；已修复并由 Round 24 双 PASS 确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 5-21 多轮从 YAML、Markdown 与 raw HTML 状态边界反复复现。 |
+  | 影响范围 | 2 | 影响 Story、sprint/workflow tracker 与 finalizer trackerChangeSet 的终态认证。 |
+  | 风险等级 | 2 | false accept 可错误完成 Story，false reject 会错误阻断合法恢复。 |
+  | 根因稳定性 | 2 | 用全文 regex 或不完整 bounded lexer读取半结构文档是稳定复现根因。 |
+  | 可执行性 | 2 | 可用 parser-valid/invalid matrix、same-line transition、scalar/fence/raw/comment 与 exact-key mutants 检查。 |
+  | 文档缺口 | 0 | owning CR contract 已详细规定 role-specific grammar；本规则用于复用 CR 经验，不新增第二 authority。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: Markdown Story status、YAML sprint/workflow terminal、leading frontmatter、bounded document parser 与恢复/终态认证。
+- **规避指南**:
+  - 不得用 whole-file regex 搜索 machine key，也不得把 code fence、raw HTML、comment、block/multiline scalar 或 display-only bold label 当作 owning field。
+- **最佳实践**:
+  - 按 role 限定唯一结构区域与 exact key grammar；对 unsupported、malformed、duplicate 或语义歧义状态 fail closed，并用 parser-validity assertion 与 adversarial transition matrix同时证明 false-accept/false-reject 边界。
+- **全局文档建议**:
+  - 不建议本次升格；owning contract 已覆盖具体 grammar，重复写入全局文档会制造第二 authority。
+- **本次落地**:
+  - Round 5-21 authorized Fixer 已完成 bounded parser hardening；Round 24 双 PASS 确认保持关闭。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **候选**: `supersededIndex` identity/continuity，来源为 Story 11.9 Round 5 首次 evaluator acceptance，Round 6-24 持续 carried。
+- **边界**: 该项仍未解决，只允许 CR05 依据既有 evidence 与确定性 canonical fingerprint 去重登记；CR04 不创建 backlog 条目、不实现该项，也不把它升级为 blocker 或已沉淀规则。
+
+### Story 11-8 / 2026-09-05
+
+- **Story**: 11-8
+- **分析来源**:
+  - `11-8-code-review-summary-20260905-round-1.md`
+  - `11-8-code-review-evaluation-20260905-round-1.md`
+  - `11-8-code-review-summary-20260905-round-2.md`
+  - `11-8-code-review-evaluation-20260905-round-2.md`
+  - `11-8-code-review-summary-20260905-round-3.md`
+  - `11-8-code-review-evaluation-20260905-round-3.md`
+  - `11-8-code-review-summary-20260905-round-4.md`
+  - `11-8-code-review-evaluation-20260905-round-4.md`
+- **模型使用时间线**:
+  - Round 1-3 Reviewer/Aggregator均记录为`GPT-5.6 (gpt-5.6)`；Round 4 Reviewer/Aggregator记录为`GPT-5`。
+  - Round 1与Round 4 Evaluator记录为`GPT-5.6 (gpt-5.6)`；Round 2与Round 3 Evaluator记录为`GPT-5.6 Sol (gpt-5.6-sol)`。
+  - Round 1与Round 3 Fixer记录为`GPT-5.6 Sol (gpt-5.6-sol)`；Round 2 Fixer记录为`GPT-5.6 (gpt-5.6)`。
+  - 本次CR04 Rules Extractor使用`GPT-5.6 Sol (gpt-5.6-sol)`。
+- **结论概览**:
+  - Round 1确认6个P1，覆盖projection type mismatch、resolver route/docs分叉、old-ID真实activation、authorized apply/precondition、candidate-scan分类与legacy lifecycle evidence；Fixer全部关闭。
+  - Round 2确认3个P1：existing resolver failure fail-open、方案I control-plane与ledger同源、redirect action缺typed rename/replacement与幂等证据；Fixer全部关闭。
+  - Round 3确认1个P1：walker在三个frozen exact exclusions之外隐式跳过`dist`/`node_modules`；Fixer以临时probe完成RED/GREEN并关闭。
+  - Round 4 Reviewer三层`3/3 PASS`，Evaluator为`PASS`，P1=`0`、P2=`0`、Owner Gate=`NONE`，形成latest双PASS并明确`ALLOW CR04`。
+  - 本次CR04按外层strict-serial授权执行`record-only`：新增1条规则，并去重更新4条既有规则；不修改全局文档、source、tests、Story、tracker、gate或TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Canonical identity rename必须由实际mutation action承载typed replacement并保持幂等 | 通过 | 11/12 | rules-summary | 外层strict-serial授权record-only，新增CR-API-43 |
+| Existing-state consumer必须将blocking artifact-root resolver issue fail closed | 通过；与既有规则同根 | 11/12 | rules-summary | 更新CR-API-37的跨Story evidence与适用范围 |
+| Contract corpus gate必须独立冻结control-plane并约束effective scan domain | 通过；属于既有role/candidate gate | 10/12 | rules-summary | 更新CR-TEST-08，不新建重复规则 |
+| Command fixture必须在首个lifecycle前建立真实legacy前置世界状态 | 通过；属于既有fixture前置规则 | 10/12 | rules-summary | 更新CR-TEST-02，不新建重复规则 |
+| Producer/spec/docs必须共同消费resolver-owned route | 通过；属于既有Markdown/executable双向binding | 11/12 | rules-summary | 更新CR-DOC-05，不新建重复规则 |
+| Phase projection未消费必填参数与Story专属exact basenames | 未通过：一次性实现错误或纯Story特例 | 4/12 | none | 不沉淀 |
+| Drawer fixed-count、global `tsc`、Story 11.10 broad inventory | 未通过：明确范围外 | N/A | none | 不沉淀、不交TODO |
+
+### 提炼规则
+
+#### CR-API-43：Canonical identity rename 必须由实际 mutation action 承载 typed replacement 并保持幂等
+
+- **来源问题**: Story 11.8 Round 1发现old-ID mapping只在update ownership helper中存在，clean existing package仍保留old executable implementation并同时投影active package，形成双active identity。修复为redirect后，Round 2又发现真正改写old entrypoint的plan action仍只是普通`update`，machine consumer无法从实际mutation确定rename reason与唯一replacement，且没有二次authorized update证明幂等。
+- **CR 证据**:
+  - `11-8-code-review-evaluation-20260905-round-1.md`: Findings #3/#4确认clean old package必须在ownership/hash/type/mode与commit-time precondition保护下转为最小redirect，覆盖两个old IDs × 两个IDE targets的authorized apply，并保持modified-old zero-write。
+  - `11-8-code-review-evaluation-20260905-round-2.md`: Finding #3确认执行redirect的old entrypoint action必须携带machine-validated`canonical-skill-renamed`与唯一`replacementCanonicalSkillId`；Fix Summary让首次`update`与二次幂等`skip`共享typed binding，并完成2×2 plan→apply→replay。
+  - `11-8-code-review-evaluation-20260905-round-4.md`: evaluator确认redirect最终态、typed rename/replacement、modified-old protection、precondition fail-close与幂等均保持关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于任何installed canonical package/entrypoint identity rename
+  - 不重复: 是；`CR-API-28`覆盖普通update后的projection同步，本规则补充identity migration action本身的machine语义、redirect与幂等
+  - 状态明确: 是；已修复并由Round 4 double-PASS确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 1从真实activation/final state、Round 2从machine plan与replay连续暴露同一identity migration根因。 |
+  | 影响范围 | 2 | 影响update planner、CommandResult schema、installed entrypoint、active package、files/skill/help/phase indexes与两类IDE target。 |
+  | 风险等级 | 2 | 双active或无replacement语义的迁移会让旧请求继续执行obsolete implementation，并使自动化无法确定唯一replacement。 |
+  | 根因稳定性 | 2 | Rename若只更新部分metadata、helper或最终文件，而未统一actual action与installed projection，后续package migration高概率复现。 |
+  | 可执行性 | 2 | 可用typed action schema、2 IDs × 2 targets、authorized apply/replay、modified-old与四类precondition矩阵直接检查。 |
+  | 文档缺口 | 1 | 既有update规则覆盖normal projection与overwrite safety，但未规定canonical identity rename必须绑定actual mutation与幂等replacement。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: canonical Skill/package ID rename、installed entrypoint migration、IDE target projection、update plan/result schema、files/skill/help/phase index同步与existing-install compatibility。
+- **规避指南**:
+  - 不得只新增old→active mapping helper或active package，就把old-ID activation视为已redirect；clean old executable entrypoint不能与active implementation并存为双active。
+  - 不得让实际改写old entrypoint的action退化为无identity语义的普通`update`，也不得依赖companion file的间接`skip`表达replacement。
+  - 不得删除、覆盖或静默改写modified old package；ownership/hash/type/mode与plan-to-commit drift任一不符都必须在任何operation/journal前fail closed。
+- **最佳实践**:
+  - Canonical rename应由全局唯一mapping生成最小redirect与唯一active package；真正执行old entrypoint mutation的plan record携带stable rename reason和唯一replacement，machine schema拒绝其他非法reason/replacement组合。
+  - 参数化所有old IDs与installed targets执行首次plan→authorized apply→二次authorized replay；断言首次typed`update`、二次typed`skip`、`changedPaths=[]`、redirect/active/index bytes与hash不变，以及fresh install不生成old package。
+  - 对content、mode、type/non-file与missing四类commit-time变化断言stable issue、zero partial write与无journal残留。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。规则总分高但适用范围集中于canonical identity migration/update技术域，且本次仅授权CR04 record-only；现有SPEC 04/07/09继续拥有具体identity、CommandResult与root contract。
+- **本次落地**:
+  - Round 1/2 Fixer已完成deterministic redirect、typed actual action、2×2 authorized apply/replay与precondition矩阵；Round 4 Reviewer/Evaluator确认关闭。本次仅新增规则记录。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-API-37 Existing-state consumer 必须将 blocking artifact-root resolver issue fail closed
+
+- **处理结果**: Story 11.3的public readout与Story 11.8的update planning都是resolver failure被`undefined`/fallback吞掉的同一consumer根因；来源更新为`11-3, 11-8`，标题从readout扩展为consumer，总分由10/12更新为11/12。
+- **更新依据**: `11-8-code-review-evaluation-20260905-round-2.md`确认resolver `ok=false`必须原样传播stable issues并在projection/transaction前HALT；Round 4确认合法无配置的legacy-compatible分支与failure分支已明确区分。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-TEST-08 Contract corpus gate 必须按 surface role 分类 whole semantic candidate
+
+- **处理结果**: 不新建“candidate-scan control-plane”专属规则。Story 11.8的同源缩面与walker隐式exclusion属于既有whole-candidate/role gate的扫描面前置条件；来源更新为`11-7, 11-8`，补充独立冻结roots/exclusions/tokens及effective-domain mutation要求。
+- **更新依据**: Round 2/3 evaluation与Fix Summary依次关闭control-plane/ledger同源和未声明`dist`/`node_modules` skip；Round 4确认`6 roots / 3 exclusions / 6 token key-parts / 24 rows`与active-zero保持闭合。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-TEST-02 Command fixture 必须显式满足被测 gate 之前的前置 evidence
+
+- **处理结果**: Story 11.8的legacy prose-only test与Story 11.6的install-after-legacy setup同属fixture未在首阶段前建立目标世界状态；来源更新为`4-3, 11-6, 11-8`，根因稳定性由1提升为2，总分由9/12更新为10/12。
+- **更新依据**: Round 1 evaluation/Fix Summary建立真实legacy readiness tree并逐阶段验证discovery、path/type/bytes/hash/tree及mutation-set零交集；Round 4确认关闭。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-DOC-05 Installed Markdown workflow 与 executable implementation 必须形成可定位、同源的双向 binding
+
+- **处理结果**: Story 11.8的producer/spec/docs resolver route分叉是Story 11.4/11.6双向binding在route ownership上的第三次复现；来源更新为`11-4, 11-6, 11-8`，补充resolver-provided root、第三fallback禁止与current docs exact parity要求，不新建重复DOC/API规则。
+- **更新依据**: Round 1 evaluation/Fix Summary统一两个readiness producer、record spec与D1 current docs到Solutioning fixed child，并对resolver failure执行HALT/zero-write；Round 4确认关闭且Grill既有record basenames未误改。
+- **同步状态**: 已写入规则总结
+
+#### 不沉淀 / 交接项
+
+- **Phase projection未消费必填参数**: 不新建规则。它是本Story一次性签名/调用错位，已由现有type gate与focused IDE projection测试关闭，缺少跨Story独立规则价值。
+- **Story专属readiness IDs、route child与exact basenames**: 不泛化。具体真源仍为Story 11.8及SPEC 04/07/09；CR04只沉淀其可复用migration、resolver消费与evidence-gate模式。
+- **External drawer、workspace mirrors、fixed-count drift与global `tsc`其他Story错误**: 明确范围外，不作为Story 11.8规则证据，不修改、不吸收。
+- **Story 11.10 broad grill inventory与generic parser/scan扩面**: Evaluator明确排除，不包装为规则或TODO。
+
+#### 05 TODO Tracker 交接
+
+- **无需新增TODO backlog**: Round 1-4 evaluation均未产生Story 11.8 P2；latest Round 4为P1=`0`、P2=`0`、Owner Gate=`NONE`。CR04不执行CR05，也不修改`cr-todo-backlog.md`。
+
+### Story 11-7 / 2026-09-05
+
+- **Story**: 11-7
+- **分析来源**:
+  - `11-7-code-review-summary-20260904-round-1.md`
+  - `11-7-code-review-evaluation-20260904-round-1.md`
+  - `11-7-code-review-summary-20260904-round-2.md`
+  - `11-7-code-review-evaluation-20260904-round-2.md`
+  - `11-7-code-review-summary-20260905-round-3.md`
+  - `11-7-code-review-evaluation-20260905-round-3.md`
+  - `11-7-code-review-summary-20260905-round-4.md`
+  - `11-7-code-review-evaluation-20260905-round-4.md`
+  - `11-7-code-review-summary-20260905-round-5.md`
+  - `11-7-code-review-evaluation-20260905-round-5.md`
+  - `11-7-code-review-summary-20260905-round-6.md`
+  - `11-7-code-review-evaluation-20260905-round-6.md`
+  - `11-7-code-review-summary-20260905-round-7.md`
+  - `11-7-code-review-evaluation-20260905-round-7.md`
+  - `11-7-code-review-summary-20260905-round-8.md`
+  - `11-7-code-review-evaluation-20260905-round-8.md`
+- **模型时间线**:
+  - Round 1 Reviewer 为 `GPT-5.5 (gpt-5.5)`；Round 1 Evaluator/Fixer 为 `GPT-5.6 (gpt-5.6)`。
+  - Round 2-8 Reviewer、Evaluator与Round 2-7 Fixer均记录为`GPT-5.6 (gpt-5.6)`；Round 8 Reviewer三层`3/3 PASS`，Round 8 Evaluator为`PASS`。
+- **结论概览**:
+  - Round 1-2共确认10个P1，覆盖single invocation date、Step 2-13 exact path state、repair成功证据、完整五类legacy lifecycle、downstream physical owner chain、active surface inventory与可重放completion evidence；对应Fix Summary均已完成。
+  - Round 3-7继续确认12个P1，全部属于focused evidence fail-open：whole framed/unframed candidate、config semantic key role、private producer/discovery role、逐surface zero intersection、all-entry location/type inventory、static filesystem binding和local-function reachability；各轮均以稳定反例先RED、再以bounded test-only方案GREEN。
+  - Round 8 Reviewer/Evaluator形成latest double-PASS：P1=`0`、P2=`0`、Owner Gate=`NONE`，允许进入CR04。Focused为`10/10`，exact related为`53/53`；affected中的4项失败仅为范围外drawer fixed-count drift，不作为本Story规则来源。
+  - 本次CR04按外层严格编排授权采用`record-only`：新增3条规则，并将downstream filesystem qualification去重更新到既有`CR-SEC-20`；不修改全局文档、source、tests、Story、tracker、gate或TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 多步骤artifact producer必须锁定单一invocation identity并复用exact target | 通过 | 10/12 | rules-summary | 外层严格编排授权record-only，新增CR-API-42 |
+| Contract corpus gate必须按surface role分类whole semantic candidate | 通过 | 10/12 | rules-summary | 外层严格编排授权record-only，新增CR-TEST-08 |
+| 静态evidence oracle必须用稳定mutant证明fail-closed reachability | 通过 | 9/12 | rules-summary | 外层严格编排授权record-only，新增CR-TEST-09 |
+| Downstream artifact candidate的physical owner/readability/type/location资格 | 通过；与既有规则等价 | 11/12 | rules-summary | 去重更新CR-SEC-20证据，不新建规则 |
+| Completion gate exact command/inventory刷新 | 未通过：本Story一次性evidence维护，已有Flow Gate流程约束 | 5/12 | none | 不沉淀独立规则 |
+| TOML arrays、通用Markdown/TOML/JavaScript parser、AST或完整call graph | 未通过：超出已批准bounded contract且被Evaluator明确驳回 | 3/12 | none | 不沉淀、不交TODO |
+
+### 提炼规则
+
+#### CR-API-42：多步骤 artifact producer 必须锁定单一 invocation identity 并复用 exact target
+
+- **来源问题**: Round 1发现report filename、initial metadata/body与final metadata仍可分别消费不同的date source；Round 2又发现Step 2-13 frontmatter使用不存在的snake_case token，导致后续step可能脱离Step 1锁定的exact target。若多步骤workflow在各阶段重算日期、路径或别名，跨午夜与同日冲突场景会产生identity分叉、重复artifact或错误消费证据。
+- **CR 证据**:
+  - `11-7-code-review-evaluation-20260904-round-1.md`: Finding #1确认一次invocation只能生成一次`validationInvocationDate`，filename、initial/final metadata、body与completion path必须共同消费该值；Fix Summary以跨午夜双时钟验证关闭。
+  - `11-7-code-review-evaluation-20260904-round-2.md`: Finding #1确认Step 2-13必须统一绑定`validationReportPath: '{validationReportPath}'`，禁止新增snake_case alias或第二路径计算规则；Fix Summary动态枚举全部active steps验证关闭。
+  - `11-7-code-review-evaluation-20260905-round-8.md`: evaluator确认exact filename/date/path、single invocation state与Step 2-13 locked path均保持关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于任何跨多步骤生成dated/versioned artifact的workflow
+  - 不重复: 是；`SPEC 07`定义当前report冲突语义，本规则补充跨步骤identity propagation的实现检查点
+  - 状态明确: 是；已修复并由Round 8 double-PASS确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 1的date source与Round 2的path token从两个阶段连续复现同一identity propagation根因。 |
+  | 影响范围 | 2 | 影响workflow activation、13个steps、metadata/body、private producer、completion output与downstream evidence。 |
+  | 风险等级 | 2 | identity分叉可导致错误artifact路径、重复输出、同日冲突绕过或自动化关联失真。 |
+  | 根因稳定性 | 2 | 多步骤workflow若允许每步重算或使用alias，随着step增加会高概率再次漂移。 |
+  | 可执行性 | 2 | 可用单一producer scan、全step token closure、跨午夜双时钟与existing-target矩阵直接检查。 |
+  | 文档缺口 | 0 | FR23e、Story与`SPEC 07`已有当前artifact owning contract；本规则仅沉淀可复用实现检查点。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: 多步骤Markdown workflow、dated/versioned report producer、跨step metadata update与任何在activation阶段确定artifact identity的流程。
+- **规避指南**:
+  - 不得在后续step重新读取clock、重算basename/path或引入未声明alias；也不得让frontmatter、body与completion output消费不同identity token。
+  - Existing exact target必须按owning contract阻断，不得通过suffix、counter、temp、same-content reuse、overwrite或append制造第二identity。
+- **最佳实践**:
+  - Activation只生成一次identity state，并把exact project-relative target作为显式state贯穿全部steps；focused test动态枚举consumer token closure，而非只抽查首尾step。
+  - 使用跨午夜双时钟和same/different existing target fixture，断言filename、metadata、body、private operation与completion output仍绑定首次identity，且阻断路径保持zero mutation。
+- **全局文档建议**:
+  - 不建议本次升格。Current FR23e、Story 11.7与`SPEC 07`已拥有具体report contract，且本轮仅授权record-only；规则总结用于其它多步骤artifact producer复用。
+- **本次落地**:
+  - Round 1-2 Fixer已完成single-date与全step exact path binding，Round 8 Reviewer/Evaluator确认关闭；本次仅新增规则记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-TEST-08：Contract corpus gate 必须按 surface role 分类 whole semantic candidate
+
+- **来源问题**: Story 11.7 Round 1-6多次证明“扫描了所有文件”不等于contract gate完整：整行legacy豁免、framed value二次截断、不对称delimiter、support basename全局skip、config局部key而非完整TOML semantic path、private script整文件豁免及negated`arrayContaining(allPaths)`都可让非法active default或单一路径污染保持绿色。Story 11.8 Round 1-3又从扫描面本身复现：roots、exclusions、tokens与ledger同源可同步缩面，且walker还能在冻结的exact exclusions之外隐式跳过任意`dist`/`node_modules`子树。Story 11.9 Round 1-4 再次证明 title-bearing CR root detector 若漏掉中文、下划线、bare variable、quoted/interleaved concat、alternate placeholder 或完整变量族，也会把 active forbidden derivation 错记为 clean。
+- **CR 证据**:
+  - `11-7-code-review-evaluation-20260904-round-1.md`: Finding #3要求按producer/metadata/help/contracts/examples/downstream建立显式inventory，并以精确`file + clause` legacy allowlist替代整行skip。
+  - `11-7-code-review-evaluation-20260904-round-2.md`: Findings #3/#5要求先提取完整basename/value再anchored分类，并把customization、published config与private producer按不同role纳入。
+  - `11-7-code-review-evaluation-20260905-round-3.md`: Findings #1/#2确认framed whole value、config/private exact role及每个command metadata surface分别与protected set求zero intersection。
+  - `11-7-code-review-evaluation-20260905-round-4.md`: Findings #1/#2要求support exemption绑定exact file+clause role，report target deny vocabulary不能依赖value恰好包含managed basename。
+  - `11-7-code-review-evaluation-20260905-round-5.md`: Findings #1/#2要求complete-clause role、共享start/end boundary与完整TOML table/dotted semantic key path。
+  - `11-7-code-review-evaluation-20260905-round-6.md`: Finding #1用保留fragment/count但改变surrounding role的mutant证明complete-clause anchor必须fail closed；Round 8确认所有相关义务关闭。
+  - `11-8-code-review-evaluation-20260905-round-2.md`: Finding #2确认candidate roots、exclusions、tokens与ledger同源会形成self-proof；Fix Summary在test code独立冻结`6 roots / 3 exclusions / 6 token key-parts`，并以missing/extra/malformed control-plane mutants证明scan前fail-close。
+  - `11-8-code-review-evaluation-20260905-round-3.md`: Finding #1确认actual walker仍在frozen exact exclusions外硬编码basename skip；Fix Summary删除隐式排除，并用临时嵌套`dist`/`node_modules` probe证明effective scan domain与冻结合同一致。
+  - `11-8-code-review-evaluation-20260905-round-4.md`: evaluator确认24-row actual/ledger双向exact equality、role allowlist、active-zero与effective exclusions closure均保持关闭。
+  - `11-9-code-review-evaluation-20260905-round-1.md`: Finding #8 要求 active title-bearing negative scan 使用 frozen full classified corpus，而不是由当前命中结果反推 inventory。
+  - `11-9-code-review-evaluation-20260905-round-2.md`: Finding #6 与 Round 3 Finding #7、Round 4 Finding #7 连续补齐中文/下划线、alternate placeholder、bare title/name/slug/filename、quoted/interleaved concat 与完整变量族；Round 24 双 PASS 确认 detector closure 保持成立。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于跨Markdown/TOML/CSV/source的contract corpus gate
+  - 不重复: 是；`CR-TEST-05/06`覆盖canonical sample与corpus discovery，本规则补充surface-role、whole semantic candidate及per-surface集合断言
+  - 状态明确: 是；已修复并由Round 8 double-PASS确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Story 11.7、11.8、11.9 连续在 inventory、tokenizer、allowlist、control plane、walker exclusion 与变量族 detector 中复现。 |
+  | 影响范围 | 2 | 跨Skill metadata、steps、help、docs、examples、TOML config、CSV与private source。 |
+  | 风险等级 | 1 | 主要风险是contract regression漏报和错误closeout evidence，而非直接数据损坏。 |
+  | 根因稳定性 | 2 | 按行/substring/全文件skip构造negative scan是跨格式contract test中稳定的false-green来源。 |
+  | 可执行性 | 2 | 可用显式role inventory、whole-value classifier、complete-clause anchor、semantic key path和逐surfaceintersection直接检查。 |
+  | 文档缺口 | 1 | 既有测试规则覆盖sample/corpus范围，但未覆盖跨格式surface-role和whole candidate语义。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: canonical contract parity/negative scans、跨Markdown/TOML/CSV/source inventory、legacy compatibility allowlist与protected path/name metadata assertions。
+- **规避指南**:
+  - 不得按整行关键词、全文件或裸basename全局豁免；allowlist必须绑定真实`relativePath + complete clause/field/declaration role + exact occurrence count`。
+  - 不得在识别quoted/code-span/TOML/CSV framed value后再按空白或标点截断，也不得只解析局部assignment key而忽略table/dotted semantic path。
+  - 不得用单个negated collection matcher表达“任何受保护元素均不得出现”；每个public surface都必须投影actual intersection并精确断言为空。
+  - 不得让fixture/ledger同时定义candidate roots、exclusions和search tokens；也不得让walker在已冻结control-plane之外另藏basename、extension或subtree skip。
+- **最佳实践**:
+  - 先定义surface inventory与role，再按真实格式提取whole semantic candidate并做anchored classification；合法support/historical fragments在扫描前以完整role anchor精确移除。
+  - 对每类允许和禁止形态建立synthetic adversarial table，同时对真实active corpus执行同一classifier；任何未知role、未消费syntax或managed prefix malformed value都fail closed。
+  - Roots、exact exclusions与token key/parts应在独立于ledger的test code或immutable contract中冻结，并在任何scan前做双向exact校验；mutation还应证明missing/extra/变形control-plane及冻结root内嵌套目录不会被隐式漏扫。
+- **全局文档建议**:
+  - 不建议本次升格。规则适用面集中于contract-test oracle，且本轮仅授权record-only；后续可作为canonical source审查与fixture设计检查表复用。
+- **本次落地**:
+  - Story 11.7 Round 1-6对应Fixer已逐步加固classified inventory，Round 8 Reviewer/Evaluator确认关闭。Story 11.8 Round 2/3 fixer进一步关闭control-plane同源缩面与walker隐式exclusion，Round 4 reviewer/evaluator确认关闭。Story 11.9 Round 1-4 fixer补齐 title-bearing 全变量族与 frozen classified scan，Round 24 Reviewer/Evaluator确认保持关闭；本次更新既有`CR-TEST-08`而不新增重复测试规则。
+- **同步状态**: 已写入规则总结
+
+#### CR-TEST-09：静态 evidence oracle 必须用稳定 mutant 证明 fail-closed reachability
+
+- **来源问题**: Round 4-7发现private producer/discovery静态门禁虽然对current source绿色，却可漏掉slice外第二writer、第二条或多行aliased filesystem import、未批准original binding、discovery间接调用local mutation helper、leading-whitespace declaration及nested declaration后的direct call。根因是oracle只搜索固定substring/slice或用相邻declaration切分函数，而没有证明已声明有限语法内的binding与reachable body被完整消费。
+- **CR 证据**:
+  - `11-7-code-review-evaluation-20260905-round-4.md`: Finding #3要求whole-file唯一producer、static mutation role与behavioral immutability三组证据，不能只搜索一个`writeFile(` substring或固定slice。
+  - `11-7-code-review-evaluation-20260905-round-5.md`: Finding #3确认必须枚举全部static fs bindings/local aliases，并从discovery对local function declaration建立有限direct-call reachable closure；第二条aliased writer与indirect helper mutant用于RED。
+  - `11-7-code-review-evaluation-20260905-round-6.md`: Finding #2补齐multiline named import、exact current original-binding allowlist与leading-whitespace local declaration，未知或未消费shape必须fail closed。
+  - `11-7-code-review-evaluation-20260905-round-7.md`: Finding #1确认nested declaration不能截断enclosing function body；Fix Summary改用有限declared-function body span并同时保持external、leading-whitespace与nested mutants可达。
+  - `11-7-code-review-evaluation-20260905-round-8.md`: evaluator确认三类mutant均命中`executePrdValidationReportOperation`、`inspectTarget`与`writeFile`，current read-only discovery返回空violations，Round 8 double-PASS。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是；适用于用轻量静态oracle保护唯一writer、只读discovery或有限调用边界的测试
+  - 不重复: 是；既有规则未覆盖test-local reachability oracle的mutation-proof完整性
+  - 状态明确: 是；已修复并由Round 8 double-PASS确认
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 4-7连续在whole-file scope、import binding、declaration shape与nested body span中复现。 |
+  | 影响范围 | 1 | 主要影响private filesystem producer/discovery与同类静态contract-test技术域。 |
+  | 风险等级 | 2 | false-green可隐藏第二writer或read-only discovery到mutation path，破坏zero-mutation与legacy preservation保证。 |
+  | 根因稳定性 | 2 | 手写regex/static slice若没有完整消费与mutant证明，会随格式重排或helper抽取稳定漏检。 |
+  | 可执行性 | 2 | 可用exact binding allowlist、function-body span、reachable closure、behavior snapshot及一组稳定mutants直接验证。 |
+  | 文档缺口 | 0 | Story测试要求已有fail-closed evidence边界；本条作为专项实现规则沉淀，不扩大到通用静态分析规范。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: test-local轻量静态oracle、唯一filesystem writer检查、read-only discovery/helper reachability；不授权通用JavaScript parser、AST、动态调用或完整call graph。
+- **规避指南**:
+  - 不得以current source通过、固定slice无禁用substring或单一behavior fixture无mutation，替代对已支持binding/declaration/call形态的完整消费证明。
+  - 不得静默忽略未知static import、未批准original binding、duplicate local name、unsupported declaration或unbalanced body；有限oracle遇到未支持结构必须fail closed。
+- **最佳实践**:
+  - 先明确支持的有限syntax与current binding allowlist，再对每个static import建立`original -> local`映射、按完整function body span构造local direct-call closure，并结合before/after no-follow snapshot验证current behavior。
+  - 每个声称受保护的逃逸分支必须有稳定mutant先证明旧oracle会false-green，再证明修复后命中；同时保留无mutantcurrent source为绿色，避免测试反向规定不存在的runtime行为。
+- **全局文档建议**:
+  - 不建议本次升格。该规则是有限test-oracle技术实践，且Evaluator明确排除通用parser/AST/call graph扩张；record-only最符合当前范围。
+- **本次落地**:
+  - Round 4-7 Fixer已在单一focused test内完成bounded evidence hardening，Round 8 Reviewer/Evaluator确认关闭；本次仅新增规则记录。
+- **同步状态**: 已写入规则总结
+
+#### 去重与不沉淀项
+
+- **Downstream filesystem qualification**: Story 11.7的portable path、readable no-follow regular file、`realProject -> realPlanning -> exact realPlanning/prd -> candidate`链和same-basename all-entry inventory，与既有`CR-SEC-20`的dereferenced regular-file、containment、structured discovery资格等价。本次只把Story 11.7 Round 1-3/8证据追加到`CR-SEC-20`，并将索引来源更新为`11-5, 11-7`，不创建`CR-SEC-22`。
+- **Completion gate replayability**: Round 1 Finding #5已由outer Flow Gate owner刷新exact command、inventory、counts、time与HEAD/worktree evidence；这是本Story current evidence维护，不形成独立开发规则。
+- **TOML arrays与通用parser/AST/call graph**: Round 5-8 Evaluator明确驳回为超出已批准bounded matrix；不得把驳回候选包装为已验证规则或TODO。
+- **External drawer与fixed-count drift**: `speclite-drawer-er-modeler/`、zip、workspace mirrors及其4项affected失败不属于Story 11.7规则来源，不修改、不吸收。
+
+#### 05 TODO Tracker 交接
+
+- **无需新增TODO backlog**: Round 1-8 evaluation均未批准Story 11.7 P2，latest Round 8为P1=`0`、P2=`0`、Owner Gate=`NONE`；CR04不执行CR05，也不修改`cr-todo-backlog.md`。
+
+### Story 11-6 / 2026-09-04
+
+- **Story**: 11-6
+- **分析来源**:
+  - `11-6-code-review-summary-20260904-round-1.md`
+  - `11-6-code-review-evaluation-20260904-round-1.md`
+  - `11-6-code-review-summary-20260904-round-2.md`
+  - `11-6-code-review-evaluation-20260904-round-2.md`
+  - `11-6-code-review-summary-20260904-round-3.md`
+  - `11-6-code-review-evaluation-20260904-round-3.md`
+  - `11-6-code-review-summary-20260904-round-4.md`
+  - `11-6-code-review-evaluation-20260904-round-4.md`
+  - `11-6-code-review-summary-20260904-round-5.md`
+  - `11-6-code-review-evaluation-20260904-round-5.md`
+- **结论概览**:
+  - 模型使用时间线：Reviewer Round 1-5、Evaluator Round 1-5 与四轮 Fixer records 均记录 `Model Used: GPT-5.5 (gpt-5.5)`；本次 CR04 使用模型为 GPT-5.5。
+  - Round 1-4 依次暴露并关闭 route/frontmatter/legacy supporting path、physical owner/nearest ancestor、bounded reference parser、install-existing evidence、operation coupling 与 installed private binding 等阻塞项；Round 5 Reviewer/Evaluator 双 PASS，`0 P0 / 0 P1 / 0 new P2`。
+  - 本次按外层 strict-serial CR04 授权采用 record-only：仅更新本规则总结。去重后新增 `CR-SEC-21`、`CR-DOC-07` 两条规则，并用 Story 11.6 证据更新既有 `CR-DOC-05`、`CR-TEST-02`；不修改任何全局文档、源码、测试、Story、tracker、gate、CR artifact或TODO。
+  - 既有 inactive Architecture duplicate step 中的 `*ux-design*.md` wildcard 状态未闭合，保持 P2 并交 CR05；external drawer、Story专属 basenames、raw template `stepsCompleted: []` 与新增 public CLI 主张均不沉淀。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Filesystem write 必须在 operation 内重验 physical owner 与 nearest existing ancestor | 通过 | 11/12 | rules-summary | 外层编排已授权 record-only，新增 CR-SEC-21 |
+| Installed Markdown workflow 与 executable implementation 必须形成可定位、同源的双向 binding | 通过 | 11/12 | rules-summary | 更新既有 CR-DOC-05 的跨 Story 证据、标题与评分，不新增重复规则 |
+| Bounded markup validator 必须与 renderer 的 precedence 和 character-reference 语义一致 | 通过 | 10/12 | rules-summary | 外层编排已授权 record-only，新增 CR-DOC-07 |
+| Command fixture 必须显式满足被测 gate 之前的前置 evidence | 通过 | 9/12 | rules-summary | 更新既有 CR-TEST-02 的跨 Story lifecycle 证据与评分，不新增重复规则 |
+| inactive Architecture duplicate UX wildcard | 未通过：状态未闭合 | N/A | todo-tracker | 保持既有 P2 defer，交 CR05 去重/登记 |
+| Story专属 UX basenames、raw template 初始 frontmatter 与 external drawer caveat | 未通过：纯特例或非本 Story finding | N/A | none | 不沉淀 |
+
+### 提炼规则
+
+#### CR-SEC-21：Filesystem write 必须在 operation 内重验 physical owner 与 nearest existing ancestor
+
+- **来源问题**: Story 11.6 Round 2 发现 candidate gate 只验证 lexical/project containment：missing leaf 没有检查 nearest existing ancestor，existing canonical/legacy candidate 也没有限制到各自 physical owner，project 内 cross-space symlink 因而可被当作安全目标。Round 3 进一步证明仅在 preflight 返回“可写”仍存在 replacement window：owner或ancestor可在真实 create/mkdir 前被替换，使先前批准的路径跨 physical ownership。若检查与 mutation 分离，安全结论无法约束实际 operation。
+- **CR 证据**:
+  - `11-6-code-review-summary-20260904-round-2.md`: Finding #1 合并 missing ancestor 与 cross-space symlink 根因，要求 canonical target物理留在 real UX owner、legacy target物理留在 real Planning owner，并对 missing leaf 验证 nearest existing ancestor。
+  - `11-6-code-review-evaluation-20260904-round-2.md`: evaluator 确认该 finding 为 P1，授权 owner-specific candidate policy、nearest-existing-ancestor检查与 write 前重验，不新增 taxonomy 或 UX-local resolver。
+  - `11-6-code-review-summary-20260904-round-3.md`: Finding #1 通过 deterministic preflight-to-write replacement 证明返回 approval 后再由 caller执行 mutation 仍可跨 owner，要求 actual operation 与 last-moment revalidation 耦合。
+  - `11-6-code-review-evaluation-20260904-round-3.md`: fixer record确认同一 bounded operation执行 initial inspection、受控 interposition、commit-time reinspection与 exclusive `wx` create/single `mkdir`，并覆盖 replacement、existing target及zero-mutation matrix。
+  - `11-6-code-review-evaluation-20260904-round-5.md`: latest evaluator确认 physical-owner、nearest-ancestor与operation coupling在 canonical script及repository routing中保持关闭，两份installed copy也执行对应负例。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是；`CR-SEC-02/13/19/20`分别覆盖 mutation前guard、existing overwrite preflight、read-route candidate与discovery资格，本规则只补 actual write operation 内的 owner/ancestor commit-time coupling
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 2 与 Round 3 连续从 missing ancestor、cross-space symlink和preflight replacement复现同一根因，并由 Round 5确认关闭。 |
+  | 影响范围 | 2 | 适用于 artifact file create、on-demand directory create、canonical/legacy owner以及installed Skill filesystem primitive。 |
+  | 风险等级 | 2 | 检查与写入脱耦可导致跨 owning space 或项目边界的实际 mutation，属于安全与数据完整性风险。 |
+  | 根因稳定性 | 2 | filesystem path安全检查若返回 approval给caller，再单独执行 mutation，会稳定暴露TOCTOU与symlink/ancestor replacement窗口。 |
+  | 可执行性 | 2 | 可用owner-specific realpath、nearest-existing-ancestor、commit-time reinspection、exclusive create与受控 replacement zero-mutation tests检查。 |
+  | 文档缺口 | 1 | 既有规则覆盖candidate/discovery与通用safe-write，但未明确把missing ancestor和physical owner重验耦合到实际artifact operation。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: 任何依据 configured artifact root/owning space 创建文件或目录的 runtime/Skill-local filesystem operation，尤其是允许missing leaf、on-demand parent或existing symlink的流程。
+- **规避指南**:
+  - 不得只证明 target lexical位于project root；canonical、legacy与其它space必须各自绑定明确physical owner。
+  - 不得把 missing leaf直接视为安全；必须找到nearest existing ancestor，验证其为dereferenced directory且物理位于owner内。
+  - 不得由preflight helper返回可写状态后让caller另行执行raw write/mkdir；安全重验与实际mutation必须处于同一bounded operation，重验后不得再经过user-controlled seam。
+- **最佳实践**:
+  - Operation先验证project/planning/owner physical roots和target lexical containment，再验证target确实missing与nearest existing ancestor；commit前重做同一检查，随后立即使用exclusive file create或single non-recursive directory create。
+  - 回归矩阵至少覆盖regular-file/FIFO/dangling/out-of-project/project内cross-space ancestor、existing target preservation、owner/ancestor replacement和outside/target/progress zero mutation。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分高但适用范围集中在artifact filesystem operation技术域，且本轮明确为record-only；已有path-safety owner contract与D1 docs承载current truth。
+- **本次落地**:
+  - Round 2/3 fixer完成owner/ancestor与operation coupling，Round 5 reviewer/evaluator确认关闭；本次仅新增`CR-SEC-21`与Story 11-6记录。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-DOC-05 Installed Markdown workflow 与 executable implementation 必须形成可定位、同源的双向 binding
+
+- **处理结果**: 不新建重复规则。Story 11.4 已证明“helper有安全语义但installed Markdown未绑定”；Story 11.6 又证明“Markdown强制operation但installed package无实现”。两者是同一 Agent execution双轨根因的相反方向，已将标题改为双向binding，来源更新为`11-4, 11-6`，总分由9/12更新为11/12。
+- **更新依据**: `11-6-code-review-evaluation-20260904-round-4.md`确认installed private binding缺失是P1；其fix record与Round 5 evaluation确认canonical Skill-local script、repo import同源、真实installer投影、两份installed invocation及fixed private CLI全部闭环。
+- **同步状态**: 已写入规则总结
+
+#### CR-DOC-07：Bounded markup validator 必须与 renderer 的 precedence 和 character-reference 语义一致
+
+- **来源问题**: Story 11.6 Round 2 发现 UX link validator 与实际Markdown/HTML renderer语义不一致：normalized duplicate Markdown reference definitions使用last-wins，可让unsafe first definition被safe duplicate覆盖；HTML attribute raw值中的character reference又在validator strip query/fragment之前未被解释，导致renderer解析到的local path与validator检查的字符串不同。单独验证“看起来安全的最终字符串”不足以证明真实消费路径安全。
+- **CR 证据**:
+  - `11-6-code-review-summary-20260904-round-2.md`: Findings #2/#3 分别确认duplicate definition precedence与HTML character-reference bypass，要求first-definition-wins及bounded decode或fail-close，禁止引入完整parser扩面。
+  - `11-6-code-review-evaluation-20260904-round-2.md`: evaluator确定Markdown normalized label采用first-definition-wins；local-ish HTML `href`/`src` raw value只要含`&`，就在strip/decode前返回`unsupported-local-reference`，同时保留external scheme与literal fragment/query-only例外。
+  - `11-6-code-review-evaluation-20260904-round-2.md`: fixer record确认duplicate unsafe-first/safe-second、safe-first/unsafe-second及decimal/hex/named/malformed HTML reference matrix均已覆盖。
+  - `11-6-code-review-evaluation-20260904-round-5.md`: latest evaluator确认first-definition-wins与HTML raw `&` fail-close保持current executable evidence。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是；`CR-DOC-06`覆盖Markdown shard grammar/pipeline/order，本规则限定validator与真实renderer在跨Markdown/HTML precedence及entity语义上的等价性，不重复单个语法case
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | 同一轮从Markdown duplicate precedence与HTML character reference两个markup surface复现renderer-validator分叉，并与Story 11.5 bounded parser drift形成跨 Story迹象。 |
+  | 影响范围 | 1 | 主要影响使用bounded Markdown/HTML local-reference validator的workflow artifact、assets与cross-document navigation技术域。 |
+  | 风险等级 | 2 | 语义分叉可让renderer消费validator未检查的越界路径，形成cross-space/project escape，也可制造伪block。 |
+  | 根因稳定性 | 2 | 手写validator若自行定义precedence/decoding而未对齐renderer，duplicate、entity、query/fragment组合会高概率再次产生语义差。 |
+  | 可执行性 | 2 | 可用unsafe-first/safe-second双向矩阵、normalized labels、decimal/hex/named/malformed entity与external/fragment controls确定性验证。 |
+  | 文档缺口 | 1 | 既有bounded Markdown规则未覆盖HTML renderer entity semantics及跨markup validator parity。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: 解析workflow-owned Markdown links、reference definitions、HTML `href`/`src`、screenshots/assets与cross-document navigation的bounded validator；不授权完整CommonMark、DOM或HTML entity parser。
+- **规避指南**:
+  - 不得用last-wins覆盖Markdown renderer的first-definition语义，也不得验证会被renderer忽略的duplicate destination。
+  - 不得在HTML raw attribute仍可能含character reference时先strip `?`/`#`并把结果当实际renderer target；未实现完整且同语义decoder时必须对local-ish形态fail closed。
+  - 不得把external scheme或纯literal fragment/query-only reference误纳入local filesystem containment。
+- **最佳实践**:
+  - 先固定支持的renderer subset与precedence，再让validator复用同一normalized label/first occurrence规则；HTML若采用保守策略，应在任何local path分类或percent decode前拒绝raw `&`。
+  - Tests成对覆盖unsafe-first/safe-second、safe-first/unsafe-second、case/whitespace label normalization、named/numeric/malformed entities、query/fragment decoy、external schemes及literal fragment/query-only controls。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则属于bounded markup validator技术域，现有D1 docs已记录current first-wins与HTML fail-close；本轮只沉淀可复用CR检查点。
+- **本次落地**:
+  - Round 2 fixer已修复，Round 5 reviewer/evaluator确认关闭；本次仅新增`CR-DOC-07`与Story 11-6记录。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-TEST-02 Command fixture 必须显式满足被测 gate 之前的前置 evidence
+
+- **处理结果**: 不新建“legacy no-migration fixture”专属规则。Story 11.6 install-after-legacy setup错误与Story 4.3缺trusted manifest却断言后置gate同属fixture前置状态不成立；已将来源更新为`4-3, 11-6`，总分由7/12更新为9/12，并补充多阶段 lifecycle逐阶段evidence要求。
+- **更新依据**: `11-6-code-review-summary-20260904-round-2.md`与对应evaluation确认install-existing证据缺口；Round 5 evaluation确认六类legacy entries在install前建立并由install/update/repair逐阶段验证source invariants与canonical no-copy。
+- **同步状态**: 已写入规则总结
+
+#### 未沉淀 / 交接项
+
+- **inactive Architecture duplicate `*ux-design*.md` wildcard**: 状态未闭合，不进入已解决规则总结；维持latest Evaluator确认的P2 defer，交CR05做去重与正式登记。
+- **raw template `stepsCompleted: []`**: 不沉淀。Round 2 aggregator/evaluator确认active Step 1在bind前先写`stepsCompleted: [1]`，不是current runtime defect。
+- **“internal helper未接public CLI”主张**: 不单独沉淀。Round 2驳回无授权public surface扩面；Round 4真实缺口已由更新后的`CR-DOC-05`限定为installed private binding，而非public CLI。
+- **Story专属 UX basenames、legacy sibling位置与config example文件清单**: 已修复的Story局部契约，不泛化为跨Story规则。
+- **external drawer与fixed-count drift**: 范围外并发状态，不是Story 11.6 finding，不写入规则。
+
+#### 05 TODO Tracker 交接
+
+- **交接候选**: inactive shipped Architecture duplicate step仍含`*ux-design*.md` wildcard；维持P2，仅由CR05决定backlog去重/登记与owner归属。
+- **CR04 边界**: 本次不写`cr-todo-backlog.md`，不处理该duplicate，不执行CR05；Story 11.6已解决规则与该open项不重复管理。
+
+### Story 11-1 / 2026-09-03
+
+- **Story**: 11-1
+- **分析来源**:
+  - `11-1-code-review-summary-20260902-round-1.md`
+  - `11-1-code-review-evaluation-20260902-round-1.md`
+  - `11-1-code-review-summary-20260902-round-2.md`
+  - `11-1-code-review-evaluation-20260903-round-2.md`
+  - `11-1-code-review-summary-20260903-round-3.md`
+  - `11-1-code-review-evaluation-20260903-round-3.md`
+- **结论概览**:
+  - Round 1 reviewer/evaluator 确认 1 个 P1 `patch` finding：`resolveArtifactRootsFromProjectConfig()` roots/modes 正确，但 no-key full-read 的 `configSources` 为空，未满足 Story 11.1 的 merged config/provenance handoff。
+  - Round 1 fixer 已修复 `src/config/customization-reader.ts` 的 no-key full-read source selection，并新增 `test/resolve-readers.test.ts` 与 `test/artifact-root-resolution.test.ts` regression；Round 3 reviewer/evaluator 确认该 P1 已关闭。
+  - Round 2 reviewer/evaluator 确认 1 个 P1 `patch` finding：`test/contract-anchors.test.ts` 仍锚定旧 `sources: {}` expectation，和已批准的 leaf provenance handoff 冲突；fixer 已作 test-only 更新，Round 3 确认关闭。
+  - Round 3 reviewer/evaluator 均通过；新 findings 0，CR TODO 0，用户决策点 0。
+  - 本次 04 按外层编排授权采用默认推荐决策：record-only。仅更新本规则总结，不修改 project-context、Architecture、AGENTS、CLAUDE、Story、SPEC、Flow Gate、源码、测试或 tracker。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Artifact-root resolver handoff 必须保留 leaf dotted-key provenance | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-34 |
+| Resolver schema anchor 必须解析真实 runtime result shape | 通过 | 9/12 | rules-summary | 用户本次授权默认推荐决策：record-only，更新既有 CR-API-13 复现证据，不新增重复规则 |
+
+### 提炼规则
+
+#### CR-API-34：Artifact-root resolver handoff 必须保留 leaf dotted-key provenance
+
+- **来源问题**: Story 11.1 Round 1 发现 artifact-root resolver wrapper 已能解析正确 roots/modes，但 `resolveProjectConfig()` no-key full-read 只按顶层 `core` / `modules` 过滤 source metadata，导致返回给 downstream consumers 的 `configSources` 为空。后续 installer、manifest、validator 或 workflow consumer 若要解释 explicit authority、legacy fallback 或 config/artifact mismatch，只能重新推导来源层，形成第二套 provenance 语义。
+- **CR 证据**:
+  - `11-1-code-review-summary-20260902-round-1.md`: Finding #1 指出 `resolveArtifactRootsFromProjectConfig()` 调用 no-key `resolveProjectConfig()` 后将空 `configSources` 透传给 resolver handoff。
+  - `11-1-code-review-evaluation-20260902-round-1.md`: evaluator 确认该 finding 为 P1，要求在既有 four-layer TOML merge/provenance 语义上修复，不新增第二套 merge logic。
+  - `11-1-code-review-evaluation-20260902-round-1.md`: 修复执行记录确认 no-key full-read 已改为按 selected nested value 的 leaf dotted keys 返回 source metadata，并补充 team/user custom 与 legacy fallback provenance regression。
+  - `11-1-code-review-evaluation-20260903-round-3.md`: evaluator 独立确认 Round 1 P1 已关闭，`resolveArtifactRootsFromProjectConfig()` 当前会把 `configResult.sources` 作为 `configSources` 透传。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 中 reviewer/evaluator/fixer/复审闭环均确认；与既有 shared resolver 接入规则有同类风险迹象，但本具体模式首次沉淀。 |
+  | 影响范围 | 2 | 影响 config reader、artifact-root resolver handoff，以及后续 installer、manifest、validator、workflow consumer 的 artifact-root evidence 解释。 |
+  | 风险等级 | 2 | provenance 丢失会让 explicit-config、legacy-compatible fallback 与 mismatch diagnostics 的 authority 难以追溯，可能诱导后续 consumer 另建不一致语义。 |
+  | 根因稳定性 | 2 | nested config 与 leaf source metadata 分开选择时，顶层 key/full-read 误配是稳定实现陷阱，后续新 root field 仍可能复现。 |
+  | 可执行性 | 2 | 可用 leaf dotted-key source selection、`configSources` handoff assertions、team/user custom override 与 legacy fallback regression 直接检查。 |
+  | 文档缺口 | 1 | 既有 SPEC/Architecture 要求 single resolver 与 provenance，但既有 CR 规则未细化 no-key full-read handoff 必须保留 leaf metadata。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: config/customization reader、artifact-root resolver、resolve/config handoff、以及任何向 downstream consumers 暴露 merged config/provenance 的 API。
+- **规避指南**:
+  - 不得在 no-key full-read 或 nested config handoff 中只按顶层 key 过滤 source metadata，导致 leaf dotted-key provenance 丢失。
+  - 不得让 downstream consumer 为了解释 artifact-root authority 重新读取 TOML 或维护第二套 config source 推导逻辑。
+- **最佳实践**:
+  - resolver handoff 应保留 selected nested value 中每个 relevant leaf dotted key 的 effective source metadata，并明确区分 explicit root source 与 legacy fallback source。
+  - focused regression 应覆盖 team custom、user custom、legacy fallback provenance，以及不返回顶层 `core` / `modules` source metadata 的 leaf-only guard。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分为 10/12，但用户本轮明确授权 CR04/05 采用默认 record-only 决策且禁止修改全局文档；`SPEC 09` 与 Architecture 已提供 owning artifact-root / shared resolver 原则，本条沉淀为实现检查点。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-API-34` 和 Story 11-1 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-13：Resolver schema anchor 必须解析真实 runtime result shape
+
+- **来源问题**: Story 11.1 Round 2 发现 `test/contract-anchors.test.ts` 仍把 no-key full-read 的 `sources: {}` 固定为 executable anchor。该 expectation 与 Round 1 已批准的 runtime leaf provenance handoff 冲突，导致 full `npm test` 唯一失败，并可能诱导后续修复回退真实 runtime result shape。
+- **CR 证据**:
+  - `11-1-code-review-summary-20260902-round-2.md`: Finding #1 指出 contract anchor 仍断言旧 `sources: {}`，但 current runtime result 已返回 `sources.core.project_name` leaf metadata。
+  - `11-1-code-review-evaluation-20260903-round-2.md`: evaluator 确认该 finding 为 P1，说明 public CLI machine output 只输出 `result.value`，human no-key output 仍显示 `source path: multiple`，因此 direct-API anchor 应跟随真实 runtime result。
+  - `11-1-code-review-evaluation-20260903-round-2.md`: 修复执行记录确认该用例已更新为 leaf `core.project_name` metadata，并保留 schema parse、value、issues、exitCode 与 leaf-not-top-level guard。
+  - `11-1-code-review-evaluation-20260903-round-3.md`: evaluator 确认 Round 2 P1 已关闭，focused verification 覆盖 `test/contract-anchors.test.ts` 并通过。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是，本次复用既有 `CR-API-13`，不新增等价规则编号
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | 同类 schema/runtime anchor 漂移已在 Story 2.4 与 Story 11.1 复现。 |
+  | 影响范围 | 1 | 影响 direct API contract anchor、resolve/config reader schema parse 和 full-suite completion evidence。 |
+  | 风险等级 | 1 | stale anchor 会把正确 runtime behavior 误判为回归，或诱导 fixer 回退已批准语义。 |
+  | 根因稳定性 | 2 | contract anchor snapshot 与 runtime result shape 分离维护，字段或 metadata 语义演进时容易再次漂移。 |
+  | 可执行性 | 2 | 可要求 anchor tests 解析真实 runtime result，并对 changed fields/source metadata 写精确 assertions。 |
+  | 文档缺口 | 1 | 既有 CR-API-13 已覆盖该检查点；本次补充跨 Story 复现证据，而非新增全局文档要求。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: resolver schema anchor、contract anchor tests、runtime result parser、以及任何直接锚定 internal API result shape 的 executable contract。
+- **规避指南**:
+  - 不得用陈旧 expected snapshot 覆盖真实 runtime result shape；当 Story 已批准 runtime semantics 更新时，direct-API anchor 必须同步更新为精确字段断言。
+- **最佳实践**:
+  - Contract anchor tests 应继续调用真实 runtime function，通过 schema parse 验证 result shape，并分别断言 public output boundary 与 internal metadata boundary，避免把 internal API metadata 误读为 CLI output contract。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档；该模式已由既有 `CR-API-13` 记录，本次只更新复现证据和规则索引。
+- **本次落地**:
+  - Round 2 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅更新 `CR-API-13` 的索引来源/评分，并在 Story 11-1 记录中追加复现证据。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- **无需新增 TODO backlog**: Round 1 与 Round 2 evaluator 均未降级任何 CR TODO；Round 3 evaluator 明确 TODO 0、用户决策点 0。04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 11-2 / 2026-09-03
+
+- **Story**: 11-2
+- **分析来源**:
+  - `11-2-code-review-summary-20260903-round-1.md`
+  - `11-2-code-review-evaluation-20260903-round-1.md`
+  - `11-2-code-review-summary-20260903-round-2.md`
+  - `11-2-code-review-evaluation-20260903-round-2.md`
+  - `11-2-code-review-summary-20260903-round-3.md`
+  - `11-2-code-review-evaluation-20260903-round-3.md`
+  - `EXPERIMENT_NOTES.md`
+- **结论概览**:
+  - 模型使用时间线：Reviewer Round 1/2/3、Evaluator Round 1/2/3 以及两轮 Fixer records 均记录 `Model Used: GPT-5.5 (gpt-5.5)`；本次 CR04 使用模型：GPT-5.5 (gpt-5.5)。
+  - Round 1 reviewer/evaluator 确认 2 个真阳性：ReadyCheck 对 fresh manifest `paths.artifactRoots[]` 缺失/错配未 fail-closed；D1 current public docs 仍发布旧 fresh defaults。Evaluator 将 ReadyCheck 上调为 P1，D1 docs 判为 P2 bounded patch；Round 1 fixer 已修复，Round 3 evaluator 确认关闭。
+  - Round 2 reviewer/evaluator 确认 2 个真阳性：fresh detailed per-root explicit override 被投影为 `fresh-default`；brownfield tutorial Step 1 / Step 6 仍使用旧 default quick paths。Evaluator 将前者改裁为 P1 `decision_needed`，用户批准方案 A 后，fixer 以 dated controlled correction 修订 owner artifacts 并完成 resolver/tests/docs 修复；Round 3 reviewer/evaluator 确认全部关闭。
+  - Round 3 reviewer/evaluator 均通过；新增 findings 0，阻塞修复 0，新 owner decision 0。唯一保留项为 `docs/reference/workflow-artifact-layout.md` generic route strings，维持 Story 11.4+ / CR TODO 候选，交 CR05 判断。
+  - 本次 04 按外层编排授权采用默认推荐决策：record-only。仅更新本规则总结与必要 CR04 记录，不修改 project-context、Architecture、AGENTS、CLAUDE、Story、SPEC、Flow Gate、源码、测试、tracker、Reviewer、Evaluator 或 TODO backlog。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Fresh ReadyCheck 必须对 caller 与 manifest 的 optional additive projection 做 fail-closed reconciliation | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-35 |
+| `resolutionMode` 必须表达 field-level 来源语义而非 lifecycle 标签 | 通过 | 9/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-36 |
+| Owner correction 必须用 dated controlled correction 保留原决策轨迹 | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-PROCESS-02 |
+| D1 current public docs fresh defaults 必须同步 | 未通过：不重复 | 6/12 | none | 已由 canonical governance 的 `current-public-docs` D1 policy 覆盖；本轮作为修复证据，不新增重复规则 |
+| Brownfield tutorial Step 1 / Step 6 default quick paths | 未通过：纯局部文档遗漏 | 4/12 | none | 已修复，但绑定单一 tutorial section，不沉淀为全局规则 |
+| `workflow-artifact-layout.md` generic route strings | 未通过：状态未闭合 | 5/12 | todo-tracker | 维持 Story 11.4+ / CR TODO 候选；CR04 不写 `cr-todo-backlog.md`，交 CR05 去重/登记判断 |
+
+### 提炼规则
+
+#### CR-API-35：Fresh ReadyCheck 必须对 caller 与 manifest 的 optional additive projection 做 fail-closed reconciliation
+
+- **来源问题**: Story 11.2 Round 1 发现 fresh install caller 已携带七个 `paths.artifactRoots[]` expected projection，但 ReadyCheck 在 manifest 缺失该 optional additive field、顺序错配、entry 内容错配或重复 field 时仍可继续使用 caller projection 并返回 ready。这样会让 manifest/index drift 被 Ready Summary gate 掩盖，形成 false-ready。
+- **CR 证据**:
+  - `11-2-code-review-summary-20260903-round-1.md`: Finding #1 用删除 manifest `paths.artifactRoots[]` 与改写第一个 `resolvedRoot` 的定向复现证明 `runReadyCheck()` 仍返回 `ok=true`。
+  - `11-2-code-review-evaluation-20260903-round-1.md`: evaluator 确认该 finding 为 P1，要求 caller `paths.artifactRoots[]` 存在时将其作为 expected projection，与 manifest projection 做 fail-closed reconciliation，同时保留旧 manifest optional compatibility。
+  - `11-2-code-review-evaluation-20260903-round-1.md`: 修复执行记录确认 `runReadyCheck()` 已覆盖 manifest missing projection、count mismatch、non-unique field、fixed order mismatch、entry field mismatch 与 invalid entry，并复用 `manifest-schema.malformed-field` 的 deterministic details。
+  - `11-2-code-review-evaluation-20260903-round-3.md`: evaluator 独立确认 ReadyCheck Round 1 finding 关闭，focused regressions 覆盖 missing/order/path/duplicate/legacy both-omit 场景。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 的 reviewer 定向复现、evaluator P1 裁决、fixer 修复与 Round 3 复审复评均确认；暂无跨 Story 复现。 |
+  | 影响范围 | 2 | 影响 install caller projection、manifest/index projection、ReadyCheck、Ready Summary、fixtures 和 release confidence。 |
+  | 风险等级 | 2 | ReadyCheck false positive 会把 manifest/index drift 投影为 ready，直接破坏 fresh install gate 可信度。 |
+  | 根因稳定性 | 2 | optional additive public field 与 backward compatibility 并存时，容易只保留 optional parse 而遗漏 caller/manifest reconciliation。 |
+  | 可执行性 | 2 | 可通过 manifest missing/count/order/field/entry mismatch regressions、stable issue details 和 legacy both-omit negative guard 直接检查。 |
+  | 文档缺口 | 1 | SPEC 01/04 声明 optional additive projection 与 ordering，但既有 CR 规则未沉淀 ReadyCheck 对 expected/actual projection fail-closed 的实现检查点。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: install/ready-check、manifest/index validation、CommandResult/Ready Summary projection，以及任何由 caller expected projection 与 on-disk manifest projection共同支撑 readiness 的流程。
+- **规避指南**:
+  - 不得因为 public field 是 optional additive，就在 fresh/install caller 已提供 expected projection 时静默回填或跳过 manifest projection mismatch。
+  - 不得只检查 artifact root directories 是否存在，而不比较 caller projection 与 manifest projection 的 count、order、field uniqueness 和 entry content。
+- **最佳实践**:
+  - 当 caller/input 携带 expected additive projection 时，ReadyCheck 应把 manifest 缺失、重复、顺序错配、field 错配、`resolvedRoot` 错配或 schema-invalid entry 归为 blocking `ValidationIssue`。
+  - Legacy compatibility 应以 caller 与 manifest 均省略 additive projection为明确豁免；manifest present/input absent 可以继续由 manifest projection 驱动 runtime path check。
+  - Issue details 应使用 deterministic/redacted codes，不携带 absolute path、hash、timestamp 或临场新增 taxonomy。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则分数达到 10/12，但适用面偏 install/ReadyCheck 实现域；SPEC 01/04 已拥有 public field contract，本次按 CR04 record-only 只写入规则总结。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-API-35` 和 Story 11-2 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-36：`resolutionMode` 必须表达 field-level 来源语义而非 lifecycle 标签
+
+- **来源问题**: Story 11.2 Round 2 发现 fresh detailed prompt 允许用户对单个 artifact root field 输入非空值，resolver 也会使用该值，但 projection 仍统一标记为 `fresh-default`。这会让 manifest、CommandResult 和 Ready Summary 在路径正确的同时错误表达来源语义，把用户显式配置伪装成默认值。
+- **CR 证据**:
+  - `11-2-code-review-summary-20260903-round-2.md`: Finding #1 指出 detailed config 下 `planning_artifacts="_speclite-output/plans"` 生效，但 `resolutionMode` 仍为 `fresh-default`。
+  - `11-2-code-review-evaluation-20260903-round-2.md`: evaluator 确认现象有效，但因 Story 11.2 kickoff 与 CLI detailed override 语义冲突，将其改裁为 P1 `decision_needed`，要求 owner 裁决。
+  - `EXPERIMENT_NOTES.md`: Owner Decision Closed 记录用户批准方案 A：fresh detailed 非空逐 field 输入为 `explicit-config`；未显式 fields、quick/default 与仅由 `output_folder` 派生的 roots 保持 `fresh-default`。
+  - `11-2-code-review-evaluation-20260903-round-2.md`: 修复执行记录确认 `src/config/artifact-root-resolver.ts` fresh 分支已按 `explicitValue !== undefined` 返回 `explicit-config`，并补充 focused/negative-guard tests。
+  - `11-2-code-review-evaluation-20260903-round-3.md`: evaluator 确认 owner correction、runtime、tests 和 ad-hoc detailed install propagation 均已闭环。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 的 Round 2 reviewer/evaluator/fixer 与 Round 3 复核确认；同类 source/provenance 语义风险在 artifact-root resolver 系列中已有复现迹象。 |
+  | 影响范围 | 2 | 影响 resolver、config initialization、CLI detailed prompt、manifest、CommandResult、Ready Summary 和 focused fixtures/tests。 |
+  | 风险等级 | 1 | 不破坏目录创建，但会让 public projection 错误表达用户显式输入来源，误导 review/readiness 或后续 consumer 判断。 |
+  | 根因稳定性 | 2 | lifecycle、default derivation 与 field-level explicit value 混在同一 projection 时，后续新增 root field 或 mode enum 容易再次误标。 |
+  | 可执行性 | 2 | 可用 per-field explicit override test、quick/default negative guard、`output_folder` 派生 guard 和 manifest/CommandResult propagation check 直接验证。 |
+  | 文档缺口 | 1 | SPEC 09 已通过 controlled correction补上语义，但既有 CR 规则未沉淀“mode 表达 field-level 来源而非 lifecycle”的检查点。 |
+
+- **总分**: 9/12
+- **建议去向**: rules-summary
+- **适用范围**: artifact-root resolver、runtime config projection、manifest/CommandResult/Ready Summary field projection，以及任何包含 `fresh-default` / `explicit-config` / `legacy-compatible` 等来源枚举的 public/internal result。
+- **规避指南**:
+  - 不得把 `resolutionMode` 当成 install lifecycle 标签统一赋值；它必须反映每个 field 的实际来源。
+  - 不得将用户在 detailed prompt 中输入的非空逐 field root 标为 `fresh-default`，除非 owner contract 明确把该输入定义为 default 参数化。
+- **最佳实践**:
+  - 对每个 projected field 分别判断来源：非空逐 field explicit input 为 `explicit-config`；blank Enter、quick/default 和仅由 `output_folder` 派生的 per-root values 保持 `fresh-default`；existing explicit config 与 legacy fallback 按 owner contract 单独标记。
+  - Tests 应同时覆盖 positive explicit override、其它未覆盖 fields 仍为 default、quick/default negative guard 和 end-to-end manifest/CommandResult propagation。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分为 9/12，但 `SPEC 09` 已作为 field-level owner 完成 controlled correction；本次只沉淀为后续 resolver/projection 实现检查点。
+- **本次落地**:
+  - Round 2 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-API-36` 和 Story 11-2 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-PROCESS-02：Owner correction 必须用 dated controlled correction 保留原决策轨迹
+
+- **来源问题**: Story 11.2 Round 2 暴露 `resolutionMode` 语义分叉后，现有 kickoff gate 曾写入“fresh install all seven roots are `fresh-default`”，而新 owner decision 选择了 fresh detailed 非空逐 field 输入为 `explicit-config`。若直接改写 Story、SPEC 或 kickoff 原文，会让后续 CR 无法追溯为什么原 gate wording 被 supersede，也会掩盖真实的 owner decision 过程。
+- **CR 证据**:
+  - `11-2-code-review-evaluation-20260903-round-2.md`: evaluator 将 mode finding 改裁为 `decision_needed`，要求先由 `SPEC 09` / Story 11.1 / Story 11.2 owner 决策，并明确是否需要 controlled correction。
+  - `EXPERIMENT_NOTES.md`: Owner Decision Closed 记录用户批准方案 A，并要求用 dated controlled correction 保留 2026-09-02 原决策轨迹，不得静默改写。
+  - `11-2-code-review-evaluation-20260903-round-2.md`: 修复执行记录确认已在 `SPEC 09`、Story 11.1、Story 11.2 和 Story 11.2 kickoff gate 追加 `Controlled Correction 2026-09-03`。
+  - `11-2-code-review-summary-20260903-round-3.md`: reviewer 确认 2026-09-02 kickoff 原始决策未删除，新修正只 supersede 该 bullet 的最后一句并限定适用范围。
+  - `11-2-code-review-evaluation-20260903-round-3.md`: evaluator 确认 owner artifacts 以 dated controlled correction 闭环，未用 post-hoc 文档掩盖 runtime/public projection 分裂。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 本 Story 首次以 owner decision + controlled correction 形式闭环；同类历史快照/当前事实边界风险在 canonical governance 中已有稳定模式。 |
+  | 影响范围 | 2 | 影响 SPEC、Story、kickoff/completion gate、review/evaluation records 和后续 CR 判断。 |
+  | 风险等级 | 1 | 静默改写通常不直接破坏 runtime，但会破坏审计链、让后续 reviewer/evaluator 误读原决策和授权边界。 |
+  | 根因稳定性 | 2 | owner artifacts 与 gate wording 发生冲突时，开发者容易把旧文本直接改成当前事实，导致历史轨迹丢失。 |
+  | 可执行性 | 1 | 可通过 diff、dated correction heading、supersede wording 和 reviewer/evaluator record 检查，但不完全适合自动化。 |
+  | 文档缺口 | 1 | canonical governance 已要求 frozen historical record 不静默刷新；本规则补充 CR owner-correction 场景下的 dated correction 操作检查点。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: owner decision gate、SPEC/Story/kickoff/completion gate controlled correction、CR evaluation/fix records，以及任何需要修正已关闭 owner wording 但保留历史事实的流程。
+- **规避指南**:
+  - 不得为了让当前实现看起来一致而删除或重写原始 gate/Story/SPEC 决策文本。
+  - 不得在未记录 owner decision、日期、supersede 范围和证据的情况下把需求语义分叉直接交给 fixer。
+- **最佳实践**:
+  - 对已关闭 owner artifact 的语义修正应追加 `Controlled Correction YYYY-MM-DD` 或等价 dated note，明确保留原决策、说明 supersede 的具体句子/范围，并绑定 reviewer/evaluator/fixer evidence。
+  - Review 阶段应检查 controlled correction 是否在所有 owner artifacts 中一致出现，且没有借修正文档暗中扩大 Story scope。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则与 canonical governance 的 D2 frozen-history policy 相近，本次只沉淀为 CR owner-correction 操作规则，避免重复修改全局治理文档。
+- **本次落地**:
+  - Round 2 fixer 已按 owner decision 修订，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-PROCESS-02` 和 Story 11-2 记录。
+- **同步状态**: 已写入规则总结
+
+#### 未沉淀 / 交接项
+
+- **D1 current public docs fresh defaults**: 不新增规则。理由：该事项已由 `canonical-governance.json` 的 `current-public-docs` D1 policy 与 `docs/reference/canonical-source-governance.md` 覆盖；Round 1 evaluator/fixer 已按 bounded scope 修复，本次作为 CR-API-35/36 的背景证据，不创建重复 CR-DOC 规则。
+- **Brownfield tutorial Step 1 / Step 6 default quick paths**: 不新增规则。理由：该 finding 绑定单一 tutorial 的两个 section，已由 Round 2 fixer 修复；可作为 D1 docs 修复证据，但纯局部路径 drift 不具备单独规则化价值。
+- **`workflow-artifact-layout.md` generic route strings**: 不写入规则总结，也不在 CR04 直接写 `cr-todo-backlog.md`。理由：Round 3 evaluator 明确它仍属于 Story 11.4+ / CR TODO 候选，当前状态未闭合；交 CR05 做现有 TODO 去重、归属和是否登记判断。
+
+#### 05 TODO Tracker 交接
+
+- **交接候选**: `workflow-artifact-layout.md` generic route strings，归属 Story 11.4+ workflow routing / canonical Skill alignment。CR04 不直接写 TODO backlog，避免与 CR05 职责重叠。
+
+### Story 11-3 / 2026-09-03
+
+- **Story**: 11-3
+- **分析来源**:
+  - `11-3-code-review-summary-20260903-round-1.md`
+  - `11-3-code-review-evaluation-20260903-round-1.md`
+  - `11-3-code-review-summary-20260903-round-2.md`
+  - `11-3-code-review-evaluation-20260903-round-2.md`
+  - `11-3-code-review-summary-20260903-round-3.md`
+  - `11-3-code-review-evaluation-20260903-round-3.md`
+- **结论概览**:
+  - 模型使用时间线：Reviewer Round 1/2/3 与 Evaluator Round 1/2/3 均记录 `Model Used: GPT-5.5 (gpt-5.5)`；Round 1 evaluation 后的 fresh fixer recovery record 也记录 `Model Used: GPT-5.5 (gpt-5.5)`；本次 CR04 使用模型：GPT-5 (Codex)。
+  - Findings 统计：Round 1 reviewer/evaluator 确认 4 个 `patch` finding，并均评估为 P1；Round 2 reviewer/evaluator 确认 1 个 legacy `story_location` directory noise `patch` finding，并评估为 P1；Round 3 reviewer/evaluator 均通过，新增 blocker 0。
+  - Round 1/2 fixer 已修复 malformed config status failure、project-level legacy actual path plumbing、installer namespace ownership precedence、unknown future metadata passthrough，以及 legacy story directory noise filtering；Round 3 evaluator 独立确认 5 个 P1 均 Closed。
+  - Resolver-level protected namespace rejection 与 single-file / metadata-only legacy Story 支持均被 Round 3 evaluator 明确维持为 P2 Owner future；本次不得写成当前强制规则或已实现 contract。
+  - Packaging 证据以 Round 3 evaluator 的最终顺序重跑为有效证据：`npm run release:packaging-check` 顺序重跑通过；早先 build/packaging 并行导致的 `dist` 竞态失败不作为产品回归。
+  - 本次 04 按外层编排授权采用默认推荐决策：record-only。仅更新本规则总结，不修改 project-context、Architecture、AGENTS、CLAUDE、Story、SPEC、Flow Gate、源码、测试、tracker、Reviewer、Evaluator、TODO backlog、PLAN、EXPERIMENTS 或 EXPERIMENT_NOTES。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Existing-state readout 必须将 blocking config resolver issue fail closed | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-37 |
+| Config/artifact mismatch 必须消费 consumer-filtered actual path evidence | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-38 |
+| Installer-owned namespace 必须优先于 overlapping artifact roots | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-SEC-18 |
+| Workflow artifact metadata schema 必须兼容 unknown future keys 且保持 required keys strict | 通过 | 8/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-39 |
+| Resolver-level protected namespace rejection | 未通过：状态未闭合且需 owner contract | 5/12 | todo-tracker | P2 Owner future；不写成当前强制规则，不写入本 rules summary 正文规则 |
+| Single-file `story_location` 或 metadata-only legacy Story 支持 | 未通过：状态未闭合且需 owner contract | 5/12 | todo-tracker | P2 Owner future；`SPEC 09` 当前仍定义 directory + `{story_key}.md`，不写成当前兼容 contract |
+
+### 提炼规则
+
+#### CR-API-37：Existing-state consumer 必须将 blocking artifact-root resolver issue fail closed
+
+- **来源问题**: Story 11.3 Round 1 发现 `status` 在 existing `_speclite/config.toml` malformed 或 artifact-root resolver blocking failure 时，静默回退 manifest `artifactRoots`，继续输出 `status="success"`、`issues=[]` 与 7 个 `fresh-default` roots。Story 11.8 Round 2 又发现 update planning 在 existing resolver `ok=false` 时返回 `undefined`，随后把 failure 误当成 legacy-compatible absence并回退 Planning-root migration projection。两者都把 blocking resolver evidence吞掉，再以 stale/default fallback继续 readout 或构造 write-capable plan。
+- **CR 证据**:
+  - `11-3-code-review-summary-20260903-round-1.md`: Finding #1 指出 `readInstalledStateSummary()` 在 resolver `!ok` 时返回 `input.manifestPaths`，`status` command 继续 success/no issues。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: evaluator 确认该 finding 为 P1，要求复用现有 resolver issues，blocking issue 时 status command failure、top-level `issues` 非空，并不得展示 manifest-derived fresh roots。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: fresh fixer recovery record 确认 malformed required config 下 `exitCode=1`、`status="failure"`、`data.highLevelHealth="failed"`，且 missing config lightweight fallback 仍保持非 blocking legacy 边界。
+  - `11-3-code-review-evaluation-20260903-round-3.md`: evaluator 独立确认 Round 1 Finding #1 已 Closed，malformed config regression 覆盖 human/JSON 不泄露 temp root、不含 `mode=fresh-default`。
+  - `11-8-code-review-evaluation-20260905-round-2.md`: Finding #1 确认 existing resolver failure 被吞掉后会进入 Planning-root migration fallback；Fix Summary 将 resolution表达为显式success/failure，原样传播stable issues，并在projection/transaction前返回blocked empty plan。
+  - `11-8-code-review-evaluation-20260905-round-4.md`: evaluator确认resolver `ok=false` 的issues传播、projection前HALT、`actions=[]`、`changedPaths=[]`与合法无root配置的legacy-compatible分支均保持关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Story 11.3 的 public readout 与 Story 11.8 的 update planning 均吞掉 blocking resolver evidence并使用fallback继续执行，已形成跨 Story 复现。 |
+  | 影响范围 | 2 | 影响 `status` command、installed-state summary、artifact-root resolver handoff、JSON/human output 与 automation health gate。 |
+  | 风险等级 | 2 | blocking config failure 被伪装为 success/fresh defaults，会让用户和自动化误判 existing install current truth。 |
+  | 根因稳定性 | 2 | Consumer把 `undefined` 同时表示“合法缺省”与“resolver失败”，再用默认/legacy fallback继续执行，是 readout 与 write planning 层稳定易复现的实现陷阱。 |
+  | 可执行性 | 2 | 可用 malformed config、schema-invalid root、top-level issues、exit code、human output 与 no fresh-default projection regression 直接检查。 |
+  | 文档缺口 | 1 | 既有 rules 覆盖 manifest/index unavailable 与 public config resolver 复用，但未细化 artifact-root resolver blocking issue 不得用 manifest roots 冒充 current readout。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: `status`、Ready Summary、installed-state readout、update/repair planning、artifact-root resolver handoff，以及任何消费 existing config/root resolution 后生成 public output 或 write-capable projection 的 command path。
+- **规避指南**:
+  - 不得在 blocking config/root resolver issue 出现时回退 manifest projection 并继续输出 empty issues 或 healthy/current roots。
+  - 不得用同一个 `undefined`/empty value同时表达“合法无配置的 legacy-compatible 状态”和“resolver `ok=false`”；失败必须保留issues并在任何projection/transaction前阻断。
+  - 不得把 `fresh-default` manifest roots 当作 existing config current truth；missing config 的 legacy fallback 必须与 malformed/invalid config failure 明确区分。
+- **最佳实践**:
+  - Existing-state readout 应消费 resolver 返回的 merged value、resolution mode 与 issues；blocking issue 进入 top-level `issues` 并驱动 command failure 或明确 warning，不展示 stale manifest-derived `artifactRoots`。
+  - Write-capable consumer应把resolver success/failure建模为可区分结果；只允许明确成功返回的`legacy-compatible` roots进入fallback-compatible projection，失败路径断言empty plan、zero changed path与无journal/partial write。
+  - Tests 应同时覆盖 malformed config、invalid root、missing config legacy fallback、human/JSON parity、redacted path 和 `status.data.highLevelHealth` / `CommandResult.status` 的边界。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。`SPEC 01`、`SPEC 09` 与既有 CR rules 已有 command/status/config 总原则，本条偏 Story 11.3 existing artifact-root readout 实现检查点；本次仅 record-only。
+- **本次落地**:
+  - Story 11.3 Round 1 fixer 已修复 readout fallback，Round 3 reviewer/evaluator 确认关闭。Story 11.8 Round 2 fixer已修复update consumer的failure propagation与projection前HALT，Round 4 reviewer/evaluator确认关闭；本次更新既有`CR-API-37`而不新增重复规则。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-38：Config/artifact mismatch 必须消费 consumer-filtered actual path evidence
+
+- **来源问题**: Story 11.3 Round 1 发现 project-level validation 只有低层 helper 手动传入 `actualArtifactPath` 时才能产生 `artifact-path.config-artifact-mismatch`；production `validate` 不会读取 legacy `sprint-status.story_location` 作为实际消费路径。Round 2 又发现修复后的 directory discovery 过宽，会把 `README.md`、`notes.md`、`notes.txt`、sidecar、hidden/temp 或 recursive child 都当作 story `actualConsumedPath` mismatch。
+- **CR 证据**:
+  - `11-3-code-review-summary-20260903-round-1.md`: Finding #2 指出 `validateArtifactPaths()` 只在 configured/default output root 下发现 artifacts，legacy actual path mismatch 只在手动 helper 参数中成立。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: evaluator 确认该 finding 为 P1，授权只接入 Story 11.3 范围内的 read-only legacy `sprint-status.story_location` evidence，不实现 whole/sharded precedence、新 routing 或 migration。
+  - `11-3-code-review-summary-20260903-round-2.md`: Finding #1 指出 legacy `story_location` 目录会把非 story 文件也纳入 `actualConsumedPath` mismatch。
+  - `11-3-code-review-evaluation-20260903-round-2.md`: evaluator 确认该 finding 为 P1，要求 directory `story_location` 只纳入同一 `development_status` 中合法 Story key 对应的 direct child `{story_key}.md`。
+  - `11-3-code-review-evaluation-20260903-round-3.md`: evaluator 确认 Round 1 Finding #2 与 Round 2 Finding #1 均 Closed；production regression 覆盖 legal story file 被纳入、README/notes/sidecar/hidden/temp/recursive child 被排除，single-file `story_location` 不作为本轮合法 evidence。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 连续两轮暴露 production actual evidence 缺失与 directory noise false positive，并由 Round 3 复审复评确认关闭。 |
+  | 影响范围 | 2 | 影响 `speclite validate`、artifact-path aggregation、legacy sprint status discovery、validation issue details 和 reviewer/evaluator evidence quality。 |
+  | 风险等级 | 2 | production path 漏接会漏报真实 config/artifact mismatch；过宽接入会制造 false positive 并污染 `actualConsumedPath`。 |
+  | 根因稳定性 | 2 | rule-level helper 可用但 command aggregation 未接入，或通用 directory walker 被用于特定 consumer evidence，是 validation 集成层稳定风险。 |
+  | 可执行性 | 2 | 可通过 `runValidateCommand()` production regression、story-key direct child filter、project-relative details 和 no-noise assertions 检查。 |
+  | 文档缺口 | 1 | `SPEC 07`/`SPEC 09` 声明 mismatch details 与 story location contract，但既有规则未沉淀“actual evidence 必须由具体 consumer 过滤后再进入 mismatch”的实现检查点。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: project-level artifact validation、legacy actual consumed path discovery、`artifact-path.config-artifact-mismatch` diagnostics、Story consumer handoff，以及任何把 rule helper 支持提升到 production command aggregation 的流程。
+- **规避指南**:
+  - 不得只用 pure helper 手动传入 `actualArtifactPath` 来证明 production validate 已能发现 actual consumed path。
+  - 不得把通用 directory recursion 的全部文件都当作某个 workflow consumer 的 actual artifacts，尤其不得把 README、notes、metadata sidecar、hidden/temp 或 recursive child 提升为 Story `actualConsumedPath`。
+- **最佳实践**:
+  - Production validation 应从具体 consumer contract 提供或发现 actual path evidence；对 legacy `story_location` directory，只接受同一 `development_status` 中合法 Story key 的 direct child `{story_key}.md`。
+  - `artifact-path.config-artifact-mismatch` details 必须保持 project-relative POSIX，包含 `field`、`configuredRoot`、`resolvedRoot`、`actualConsumedPath`、`resolutionMode` 和 stable `reason`，并保持 read-only/no-migration。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则适用面偏 validation aggregation 技术域，且 `SPEC 07` / `SPEC 09` 已拥有 public issue shape 与 Story artifact owner contract；本次只沉淀为实现检查点。
+- **本次落地**:
+  - Round 1/2 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-API-38` 与 Story 11-3 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-18：Installer-owned namespace 必须优先于 overlapping artifact roots
+
+- **来源问题**: Story 11.3 Round 1 发现 artifact roots 可以配置为 `_speclite`、`.claude` 或 `.agents` 等 installer/control namespace；由于 `classifyOwnership()` 先匹配 configured artifact root，再匹配 installer-owned path，`_speclite/_config/manifest.yaml`、`.claude/skills/*` 等 installer-managed files 会被误判为 `workflow-owned`，从而在 update/repair planning 中被 `workflow-owned skip` 吞掉。
+- **CR 证据**:
+  - `11-3-code-review-summary-20260903-round-1.md`: Finding #3 指出 `implementation_artifacts="_speclite"` 被 resolver 接受，`_speclite/_config/manifest.yaml` 被 classifier 归为 `workflow-owned`。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: evaluator 确认该 finding 为 P1，但只授权 ownership precedence patch；resolver-level protected namespace rejection 需 owner decision / future requirement。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: fresh fixer recovery record 确认 classifier 顺序改为 human-owned custom path、installer-owned namespace、configured artifact roots，并补充 update/repair overlap regression。
+  - `11-3-code-review-evaluation-20260903-round-3.md`: evaluator 确认 Round 1 Finding #3 Closed；同时独立复现确认 `implementation_artifacts="_speclite"` 仍可解析为 `explicit-config` 且 `issues=[]`，说明 protected namespace rejection 没有被误写入当前 contract。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 本 Story reviewer/evaluator/fixer/复审复评闭环确认；与既有 ownership classifier 优先级、files-index mislabel 和 configured root 边界问题有同类复现迹象。 |
+  | 影响范围 | 2 | 影响 ownership classifier、update planning、repair planning、files-index consumption、installer-owned runtime/config/skill namespaces 与 no-migration 边界。 |
+  | 风险等级 | 2 | installer-managed files 被误判为 workflow-owned skip，会绕过 update/repair 对 manifest、files-index、skill package 或 hook config 的 managed repair。 |
+  | 根因稳定性 | 2 | 多类 ownership boundary 按路径前缀交叠时，先匹配宽泛 workflow root 再匹配 managed namespace 是稳定易复现的 ordering bug。 |
+  | 可执行性 | 2 | 可用 `_speclite`、`.claude`、`.agents` overlap classifier tests，以及 update/repair 不输出 `workflow-owned skip` 的 regression 检查。 |
+  | 文档缺口 | 1 | 既有 CR-SEC-09 覆盖 classifier 优先于 files-index，本规则补充 classifier 内部 installer namespace 与 configured artifact root overlap 的 precedence 检查点。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: ownership classification、update/repair planning、installer-owned namespace detection、configured artifact roots overlap，以及 no-migration / protected workflow artifact preservation 相关流程。
+- **规避指南**:
+  - 不得让宽泛 configured artifact root 覆盖已知 installer-owned namespace；no-migration 保护不得扩大成 managed installer updates bypass。
+  - 不得把 resolver-level protected namespace rejection 当作本规则已实现或当前强制要求；它仍需要 owner contract 与 stable diagnostic。
+- **最佳实践**:
+  - Ownership classifier 应保持 human-owned custom path 优先，其后 installer-owned managed namespaces，再匹配 configured/default workflow artifact roots。
+  - Update/repair regression 应覆盖 overlapping artifact root 下 `_speclite/_config/*`、`.claude/skills/*`、`.agents/skills/*` 等仍可按 installer-owned drift/conflict/regenerate 处理，而不是 `workflow-owned skip`。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则与既有 ownership/path-safety 规则相近，且 resolver-level rejection 尚未 owner-confirm；本次只记录已实现的 precedence contract。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-SEC-18` 与 Story 11-3 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-API-39：Workflow artifact metadata schema 必须兼容 unknown future keys 且保持 required keys strict
+
+- **来源问题**: Story 11.3 Round 1 发现 `WorkflowArtifactMetadataSchema` 使用 `.strict()`，会把带有 future extension keys 的 workflow artifact metadata 解析为 `unrecognized_keys`，再被 validator 转成 `artifact-path.invalid-required-metadata`。这违反 existing install 对 unknown future metadata 的兼容读取要求；同时修复又不能放松 `workflowType`、`sourceSkill`、`generatedAt` 三个 required keys 及 canonical `sourceSkill` mismatch。
+- **CR 证据**:
+  - `11-3-code-review-summary-20260903-round-1.md`: Finding #4 指出 metadata 带 `futureKey` 时 strict schema 拒绝，测试未覆盖 unknown future metadata 正向兼容。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: evaluator 确认该 finding 为 P1，要求只允许 unknown future keys，required keys/value/sourceSkill 仍必须严格。
+  - `11-3-code-review-evaluation-20260903-round-1.md`: fresh fixer recovery record 确认 schema 改为 `.passthrough()`，并新增 frontmatter、sidecar、directory metadata 三种 unknown future key positive tests。
+  - `11-3-code-review-evaluation-20260903-round-3.md`: evaluator 确认 Round 1 Finding #4 Closed；missing required metadata、invalid values 与 wrong canonical `sourceSkill` negative tests 仍通过。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 本 Story reviewer/evaluator/fixer/复审复评闭环确认；暂无跨 Story 同字段复现。 |
+  | 影响范围 | 1 | 影响 workflow artifact metadata schema、artifact path validation、frontmatter/sidecar/directory metadata 读取和 existing compatibility。 |
+  | 风险等级 | 1 | 过严会把兼容 future metadata 判 invalid；过松则可能放过 required metadata 缺失或 canonical `sourceSkill` mismatch。 |
+  | 根因稳定性 | 2 | schema evolution 中 `.strict()` 与 required-field validation 混用是稳定风险，后续 metadata 扩展仍可能复现。 |
+  | 可执行性 | 2 | 可用 passthrough schema、required key negative tests、wrong sourceSkill negative tests 和三类 metadata location positive tests 检查。 |
+  | 文档缺口 | 1 | 既有 rules 已覆盖 metadata production consumption，但未细化 unknown future metadata 与 required metadata strictness 的双边兼容规则。 |
+
+- **总分**: 8/12
+- **建议去向**: rules-summary
+- **适用范围**: workflow artifact metadata schema、artifact path validation、frontmatter/sidecar/directory metadata reader，以及 any backward/forward-compatible metadata extension point。
+- **规避指南**:
+  - 不得用 `.strict()` 或等价 unknown-key rejection 阻断 future additive metadata；也不得为了兼容 unknown keys 而放松 required keys、value domain 或 canonical source identity。
+- **最佳实践**:
+  - 对 metadata extension point 使用 passthrough/loose outer object；对 `workflowType`、`sourceSkill`、`generatedAt` 等 required fields 保持 explicit required/value validation。
+  - Tests 应同时覆盖 frontmatter、sidecar、directory metadata unknown future key positive cases，以及 missing required、invalid required value、wrong canonical `sourceSkill` negative cases。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则偏 metadata schema evolution 实现域，且 Story 11.3 Testing Requirements 已直接覆盖 unknown future metadata；本次仅 record-only。
+- **本次落地**:
+  - Round 1 fixer 已修复，Round 3 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-API-39` 与 Story 11-3 记录。
+- **同步状态**: 已写入规则总结
+
+#### 未沉淀 / 交接项
+
+- **Resolver-level protected namespace rejection**: 不写入当前规则总结正文，也不写成已实现 contract。理由：Round 1/2/3 evaluator 均将 config resolver 层拒绝 `_speclite`、`.claude`、`.agents` artifact root 判为 `decision_needed / future` 或 P2 Owner future；当前只实现 ownership precedence，尚无 owner contract 与 stable diagnostic。
+- **Single-file `story_location` 或 metadata-only legacy Story 支持**: 不写入当前规则总结正文，也不写成 existing compatibility 已支持。理由：Round 2/3 evaluator 明确 `SPEC 09` 当前定义 `story_location` 为 Story 文件所在目录，合法 artifact 为 `{story_root}/{story_key}.md`；扩展 single-file 或 metadata-only `legacy.md` 需要先 owner decision。
+
+#### 05 TODO Tracker 交接
+
+- **交接候选**:
+  - Resolver-level protected namespace rejection：是否在 config resolver 层拒绝 `_speclite`、`.claude`、`.agents` 等 installer/control namespace 作为 artifact root。
+  - Single-file `story_location` 或 metadata-only legacy Story 支持：是否扩展 `SPEC 09` / consumer discovery contract。
+- **CR04 边界**: 本次不写 `cr-todo-backlog.md`，不执行 CR05，只将候选项交给后续 CR05 做去重、归属和是否登记判断。
+
+### Story 11-4 / 2026-09-04
+
+- **Story**: 11-4
+- **分析来源**:
+  - `11-4-code-review-summary-20260904-round-4.md`
+  - `11-4-code-review-evaluation-20260904-round-4.md`
+  - `11-4-code-review-summary-20260904-round-5.md`
+  - `11-4-code-review-evaluation-20260904-round-5.md`
+  - `11-4-code-review-summary-20260904-round-6.md`
+  - `11-4-code-review-evaluation-20260904-round-6.md`
+  - `11-4-code-review-summary-20260904-round-7.md`
+  - `11-4-code-review-evaluation-20260904-round-7.md`
+- **排除来源**:
+  - `11-4-code-review-summary-20260904-round-3.md`
+  - `11-4-code-review-evaluation-20260904-round-3.md`
+- **结论概览**:
+  - Round 4 evaluator 明确 Round 3 summary/evaluation 为 concurrent invalid provenance，本次 CR04 不采信 Round 3 的 finding、授权、canonical governance 判断或 closeout 结论。
+  - Round 4 evaluation 接受 3 个 P1：fresh `resolve artifact-roots --lifecycle fresh` 在缺少 base config 时应走 pure resolver；public resolver docs 不得遗留 two-command closed list；analysis route helper 必须约束 portable basename、project-local boundary、regular non-symlink candidate 与 Owner B no-migration precedence。Round 4 fix record 已修复，Round 7 evaluator 确认关闭。
+  - Round 5 evaluation 接受 2 个 P1：PB/PRFAQ installed Markdown workflow 未同步 TS route helper safety contract；trimmed project identity 与 basename generation 不一致。Round 5 fix record 已修复，Round 7 evaluator 确认关闭。
+  - Round 6 evaluation 接受 2 个 P1：regular non-symlink candidate 未做 readability probe；PB/PRFAQ Load Config 未显式从 raw merged `core.project_name` 绑定 `{project_name}`。Round 6 fix record 已修复，Round 7 evaluator 确认关闭。
+  - Round 7 reviewer/evaluator 均为 PASS；新增 findings 0，阻塞修复 0。Round 2 Finding #3 继续为 P2 / CR TODO / evidence hygiene defer，不阻塞 Story 11.4 `EVALUATION_PASS`，本次 CR04 不登记 TODO backlog。
+  - 本次 04 按外层编排授权采用默认推荐决策：record-only。仅更新本规则总结，不修改 project-context、Architecture、AGENTS、CLAUDE、Story、SPEC、Flow Gate、源码、测试、tracker、Reviewer、Evaluator、TODO backlog、PLAN、EXPERIMENTS、EXPERIMENT_NOTES、commit 或 push。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Public resolver surfaces 必须区分 raw config 与 effective artifact-root resolution | 通过 | 10/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-API-40 |
+| Analysis artifact route selection 必须验证 portable basename 与 project-local readable regular candidate | 通过 | 11/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-SEC-19 |
+| Installed Markdown workflow 必须与 executable route helper 保持同等 safety/config binding | 通过 | 9/12 | rules-summary | 用户本次授权默认推荐决策：record-only，新增 CR-DOC-05 |
+| Public resolver docs closed-list drift | 未通过：偏一次性同步且已有 public docs/CLI contract gate | 6/12 | none | 已作为 Round 4 fix evidence 使用，不新增开发规则 |
+| broad legacy-pattern `575` 精确计数缺少可复现命令 | 未通过：状态未闭合 | 5/12 | todo-tracker | 维持 Round 2 Finding #3 P2 defer；CR04 不写 `cr-todo-backlog.md`，交 CR05 去重/登记判断 |
+
+### 提炼规则
+
+#### CR-API-40：Public resolver surfaces 必须区分 raw config 与 effective artifact-root resolution
+
+- **来源问题**: Story 11.4 Round 4 发现 public `resolve artifact-roots --lifecycle fresh` 在 fresh project 尚无 `_speclite/config.toml` 时，先走 required raw config reader 而失败，无法返回 Story 11.1 已定义的七个 `fresh-default` effective roots；同时修复必须保持 `resolve config` 仍是 raw merged config surface，不能用 artifact-root synthetic fallback 污染 raw config 语义。Round 6 又发现 PB/PRFAQ route selection 使用 `{project_name}`，但 Load Config 未显式绑定 raw merged `core.project_name`，进一步证明 raw config value 与 effective artifact-root resolver result 需要分层消费。
+- **CR 证据**:
+  - `11-4-code-review-evaluation-20260904-round-4.md`: Finding #1 被确认为 P1，要求仅在 `lifecycle=fresh` 且 required base config 确实 `ENOENT` 时以 empty config 调用 pure artifact-root resolver，返回七个 `fresh-default` roots 与空 `configSources`；不得吞掉 malformed/unreadable/non-file config，也不得改变 `resolve config` required-layer/raw semantics。
+  - `11-4-code-review-evaluation-20260904-round-4.md`: 修复执行记录确认 fresh absent public CLI、fresh valid config、existing absent 与 raw config absent matrix 均按分层语义修复。
+  - `11-4-code-review-evaluation-20260904-round-6.md`: Finding #2 被确认为 P1，要求 PB/PRFAQ installed workflow 从 `speclite resolve config --project-root {project-root}` 的 raw merged config field `core.project_name` 绑定 `{project_name}`，不得把 `config.toml.example` 当 runtime fallback，也不得改变 `resolve artifact-roots` surface。
+  - `11-4-code-review-evaluation-20260904-round-7.md`: evaluator 确认 fresh `resolve artifact-roots`、raw `resolve config` 与 PB/PRFAQ raw `core.project_name` binding 均已关闭，且 Round 3 invalid provenance 不作为输入。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 1 | 同一 Story 的 Round 4 与 Round 6 从 public CLI 与 installed workflow 两个 surface 暴露同一 raw/effective 分层风险，并由 Round 7 复审复评关闭。 |
+  | 影响范围 | 2 | 影响 `resolve config`、`resolve artifact-roots`、installed workflow Load Config、fresh install bootstrap、artifact-root provenance 和 downstream route selection。 |
+  | 风险等级 | 2 | raw config 与 effective roots 混用会在 fresh project 误失败，或让 workflow 用 synthetic fallback 代替真实 config value，破坏 runtime support contract。 |
+  | 根因稳定性 | 2 | resolver surface 增加后，consumer 容易只复用 required raw config reader 或反向用 effective resolver 填 raw fields，是稳定集成陷阱。 |
+  | 可执行性 | 2 | 可用 fresh absent/fresh valid/existing absent/raw config absent CLI matrix、raw `core.project_name` workflow scan 和 focused tests 直接检查。 |
+  | 文档缺口 | 1 | `SPEC 01`、`SPEC 09` 与 CLI docs 已定义两类 surface，但既有 CR 规则未沉淀 public resolver consumer 的 raw-vs-effective 分层检查点。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: public resolver commands、installed Skill workflow Load Config、artifact-root route selection、fresh install bootstrap、以及任何同时消费 raw merged config 和 effective artifact-root resolver result 的流程。
+- **规避指南**:
+  - 不得用 required raw config reader 阻断 fresh lifecycle 下 base config `ENOENT` 的 effective artifact-root resolution。
+  - 不得把 `resolve artifact-roots` 的 synthetic defaults、legacy-compatible roots 或 fallback provenance 当作 `resolve config` 的 raw merged config value。
+  - 不得让 installed workflow 隐式猜测 `{project_name}`；必须显式绑定到 raw merged `core.project_name`，并在 route selection 前处理 missing、非 string 或 trim-empty。
+- **最佳实践**:
+  - Public resolver tests 应覆盖 `fresh + base config ENOENT`、fresh valid config、malformed/non-file/unreadable fail-closed、existing absent fail-closed、以及 raw `resolve config` 不变。
+  - Installed workflow 应先调用 `resolve config` 绑定 non-root runtime fields，再调用 `resolve artifact-roots` 绑定 effective artifact roots；两类 evidence 的变量名、HALT 条件和 tests 应分开断言。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则总分 10/12，但用户本轮明确限定 CR04 record-only 范围；同时 active CLI docs 与 SPEC 已有 owning contract，本条沉淀为后续 CR 检查规则。
+- **本次落地**:
+  - Round 4 与 Round 6 fixer 已修复，Round 7 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-API-40` 和 Story 11-4 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-19：Analysis artifact route selection 必须验证 portable basename 与 project-local readable regular candidate
+
+- **来源问题**: Story 11.4 Round 4 发现 `resolveAnalysisDocumentRoute()` 直接把 `projectName` 拼入 basename，未约束 single filename segment、project boundary、candidate type 或 symlink escape；Round 5 发现校验使用 trimmed 值但 basename 仍用原始值；Round 6 发现 regular non-symlink candidate 未做 readability probe。若这些检查缺失，Product Brief / PRFAQ route selection 可能逃离 analysis root、选择 directory/non-file/symlink/unreadable file，或因首尾空格产生不同 artifact basename，破坏 resume/write 前的 fail-closed 与 no-migration policy。
+- **CR 证据**:
+  - `11-4-code-review-evaluation-20260904-round-4.md`: Finding #3 被确认为 P1，要求 `projectName` 仅作为 portable single filename segment；new/legacy candidate 必须 project-local，project root 外 symlink fail closed，existing candidate 只有 project-local regular non-symlink file 才算存在，只有 `ENOENT` 表示 missing，并保持 new-first、legacy-compatible-only、related artifacts co-location 与 no migration/copy/delete/rename/rewrite。
+  - `11-4-code-review-evaluation-20260904-round-5.md`: Finding #2 被确认为 P1，要求 helper 返回 trimmed project name，并用 trimmed value 生成 Product Brief / PRFAQ main 与 distillate basename；内部空格与 Unicode 保留，不做 slugify 或额外字符集收窄。
+  - `11-4-code-review-evaluation-20260904-round-6.md`: Finding #1 被确认为 P1，要求 regular non-symlink existing candidate 还必须通过 `fs.open(..., "r")` readability probe；`EACCES`、`EPERM`、ACL/sandbox 或任何 non-`ENOENT` open failure 均 HALT。
+  - `11-4-code-review-evaluation-20260904-round-7.md`: evaluator 确认 basename、directory/non-file、symlink boundary、trimmed basename mismatch、readability probe、new-first 不读取 legacy、`ENOENT` missing 与 no-migration 语义均已关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | 同一 Story 多轮反复暴露 basename、candidate type/symlink、trim identity 与 readability 子问题，均由 Round 7 确认关闭。 |
+  | 影响范围 | 2 | 影响 Product Brief、PRFAQ、analysis artifact routing helper、installed workflow resume/write path、distillate co-location 与 legacy compatibility。 |
+  | 风险等级 | 2 | 错误 route 可逃离 root、选择不可安全读取的 existing artifact、或制造重复 artifact，直接影响文件写入/恢复边界。 |
+  | 根因稳定性 | 2 | 文件路径 helper 容易把 display name 当 path segment，把 existence 当 readability，把 directory/symlink 当普通 artifact，是稳定复现风险。 |
+  | 可执行性 | 2 | 可用 unsafe name、trimmed basename、internal space/Unicode、directory、symlink escape、unreadable mock、new-first 和 neither-missing tests 直接检查。 |
+  | 文档缺口 | 1 | 既有 path/file integrity 规则覆盖 no-follow 与 ENOENT 分类，本规则补充 analysis artifact route selection 的 basename/readability/no-migration composite check。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: analysis document routing、workflow artifact resume/write target selection、Product Brief/PRFAQ/main+distillate co-location、legacy-compatible root-level discovery，以及任何从 display project name 生成 artifact basename 的流程。
+- **规避指南**:
+  - 不得把 raw display name 直接拼接成 path segment；必须先 trim，拒绝空白、`.`、`..`、separator、NUL、absolute 或 drive-like shape，并保留合法内部空格/Unicode。
+  - 不得把 path existence 当作 valid existing artifact；directory、non-file、candidate symlink、project-boundary symlink escape、unreadable file 或 non-`ENOENT` error 都必须 HALT。
+  - 不得在 legacy-compatible discovery 中 migration、copy、delete、rename 或 rewrite 旧 artifact；new existing 优先，legacy 只在 new missing 且 legacy safe regular readable file 时使用。
+- **最佳实践**:
+  - Route helper 应返回 trimmed basename identity，并对 new/legacy candidate 统一执行 project-local boundary、no-follow type、readability probe 和 `ENOENT`-only missing 分类。
+  - Related artifacts 应始终跟随 selected main directory；focused regressions 应覆盖 Product Brief 与 PRFAQ 两类 artifact、new-first 不探测 legacy、both missing 选择 new subject、legacy-compatible-only 与 no-migration tokens。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则虽然分数高，但适用范围集中于 analysis artifact route selection 技术域；已有 global path-safety / file-integrity rules 可承接通用原则，本次只沉淀 Story 11.4 的 composite implementation checklist。
+- **本次落地**:
+  - Round 4/5/6 fixer 已修复，Round 7 reviewer/evaluator 确认关闭；本次 04 仅新增 `CR-SEC-19` 和 Story 11-4 记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-DOC-05：Installed Markdown workflow 与 executable implementation 必须形成可定位、同源的双向 binding
+
+- **来源问题**: Story 11.4 Round 5 发现 TS helper 已包含 route safety，但 Product Brief / PRFAQ installed Markdown workflow 才是真实 Agent 执行面，仍只有 literal exists 选择逻辑，未声明 portable filename、project-local regular non-symlink、symlink escape、unreadable/non-`ENOENT` HALT 等边界。Round 6 又发现两份 workflow 使用 `{project_name}` 构造 artifact basename，却未在 Load Config 中明确绑定 raw merged `core.project_name`。Story 11.6 Round 4 从反方向复现同一双轨根因：active Create UX Markdown 已强制调用 bounded filesystem operation，但实现只存在于未发布的 repository `src/`/test import graph，fresh installed Skill 无可定位、可执行的 binding。Story 11.8 Round 1 再次发现 Grill workflow/record spec绕开resolver硬编码default与第三fallback，而current docs又发布Planning root、幽灵目录和非exact basename；三类缺口都会让helper/resolver truth、真实installed workflow与用户可见route guidance脱节。
+- **CR 证据**:
+  - `11-4-code-review-evaluation-20260904-round-5.md`: Finding #1 被确认为 P1，说明 `resolveAnalysisDocumentRoute()` 仅由 tests 调用，Product Brief / PRFAQ installed workflow 没有消费 TS helper；要求两份 workflow-details 同步 TS helper 等价规则，并补 installed workflow contract assertions。
+  - `11-4-code-review-evaluation-20260904-round-5.md`: 修复执行记录确认两份 workflow 已补充 trim、portable single filename segment、project-local、regular non-symlink、unreadable/non-`ENOENT` HALT、`ENOENT` missing、new-first、legacy-compatible-only、related artifacts co-location 与 no migration/copy/delete/rename/rewrite。
+  - `11-4-code-review-evaluation-20260904-round-6.md`: Finding #2 被确认为 P1，要求两份 workflow Load Config 显式从 raw merged config field `core.project_name` 绑定 `{project_name}`，字段缺失、非 string 或 trim-empty 时 HALT before route selection。
+  - `11-4-code-review-evaluation-20260904-round-7.md`: evaluator 确认 PB/PRFAQ installed workflow route safety contract 与 `core.project_name` binding 均已关闭，并由 `test/analysis-artifact-routing.test.ts` contract scan 覆盖。
+  - `11-6-code-review-evaluation-20260904-round-4.md`: evaluator 确认 required filesystem operation 仅存在于未发布 `src/` 与 repository tests，installed Create UX package缺少 private script、exact invocation、result/HALT contract 与真实消费证据，构成 P1。
+  - `11-6-code-review-evaluation-20260904-round-4.md`: 修复执行记录将 operation 收口到 canonical Skill-local private Node script，repository harness 直接 import 同一 export，installer 投影到 `.agents` / `.claude` 并记录 bytes/hash/mode/`sourceRef`/`executable`。
+  - `11-6-code-review-evaluation-20260904-round-5.md`: evaluator 通过两份 installed copy 的实际 create/mkdir/negative invocation、fixed argv、single JSON 与 no hidden hook 确认双向 binding 和 single source 已关闭。
+  - `11-8-code-review-evaluation-20260905-round-1.md`: Finding #2 确认 Grill producer、record spec与D1 current docs未共同消费resolver-provided Solutioning fixed child，且存在合同外`.specskills/output` fallback；Fix Summary统一resolver invocation、HALT/zero-write与exact public route/basename。
+  - `11-8-code-review-evaluation-20260905-round-4.md`: evaluator确认两个readiness producer、record spec与current docs保持同一resolver-backed route，Grill既有record basenames未被误改。
+  - `11-9-code-review-evaluation-20260907-round-19.md`: Finding #6 确认 CR04/CR05 durable output plane 已进入 executable contract，但 active public docs/help metadata 未同步，真实 Agent 与用户无法定位收口产物；Fix Summary 对齐 docs/help 双输出，Round 24 双 PASS 确认保持关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Story 11.4、11.6、11.8 与 11.9 分别从 helper→Markdown、Markdown→installed executable、resolver→producer/docs、durable output→docs/help 四个方向复现同源 binding 缺口。 |
+  | 影响范围 | 2 | 影响 Product Brief、PRFAQ、installed Skill Markdown、workflow-details contract scan、Agent execution path 与 executable helper evidence 的可信度。 |
+  | 风险等级 | 2 | 任一方向缺失都会让真实 installed Agent 绕开已验证安全语义或根本无法执行 required operation，导致越界风险、late failure 或虚假 completion evidence。 |
+  | 根因稳定性 | 2 | 对 Agent-installed workflow 而言，TS helper/test 与 Markdown instructions 分离维护，后续 workflow route 或 config field 演进时高概率复现。 |
+  | 可执行性 | 2 | 可用 canonical Markdown contract scan、package inventory/index/hash/mode检查及真实 `.agents` / `.claude` installed invocation同时验证两端。 |
+  | 文档缺口 | 1 | 既有规则强调 executable gate，但未具体要求 Markdown workflow 与 evidence helper 的 route safety/config binding parity。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: installed Skill Markdown workflow、workflow-details routing/operation instructions、Skill-local private executable、repository helper/harness、installer package projection、contract scan 与 installed invocation tests。
+- **规避指南**:
+  - 不得只修 TS helper 或 tests，就把 installed Markdown workflow 视为已获得同等 runtime safety。
+  - 不得让 active Markdown 强制执行某个 operation，却只在未发布 repository source/test graph 中保留实现；required operation 必须在 installed Skill 中有 exact、可定位、可执行且非 public 扩面的 binding。
+  - 不得维护 repository helper 与 installed script 两份实际 operation 实现；测试与 installed invocation 必须消费同一 canonical source/export。
+  - 不得在 Markdown route selection 中使用未在 Load Config 显式绑定的变量；尤其涉及 basename 的 `{project_name}` 必须绑定到 raw merged `core.project_name`。
+  - 不得在workflow或record spec中绕开shared resolver硬编码default root、增加第三fallback，或让current docs发布不同root/basename。
+  - 不得把 `.agents` / `.claude` mirror 是否存在、external drawer 或 full count caveat 写成 workflow parity 的前置规则；本规则只约束 canonical installed Markdown workflow 与 executable evidence helper。
+- **最佳实践**:
+  - 每次新增或调整 workflow route helper 时，同步检查真实 installed workflow Markdown 是否包含同等 input binding、HALT 条件、candidate safety、precedence、related artifact co-location 与 no-migration wording。
+  - Route由shared resolver拥有时，producer、record spec与current docs必须消费同一resolved root/fixed child，并对resolver block/error统一HALT；focused contract test应同时覆盖custom、legacy-compatible、failure与exact public basename。
+  - Contract tests 应扫描 canonical workflow-details 中的 executable tokens，并由真实 installer 证明 private executable进入两类 target、bytes/hash/mode/sourceRef一致，再从 installed copy执行成功、失败与安全负例；不能用repo-local import或manifest文字替代installed consumption。
+  - Private CLI只暴露Story授权的fixed argv/result contract；test-only interposition不得通过argv、stdin、env或active workflow输入进入installed surface。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则偏 installed workflow 文档/测试协同域，且本轮只授权 CR04 record-only；本次不修改 Architecture、project-context、AGENTS 或 public docs。
+- **本次落地**:
+  - Story 11.4 Round 5/6 fixer 已修复Markdown→helper parity，Round 7确认关闭。Story 11.6 Round 4 fixer已补Skill-local private binding、single source与installed invocation，Round 5 reviewer/evaluator确认关闭。Story 11.8 Round 1 fixer已统一readiness producer/spec/docs的resolver route，Round 4 reviewer/evaluator确认关闭。Story 11.9 Round 19 fixer同步 CR04/CR05 durable output 的 active docs/help 双输出，Round 24确认保持关闭；本次继续更新既有`CR-DOC-05`而不新增重复规则。
+- **同步状态**: 已写入规则总结
+
+#### 未沉淀 / 交接项
+
+- **Public resolver docs closed-list drift**: 不新增开发规则。理由：Round 4 Finding #2 已作为 P1 修复证据关闭，但它主要是四处 active public docs 与现有 CLI/SPEC contract 的一次性同步遗漏；相关通用风险已由 `CR-API-40` 的 raw/effective resolver 分层和既有 public docs governance 覆盖。
+- **Round 2 Finding #3 / broad legacy-pattern `575` 精确计数缺少可复现命令**: 不写入当前规则总结正文，也不在 CR04 登记 backlog。理由：Round 7 evaluator 明确维持 P2 / CR TODO / evidence hygiene defer；该项状态未闭合，且应交 CR05 做去重、归属和是否登记判断。
+- **external drawer、`.agents/.claude` mirror、build/packaging/full-suite fixed-count caveat**: 不写入开发规则。理由：Round 7 evaluator 明确这些 caveat 与 Story 11.4 bounded closeout scope 隔离，不构成本轮阻塞项或规则沉淀来源。
+- **Round 3 summary/evaluation**: 禁止采信。理由：Round 4 provenance recovery 与 Round 7 evaluator 均确认其为 concurrent invalid provenance，不得作为 finding set、授权、canonical governance 判断或 closeout 输入。
+
+#### 05 TODO Tracker 交接
+
+- **交接候选**:
+  - Round 2 Finding #3：broad legacy-pattern `575` 精确计数缺少可复现命令，维持 P2 / CR TODO / evidence hygiene defer。
+- **CR04 边界**: 本次不写 `cr-todo-backlog.md`，不执行 CR05，只将候选项交给后续 CR05 做去重、归属和是否登记判断。
+
+### Story 11-5 / 2026-09-04
+
+- **Story**: 11-5
+- **分析来源**:
+  - `11-5-code-review-summary-20260904-round-1.md`
+  - `11-5-code-review-evaluation-20260904-round-1.md`
+  - `11-5-code-review-summary-20260904-round-2.md`
+  - `11-5-code-review-evaluation-20260904-round-2.md`
+  - `11-5-code-review-summary-20260904-round-3.md`
+  - `11-5-code-review-evaluation-20260904-round-3.md`
+  - `11-5-code-review-summary-20260904-round-4.md`
+  - `11-5-code-review-evaluation-20260904-round-4.md`
+  - `11-5-code-review-summary-20260904-round-5.md`
+  - `11-5-code-review-evaluation-20260904-round-5.md`
+  - `11-5-code-review-summary-20260904-round-6.md`
+  - `11-5-code-review-evaluation-20260904-round-6.md`
+  - `11-5-code-review-summary-20260904-round-7.md`
+  - `11-5-code-review-evaluation-20260904-round-7.md`
+  - `11-5-code-review-summary-20260904-round-8.md`
+  - `11-5-code-review-evaluation-20260904-round-8.md`
+- **模型时间线**:
+  - Round 1-8 Reviewer、Evaluator 与各轮 Fixer 均记录为 `GPT-5.5 (gpt-5.5)`；Round 8 Reviewer 三层为 `3/3 PASS`，Round 8 Evaluator 为 `PASS`。
+- **结论概览**:
+  - Round 1-4 反复暴露 whole/index/subject symlink containment、finite mismatch probe、bounded Markdown grammar、声明顺序、自引用、destination pipeline 与 `selection=whole` validation precedence 缺口；Owner M/L/S 的裁决及对应 fixer 已逐轮关闭这些 P1。
+  - Round 5-7 继续发现 canonical entry、mismatch candidate、candidate scan 与 declared shard 的 filesystem truth 不完整：non-file/unreadable entry 被当 absent、无关 subtree 被扫描、scan failure 抛 raw error、dereferenced symlink target 未验证 regular file。Owner I 与各轮 fixer 已将阻塞项收敛为 structured fail-closed，并由 Round 8 double-PASS 确认关闭。
+  - Round 8 为 latest Reviewer/Evaluator double-PASS，当前 `0 P0 / 0 P1`；focused/related `123/123`、docs、canonical warn/strict 与 diff checks 均通过。External drawer、mirror 与 fixed-count drift不属于 Story 11.5 规则来源。
+  - Round 7 Finding #2 仍是有效 P2：missing-index candidate scan忽略 lexical `.md` symlink。该项未解决且 owning candidate semantics未完整定义，本次禁止写成已解决规则，交 CR05 正式登记。
+  - 外层严格编排已授权本次 CR04 采用 record-only；仅更新本规则总结，不修改全局文档、源码、测试、SPEC、Story、tracker、gate、review/evaluation、TODO backlog、progress logs、mirror或external drawer。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| Whole/sharded selection 必须分离 canonical entry safety 与 selected graph validation | 通过 | 11/12 | rules-summary | 外层严格编排授权 record-only，新增 CR-API-41 |
+| Artifact discovery 必须以 dereferenced regular-file 与 containment 证据决定消费资格 | 通过 | 11/12 | rules-summary | 外层严格编排授权 record-only，新增 CR-SEC-20 |
+| Bounded Markdown shard parser 必须 post-decode 分类、fail closed 并保持声明顺序 | 通过 | 10/12 | rules-summary | 外层严格编排授权 record-only，新增 CR-DOC-06 |
+| Missing-index lexical `.md` symlink candidate semantics | 未通过：状态未闭合且 owning taxonomy 未完整定义 | 7/12 | todo-tracker | 保持 Round 7 Finding #2 P2 defer；CR04 不写 backlog，交 CR05 登记 |
+
+### 提炼规则
+
+#### CR-API-41：Whole/sharded selection 必须分离 canonical entry safety 与 selected graph validation
+
+- **来源问题**: Story 11.5 Round 4 发现显式 `selection=whole` 仍在 selection branch 前解析未选 `index.md` 的 shard graph，导致 missing/broken 未选 shard 阻断已明确选择的 whole；Round 5 又证明即使跳过 graph，若无条件扫描整个 subject tree，未选且无关 subtree 的访问异常仍可阻断调用。同时，canonical whole/index entry 本身的类型、可读性与 containment 不能因未被选择而跳过，否则 discovery shape 与安全证据失真。
+- **CR 证据**:
+  - `11-5-code-review-evaluation-20260904-round-4.md`: Finding #6 被确认 P1，要求显式 `selection=whole` 只消费 whole并记录未选 index，不读取或验证未选 shard graph；canonical entry safety仍须保留。
+  - `11-5-code-review-evaluation-20260904-round-5.md`: Finding #2 被确认 P1，要求 `indexPresent=true` 时跳过仅服务于 missing-index shape判断的递归 candidate scan，避免无关 subtree影响任何 selection branch。
+  - `11-5-code-review-evaluation-20260904-round-6.md`: canonical entry symlink final-target regular-file gate被确认必须发生在 shape/selection之前，证明 entry safety 与 graph validation是两个独立阶段。
+  - `11-5-code-review-evaluation-20260904-round-8.md`: Owner S closure确认 whole/index entry先完成 safety检查；whole+index且显式选择whole时跳过未选index内容与graph，只记录`unselectedPath`并继续。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 4-6从graph解析、candidate scan与entry safety三个阶段连续暴露同一precedence问题，并由Round 8确认关闭。 |
+  | 影响范围 | 2 | 共享resolver同时服务PRD、Epics、Architecture及其CLI/consumer surfaces。 |
+  | 风险等级 | 2 | 错误顺序会让未选内容阻断合法选择，或跳过canonical entry安全门禁后错误继续。 |
+  | 根因稳定性 | 2 | 多形态resolver容易把existence、entry safety、shape判定与selected graph validation混成单一流程。 |
+  | 可执行性 | 2 | 可用whole+index、三种selection、unsafe entry、broken/malformed/undefined未选graph与无关subtree fixtures直接验证。 |
+  | 文档缺口 | 1 | `SPEC 09`已有decision table，但既有CR规则尚未沉淀entry safety与selected graph validation分阶段检查点。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: 支持whole/sharded共存与invocation-scoped selection的document resolver、artifact consumer、CLI discovery surface及任何具有未选分支的多形态输入解析。
+- **规避指南**:
+  - 不得在显式选择whole后读取、解析或验证未选index的内容与declared shard graph，也不得让只为missing-index判断服务的undeclared candidate scan提前运行。
+  - 不得因某形态未被选择而跳过其canonical entry自身的no-follow type、readability、realpath containment与dereferenced regular-file安全检查。
+  - 不得把未选graph的内容错误写入`consumedPaths`；block时必须空消费并保持zero mutation。
+- **最佳实践**:
+  - Resolver按`canonical entry safety -> shape/selection decision -> selected graph validation -> consumption projection`分阶段实现；阶段输出使用显式状态，避免truthy existence代替安全资格。
+  - 回归矩阵应覆盖whole-only、sharded-only、whole+sharded无selection、显式whole、显式sharded，以及未选graph为missing/malformed/undefined、canonical entry non-file/symlink escape和无关subtree unreadable。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。规则虽为11/12，但适用范围集中于多形态document discovery；owning `SPEC 09`与public guidance已表达契约，本次只沉淀为复用CR检查表。
+- **本次落地**:
+  - Round 4-7 fixer已修复相关blocking findings，Round 8 reviewer/evaluator double-PASS确认关闭；本次仅新增`CR-API-41`与Story 11-5记录。
+- **同步状态**: 已写入规则总结
+
+#### CR-SEC-20：Artifact discovery 必须以 dereferenced regular-file 与 containment 证据决定消费资格
+
+- **来源问题**: Story 11.5 多轮证明`exists`、`access(R_OK)`、lexical `lstat`或安全-looking relative path都不足以证明artifact可消费：canonical entry、subject directory、mismatch probe与declared shard均曾允许symlink逃逸、symlink重绑定container、symlink最终指向directory/FIFO，或把non-file/unreadable entry当missing；missing-index scan的`readdir`失败还曾以raw exception逃逸structured result。Story 11.7 从 downstream historical report discovery 再次复现同类根因：仅验证candidate自身仍不足以证明`realProject -> realPlanning -> exact realPlanning/prd -> candidate`的完整physical owner chain，且same-basename inventory若只记录`Dirent.isFile()`会漏掉symlink、directory与其它non-file entry。
+- **CR 证据**:
+  - `11-5-code-review-evaluation-20260904-round-1.md`: canonical whole/index symlink escape被确认P1，要求realpath subject containment及structured empty-consumption block。
+  - `11-5-code-review-evaluation-20260904-round-2.md`: subject directory symlink rebinding被确认P1；不得把realpath target升格为新的authoritative container。
+  - `11-5-code-review-evaluation-20260904-round-5.md`: canonical whole non-file/unreadable与index-present无关scan被确认必须fail closed或跳过。
+  - `11-5-code-review-evaluation-20260904-round-6.md`: canonical whole/index与finite mismatch candidate必须验证dereferenced final target为project-local readable regular file；candidate scan failure采用Owner I的structured mapping。
+  - `11-5-code-review-evaluation-20260904-round-7.md`: declared shard symlink final target non-regular被确认P1并修复；Round 8 evaluation确认该gate发生在加入消费路径之前。
+  - `11-7-code-review-evaluation-20260904-round-1.md`: Finding #4确认Edit PRD、Implementation Readiness与Correct Course在加载historical report前必须统一验证portable path、readable no-follow regular file与physical PRD-owner containment。
+  - `11-7-code-review-evaluation-20260904-round-2.md`: Finding #2进一步确认必须先证明`realPlanning`位于`realProject`内，并要求`realPrdOwner`物理路径精确等于`realPlanning/prd`；相对于错误owner root的candidate containment不能算安全。
+  - `11-7-code-review-evaluation-20260905-round-3.md`: Finding #3确认全项目same-basename inventory必须在递归前记录所有matching entry的no-follow类型，不能只枚举regular file；Fix Summary完成location+type精确快照。
+  - `11-7-code-review-evaluation-20260905-round-8.md`: evaluator确认downstream physical owner chain与same-basename all-entry no-follow inventory均保持关闭，最新Reviewer/Evaluator双PASS。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Story 11.5 Round 1、2、5、6、7与Story 11.7 Round 1–3跨Story复现于canonical entry、container、probe、declared shard、downstream historical discovery和location inventory。 |
+  | 影响范围 | 2 | 跨PRD/Epics/Architecture、canonical/mismatch/declared-shard branches及公共consumer evidence。 |
+  | 风险等级 | 2 | 可导致越界读取、消费directory/FIFO、raw error泄露或把不可判定状态伪装成安全continue。 |
+  | 根因稳定性 | 2 | filesystem API分别回答lexical type、access、real target与dereferenced type；缺少统一资格序列会稳定漏检。 |
+  | 可执行性 | 2 | 可通过lstat/access/realpath/stat顺序、containment、ENOENT-only missing、structured issue与zero-mutation matrix直接检查。 |
+  | 文档缺口 | 1 | `CR-SEC-07/08/19`分别覆盖no-follow、realpath或analysis route；本规则补充shared document discovery中dereferenced eligibility与structured failure的组合边界。 |
+
+- **总分**: 11/12
+- **建议去向**: rules-summary
+- **适用范围**: artifact/document discovery、canonical entry、declared references、bounded mismatch probes、subject containers、historical report readers、same-basename lifecycle inventory及会把filesystem entity加入public consumption evidence的resolver。
+- **规避指南**:
+  - 不得用lexical existence、`access(R_OK)`或relative evidence替代dereferenced target的regular-file与containment验证。
+  - 不得接受subject/container symlink重绑定authoritative boundary；也不得让canonical或declared artifact symlink最终指向directory、FIFO或其它non-regular target后进入消费路径。
+  - 不得让bounded enumeration/readability错误以raw exception逃逸；non-`ENOENT`不可判定状态必须映射到owning stable issue/reason，输出安全project-relative evidence、空消费与zero mutation。
+- **最佳实践**:
+  - 对允许symlink的artifact entry统一执行lexical `lstat`、readability probe、`realpath` containment和dereferenced `stat().isFile()`，且只在全部通过后加入`declaredShardPaths`/`consumedPaths`。
+  - 对diagnostic-only candidate复用同一eligibility contract，但只产生mismatch evidence，不fallback消费、不迁移；fixtures覆盖in-bound regular、outbound、broken、directory/FIFO、unreadable、root/nested enumeration failure及重复调用稳定性。
+  - 多级owner链必须逐级证明physical containment与exact subject identity；全局location inventory应先记录matching entry的project-relative path与no-follow type，再只递归真实directory且绝不follow symlink。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。既有全局/CR安全规则已覆盖通用no-follow与realpath原则；本条作为artifact discovery组合检查清单去重补充，不修改Architecture或project-context。
+- **本次落地**:
+  - Story 11.5 Round 1-7对应P1均已修复，Round 8 double-PASS确认消费资格与structured failure关闭；Story 11.7 Round 1-3补齐downstream owner chain与all-entry inventory，Round 8再次确认关闭。本次更新`CR-SEC-20`复现证据，不创建等价新规则。
+- **同步状态**: 已写入规则总结
+
+#### CR-DOC-06：Bounded Markdown shard parser 必须 post-decode 分类、fail closed 并保持声明顺序
+
+- **来源问题**: Story 11.5 Round 1-4持续发现手写Markdown shard parser的完整性与顺序缺口：reference-style、query/fragment、percent-encoded、nested/shortcut links被静默漏读；external/network、Windows drive、backslash、fenced code、escaped opener、malformed/empty/duplicate definitions被误分类；raw与decoded destination在不同阶段分类导致同一语义被忽略、消费或错误block；alphabetical sort又改写index声明顺序。
+- **CR 证据**:
+  - `11-5-code-review-evaluation-20260904-round-1.md`: Owner L批准bounded inline/reference-style subset；要求parse、strip query/fragment、single decode、portable/containment/readability顺序，unsupported/malformed local-ish fail closed，并保留first-declaration order。
+  - `11-5-code-review-evaluation-20260904-round-2.md`: angle external、fenced code、drive-letter、nested inline与shortcut reference被确认P1，要求在bounded、无dependency范围内准确分类。
+  - `11-5-code-review-evaluation-20260904-round-3.md`: reference definition state、post-decode portability、malformed inline与odd/even escaped opener被确认需修复，不能静默少消费或制造伪声明。
+  - `11-5-code-review-evaluation-20260904-round-4.md`: 要求destination在single decode后统一分类、first-definition-wins先于duplicate destination validation、empty definition fail closed、backslash拒绝、angle内部空白malformed，并保持不扩展到完整CommonMark或link-title grammar。
+  - `11-5-code-review-evaluation-20260904-round-8.md`: Owner L closure确认inline/reference-style、label normalization、post-decode classification、声明顺序、first-occurrence dedupe与self-link exclusion均保持关闭。
+- **硬性门槛**:
+  - 有证据: 是
+  - 可规则化: 是
+  - 非纯特例: 是
+  - 不重复: 是
+  - 状态明确: 是
+- **量化评分**:
+
+  | 维度 | 分数 | 理由 |
+  |------|------|------|
+  | 复现频次 | 2 | Round 1-4连续多轮从grammar、context、escape、definition precedence和pipeline order复现。 |
+  | 影响范围 | 2 | 共享parser影响PRD、Epics、Architecture所有sharded consumers及public CLI evidence。 |
+  | 风险等级 | 1 | 主要造成文档少消费、伪block或host-dependent path evidence，未形成数据写入损坏。 |
+  | 根因稳定性 | 2 | bounded手写parser若没有显式grammar与单一pipeline，新增形态时高概率在不同阶段重复分类或静默遗漏。 |
+  | 可执行性 | 2 | 可建立accepted/rejected syntax、context、decode、portable、order/dedupe/self-link固定fixture矩阵。 |
+  | 文档缺口 | 1 | `CR-DOC-05`覆盖installed Markdown与helper parity；本规则补充Markdown作为executable shard declaration input时的parser invariant。 |
+
+- **总分**: 10/12
+- **建议去向**: rules-summary
+- **适用范围**: 从Markdown index提取本地artifact references的bounded parser、document resolver、CLI discovery与consumer contract tests；不授权完整CommonMark、HTML、inline code、image或link-title扩展。
+- **规避指南**:
+  - 不得在single percent-decode前分别用raw字符串决定drive/external/network/local语义；也不得second decode或把decoded backslash/drive path转换后访问。
+  - 不得静默忽略supported或明显local-ish但malformed/unsupported的reference；必须使用owning stable issue与`referenceKind` fail closed。External/network与fenced-code literal应确定性ignore。
+  - 不得排序改写index声明顺序；first-definition-wins、first-occurrence dedupe与index self-link exclusion必须在访问无效duplicate或投影消费路径之前生效。
+- **最佳实践**:
+  - 固定`parse bounded syntax -> strip query/fragment -> decode exactly once -> classify external/network/portable local -> containment/readability`pipeline，并让所有inline/reference-style形态复用同一destination classifier。
+  - Tests同时覆盖inline/full/collapsed/shortcut、nested labels、case/whitespace normalization、angle、query/fragment、percent encoding、external/network、Windows/backslash、traversal、fence、escaped opener、malformed/undefined/duplicate definition、declaration order/dedupe/self-link。
+- **全局文档建议**:
+  - 不建议本次升格到全局文档。该规则针对Markdown shard declaration技术域，owning SPEC与public docs已有明确支持边界；本次record-only沉淀为CR复用规则。
+- **本次落地**:
+  - Round 1-4 fixer已关闭parser阻塞项，Round 8 reviewer/evaluator确认Owner L未回归；本次仅新增`CR-DOC-06`与Story 11-5记录。
+- **同步状态**: 已写入规则总结
+
+#### 未沉淀 / 交接项
+
+- **Missing-index lexical `.md` symlink candidate semantics**: 不写入已解决规则。理由：Round 7 Finding #2与Round 8 double-PASS均确认current `Dirent.isFile()`仍忽略该entry；影响为diagnostic truth/mismatch precedence，当前仍structured block、空消费与zero mutation，且in-bound、outbound、broken、directory/FIFO target的undeclared candidate policy尚无完整owning contract。
+- **Round 1-7逐条实现特例**: 不为angle inner whitespace、duplicate definition、self-link、fenced code等分别新增规则；它们已分别收敛到`CR-DOC-06`的统一parser pipeline或`CR-API-41`的selection precedence，避免规则碎片化。
+- **External drawer、`.agents/.claude` mirrors与fixed-count drift**: 不作为Story 11.5规则来源，也不修改或回滚；它们与本Story bounded discovery closeout隔离。
+
+#### 05 TODO Tracker 交接
+
+- **交接候选**:
+  - Round 7 Finding #2：由Owner明确missing-index undeclared lexical `.md` symlink candidate semantics，至少覆盖subject内readable regular、outbound、broken、directory/FIFO/non-regular target；实现保持index-present no-scan、只判断不消费、structured block、safe project-relative evidence与zero mutation，除非owning contract明确要求否则不新增stable issue ID。
+- **CR04 边界**: 本次不写`cr-todo-backlog.md`、不执行CR05；只将P2候选交给下一门禁做去重与正式登记。candidate symlink taxonomy不得写成`CR-SEC-20`已解决内容。
 
 ### Story 10-5 / 2026-07-07
 

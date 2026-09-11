@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "speclite.edge-case-hunter.v1",
+  "status": "FINDINGS_REPORTED",
+  "modelUsed": "OpenAI GPT-5.6 Sol high",
+  "inputRawSha256": "60e13525492c23c683269b0740f5984eb6f0422d4a9ce10742a34e8a4846cf5d",
+  "findings": [
+    {
+      "category": "datetime-validation",
+      "invariant": "所有合法 RFC3339 timestamp 都必须按其声明的 offset 完成日历校验。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:681",
+      "trigger_condition": "generatedAt 使用合法非零 offset，例如 +08:00",
+      "actual_result": "Date.parse 先换算为 UTC，但随后把 UTC 时分与原始本地时分比较，validTimestamp 返回 false；已完成 legacy run 被判为 unfinished 并原位续写。",
+      "expected_result": "非零 offset 的合法 timestamp 应通过日历校验，并按真实 instant 参与 freshness 比较。",
+      "guard_snippet": "按声明 offset 校验日历字段，或改用严格 RFC3339 parser 后只比较 instant。",
+      "potential_consequence": "已完成 legacy run 被再次续写"
+    },
+    {
+      "category": "tracker-authority",
+      "invariant": "存在重复 semantic key 的 tracker 绝不能认证 terminal state。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1317",
+      "trigger_condition": "YAML 同时含 quoted duplicate key 与 raw terminal key",
+      "actual_result": "例如 \"implementation\": review 与 implementation: done 共存时，lexical scanner 只匹配 raw key，返回唯一 terminal match，导致 malformed duplicate-key YAML 通过认证。",
+      "expected_result": "先验证整份 YAML 且拒绝 semantic duplicate，再要求唯一 scalar 精确等于 frozen terminal state。",
+      "guard_snippet": "先以 duplicate-key fail-closed 的 YAML parser 验证全文，再提取 exact key scalar。",
+      "potential_consequence": "歧义 tracker 可伪造 DONE authority"
+    },
+    {
+      "category": "artifact-schema-validation",
+      "invariant": "每个 bounded inline-list 字段必须是合法 YAML sequence，才能认证 predecessor。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:780",
+      "trigger_condition": "declaredFiles 为 [src/a.ts # comment]",
+      "actual_result": "unquoted # comment 会吞掉 YAML closing bracket，使 frontmatter sequence 无效；自定义 parser 仍把整段当作单一 item 并认证 review schema。",
+      "expected_result": "任何 YAML-invalid inline list 都必须使 predecessor validation fail closed。",
+      "guard_snippet": "使用严格 YAML sequence parser，或至少拒绝 unquoted comment introducer。",
+      "potential_consequence": "无效 review artifact 被认证为完成证据"
+    }
+  ]
+}

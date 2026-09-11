@@ -22,7 +22,11 @@ Use for an Epic or Story set requiring a full CR loop, fresh outer agents, goal 
 
 Do not use for isolated Story development, one CR role, read-only status, parallel Story execution, or SR work.
 
+- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
+
 ## Core Capabilities
+
+Hard gate: resolve and freeze one `directoryContext` (Story/series/four directory fields); CR01–06 call the production validator before any actual write and never re-derive the directory from title, slug, filename, or tracker state.
 
 - **Strict-serial orchestration**: Advance one Story and one outer state transition at a time.
 - **Structured CR v2 routing**: Route by exact schema, verdict, scope hash, and round binding.
@@ -52,8 +56,9 @@ HALT when Epic, Story set, project root, or authorization is unclear.
 1. Run `speclite resolve config --project-root {projectRoot}`.
 2. Read merged artifact roots and workflow tracker config.
 3. Resolve the Skill parent as `{skills-root}` and read the shared contract.
-4. HALT on resolution failure, empty required paths, or identity conflicts.
-5. Never fall back to examples or historical default directories.
+4. Invoke shared `scripts/resolve-cr-directory.mjs` exactly once per Story, freeze the verified `crDir`, and pass it explicitly to CR01–06; any ambiguity HALTs before goal, artifact, or progress writes.
+5. HALT on resolution failure, empty required paths, or identity conflicts.
+6. Never fall back to examples or historical default directories.
 
 ## Workflow
 

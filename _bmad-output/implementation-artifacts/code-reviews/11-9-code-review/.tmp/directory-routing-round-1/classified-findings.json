@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "speclite.cr-classified-findings.v2",
+  "storyId": "11-9",
+  "reviewSeries": "directory-routing",
+  "round": 1,
+  "normalization": "NFC; CRLF/CR to LF; trim trailing whitespace; fingerprint seed is category, invariant, concreteFailureScenario, primaryLocation joined by LF with no terminal LF",
+  "findings": [
+    {
+      "findingId": "DR-R1-F1",
+      "title": "普通 note 中的 series 子串被误判为 current identity conflict",
+      "category": "lifecycle",
+      "invariant": "不符合完整 current-artifact 文件名结构的普通文件不得参与 current CR directory 归属判定。",
+      "concreteFailureScenario": "storyId=11-9、reviewSeries=main，legacy candidate 内只有普通文件 11-9-code-review-summary-maintenance.md；maintenance 含 main，宽泛 name.includes(reviewSeries) fallback 把普通 note 判为 identity conflict，resolver 错误阻断本可继续的新 run。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:382",
+      "sourceLayers": [
+        "blind"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Blind diff inspection；Reviewer 受控临时 fixture 实际返回 ok=false / current-directory-identity-conflict。",
+      "impact": "违反 ordinary notes 不参与归属的 shared contract，并可让默认 main series 被任意 maintenance note 阻断。",
+      "suggestedNextStep": "将 malformed-current 检测限定为结构化 filename 字段并补普通 note substring 反例。",
+      "fingerprintSeed": "lifecycle\n不符合完整 current-artifact 文件名结构的普通文件不得参与 current CR directory 归属判定。\nstoryId=11-9、reviewSeries=main，legacy candidate 内只有普通文件 11-9-code-review-summary-maintenance.md；maintenance 含 main，宽泛 name.includes(reviewSeries) fallback 把普通 note 判为 identity conflict，resolver 错误阻断本可继续的新 run。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:382",
+      "fingerprint": "sha256:368c6718832b7cfe2253c5320e198122e23bc9e5fcd06bf1da3e3887ac40b159"
+    },
+    {
+      "findingId": "DR-R1-F2",
+      "title": "缺失 v2 schema/type 的文件仍建立 legacy current authority",
+      "category": "provenance",
+      "invariant": "建立 current directory authority 的精确 current-family artifact 必须具备与文件名一致的 v2 schemaVersion 与 artifactType identity。",
+      "concreteFailureScenario": "canonical 不存在，legacy 中精确命名的 directory-routing round-1 summary 仅含 storyId/reviewSeries/round，缺 schemaVersion/artifactType；可选式校验仍递增 currentCount，resolver 实际返回 legacy-resume。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:341",
+      "sourceLayers": [
+        "blind"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Blind source inspection；Reviewer 受控临时 fixture 实际返回 ok=true / legacy-resume。",
+      "impact": "无合法 v2 provenance 的伪 artifact 可决定后续全部 CR 写入目录。",
+      "suggestedNextStep": "要求 exact current-family artifact 的 schemaVersion/artifactType 与 filename family 精确匹配，并补缺字段反例。",
+      "fingerprintSeed": "provenance\n建立 current directory authority 的精确 current-family artifact 必须具备与文件名一致的 v2 schemaVersion 与 artifactType identity。\ncanonical 不存在，legacy 中精确命名的 directory-routing round-1 summary 仅含 storyId/reviewSeries/round，缺 schemaVersion/artifactType；可选式校验仍递增 currentCount，resolver 实际返回 legacy-resume。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:341",
+      "fingerprint": "sha256:b7d56c020c235a9f8835710c4d6b89c45874ad36d0be82847ff672d7bf135aba"
+    },
+    {
+      "findingId": "DR-R1-F3",
+      "title": "--__proto__ 绕过 strict CLI unknown-argument gate",
+      "category": "cli-argument-validation",
+      "invariant": "CLI 必须拒绝所有 unknown、duplicate、empty 或 partial 参数。",
+      "concreteFailureScenario": "在一组合法 resolve 参数后追加 --__proto__ ignored；普通对象的 __proto__ 赋值不形成 own key，Object.keys unknown 检查看不到该参数，CLI 实际 exit 0 并返回 ok=true。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:659",
+      "sourceLayers": [
+        "edge"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Edge path analysis；Reviewer 在当前 production CLI 实际执行后得到 exit 0 / ok=true。",
+      "impact": "违反 contract 的 unknown 参数 fail-close，非法调用可被接受为权威 directoryContext。",
+      "suggestedNextStep": "使用 null-prototype 参数表或 Map，并补 __proto__ / constructor / prototype 参数测试。",
+      "fingerprintSeed": "cli-argument-validation\nCLI 必须拒绝所有 unknown、duplicate、empty 或 partial 参数。\n在一组合法 resolve 参数后追加 --__proto__ ignored；普通对象的 __proto__ 赋值不形成 own key，Object.keys unknown 检查看不到该参数，CLI 实际 exit 0 并返回 ok=true。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:659",
+      "fingerprint": "sha256:646f848391831effbd67139b3e4866e0bf9224947d5b23a01aabc5ae13224ae5"
+    },
+    {
+      "findingId": "DR-R1-F4",
+      "title": "超大 round 被同 series 的 other-series regex 吞掉",
+      "category": "round-overflow",
+      "invariant": "无法表示为 safe integer 的 current-family round evidence 必须 fail-close。",
+      "concreteFailureScenario": "唯一 legacy current-family filename 使用超大 round 数字；exact 分支 Number 非 safe integer 后下落，completeOtherSeries 又匹配同一 reviewSeries 并返回 unrelated，resolver 实际忽略 legacy evidence 而选择 canonical sibling。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:367",
+      "sourceLayers": [
+        "edge"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Edge branch enumeration；Reviewer 受控临时 fixture 实际返回 ok=true 且 crDir=canonical，同时 legacyArtifactPaths 非空。",
+      "impact": "可把同一 unfinished legacy run 拆到 canonical sibling。",
+      "suggestedNextStep": "exact current-series filename匹配后若 round 非 safe integer立即 identity-conflict，并补 overflow 回归。",
+      "fingerprintSeed": "round-overflow\n无法表示为 safe integer 的 current-family round evidence 必须 fail-close。\n唯一 legacy current-family filename 使用超大 round 数字；exact 分支 Number 非 safe integer 后下落，completeOtherSeries 又匹配同一 reviewSeries 并返回 unrelated，resolver 实际忽略 legacy evidence 而选择 canonical sibling。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:367",
+      "fingerprint": "sha256:88af6e25e5dc4bf54c0146ee725ebef219fe63c45cbc0a6ac28b3c24790a30c9"
+    },
+    {
+      "findingId": "DR-R1-F5",
+      "title": "quoted semantic duplicate identity 未被 bounded parser 识别",
+      "category": "identity-provenance",
+      "invariant": "current artifact 的 Story、series 和 round identity 必须唯一且无语义冲突。",
+      "concreteFailureScenario": "精确 current summary frontmatter 同时含 bare storyId: 11-9 与 quoted \"storyId\": 11-8；bounded parser 忽略 quoted semantic key并只返回 bare 值，resolver 实际把该 legacy candidate 标为 CURRENT 并返回 legacy-resume。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:389",
+      "sourceLayers": [
+        "edge"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Edge identity analysis；Reviewer 受控临时 fixture 实际返回 ok=true / legacy-resume。",
+      "impact": "冲突的 Story identity 可以决定当前目录归属。",
+      "suggestedNextStep": "在不恢复旧 approval scanner 的前提下，对 identity key 做 bounded semantic duplicate fail-close，并补 quoted/bare 冲突测试。",
+      "fingerprintSeed": "identity-provenance\ncurrent artifact 的 Story、series 和 round identity 必须唯一且无语义冲突。\n精确 current summary frontmatter 同时含 bare storyId: 11-9 与 quoted \"storyId\": 11-8；bounded parser 忽略 quoted semantic key并只返回 bare 值，resolver 实际把该 legacy candidate 标为 CURRENT 并返回 legacy-resume。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:389",
+      "fingerprint": "sha256:1e3b3a447e55b71ecd94df95d72327c1c8ba48eed46ecf2b6fd353d61b6229f4"
+    },
+    {
+      "findingId": "DR-R1-F6",
+      "title": "CR06 将 frozen legacy-resume 再解释为仅 unfinished",
+      "category": "legacy-resume-contract",
+      "invariant": "所有 CR consumers 必须原样消费 resolver 冻结的 legacy-resume 结论，完成性只由正常 approval owner 判断。",
+      "concreteFailureScenario": "唯一 current legacy directory 含 DONE claim；resolver contract 要求仍返回 legacy-resume，但 CR06 Step 1 只允许 unfinished legacy directory 作为 current，因此 finalizer 可拒绝或重解释已冻结目录。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md:16",
+      "sourceLayers": [
+        "edge"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Edge cross-consumer comparison；Reviewer 核对 shared contract line 83 与 finalizer workflow line 16 文义冲突。",
+      "impact": "合法 legacy closeout 可能 HALT，破坏 single resolved crDir propagation。",
+      "suggestedNextStep": "删除 CR06 的 unfinished 再判断，明确只消费 compatibilityMode=legacy-resume，再执行原 approval/freshness gates。",
+      "fingerprintSeed": "legacy-resume-contract\n所有 CR consumers 必须原样消费 resolver 冻结的 legacy-resume 结论，完成性只由正常 approval owner 判断。\n唯一 current legacy directory 含 DONE claim；resolver contract 要求仍返回 legacy-resume，但 CR06 Step 1 只允许 unfinished legacy directory 作为 current，因此 finalizer 可拒绝或重解释已冻结目录。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md:16",
+      "fingerprint": "sha256:5b81d85626cada208ee35d299e6bbc3438a9527f01db6c210608d70ce8a30a7f"
+    },
+    {
+      "findingId": "DR-R1-F7",
+      "title": "Legacy pre-summary 中断态被拆到 canonical sibling",
+      "category": "lifecycle",
+      "invariant": "唯一 legacy-only unfinished run 必须原目录恢复，不得因尚无顶层 review artifact 创建 canonical sibling。",
+      "concreteFailureScenario": "legacy directory 仅含 .tmp/directory-routing-round-1/review-input.diff 和/或 goal-execute-records/PLAN.md，尚无顶层 current-family Markdown；resolver跳过两个 reserved directories，得到 NO_CURRENT_SERIES_EVIDENCE 并选择 canonical，下一次写入拆分同一 run。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:296",
+      "sourceLayers": [
+        "auditor"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Auditor AC9/AC11 path audit；现有 legacy test 先写 summary，未覆盖 pre-summary interruption。",
+      "impact": "违反 AC9 的 legacy-only unfinished resume 和 AC11 的恢复覆盖。",
+      "suggestedNextStep": "为可验证的 reserved pre-summary evidence 定义 bounded ownership读取或明确durable frozen-context恢复规则，并补 zero-migration 回归。",
+      "fingerprintSeed": "lifecycle\n唯一 legacy-only unfinished run 必须原目录恢复，不得因尚无顶层 review artifact 创建 canonical sibling。\nlegacy directory 仅含 .tmp/directory-routing-round-1/review-input.diff 和/或 goal-execute-records/PLAN.md，尚无顶层 current-family Markdown；resolver跳过两个 reserved directories，得到 NO_CURRENT_SERIES_EVIDENCE 并选择 canonical，下一次写入拆分同一 run。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:296",
+      "fingerprint": "sha256:4a506ab42bb5d39e8066f1206c7fdc4b899594fd8e2a46eee9531e4c9becc869"
+    },
+    {
+      "findingId": "DR-R1-F8",
+      "title": "Active CR01 与 public lifecycle 仍允许删除当前 round .tmp 证据",
+      "category": "lifecycle-policy",
+      "invariant": "directory-routing 当前 round 的 diff/layer/scope/history 输入在后续 consumer 完成前必须保留，旧 .tmp evidence 不得清理。",
+      "concreteFailureScenario": "CR01 Step 7 在 review summary 写完后立即清理 current round 临时目录，Evaluator 随后读取时 review-input、三层原始输出、scope payload 与 history registry 已删除；public docs 还把 review .tmp 标为完成时应清理/可清理。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:62",
+      "sourceLayers": [
+        "auditor"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Auditor AC7 inspection；reviewer workflow line 62 与 workflow-artifact-layout lines 193/234 明确授权清理。",
+      "impact": "删除 evaluator 复算 scope/finding 与审计所需的第一手证据，并违反本系列明确 no-clean 边界。",
+      "suggestedNextStep": "移除 CR01 自动清理；把 retention/清理责任放到有明确时机与授权的后续 owner，旧 .tmp 保持原位。",
+      "fingerprintSeed": "lifecycle-policy\ndirectory-routing 当前 round 的 diff/layer/scope/history 输入在后续 consumer 完成前必须保留，旧 .tmp evidence 不得清理。\nCR01 Step 7 在 review summary 写完后立即清理 current round 临时目录，Evaluator 随后读取时 review-input、三层原始输出、scope payload 与 history registry 已删除；public docs 还把 review .tmp 标为完成时应清理/可清理。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:62",
+      "fingerprint": "sha256:cf44eb0bb38ad7b131706d668f1c1daa01e3f61dee4cb69adf9dccefd577201c"
+    },
+    {
+      "findingId": "DR-R1-F9",
+      "title": "CR01 production validator 示例的嵌套反引号使命令不可执行",
+      "category": "workflow-executability",
+      "invariant": "CR01 在每个 artifact 或 .tmp 写入前必须能用实际 write-subpath 成功调用 production validate-context。",
+      "concreteFailureScenario": "按 reviewer-workflow line 8 原样替换并从 project root 执行，--write-subpath 参数中的嵌套反引号触发 shell command substitution；zsh先报告 .tmp/.../review-input.diff 不存在，validator收到空参数并以 invalid-arguments exit 2。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:8",
+      "sourceLayers": [
+        "reviewer"
+      ],
+      "bucket": "patch",
+      "disposition": "new",
+      "evidence": "Outer Reviewer 逐字执行 canonical documented command，实际得到 zsh no such file or directory、validator invalid-arguments、exit 2；其他五个 workflow 无该嵌套反引号。",
+      "impact": "严格按 canonical CR01 workflow 执行会在首次 input write 前 HALT，无法形成 review artifact。",
+      "suggestedNextStep": "移除参数值内的反引号并补文档命令形状或 production CLI probe。",
+      "fingerprintSeed": "workflow-executability\nCR01 在每个 artifact 或 .tmp 写入前必须能用实际 write-subpath 成功调用 production validate-context。\n按 reviewer-workflow line 8 原样替换并从 project root 执行，--write-subpath 参数中的嵌套反引号触发 shell command substitution；zsh先报告 .tmp/.../review-input.diff 不存在，validator收到空参数并以 invalid-arguments exit 2。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:8",
+      "fingerprint": "sha256:05f69a8256e98077334bd2e2f8957f0c0f97f04cce7ddd21790986f6d4fd8360"
+    }
+  ],
+  "findingSetCanonicalJson": "[{\"bucket\":\"patch\",\"category\":\"lifecycle\",\"concreteFailureScenario\":\"storyId=11-9、reviewSeries=main，legacy candidate 内只有普通文件 11-9-code-review-summary-maintenance.md；maintenance 含 main，宽泛 name.includes(reviewSeries) fallback 把普通 note 判为 identity conflict，resolver 错误阻断本可继续的新 run。\",\"disposition\":\"new\",\"evidence\":\"Blind diff inspection；Reviewer 受控临时 fixture 实际返回 ok=false / current-directory-identity-conflict。\",\"findingId\":\"DR-R1-F1\",\"fingerprint\":\"sha256:368c6718832b7cfe2253c5320e198122e23bc9e5fcd06bf1da3e3887ac40b159\",\"fingerprintSeed\":\"lifecycle\\n不符合完整 current-artifact 文件名结构的普通文件不得参与 current CR directory 归属判定。\\nstoryId=11-9、reviewSeries=main，legacy candidate 内只有普通文件 11-9-code-review-summary-maintenance.md；maintenance 含 main，宽泛 name.includes(reviewSeries) fallback 把普通 note 判为 identity conflict，resolver 错误阻断本可继续的新 run。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:382\",\"impact\":\"违反 ordinary notes 不参与归属的 shared contract，并可让默认 main series 被任意 maintenance note 阻断。\",\"invariant\":\"不符合完整 current-artifact 文件名结构的普通文件不得参与 current CR directory 归属判定。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:382\",\"sourceLayers\":[\"blind\"],\"suggestedNextStep\":\"将 malformed-current 检测限定为结构化 filename 字段并补普通 note substring 反例。\",\"title\":\"普通 note 中的 series 子串被误判为 current identity conflict\"},{\"bucket\":\"patch\",\"category\":\"provenance\",\"concreteFailureScenario\":\"canonical 不存在，legacy 中精确命名的 directory-routing round-1 summary 仅含 storyId/reviewSeries/round，缺 schemaVersion/artifactType；可选式校验仍递增 currentCount，resolver 实际返回 legacy-resume。\",\"disposition\":\"new\",\"evidence\":\"Blind source inspection；Reviewer 受控临时 fixture 实际返回 ok=true / legacy-resume。\",\"findingId\":\"DR-R1-F2\",\"fingerprint\":\"sha256:b7d56c020c235a9f8835710c4d6b89c45874ad36d0be82847ff672d7bf135aba\",\"fingerprintSeed\":\"provenance\\n建立 current directory authority 的精确 current-family artifact 必须具备与文件名一致的 v2 schemaVersion 与 artifactType identity。\\ncanonical 不存在，legacy 中精确命名的 directory-routing round-1 summary 仅含 storyId/reviewSeries/round，缺 schemaVersion/artifactType；可选式校验仍递增 currentCount，resolver 实际返回 legacy-resume。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:341\",\"impact\":\"无合法 v2 provenance 的伪 artifact 可决定后续全部 CR 写入目录。\",\"invariant\":\"建立 current directory authority 的精确 current-family artifact 必须具备与文件名一致的 v2 schemaVersion 与 artifactType identity。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:341\",\"sourceLayers\":[\"blind\"],\"suggestedNextStep\":\"要求 exact current-family artifact 的 schemaVersion/artifactType 与 filename family 精确匹配，并补缺字段反例。\",\"title\":\"缺失 v2 schema/type 的文件仍建立 legacy current authority\"},{\"bucket\":\"patch\",\"category\":\"cli-argument-validation\",\"concreteFailureScenario\":\"在一组合法 resolve 参数后追加 --__proto__ ignored；普通对象的 __proto__ 赋值不形成 own key，Object.keys unknown 检查看不到该参数，CLI 实际 exit 0 并返回 ok=true。\",\"disposition\":\"new\",\"evidence\":\"Edge path analysis；Reviewer 在当前 production CLI 实际执行后得到 exit 0 / ok=true。\",\"findingId\":\"DR-R1-F3\",\"fingerprint\":\"sha256:646f848391831effbd67139b3e4866e0bf9224947d5b23a01aabc5ae13224ae5\",\"fingerprintSeed\":\"cli-argument-validation\\nCLI 必须拒绝所有 unknown、duplicate、empty 或 partial 参数。\\n在一组合法 resolve 参数后追加 --__proto__ ignored；普通对象的 __proto__ 赋值不形成 own key，Object.keys unknown 检查看不到该参数，CLI 实际 exit 0 并返回 ok=true。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:659\",\"impact\":\"违反 contract 的 unknown 参数 fail-close，非法调用可被接受为权威 directoryContext。\",\"invariant\":\"CLI 必须拒绝所有 unknown、duplicate、empty 或 partial 参数。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:659\",\"sourceLayers\":[\"edge\"],\"suggestedNextStep\":\"使用 null-prototype 参数表或 Map，并补 __proto__ / constructor / prototype 参数测试。\",\"title\":\"--__proto__ 绕过 strict CLI unknown-argument gate\"},{\"bucket\":\"patch\",\"category\":\"round-overflow\",\"concreteFailureScenario\":\"唯一 legacy current-family filename 使用超大 round 数字；exact 分支 Number 非 safe integer 后下落，completeOtherSeries 又匹配同一 reviewSeries 并返回 unrelated，resolver 实际忽略 legacy evidence 而选择 canonical sibling。\",\"disposition\":\"new\",\"evidence\":\"Edge branch enumeration；Reviewer 受控临时 fixture 实际返回 ok=true 且 crDir=canonical，同时 legacyArtifactPaths 非空。\",\"findingId\":\"DR-R1-F4\",\"fingerprint\":\"sha256:88af6e25e5dc4bf54c0146ee725ebef219fe63c45cbc0a6ac28b3c24790a30c9\",\"fingerprintSeed\":\"round-overflow\\n无法表示为 safe integer 的 current-family round evidence 必须 fail-close。\\n唯一 legacy current-family filename 使用超大 round 数字；exact 分支 Number 非 safe integer 后下落，completeOtherSeries 又匹配同一 reviewSeries 并返回 unrelated，resolver 实际忽略 legacy evidence 而选择 canonical sibling。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:367\",\"impact\":\"可把同一 unfinished legacy run 拆到 canonical sibling。\",\"invariant\":\"无法表示为 safe integer 的 current-family round evidence 必须 fail-close。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:367\",\"sourceLayers\":[\"edge\"],\"suggestedNextStep\":\"exact current-series filename匹配后若 round 非 safe integer立即 identity-conflict，并补 overflow 回归。\",\"title\":\"超大 round 被同 series 的 other-series regex 吞掉\"},{\"bucket\":\"patch\",\"category\":\"identity-provenance\",\"concreteFailureScenario\":\"精确 current summary frontmatter 同时含 bare storyId: 11-9 与 quoted \\\"storyId\\\": 11-8；bounded parser 忽略 quoted semantic key并只返回 bare 值，resolver 实际把该 legacy candidate 标为 CURRENT 并返回 legacy-resume。\",\"disposition\":\"new\",\"evidence\":\"Edge identity analysis；Reviewer 受控临时 fixture 实际返回 ok=true / legacy-resume。\",\"findingId\":\"DR-R1-F5\",\"fingerprint\":\"sha256:1e3b3a447e55b71ecd94df95d72327c1c8ba48eed46ecf2b6fd353d61b6229f4\",\"fingerprintSeed\":\"identity-provenance\\ncurrent artifact 的 Story、series 和 round identity 必须唯一且无语义冲突。\\n精确 current summary frontmatter 同时含 bare storyId: 11-9 与 quoted \\\"storyId\\\": 11-8；bounded parser 忽略 quoted semantic key并只返回 bare 值，resolver 实际把该 legacy candidate 标为 CURRENT 并返回 legacy-resume。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:389\",\"impact\":\"冲突的 Story identity 可以决定当前目录归属。\",\"invariant\":\"current artifact 的 Story、series 和 round identity 必须唯一且无语义冲突。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:389\",\"sourceLayers\":[\"edge\"],\"suggestedNextStep\":\"在不恢复旧 approval scanner 的前提下，对 identity key 做 bounded semantic duplicate fail-close，并补 quoted/bare 冲突测试。\",\"title\":\"quoted semantic duplicate identity 未被 bounded parser 识别\"},{\"bucket\":\"patch\",\"category\":\"legacy-resume-contract\",\"concreteFailureScenario\":\"唯一 current legacy directory 含 DONE claim；resolver contract 要求仍返回 legacy-resume，但 CR06 Step 1 只允许 unfinished legacy directory 作为 current，因此 finalizer 可拒绝或重解释已冻结目录。\",\"disposition\":\"new\",\"evidence\":\"Edge cross-consumer comparison；Reviewer 核对 shared contract line 83 与 finalizer workflow line 16 文义冲突。\",\"findingId\":\"DR-R1-F6\",\"fingerprint\":\"sha256:5b81d85626cada208ee35d299e6bbc3438a9527f01db6c210608d70ce8a30a7f\",\"fingerprintSeed\":\"legacy-resume-contract\\n所有 CR consumers 必须原样消费 resolver 冻结的 legacy-resume 结论，完成性只由正常 approval owner 判断。\\n唯一 current legacy directory 含 DONE claim；resolver contract 要求仍返回 legacy-resume，但 CR06 Step 1 只允许 unfinished legacy directory 作为 current，因此 finalizer 可拒绝或重解释已冻结目录。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md:16\",\"impact\":\"合法 legacy closeout 可能 HALT，破坏 single resolved crDir propagation。\",\"invariant\":\"所有 CR consumers 必须原样消费 resolver 冻结的 legacy-resume 结论，完成性只由正常 approval owner 判断。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md:16\",\"sourceLayers\":[\"edge\"],\"suggestedNextStep\":\"删除 CR06 的 unfinished 再判断，明确只消费 compatibilityMode=legacy-resume，再执行原 approval/freshness gates。\",\"title\":\"CR06 将 frozen legacy-resume 再解释为仅 unfinished\"},{\"bucket\":\"patch\",\"category\":\"lifecycle\",\"concreteFailureScenario\":\"legacy directory 仅含 .tmp/directory-routing-round-1/review-input.diff 和/或 goal-execute-records/PLAN.md，尚无顶层 current-family Markdown；resolver跳过两个 reserved directories，得到 NO_CURRENT_SERIES_EVIDENCE 并选择 canonical，下一次写入拆分同一 run。\",\"disposition\":\"new\",\"evidence\":\"Auditor AC9/AC11 path audit；现有 legacy test 先写 summary，未覆盖 pre-summary interruption。\",\"findingId\":\"DR-R1-F7\",\"fingerprint\":\"sha256:4a506ab42bb5d39e8066f1206c7fdc4b899594fd8e2a46eee9531e4c9becc869\",\"fingerprintSeed\":\"lifecycle\\n唯一 legacy-only unfinished run 必须原目录恢复，不得因尚无顶层 review artifact 创建 canonical sibling。\\nlegacy directory 仅含 .tmp/directory-routing-round-1/review-input.diff 和/或 goal-execute-records/PLAN.md，尚无顶层 current-family Markdown；resolver跳过两个 reserved directories，得到 NO_CURRENT_SERIES_EVIDENCE 并选择 canonical，下一次写入拆分同一 run。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:296\",\"impact\":\"违反 AC9 的 legacy-only unfinished resume 和 AC11 的恢复覆盖。\",\"invariant\":\"唯一 legacy-only unfinished run 必须原目录恢复，不得因尚无顶层 review artifact 创建 canonical sibling。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:296\",\"sourceLayers\":[\"auditor\"],\"suggestedNextStep\":\"为可验证的 reserved pre-summary evidence 定义 bounded ownership读取或明确durable frozen-context恢复规则，并补 zero-migration 回归。\",\"title\":\"Legacy pre-summary 中断态被拆到 canonical sibling\"},{\"bucket\":\"patch\",\"category\":\"lifecycle-policy\",\"concreteFailureScenario\":\"CR01 Step 7 在 review summary 写完后立即清理 current round 临时目录，Evaluator 随后读取时 review-input、三层原始输出、scope payload 与 history registry 已删除；public docs 还把 review .tmp 标为完成时应清理/可清理。\",\"disposition\":\"new\",\"evidence\":\"Auditor AC7 inspection；reviewer workflow line 62 与 workflow-artifact-layout lines 193/234 明确授权清理。\",\"findingId\":\"DR-R1-F8\",\"fingerprint\":\"sha256:cf44eb0bb38ad7b131706d668f1c1daa01e3f61dee4cb69adf9dccefd577201c\",\"fingerprintSeed\":\"lifecycle-policy\\ndirectory-routing 当前 round 的 diff/layer/scope/history 输入在后续 consumer 完成前必须保留，旧 .tmp evidence 不得清理。\\nCR01 Step 7 在 review summary 写完后立即清理 current round 临时目录，Evaluator 随后读取时 review-input、三层原始输出、scope payload 与 history registry 已删除；public docs 还把 review .tmp 标为完成时应清理/可清理。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:62\",\"impact\":\"删除 evaluator 复算 scope/finding 与审计所需的第一手证据，并违反本系列明确 no-clean 边界。\",\"invariant\":\"directory-routing 当前 round 的 diff/layer/scope/history 输入在后续 consumer 完成前必须保留，旧 .tmp evidence 不得清理。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:62\",\"sourceLayers\":[\"auditor\"],\"suggestedNextStep\":\"移除 CR01 自动清理；把 retention/清理责任放到有明确时机与授权的后续 owner，旧 .tmp 保持原位。\",\"title\":\"Active CR01 与 public lifecycle 仍允许删除当前 round .tmp 证据\"},{\"bucket\":\"patch\",\"category\":\"workflow-executability\",\"concreteFailureScenario\":\"按 reviewer-workflow line 8 原样替换并从 project root 执行，--write-subpath 参数中的嵌套反引号触发 shell command substitution；zsh先报告 .tmp/.../review-input.diff 不存在，validator收到空参数并以 invalid-arguments exit 2。\",\"disposition\":\"new\",\"evidence\":\"Outer Reviewer 逐字执行 canonical documented command，实际得到 zsh no such file or directory、validator invalid-arguments、exit 2；其他五个 workflow 无该嵌套反引号。\",\"findingId\":\"DR-R1-F9\",\"fingerprint\":\"sha256:05f69a8256e98077334bd2e2f8957f0c0f97f04cce7ddd21790986f6d4fd8360\",\"fingerprintSeed\":\"workflow-executability\\nCR01 在每个 artifact 或 .tmp 写入前必须能用实际 write-subpath 成功调用 production validate-context。\\n按 reviewer-workflow line 8 原样替换并从 project root 执行，--write-subpath 参数中的嵌套反引号触发 shell command substitution；zsh先报告 .tmp/.../review-input.diff 不存在，validator收到空参数并以 invalid-arguments exit 2。\\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:8\",\"impact\":\"严格按 canonical CR01 workflow 执行会在首次 input write 前 HALT，无法形成 review artifact。\",\"invariant\":\"CR01 在每个 artifact 或 .tmp 写入前必须能用实际 write-subpath 成功调用 production validate-context。\",\"primaryLocation\":\"assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:8\",\"sourceLayers\":[\"reviewer\"],\"suggestedNextStep\":\"移除参数值内的反引号并补文档命令形状或 production CLI probe。\",\"title\":\"CR01 production validator 示例的嵌套反引号使命令不可执行\"}]",
+  "findingSetHash": "sha256:01de0380c8d0bcbc9195514d66ffb8f3073850757687ec87ef24d1fb78d82145"
+}
+

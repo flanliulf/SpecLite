@@ -1,0 +1,42 @@
+[
+  {
+    "category": "authority-provenance",
+    "invariant": "写前校验只能接受 shared resolver 实际签发并冻结的唯一 directoryContext。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:194",
+    "trigger_condition": "canonical与legacy均为CURRENT，调用者伪造两份相同canonical context",
+    "actual_result": "两份调用者控制的 context 相同即通过，安全路径存在时返回 ok=true。",
+    "expected_result": "未绑定 resolver 输出或 ownership marker 的 context 必须失败。",
+    "guard_snippet": "if (!matchesResolverEvidence(frozen.value)) return { ok: false, reason: 'untrusted-frozen-context' };",
+    "potential_consequence": "歧义目录可被绕过并产生分叉CR产物"
+  },
+  {
+    "category": "path-safety",
+    "invariant": "通过 validator 的现存写入目标不得映射到项目外 inode。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:661",
+    "trigger_condition": "现存writePath是指向项目外文件的regular hard link",
+    "actual_result": "lstat 视为普通文件且 realpath 保留项目内别名，最终返回 ok=true。",
+    "expected_result": "多链接写入目标必须作为 unsafe-write-path 阻断。",
+    "guard_snippet": "if (isFinal && finalKind === 'file' && metadata.nlink !== 1) return { ok: false, reason: 'unsafe-path' };",
+    "potential_consequence": "后续写入可修改项目外同一inode"
+  },
+  {
+    "category": "path-safety",
+    "invariant": "路径安全判定与实际写入之间不得允许目标被替换。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:213",
+    "trigger_condition": "validator成功后写入前，父目录被替换为外部symlink",
+    "actual_result": "validator 已退出，后续 consumer 写入会跟随替换后的 symlink。",
+    "expected_result": "校验与写入必须绑定同一已打开句柄并原子完成。",
+    "guard_snippet": "await atomicWriteWithinRoot(projectRoot, writePath, payload, { noFollow: true });",
+    "potential_consequence": "竞态可把CR产物写到项目外"
+  },
+  {
+    "category": "portability",
+    "invariant": "合法 current artifact 的 identity 解析不得依赖 LF-only 行尾。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:426",
+    "trigger_condition": "current artifact的frontmatter使用CRLF行尾",
+    "actual_result": "startsWith 检查失败并返回 null，candidate 被判定为 identity conflict。",
+    "expected_result": "CRLF 与 LF frontmatter 应解析为相同 identity。",
+    "guard_snippet": "const normalizedContent = content.replace(/\r\n/gu, '\n');",
+    "potential_consequence": "Windows检出的合法CR运行被永久阻断"
+  }
+]

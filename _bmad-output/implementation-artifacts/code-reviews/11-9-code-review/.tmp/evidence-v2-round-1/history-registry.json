@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "speclite.cr-history-registry.v1",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "currentSeriesFindings": [],
+  "legacyProvenance": [
+    {
+      "roundRange": "5-24",
+      "source": "legacy Story 11-9 review/evaluation artifacts",
+      "status": "accepted non-blocking P2",
+      "topic": "supersededIndex identity/continuity",
+      "canonicalFingerprint": null,
+      "rule": "generate a new evidence-v2 fingerprint from a disclosed seed; do not claim continuity with a historical fingerprint"
+    }
+  ]
+}

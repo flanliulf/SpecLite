@@ -55,7 +55,65 @@ CR01–06、runner 和人工 orchestrator 必须按以下顺序判定实现证�
 - `round`：同一 `storyId + reviewSeries` 内从 1 开始连续递增。
 - CR 目录固定为 `{implementation_artifacts}/code-reviews/{storyId}-code-review/`。
 - Goal records 固定为 `{crDir}/goal-execute-records/`；不得为同一 Story 创建带 slug 的第二个 CR 目录。
-- 发现 legacy 或带 slug 目录时只读记录到 `legacyArtifactPaths`，不得自动移动、删除或继续写入。
+- `storyId` 只接受规范 numeric identity `N.N` 或 `N-N`，且每段必须为无前导零的正整数；不得从 title、slug、filename remainder、中文、空格、标点或其他文本提取、截断或 fallback。
+- 发现 legacy 或带 slug 目录时记录到 `legacyArtifactPaths`；不得自动移动、复制、重命名或删除。
+
+### CR Directory Resolution（CR 目录解析）
+
+`speclite-code-review-contract/scripts/resolve-cr-directory.mjs` 同时提供唯一 executable directory resolver 与 production context validator。resolver 只负责 numeric identity、current candidate 归属和物理路径安全，不拥有或复放 approval、tracker、gate、scope/hash、freshness、round 连续性或 supersession；这些检查仍由 runner、Flow Gate 与 CR01–06 的原 owner 执行。
+
+orchestrator 在一个 Story 的 CR 闭环开始时只调用一次：
+
+`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode resolve --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --story-id "{storyId}" --review-series "{reviewSeries}" [--directory-choice "{directoryChoice}"]`
+
+stdout `ok=true` 后，orchestrator 冻结 `storyId`、`reviewSeries`、`crDir`、`canonicalCrDir`、`compatibilityMode` 与 `legacyArtifactPaths` 为同一个 `directoryContext`，并原样传给 CR01–06。runner mode consumer 不得再次调用 resolver；manual mode standalone Skill 必须独立调用 resolver 一次并冻结同样 context。任何 consumer 都不得根据 title、slug、filename 或 tracker 重新推导目录。
+
+每个 consumer 在任何实际写入前必须调用同一脚本的 production validator，并同时提供 orchestrator 冻结 context 与本次 consumer 收到的 context：
+
+`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{writeSubpath}"`
+
+validator 只比较两份 context 的六个冻结字段并检查 `crDir` / `writeSubpath` 的物理安全；它不重新选择目录，也不替代 consumer 原有的 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。unknown、duplicate、empty、partial 参数、context mismatch 或 unsafe path 均以 redacted JSON fail-close，并在写入前 HALT。
+
+orchestrator 首次解析并冻结一个 current run 后，必须在其他 pre-summary `.tmp` 或 goal record 写入前创建固定 ownership marker：`{crDir}/.tmp/cr-directory-ownership.json`。创建前先调用 production validator，并将 `writeSubpath` 精确设为 `.tmp/cr-directory-ownership.json`；验证成功后写入且重读以下唯一五字段 JSON：
+
+```json
+{
+  "schemaVersion": "speclite.cr-directory-ownership.v1",
+  "artifactType": "cr-directory-ownership",
+  "storyId": "11-9",
+  "reviewSeries": "main",
+  "crDir": "_bmad-output/implementation-artifacts/code-reviews/11-9-code-review"
+}
+```
+
+`storyId`、`reviewSeries` 与 project-relative POSIX `crDir` 必须逐字等于 frozen `directoryContext`。该 marker 只证明 pre-summary run 的目录 ownership，不证明 approval、tracker、gate、scope/hash、freshness、round 或 completion。后续 resolver 只读取这个固定 marker；不得扫描 `.tmp` 其他文件、`PLAN.md` 或 prose/approval claim。marker 缺失不从 reserved 目录内容猜测 authority；marker malformed、字段冲突、symlink、escape 或同一 Story/series 在多个目录各有合法 marker 时 fail-close。resolver 不创建、迁移、复制、重命名或删除 marker。
+
+Resolver 是 read-only preflight，不创建目录、临时文件、goal record 或 progress mutation。归属矩阵固定为：
+
+| On-disk state | `crDir` | Continuation |
+|---|---|---|
+| 无既有 current run | canonical `{storyId}-code-review/` | Continue；后续获得写入授权并通过 validator 后先创建 ownership marker |
+| canonical-only | canonical directory | Continue |
+| 恰一个 current legacy（即使包含 `DONE` claim） | 该 legacy directory | Continue with `compatibilityMode=legacy-resume`；完成性由正常 approval owner 判断 |
+| 恰一个仅含合法 ownership marker 的 pre-summary legacy | 该 legacy directory | Continue with `compatibilityMode=legacy-resume`；不得创建 canonical sibling |
+| 多个 current candidate | none | Block；仅显式 `directoryChoice` 可选择其中一个 current candidate |
+| candidate symlink、non-directory、escape 或 evidence 无法唯一绑定 current series/round | none | Block before write |
+
+legacy-only unfinished resume 是 existing run continuation，不是新 CR run；不得在 resume 中创建 canonical sibling 或把同一轮拆分到新旧目录。Review、evaluation、fix record、rules、TODO result、finalizer、`.tmp/` 与 goal records 全部使用 resolved `crDir`。
+
+`directoryChoice` 只能解决多个安全 current candidate 的归属歧义；不得绕过 symlink/non-directory/escape/identity conflict，不得搬迁 artifacts、合并目录或把同一 round 拆到两个目录。resolver 只读取 current-family artifact 开头的少量 identity 字段以确认 Story/series 归属；ordinary notes、其他 Story、其他 series 与历史 superseded 文件不参与归属。完整 round/supersession lineage 与 approval validity 继续由 runner 和各 CR owner 检查。
+
+Ambiguity 由本 shared CR workflow-local contract 拥有，不进入 `SPEC 07` project validation taxonomy。Stable diagnostic 固定为：
+
+- `issueId: cr-directory.ambiguous-resume-root`
+- `category: lifecycle`
+- `severity: error`
+- `continuation: block`
+- `details`: `storyId`、project-relative POSIX `canonicalCrDir`、byte-wise 排序且去重的 `legacyCrDirs`、`reviewSeries`、每个候选的结构化 `roundEvidence`、稳定 `reason`
+
+`roundEvidence` 只记录本次实际检查的 canonical/legacy current-candidate ownership 与安全结果，按 byte-wise 排序且不得读取或伪造尚未检查 candidate 的状态。
+
+Details 禁止 absolute/home/temp path、raw artifact content、stack trace、随机值或非规范时间。该 diagnostic 必须先于任何 round artifact、goal record、temporary file、Story/tracker 或 progress mutation 返回。
 
 ## Canonical Paths（规范路径）
 

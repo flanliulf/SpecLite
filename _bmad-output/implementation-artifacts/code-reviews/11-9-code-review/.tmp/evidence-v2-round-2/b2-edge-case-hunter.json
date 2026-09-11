@@ -1,0 +1,22 @@
+[
+  {
+    "category": "duplicate-key",
+    "invariant": "leading frontmatter 的语义 authority key 必须唯一且无歧义",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440-450",
+    "trigger_condition": "finalizer 同时含 result: DONE 与显式 ? result / : HALTED",
+    "actual_result": "parseLeadingFrontmatter 忽略显式 mapping 两行并保留 result=DONE；其余证据合法时 validDoneFinalizer 返回 true，将该 legacy round 判为 completed。",
+    "expected_result": "检测 result 的语义重复并返回 invalid-current-series-evidence，禁止认证 DONE。",
+    "guard_snippet": "const doc = parseDocument(frontmatter, { uniqueKeys: true }); if (doc.errors.length) return null;",
+    "potential_consequence": "错误启动 canonical 新轮并遗留冲突 legacy 状态"
+  },
+  {
+    "category": "timestamp-precision",
+    "invariant": "freshness 顺序必须按 RFC3339 完整精度比较",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:590-617,650-661,888",
+    "trigger_condition": "review 为 .9001Z 而 evaluation 为更早的 .9000Z",
+    "actual_result": "validTimestamp 接受任意长度小数秒，但 Date.parse 将两者都折叠为同一毫秒；evaluationTime >= reviewTime 因此错误通过，fixRecord 与 gate 顺序比较也存在同类路径。",
+    "expected_result": "按完整小数秒精度判定 evaluation 早于 review，并拒绝 completed evidence。",
+    "guard_snippet": "if (compareRfc3339Exact(evaluationAt, reviewAt) < 0) return false;",
+    "potential_consequence": "陈旧 evaluation 或 gate 被认证为 fresh DONE"
+  }
+]

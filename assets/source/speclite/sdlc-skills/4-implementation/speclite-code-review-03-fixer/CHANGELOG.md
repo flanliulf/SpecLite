@@ -1,5 +1,9 @@
 # Changelog（变更记录）
 
+## [Unreleased] - 2026-09-09
+
+- fixer 消费 frozen `directoryContext`，source/fixRecord 写入前调用 production validator；原 evaluator authorization 不变。
+
 ## [2.1.0] - 2026-08-25
 
 ### Changed（变更）

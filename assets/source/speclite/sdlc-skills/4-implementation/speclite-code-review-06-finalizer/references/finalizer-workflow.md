@@ -2,11 +2,18 @@
 
 本文档承载 CR06 的详细 fail-closed closeout 流程。共享 identity、scope、freshness、tracker 和 finalizer report schema 以 CR shared contract 为准。
 
+## Directory Preflight（目录预检）
+
+- runner mode 必传 orchestrator 冻结的 `directoryContext` 以及 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；不得再次调用 resolver。manual Story mode 必须用 shared script 的 `--mode resolve` 只解析一次并冻结相同 context。
+- 任何 finalizer report、`.tmp`、tracker 或 progress write 前，必须真实调用 production validator：`node "{skills-root}/speclite-code-review-contract/scripts/resolve-cr-directory.mjs" --mode validate-context --project-root "{projectRoot}" --implementation-artifacts "{implementation_artifacts}" --frozen-context "{directoryContextJson}" --story-id "{storyId}" --review-series "{reviewSeries}" --cr-dir "{crDir}" --canonical-cr-dir "{canonicalCrDir}" --compatibility-mode "{compatibilityMode}" --legacy-artifact-paths "{legacyArtifactPathsJson}" --write-subpath "{storyId}-cr-finalizer-{date}-{reviewSeries}-round-{round}.md"`。
+- validator stdout 必须为 `ok=true`；缺字段、consumer context 与 frozen context 不一致、unsafe write path、non-zero 或 invalid JSON 时在任何写入前 HALT。validator 只验证目录 context/path，不替代本 Skill 原有 approval、scope/hash、tracker、freshness、round 或 coordinated-write gate。
+- 所有 Story mode 不得根据 Story title、slug、filename 或 tracker 重新推导目录；全部 outputs 使用同一个 resolved `crDir`。
+
 ## Step 1: Resolve Identity（解析身份）
 
 1. 建立唯一 `storyId/storyKey/storyFile/reviewSeries`。
-2. CR 目录必须是 `{storyId}-code-review/`。
-3. legacy v1、slug 目录或 superseded series 只作历史 evidence。
+2. 验证 resolved `crDir` 与 numeric `storyId`、canonical/legacy compatibility evidence 一致。
+3. legacy v1 或 superseded series 只作历史 evidence；原样消费 frozen `compatibilityMode=legacy-resume` 与对应 `crDir`，不得按 `DONE` claim 或 unfinished 状态二次解释目录 ownership；随后继续执行本 workflow 的全部 approval、scope、freshness 与 closeout gates。
 4. 由 Finalizer 自身按 shared contract 重算 current scope；runner/manual records 只可作为候选输入。
 
 ## Step 2: Validate Current Evaluation（验证 current evaluation）

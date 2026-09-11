@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "speclite.cr-finding-seeds.v1",
+  "status": "INTERIM_SUPERSEDED_BY_CLASSIFIED_FINDINGS",
+  "canonicalSource": "classified-findings.json",
+  "note": "本文件保留首次 carried-defer seed 的可追溯计算；聚合后规范措辞、ID 与 canonical fingerprint 以 classified-findings.json 为准，不删除本中间证据。",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 1,
+  "generatedAt": "2026-09-07T08:12:52Z",
+  "canonicalization": "Unicode NFC; LF separators; trim line trailing whitespace and file trailing whitespace; UTF-8 SHA-256",
+  "findings": [
+    {
+      "findingId": "INTERIM-DEFER-SEED-1",
+      "canonicalFindingId": "EVIDENCE-V2-R1-F7",
+      "canonicalFingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "category": "lifecycle",
+      "invariant": "同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。",
+      "concreteFailureScenario": "当同一 current artifact 的合法 superseded 文件出现 suffix 缺口、重复或重编号时，resolver 只验证 suffix 为正整数且 supersededBy 指向 current，不验证 supersededIndex 的连续性或不可重编号身份；因此历史 lineage 可以在仍通过 current/superseded 结构验证的情况下丢失稳定 ordinal identity。该缺口不改变 current artifact 唯一性，故当前为非阻塞延期项。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"],
+      "seedText": "lifecycle\n同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。\n当同一 current artifact 的合法 superseded 文件出现 suffix 缺口、重复或重编号时，resolver 只验证 suffix 为正整数且 supersededBy 指向 current，不验证 supersededIndex 的连续性或不可重编号身份；因此历史 lineage 可以在仍通过 current/superseded 结构验证的情况下丢失稳定 ordinal identity。该缺口不改变 current artifact 唯一性，故当前为非阻塞延期项。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "fingerprint": "sha256:19477c1058327b992c6335d4392f886b9e6180e05eff75df7a17df93205de46f",
+      "historicalFingerprint": null,
+      "bucket": "defer",
+      "disposition": "deferred"
+    }
+  ]
+}

@@ -16,6 +16,8 @@ metadata:
 
 本 Skill 只读，不创建 review、evaluation、fix、TODO 或 finalizer artifact，也不修改源码、Story 或 tracker。
 
+- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
+
 ## Core Capabilities（核心能力）
 
 - **契约唯一来源**：以 `references/cr-contract.md` 作为 CR v2 唯一规范性定义。
@@ -23,13 +25,14 @@ metadata:
 - **结构校验**：验证 schema、exact verdict、Story identity、series、round、scope 和 source hash。
 - **时效校验**：检查 review、evaluation、fixRecord 与 Flow Gate 的 freshness 关系。
 - **Closeout 校验**：验证 rules extraction、TODO result 与 finalizer durable report 的 canonical path、schema 和 binding。
+- **CR 目录路由**：resolver 只判断 numeric identity、current candidate 归属与物理安全；production validator 在写前比较 frozen/consumer context，不承接审批或 tracker 规则。
 - **只读诊断**：输出具体不一致项和下一步，不替代 reviewer、evaluator、fixer 或 finalizer。
 
 ## Workflow（工作流）
 
 1. 完整读取 `references/cr-contract.md`；文件不可读时 HALT。
 2. 运行 `speclite resolve config --project-root {project-root}`，解析 merged `planning_artifacts` 与 `implementation_artifacts`；失败时 HALT。
-3. 根据输入建立唯一 `storyId -> storyKey -> storyFile`，并定位指定或 current CR artifact。
+3. 根据输入建立唯一 `storyId -> storyKey -> storyFile`；使用 `scripts/resolve-cr-directory.mjs` 一次解析 verified `crDir`，再定位指定或 current CR artifact。
 4. 按共享契约检查 artifact schema、identity、path、series、round、hash、scope、verdict、freshness 与 CR04–06 durable closeout binding。
 5. 输出只读验证结论：`VALID | INVALID | INCOMPLETE`、逐项证据和精确下一步；不得修改被检查文件。
 

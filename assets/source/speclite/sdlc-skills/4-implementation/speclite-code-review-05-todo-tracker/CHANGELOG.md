@@ -1,5 +1,9 @@
 # Changelog（变更记录）
 
+## [Unreleased] - 2026-09-09
+
+- Story-mode TODO result 消费 frozen `directoryContext` 并在写入前调用 production validator；project utility mode 不变。
+
 ## [2.1.1] - 2026-08-26
 
 ### Changed（变更）

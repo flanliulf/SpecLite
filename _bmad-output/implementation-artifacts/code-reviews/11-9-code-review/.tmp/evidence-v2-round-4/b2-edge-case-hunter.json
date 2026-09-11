@@ -1,0 +1,22 @@
+[
+  {
+    "category": "artifact-classification",
+    "invariant": "Selected-series near-current basenames must fail closed before directory resolution succeeds.",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:445",
+    "trigger_condition": "Canonical root contains only a selected-series mainround-1 artifact.",
+    "actual_result": "classifyArtifactName returns unrelated, inspectCandidate reports no current evidence, and canonical resolution succeeds.",
+    "expected_result": "The near-current basename is malformed-current-intent and resolution blocks before any downstream write.",
+    "guard_snippet": "Recognize concatenated selected-series round tokens as malformed current intent before unrelated fallback.",
+    "potential_consequence": "A duplicate round can be created beside hidden current evidence."
+  },
+  {
+    "category": "tracker-authentication",
+    "invariant": "Every terminal state accepted during binding preflight must be representable by the exact terminal-state matcher.",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1047",
+    "trigger_condition": "expectedTerminalState is done|verified and the tracker contains that exact scalar.",
+    "actual_result": "validTerminalState accepts the binding, but candidatePattern excludes the pipe and reports no match.",
+    "expected_result": "Preflight rejects the unsupported vocabulary or the matcher authenticates the exact scalar consistently.",
+    "guard_snippet": "Use one shared scalar grammar for binding validation and terminal-state matching.",
+    "potential_consequence": "A valid completed run is permanently classified as invalid evidence."
+  }
+]

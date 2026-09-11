@@ -1,5 +1,9 @@
 # Changelog（变更记录）
 
+## [Unreleased] - 2026-09-09
+
+- 每个 Story 只 resolve 一次并冻结 `directoryContext`；向 CR01–06 传递四字段并要求任何实际写入前调用 production validator。
+
 ## [2.1.0] - 2026-08-25
 
 ### Changed（变更）

@@ -1,0 +1,49 @@
+{
+  "resolvedAt": "2026-09-09 08:28:10 UTC",
+  "projectRoot": "/Users/fancyliu/Repos/SpecLite",
+  "implementationArtifacts": "_bmad-output/implementation-artifacts",
+  "source": "node dist/bin/speclite.js resolve config --project-root /Users/fancyliu/Repos/SpecLite",
+  "directoryResolutionCount": 1,
+  "directoryContext": {
+    "storyId": "11-9",
+    "reviewSeries": "directory-routing",
+    "crDir": "_bmad-output/implementation-artifacts/code-reviews/11-9-code-review",
+    "canonicalCrDir": "_bmad-output/implementation-artifacts/code-reviews/11-9-code-review",
+    "compatibilityMode": "canonical",
+    "legacyArtifactPaths": []
+  },
+  "resolverResult": {
+    "ok": true,
+    "storyId": "11-9",
+    "reviewSeries": "directory-routing",
+    "crDir": "_bmad-output/implementation-artifacts/code-reviews/11-9-code-review",
+    "canonicalCrDir": "_bmad-output/implementation-artifacts/code-reviews/11-9-code-review",
+    "compatibilityMode": "canonical",
+    "legacyArtifactPaths": [],
+    "issue": null
+  },
+  "storyKey": "11-9-normalize-code-review-artifact-directories-by-story-id",
+  "baseSha": "ff7528d3f9ec34072bb669ee79f7569345c23d47",
+  "orchestrationMode": "runner",
+  "handoffTarget": "runner",
+  "confirmationPolicy": "preauthorized",
+  "authorizationSource": "_bmad-output/implementation-artifacts/code-reviews/11-9-code-review/goal-execute-records/PLAN.md",
+  "trackerBindings": {
+    "story": {
+      "required": true,
+      "path": "_bmad-output/implementation-artifacts/stories/11-9-normalize-code-review-artifact-directories-by-story-id.md",
+      "key": "Status",
+      "expectedTerminalState": "done"
+    },
+    "sprint": {
+      "required": true,
+      "path": "_bmad-output/implementation-artifacts/sprint-status.yaml",
+      "key": "11-9-normalize-code-review-artifact-directories-by-story-id",
+      "expectedTerminalState": "done"
+    },
+    "workflow": {
+      "required": false
+    }
+  },
+  "trackerAuthority": "workflow required=false 为用户已显式确认的项目调用上下文，沿用 evidence-v2-authorization.md 的项目级 tracker 选择；不是 resolver 参数，不从配置缺失推断。"
+}

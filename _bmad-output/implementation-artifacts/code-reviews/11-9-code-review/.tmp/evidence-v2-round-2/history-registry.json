@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "speclite.cr-history-registry.v2",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "currentRound": 2,
+  "reviewSource": "11-9-code-review-summary-20260907-evidence-v2-round-1.md",
+  "reviewSourceHash": "sha256:9f8fa299bfe5e4c30a5ca45d61fcfbb618b18fb9b141db60909e1a291ab86ae7",
+  "evaluationSource": "11-9-code-review-evaluation-20260907-evidence-v2-round-1.md",
+  "evaluationSourceHash": "sha256:1d2bdc23c52662e1c58a83b32f936b197566c92c3dd7c4edb1cc002a54ee87bf",
+  "fixRecordStatus": "completed",
+  "findings": [
+    {
+      "id": "F1",
+      "fingerprint": "sha256:73633336ba59334e4fde265d3285ea644006ffba00f60151c0505f5fc5cf70a3",
+      "historicalDisposition": "accepted-p1-fixed",
+      "category": "artifact-authentication"
+    },
+    {
+      "id": "F2",
+      "fingerprint": "sha256:62aae5375ba25b302bb7c61b873c177ea16e0225d99738d79b3d51f6c6e9de46",
+      "historicalDisposition": "accepted-p1-fixed",
+      "category": "contract-propagation"
+    },
+    {
+      "id": "F3",
+      "fingerprint": "sha256:4138442f8dd2099c06169b78bc322543a1d75ab903e6f24be4c0019410777717",
+      "historicalDisposition": "accepted-p1-fixed",
+      "category": "tracker-authentication"
+    },
+    {
+      "id": "F4",
+      "fingerprint": "sha256:297c0f72c9f7a1633dd0cdfae83f5870220fcb60b20556fbbcdd5b89afc77adf",
+      "historicalDisposition": "accepted-p1-fixed",
+      "category": "artifact-schema-compatibility"
+    },
+    {
+      "id": "F5",
+      "fingerprint": "sha256:b0f57b0ce8e8c9559dbf743e83fab533ef45be8f6dfa2268fc5e9144efe59aac",
+      "historicalDisposition": "accepted-p1-fixed",
+      "category": "approval-semantics"
+    },
+    {
+      "id": "F6",
+      "fingerprint": "sha256:3ce32b8329eee5ff252253e6cf68cfd6da3529f73a7f3b5a383b28de06fe66ce",
+      "historicalDisposition": "accepted-p1-fixed",
+      "category": "completion-gate-authentication"
+    },
+    {
+      "id": "F7",
+      "fingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "historicalDisposition": "deferred-nonblocking",
+      "category": "lifecycle"
+    }
+  ]
+}

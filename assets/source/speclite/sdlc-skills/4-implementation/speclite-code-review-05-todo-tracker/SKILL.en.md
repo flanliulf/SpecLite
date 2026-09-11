@@ -20,6 +20,8 @@ Manage evaluator-accepted non-blocking items in `{implementation_artifacts}/cr-r
 - Backlog utility: check, resolve, list, or extract items on user request; these operations never change the original evaluation verdict.
 - Do not record P0/P1, `VERIFY_REQUIRED`, dismissed, or superseded findings.
 
+- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
+
 ## Core Capabilities
 
 - **Add items**: Extract and confirm non-blocking deferred candidates from the current evaluation.
@@ -35,6 +37,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - `mode=closeout | add | check | resolve | list | extract` plus the Story/TODO identity required by that mode. `closeout` is Story-closeout only; read-only `list`/`check` skip the durable result by default.
+- Runner Story mode requires the frozen `directoryContext` and all four verified directory fields; manual Story mode invokes the shared resolver once. Call the production context validator before Story-mode writes; project utility mode does not resolve `crDir`.
 - `confirmationPolicy: explicit | preauthorized`; default to `explicit` when omitted.
 - `authorizationSource`, `orchestrationMode`, and `handoffTarget`; authorization source is mandatory for `preauthorized`.
 

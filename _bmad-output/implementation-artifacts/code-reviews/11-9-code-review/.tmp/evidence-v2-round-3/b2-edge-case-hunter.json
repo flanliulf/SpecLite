@@ -1,0 +1,51 @@
+{
+  "modelUsed": "OpenAI GPT-5.6 Sol (high)",
+  "inputSha256": "2d34d3d44fd7b48a18ed58dfbc831459be274fdaf0d5b99ea69abe4fd4b77834",
+  "completedAtUtc": "2026-09-07T13:18:56Z",
+  "findings": [
+    {
+      "category": "artifact-classification",
+      "invariant": "当前 Story、family、series 的近似非规范 basename 必须归为 malformed-current-intent 并 fail-close。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:421",
+      "trigger_condition": "Canonical dir contains selected-series main@round delimiter",
+      "actual_result": "`11-9-code-review-summary-20260905-main@round-1.md` 未命中有限的 `.`, `+`, `:`, `-`, `_` 分隔检测，被返回为 `unrelated`；canonical candidate 随后可返回 `ok:true`。",
+      "expected_result": "该 basename 应归为 `malformed-current-intent`，并在任何后续写入前返回 current-series evidence invalid。",
+      "guard_snippet": "Reject every selected-series known-family basename that is noncanonical before returning unrelated.",
+      "potential_consequence": "Malformed current evidence is silently bypassed",
+      "first_hand_diff_evidence": "新增 classifier 仅在 lines 441-456 枚举部分分隔符，line 458 对其余情况无条件返回 unrelated。"
+    },
+    {
+      "category": "frontmatter-ambiguity",
+      "invariant": "决定 artifact identity 或 DONE authority 的 YAML key 必须语义唯一。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:471",
+      "trigger_condition": "Finalizer uses explicit-key result plus bare result",
+      "actual_result": "Leading frontmatter 中 `? result` / `: HALTED` 被逐行忽略，后续 `result: DONE` 被接受；在其余 graph 合法时 resolver 可把语义重复的 finalizer 认证为 DONE。",
+      "expected_result": "任何 YAML-equivalent duplicate authority key 都应使 frontmatter 无效并阻断 completion recognition。",
+      "guard_snippet": "Parse the bounded frontmatter with duplicate-key errors enabled before projecting authority fields.",
+      "potential_consequence": "Ambiguous authority can certify a completed run",
+      "first_hand_diff_evidence": "新增 parser 只拒绝 quoted keys、只检测 regex 可见 bare-key duplicates，并忽略 explicit-key 两行结构。"
+    },
+    {
+      "category": "schema-validation",
+      "invariant": "用于认证 predecessor 的 inline YAML list 必须是可解析的合法 YAML。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:780",
+      "trigger_condition": "Review list contains invalid double-quoted escape",
+      "actual_result": "例如 `declaredFiles: [\"\\q\"]` 时，parser 对反斜杠后的任意字符直接复制并返回非 null，`validPredecessorSchema` 因而接受 YAML-invalid review evidence。",
+      "expected_result": "不属于 YAML double-quoted escape 集合的序列必须使 list 与 predecessor schema 校验失败。",
+      "guard_snippet": "Validate double-quoted escapes against YAML grammar or use a fail-closed YAML parser.",
+      "potential_consequence": "Malformed predecessor evidence can certify DONE",
+      "first_hand_diff_evidence": "新增 loop lines 789-794 无条件接受任意 escaped character，lines 705-708 只检查返回值非 null。"
+    },
+    {
+      "category": "filesystem-race",
+      "invariant": "resolver 读取的 artifact 与 tracker 必须保持在已验证目录内且不得跟随 symlink。",
+      "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:664",
+      "trigger_condition": "Checked file is swapped before separate readFile",
+      "actual_result": "`lstat` 和 `realpath` 校验结束后，代码按原始 pathname 单独 `readFile`；并发替换为 symlink 可令读取跟随到已验证 parent 外的文件。",
+      "expected_result": "应以 no-follow 打开文件，并在同一 descriptor 上 `fstat`、绑定路径与读取内容。",
+      "guard_snippet": "Open with no-follow and validate then read through the same file descriptor.",
+      "potential_consequence": "Out-of-root evidence can be authenticated",
+      "first_hand_diff_evidence": "新增 `readBoundRegularFile` lines 665-670 将检查与读取分成三个 pathname-based filesystem operations。"
+    }
+  ]
+}

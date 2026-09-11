@@ -19,6 +19,8 @@ metadata:
 - 用于验证 reviewer findings、反证、severity、disposition 和 convergence。
 - 不用于修改 source/test、执行 fixer、登记 TODO、更新 Story/tracker 或替代 reviewer。
 
+- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
+
 ## Core Capabilities（核心能力）
 
 - **一对一绑定**：按 Story、series、round、scope 和 review hash 精确绑定。
@@ -33,6 +35,7 @@ metadata:
 ## Inputs（输入）
 
 - Story identity、`reviewSeries` 和 current v2 review，或足够独立定位它的信息。
+- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
 - `orchestrationMode` 与 `handoffTarget`；缺失时按人工 standalone 调用处理。
 
 ## Workflow（工作流）

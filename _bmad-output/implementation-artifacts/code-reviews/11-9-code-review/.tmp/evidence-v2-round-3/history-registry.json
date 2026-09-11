@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "speclite.cr-history-registry.v2",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "currentRound": 3,
+  "round1": {
+    "reviewSource": "11-9-code-review-summary-20260907-evidence-v2-round-1.md",
+    "reviewSourceHash": "sha256:9f8fa299bfe5e4c30a5ca45d61fcfbb618b18fb9b141db60909e1a291ab86ae7",
+    "evaluationSource": "11-9-code-review-evaluation-20260907-evidence-v2-round-1.md",
+    "evaluationSourceHash": "sha256:1d2bdc23c52662e1f58a83b32f936b197566c92c3dd7c4edb1cc002a54ee87bf",
+    "findings": [
+      {"fingerprint":"sha256:73633336ba59334e4fde265d3285ea644006ffba00f60151c0505f5fc5cf70a3","disposition":"resolved","category":"artifact-authentication"},
+      {"fingerprint":"sha256:62aae5375ba25b302bb7c61b873c177ea16e0225d99738d79b3d51f6c6e9de46","disposition":"resolved","category":"contract-propagation"},
+      {"fingerprint":"sha256:4138442f8dd2099c06169b78bc322543a1d75ab903e6f24be4c0019410777717","disposition":"resolved","category":"tracker-authentication"},
+      {"fingerprint":"sha256:297c0f72c9f7a1633dd0cdfae83f5870220fcb60b20556fbbcdd5b89afc77adf","disposition":"resolved","category":"artifact-schema-compatibility"},
+      {"fingerprint":"sha256:b0f57b0ce8e8c9559dbf743e83fab533ef45be8f6dfa2268fc5e9144efe59aac","disposition":"resolved","category":"approval-semantics"},
+      {"fingerprint":"sha256:3ce32b8329eee5ff252253e6cf68cfd6da3529f73a7f3b5a383b28de06fe66ce","disposition":"resolved","category":"completion-gate-authentication"}
+    ]
+  },
+  "round2": {
+    "reviewSource": "11-9-code-review-summary-20260907-evidence-v2-round-2.md",
+    "reviewSourceHash": "sha256:7b7b8fbf4b6c22facbccc0498e2b0fe0bc898e1be3a6221df8bce7c0dfef1164",
+    "evaluationSource": "11-9-code-review-evaluation-20260907-evidence-v2-round-2.md",
+    "evaluationSourceHash": "sha256:e1a5e9ee2c74c76c88db5f53bdd3d2e886d1aa98ccebc2678875f7e1ab724ccb",
+    "fixRecordStatus": "completed",
+    "findings": [
+      {"fingerprint":"sha256:4b9c617b38f75a104c3cd08fbce260af490fd72d0722f0ff353bf1075a374ac9","disposition":"dismissed","category":"provenance"},
+      {"fingerprint":"sha256:f113580e33ce900c8f1516e7cd540b7bac96b7ceafdc5907d243c0ecbaebf1e4","disposition":"dismissed","category":"authority"},
+      {"fingerprint":"sha256:6c2824d6e2d973a0d1e630d4d84bf21b9f46b53ed0c95594f0ad4974c06bd7ca","disposition":"dismissed","category":"artifact-authentication"},
+      {"fingerprint":"sha256:12d668827d3f339bd533356fc7f8b68a88e33fbd4150dafea1ade6debeacb29b","disposition":"dismissed","category":"completeness"},
+      {"fingerprint":"sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244","disposition":"deferred","category":"freshness","urgency":"T2"},
+      {"fingerprint":"sha256:4ac82b8bd024bfb5ba610fa75e3eba2230a93105fbbee4caf6de478cf629030a","disposition":"accepted-p1-fixed-pending-fresh-review","category":"filesystem-containment"},
+      {"fingerprint":"sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483","disposition":"deferred","category":"lifecycle","urgency":"T2"}
+    ]
+  },
+  "constraints": [
+    "R2 F1-F4 require a genuinely new owner obligation and concrete scenario before reconsideration; wording-only restatement stays dismissed.",
+    "R2 F5 and F7 retain original fingerprints and T2 deferred status.",
+    "R2 F6 must be freshly verified; completed fixRecord is evidence, not a pre-decided Reviewer verdict."
+  ]
+}

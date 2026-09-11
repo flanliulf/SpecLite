@@ -1,0 +1,72 @@
+[
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 147,
+    "token": "11-9-old-title-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 resolver compatibility regression fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 170,
+    "token": "11-9-old-title-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 sticky legacy ownership regression fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 214,
+    "token": "11-9-old-title-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 physical safety regression fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 300,
+    "token": "11-9-replaced-code-review",
+    "role": "regression-assertion",
+    "rationale": "Story 11.9 consumer context replacement rejection"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 459,
+    "token": "11-9-note-fixture-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 ordinary note and near-current filename boundary fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 490,
+    "token": "11-9-identity-fixture-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 current artifact identity rejection fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 508,
+    "token": "11-9-identity-positive-fixture-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 non-identity frontmatter duplicate positive fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 525,
+    "token": "11-9-round-fixture-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 selected-series round overflow fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 558,
+    "token": "11-9-marker-fixture-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 pre-summary ownership marker resume fixture"
+  },
+  {
+    "path": "test/cr-directory-resolution.test.ts",
+    "line": 589,
+    "token": "11-9-marker-conflict-code-review",
+    "role": "legacy-fixture",
+    "rationale": "Story 11.9 ownership marker conflict fixture"
+  }
+]

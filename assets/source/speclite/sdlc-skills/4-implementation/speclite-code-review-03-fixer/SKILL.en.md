@@ -19,6 +19,8 @@ This is the only CR01–06 step allowed to modify source or tests. It supports r
 - Use it to execute evaluator-accepted and explicitly bounded fixes or verification obligations.
 - Do not use it to evaluate findings, absorb deferred/TODO items, change requirements, update Stories/trackers, or authorize finalization.
 
+- Hard gate: consume only the numeric Story identity, `reviewSeries`, and `crDir` resolved once and then frozen; implementations must not rederive a directory from Story title, name, slug, filename, or a local candidate.
+
 ## Core Capabilities
 
 - **Authorized scope**: Consume only obligations explicitly approved by the current evaluation.
@@ -33,6 +35,7 @@ Resolve the current Skill directory parent as `{skills-root}`, fully read `{skil
 ## Inputs
 
 - Story identity, `reviewSeries`, current evaluation, and `mode=patch | verify-only`.
+- Runner mode requires the frozen `directoryContext` and all four verified directory fields; manual mode invokes the shared resolver once. Call the production context validator before any actual write.
 - `confirmationPolicy`, `authorizationSource`, `orchestrationMode`, and `handoffTarget`; default missing confirmation policy to `explicit`.
 
 ## Workflow

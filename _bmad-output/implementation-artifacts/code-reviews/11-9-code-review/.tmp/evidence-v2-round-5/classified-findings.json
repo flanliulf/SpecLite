@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "speclite.cr-classified-findings.v1",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 5,
+  "generatedAt": "2026-09-08T04:28:06Z",
+  "canonicalization": "NFC + LF + trimEnd; fingerprints hash LF-joined seed fields; findingSetHash hashes code-point-key-sorted compact JSON findings array",
+  "findingSetHash": "sha256:f2175a3862561189bebda8575483e2cab309fa7751da1b468f8add19fc14a3e8",
+  "counts": {"decisionNeeded": 0, "patch": 1, "verifyRequired": 0, "defer": 2, "dismiss": 2},
+  "findings": [
+    {
+      "findingId": "EVIDENCE-V2-R5-F1",
+      "title": "bounded inline-list 可把被 comment 吞掉的 closing bracket 当作有效 sequence",
+      "category": "artifact-authentication",
+      "invariant": "resolver 已承担的 bounded inline-list parser 必须拒绝会使 sequence closing bracket 落入 YAML comment 的 unquoted item，不能认证语法无效的 predecessor list。",
+      "concreteFailureScenario": "otherwise-authentic review 将 declaredFiles 写为 `[src/a.ts # comment]`；YAML 中空格后的 `#` 启动 comment 并吞掉 closing `]`，该 sequence 未闭合，但 parseBoundedInlineList 只检查原始字符串首尾字符并把整段作为单 item 接受，validPredecessorSchema 因而允许无效 review 参与 DONE authentication。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:780",
+      "sourceLayers": ["edge"],
+      "bucket": "patch",
+      "disposition": "new",
+      "fingerprint": "sha256:f901eda7efb58650982cf9e821fce188a4e6e64468449e0b2ca04493b79ed7e3",
+      "evidence": "parseBoundedInlineList 只验证 value.startsWith('[') / endsWith(']')，循环和 boundedListItem 均未识别 unquoted whitespace-# comment；该缺口位于 resolver 已主动承担的 inline-list grammar，而非 whole-document YAML 扩权。",
+      "suggestedNext": "由 Evaluator 独立裁决；若接受，只在 bounded inline-list parser 与 focused test 内拒绝 unquoted comment introducer，不引入通用 YAML parser。"
+    },
+    {
+      "findingId": "EVIDENCE-V2-R5-D1",
+      "title": "quoted tracker key duplicate 候选依赖未获授权的 full YAML key grammar",
+      "category": "authority",
+      "invariant": "required sprint/workflow tracker 中，caller-frozen key 必须只有一个语义实例且该实例精确等于 expectedTerminalState；任何 duplicate 或非终态实例都必须在认证历史 DONE 前阻断。",
+      "concreteFailureScenario": "workflow tracker 同时包含 `implementation: done` 与 `\"implementation\": in-progress`，并同步 finalizer afterHash；bounded exact-key matcher只计 bare key，因此候选认为 quoted key 可作为第二个语义 owner key而绕过 duplicate rejection。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1054",
+      "sourceLayers": ["blind", "edge"],
+      "bucket": "dismiss",
+      "disposition": "dismissed",
+      "fingerprint": "sha256:dc49d985f86678a2c43f881583f53095f4a7d021d13cc41d22c98ed8f1e077d2",
+      "historicalOwnerEvidence": "Round 2/3 已将 explicit/quoted 等未进入 canonical bounded bare-key grammar 的 semantic duplicate 变体裁为 full YAML key grammar owner 扩张；shared contract 本轮仍只冻结 exact key scalar 的 bounded grammar，未新增通用 YAML key parser义务。",
+      "suggestedNext": "无；若 owner 未来要接受完整 YAML key grammar，须先演进 owning contract，不得借语法变体复用历史 P1。"
+    },
+    {
+      "findingId": "EVIDENCE-V2-R5-D2",
+      "title": "non-zero offset timestamp 候选误读 calendar validation 控制流",
+      "category": "datetime-validation",
+      "invariant": "所有合法 RFC3339 timestamp 都必须按其声明的 offset 完成日历校验。",
+      "concreteFailureScenario": "候选声称 generatedAt 使用合法 `+08:00` 时，Date.parse 先换算 UTC，随后 UTC 字段与原始本地字段比较而返回 false，导致 completed legacy run 被判 unfinished。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:681",
+      "sourceLayers": ["edge"],
+      "bucket": "dismiss",
+      "disposition": "dismissed",
+      "fingerprint": "sha256:1ea0c8bba570f7b13a62a8bfcced5adc914ca3881e6e4bb41911a2697b55797d",
+      "counterEvidence": "Date.parse(value) 只参与 finite guard；第 686 行另以 match 中原始 year/month/day/hour/minute/second 构造 Date.UTC calendar 做日历合法性校验，并未使用 offset 换算后的 Date.parse 结果。focused fixture 也已有合法 `2028-02-29T12:40:00+08:00` 正向控制。",
+      "suggestedNext": "无；实际错误结果不成立，作为事实误读丢弃。"
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F5",
+      "title": "RFC3339 小数秒精度被 Date.parse 截断",
+      "category": "freshness",
+      "invariant": "CR artifact freshness 顺序必须按 RFC3339 的完整小数秒精度比较，不能丢弃超过毫秒的有效精度。",
+      "concreteFailureScenario": "review `generatedAt` 为 `.9001Z`，evaluation 为更早的 `.9000Z`；validTimestamp 接受任意长度小数秒，但 Date.parse 将二者截为同一毫秒，evaluationTime >= reviewTime 错误通过；fixRecord 与 gate 顺序存在同类路径。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:650",
+      "sourceLayers": ["historical-provenance"],
+      "bucket": "defer",
+      "disposition": "deferred",
+      "fingerprint": "sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244",
+      "urgency": "T2",
+      "preservedCanonicalSeed": true
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F7",
+      "title": "supersededIndex identity/continuity",
+      "category": "lifecycle",
+      "invariant": "同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。",
+      "concreteFailureScenario": "当同一 current artifact 的合法 superseded 文件出现 suffix 缺口、重复或重编号时，resolver 只验证 suffix 为正整数且 supersededBy 指向 current，不验证 supersededIndex 连续性或不可重编号身份；历史 lineage 可在仍通过结构验证时失去稳定 ordinal identity。该缺口不改变 current artifact 唯一性，故当前为非阻塞延期项。",
+      "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "sourceLayers": ["historical-provenance"],
+      "bucket": "defer",
+      "disposition": "deferred",
+      "fingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "urgency": "T2",
+      "preservedCanonicalSeed": true
+    }
+  ]
+}

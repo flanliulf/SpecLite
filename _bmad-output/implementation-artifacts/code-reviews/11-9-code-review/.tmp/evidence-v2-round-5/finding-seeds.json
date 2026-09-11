@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "speclite.cr-finding-seeds.v1",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 5,
+  "generatedAt": "2026-09-08T04:28:06Z",
+  "seedOrder": ["category", "invariant", "concreteFailureScenario", "primaryLocation"],
+  "items": [
+    {
+      "findingId": "EVIDENCE-V2-R5-F1",
+      "title": "bounded inline-list 可把被 comment 吞掉的 closing bracket 当作有效 sequence",
+      "fingerprint": "sha256:f901eda7efb58650982cf9e821fce188a4e6e64468449e0b2ca04493b79ed7e3",
+      "disposition": "new",
+      "seedText": "artifact-authentication\nresolver 已承担的 bounded inline-list parser 必须拒绝会使 sequence closing bracket 落入 YAML comment 的 unquoted item，不能认证语法无效的 predecessor list。\notherwise-authentic review 将 declaredFiles 写为 `[src/a.ts # comment]`；YAML 中空格后的 `#` 启动 comment 并吞掉 closing `]`，该 sequence 未闭合，但 parseBoundedInlineList 只检查原始字符串首尾字符并把整段作为单 item 接受，validPredecessorSchema 因而允许无效 review 参与 DONE authentication。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:780",
+      "preservedCanonicalSeed": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R5-D1",
+      "title": "quoted tracker key duplicate 候选依赖未获授权的 full YAML key grammar",
+      "fingerprint": "sha256:dc49d985f86678a2c43f881583f53095f4a7d021d13cc41d22c98ed8f1e077d2",
+      "disposition": "dismissed",
+      "seedText": "authority\nrequired sprint/workflow tracker 中，caller-frozen key 必须只有一个语义实例且该实例精确等于 expectedTerminalState；任何 duplicate 或非终态实例都必须在认证历史 DONE 前阻断。\nworkflow tracker 同时包含 `implementation: done` 与 `\"implementation\": in-progress`，并同步 finalizer afterHash；bounded exact-key matcher只计 bare key，因此候选认为 quoted key 可作为第二个语义 owner key而绕过 duplicate rejection。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1054",
+      "preservedCanonicalSeed": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R5-D2",
+      "title": "non-zero offset timestamp 候选误读 calendar validation 控制流",
+      "fingerprint": "sha256:1ea0c8bba570f7b13a62a8bfcced5adc914ca3881e6e4bb41911a2697b55797d",
+      "disposition": "dismissed",
+      "seedText": "datetime-validation\n所有合法 RFC3339 timestamp 都必须按其声明的 offset 完成日历校验。\n候选声称 generatedAt 使用合法 `+08:00` 时，Date.parse 先换算 UTC，随后 UTC 字段与原始本地字段比较而返回 false，导致 completed legacy run 被判 unfinished。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:681",
+      "preservedCanonicalSeed": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F5",
+      "title": "RFC3339 小数秒精度被 Date.parse 截断",
+      "fingerprint": "sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244",
+      "disposition": "deferred",
+      "seedText": "freshness\nCR artifact freshness 顺序必须按 RFC3339 的完整小数秒精度比较，不能丢弃超过毫秒的有效精度。\nreview `generatedAt` 为 `.9001Z`，evaluation 为更早的 `.9000Z`；`validTimestamp()` 接受任意长度小数秒，但 `Date.parse()` 将二者截为同一毫秒，`evaluationTime >= reviewTime` 错误通过；fixRecord 与 gate 顺序存在同类路径。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:650",
+      "preservedCanonicalSeed": true
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F7",
+      "title": "supersededIndex identity/continuity",
+      "fingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "disposition": "deferred",
+      "seedText": "lifecycle\n同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。\n当同一 current artifact 的合法 superseded文件出现suffix缺口、重复或重编号时，resolver只验证suffix为正整数且supersededBy指向current，不验证supersededIndex连续性或不可重编号身份；历史lineage可在仍通过结构验证时失去稳定ordinal identity。该缺口不改变current artifact唯一性，故当前为非阻塞延期项。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "preservedCanonicalSeed": true
+    }
+  ]
+}

@@ -20,6 +20,8 @@ metadata:
 - Backlog utility：按用户要求 check、resolve、list 或 extract；这些操作不得反向改变原 evaluation verdict。
 - 不用于记录 P0/P1、`VERIFY_REQUIRED`、dismissed 或 superseded finding。
 
+- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
+
 ## Core Capabilities（核心能力）
 
 - **添加条目**：从 current evaluation 提取并确认非阻塞延期项。
@@ -35,6 +37,7 @@ metadata:
 ## Inputs（输入）
 
 - `mode=closeout | add | check | resolve | list | extract`，以及该 mode 所需的 Story/TODO identity。`closeout` 为 Story 收口专用，只读 `list`/`check` 默认不写 durable result。
+- Story mode 的 runner 调用必传冻结的 `directoryContext` 与四个 verified 目录字段；manual Story mode 使用 shared resolver 单次解析；任何 Story-mode 实际写入前调用 production context validator。project utility mode 不解析 `crDir`。
 - `confirmationPolicy: explicit | preauthorized`；缺失时固定为 `explicit`。
 - `authorizationSource`、`orchestrationMode` 与 `handoffTarget`；`preauthorized` 时 authorization source 必填。
 

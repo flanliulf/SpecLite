@@ -1,0 +1,116 @@
+[
+  {
+    "findingId": "DR-R2-F1",
+    "title": "CR01 未把 validator 的 writeSubpath 逐次绑定到实际写入目标",
+    "category": "path-safety.actual-write-binding",
+    "invariant": "每次 CR directory 写入前，production validator 接收的 writeSubpath 必须精确对应本次实际写入目标。",
+    "concreteFailureScenario": "summary 路径已是指向 project root 外部文件的 symlink，而 review-input.diff 路径安全；CR01 按唯一示例只验证 review-input.diff 后执行 Step 7 summary 写入，后者未被校验并可跟随 symlink 写到项目外。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/references/reviewer-workflow.md:8",
+    "sourceLayers": [
+      "auditor"
+    ],
+    "bucket": "patch",
+    "disposition": "new",
+    "evidence": "Auditor 对照 workflow line 8/61、shared contract write-before-validate hard gate 和 validator 仅检查传入 writeSubpath 的实现；现有 test 只断言每个 leaf 存在一个 write-subpath。",
+    "impact": "CR01 summary 或其他未逐目标校验的产物可绕过已批准的物理路径安全门禁。",
+    "suggestedNextStep": "明确每个实际 write 使用其精确 writeSubpath 调用 validator，并补 summary 与各 pre-summary output 的 target-binding regression。"
+  },
+  {
+    "findingId": "DR-R2-F2",
+    "title": "非独占行的 closing delimiter 可伪造 current artifact ownership",
+    "category": "identity-provenance",
+    "invariant": "只有具备完整、合法 frontmatter 边界的 current-family artifact 才能成为 CR directory ownership evidence。",
+    "concreteFailureScenario": "legacy 目录中精确 current summary 以合法 identity 开头、以 ---not-a-delimiter 结尾；readLeadingIdentity() 把该前缀当 closing delimiter，resolver 实际返回 ok=true / legacy-resume。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:426",
+    "sourceLayers": [
+      "blind"
+    ],
+    "bucket": "patch",
+    "disposition": "new",
+    "evidence": "Blind source analysis；Reviewer 在受控 OS temp fixture 中实际得到 ok=true、compatibilityMode=legacy-resume。",
+    "impact": "没有合法 v2 frontmatter 的伪 artifact 可以建立 current directory authority。",
+    "suggestedNextStep": "要求 closing delimiter 独占一行并补 malformed delimiter 回归，保持 bounded identity parser。"
+  },
+  {
+    "findingId": "DR-R2-F3",
+    "title": "固定 ownership marker 永久阻断同 Story 的合法新 reviewSeries",
+    "category": "lifecycle",
+    "invariant": "同 Story 的固定 ownership marker 不得把已结束或另一个 series 的身份误判为当前新 series 的 identity conflict。",
+    "concreteFailureScenario": "canonical 目录只含合法 evidence-v2 ownership marker；显式启动 directory-routing 新 series 时，inspectOwnershipMarker() 因 reviewSeries 不等直接返回 identity conflict，resolver 实际 ok=false，且契约没有 marker 替换、supersession 或清理 owner。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:487",
+    "sourceLayers": [
+      "reviewer"
+    ],
+    "bucket": "patch",
+    "disposition": "new",
+    "evidence": "Reviewer 受控 OS temp fixture 实际得到 cr-directory.ambiguous-resume-root/current-directory-identity-conflict；全仓 marker 引用没有 series transition lifecycle。",
+    "impact": "首次使用 marker 后，同一 Story 无法按 shared reviewSeries contract 开启后续 Correct Course 或 replacement series。",
+    "suggestedNextStep": "定义固定 marker 的跨 series 读取/替换生命周期，使其他合法 series 不被当作 malformed identity，同时保留同 series dual-marker ambiguity。"
+  },
+  {
+    "findingId": "DR-R2-F4",
+    "title": "现存 hard-link 写入目标可绕过 project-root 路径安全",
+    "category": "path-safety",
+    "invariant": "通过 validator 的现存写入目标不得与 project root 外部文件共享 inode。",
+    "concreteFailureScenario": "project 内 writePath 是指向同文件系统 project 外文件的 regular hard link；lstat 视为普通文件、realpath 仍为项目内别名，validator 实际返回 ok=true，后续原位写可修改外部 inode。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:661",
+    "sourceLayers": [
+      "edge"
+    ],
+    "bucket": "patch",
+    "disposition": "new",
+    "evidence": "Edge path analysis；Reviewer 受控 OS temp fixture 创建外部文件 hard link 后，validateCrDirectoryContext 实际返回 ok=true。",
+    "impact": "物理写路径安全可被 regular hard link 绕过，影响项目外文件。",
+    "suggestedNextStep": "对现存最终 file 的 link count/写入策略做 fail-close，并补 external hard-link 回归；不得扩为新 approval engine。"
+  },
+  {
+    "findingId": "DR-R2-F5",
+    "title": "CRLF current artifact 被误判为 legacy identity conflict",
+    "category": "compatibility.legacy-resume-identity",
+    "invariant": "唯一 legacy-only current run 的合法 v2 identity 必须在 CRLF/LF 规范化等价下得到相同 ownership 结论。",
+    "concreteFailureScenario": "唯一 title-bearing legacy directory 的合法 current v2 summary 使用 CRLF frontmatter；readLeadingIdentity() 要求 ---\\n 开头并返回 null，resolver 实际返回 identity conflict 而非 legacy-resume。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:426",
+    "sourceLayers": [
+      "edge",
+      "auditor"
+    ],
+    "bucket": "patch",
+    "disposition": "new",
+    "evidence": "Edge 与 Auditor 独立命中；Reviewer 受控 OS temp fixture 实际得到 ok=false/current-directory-identity-conflict；shared hash canonicalization 明确 CRLF→LF。",
+    "impact": "Windows 或 CRLF checkout 中的合法 current legacy run 无法恢复。",
+    "suggestedNextStep": "在 bounded frontmatter identity parsing 前规范化 CRLF/CR 为 LF，并补等价回归。"
+  },
+  {
+    "findingId": "DR-R2-D1",
+    "title": "要求 validator 独立证明 frozen context 的 resolver 签发来源",
+    "category": "authority-provenance",
+    "invariant": "validator 应重新认证 frozen context 确实来自唯一 resolver 调用。",
+    "concreteFailureScenario": "调用者跳过 resolver并同时传入两份相同伪 canonical context，validator 会在安全路径下返回 ok=true。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:194",
+    "sourceLayers": [
+      "blind",
+      "edge"
+    ],
+    "bucket": "dismiss",
+    "disposition": "dismissed",
+    "evidence": "机械行为可复现，但 approved replacement boundary 明确单次 resolve/freeze 是 orchestrator hard gate，validator 只比较 frozen/consumer 六字段且不得重新发现或选择目录。",
+    "impact": "若把该候选采纳，会把 resolver authority/provenance 重放职责错误搬入 validator，违反本轮批准的职责解耦。",
+    "suggestedNextStep": "维持现有职责边界；由 orchestrator/runner 执行单次 resolve 与冻结，不为 validator 增加签发或重选引擎。"
+  },
+  {
+    "findingId": "DR-R2-D2",
+    "title": "要求 validator 与所有 consumer 写入绑定为原子 no-follow writer",
+    "category": "path-safety",
+    "invariant": "validator 返回后到 consumer 写入前不得存在任何文件系统替换窗口。",
+    "concreteFailureScenario": "validator 成功后，恶意并发进程在 consumer 写入前把父目录替换为外部 symlink，普通后续写入可能跟随替换路径。",
+    "primaryLocation": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:213",
+    "sourceLayers": [
+      "edge"
+    ],
+    "bucket": "dismiss",
+    "disposition": "dismissed",
+    "evidence": "存在一般 TOCTOU 理论窗口，但本 Story 批准的是 resolver+validator directory ownership replacement，明确不新增 package/framework/dependency，也未授权把六个 consumer 重构为原子 writer。",
+    "impact": "机械采纳会扩大到新的跨 consumer 写入架构和威胁模型，超出原 12 AC 与 evaluator 授权边界。",
+    "suggestedNextStep": "本轮不扩写；若需对抗恶意并发文件系统替换，由安全/写入 lifecycle owner 另行定义 threat model 与统一 writer contract。"
+  }
+]

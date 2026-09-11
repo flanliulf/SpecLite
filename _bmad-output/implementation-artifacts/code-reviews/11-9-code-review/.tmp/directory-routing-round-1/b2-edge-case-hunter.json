@@ -1,0 +1,42 @@
+[
+  {
+    "category": "cli-argument-validation",
+    "invariant": "CLI 必须拒绝所有 unknown、duplicate、empty 或 partial 参数。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:657",
+    "trigger_condition": "合法 resolve 参数后追加 --__proto__ ignored",
+    "actual_result": "普通对象的 __proto__ 赋值不形成 own key，unknown-key 检查漏过该参数并返回 ok=true。",
+    "expected_result": "将 --__proto__ 识别为 unknown 参数，返回 invalid-arguments 并以 exit 2 结束。",
+    "guard_snippet": "const values = Object.create(null);",
+    "potential_consequence": "非法调用被当成权威 directoryContext"
+  },
+  {
+    "category": "round-overflow",
+    "invariant": "无法表示为 safe integer 的 current-family round evidence 必须 fail-close。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:367",
+    "trigger_condition": "current artifact 文件名使用超大 round",
+    "actual_result": "exact 分支发现 round 非 safe integer 后继续下落，completeOtherSeries 将同 series 文件归为 unrelated。",
+    "expected_result": "把该文件归为 identity-conflict，并在选择 canonical 或 legacy 目录前阻断。",
+    "guard_snippet": "if (exact && !Number.isSafeInteger(Number(exact[1]))) return { kind: \"identity-conflict\" };",
+    "potential_consequence": "legacy run 被忽略并启动 split root"
+  },
+  {
+    "category": "identity-provenance",
+    "invariant": "current artifact 的 Story、series 和 round identity 必须唯一且无语义冲突。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:389",
+    "trigger_condition": "frontmatter 同时含 canonical 与 quoted 冲突 storyId",
+    "actual_result": "readLeadingIdentity 忽略 quoted semantic key，仅返回 canonical storyId，候选目录仍被标记为 CURRENT。",
+    "expected_result": "检测同一 semantic identity key 的冲突表达并返回 identity-conflict。",
+    "guard_snippet": "if (hasNonCanonicalIdentityKey(block)) return null;",
+    "potential_consequence": "伪造 artifact 将错误 legacy 根绑定当前 Story"
+  },
+  {
+    "category": "legacy-resume-contract",
+    "invariant": "所有 CR consumers 必须原样消费 resolver 冻结的 legacy-resume 结论。",
+    "location": "assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/references/finalizer-workflow.md:16",
+    "trigger_condition": "唯一 legacy current 目录包含 DONE claim",
+    "actual_result": "resolver 契约明确返回 legacy-resume，但 CR06 指令只允许 unfinished legacy directory 作为 current。",
+    "expected_result": "CR06 接受冻结的 legacy-resume 目录，并由正常 completion 与 approval gates 判断 DONE claim。",
+    "guard_snippet": "if (directoryContext.compatibilityMode === \"legacy-resume\") consumeFrozenCrDir();",
+    "potential_consequence": "合法 legacy closeout 被 HALT 或重解释"
+  }
+]

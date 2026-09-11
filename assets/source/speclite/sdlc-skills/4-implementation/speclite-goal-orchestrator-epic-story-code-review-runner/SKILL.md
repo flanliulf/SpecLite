@@ -28,6 +28,8 @@ metadata:
 - 用户明确要求并行推进多个 Story；
 - 任务属于 Story Review，应使用对应 SR runner。
 
+- Hard gate：只解析一次并冻结 `directoryContext`（Story/series/四目录字段）；CR01–06 任何实际写入前调用 production validator，禁止依据 title、slug、filename 或 tracker 重推导目录。
+
 ## Core Capabilities（核心能力）
 
 - **严格串行编排**：每次只推进一个 Story 和一个外层状态迁移。
@@ -59,7 +61,8 @@ metadata:
 2. 读取 merged `planning_artifacts`、`implementation_artifacts` 和 workflow tracker 配置。
 3. 将当前 Skill 目录父目录解析为 `{skills-root}`。
 4. 读取 `{skills-root}/speclite-code-review-contract/references/cr-contract.md`。
-5. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
+5. 对每个 Story 仅调用一次 shared `scripts/resolve-cr-directory.mjs`，冻结 verified `crDir` 并显式传给 CR01–06；任何 ambiguity 必须在 goal/artifact/progress write 前 HALT。
+6. 解析失败、关键路径为空或 Story identity 冲突时 HALT；`config.toml.example` 和历史默认目录不能作为 fallback。
 
 ## Workflow（工作流）
 

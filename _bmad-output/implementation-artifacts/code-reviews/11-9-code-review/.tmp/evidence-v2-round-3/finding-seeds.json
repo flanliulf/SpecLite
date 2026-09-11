@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "speclite.cr-finding-seeds.v1",
+  "storyId": "11-9",
+  "reviewSeries": "evidence-v2",
+  "round": 3,
+  "generatedAt": "2026-09-07T13:33:54.000Z",
+  "seedOrder": [
+    "category",
+    "invariant",
+    "concreteFailureScenario",
+    "primaryLocation"
+  ],
+  "items": [
+    {
+      "findingId": "EVIDENCE-V2-R3-F1",
+      "title": "selected-series @round malformed intent 被静默归为 unrelated",
+      "fingerprint": "sha256:246de7037cff9f0b2f51929313785794e67b5066e9c99ba1cd27de5c559efdfd",
+      "disposition": "new",
+      "seedText": "artifact-classification\n当前 Story、artifact family、reviewSeries 与日期均可识别且出现 round delimiter 的近似 current basename，若不符合 canonical basename 必须归为 malformed-current-intent 并 fail-close。\ncanonical 11-9-code-review/ 中存在 11-9-code-review-summary-20260907-evidence-v2@round-3.md，同时没有合法 current artifact；classifier 的 current-series malformed patterns 不识别 @round，将该文件归为 unrelated，resolver 因而返回 ok=true 并允许从 canonical root 继续，静默绕过近似 current evidence。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:447",
+      "preservedCanonicalSeed": false,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R3-F2",
+      "title": "inline YAML list 的非法 double-quoted escape 可通过 predecessor schema",
+      "fingerprint": "sha256:c51fd1f311e9dbfd75b522ce77000dbbd2731670a1160c0634c492ccd7f3051e",
+      "disposition": "new",
+      "seedText": "artifact-authentication\n用于认证 CR predecessor 的 leading YAML frontmatter inline list 必须是可解析的合法 YAML；非法 quoted scalar 不能成为 completion evidence。\ncurrent review frontmatter 使用 declaredFiles: [double-quoted backslash-q]，并让其余 identity、hash、counts 与 downstream bindings 全部合法；parseBoundedInlineList 对 double-quoted scalar 中反斜杠后的任意字符直接复制，接受 YAML 非法 escape，validPredecessorSchema 因而可把语法无效的 review 当成有效 predecessor 并参与 DONE 认证。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:790",
+      "preservedCanonicalSeed": false,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R3-F3",
+      "title": "pathname 分离检查与读取存在 symlink-swap race",
+      "fingerprint": "sha256:77f61c0dc1d3276934ada7df887fdce4035781a8b855921b038bedb5e248b6b4",
+      "disposition": "new",
+      "seedText": "filesystem-containment\nresolver 用于认证的 artifact、gate 与 tracker 内容必须来自同一已验证的 non-symlink file identity，且物理位于冻结 root 内。\n攻击者在 readBoundRegularFile 完成 lstat 与 realpath containment 检查后、readFile(absolute) 前，把原 regular file 替换为指向 root 外攻击者控制文件的 symlink；最后一次 pathname-based readFile 会跟随新 symlink，resolver 可读取并认证 root 外内容。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:664",
+      "preservedCanonicalSeed": false,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F5",
+      "title": "RFC3339 小数秒精度被 Date.parse 截断",
+      "fingerprint": "sha256:a71d3d571a9ff71b09d6f36a00e65148d2ceb2e57c1b1603ecd4cd93ecd31244",
+      "disposition": "deferred",
+      "seedText": "freshness\nCR artifact freshness 顺序必须按 RFC3339 的完整小数秒精度比较，不能丢弃超过毫秒的有效精度。\nreview `generatedAt` 为 `.9001Z`，evaluation 为更早的 `.9000Z`；`validTimestamp()` 接受任意长度小数秒，但 `Date.parse()` 将二者截为同一毫秒，`evaluationTime >= reviewTime` 错误通过；fixRecord 与 gate 顺序存在同类路径。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:650",
+      "preservedCanonicalSeed": true,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R2-F7",
+      "title": "supersededIndex identity/continuity",
+      "fingerprint": "sha256:cc04b874c8df8002fee766dfe795e7b68aed5e67658359dffd159c66831b6483",
+      "disposition": "deferred",
+      "seedText": "lifecycle\n同一 artifact family/round 的 supersededIndex identity 与 continuity 必须由稳定且可验证的 ordinal mapping 约束。\n当同一 current artifact 的合法 superseded文件出现suffix缺口、重复或重编号时，resolver只验证suffix为正整数且supersededBy指向current，不验证supersededIndex连续性或不可重编号身份；历史lineage可在仍通过结构验证时失去稳定ordinal identity。该缺口不改变current artifact唯一性，故当前为非阻塞延期项。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:399",
+      "preservedCanonicalSeed": true,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R3-D1",
+      "title": "canonical hash 与 raw-byte identity 混淆",
+      "fingerprint": "sha256:ecbd77c0f73e1c068a0ea42acaeff71648d319bad7d5143fc8371a7152911a8a",
+      "disposition": "dismissed",
+      "seedText": "integrity.tracker-after-hash-exactness\ntracker afterHash 必须按 shared CR Hash Canonicalization 绑定 whole-file 内容，不得另行发明 raw-byte hash 语义。\nBlind 候选把仅增加 trailing LF、CRLF/LF 或 NFC/NFD 变化视为必须破坏历史认证，但 shared contract 明确要求所有 Hash 先 NFC、LF、去尾空白再 SHA-256；按 contract 这些 bytes 等价，因此当前 canonicalizedHash 不是绕过。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/references/cr-contract.md:331",
+      "preservedCanonicalSeed": false,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R3-D2",
+      "title": "YAML directive 场景重复 whole-document validity owner 主张",
+      "fingerprint": "sha256:b58c751d644f38601bc76bb6b850743b0b619a6b9c8613fed78c458019f7379f",
+      "disposition": "dismissed",
+      "seedText": "authority\nRequired sprint/workflow terminal state 由 shared contract 明确冻结的 bounded YAML scalar grammar 认证；除非 owner 扩展契约，不要求 resolver 成为 whole-document YAML validator。\nBlind 候选使用缺少 document-start 的 YAML directive 后跟 implementation: done，其错误结果仍依赖把 whole-document YAML validity 提升为 resolver owner obligation；这与 Round 2 F2 已 dismissed 的非法前缀后跟 terminal scalar 属同一 owner 缺口，没有新授权或不同 authority bypass。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:1305",
+      "preservedCanonicalSeed": false,
+      "preservedHistoricalFingerprint": false
+    },
+    {
+      "findingId": "EVIDENCE-V2-R3-D3",
+      "title": "explicit mapping duplicate-key 场景已由 Round 2 Evaluator dismissed",
+      "fingerprint": "sha256:6c2824d6e2d973a0d1e630d4d84bf21b9f46b53ed0c95594f0ad4974c06bd7ca",
+      "disposition": "dismissed",
+      "seedText": "artifact-authentication\n用于恢复目录和认证 DONE 的 leading YAML frontmatter 必须拒绝任何语义重复或冲突的 authority key，包括 bounded parser 未识别的 YAML 合法等价 key 形式。\n一个 otherwise-authentic finalizer 已有 `result: DONE`，再加入 `result : HALTED`，或显式 mapping `? result` / `: HALTED`；YAML 中它们与 bare `result` 是同一 key，但 parser 静默忽略额外形式并保留 DONE，resolver 因而错误认证 completed run。\nassets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/scripts/resolve-cr-directory.mjs:440",
+      "preservedCanonicalSeed": false,
+      "preservedHistoricalFingerprint": true
+    }
+  ]
+}

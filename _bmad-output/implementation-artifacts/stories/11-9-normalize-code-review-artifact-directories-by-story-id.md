@@ -1,6 +1,6 @@
 # Story 11.9: Normalize Code Review Artifact Directories By Story ID（按 Story ID 统一 Code Review Artifact 目录）
 
-Status: ready-for-dev
+Status: review
 
 ## Story（故事）
 
@@ -25,12 +25,21 @@ Status: ready-for-dev
 
 ## Tasks / Subtasks（任务 / 子任务）
 
-- [ ] 核验 11.1–11.8 completion Gates，运行 11.9 kickoff，冻结 canonical/legacy directory contract。
-- [ ] 先建立 normalization、propagation、legacy recovery、dual-directory conflict 与 traversal failing tests。
-- [ ] 收口 shared CR contract/parser；orchestrator 一次解析 `$cr_dir` 并显式传递 CR01–06。
-- [ ] 更新 CR01–06/read-write paths、templates、goal records、help/metadata/docs，不改变 basenames/algorithm/approval。
-- [ ] 实现 legacy-only resume 与 ambiguous dual-dir stable diagnostic；保持 legacy files 原位。
-- [ ] 执行 full active-pattern scan、focused CR tests、build、diff check 与 completion Gate。
+- [x] 核验 11.1–11.8 completion Gates，运行 11.9 kickoff，冻结 canonical/legacy directory contract。
+- [x] 先建立 normalization、propagation、legacy recovery、dual-directory conflict 与 traversal failing tests。
+- [x] 收口 shared CR contract/parser；orchestrator 一次解析 `$cr_dir` 并显式传递 CR01–06。
+- [x] 更新 CR01–06/read-write paths、templates、goal records、help/metadata/docs，不改变 basenames/algorithm/approval。
+- [x] 实现 legacy-only resume 与 ambiguous dual-dir stable diagnostic；保持 legacy files 原位。
+- [x] 执行 full active-pattern scan、focused CR tests、build、diff check 与 completion Gate。
+
+### Directory Routing Replacement（目录归属重实现）
+
+- [x] 按 2026-09-09 用户批准的完整方案修订本 Story 添加的 directory-layer contract，保留原 12 条 AC 与原 CR 审批职责。
+- [x] 先建立 directory-only 与生产 context validator 的 failing tests，拆分目录测试并记录旧审批重放断言的职责映射。
+- [x] 精简既有 resolver，只做 numeric identity、候选归属和物理路径安全；不做审批、gate 或 tracker 认证，不新增依赖。
+- [x] 在既有脚本内接入生产 context validation，并同步 runner 与 CR01–06 中英文消费者及相关 docs/help。
+- [x] 验证 numeric/title、legacy/ambiguity、safe paths、single propagation、全产物路径、zero-write、installed 双 IDE 和原审批不变；执行受控真实 Skill 路径消费验证。
+- [x] 完成 build、focused/full tests、docs、canonical strict、scoped lint、diff audit 和隔离 fixed-input packaging，记录真实失败与基线对照后交接 fresh CR。
 
 ## Dev Notes（开发备注）
 
@@ -91,24 +100,75 @@ Status: ready-for-dev
 
 ## Dev Agent Record（开发代理记录）
 
+### Implementation Plan（实施计划）
+
+- Directory resolver 仅拥有 numeric Story identity、current candidate ownership、显式 `directoryChoice` 与物理路径安全；`DONE`、approval、tracker、gate、scope/hash、freshness、round completeness 和 coordinated write 继续由原 CR owner 验证。
+- Resolver 返回并冻结 `crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyArtifactPaths`；唯一 current legacy 即使含 `DONE` claim 也原位绑定，不隐式换目录或重启 series。
+- 同一 production script 导出并提供 CLI `validate-context`，只验证 runner 已冻结的 Story/series/四字段与单个 `writeSubpath`，不重新发现或选择目录。
+- runner 单次 resolve；CR01–06 每次写入前调用 production validator。显式 `directoryChoice` 只消除多个安全 current candidates 的归属歧义，不能绕过 unsafe path、迁移历史或合并/拆分轮次。
+- 原 `test/code-review-contract.test.ts` 的 15 个审批 contract tests 与 4 个 `it.todo` 保留；目录、安全、scan、install 和 production validator coverage 拆到 `test/cr-directory-resolution.test.ts`。旧 resolver 审批重放测试退出的职责映射记录在本轮 goal records，不能视为审批规则删除。
+
+### Directory Routing Authorization（目录归属重实现授权）
+
+- 2026-09-09 用户批准「按上一条完整方案实施」。当前执行方案及精确范围见 `../code-reviews/11-9-code-review/goal-execute-records/PLAN.md` 和 `directory-routing-baseline.json`。
+- 原任务完成说明及下方旧 PASS_EQUIVALENT 记录保留为历史；当前旧 completion gate 实际为 FAIL_FUNCTION，新实现与 fresh CR 尚未完成。
+- 新 series=`directory-routing`，目录归属与审批解耦；旧 evidence-v2 及 TODO018–022 保留，不靠重标证据或风险豁免完成。
+
 ### Agent Model Used（使用模型）
-待实现 Agent 填写。
+OpenAI GPT-5.6 Sol (medium)
 
 ### Completion Notes List（完成说明）
+- 2026-09-09 流程顺序纠正：开发完成后曾在 fresh development completion gate 之前提前切换为 `review`；已先恢复 Story/sprint 为 `in-progress`。仅在保存旧 `FAIL_FUNCTION` gate 并由真实 Flow Gate 生成允许结论后，才可重新进入 `review`。
+- 2026-09-09 fresh development completion gate 已按 canonical `speclite-flow-gate` 生成 `PASS`，raw SHA-256=`e7f93a5531ebfaffe7e483361eca67dd45a4b7e56a8b645d8532dded6935cd1f`；旧 `FAIL_FUNCTION` gate 以原始 hash `b013691d…` 逐字节保存后，Story/sprint 才重新进入 `review`。后续顺序为 CR01/02 → 必要 CR03 与复审复评 → CR04/05 → fresh closeout gate → CR06。
+- 2026-09-09 directory-routing 开发完成：resolver 从 1791 行收敛为 757 行，只处理 numeric identity、current candidate 归属、显式 `directoryChoice` 和物理安全；移除 trackerBindings、审批历史重放与 Markdown/HTML/YAML 审批扫描。
+- 同一 production script 新增 export/CLI `validate-context`：比较 orchestrator frozen context 与 consumer context 的 Story/series/四目录字段，并在写前校验 write path；runner 只 resolve 一次，CR01–06 均真实调用该入口且不重选目录。
+- RED→GREEN：新增 directory test 初始 `1 passed / 9 failed`，实现后 focused 最终 `25 passed / 4 todo`；原 `test/code-review-contract.test.ts` 精确保留 15 个审批 tests 与 4 个 `it.todo`。主代理只读核对确认 shared contract 从 Review Scope Manifest 到 EOF 与 HEAD 逐字节一致。
+- installed 双 IDE 验证使用真实 `runInstallCommand`，确认 `.agents/.claude` resolver bytes、mode、resolve 与 validate CLI；这是 production 路径消费证据，不冒充正式审批 E2E。链路按 CR01/02、必要 CR03 与复审复评、CR04/05、fresh closeout gate、CR06 顺序记录，完整证据在 CR06 后齐备。
+- 验证：build、focused、docs、canonical strict、八个 scoped density lint、diff check 与隔离 packaging PASS；affected `37 passed / 4 failed`，失败均为范围外 core `18→19` / total `68→69` 固定计数。
+- 隔离 full 关闭 file parallelism 后为 `695 passed / 13 failed / 4 todo`；其中 12 项均为同一外部固定计数，1 项仅因 `/private/tmp` copy 被 local-source 自引用保护拒绝，迁到允许的系统 TMPDIR 单测为 `14 passed`。不声称 full PASS，也不扩大范围修复。
+- 主目录旧 manifest `82bf17e8…` 在开发 baseline full 的既有 writer/cache 失败中丢失且无法原字节恢复；最终同步的是隔离工具真实新派生版 rawHash `029b8110…`（packageHash `sha256:143d04dc…`），与隔离输出逐字节一致，不冒充旧版恢复。
 - 终极上下文引擎分析已完成 —— 已创建完整开发者指南。
-- Story 尚未实现；current prose 不等于 full-chain executable evidence。
+- Kickoff `PASS`：legacy-only 唯一 unfinished run 原位 resume；dual/multi ambiguity 由 shared CR-local contract 以 `cr-directory.ambiguous-resume-root` fail-close，并在任何写入前停止。
+- 新增 executable shared resolver，仅接受 numeric Story ID；runner 单次解析并向 CR01–06、全部 CR artifacts、`.tmp/` 与 goal records 传播同一 `crDir`。
+- 完成 legacy recovery、latest-round、ambiguity redaction/zero-write、title/traversal isolation、active-pattern scan 与 fresh-install resolver parity 回归。
+- Focused final `24 passed / 4 todo`；affected matrix `74 passed / 4 external fixed-count failures / 4 todo`；full suite `695 passed / 12 external fixed-count failures / 4 todo`。
+- `docs:check`、ESM/DTS build、packaging、canonical strict、skill density 与 `git diff --check` 均通过；completion gate 为 `PASS_EQUIVALENT`。
 
 ### File List（文件清单）
 - `_bmad-output/implementation-artifacts/stories/11-9-normalize-code-review-artifact-directories-by-story-id.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/flow-gates/11-9-normalize-code-review-artifact-directories-by-story-id-story-kickoff-gate.md`
+- `_bmad-output/implementation-artifacts/flow-gates/11-9-normalize-code-review-artifact-directories-by-story-id-story-completion-gate.md`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-contract/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/cr-contract.md,scripts/resolve-cr-directory.mjs}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-goal-orchestrator-epic-story-code-review-runner/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/runner-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-01-reviewer/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/reviewer-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-02-evaluator/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/evaluator-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-03-fixer/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/fixer-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-04-rules-extractor/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/rules-extractor-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-05-todo-tracker/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/todo-tracker-workflow.md}`
+- `assets/source/speclite/sdlc-skills/4-implementation/speclite-code-review-06-finalizer/{SKILL.md,SKILL.en.md,CHANGELOG.md,references/finalizer-workflow.md}`
+- `assets/source/speclite/sdlc-skills/module-help.csv`
+- `assets/source/speclite/{README.md,README.en.md}`
+- `docs/reference/skills/sdlc-workflows.md`
+- `docs/reference/workflow-artifact-layout.md`
+- `test/code-review-contract.test.ts`
+- `test/cr-directory-resolution.test.ts`
+- `test/fixtures/code-review-contract/title-bearing-path-ledger.json`
+- `release/packaging-manifest.json`
 
 ## Anchor Evidence Summary（锚点证据摘要）
-- Normalization / propagation / legacy / scan / gates：待实际执行填写。
+- Normalization：`11.9` 与 `11-9` 唯一归一为 `11-9-code-review`；非数字、零前缀、title 与 traversal inputs fail-close。
+- Propagation：runner resolver invocation count 为 1，CR01–06、all artifacts、`.tmp/`、`goal-execute-records/` 消费同一 `crDir`。
+- Legacy / ambiguity：唯一 unfinished legacy 原位 resume；completed legacy 使用 canonical；dual/multi 或 unsafe evidence 产生 stable、redacted、zero-write diagnostic。
+- Scan / install：active title-bearing expression 为零；fresh `.agents` / `.claude` resolver bytes、mode 与 CLI probe 通过。
+- Gates：kickoff `PASS`；completion `PASS_EQUIVALENT`；Story status target=`review`。
 
 ## Change Log（变更记录）
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 CR Story-ID-only root、single propagation、legacy/ambiguity 与 evidence 上下文。 | Fancyliu / Codex |
+| 2026-09-05 | 1.0 | 实现 numeric-only resolver、single `crDir` propagation、legacy resume、ambiguity pre-write stop，并完成回归与 Completion Gate。 | Codex |
+| 2026-09-09 | 1.1 | 以 directory-only resolver + production frozen-context validator 替换审批重放实现，保留原 CR owner，完成隔离验证并交接 fresh CR。 | Codex |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*

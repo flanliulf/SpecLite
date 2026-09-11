@@ -19,6 +19,8 @@ metadata:
 - 用于验证最终 CR/gate/tracker eligibility 并执行最小 Story 状态同步。
 - 不用于执行修复、补测试、登记 TODO、推断 prose approval、提交 Git 或自动关闭 Epic。
 
+- Hard gate：只消费一次解析并冻结的 numeric Story identity、`reviewSeries` 与 `crDir`；禁止依据 Story title、name、slug、filename 或本地 candidate 重新推导目录。
+
 ## Core Capabilities（核心能力）
 
 - **精确资格判断**：只接受 current、精确绑定且可收口的 v2 verdict。
@@ -33,6 +35,7 @@ metadata:
 ## Inputs（输入）
 
 - Story identity、`reviewSeries` 和 current evaluation，或足够独立定位它的信息。
+- runner mode 必传冻结的 `directoryContext` 与四个 verified 目录字段；manual mode 使用 shared resolver 单次解析。任何实际写入前调用 production context validator。
 - `confirmationPolicy`、`authorizationSource`、`orchestrationMode` 与 `handoffTarget`；缺失 confirmation policy 时固定为 `explicit`，`preauthorized` 缺 `authorizationSource` 时 HALT。
 
 ## Workflow（工作流）
