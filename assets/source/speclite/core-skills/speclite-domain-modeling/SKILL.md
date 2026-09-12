@@ -10,7 +10,7 @@ metadata:
 
 # Domain Modeling（领域建模）
 
-在设计过程中主动构建并打磨项目的 domain model。这是一项*主动*的实践——质疑术语、构造 edge-case scenarios，并在 glossary 和 decisions 一旦明确时立即将其写下。（仅仅为了词汇而*读取* `CONTEXT.md` 并不属于本 Skill——那只是任何 Skill 都能做到的一行习惯。本 Skill 用于改变 model，而不只是使用它。）
+在设计过程中主动构建并打磨项目的 domain model。这是一项 *主动* 的实践——质疑术语、构造 edge-case scenarios，并在 glossary 和 decisions 一旦明确时立即将其写下。（仅仅为了词汇而 *读取* `CONTEXT.md` 并不属于本 Skill——那只是任何 Skill 都能做到的一行习惯。本 Skill 用于改变 model，而不只是使用它。）
 
 ## File structure（文件结构）
 
