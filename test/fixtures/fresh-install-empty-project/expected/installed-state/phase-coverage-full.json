@@ -1265,7 +1265,7 @@
       ],
       "artifactContract": {
         "artifactType": "brainstorming-session",
-        "defaultOutputPath": "_speclite-output/brainstorming",
+        "defaultOutputPath": "_speclite-output/0-brainstorming-artifacts",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",

@@ -155,7 +155,7 @@ _speclite-output/
 
 | Path or Pattern | Producer Skill | Creation and Maintenance |
 |---|---|---|
-| `brainstorming/brainstorming-session-{date}-{time}.md` | `speclite-brainstorming` | 每次 session 按时间创建或续写，不属于 `planning-artifacts/`。 |
+| `{brainstorming_artifacts}/brainstorming-session-{date}-{time}.md` | `speclite-brainstorming` | 每次 session 按时间创建或续写；输出根来自 `speclite resolve artifact-roots` 的 `brainstorming_artifacts`，不属于 `planning-artifacts/`。 |
 | `project-context.md` | `speclite-generate-project-context` | 在输出根目录创建，跨迭代持续维护 AI agent 需要的项目规则。 |
 | `1-analysis-artifacts/research/*.md` | `speclite-domain-research`、`speclite-market-research`、`speclite-technical-research` | 按研究类型、主题和日期新增；可读取 `{project_knowledge}`，但不把 research 输出写入 Project Knowledge 或 Public Documentation。 |
 | `1-analysis-artifacts/product-brief/product-brief-*.md` | `speclite-product-brief` | 主 brief 分阶段增量维护；distillate 按用户选择创建在同一 subject directory。 |

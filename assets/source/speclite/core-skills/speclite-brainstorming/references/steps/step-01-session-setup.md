@@ -33,7 +33,7 @@ Initialize the brainstorming workflow by detecting continuation state and settin
 
 First, check the brainstorming sessions folder for existing sessions:
 
-- List all files in `{output_folder}/brainstorming/`
+- List all files in `{brainstorming_artifacts}/`
 - **DO NOT read any file contents** - only list filenames
 - If files exist, identify the most recent by date/time in the filename
 - If no files exist, this is a fresh workflow

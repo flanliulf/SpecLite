@@ -38,9 +38,16 @@ Run `speclite resolve config --project-root {project-root}` and resolve merged r
 - `communication_language`, `document_output_language`, `user_skill_level`
 - `date` as system-generated current datetime
 
+Run `speclite resolve artifact-roots --project-root {project-root}` and resolve artifact root fields from the returned `roots[]` entries:
+
+- Use `brainstorming_artifacts.resolvedRoot` as `{brainstorming_artifacts}` for output location
+- Preserve its `resolutionMode` and provenance for audit notes
+
+If the artifact-root command exits non-zero, or `brainstorming_artifacts` is missing, HALT. Do not hand-write fallback logic in this workflow.
+
 ### Paths
 
-- `brainstorming_session_output_file` = `{output_folder}/brainstorming/brainstorming-session-{{date}}-{{time}}.md` (evaluated once at workflow start)
+- `brainstorming_session_output_file` = `{brainstorming_artifacts}/brainstorming-session-{{date}}-{{time}}.md` (evaluated once at workflow start)
 
 All steps MUST reference `{brainstorming_session_output_file}` instead of the full path pattern.
 - `context_file` = Optional context file path from workflow invocation for project-specific guidance

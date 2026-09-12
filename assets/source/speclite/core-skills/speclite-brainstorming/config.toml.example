@@ -8,6 +8,7 @@ communication_language = "Chinese"
 document_output_language = "Chinese"
 user_skill_level = "intermediate"
 output_folder = "{project-root}/_speclite-output"
+brainstorming_artifacts = "{project-root}/_speclite-output/0-brainstorming-artifacts"
 
 [modules.sdlc]
 planning_artifacts = "{project-root}/_speclite-output/planning-artifacts"

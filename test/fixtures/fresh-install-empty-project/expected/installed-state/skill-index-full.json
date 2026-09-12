@@ -118,7 +118,7 @@
       "canonicalSkillId": "speclite-brainstorming",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-brainstorming",
-      "canonicalPackageHash": "sha256:2bb5302623bff2baeab0604647a4af5b81457327ad2aec83b20ecfe8d69803fa",
+      "canonicalPackageHash": "sha256:43ae59798d3c7d3bd0dc1f9c99ef6d1ddc0e0f454a9ffb9b20fbf41ba3183be7",
       "installedTargets": [
         "claude",
         "agents"

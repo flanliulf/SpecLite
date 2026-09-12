@@ -1,7 +1,7 @@
 module,skill,display-name,menu-code,description,action,args,phase,preceded-by,followed-by,required,output-location,outputs
 SpecLite Core,_meta,,,,,,,,,false,,
 SpecLite Core,speclite-advanced-elicitation,Advanced Elicitation,AE,Use structured elicitation methods to challenge refine and improve recent LLM output.,,,anytime,,,false,,
-SpecLite Core,speclite-brainstorming,Brainstorming,BSP,Use early in ideation or when stuck generating ideas.,,,anytime,,,false,{output_folder}/brainstorming,brainstorming session
+SpecLite Core,speclite-brainstorming,Brainstorming,BSP,Use early in ideation or when stuck generating ideas.,,,anytime,,,false,{brainstorming_artifacts},brainstorming session
 SpecLite Core,speclite-party-mode,Party Mode,PM,Orchestrate multi-agent discussions when you need multiple perspectives or want agents to collaborate.,,,anytime,,,false,,
 SpecLite Core,speclite-help,SpecLite Help,SH,,,,anytime,,,false,,
 SpecLite Core,speclite-index-docs,Index Docs,ID,Use when LLM needs to understand available docs without loading everything.,,,anytime,,,false,,
