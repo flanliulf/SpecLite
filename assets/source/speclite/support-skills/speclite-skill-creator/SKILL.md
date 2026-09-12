@@ -1,63 +1,42 @@
 ---
 name: speclite-skill-creator
-description: "通过结构化对话创建完整 Agent Skill 包与 `SKILL.md`。用于用户要求 speclite-skill-creator、create skill、新建技能、生成技能包或封装 workflow。核心能力：设计 progressive disclosure、生成 YAML frontmatter、组织 references、脚手架脚本并指导触发测试。"
+description: "创建或迭代 SpecLite workflow Skill；用于 create skill、新建技能、生成技能包或封装工作流。设计入口、辅助资源和验证用例；Agent 定义包转交 speclite-agent-creator。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.9.0"
+  version: "2.0.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[Overview（技能说明）]
-    通过结构化交互对话创建符合 Anthropic Skills 开放标准的完整 Agent Skills 包。它把用户需求转化为标准化的 SKILL.md、SKILL.en.md、CHANGELOG.md、references/、scripts/ 和 assets/，并用脚本化 Workflow density gate 保证入口文件符合渐进式披露思想。
+## Overview（技能说明）
 
-[Core Capabilities（核心能力）]
-    - **需求挖掘**：一次最多提问 3 个，收集名称、目标、触发词、输入输出、catalog 和执行步骤。
-    - **工作流匹配**：根据业务特征推荐顺序、多 MCP、迭代、上下文感知或领域专有模式，详见 `references/workflow-patterns.md`。
-    - **Agent 路由识别**：遇到 `speclite-agent-*`、`bmad-agent-*` 或包含 `[agent]` 的 role activation skill 时，转交 `speclite-agent-creator`，不套用普通 workflow 生成规则。
-    - **Ecosystem target routing**：支持 `ecosystems/<category>/<id>` 目标组，生成到 `assets/source/speclite/ecosystems/<category>/<id>/<skill-name>/` 并提示 module metadata、help row、version 和 changelog 同步。
-    - **规范转译**：生成三段式 description、以 `speclite-` 开头的 kebab-case name、allowed-tools，并按 metadata 字段契约写入 `metadata.version`、`metadata.author` 和可选 `metadata.catalog`。
-    - **双语入口生成**：生成中文 canonical `SKILL.md` 与英文 mirror `SKILL.en.md`，保持 YAML、版本、目录和执行语义一致。
-    - **Workflow density gate**：使用 deterministic 脚本统计正文长度、Workflow 长度和占比，命中阈值时抽取 workflow reference。
-    - **Flow Gate guidance**：为会推进 Story/Epic 状态或依赖实现锚点的 workflow skill 生成 Contract -> Functional -> Evidence 门控表达，避免固定路径误判。
-    - **渐进式文件组织**：按 SKILL.md、SKILL.en.md、CHANGELOG.md、references/、scripts/、assets/ 分配核心指令、详细资料、脚本和模板。
-    - **质量与测试指导**：控制正文长度、语言规则、命名规范、生成标注和触发测试建议。
+创建 SpecLite 普通 workflow Skill，输出中文 SKILL.md、英文 mirror、CHANGELOG 和按需辅助资源。按共享规则契约区分基础格式、Codex 适配与项目约定；不宣称生成结果已获官方认证。
 
-[Workflow（执行流程）]
-    本 Skill 采用需求收集→结构规划→文件生成→density gate→总结交付的顺序工作流。完整步骤见 `references/skill-creation-workflow.md`。
+## Core Capabilities（核心能力）
 
-    Step 1：收集并确认需求
-        读取 `references/skill-creation-workflow.md` 的 Requirement Collection 部分，按最多 3 个问题一组收集信息，并在生成前展示确认清单。
-        如果目标是 Agent 定义包，即名称匹配 `speclite-agent-*` / `bmad-agent-*`，或源目录包含 `customize.toml` 的 `[agent]`，停止当前 workflow 创建流程并使用 `speclite-agent-creator`。
+- 识别目标、输入输出、触发边界和缺失信息，一次最多问三个有实质影响的问题。
+- 按实际需求选取工作流模式，支持 core、sdlc、support 与 ecosystem source 分区。
+- 用共享规则表生成规范字段、语义等价的双语入口及版本记录。
+- 按需配置 Codex 调用策略、显示信息和真实 MCP 依赖。
+- 将详细规则、模板讲解、输出模板和确定性代码按用途组织，并明确加载路由。
+- 运行密度检查、静态复核并提供可执行行为用例，区分未测试与已验证。
 
-    Step 2：规划文件结构并生成入口
-        先写入 `assets/source/speclite/<group>/<skill-name>/`，其中 `<group>` 为 `core-skills`、`sdlc-skills/<phase>`、`support-skills` 或 `ecosystems/<category>/<id>`。Ecosystem target 的完整路径是 `assets/source/speclite/ecosystems/<category>/<id>/<skill-name>/`，必须确认 `category`、`ecosystem_id`、`ecosystem-<category>-<id>` module code、`module-help.csv` row、`CHANGELOG.md`、`SKILL.md` / `SKILL.en.md` 版本同步和 runtime path 表达。生成 SKILL.md、SKILL.en.md、CHANGELOG.md，并按需生成 references/、scripts/、assets/；需要外部 forge mirror 时，再同步到 `/Users/fancyliu/Repos/skills-creator/forge/speclite/` 对应分区。
+## Workflow（执行流程）
 
-    Step 3：加入 Flow Gate guidance
-        若 Skill 会推进 Story/Epic 状态、消费 Story 文件、检查实现 anchor 或写入 implementation artifacts，必须在入口或 reference 中加入 flow-gate guidance：固定路径只有 owning SPEC 明确要求时才是 hard gate，否则应描述 equivalent implementation policy。
+1. 读取 `references/skill-creation-workflow.md`，确认 SpecLite 目标、source 路径、宿主与用户已授权范围。Agent 包转交专属 creator。
+2. 规划前读取 `references/spec-guide.md`，按其中 Shared Contract 路由解析实际 `{lint-root}` 并读取共享 registry；需要选择执行模式时读取 `references/workflow-patterns.md`。
+3. 生成前读取 `references/templates.md`，按规则实例化入口与资源；Codex 配置仅在需要且字段值已核实时生成。实施流程加入 owning SPEC、等价实现证据及 Flow Gate guidance。
+4. 使用当前配套 lint 的 `scripts/check_skill_density.py` 统计两个入口；Workflow 未识别时不能判 PASS。命中项目密度阈值时抽取实际承载流程的 reference，并在入口说明何时读取。
+5. 验证前读取 `references/testing-guide.md`；按共享规则清单检查草稿，记录静态结果和真实宿主行为测试状态。已有用户授权足够时继续，不重复请求确认。
+6. 交付文件树、版本、契约版本、验证证据和未执行用例。安装、外部 mirror 同步与分发按本次授权执行。
 
-    Step 4：运行 Workflow density gate
-        生成草稿后，优先调用已安装 `speclite-skill-lint` 的 `scripts/check_skill_density.py`；在本仓库源码中使用 `python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py <skill-dir>`。脚本结果是唯一判断来源。
+## Notes（注意事项）
 
-    Step 5：按 gate 结果拆分 Workflow
-        若任一入口文件满足 `workflow_chars > 1500` 且 `workflow_ratio > 0.5`，必须创建 `references/<skill-name>-workflow.md` 或等价 workflow reference。入口 Workflow 只保留阶段摘要、何时读取 reference 和关键停止条件。
-
-    Step 6：完成总结
-        展示文件树、渐进式披露分层、触发测试建议、版本信息和后续通过 `speclite-skill-lint` 收敛的入口。
-
-[Notes（注意事项）]
-    - SKILL.md 是中文 canonical 文档，正文使用中文；章节标题使用 English（中文）形式；命令、路径、字段名、fixture 名称、schema/issue id 等技术标识使用英文。
-    - SKILL.en.md 是英文 mirror，不得新增中文入口没有的能力、步骤、限制或触发条件。
-    - 每个 Skill 必须包含 SKILL.md、SKILL.en.md 和 CHANGELOG.md，版本号保持同步。
-    - Agent 定义包例外：`speclite-agent-*` 的 `SKILL.en.md` 是可选镜像，应由 `speclite-agent-creator` 和 `speclite-agent-lint` 管理。
-    - 中文与英文入口正文分别控制在 5000 字以内；Workflow density gate 是 Warning 级质量规则，但创建时命中必须拆分。
-    - YAML frontmatter 只允许 name、description、license、allowed-tools、metadata，且不得包含 XML 尖括号或代码执行逻辑。
-    - metadata 仅支持 `version`、`author`、`catalog`：`version` 和 `author` 必填，`catalog` 在 Skill 归入 catalog 时填写并与路径及 mirror 对齐。
-    - 目录和 name 字段必须使用 kebab-case，并以 `speclite-` 开头；禁止保留前缀 claude-*、codex-*、anthropic-*。
-    - Ecosystem target 只允许 `frontend`、`backend`、`other` 三类 category；普通 workflow creator 不创建 `speclite-agent-*`、`bmad-agent-*` 或 `[agent]` package。
-    - 涉及实现阶段状态推进或 anchor 检查的 workflow skill，必须说明 owning SPEC、equivalent implementation policy 和 Flow Gate report 消费方式。
-    - 运行产物写入 `.specskills/output/`，过程分析文档写入 `.specskills/docs/analysis/`，不得散落在项目根目录。
-    - 如需安装测试，只同步到实际存在的安装根；不得凭空创建 `.codex/skills`。
-
-[Generation Metadata（生成信息）]
-    本 Skill 由 speclite-skill-creator 自动生成。如需修改，必须同步更新 SKILL.md 与 SKILL.en.md，并同步 `assets/source/speclite/support-skills/speclite-skill-creator/` 与实际安装副本。
+- 本 creator 专用于 SpecLite；中文 canonical、英文 mirror、CHANGELOG、speclite- 前缀与长度预算是项目约定。
+- metadata.version / author 必填，catalog 可选且存在时为 speclite；未知扩展字段查来源和消费方，不冒充官方禁止。
+- description 可翻译，目标、触发与排除边界等价；身份字段保持一致。英文 mirror 不是 Codex 自动读取的第二入口。
+- name 匹配 speclite-agent-* / bmad-agent-* 或 customize.toml 含 [agent] 时使用 speclite-agent-creator；缺少依赖时报告未执行。
+- ecosystem source 分区为 `ecosystems/<category>/<id>`，category 仅 frontend、backend、other；module metadata、help row、selected-only 和 other admission 按详细流程保留。
+- 脚本用于确定性需求；allowed-tools 不提供跨宿主权限隔离，也不代替 MCP 依赖声明。
+- 过程输出遵循项目 `.specskills/output/`、`.specskills/docs/analysis/` 约定；source 编辑与安装副本同步分开记录，不隐式写入外部工作区。
+- 维护时同步两个入口、相关 references/scripts 和 CHANGELOG；本次 source 修订不自动代表安装副本已更新。

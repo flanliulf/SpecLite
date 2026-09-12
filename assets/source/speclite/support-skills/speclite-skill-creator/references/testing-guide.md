@@ -1,107 +1,44 @@
-# 测试与迭代指南
+# Skill Validation Guide（技能验证指南）
 
-## 概述
-Skill 创建完成后，需要进行系统性的触发测试和迭代优化，确保 Skill 在正确的场景下被触发，且不会误触发。
+## Evidence Levels（证据层次）
 
-## 触发测试
+从 spec-guide.md 解析配套 lint 与共享 registry；记录 contract_version、registry hash 和目标包版本。list_rules.py 只生成检查计划，density 只测量入口；都不是完整静态验证或行为测试。
 
-### 测试方法
-准备三类测试输入各 3-5 个：
+静态检查按全部适用规则完成，逐条给证据。宿主无法访问、未安装、未执行或无结果时记 NOT_CHECKED。用例建议、模型对“何时使用”的解释和人工推测都不计作执行结果。
 
-| 测试类别 | 说明 | 合格标准 |
-|:--------|:-----|:---------|
-| ✅ 明确相关 | 包含触发关键词的标准输入 | 触发率 100% |
-| ✅ 同义替换 | 换种说法表达相同意图 | 触发率不低于 80% |
-| ❌ 无关查询 | 验证不会误触发 | 误触发率约 0% |
+## Static Review（静态复核）
 
-**整体合格标准**：相关查询触发率不低于 90%，无关查询误触发率约 0%
+1. 安全解析两种入口 frontmatter，检查字段、重复键、类型、版本、身份字段及 description 语义等价。
+2. 检查所有实际依赖路径、参考资料加载路由和资源用途；示例与真实依赖分开。
+3. 运行配套 `check_skill_density.py`，保存 schema_version=2 JSON。missing / ambiguous Workflow 用人工证据判 N/A 或 NOT_CHECKED；不可把 null 当作零。
+4. SpecLite 任一入口超过项目预算或命中密度阈值时，精简或拆分实际流程；两个入口同步。
+5. host=codex 时，按需要检查 agents/openai.yaml 的显示信息、真实 MCP 依赖、调用策略和发现说明。无需求时可 N/A。
+6. 按 registry 的 method 标明脚本检查、安全 parser 检查、语义复核或行为测试，不能混为全自动 lint。
 
-### 测试输出模板
-生成 Skill 后，向用户提供如下测试建议：
+## Behavior Cases（行为用例）
 
-```
-🧪 触发测试建议：
-请依次测试以下三类输入：
-1. ✅ 明确相关："<包含触发词的标准输入>"
-2. ✅ 换种说法："<同义词/口语化的输入>"
-3. ❌ 不相关："<无关问题，验证不会误触发>"
-```
+为每类准备能区分正确与错误行为的代表性请求，数量按风险选择：
 
-## 调试技巧
+| 类型 | 预期 |
+|---|---|
+| 直接请求 | 明确用户目标时选择正确 Skill 并产生符合要求的结果 |
+| 同义/口语表达 | 不依赖精确关键词也能识别相同目标 |
+| 输入缺失 | 只问影响执行的关键信息；已有授权和信息不重复询问 |
+| 相邻但不相关请求 | 不误触发；creator 与 Agent creator 等边界清楚 |
+| 边界请求 | 不虚构事实、不扩大范围、不执行未支持动作 |
+| 依赖不可用 | 清楚停止或按已定义路线降级，不伪造工具结果 |
+| 输出质量 | 文件可打开、字段完整、证据可追溯，满足用户成功标准 |
 
-如果触发不理想，让用户直接问智能体：
-> "你会在什么情况下使用 [Skill 名称] 这个技能？"
+Codex 还应区分显式调用与隐式匹配；allow_implicit_invocation=false 时隐式不触发是正确结果。存在多个同名安装包时先确认实际消费路径，不能拿另一个版本的测试证明本次 source 生效。
 
-智能体会暴露它对触发条件的理解，便于定位 description 问题。
+## Execution Record（执行记录）
 
-## 常见问题与对策
+| Case | Host / version | Skill path / version / hash | Input | Expected | Actual | Status | Evidence |
+|---|---|---|---|---|---|---|---|
+| case-id | 实际宿主与版本 | 实际消费的包身份 | 具体请求 | 可判定结果 | 实际结果或未执行原因 | PASS / FAIL / NOT_CHECKED | 日志或产物路径 |
 
-### 触发不足（该加载时没加载）
-- **诊断**：description 太笼统或缺少用户常用口语
-- **对策**：
-  - 补充领域术语
-  - 添加用户原话关键词
-  - 补充文件类型后缀
+触发率只能由明确样本数和实际结果计算；不预设 90% 或“约 0%”为官网标准。报告 activation 和 output quality 两类结论。涉及外部写操作的测试仅在当前授权范围内执行。
 
-### 过度触发（不相关时也加载）
-- **诊断**：description 适用范围界定不清
-- **对策 1**：添加负面触发词
-  - 示例：`"Do NOT use for simple data exploration"`
-- **对策 2**：提高具体化程度
-  - 改前："处理文档"
-  - 改后："处理 PDF 法律文档以进行合同审查"
-- **对策 3**：澄清适用范围
-  - 示例：`"专门用于在线支付工作流，不适用于一般财务查询"`
+## Completion（交付）
 
-## 迭代优化流程
-
-```
-1. 用户反馈触发问题
-       ↓
-2. 分析属于"触发不足"还是"过度触发"
-       ↓
-3. 针对性修改 YAML description
-       ↓
-4. 重新测试验证
-       ↓
-5. 必要时调整 SKILL.md 正文中的执行流程
-       ↓
-6. 同步更新 SKILL.en.md mirror
-       ↓
-7. 更新 CHANGELOG.md 记录变更
-```
-
-### 优化 description 的检查清单
-- [ ] 包含功能描述（What it does）
-- [ ] 包含触发条件（When to use it）+ 关键词 + 文件类型
-- [ ] 包含核心能力（Core capabilities）
-- [ ] **触发关键词覆盖中英文双语**（中文正式用语 + 口语化表达 + 英文关键词）
-- [ ] 不超过 1024 字符
-- [ ] 无 XML 尖括号
-- [ ] 关键词覆盖用户常用口语和同义词
-- [ ] 有明确的适用边界（避免过度触发）
-
-### 双语入口检查清单
-- [ ] SKILL.md 与 SKILL.en.md 同时存在
-- [ ] 两个文件的 YAML frontmatter 保持一致
-- [ ] `metadata.version` 必填且与 CHANGELOG.md 最新版本一致
-- [ ] `metadata.author` 必填且非空
-- [ ] `name` 与目录名以 `speclite-` 开头，并保持一致
-- [ ] `metadata.catalog` 固定为 `speclite`，并与路径及 mirror 一致
-- [ ] 不包含未登记的 `metadata.*` 字段
-- [ ] SKILL.md 章节标题使用 English（中文）形式，正文内容使用中文
-- [ ] SKILL.en.md 是 SKILL.md 的英文 mirror，能力、步骤、限制、引用路径未漂移
-- [ ] CHANGELOG.md 版本号与两个入口的 metadata.version 一致
-
-### Workflow density 检查清单
-- [ ] 已运行 `python3 assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py <skill-dir>`
-- [ ] 已记录 SKILL.md 与 SKILL.en.md 的 `body_chars`、`workflow_chars`、`workflow_ratio`
-- [ ] 任一入口命中 `triggered_density_warning` 时，已抽取 `references/<skill-name>-workflow.md` 或等价 workflow reference
-- [ ] 入口 Workflow 只保留阶段摘要、何时读取 reference、关键停止条件
-- [ ] 两个入口引用同一个 workflow reference 路径
-
-## 版本说明
-- v1.3 (2026-05-26): 增加 metadata 字段契约检查
-- v1.2 (2026-05-26): 增加 Workflow density gate 测试检查
-- v1.1 (2026-05-25): 增加 SKILL.en.md mirror 迭代检查
-- v1.0 (2026-03-25): 初始版本
+报告静态 PASS/FAIL/WARN/N/A/NOT_CHECKED 计数和行为测试状态；说明剩余用例、宿主或依赖限制。不能将 source 修改、静态通过、安装成功和实际消费合并为一个“完成”结论。重测时绑定新版本，不沿用旧证据。

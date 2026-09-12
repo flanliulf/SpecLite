@@ -4,6 +4,20 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [2.0.0] - 2026-09-08
+
+### Changed（修改）
+
+- 与 lint 3.x 共用 rule-registry contract 1.0.0，区分基础格式、Codex 适配与 SpecLite 项目约定，移除冒充官方规范的封闭字段白名单。
+- description 改为目标/边界驱动；英文 mirror 可语义等价翻译，身份字段一致。
+- 入口明确路由到 spec-guide、templates、testing-guide；按需生成 agents/openai.yaml，保留真实 MCP 与宿主边界。
+- 精简入口、保留 ecosystem / Flow Gate 约束，安装与 source 验证分开；测试扩展到输入缺失、依赖缺失、边界与输出质量。
+
+### Compatibility（兼容性）
+
+- 配套 lint 必须提供 contract_version=1.0.0 与 density schema_version=2；旧安装副本不能替代当前共享契约。
+- metadata 扩展不再一概判非法；mirror description 不再要求逐字相同。项目 namespace、版本与双语交付继续保留。
+
 ## [1.9.0] - 2026-07-06
 
 ### Added
