@@ -4,6 +4,26 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [3.0.0] - 2026-09-08
+
+### Added（新增）
+
+- 新增唯一 rule-registry、只读 list_rules.py 待检查清单及按 scope 计算的规则数量；保留全部旧 rule id，覆盖 ECO-07。
+- 新增 Codex 可选配置、MCP 依赖、调用/发现策略、资源路由与真实行为证据规则；source / scope / severity / method 明确可追溯。
+- 新增脚本回归覆盖：中英文标题、代码示例、frontmatter 分隔符、未识别/歧义、外部 profile 及 ecosystem 适用性。
+
+### Changed（修改）
+
+- 项目约定不再统一称为官方硬性要求；按资源用途和触发语义检查，英文 description 允许等价翻译。
+- 报告使用 PASS / FAIL / WARN / N/A / NOT_CHECKED；清单生成与静态检查不代表真实行为通过。
+- 修正历史入口/流程/清单的数量漂移；当前数量从注册表生成，不采用历史写死的分母。
+
+### Compatibility（兼容性）
+
+- density 输出 schema_version=2：Workflow missing / ambiguous 时 workflow_chars、workflow_ratio、triggered_density_warning 为 null，新增 workflow_status 与 workflow_section_count。消费者必须检查识别状态，不能把 null 当作零或 PASS。
+- 已识别 Workflow 的字段及 warning 时 exit 0 保持兼容；缺少 SKILL.md、读取失败或 frontmatter 未结束返回非零。
+- creator 2.x 与本版本共用 contract_version=1.0.0；SpecLite 项目契约要求的 mirror / changelog / version / author 缺失统一为 Error，外部 base profile 不套用这些规则。
+
 ## [2.8.1] - 2026-08-25
 
 ### Fixed（修复）

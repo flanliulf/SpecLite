@@ -1,307 +1,61 @@
-# Skill 规范检查规则清单
-
-## 概述
-
-本文档定义了普通 workflow 风格 Agent Skill 规范检查的 43 条规则，涵盖 YAML 头部、description 质量、文件结构、版本一致性、正文约束、命名规范、双语 mirror、文件分类合理性和 ecosystem source 规则九个维度。规则源自 Anthropic Skills 开放标准规范和 `speclite-skill-creator` 项目实践。
-
-`speclite-agent-*` Agent 定义包不直接套用本规则集。若目标目录名匹配 `speclite-agent-*`，或 `customize.toml` 包含 `[agent]`，应改用 `speclite-agent-lint`；其 `SKILL.en.md` 是可选镜像，存在时才检查一致性。
-
-## 1. YAML Frontmatter 检查（5 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| YML-01 | name 格式 | Error | 以 `speclite-` 开头的 kebab-case，不超过 64 字符，与目录名一致 |
-| YML-02 | description 长度 | Error | 不超过 1024 字符 |
-| YML-03 | description 三段式 | Warning | 包含功能描述 + 触发条件 + 核心能力三部分 |
-| YML-04 | 顶级属性与 metadata 合法性 | Error | 只允许 name、description、license、allowed-tools、metadata 五个顶级属性；metadata 仅支持 version、author、catalog |
-| YML-05 | 安全检查 | Error | 无 XML 尖括号（`<` 或 `>`），无代码执行逻辑 |
-
-### 详细说明
-
-**YML-01 name 格式**：
-- 必须为短横线命名法（kebab-case）
-- 必须以 `speclite-` 开头
-- 长度不超过 64 字符
-- 必须与 Skill 目录名完全一致
-- 不得以 `claude-`、`codex-` 或 `anthropic-` 开头（保留前缀）
-- 检查方法：正则匹配 `^speclite-[a-z0-9]+(-[a-z0-9]+)*$`
-
-**YML-04 顶级属性与 metadata 合法性**：
-- YAML frontmatter 严格只允许五个顶级属性
-- `metadata` 下仅支持 `version`、`author`、`catalog` 三个子属性
-- `metadata.version` 与 `metadata.author` 的存在性分别由 VER-01、VER-04 报告
-- `metadata.catalog` 可选；存在时必须为非空 kebab-case，并与 SKILL.en.md mirror 对齐
-- 任何其他顶级属性（如 `version`、`author`）均为非法
-- 任何未登记的 `metadata.*` 子属性均为非法
-
-**YML-05 安全检查**：
-- 扫描 YAML 区域（`---` 到 `---` 之间）是否包含 `<` 或 `>` 字符
-- 检查是否包含 Shell 命令、代码片段等执行逻辑
-
-## 2. description 质量检查（3 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| DESC-01 | 中英文双语触发词 | Warning | 至少包含 2 个中文触发关键词 + 2 个英文触发关键词 |
-| DESC-02 | 触发词具体性 | Warning | 不使用过于模糊的通用词（如"处理项目"、"帮助用户"） |
-| DESC-03 | 无尖括号 | Error | description 字段中不包含 `<` 或 `>` 字符 |
-
-### 详细说明
-
-**DESC-01 中英文双语触发词**：
-- 检查 description 中单引号包裹的关键词
-- 统计中文关键词数量（含中文字符的关键词）和英文关键词数量
-- 至少各 2 个才算通过
-- 中文关键词应覆盖正式用语和口语化表达
-
-**DESC-02 触发词具体性**：
-- 检测是否使用过于宽泛的触发词
-- 模糊词黑名单："帮助处理项目"、"处理文件"、"完成任务" 等
-- 应使用领域特定的具体描述
-
-## 3. 文件结构检查（6 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| FILE-01 | SKILL.md 大写 | Error | 文件名严格为 `SKILL.md`，不接受其他大小写 |
-| FILE-02 | 目录名 kebab-case | Error | 目录名以 `speclite-` 开头，无大写字母、无下划线、无空格 |
-| FILE-03 | 无 README.md | Error | Skill 目录内不存在 `README.md` 文件 |
-| FILE-04 | CHANGELOG.md 存在 | Warning | 每个 Skill 应包含 `CHANGELOG.md` |
-| FILE-05 | 无保留前缀 | Error | 目录名不以 `claude-`、`codex-` 或 `anthropic-` 开头，且必须使用 `speclite-` 命名空间 |
-| FILE-06 | SKILL.en.md 存在 | Warning | 每个 Skill 应包含英文 mirror 文件 `SKILL.en.md` |
-
-## 4. 版本一致性与 metadata 字段检查（5 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| VER-01 | metadata.version 存在 | Warning | SKILL.md 的 YAML 中包含 `metadata.version` 字段 |
-| VER-02 | 版本号一致 | Error | SKILL.md 中 `metadata.version` 与 CHANGELOG.md 最新版本号一致 |
-| VER-03 | CHANGELOG 日期格式 | Warning | `## [x.y.z] - ` 后的日期匹配 `YYYY-MM-DD` 格式 |
-| VER-04 | metadata.author 存在 | Warning | SKILL.md 的 YAML 中包含 `metadata.author` 字段且非空 |
-| VER-05 | SKILL.en.md 版本一致 | Error | SKILL.en.md 的 `metadata.version` 与 SKILL.md 完全一致 |
-
-### 详细说明
-
-**VER-02 版本号一致**：
-- 从 SKILL.md 的 YAML frontmatter 中提取 `metadata.version` 值
-- 从 CHANGELOG.md 中提取第一个 `## [x.y.z]` 格式的版本号
-- 两者必须完全一致
-- 版本号格式必须符合语义化版本（MAJOR.MINOR.PATCH）
-
-**VER-03 CHANGELOG 日期格式**：
-- 检查 CHANGELOG.md 中所有 `## [x.y.z] - <date>` 行
-- 日期部分必须匹配正则 `^\d{4}-\d{2}-\d{2}$`（即 YYYY-MM-DD）
-- 不合法示例：`2026/04/07`、`April 7, 2026`、`20260407`
-
-**VER-04 metadata.author 存在**：
-- 检查 SKILL.md 的 YAML frontmatter 中是否包含 `metadata.author` 字段
-- 字段值必须非空（不能为空字符串或仅空格）
-- author 记录 Skill 的原始作者，创建时写入，后续版本迭代不变
-- 缺失时建议：从 `git config user.name` 获取作者名并添加到 metadata 中
-
-**metadata.catalog 字段契约**：
-- `metadata.catalog` 是可选字段；不存在时不单独报错
-- 存在时必须使用 kebab-case，且不得为空字符串或仅空格
-- 当 Skill 位于 `assets/source/speclite/<group>/<skill-name>/`、`.claude/skills/<skill-name>/` 或 `.agents/skills/<skill-name>/` 的同步副本中时，catalog 值应表达源码 catalog 归属
-- SKILL.en.md 中的 `metadata.catalog` 必须与 SKILL.md 一致，由 MIRROR-01 报告
-- 缺失但目录明显属于某个 catalog 时，建议补充 `metadata.catalog` 并同步 mirror
-
-**VER-05 SKILL.en.md 版本一致**：
-- 如果 SKILL.en.md 存在，提取其 YAML frontmatter 中的 `metadata.version`
-- 与 SKILL.md 中的 `metadata.version` 必须完全一致
-- 如果 SKILL.en.md 缺失，本规则记为未检查，由 FILE-06 报告
-
-## 5. 正文质量检查（10 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| BODY-01 | 字数限制 | Error | SKILL.md 正文（不含 YAML 头部）不超过 5000 字符 |
-| BODY-02 | 必需章节 | Warning | 包含 [Overview（技能说明）]、[Core Capabilities（核心能力）]、[Workflow（执行流程）]、[Notes（注意事项）] 四个章节 |
-| BODY-03 | 引用路径正确 | Warning | `references/` 引用路径对应的文件实际存在 |
-| BODY-04 | 无模糊表述 | Warning | 不含"妥善验证"、"适当处理"、"酌情考虑"等模糊指令词 |
-| BODY-05 | 核心能力条数 | Warning | [Core Capabilities（核心能力）] 章节内 `- **` 开头的行数应在 4-8 范围内 |
-| BODY-06 | 中文 canonical 语言规则 | Warning | SKILL.md 章节标题使用 English（中文）形式，正文内容使用中文，技术标识使用英文 |
-| BODY-07 | Workflow density | Warning | `workflow_chars > 1500` 且 `workflow_ratio > 0.5` |
-| BODY-08 | Workflow extraction | Warning | 命中 BODY-07 时入口应引用 `references/*workflow*.md` 或等价流程 reference |
-| BODY-09 | Fixed path hard gate | Warning | 出现 `must exist` + 具体源码路径时，必须同时说明 owning SPEC 或 equivalent implementation policy |
-| BODY-10 | Config reference classification | Warning | 配置状引用必须能归类为本地定义、本地占位、runtime config、artifact path、workflow 变量、模板占位、schema 字段、workflow 参数、外部项目引用或已定义契约 |
-
-### 详细说明
-
-**BODY-01 字数限制**：
-- 字数计算从 YAML 结束标记 `---` 之后开始
-- 统计字符数（中英文混合场景下以字符数为准）
-- 超过 5000 字符需将低频内容拆分到 `references/`
-
-**BODY-04 无模糊表述**：
-- 模糊词检测列表："妥善验证"、"适当处理"、"酌情考虑"、"合理安排"、"必要时"
-- 这些词在指令中不可执行，应替换为具体操作描述
-
-**BODY-05 核心能力条数**：
-- 统计 [Core Capabilities（核心能力）] 章节内以 `- **` 开头的行数
-- 合理范围为 4-8 条，过少说明能力描述不完整，过多说明应精简或拆分
-- [Core Capabilities（核心能力）] 章节的范围从标题到下一个 `[` 开头的章节标题
-
-**BODY-06 中文 canonical 语言规则**：
-- SKILL.md 必须使用中文正文，章节标题使用 English（中文）形式
-- 命令、路径、字段名、fixture 名称、schema/issue id、API 名称、库名、协议名等技术标识和专有技术术语应保留英文
-- 检查方式以结构扫描和人工报告建议为主：缺少 English（中文）章节标题时警告；正文大量英文叙述时警告
-
-**BODY-07 Workflow density**：
-- 必须使用 `scripts/check_skill_density.py <skill-dir>` 的 JSON 输出，不允许用 LLM 估算替代脚本结果
-- checker 必须同时识别 `[Workflow（执行流程）]` / `[Workflow]` 方括号章节，以及 `## Workflow（工作流）` / `## Workflow` Markdown 章节；Markdown Workflow 内的更低级标题属于同一章节
-- 对 SKILL.md 和 SKILL.en.md 分别检查 `triggered_density_warning`
-- 阈值固定为 `workflow_chars > 1500` 且 `workflow_ratio > 0.5`
-- `near_body_limit` 为 true 时，在详情中提示正文接近 5000 字上限
-
-**BODY-08 Workflow extraction**：
-- 仅在同一入口文件命中 BODY-07 时检查
-- 如果 `has_workflow_reference` 为 false，报告 Warning
-- 修复建议：创建 `references/<skill-name>-workflow.md` 或等价 workflow reference，把详细步骤、规则矩阵、命令清单和长校验列表移入 reference，入口 Workflow 只保留阶段路由、读取条件和停止条件
-
-**BODY-09 Fixed path hard gate**：
-- 扫描 SKILL.md、SKILL.en.md 和 references/ 中的正文指令。
-- 当同一段落同时出现 `must exist`、`required file`、`hard gate`、`必须存在`、`必须有` 等强制门控词，以及 `src/`、`test/`、`assets/source/`、`fixtures/` 等具体源码路径时，必须同时说明该路径来自 owning SPEC，或说明 equivalent implementation policy。
-- 若没有 owning SPEC 或 equivalent implementation policy，报告 Warning。
-- 修复建议：将固定路径要求改写为 `Contract Anchor`、`Functional Anchor`、`Evidence Anchor` 或 `Guidance Anchor`，并明确固定文件名只有 owning SPEC 明确要求时才是 hard gate。
-
-**BODY-10 Config reference classification**：
-- 扫描 SKILL.md、SKILL.en.md 和 references/ 中的配置状引用，包括 `{section.key}`、`section.key`、`*_file`、`*_path`、`*_dir`、`*_status`、`*.json`、`*.yaml`、`*.csv`、runtime path 和 workflow mode。
-- 每个引用必须能被解释为以下类型之一：同 skill 本地配置定义、同 skill 本地文件、同 skill 本地占位引用、runtime config、artifact path、workflow local variable、external project file/pattern、template placeholder、schema field、workflow parameter，或由 planning/implementation contract 明确定义。
-- 若引用无法分类，且也没有 owning contract 或 local file/local config evidence，报告 Warning。
-- 修复建议：补充本地配置定义、修正 stale file/path、把引用改写成明确的 workflow 参数或 schema 字段，或在 reference 中写明该引用属于外部项目扫描样例而不是 SpecLite runtime config。
-
-## 6. 命名规范检查（3 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| NAME-01 | Reference 文件命名 | Warning | `references/` 下的文件使用小写短横线（如 `api-guide.md`） |
-| NAME-02 | Script 文件命名 | Warning | Python 文件 snake_case（如 `convert_csv.py`），Shell 文件 kebab-case（如 `run-checks.sh`） |
-| NAME-03 | Assets 文件命名 | Warning | `assets/` 下的文件使用小写短横线（如 `report-template.md`） |
-
-## 7. 双语 mirror 检查（3 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| MIRROR-01 | YAML frontmatter 对齐 | Error | SKILL.en.md 的 name、description、allowed-tools、metadata.author、metadata.catalog 与 SKILL.md 保持一致 |
-| MIRROR-02 | 英文章节齐备 | Warning | SKILL.en.md 包含 [Overview]、[Core Capabilities]、[Workflow]、[Notes] 四个章节 |
-| MIRROR-03 | 引用路径同步 | Warning | SKILL.en.md 引用的 references/、scripts/、assets/ 路径均存在，并与 SKILL.md 的引用路径不冲突 |
-
-### 详细说明
-
-**MIRROR-01 YAML frontmatter 对齐**：
-- SKILL.en.md 是 SKILL.md 的英文 mirror，不能使用独立 metadata
-- 允许正文语言不同，但 YAML 触发和版本信息必须一致
-- `metadata.version` 的一致性由 VER-05 单独报告
-
-**MIRROR-02 英文章节齐备**：
-- SKILL.en.md 至少包含 [Overview]、[Core Capabilities]、[Workflow]、[Notes]
-- 各章节应与 SKILL.md 的四个 canonical 章节语义对应
-
-**MIRROR-03 引用路径同步**：
-- 扫描 SKILL.en.md 中的相对路径引用
-- 所有引用的 `references/`、`scripts/`、`assets/` 路径必须存在
-- 如 SKILL.md 与 SKILL.en.md 引用集合明显不同，报告 Warning，提示人工核对 mirror 漂移
-
-## 8. 文件分类合理性检查（3 条）
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| CLASS-01 | 模板文件应放 assets/ | Warning | `references/` 下的 .md 文件如果包含 ` ```markdown` 代码块包裹的完整文档骨架，应放在 `assets/` |
-| CLASS-02 | 脚本文件应放 scripts/ | Warning | `references/` 或 `assets/` 下存在 `.py` 或 `.sh` 文件 |
-| CLASS-03 | 知识文档应放 references/ | Warning | `assets/` 下的 .md 文件如果不含模板骨架（无 ` ```markdown` 代码块），应放在 `references/` |
-
-### 详细说明
-
-**CLASS-01 模板文件应放 assets/**：
-- 扫描 `references/` 下所有 .md 文件
-- 如果文件内容包含 ` ```markdown` 代码块（即用代码块包裹的完整文档骨架/模板），则该文件属于"固定格式的模板资源"
-- 根据渐进式披露架构，模板资源应放在 `assets/` 目录，而非 `references/`
-- 额外信号：SKILL.md 中对该文件的引用描述包含"模板"、"按此格式生成"、"严格按照模板"等字样
-- 检查方法：读取 `references/` 下每个 .md 文件，搜索 ` ```markdown` 出现次数，>=1 则触发警告
-
-**CLASS-02 脚本文件应放 scripts/**：
-- 扫描 `references/` 和 `assets/` 下的所有文件
-- 如果存在 `.py` 或 `.sh` 后缀的文件，触发警告
-- 根据渐进式披露架构，可执行脚本应放在 `scripts/` 目录
-
-**CLASS-03 知识文档应放 references/**：
-- 扫描 `assets/` 下所有 .md 文件
-- 如果文件内容不包含任何 ` ```markdown` 代码块（即纯知识性说明文档，无模板骨架），则该文件属于"低频查阅的详细资料"
-- 根据渐进式披露架构，知识性文档应放在 `references/` 目录，而非 `assets/`
-
-## 9. Ecosystem Source 检查（7 条）
-
-本组仅在目标目录位于 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` 时执行。Ecosystem Skill 仍必须通过前 36 条通用规则；本组不降低 YAML、description、version、mirror、density、fixed path hard gate 或 `speclite-` 前缀要求。
-
-| 规则 ID | 检查项 | 严重级别 | 判断标准 |
-|:--------|:-------|:---------|:---------|
-| ECO-01 | Ecosystem path classification | Error | 路径必须匹配 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/`，且 `<category>` 只能是 `frontend`、`backend`、`other` |
-| ECO-02 | Module metadata consistency | Error | 上级 module root 必须存在 `module.yaml`，且 `module_kind: ecosystem`、`ecosystem_category`、`ecosystem_id` 与目录一致 |
-| ECO-03 | Module code consistency | Error | `module.yaml` 的 `code` 必须等于 `ecosystem-<category>-<id>`，并声明 `required_dependencies: [sdlc]`、`default_selected: false`、`required: false` |
-| ECO-04 | Help row coverage | Error | 上级 `module-help.csv` 必须存在，并至少包含一条非 `_meta` row，其 `skill` 等于当前 package id |
-| ECO-05 | Version and changelog sync | Error | `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和 `metadata.version` 必须同步；缺少 `CHANGELOG.md` 或 `SKILL.en.md` 对普通 workflow ecosystem Skill 为 Error |
-| ECO-06 | Runtime path boundary | Warning | 入口和 references 不得把 `assets/source/speclite/ecosystems/...` 写成目标项目 runtime dependency，应使用 `{project-root}`、`.claude/skills/<skill-name>`、`.agents/skills/<skill-name>` 和 `_speclite` |
-| ECO-07 | Other admission evidence | Warning | 当 `category` 为 `other` 时，module / docs / changelog / maintainer notes 必须记录 `why-not-frontend`、`why-not-backend`、目标项目事实、安装价值和 selected-only 验收；`misc`、`general`、`tools` 默认不允许 |
-
-### 详细说明
-
-**ECO-01 Ecosystem path classification**：
-- 识别 canonical source 中的 ecosystem package，避免把它误判为 external project path。
-- 如果 `category` 不是 `frontend`、`backend`、`other`，报告 Error。
-
-**ECO-02 / ECO-03 Module metadata consistency**：
-- `module.yaml` 是 ecosystem module 的事实源。
-- `ecosystem_id` 必须与 `<id>` 相同，module code 必须与目录派生值一致。
-- Ecosystem module 是 selected-only extension；不得设置成 `default_selected: true` 或 `required: true`。
-
-**ECO-04 Help row coverage**：
-- `module-help.csv` 必须能让菜单、phase、output location 和 artifact type 被发现。
-- duplicate row、unknown package root 和 missing package row 应与 canonical source checker 的 `module-help.*` findings 对齐。
-
-**ECO-05 Version and changelog sync**：
-- 普通 workflow ecosystem Skill 必须同步 `SKILL.md`、`SKILL.en.md`、`CHANGELOG.md` 和 `metadata.version`。
-- 从 `sdlc-skills/` 迁移到 ecosystem module 时，CHANGELOG 或维护记录应说明 source path move、runtime behavior unchanged 和 package id 是否保持不变。
-
-**ECO-06 Runtime path boundary**：
-- Source path 可以出现在 authoring docs、migration notes 或维护说明中。
-- 当前执行规约不得要求目标项目运行时读取 `assets/source/speclite/ecosystems/...`。
-
-**ECO-07 Other admission evidence**：
-- `other` 只接受不能归入 `frontend` / `backend` 且具有稳定项目形态的 ecosystem id。
-- 初始允许 examples 是 `npm-package`、`cli-tool`、`documentation-only`；新增 id 必须说明 `why-not-frontend`、`why-not-backend`、目标项目事实、安装价值和 selected-only 验收。
-- `other/misc`、`other/general`、`other/tools` 这类无边界命名默认不允许。
-
-## 严重级别说明
-
-| 级别 | 含义 | 处理要求 |
-|:-----|:-----|:---------|
-| **Error** | 违反官方硬性要求 | 必须修复，否则 Skill 可能无法正常工作 |
-| **Warning** | 影响质量但不阻塞使用 | 建议修复，提升 Skill 的触发准确率和可维护性 |
-
-## 检查报告格式
-
-检查完成后输出标准化报告：
-
-```
-📋 Skill 规范检查报告：<skill-name>
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-| # | 规则 ID | 检查项 | 状态 | 详情 |
-|---|---------|--------|------|------|
-| 1 | YML-01  | name 格式 | ✅ | — |
-| 2 | YML-02  | description 长度 | ✅ | 620/1024 字符 |
-| ...
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-总结：X/42 项通过，Y 项警告，Z 项错误
-状态：🟢 全部通过 / 🟡 有警告 / 🔴 有错误
-```
-
-## 版本说明
-- v1.8 (2026-07-06): 增加 Other admission evidence（ECO-07），总计 43 条规则
-- v1.7 (2026-07-06): 增加 Ecosystem Source 检查（ECO-01 ~ ECO-06），总计 42 条规则
-- v1.6 (2026-06-05): 收紧 SpecLite canonical skill 命名，要求 `speclite-` 前缀，总计 36 条规则
-- v1.5 (2026-05-27): 增加 Config reference classification 检查，总计 36 条规则
-- v1.4 (2026-05-27): 增加 Fixed path hard gate 检查，总计 35 条规则
-- v1.3 (2026-05-26): 增加 Workflow density 和 Workflow extraction 检查，总计 34 条规则
-- v1.2 (2026-05-25): 增加 SKILL.en.md mirror、版本一致性和中文 canonical 语言规则检查，总计 32 条规则
-- v1.0 (2026-03-25): 初始版本，22 条规则
+# Skill Rules Contract（技能规则契约）
+
+## Authority（来源与权威）
+
+`references/rule-registry.json` 是 creator 与 lint 共享的唯一规则注册表；本文件解释执行方式，不复制规则矩阵。每条规则包含 `id`、`scope`、`source`、`severity`、`method`、`criteria`。规则数从注册表计算，不能硬编码报告分母。
+
+官方依据于 2026-09-08 核验：
+- [OpenAI Build skills](https://learn.chatgpt.com/docs/build-skills)：入口、发现、调用策略与可选配置。
+- [OpenAI Plugin Build skills](https://developers.openai.com/plugins/build/skills)：工作流、资源、MCP 与测试。
+
+官方页面未给出完整 parser schema；不要把未说明的字段推断为禁止或已支持。历史记录中的“Anthropic Skills 开放标准”及旧规则数量不再作为当前判定依据。OpenAI 文档引用 Agent Skills 开放标准，但本契约不声称覆盖其完整规范。
+
+## Profiles（适用层次）
+
+| Scope | 启用条件 | 约束来源 |
+|---|---|---|
+| base | 普通 workflow Skill | 官方基础结构与建议，以及明确标注的项目质量方法 |
+| codex | 用户明确目标宿主为 Codex，或本次评估专门核验 Codex 适配 | Codex 已文档化能力 |
+| speclite | 用户指定或确认目标属于 SpecLite source / 安装副本 | 项目治理约定 |
+| ecosystem | SpecLite canonical ecosystem 路径 | module 与 selected-only 约定 |
+| ecosystem-other | ecosystem category 为 other | Other admission evidence |
+
+外部目录默认 base，不能仅因当前执行宿主是 Codex 就声称目标依赖 Codex。名称不足以证明安装副本身份；以 source path、安装 provenance 或用户指定为依据。SpecLite source 明确选择 speclite。Agent 包（speclite-agent-*、bmad-agent-* 或 customize.toml 的 [agent]）转交 agent 专属 Skill，不套用普通 workflow 项目规则。
+
+## Fields and Mirrors（字段与镜像）
+
+Ecosystem source 路由识别 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/`：按注册表逐条消费 ecosystem 规则，包括 ECO-01 的路径校验；category=other 再消费 ECO-07 的准入证据。读取 module.yaml、module-help.csv、CHANGELOG.md 和 SKILL.en.md 核验相关契约。这是 authoring source 定位，不要求目标项目运行时拥有此路径。
+
+通用必需字段是非空 name 与 description。使用已存在的安全 YAML parser 检查语法、重复键和类型；缺少 parser 证据就记 NOT_CHECKED，不用正则冒充完整 YAML 验证。合法折叠标量 `>` 不构成错误；字符串中的尖括号不证明注入。
+
+SpecLite 保留 speclite- 命名空间、name 64 字符及 description 1024 字符预算、中文 canonical、英文 mirror、CHANGELOG、metadata.version / author、可选 catalog=speclite。README 禁止项和 5000 字符预算同样只属于 SpecLite。已知 metadata 扩展需说明消费方；未知字段核验宿主与来源，不根据封闭白名单删除它，也不凭未知判官方 Error。
+
+Mirror 的身份字段（name、allowed-tools、license、metadata）一致；description 可翻译，但目标、触发与排除边界语义等价。SKILL.en.md 是维护镜像，不是 Codex 自动选择的第二个入口。不强制固定能力条数、三段式 description 或按引号统计触发词。
+
+## Measurement（测量边界）
+
+BODY-07 / BODY-08 消费 `check_skill_density.py` 的 schema_version=2 输出。识别中英文 Markdown / 方括号 Workflow，屏蔽 fenced code 示例，保留子标题内容。missing / ambiguous 返回 null，代表无法判断；应人工定位实际步骤再决定 N/A 或 NOT_CHECKED，不能报告密度 PASS。
+
+`has_workflow_reference` 只是命名线索；需阅读实际 reference 确认存在、用途和路由。不能为了满足正则而给无关文件改名。references 内的模板讲解或示例可以保留；真正被复制、转换的输出模板放 assets。scripts 中代码样例不等于必须执行的脚本。
+
+## Codex Configuration（Codex 配置）
+
+按需使用 agents/openai.yaml；缺失文件本身不是通用违规。需要 MCP 时核验真实依赖声明；需要显示元数据或显式调用策略时按已文档化字段检查。`allowed-tools` 不是跨宿主权限隔离保证，也不能代替 dependencies.tools。只检查有官方依据的类型与依赖，不发明完整 schema 或伪造服务 URL。
+
+## Findings（结论格式）
+
+Error 表示所选 scope 内强制契约不满足；只有 source 对应官方明确要求时才称官方错误。Warning 表示质量建议或兼容性疑点。状态与严重级别分开：
+
+| Status | 含义 |
+|---|---|
+| PASS | 已执行检查且满足 criteria，有证据 |
+| FAIL | 已证实违反适用 Error 规则 |
+| WARN | 已证实命中适用 Warning 规则 |
+| N/A | scope 或规则条件不适用，注明理由 |
+| NOT_CHECKED | 适用但缺工具、资料、执行记录或尚未检查 |
+
+逐条报告 rule id、source、scope、severity、method、status、证据路径/行号、原因与修复建议。报告 registered_count、applicable_count、executed_count、各状态数量；applicable_count 排除 N/A，executed_count 仅计 PASS/FAIL/WARN。只要有 NOT_CHECKED，就不能声称全部通过。行为验证单独列出；静态 PASS 不等于宿主加载、触发或结果已验证。
+
+## Maintenance（维护）
+
+改变规则语义时同步 creator 指引、lint workflow、回归用例及两个包 CHANGELOG。保留旧 rule id 便于追溯，但以当前 contract_version 和 criteria 为准。发布说明需注明 density schema 变化及翻译语义策略；宿主支持随时间变化，更新规则时重新核验对应官方页面。

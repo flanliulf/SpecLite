@@ -1,54 +1,41 @@
 ---
 name: speclite-skill-lint
-description: "Validates Agent Skills against specification, including YAML, naming, description quality, version consistency, and content constraints. Use when the user asks for speclite-skill-lint, lint skill, validate skill, check skill, skill compliance, or audit an existing Skill. Capable of YAML violation detection, bilingual trigger coverage analysis, version mismatch checks, forbidden file scanning, and structured report generation."
+description: "Read-only review of Skill definitions when asked to lint, check or assess a Skill. Separate base format, Codex adaptation and SpecLite policy, reporting evidence and unchecked items; route Agent definition packages to speclite-agent-lint."
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.8.1"
+  version: "3.0.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[Overview]
-    Read-only Skill compliance checking against the rules in `references/check-rules.md` and scan flow in `references/lint-workflow.md`.
+## Overview
 
-[Core Capabilities]
-    - **YAML frontmatter validation**: Check name, description, allowed-tools, metadata, and safety boundaries.
-    - **Description quality analysis**: Check three-part shape, bilingual triggers, specificity, and angle-bracket safety.
-    - **File structure compliance**: Check entries, changelog, naming, forbidden README, reserved prefixes, and `speclite-` namespace.
-    - **Agent routing detection**: Route `speclite-agent-*` or `[agent]` packages to `speclite-agent-lint`.
-    - **Version and mirror consistency**: Check version, YAML, and reference alignment across both entries and changelog.
-    - **Body and Workflow density checks**: Count body and Workflow density, and check fixed-path ownership or equivalent implementation policy.
-    - **Config reference classification checks**: Classify local, runtime, artifact, workflow, template, schema, and external references.
-    - **Naming and file classification checks**: Check naming and responsibility boundaries for references/, scripts/, and assets/.
-    - **Ecosystem source validation**: Detect `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` and check category, `ecosystem_id`, module code, `module-help.csv`, version/changelog/mirror sync, and runtime path boundaries.
-    - **Structured reporting**: Output rule tables, summaries, and concrete repair guidance separated by Error and Warning.
+Review ordinary workflow Skills without modifying them. `references/rule-registry.json` is the shared authority consumed by the creator; derive counts from its rules and applicability. Separate static findings from behavior evidence and project policy from OpenAI requirements.
 
-[Workflow]
-    Follow scan -> report -> repair guidance -> rescan. Full steps are in `references/lint-workflow.md`.
+## Core Capabilities
 
-    Step 1: Locate target Skill
-        Accept a directory, Skill name, or "all Skills" and search existing canonical or installed roots. Require SKILL.md. Route `speclite-agent-*` or `[agent]` packages to `speclite-agent-lint`.
+- Identify actual targets and provenance, selecting base, Codex and SpecLite scopes.
+- Review YAML, description goals and trigger boundaries while preserving evidenced host extensions.
+- Review SpecLite names, versions, semantically equivalent mirrors, configuration and ecosystem contracts.
+- Measure body and Workflow density deterministically, reporting missing and ambiguous sections.
+- Review resource purpose, load routes, inputs, outputs, missing dependencies and stop conditions.
+- Check optional Codex agents/openai.yaml without inferring host behavior from static files.
+- Report source, scope, severity, method, status and reproducible evidence for every rule.
 
-    Step 2: Read rules and compute density
-        Read `references/check-rules.md` and `references/lint-workflow.md`. Run the read-only script:
-        `python3 scripts/check_skill_density.py <skill-dir>`
-        Use the script JSON result as the only source for BODY-07 and BODY-08 decisions.
+## Workflow
 
-    Step 3: Run 42 checks
-        Follow `references/lint-workflow.md` for all rule groups. Do not modify target files.
+1. Read `references/lint-workflow.md`; locate the target and confirm profile / host. Route speclite-agent-*, bmad-agent-* or [agent] packages to dedicated lint.
+2. Read `references/check-rules.md` and `references/rule-registry.json`. Resolve `{lint-root}` from the actual Skill location and run `python3 "{lint-root}/scripts/list_rules.py" "{target}" --profile speclite --host codex`. Adjust arguments to the target; external Skills default to base. This command only generates a pending checklist.
+3. Review each registered rule using a safe YAML parser. Run `python3 "{lint-root}/scripts/check_skill_density.py" "{target}"` for density evidence. Do not execute target scripts as a substitute for read-only review.
+4. Report PASS / FAIL / WARN / N/A / NOT_CHECKED with reasons, paths and suggestions; derive totals from results. On recheck, reread the target and contract and identify new and resolved findings.
 
-    Step 4: Report and rescan
-        Report rule id, status, evidence, and repair guidance. On re-check, rerun Steps 2-4 and mark changes.
+## Notes
 
-[Notes]
-    - This Skill is read-only and must not modify files; Bash is allowed only for read-only statistics scripts such as `scripts/check_skill_density.py`.
-    - Error means hard compliance failure; Warning means quality, maintainability, or progressive disclosure risk.
-    - BODY-07 uses fixed thresholds: `workflow_chars > 1500` and `workflow_ratio > 0.5`; BODY-08 warns when BODY-07 is triggered without a workflow reference.
-    - New or updated Skills must include canonical Chinese SKILL.md and English mirror SKILL.en.md.
-    - Agent definition packages are the exception: `speclite-agent-*` package `SKILL.en.md` is optional and must be checked with Agent-specific rules in `speclite-agent-lint`.
-    - SpecLite canonical and installed Skill copies must have name and directory values that start with `speclite-`.
-    - Skills under `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` still use YAML, description, version, mirror, density, fixed path, and `speclite-` prefix rules; do not classify them as external project paths or runtime dependencies.
-    - Chinese SKILL.md must use English-Chinese section headings, Chinese body content, and English technical identifiers.
-
-[Generation Metadata]
-    This Skill was generated by speclite-skill-creator. Update SKILL.md and SKILL.en.md together, and sync `assets/source/speclite/support-skills/speclite-skill-lint/` with installed copies.
+- Do not modify files, installed copies or external services. Bash is limited to trusted read-only checking tools.
+- Error means a mandatory contract fails within the selected scope, not that every error is official. Warning indicates a quality recommendation; missing evidence means NOT_CHECKED.
+- BODY-07 / BODY-08 consume density schema_version=2. Null metrics for missing / ambiguous Workflow are not zero or PASS. See the contract for project thresholds and semantic reference review.
+- Chinese canonical, English mirror, versions, speclite- names and budgets apply only to SpecLite. Dedicated Agent lint governs optional Agent mirrors.
+- Chinese entries use English-Chinese headings. English descriptions may be translated without changing trigger boundaries or identity.
+- Do not infer resource purpose from code fences, trigger quality from quoted keyword counts, or permission isolation from allowed-tools.
+- Any NOT_CHECKED prevents an all-pass claim. Static validation does not establish loading, activation or output quality.
+- Maintain both entries, registry, references/scripts and CHANGELOG together; record source and installed-copy updates separately.

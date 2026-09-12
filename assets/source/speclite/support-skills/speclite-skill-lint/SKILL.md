@@ -1,55 +1,41 @@
 ---
 name: speclite-skill-lint
-description: "检查 Agent Skill 是否符合规范，包括 YAML、命名、description、版本与内容约束。用于用户要求 speclite-skill-lint、lint skill、check skill、检查 Skill 规范或验证技能。核心能力：发现 YAML 违规、校验双语触发词、识别版本不一致、输出结构化报告。"
+description: "只读检查 Skill 定义；用于 lint skill、check skill、检查技能或评估 Skill 规范。区分基础格式、Codex 适配和 SpecLite 约定，报告证据及未检查项；Agent 定义包转交 speclite-agent-lint。"
 allowed-tools: Read, Bash, Grep, Glob
 metadata:
-  version: "2.8.1"
+  version: "3.0.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
 
-[Overview（技能说明）]
-    纯只读的 Skill 规范检查器，对指定 Skill 目录执行 42 条合规规则扫描，生成结构化检查报告。不修改任何文件，仅报告问题并提供修复建议。完整规则见 `references/check-rules.md`，详细扫描流程见 `references/lint-workflow.md`。
+## Overview（技能说明）
 
-[Core Capabilities（核心能力）]
-    - **YAML 头部验证**：检查 name、description、allowed-tools、metadata 字段契约和安全边界是否符合开放标准。
-    - **description 质量分析**：验证三段式结构、中英文双语触发词覆盖、触发词具体性和尖括号安全。
-    - **文件结构合规**：检查 SKILL.md、SKILL.en.md、CHANGELOG.md、目录命名、README.md 禁止项、保留前缀和 `speclite-` 命名空间前缀。
-    - **Agent 路由识别**：遇到 `speclite-agent-*` 或包含 `[agent]` 的 Agent 定义包时，转交 `speclite-agent-lint`，避免 workflow-only 规则误报。
-    - **版本与 mirror 一致性**：验证 SKILL.md、SKILL.en.md、CHANGELOG.md 的版本、YAML 和引用路径同步。
-    - **正文与 Workflow density 检查**：统计正文长度、Workflow 长度和占比，识别需要抽到 references/ 的过重流程，并检查 fixed path hard gate 是否有 owning SPEC 或 equivalent implementation policy。
-    - **配置引用分类检查**：识别本地定义、本地占位引用、runtime config、artifact path、workflow 变量、模板占位符、schema 字段和外部项目引用，避免把可解释引用误报为配置缺失。
-    - **命名与文件分类检查**：检查 references/、scripts/、assets/ 的命名和职责边界。
-    - **Ecosystem source validation**：识别 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/`，检查 category、`ecosystem_id`、module code、`module-help.csv`、版本/changelog/mirror 和 runtime path 边界。
-    - **结构化报告输出**：按 Error 与 Warning 输出规则表、摘要和具体修复建议。
+只读检查普通 workflow Skill。`references/rule-registry.json` 是与 creator 共享的规则真源；规则数按注册表及适用条件计算。输出静态发现与行为验证状态，不将项目约定当作 OpenAI 官方要求。
 
-[Workflow（执行流程）]
-    本 Skill 采用扫描→报告→修复建议→重新扫描的迭代模式。完整步骤见 `references/lint-workflow.md`；入口仅保留阶段路由，执行细则以 reference 为准。
+## Core Capabilities（核心能力）
 
-    Step 1：定位目标 Skill
-        接收完整目录、Skill 名称或"所有 Skill"。按 `assets/source/speclite/`、`.claude/skills/`、`.agents/skills/`、`.codex/skills/` 的实际存在目录搜索，目标必须包含 SKILL.md。
-        如果目标目录名匹配 `speclite-agent-*`，或存在 `customize.toml` 且包含 `[agent]`，停止通用 lint 流程并使用 `speclite-agent-lint`。
+- 识别实际目标与来源，按 base、Codex 和 SpecLite 范围选择规则。
+- 检查 YAML、description 目标与触发边界，保留有证据的宿主扩展。
+- 检查 SpecLite 命名、版本、语义等价 mirror、配置与 ecosystem 契约。
+- 用确定性脚本统计正文与 Workflow，明确未识别及歧义状态。
+- 按用途核验资源组织、加载路由、输入输出、依赖缺失及停止条件。
+- 按需核验 Codex agents/openai.yaml，不以静态文件推断宿主行为。
+- 输出逐条 source、scope、severity、method、status 与可复核证据。
 
-    Step 2：读取规则与统计密度
-        读取 `references/check-rules.md` 和 `references/lint-workflow.md`。对目标目录运行只读脚本：
-        `python3 scripts/check_skill_density.py <skill-dir>`
-        使用脚本 JSON 结果作为 BODY-07 与 BODY-08 的唯一判断来源。
+## Workflow（执行流程）
 
-    Step 3：执行 42 条规则扫描
-        按 `references/lint-workflow.md` 的分组流程检查 YAML、description、文件结构、版本、正文、命名、mirror、分类、`speclite-` 前缀、Workflow density 和 ecosystem source rules。不得修改目标文件。
+1. 读取 `references/lint-workflow.md`，定位目标并确认 profile / host。speclite-agent-*、bmad-agent-* 或 [agent] 包转交专属 lint。
+2. 读取 `references/check-rules.md` 与 `references/rule-registry.json`。按实际 Skill 路径解析 `{lint-root}`，运行 `python3 "{lint-root}/scripts/list_rules.py" "{target}" --profile speclite --host codex`；参数按目标调整，外部 Skill 默认 base。此命令只生成待检查清单。
+3. 按注册表逐条检查，使用安全 YAML parser；运行 `python3 "{lint-root}/scripts/check_skill_density.py" "{target}"` 取得密度证据。不得执行目标包脚本来冒充只读检查。
+4. 报告 PASS / FAIL / WARN / N/A / NOT_CHECKED、理由、路径和建议；从结果计算总数。复查重新读取目标和规则契约，标明新增与修复项。
 
-    Step 4：输出报告并支持复查
-        输出标准表格：规则 ID、检查项、状态、详情、修复建议。用户修复后说"重新检查"、"re-lint"或"再查一次"时，重新执行 Step 2-4 并标注已修复和新增问题。
+## Notes（注意事项）
 
-[Notes（注意事项）]
-    - 本 Skill 只读，绝不修改文件；Bash 仅可用于运行 `scripts/check_skill_density.py` 这类只读统计脚本。
-    - Error 表示硬性合规问题；Warning 表示质量、可维护性或渐进式披露风险。
-    - BODY-07 阈值固定为 `workflow_chars > 1500` 且 `workflow_ratio > 0.5`；BODY-08 在命中 BODY-07 且无 workflow reference 时提示抽取。
-    - 新建或更新后的 Skill 必须包含中文 canonical `SKILL.md` 与英文 mirror `SKILL.en.md`。
-    - Agent 定义包例外：`speclite-agent-*` 的 `SKILL.en.md` 是可选镜像，应由 `speclite-agent-lint` 按 Agent 专属规则检查。
-    - SpecLite canonical 和安装副本的 Skill name 与目录名必须以 `speclite-` 开头。
-    - 位于 `assets/source/speclite/ecosystems/<category>/<id>/<skill>/` 的 Skill 仍适用 YAML、description、version、mirror、density、fixed path 和 `speclite-` 前缀规则，不得被误判为 external project path 或 runtime dependency。
-    - 中文 SKILL.md 的章节标题必须使用 English（中文）形式，正文内容使用中文，命令、路径、字段名、fixture 名称、schema/issue id 等技术标识和专有技术术语使用英文。
-
-[Generation Metadata（生成信息）]
-    本 Skill 由 speclite-skill-creator 自动生成。如需修改，必须同步更新 SKILL.md 与 SKILL.en.md，并同步 `assets/source/speclite/support-skills/speclite-skill-lint/` 与实际安装副本。
+- 本 Skill 不修改文件、安装副本或外部服务；Bash 仅运行可信只读检查工具。
+- Error 是所选 scope 的强制契约失败，不等于所有错误都来自官网；Warning 为质量建议。缺证据时 NOT_CHECKED。
+- BODY-07 / BODY-08 只消费 density schema_version=2；Workflow missing / ambiguous 的 null 不是零值或通过。项目阈值与 reference 语义复核见规则契约。
+- 中文 canonical、英文 mirror、版本、speclite- 命名空间与长度预算仅适用于 SpecLite；Agent mirror 可选性由专属 lint 管理。
+- 中文正文配 English（中文）标题；英文 description 可翻译，但触发边界与身份信息不可漂移。
+- 不按代码围栏推断资源用途，不按单引号统计触发质量，不把 allowed-tools 当权限隔离。
+- 存在 NOT_CHECKED 时不能宣称全通过；静态验证不等于加载、触发或输出质量已验证。
+- 维护时同步两个入口、规则表、相关 references/scripts 与 CHANGELOG；source 和实际安装副本分别记录。
