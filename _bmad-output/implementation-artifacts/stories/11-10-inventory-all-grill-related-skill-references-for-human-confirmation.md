@@ -115,7 +115,7 @@ Status: in-progress
   ```
   单一 token `grill`（case-insensitive）覆盖 AC2 全部 variants（`grilling`、`ir-grill`、`grill-consistency`、`implementation-readiness-grill`、`grill-with-docs` 均含该子串）。
 - Scope（completeness denominator）：`assets/source/speclite/**`（含 `docs/legacy/**`）、`docs/**`、`src/**`、`test/**`（含 fixtures）、`README.md`。
-- Exclusions（逐项理由）：`_bmad-output/**`（workflow / planning artifacts，非 canonical 定义；预扫描约 425 行）；`release/packaging-manifest.json`（由 assets 生成的 hash 清单，28 行命中均为 package 路径镜像）；`dist/**`（构建产物）；`node_modules/**`；installed mirrors `.claude/skills`、`.agents/skills`、`_speclite/`、`.specskills/`（安装投影 / 本地分析目录，非 canonical source）；`.git/**`；二进制（`rg` 默认跳过；scope 内实际被跳过的仅 gitignored `.DS_Store`）。
+- Exclusions（逐项理由）：`_bmad-output/**`（workflow / planning artifacts，非 canonical 定义；预扫描约 425 行）；`release/packaging-manifest.json`（由 assets 生成的 hash 清单，28 行命中均为 package 路径镜像）；`dist/**`（构建产物）；`node_modules/**`；installed mirrors `.claude/skills`、`.agents/skills`、`_speclite/`、`.specskills/`（安装投影 / 本地分析目录，非 canonical source）；`.git/**`；二进制（`rg` 默认跳过；scope 内实际被跳过的仅 gitignored `.DS_Store`）；hidden 路径（`test/fixtures/**/input/.gitkeep` 与 fixture 内 `.claude/` 共 22 个 tracked 文件，`rg` 默认跳过；`--hidden --no-ignore` 复扫 0 命中，不影响 269 计数）。
 - Raw match artifact：`raw.txt` 269 行，sha256 `571645e6898745064d8d7fdd0e1241f82b90c91e7e700b30c00168aa0bc35c74`。Machine match 定义 = `rg` 输出的一行（path:line）；同一行多个 literal 在条目 Literal 列全部列出。
 - Counts：raw 269 / entries 269 / unmapped 0（validator：`len(entries)==len(raw)` 且 ID 与 raw 行号 1:1）。
   - Classification：`fixture` 152、`active` 102、`legacy` 9、`compatibility` 6
@@ -150,10 +150,10 @@ ID = `G` + raw 行号；File:line 可直接回查。Lang 按文件：`.en.md`=EN
 | G016 | `assets/source/speclite/core-skills/speclite-grilling/CHANGELOG.md:3` | ZH | speclite-grilling | prose/example | `speclite-grilling` | speclite-grilling | active | none | keep | 变更记录 |
 | G017 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.en.md:2` | EN | speclite-grilling | identity/frontmatter | `speclite-grilling` | speclite-grilling | active | none | keep |  |
 | G018 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.en.md:3` | EN | speclite-grilling | trigger/description | `grill`, `Grill` | — | active | none | keep |  |
-| G019 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.en.md:20` | EN | speclite-grilling | prose/example | `assets/source/speclite/core-skills/speclite-grilling/` | — | active | none | keep | 生成署名 / 同步提示（含自身路径） |
+| G019 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.en.md:20` | EN | speclite-grilling | prose/example | `assets/source/speclite/core-skills/speclite-grilling/` | speclite-grilling | active | none | keep | 生成署名 / 同步提示（含自身 ID 或路径） |
 | G020 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.md:2` | ZH | speclite-grilling | identity/frontmatter | `speclite-grilling` | speclite-grilling | active | none | keep | dirty-worktree（未提交改动） |
 | G021 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.md:3` | ZH | speclite-grilling | trigger/description | `grill`, `Grill` | — | active | none | keep | dirty-worktree（未提交改动） |
-| G022 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.md:20` | ZH | speclite-grilling | prose/example | `assets/source/speclite/core-skills/speclite-grilling/` | — | active | none | keep | 生成署名 / 同步提示（含自身路径） |
+| G022 | `assets/source/speclite/core-skills/speclite-grilling/SKILL.md:20` | ZH | speclite-grilling | prose/example | `assets/source/speclite/core-skills/speclite-grilling/` | speclite-grilling | active | none | keep | 生成署名 / 同步提示（含自身 ID 或路径）；dirty-worktree（未提交改动） |
 | G023 | `assets/source/speclite/docs/legacy/BMAD_SPECLITE_SKILL_MAPPING.md:74` | ZH | canonical legacy docs | legacy/regression-evidence | `grill`, `sdlc-skills/3-solutioning/speclite-ir-grill-consistency-reviewer` | speclite-ir-grill-consistency-reviewer | legacy | 11.8 legacy-doc (excluded by 11.8 scan) | keep (legacy docs; 11.8 excluded) |  |
 | G024 | `assets/source/speclite/docs/legacy/CANONICAL_SKILL_ITERATION_CONTEXT.md:11` | ZH | canonical legacy docs | legacy/regression-evidence | `grill`, `speclite-ir-grill-consistency-reviewer` | speclite-ir-grill-consistency-reviewer | legacy | 11.8 legacy-doc (excluded by 11.8 scan) | keep (legacy docs; 11.8 excluded) |  |
 | G025 | `assets/source/speclite/docs/legacy/CANONICAL_SKILL_ITERATION_CONTEXT.md:85` | ZH | canonical legacy docs | legacy/regression-evidence | `grill`, `Grill` | — | legacy | none | keep (legacy docs; 11.8 excluded) |  |
@@ -529,6 +529,7 @@ Claude Opus 5 (claude-opus-5)，manual orchestrator 模式。
 | 2026-09-12 | 1.1 | 记录用户对 B1–B4 的裁决与落地 commit（`a349f08`、`cfe49c1`）；B5 补充出处待判断。 | Claude |
 | 2026-09-12 | 1.2 | B5 裁决保持不动；用户确认 inventory 作为 completion evidence，进入 CR 闭环。 | Claude |
 | 2026-09-12 | 1.3 | CR main round 1 修复：G019/G022 分类与计数、15 条 Literal 补全、"七处提及"、G176 Target、B5 行号标注、exclusion 幻影 `.zip`；新增 Post-confirmation change commits 小节并扩展 File List。 | Claude |
+| 2026-09-12 | 1.4 | CR main round 2 修复：G019 / G022 Target 对齐自身 ID，G022 恢复 dirty-worktree 标注；Exclusions 补 hidden 路径披露（R2-F2 顺带）。 | Claude |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*

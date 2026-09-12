@@ -34,3 +34,15 @@
 - Evaluator：`FIX_REQUIRED`；p1=6（R1-F1–F6，均为 Story inventory 文档修正）/ verifyRequired=1（R1-F7）/ deferred=1（R1-F8 T2）/ dismissed=1（R1-F9）；convergence new 6。evaluator 指出 completion gate（02:37Z）早于 change commits，CR06 按 freshness 会 HALT，须在 fresh review 后重生成。artifact `11-10-code-review-evaluation-20260912-main-round-1.md`。
 - Fixer：completed（patch）；仅改 Story 文件（+44/−22）；R1-F1–F6 关闭，R1-F7 留痕小节 + File List 顺带补齐；docs:check PASS。
 - 下一步判断：提交 fix commit → fresh CR01 main round 2。
+
+## 2026-09-12 — CR Reviewer / main Round 2
+
+- 结果：`FINDINGS_REPORTED`；3/3 layers；head `c2eb474`。R1-F1–F6 三层一致 resolved（validator 0 mismatch），fixer 未越权；R1-F7 Story 侧关闭、gate STALE 待重生成；R1-F8/F9 未变。
+- 新增：R2-F1 G022 dirty 标注被 round 1 修复覆盖 + G019/G022 Target 与 G012/G015 不一致（patch，两行）；R2-F2 hidden fixture 路径未在 exclusions 说明（defer，0 命中）。counts：patch 1 / verify 1 / defer 2 / dismiss 1。
+- 下一步判断：CR02 round 2。
+
+## 2026-09-12 — CR Evaluator + Fixer / main Round 2
+
+- Evaluator：`FIX_REQUIRED`；p1=1（R2-F1）/ verify=1（R1-F7 gate 重生成，orchestrator 义务）/ deferred=2（R2-F2 T3、R1-F8 T2）/ dismissed=1；convergence new 1 / resolved 6；提示 round 3 若再出新阻塞即 STOP_LOSS。
+- Fixer：completed；仅改 Story 文件（G019/G022 两行 + Exclusions 一句 + Change Log 1.4）；validator dirty 一致性 0 不一致。
+- 下一步判断：提交 → fresh CR01 main round 3（收敛确认）。
