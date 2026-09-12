@@ -9,7 +9,7 @@ metadata:
 ---
 
 [Overview]
-    This Skill reviews PRD, UX, Architecture, and Epics / Stories for implementation-readiness consistency. It embeds a grill-with-docs protocol: challenge each branch of the design against the existing domain model and documented decisions, answer evidence-resolvable questions first, then raise one recommended decision and patch, verify, and record it.
+    This Skill reviews PRD, UX, Architecture, and Epics / Stories for implementation-readiness consistency. It embeds a built-in grilling protocol (derived from the grill-with-docs method; it does not depend on the `speclite-grill-with-docs` Skill): challenge each branch of the design against the existing domain model and documented decisions, answer evidence-resolvable questions first, then raise one recommended decision and patch, verify, and record it.
 
 [Core Capabilities]
     - **UX input path governance**: use Planning root evidence to prefer `{planning_artifacts}/ux/ux-design-specification.md`, read the exact legacy fallback only when canonical is absent, and record `resolvedRoot`, `resolutionMode`, `actualConsumedPath`, and the no-migration boundary.

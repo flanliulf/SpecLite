@@ -642,7 +642,7 @@
       ],
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer",
-      "canonicalPackageHash": "sha256:13dede15308ebcc230bbfb4a93e91113c47f4804c9f8eb3c4a578d942ff6a7c6",
+      "canonicalPackageHash": "sha256:d3bf1e85303666a91f418ec46db7c4b5fbbe22f043786c261e6f796b7ebcc308",
       "installedTargets": [
         "claude",
         "agents"

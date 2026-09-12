@@ -17,7 +17,7 @@
 
 执行规则：
 - 使用 speclite-implementation-readiness-grill-consistency-reviewer。
-- 使用内建 grill-with-docs 协议：单题追问、推荐答案、证据优先、术语校准、具体场景、文档/代码交叉验证、内联更新。
+- 使用内建追问协议（源自 grill-with-docs 方法）：单题追问、推荐答案、证据优先、术语校准、具体场景、文档/代码交叉验证、内联更新。
 - 严格串行，每轮 <question_count or 50> 题。
 - 每题固定：证据检查 -> grill question -> recommended decision -> 修订 -> 验证 -> 记录。
 - 只修改当前问题直接相关 planning artifact 和本轮记录。

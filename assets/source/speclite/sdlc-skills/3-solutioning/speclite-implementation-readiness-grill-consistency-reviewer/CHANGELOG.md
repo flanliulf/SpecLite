@@ -4,6 +4,12 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [Unreleased] - 2026-09-12
+
+### Changed（变更）
+
+- 依 Story 11.10 inventory B4 用户裁决：SKILL zh/en、prompt-library、workflow 中"内建 grill-with-docs 协议"改为"内建追问协议（源自 grill-with-docs 方法，不依赖 `speclite-grill-with-docs` Skill）"，消除与 canonical Skill ID 的歧义；历史 CHANGELOG 条目不改。
+
 ## [1.0.1] - 2026-07-04
 
 ### Changed

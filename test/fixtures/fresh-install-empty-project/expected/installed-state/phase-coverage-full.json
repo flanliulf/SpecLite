@@ -538,7 +538,7 @@
         }
       ],
       "artifactContract": {
-        "artifactType": "ir-grill-records",
+        "artifactType": "grill-consistency-records",
         "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/implementation-readiness-report/grill-consistency",
         "requiredMetadata": [
           "workflowType",

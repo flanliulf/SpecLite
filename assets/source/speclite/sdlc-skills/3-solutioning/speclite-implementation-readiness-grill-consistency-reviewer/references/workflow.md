@@ -19,9 +19,9 @@
 
 若上述路径不存在，先做 inventory 并在记录中写明 fallback。不得凭固定路径假设文档存在。
 
-## Grill-with-docs Protocol（内建追问协议）
+## Built-in Grilling Protocol（内建追问协议，源自 grill-with-docs 方法）
 
-本 Skill 内建以下 grill-with-docs 规则，执行时按本节自包含协议推进：
+本 Skill 内建以下追问规则（源自 grill-with-docs 方法，不依赖 `speclite-grill-with-docs` Skill），执行时按本节自包含协议推进：
 
 1. Relentless interview：围绕规划方案的每个方面持续追问，直到 PRD、UX、Architecture、Epics / Stories 的边界能共同解释。
 2. Design tree walk：沿设计树逐分支检查，并一次解决一个依赖决策，不跳过前置未闭合问题。

@@ -9,7 +9,7 @@ metadata:
 ---
 
 [Overview（技能说明）]
-    本 Skill 用于对 PRD、UX、Architecture、Epics / Stories 做 implementation-readiness 一致性 grill。它内建 grill-with-docs 协议：围绕既有领域模型和文档决策逐分支追问，先用证据回答可回答的问题，再提出单题推荐决策并定点修订、验证和记录。
+    本 Skill 用于对 PRD、UX、Architecture、Epics / Stories 做 implementation-readiness 一致性 grill。它内建追问协议（源自 grill-with-docs 方法，不依赖 `speclite-grill-with-docs` Skill）：围绕既有领域模型和文档决策逐分支追问，先用证据回答可回答的问题，再提出单题推荐决策并定点修订、验证和记录。
 
 [Core Capabilities（核心能力）]
     - **UX 输入路径治理**：通过 Planning root evidence 优先读取 `{planning_artifacts}/ux/ux-design-specification.md`，仅在其缺失时只读读取 exact legacy fallback，并记录 `resolvedRoot`、`resolutionMode`、`actualConsumedPath` 与 no-migration 边界。
