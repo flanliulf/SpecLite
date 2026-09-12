@@ -61,3 +61,9 @@
 ## 2026-09-12 — CR06 Finalizer
 
 - 结果：`DONE`；Story `in-progress → done`、`sprint-status.yaml → done`，写前/写后 hash 重读一致；binding / freshness 全部通过。Epic 11 全部 Story done，待 epic-completion gate。
+
+## 2026-09-12 — Post-done Docs Follow-up（用户授权）
+
+- 改动：Story 文件 G113 归 compatibility 并入 AC7 单列（Compatibility 6→7）；B2/B4/B5 引用的 9 条 entry Rec 标 `confirm → resolved`；条目表引言注明回查基准 HEAD 3cc1ba9；计数同步；Change Log 1.5。
+- 审查：fresh 独立审查者首轮 FAIL（我误改 G003 而非 G113；G043/G046 裁决文字与 §C 不符；引言对 G042 不精确），修正后复验 PASS（计数重算、G113 依据、raw sha 复现、resolved 文字与 §C 一致、docs:check）。
+- 边界：只改 Story 文件；canonical 面未动。
