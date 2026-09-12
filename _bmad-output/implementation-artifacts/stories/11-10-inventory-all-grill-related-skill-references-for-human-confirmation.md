@@ -1,6 +1,6 @@
 # Story 11.10: Inventory All Grill-Related Skill References For Human Confirmation（盘点全部 Grill 相关 Skill 引用供人工确认）
 
-Status: in-progress
+Status: done
 
 ## Story（故事）
 

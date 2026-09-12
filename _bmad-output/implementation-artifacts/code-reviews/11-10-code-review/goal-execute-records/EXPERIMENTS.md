@@ -57,3 +57,7 @@
 - 事实：本会话与其 `claude --resume` 副本在 12:17–12:52 并发运行 Story 11.10 CR；副本完成 main round 1–3（review / evaluation / 两轮 fix commit `c2eb474`、`d1d1f54`）、CR04、CR05（TODO-028）、completion gate 重生成后由用户退出；本会话 round-1 summary 写入因 `.tmp` 被副本清理而失败，未产生第二个 current 产物。
 - 处置：采用副本产物为 current（binding 逐项验证：review hash / scope / head / CR04-05 evaluationSourceHash / gate freshness / backlog hash 全部一致）；本会话独有的 3 条非阻塞观察（G113 裸 `ir-grill/` 条款分类为 active、B4/B5 条目 Rec 与 §B 不一致、条目表引言未注明回查基准 HEAD 3cc1ba9）未进入任何 round，记录于 EXPERIMENT_NOTES 供用户裁决是否作为后续 docs change。
 - 下一步判断：提交 CR04/05/gate/backlog → CR06。
+
+## 2026-09-12 — CR06 Finalizer
+
+- 结果：`DONE`；Story `in-progress → done`、`sprint-status.yaml → done`，写前/写后 hash 重读一致；binding / freshness 全部通过。Epic 11 全部 Story done，待 epic-completion gate。
