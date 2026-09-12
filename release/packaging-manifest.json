@@ -19,7 +19,7 @@
       "README.md"
     ]
   },
-  "packageHash": "sha256:e93459f327743f45d8e041e1620aa523164fe6e7ccb9d6796f267ffa23f1929a",
+  "packageHash": "sha256:7567503d246ef8e248a17d70689093699e1a9c22b96214fdaf510c5048bb66ad",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",
@@ -735,7 +735,10 @@
     "assets/source/speclite/support-skills/speclite-skill-lint/CHANGELOG.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/references/check-rules.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/references/lint-workflow.md",
+    "assets/source/speclite/support-skills/speclite-skill-lint/references/rule-registry.json",
     "assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py",
+    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/list_rules.py",
+    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/test_skill_tools.py",
     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.en.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.md",
     "dist/bin/speclite.d.ts",
@@ -1462,7 +1465,10 @@
     "assets/source/speclite/support-skills/speclite-skill-lint/CHANGELOG.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/references/check-rules.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/references/lint-workflow.md",
+    "assets/source/speclite/support-skills/speclite-skill-lint/references/rule-registry.json",
     "assets/source/speclite/support-skills/speclite-skill-lint/scripts/check_skill_density.py",
+    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/list_rules.py",
+    "assets/source/speclite/support-skills/speclite-skill-lint/scripts/test_skill_tools.py",
     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.en.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.md",
     "dist/bin/speclite.d.ts",

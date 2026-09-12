@@ -426,7 +426,7 @@
       "canonicalSkillId": "speclite-domain-modeling",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-domain-modeling",
-      "canonicalPackageHash": "sha256:14fd3e071391c1a678dc1548fd9f15687d72501f19af79cc2907a06536b1072a",
+      "canonicalPackageHash": "sha256:5d173f478750a76bc71f837d6503511a0ff5f4be52abe87ef5488f70e6feb9f8",
       "installedTargets": [
         "claude",
         "agents"
@@ -580,7 +580,7 @@
       "canonicalSkillId": "speclite-grilling",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-grilling",
-      "canonicalPackageHash": "sha256:870c5a4c84cf9e5b1e752258cc435dfbf92414889d2b194c19e65be777f29795",
+      "canonicalPackageHash": "sha256:7b6d0c0041782591ed0163c35af50ee6a2dd39e20dbb3ff4ec38119bf124dd38",
       "installedTargets": [
         "claude",
         "agents"
