@@ -15,3 +15,9 @@
 - 关键发现：唯一显式 caller→callee 是 `speclite-grill-with-docs` → `/speclite-grilling`，其 HEAD 版本为 `/grilling` / `/domain-modeling`（非 canonical ID），工作树未提交修正；`ir grill records` → artifactType `ir-grill-records` 沿用旧词形；reviewer 包 `grill-with-docs` 提及为内建协议来源而非依赖；`.specskills/docs/analysis/` 路径未被测试覆盖。
 - Read-only：scan 前后 canonical 面 `git status` 集合 hash 一致（`335505e1…`）。
 - 下一步判断：completion gate，然后向用户请求人工确认（AC12），确认后 CR。
+
+## 2026-09-12 — Human Confirmation Round 1
+
+- 用户裁决：B1 是（commit `a349f08`）；B2 按建议更名（`cfe49c1`）；B3 保留 roadmap，standalone grill Skills 去向登记为未来独立 Story 候选；B4 改措辞（`cfe49c1`）；B5 要求列出出处（已补充）。
+- 副产物：发现 11.9 期间 fixture / packaging manifest 在脏工作树上生成，`a349f08` 已按提交树重生成；用户工作树中 `speclite-grilling` / `speclite-domain-modeling` 的本地改动在提交前会使 `fixture-release-gates` 本地红。
+- 下一步判断：等待 B5 裁决与"inventory 作为 completion evidence"确认，再进入 CR01（reviewSeries=`main`）。

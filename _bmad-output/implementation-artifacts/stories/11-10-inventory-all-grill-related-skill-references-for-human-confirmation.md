@@ -460,7 +460,20 @@ ID = `G` + raw 行号；File:line 可直接回查。Lang 按文件：`.en.md`=EN
 | B5 | G093（`workflow.md:81` `.specskills/docs/analysis/…`） | 过程分析路径指向 `.specskills/`（本地分析目录，非 SPEC 09 artifact root）；测试 G253 只禁止 `.specskills/output/`，未覆盖 `docs/analysis/`。 | 确认是否属 canonical contract；若否，应改为 resolver-provided root 或明确标注为本地可选。 |
 | B6 | Parity 差异（reviewer SKILL:23） | literal 计数 ZH 11 / EN 10，语义一致。 | 无需处理；记录以证明 parity 已逐行核对。 |
 
-**C. 人工确认请求**
+**C. 人工确认记录（2026-09-12）**
+
+| # | 用户裁决 | 落地 |
+|---|---|---|
+| B1 | 是，提交工作树修正 | commit `a349f08`：`speclite-grill-with-docs` SKILL zh/en 改为 `/speclite-grilling` / `/speclite-domain-modeling`；fixture 与 packaging manifest 按提交树重生成 |
+| B2 | 按建议更名 | commit `cfe49c1`：`module-help.csv:35` outputs `ir grill records` → `grill consistency records`（artifactType `grill-consistency-records`） |
+| B3 | 按建议 | README roadmap 条目保留；standalone grill Skills（`speclite-grilling` / `speclite-grill-with-docs`）的去向作为**未来独立 Story 候选**登记于本清单，不在 Epic 11 内处理 |
+| B4 | 改措辞 | commit `cfe49c1`：SKILL zh/en:12、prompt-library:20、workflow:22/24 改为"内建追问协议（源自 grill-with-docs 方法，不依赖 `speclite-grill-with-docs` Skill）"；CHANGELOG 历史条目不改 |
+| B5 | 待用户判断 | 出处：`references/workflow.md:78-82`；`.specskills/docs/analysis/<skill>/` 是 `speclite-skill-creator` workflow 定义的项目级过程分析约定（`skill-creation-workflow.md:59`），`speclite-terminology-governance`、`speclite-docs-intro-ppt-creator` 同样使用；测试 `implementation-readiness-rename-routing.test.ts:150` 只禁止 `.specskills/output/…` 作为产物路径，不涉及 `docs/analysis/` |
+| B6 | 无需处理 | — |
+
+B1 / B2 / B4 的改动是用户确认后的独立 change commit，不属于 Story 11.10 的 read-only inventory 本身；inventory 条目 G011 / G014 / G099 / G043–G088 的 literal 以扫描时（HEAD `3cc1ba9`）为准，未回写。
+
+**C'. 原人工确认请求（已答复）**
 
 以上 A 类 0 项、B 类 6 项均未修改任何 canonical 定义。请确认：(1) B1 是否提交工作树修正；(2) B2–B5 是否立项为后续治理 Story / change；(3) 本 inventory 是否可作为 Story 11.10 的 completion evidence。"已列出"不构成对任何修改的批准。
 
@@ -499,6 +512,7 @@ Claude Opus 5 (claude-opus-5)，manual orchestrator 模式。
 | --- | --- | --- | --- |
 | 2026-09-02 | 0.1 | 创建 broad read-only grill inventory、100% reconciliation 与 human confirmation 上下文。 | Fancyliu / Codex |
 | 2026-09-12 | 1.0 | 在 11.9 restart 之后的 current tree 上执行 broad scan（269 matches，100% match-to-entry），填入 inventory / 关系 / parity / 高风险清单，请求人工确认。 | Claude |
+| 2026-09-12 | 1.1 | 记录用户对 B1–B4 的裁决与落地 commit（`a349f08`、`cfe49c1`）；B5 补充出处待判断。 | Claude |
 
 ---
 *本文档由 bmad-create-story Skill 自动生成*
