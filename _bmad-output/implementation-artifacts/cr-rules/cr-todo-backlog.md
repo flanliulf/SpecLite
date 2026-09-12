@@ -7,7 +7,7 @@
 
 | 状态 | 数量 |
 |------|------|
-| 🔴 open | 14 |
+| 🔴 open | 15 |
 | ⏸ superseded-by-restart | 5 |
 | 🟡 in-progress | 0 |
 | ✅ resolved | 8 |
@@ -19,6 +19,18 @@
 <!-- 按优先级排序：P1 > P2 > P3 -->
 
 > 自 Story 11.9 起，新增条目使用 CR v2 的 `T1/T2/T3` 紧迫度；下列既有条目的 legacy `P2` 字段原样保留，不作机械迁移。`T1` 表示下次触及前必须处理，但仍是当前非阻塞项。
+
+### TODO-028: Epic 11 runner 最终交付提供 Story 11.10 inventory 可点击路径
+
+- **来源**: 11-10 CR main round 3 (2026-09-12)
+- **紧迫度**: T2
+- **发现指纹**: sha256:2aa33e08aed8bcf90107d218d7ab644b1c056a9c9c37c9c90a9cd366e364693e
+- **类别**: other
+- **描述**: Story 11.10 AC8 要求"Epic 11 runner 最终交付必须提供该 Story 文件的可点击路径"。当前两份 11.10 flow-gate 与 goal records 均不含 `_bmad-output/implementation-artifacts/stories/11-10-inventory-all-grill-related-skill-references-for-human-confirmation.md` 路径；载体（epic-completion handoff / Story done 最终交付消息）在 Story CR 阶段尚未发生。evaluator main round 1–3 均判 deferred T2。
+- **涉及文件**: `_bmad-output/implementation-artifacts/flow-gates/epic-11-completion-gate.md`（待生成）, `_bmad-output/implementation-artifacts/stories/11-10-inventory-all-grill-related-skill-references-for-human-confirmation.md`
+- **建议时机**: 运行 `speclite-flow-gate mode=epic-completion target=11` 时，在报告 Recommended Next Action / handoff 段写入该 Story 文件的可点击路径；Story 11.10 `done` 的最终交付消息亦须包含该路径。
+- **状态**: open
+- **解决记录**:
 
 ### TODO-023: 使含反斜杠的 legacy 目录名在 boundary 检查前 fail-close
 

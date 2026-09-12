@@ -46,3 +46,14 @@
 - Evaluator：`FIX_REQUIRED`；p1=1（R2-F1）/ verify=1（R1-F7 gate 重生成，orchestrator 义务）/ deferred=2（R2-F2 T3、R1-F8 T2）/ dismissed=1；convergence new 1 / resolved 6；提示 round 3 若再出新阻塞即 STOP_LOSS。
 - Fixer：completed；仅改 Story 文件（G019/G022 两行 + Exclusions 一句 + Change Log 1.4）；validator dirty 一致性 0 不一致。
 - 下一步判断：提交 → fresh CR01 main round 3（收敛确认）。
+
+## 2026-09-12 — CR Reviewer / main Round 3
+
+- 结果：`FINDINGS_REPORTED`；3/3；head `d1d1f54`；**新阻塞 0**。R2-F1 / R2-F2 三层一致 resolved（累计 8 关闭）；R1-F7 gate STALE 预期 recurred；R1-F8 / F9 未变；R3-F1 措辞精度（dismiss 候选）。
+- 下一步判断：CR02 round 3。
+
+## 2026-09-12 — Session Reconciliation（会话并发收口）
+
+- 事实：本会话与其 `claude --resume` 副本在 12:17–12:52 并发运行 Story 11.10 CR；副本完成 main round 1–3（review / evaluation / 两轮 fix commit `c2eb474`、`d1d1f54`）、CR04、CR05（TODO-028）、completion gate 重生成后由用户退出；本会话 round-1 summary 写入因 `.tmp` 被副本清理而失败，未产生第二个 current 产物。
+- 处置：采用副本产物为 current（binding 逐项验证：review hash / scope / head / CR04-05 evaluationSourceHash / gate freshness / backlog hash 全部一致）；本会话独有的 3 条非阻塞观察（G113 裸 `ir-grill/` 条款分类为 active、B4/B5 条目 Rec 与 §B 不一致、条目表引言未注明回查基准 HEAD 3cc1ba9）未进入任何 round，记录于 EXPERIMENT_NOTES 供用户裁决是否作为后续 docs change。
+- 下一步判断：提交 CR04/05/gate/backlog → CR06。
