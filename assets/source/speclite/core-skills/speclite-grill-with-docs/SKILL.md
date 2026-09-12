@@ -8,7 +8,7 @@ metadata:
   catalog: "speclite"
 ---
 
-运行一次 `/grilling` session，并使用 `/domain-modeling` skill。
+运行一次 `/speclite-grilling` session，并使用 `/speclite-domain-modeling` skill。
 
 [Generation Metadata（生成信息）]
     本 Skill 由 speclite-skill-creator 自动生成。如需修改，必须同步更新 SKILL.md 与 SKILL.en.md，并同步 `assets/source/speclite/core-skills/speclite-grill-with-docs/` 与实际安装副本。
