@@ -28,12 +28,12 @@
 | CR-API-12 | Installed activation path basename 必须绑定对应 `canonicalSkillId` | 2-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-13 | Resolver schema anchor 必须解析真实 runtime result shape | 2-4, 11-1 | 9/12 | rules-summary | 已写入规则总结 |
 | CR-API-14 | Installed activation 必须通过 `speclite resolve` runtime entry 获取配置与 customization | 2-4 | 8/12 | rules-summary | 已写入规则总结 |
-| CR-SEC-04 | Artifact path public contract 必须先严格校验 POSIX-style 再做 filesystem normalization | 2-5 | 6/12 | rules-summary | 已写入规则总结 |
+| CR-SEC-04 | Artifact path public contract 必须先严格校验 POSIX-style 再做 filesystem normalization | 2-5, 11-9 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-05 | `actualArtifactPath` containment 必须以 configured artifact root 为边界 | 2-5 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-06 | Public status path projection 必须拒绝未校验 installed-state paths | 3-1 | 7/12 | rules-summary | 已写入规则总结 |
-| CR-API-15 | Installed-state index 读取必须区分 missing 与 corrupted | 3-1 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-15 | Installed-state index 读取必须区分 missing 与 corrupted | 3-1, 11-9 | 9/12 | rules-summary | 已写入规则总结 |
 | CR-API-16 | Skill index completeness 必须比对 selected canonical package root expected set | 3-2 | 7/12 | rules-summary | 已写入规则总结 |
-| CR-API-17 | Canonical hash walker 必须在遍历阶段应用 candidate include 边界 | 3-3 | 7/12 | rules-summary | 已写入规则总结 |
+| CR-API-17 | Canonical hash walker 必须在遍历阶段应用 candidate include 边界 | 3-3, 11-9 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-SEC-07 | File integrity symlink 诊断必须先 no-follow 分类再决定 issue 语义 | 3-3 | 7/12 | rules-summary | 已写入规则总结 |
 | CR-API-18 | Production artifact validation 必须消费 on-disk metadata entity | 3-4 | 8/12 | rules-summary | 已写入规则总结 |
 | CR-API-19 | Config 派生的 public command result 字段必须复用 shared resolver | 4-2 | 7/12 | rules-summary | 已写入规则总结 |
@@ -3170,6 +3170,56 @@
 #### 05 TODO Tracker 交接
 
 - **无需新增 TODO backlog**: Round 1 evaluation 未降级任何 CR TODO，Round 2 evaluation 明确 CR TODO 0；04 未识别未解决的非阻塞改进项，因此不向 05 交接 TODO 候选。
+
+### Story 11-9 (restart) / 2026-09-11
+
+- **Story**: 11-9（reviewSeries=`restart`；本记录取代下方 2026-09-07 的 main series 记录作为 Story 11.9 当前有效来源。下方记录对应已按 Correct Course 回退并归档于 `11-9-code-review/superseded-main/` 的 1.0/1.1 实现，其规则 CR-API-44 / CR-PROCESS-03 / CR-DOC-08 及 CR-TEST-01 的 11-9 来源保留为历史，不据此放大置信度。）
+- **分析来源**:
+  - `11-9-code-review-summary-20260911-restart-round-1.md` 至 `round-3.md`
+  - `11-9-code-review-evaluation-20260911-restart-round-1.md` 至 `round-3.md`（round 1/2 含 fixRecord）
+  - `11-9-cr-rules-extraction-20260911-restart-round-3.md`
+- **模型使用时间线**:
+  - Round 1–3 Reviewer 三层（blind / edge / auditor）与 aggregator、Evaluator、Fixer（round 1/2）均为 `Claude Opus 5 (claude-opus-5)`；本次 CR04 Rules Extractor 同。全 series 单一模型家族，为 evidence caveat。
+- **结论概览**:
+  - Round 1 `FIX_REQUIRED`：5 个 P1（readdir 非 ENOENT 未捕获、契约 legacy 只读句与 `legacy-resume` 矛盾、runner 调用串未承载 `crDir`、HALTED finalizer 使 `unfinished` 翻转、越界 symlink 先枚举后检测）+ 1 VERIFY；Fixer 全部关闭。
+  - Round 2 `FIX_REQUIRED`：2 个 P1（boundary helper 路径 ELOOP / ENOTDIR / EACCES 穿透；R1-F4 fresh-session 重入子场景 recurred）；Fixer 关闭。
+  - Round 3 `PASS_WITH_DEFERRED_TODOS`：newBlocking=0，累计 7 blocking 关闭；5 deferred（TODO-023~027）、3 dismissed；Auditor AC1–12 与 Threat Model 全 PASS。
+  - 本次 CR04 由用户授权写入规则总结：2 条 global-rule-eligible 并入既有 family（CR-API-15、CR-SEC-04 / CR-API-17），3 条单 Story 候选仅记录。
+
+#### 升格判定摘要
+
+| 候选规则 | 硬性门槛 | 总分 | 建议去向 | 用户确认结果 |
+|----------|----------|------|----------|--------------|
+| 文件系统探测只把 ENOENT 当"不存在"，其余错误码归结构化 block | 通过；与 CR-API-15 同根（missing vs corrupted） | 9/12 | rules-summary | 用户授权，更新 CR-API-15 来源与适用范围 |
+| 路径边界检测先于任何枚举，且检测对象与后续 stat / readdir 使用同一未改写路径 | 通过；与 CR-SEC-04（先严格校验再 normalization）/ CR-API-17（遍历阶段应用边界）同根 | 8/12 | rules-summary | 用户授权，更新 CR-SEC-04 与 CR-API-17 来源与适用范围 |
+| 契约声明"唯一派生点"时必须同步实际调用面并用 prose 断言守护 | 通过；单 Story | 7/12 | 仅记录 | 不升格，观察跨 Story 复现 |
+| "只按文件名判定生命周期"的契约必须显式规定文件名无法区分的状态如何重入 | 通过；单 Story，与决策 A 强绑定 | 7/12 | 仅记录 | 不升格 |
+| 在既有契约插入新章节时逐句复核相邻条款 | 通过；单 Story | 6/12 | 仅记录 | 不升格 |
+| dismissed 3 项（schema redaction 仓库级约定、config 失败 stdout 为空、别名 symlink by-design） | 未通过：非 Story 所有或 by-design | N/A | none | 不沉淀 |
+
+#### 既有规则更新：CR-API-15 Installed-state index 读取必须区分 missing 与 corrupted
+
+- **处理结果**: Story 11.9 restart 的 R1-F1（readdir / stat 面）与 R2-F1（boundary helper 面）在两轮中先后暴露同一根因——文件系统探测把所有错误吞成"不存在"或直接抛异常；来源更新为 `3-1, 11-9`，适用范围从 installed-state index 读取扩展到 `src/config/*` / `src/fs/*` 所有 resolver 的 `readdir` / `stat` / `lstat` / `realpath` 调用面（含共享 helper 间接路径），总分由 7/12 更新为 9/12（复现频次 +1、影响范围 +1）。
+- **更新依据**: `11-9-code-review-evaluation-20260911-restart-round-1.md` R1-F1 accepted P1（同构 11.5 resolver 对非 ENOENT 结构化 block，本实现偏离先例）；`…-restart-round-2.md` R2-F1 accepted P1（修复一次只包住一个调用面）；round 3 三层确认两者 resolved。
+- **规避指南补充**: 修复此类问题时必须枚举同一 invariant 的全部调用面（含共享 helper），而非只修报告的那一处；ENOENT 语义（"不存在 / inside"）保持不变。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-SEC-04 Artifact path public contract 必须先严格校验 POSIX-style 再做 filesystem normalization
+
+- **处理结果**: Story 11.9 restart 的 R3-F1（deferred T1，TODO-023）复现了同一根因的另一形态——`normalizeProjectRelativePosixPath` 把 `\` 改写为 `/` 后 boundary 检查与后续 `stat` / `readdir` 走了两条不同路径，越界 symlink 绕过检测；来源更新为 `2-5, 11-9`，适用范围扩展到所有先做 boundary / symlink-escape 检查再枚举候选的 resolver，总分由 6/12 更新为 8/12（复现频次 +1、风险等级 +1）。
+- **更新依据**: `11-9-code-review-summary-20260911-restart-round-3.md` R3-F1（edge + blind 独立复现，对照组正确 block）；`…-evaluation-…-round-3.md` 判 deferred T1（协作式威胁模型外，但属 in-scope 确定性绕过）。
+- **规避指南补充**: 边界检测对象与实际访问对象必须是同一未经改写的路径；候选名一旦经 normalization 发生变化即 fail-close。
+- **同步状态**: 已写入规则总结
+
+#### 既有规则更新：CR-API-17 Canonical hash walker 必须在遍历阶段应用 candidate include 边界
+
+- **处理结果**: Story 11.9 restart 的 R1-F5（accepted P1）是同一根因——`code-reviews` 越界 symlink 先被 `readdir` 枚举、再做 escape 检测，越界目录名泄入 block 结果；来源更新为 `3-3, 11-9`，适用范围扩展到任何"先枚举再判边界"的 resolver，总分由 7/12 更新为 8/12（复现频次 +1）。
+- **更新依据**: `11-9-code-review-evaluation-20260911-restart-round-1.md` R1-F5 accepted P1（纯重排修复）；round 2 三层确认 resolved（escape block 时 `legacyCrDirs=[]`、`roundEvidence=[]`）。
+- **同步状态**: 已写入规则总结
+
+#### 05 TODO Tracker 交接
+
+- TODO-023（T1）~ TODO-027（T3）已由 restart round 3 CR05 closeout 登记；TODO-018~022 为 superseded-by-restart。
 
 ### Story 11-9 / 2026-09-07
 

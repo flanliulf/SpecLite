@@ -881,11 +881,22 @@ Epic 11 按 Story 11.1 → 11.10 strict serial 执行。每个 Story 只能消�
 
     本 Story 不修改 review/evaluation 文件 basename、CR 算法、round 编号或 CR 审批规则。
 
+### Correct Course Decisions（纠偏裁决，2026-09-11）
+
+首版实现（1.0 / 1.1，24+10+2 轮 CR）把"目录归属"做成了产物认证与审批重放引擎，与 AC12 冲突；项目负责人裁决后按 restart 2.0 重做。以下三项为本 Story 的固定前提，后续修订与 CR 不得重开：
+
+- **决策 A · 威胁模型边界**：目录 resolver 面向协作式本地文件系统。In scope：Story ID 数字归一化、canonical / legacy 目录归属、symlink 越界检测、按 v2 文件名判定未完成 run、ambiguity 稳定诊断且零 mutation。Out of scope（明示）：hard link、CRLF、TOCTOU、伪造 frontmatter / 正文伪字段、产物真伪认证、审批重放、tracker 认证、freshness 比较；resolver 只看目录名与直接子文件名，不读产物内容。AC9 中"无法唯一判断当前轮次"据此解释为：目录 D 含 series S 的未完成 run ⇔ D 的直接子文件中存在 S 的 v2 review summary 且不存在 S 的 v2 finalizer；round 有效性与审批继续归 runner 与 CR06。CR 对 out-of-scope 类 finding 按契约归 `dismiss`。
+- **决策 B · 实现位置**：与 Story 11.1 / 11.5 同构——可执行逻辑在 `src/config/cr-directory.ts`，通过 `speclite resolve cr-directory --story-id <N.N|N-N> --review-series <series> --project-root <root>` 暴露（SPEC 01 CommandResult，schema `speclite.resolve.cr-directory.v1`）；Skill 只调用 CLI，canonical Skill 包不随包投影 `.mjs`。AC7 中的"共享 `cr-config.md`"以 `speclite-code-review-contract/references/cr-contract.md` 的 CR Directory Resolution 章节承载（当前 canonical source 不存在 `cr-config.md`）。Ambiguity 诊断 `cr-directory.ambiguous-resume-root`（`lifecycle` / `error` / `block`）由 shared CR contract 拥有，不进入 SPEC 07。
+- **决策 C · 历史处置**：1.0 / 1.1 的 234 个 CR 产物整目录移入 `{implementation_artifacts}/code-reviews/11-9-code-review/superseded-main/`，TODO-018~022 标 `superseded-by-restart`；不删除。
+
+Restart 2.0 以 reviewSeries=`restart` 三轮 CR 收敛（5 P1 → 2 P1 → 0），completion gate `PASS`，Story `done`；残留 TODO-023~027 均为协作式威胁模型边界内的非阻塞项。
+
 ### Requirement Traceability（需求追踪）
 
 - FR23g
 - NFR14a
 - NFR40f（Code Review 目录部分）
+- CC-2026-09-11-story-11-9-restart（决策 A / B / C）
 
 ## Story 11.10: Inventory All Grill-Related Skill References for Human Confirmation（盘点全部 Grill 相关 Skill 引用供人工确认）
 
