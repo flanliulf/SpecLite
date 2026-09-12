@@ -140,7 +140,7 @@ development_status:
   epic-10-retrospective: done
 
   # Phase-aligned workflow artifact governance. Strict serial: Story 11.1 -> 11.10.
-  epic-11: in-progress
+  epic-11: done
   11-1-executable-artifact-root-resolution-contract: done
   11-2-fresh-install-artifact-root-projection: done
   11-3-existing-install-compatibility-and-diagnostics: done
