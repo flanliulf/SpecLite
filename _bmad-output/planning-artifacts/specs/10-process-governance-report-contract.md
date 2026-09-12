@@ -37,6 +37,7 @@ type GovernanceReportData = {
     artifactPresenceRate: RatioMetric;
     validatePassRate: RatioMetric;
     openGapCount: number;
+    notYetProducedCount: number;
   };
   phaseGaps: GovernancePhaseGap[];
   artifactChecks: GovernanceArtifactCheck[];
@@ -52,6 +53,10 @@ type GovernanceReportData = {
 ```
 
 `rate` 必须是 `covered / total`，保留稳定数字；当 `total === 0` 时输出 `0`。
+
+`openGapCount` 只统计真实 process gap：phase gaps 加上 `artifact-path` issues 中不属于 `reason: "not-yet-produced"` 的项。`notYetProducedCount` 单独统计 `issueId: "artifact-path.missing-required-artifact"` 且 `details.reason === "not-yet-produced"` 的 issue 数量。两者必须互斥，且都是非负整数。`notYetProducedCount` 是 `speclite.command-result.v1` 内的 backward-compatible additive field；pristine install 下 `openGapCount` 不得因为尚未产出的 contracted artifacts 而升高。
+
+`validatePassRate` 以 `speclite validate` 的 checked categories 为 `total`。一个 category 计入 `covered` 的条件是该 category 下没有 `severity` 为 `warning`、`error` 或 `critical` 的 `ValidationIssue`；`severity: "info"` 按 `SPEC 07` 的定义只是状态说明或建议，不得使 category 视为未通过。因此 pristine fresh install 下即使 `artifact-path` category 存在 `not-yet-produced` info issue，`validatePassRate` 仍必须为 `total / total`。该规则是 `speclite.command-result.v1` 内的语义澄清，不改变 `RatioMetric` shape。
 
 ## Phase Gaps（阶段缺口）
 
@@ -99,6 +104,8 @@ type GovernanceArtifactCheck = {
 - `category: "artifact-path"`
 - `issueId: "artifact-path.missing-required-artifact"`
 - `affectedPath: defaultOutputPath`
+
+该 issue 的 severity 与 `details.reason` 由 `_bmad-output/planning-artifacts/specs/07-validation-issue-taxonomy.md` 定义：artifact root 下尚无任何 workflow artifact 时为 `info` / `not-yet-produced`，其余为 `warning` / `no-artifacts-found`。报告不得重新定义该判定，也不得把 `not-yet-produced` 计入 `openGapCount`。
 
 metadata 不合法时继续复用 `artifact-path.missing-required-metadata` 或 `artifact-path.invalid-required-metadata`。
 

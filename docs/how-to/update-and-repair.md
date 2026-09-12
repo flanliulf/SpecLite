@@ -73,7 +73,11 @@ NO_COLOR=1 speclite update "$PROJECT_ROOT" --repair --yes
 NO_COLOR=1 speclite validate "$PROJECT_ROOT"
 ```
 
+Repair plan 会把 human-owned custom files 和 workflow-owned artifacts 列为 `action: "skip"`，`reason` 为 `human-owned` 或 `workflow-owned`。这些 protected paths 不是 conflict，也不会阻断其余 installer-owned drift 的修复；授权写入后它们出现在 `skippedPaths` 中，内容保持不变。安装器在 fresh install 创建的 `_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` 与 `.gitignore` 同样按 skip 处理。
+
 ## Handle Conflicts（处理冲突）
+
+`conflicts` 只保留真正无法安全处理的 blocker：unknown ownership、path escape、missing source evidence 和 unsupported repair。Protected ownership 本身不会产生 conflict。
 
 如果 output 是 `blocked-by-conflict`，不要直接追加普通 `--yes` 试图绕过。先阅读 `Issues`、`conflicts` 和 `Next Actions`：
 

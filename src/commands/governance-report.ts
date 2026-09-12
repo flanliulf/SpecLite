@@ -93,7 +93,10 @@ export async function runGovernanceReportCommand(input: {
         checkedCategories,
         issues,
       }),
-      openGapCount: phaseCoverage.phaseGaps.length + issues.filter((issue) => issue.category === "artifact-path").length,
+      openGapCount:
+        phaseCoverage.phaseGaps.length +
+        issues.filter((issue) => issue.category === "artifact-path" && !isNotYetProducedIssue(issue)).length,
+      notYetProducedCount: issues.filter(isNotYetProducedIssue).length,
     },
     phaseGaps: phaseCoverage.phaseGaps,
     artifactChecks: artifactResult.artifactChecks,
@@ -120,6 +123,14 @@ export async function runGovernanceReportCommand(input: {
         ? ["Use this report as local evidence for Post-MVP process governance review."]
         : ["Inspect phase gaps and validation issues before treating process governance as covered."],
   });
+}
+
+/** A contracted artifact that has not been produced yet is reported separately from real process gaps. */
+function isNotYetProducedIssue(issue: ValidationIssue): boolean {
+  return (
+    issue.issueId === "artifact-path.missing-required-artifact" &&
+    issue.details?.reason === "not-yet-produced"
+  );
 }
 
 function calculatePhaseCoverage(input: {
@@ -189,7 +200,10 @@ function createValidatePassRate(input: {
   checkedCategories: IssueCategory[];
   issues: ValidationIssue[];
 }): RatioMetric {
-  const categoriesWithIssues = new Set(input.issues.map((issue) => issue.category));
+  // SPEC 10: info issues are status notes, not failures; only warning/error/critical fail a category.
+  const categoriesWithIssues = new Set(
+    input.issues.filter((issue) => issue.severity !== "info").map((issue) => issue.category),
+  );
   return createRatioMetric({
     covered: input.checkedCategories.filter((category) => !categoriesWithIssues.has(category)).length,
     total: input.checkedCategories.length,

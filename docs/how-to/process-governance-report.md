@@ -27,12 +27,13 @@ npm run dev -- governance-report /path/to/target-project --json
 
 ## Metrics（指标）
 
-报告包含四个核心指标：
+报告包含五个核心指标：
 
 - `phaseEntryCoverage`：来自 `_speclite/_config/phase-coverage.json` 的阶段入口覆盖。
 - `artifactPresenceRate`：来自 `phaseCoverage.rows[].artifactContract` 的标准产物存在与 metadata contract 检查。
-- `validatePassRate`：基于 `speclite validate` 已检查 categories 和 `ValidationIssue` 聚合。
-- `openGapCount`：阶段缺口与 artifact contract issue 的数量。
+- `validatePassRate`：基于 `speclite validate` 已检查 categories 和 `ValidationIssue` 聚合；只有 `warning`、`error`、`critical` issue 会让 category 计为未通过，`info` 不计入。
+- `openGapCount`：阶段缺口与 artifact contract issue 的数量；尚未产出的 contracted artifact 不计入。
+- `notYetProducedCount`：已解析 artifact root 下尚无任何 workflow artifact 时，被标记为 `not-yet-produced` 的 contracted artifact 数量。
 
 JSON 输出位于 `data.metrics`，完整 envelope 遵循 [`../reference/command-result-json.md`](../reference/command-result-json.md)。
 

@@ -169,6 +169,8 @@ Operation locks should be released after controlled success or controlled failur
 
 If source evidence or canonical baseline is missing, the planner must produce a conflict with `reason: "missing-source-evidence"` instead of a repair action.
 
+Repair planning must handle protected ownership exactly the way normal update planning does. Human-owned and workflow-owned entries already registered in the files index are planned skips, not repair blockers: the planner must produce `action: "skip"` with `reason: "human-owned"` or `reason: "workflow-owned"`, must not produce a conflict, and must not downgrade `writeAuthorized` because of them. The same rule applies to `_speclite/custom/config.toml`, `_speclite/custom/config.user.toml`, and the gitignore entry created by fresh install under `Human-Owned TOML Stubs（人工维护 TOML Stub）` in this SPEC, so installer-owned drift on a pristine installation must be repairable. Only unknown ownership, path escape, missing source evidence, and unsupported repair are repair conflicts.
+
 ## Target Status Mapping（目标状态映射）
 
 Target status vocabulary is layer-specific:

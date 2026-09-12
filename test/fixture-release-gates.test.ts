@@ -3,11 +3,14 @@ import os from "node:os";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { describe, expect, it } from "vitest";
+import { runGovernanceReportCommand } from "../src/commands/governance-report.js";
 import { runInstallCommand } from "../src/commands/install.js";
 import { runUpdateCommand } from "../src/commands/update.js";
 import { runValidateCommand } from "../src/commands/validate.js";
 import {
+  GovernanceReportCommandResultSchema,
   InstallCommandResultSchema,
+  RepairCommandResultSchema,
   UpdateCommandResultSchema,
   ValidateCommandResultSchema,
 } from "../src/diagnostics/command-result-schema.js";
@@ -141,6 +144,141 @@ describe("fresh-install-empty-project release gate fixture", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+});
+
+describe("pristine fresh install validate and repair release gate", () => {
+  it("validates a pristine fresh install without any error or critical issue", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-pristine-validate-"));
+
+    try {
+      const install = await runFreshInstall(tempRoot);
+      expect(install.exitCode).toBe(0);
+
+      const outcome = await runValidateCommand({
+        options: { json: true },
+        runtime: { ...supportedRuntime, cwd: tempRoot, targetProject: "fresh-install-empty-project" },
+      });
+      const parsed = ValidateCommandResultSchema.parse(JSON.parse(renderCommandResultJson(outcome.result)));
+
+      expect(outcome.exitCode).toBe(0);
+      expect(parsed.status).toBe("success");
+      expect(parsed.data.issueCounts.error).toBe(0);
+      expect(parsed.data.issueCounts.critical).toBe(0);
+      expect(parsed.data.issueCounts.warning).toBe(0);
+      expect(
+        parsed.issues.filter(
+          (issue) => issue.severity === "error" || issue.severity === "critical",
+        ),
+      ).toEqual([]);
+      expect(parsed.issues.map((issue) => issue.issueId)).not.toContain(
+        "file-integrity.unknown-ownership",
+      );
+      // Contracted artifacts that no workflow has produced yet are reported as info, not as gaps.
+      for (const issue of parsed.issues) {
+        expect(issue).toMatchObject({
+          issueId: "artifact-path.missing-required-artifact",
+          severity: "info",
+          details: expect.objectContaining({ reason: "not-yet-produced" }),
+        });
+      }
+
+      // SPEC 10: info issues must not lower validatePassRate, and not-yet-produced artifacts are not gaps.
+      const governance = GovernanceReportCommandResultSchema.parse(
+        JSON.parse(
+          renderCommandResultJson(
+            (
+              await runGovernanceReportCommand({
+                options: { json: true },
+                runtime: { ...supportedRuntime, cwd: tempRoot, targetProject: "fresh-install-empty-project" },
+              })
+            ).result,
+          ),
+        ),
+      );
+      expect(governance.status).toBe("success");
+      expect(governance.data.metrics.validatePassRate.total).toBeGreaterThan(0);
+      expect(governance.data.metrics.validatePassRate).toEqual({
+        covered: governance.data.metrics.validatePassRate.total,
+        total: governance.data.metrics.validatePassRate.total,
+        rate: 1,
+      });
+      expect(governance.data.metrics.openGapCount).toBe(0);
+      expect(governance.data.metrics.notYetProducedCount).toBe(parsed.issues.length);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("repairs a tampered IDE mirror on a pristine fresh install while skipping protected paths", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-pristine-repair-"));
+
+    try {
+      const install = await runFreshInstall(tempRoot);
+      expect(install.exitCode).toBe(0);
+
+      const mirrorPath = ".claude/skills/speclite-help/SKILL.md";
+      const gitignorePath = path.join(tempRoot, ".gitignore");
+      const customPath = path.join(tempRoot, "_speclite/custom/config.toml");
+      const userCustomPath = path.join(tempRoot, "_speclite/custom/config.user.toml");
+      const canonicalMirrorHash = await hashFile(path.join(tempRoot, mirrorPath));
+      const gitignoreBefore = await readFile(gitignorePath, "utf8");
+      const customBefore = await readFile(customPath, "utf8");
+      const userCustomBefore = await readFile(userCustomPath, "utf8");
+
+      await writeFile(path.join(tempRoot, mirrorPath), "# tampered IDE mirror\n", "utf8");
+
+      const tamperedValidate = ValidateCommandResultSchema.parse(
+        (
+          await runValidateCommand({
+            options: { json: true },
+            runtime: { ...supportedRuntime, cwd: tempRoot, targetProject: "fresh-install-empty-project" },
+          })
+        ).result,
+      );
+      expect(tamperedValidate.status).toBe("failure");
+      expect(tamperedValidate.issues.map((issue) => issue.issueId)).toContain(
+        "ide-mirror.hash-mismatch",
+      );
+
+      const repairOutcome = await runUpdateCommand({
+        options: { json: true, repair: true, yes: true },
+        runtime: { ...supportedRuntime, cwd: tempRoot, targetProject: "fresh-install-empty-project" },
+      });
+      const repair = RepairCommandResultSchema.parse(
+        JSON.parse(renderCommandResultJson(repairOutcome.result)),
+      );
+
+      expect(repairOutcome.exitCode).toBe(0);
+      expect(repair.status).toBe("success");
+      expect(repair.data.conflicts).toEqual([]);
+      expect(repair.data.writeAuthorized).toBe(true);
+      expect(repair.data.changedPaths).toContain(mirrorPath);
+      expect(repair.data.skippedPaths).toEqual(
+        expect.arrayContaining([
+          ".gitignore",
+          "_speclite/custom/config.toml",
+          "_speclite/custom/config.user.toml",
+        ]),
+      );
+      await expect(hashFile(path.join(tempRoot, mirrorPath))).resolves.toBe(canonicalMirrorHash);
+      await expect(readFile(gitignorePath, "utf8")).resolves.toBe(gitignoreBefore);
+      await expect(readFile(customPath, "utf8")).resolves.toBe(customBefore);
+      await expect(readFile(userCustomPath, "utf8")).resolves.toBe(userCustomBefore);
+
+      const finalValidate = await runValidateCommand({
+        options: { json: true },
+        runtime: { ...supportedRuntime, cwd: tempRoot, targetProject: "fresh-install-empty-project" },
+      });
+      const finalParsed = ValidateCommandResultSchema.parse(finalValidate.result);
+
+      expect(finalValidate.exitCode).toBe(0);
+      expect(finalParsed.status).toBe("success");
+      expect(finalParsed.data.issueCounts.error).toBe(0);
+      expect(finalParsed.data.issueCounts.critical).toBe(0);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  }, 60_000);
 });
 
 describe("selected ecosystem fresh install release gate fixtures", () => {

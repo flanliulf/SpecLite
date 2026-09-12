@@ -71,7 +71,10 @@ export async function validateFileIntegrity(input: {
     }
 
     if (entry.ownership !== "installer-owned") {
-      if (isInstallerControlledArtifact(entry)) {
+      // Installer-registered protected entries (for example project-custom-stub TOML files and the
+      // gitignore entry) resolve to a protected ownership through the ownership model and are expected
+      // pristine install state. Only entries whose ownership cannot be established are reported.
+      if (isInstallerControlledArtifact(entry) && classification.ownership === "unknown") {
         validatedPaths.add(entry.path);
         issues.push(
           createFileIntegrityIssue({

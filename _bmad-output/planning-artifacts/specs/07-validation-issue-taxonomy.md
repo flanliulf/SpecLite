@@ -261,6 +261,7 @@ Default severity（默认严重级别）：
 
 - 当 workflow output 无法写入时为 `error`
 - 当 optional artifact path 缺失但 workflow 可以继续时为 `warning`
+- 当 contracted artifact 只是尚未产出，而不是既有流程出现缺口时为 `info`
 
 Reserved MVP issue ids：
 
@@ -279,6 +280,15 @@ Reserved MVP issue ids：
 - `artifact-path.broken-shard-reference`
 - `artifact-path.subject-document-missing`
 - `artifact-path.prd-validation-report-exists`
+
+`artifact-path.missing-required-artifact` 用于 contracted artifact output path 下没有发现 workflow artifact。它必须区分“尚未产出”与“缺失”两种状态，且在两种状态下保持同一个 `issueId` 与同一个 `affectedPath`：
+
+| State（状态） | Condition（条件） | `severity` | `details.reason` |
+| --- | --- | --- | --- |
+| Not yet produced（尚未产出） | 已解析的 artifact root 目录存在，且该 artifact root 下当前没有发现任何 workflow artifact。 | `info` | `not-yet-produced` |
+| Missing（缺失） | artifact root 下已经存在其它 workflow artifact，但本 contract 的 output path 下没有发现 artifact。 | `warning` | `no-artifacts-found` |
+
+`not-yet-produced` 表示 pristine install 或 workflow 尚未运行，不得被解释为 process gap；因此 pristine fresh install 后 `validate` 不得因为这些 entry 产生 warning 或 error。`no-artifacts-found` 表示项目已经在产出 workflow artifacts，但该 contract 仍未覆盖，属于真实 process gap。`artifact-root-resolver` 产生的 `reason: "missing-required-config"` 不属于上述两种状态，语义与 severity 保持不变。Details 必须保持 deterministic：只允许 `artifactType` 与稳定 `reason`，不得包含 absolute path、home directory、timestamp、stack trace 或随机值。
 
 `artifact-path.unresolved-token` details 必须使用 deterministic fields，例如 `field` 和 `reason: "unresolved-token"`；不得包含 raw path value、absolute path、home directory、drive letter、temporary/cache path、credential-bearing URL、timestamp、stack trace 或随机值。
 
@@ -326,6 +336,8 @@ Reserved MVP issue ids：
 - `file-integrity.case-conflict`
 - `file-integrity.executable-bit-mismatch`
 - `file-integrity.stale-temp-file`
+
+`file-integrity.unknown-ownership` 只用于 installer-controlled space 内 ownership 无法建立的 files index entry。判定必须复用 ownership model 的 path classification：当 entry 的 `ownership` 不是 `installer-owned`，且该 path 的 classification 结果为 `unknown`（包括 path escape 与不属于任何已声明 human-owned custom path、installer-owned path 或 workflow artifact root 的 path）时，才报告该 issue。安装器合法登记的 protected entry 不得触发它：files index 中 `ownership` 为 `human-owned` 或 `workflow-owned`，且 path classification 给出同为 protected 的 ownership 的 entry（例如 `artifactKind: "project-custom-stub"` 的 `_speclite/custom/*.toml`、`artifactKind: "gitignore"` 的 `.gitignore`，以及 workflow artifact root 下的 workflow-owned entry）属于 expected pristine install state，必须保持无 issue。Files index 记录为 `installer-owned` 但 classification 为 protected 的 entry 仍由 `file-integrity.unsafe-overwrite-risk` 覆盖，不得改用本 issue。
 
 ### `operation-lock`（operation-lock 类别）
 

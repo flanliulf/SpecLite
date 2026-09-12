@@ -96,8 +96,9 @@ Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human re
 |---|---|
 | `phaseEntryCoverage` | phase coverage 中已映射 phase/target 的比例。 |
 | `artifactPresenceRate` | workflow artifact contract 存在且 metadata 有效的比例。 |
-| `validatePassRate` | checked validation categories 中未出现 issue 的比例。 |
-| `openGapCount` | phase gaps 与 artifact-path issue 的合计数量。 |
+| `validatePassRate` | checked validation categories 中未出现 `warning`/`error`/`critical` issue 的比例；`info` issue 不使 category 计为未通过。 |
+| `openGapCount` | phase gaps 与 artifact-path issue 的合计数量，不含 `not-yet-produced` 项。 |
+| `notYetProducedCount` | `artifact-path.missing-required-artifact` 中 `details.reason` 为 `not-yet-produced` 的数量。 |
 
 治理报告只证明本地 contract evidence，不证明文档内容质量、人工 review 质量或团队真实执行质量。
 

@@ -1361,6 +1361,36 @@ describe("validate command manifest/index schema validation", () => {
             artifactKind: "generated-control",
             sourceRef: "local:ownerless",
           },
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: "_speclite/custom/config.toml",
+            ownership: "human-owned",
+            hash: "sha256:project-custom-stub",
+            hashAlgorithm: "sha256",
+            executable: false,
+            artifactKind: "project-custom-stub",
+            sourceRef: "install-plan:human-owned-stub",
+          },
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: "_speclite/custom/config.user.toml",
+            ownership: "human-owned",
+            hash: "sha256:user-custom-stub",
+            hashAlgorithm: "sha256",
+            executable: false,
+            artifactKind: "project-custom-stub",
+            sourceRef: "install-plan:human-owned-stub",
+          },
+          {
+            schemaVersion: "speclite.files-index.v1",
+            path: ".gitignore",
+            ownership: "human-owned",
+            hash: "sha256:gitignore",
+            hashAlgorithm: "sha256",
+            executable: false,
+            artifactKind: "gitignore",
+            sourceRef: "install-plan:user-config-gitignore",
+          },
         ],
       });
 
@@ -1443,6 +1473,14 @@ describe("validate command manifest/index schema validation", () => {
           }),
         }),
       ]);
+      // Installer-registered protected entries resolve to a protected ownership and stay silent.
+      expect(
+        parsed.issues.filter((issue) =>
+          [".gitignore", "_speclite/custom/config.toml", "_speclite/custom/config.user.toml"].includes(
+            issue.affectedPath ?? "",
+          ),
+        ),
+      ).toEqual([]);
       expect(JSON.stringify(parsed)).not.toContain("../outside.md");
       expect(JSON.stringify(parsed)).not.toContain(tempRoot);
     } finally {

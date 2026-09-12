@@ -30,6 +30,7 @@ describe("governance report command", () => {
         artifactPresenceRate: { covered: 1, total: 1, rate: 1 },
         validatePassRate: { covered: 8, total: 8, rate: 1 },
         openGapCount: 0,
+        notYetProducedCount: 0,
       });
       expect(parsed.data.phaseGaps).toEqual([]);
       expect(parsed.data.artifactChecks).toEqual([

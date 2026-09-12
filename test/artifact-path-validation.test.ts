@@ -462,4 +462,77 @@ describe("artifact path validation", () => {
       await rm(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("reports contracted artifacts as not-yet-produced when the artifact root holds no artifact", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-not-yet-produced-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite-output/2-planning-artifacts/prd"), { recursive: true });
+      await mkdir(path.join(tempRoot, "_speclite-output/4-implementation-artifacts/stories"), {
+        recursive: true,
+      });
+
+      const result = await validateArtifactPaths({
+        projectRoot: tempRoot,
+        configuredRoot: "_speclite-output",
+        defaultOutputPaths: [
+          { artifactType: "prd", defaultOutputPath: "_speclite-output/2-planning-artifacts/prd" },
+          { artifactType: "story", defaultOutputPath: "_speclite-output/4-implementation-artifacts/stories" },
+        ],
+      });
+
+      expect(result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "artifact-path.missing-required-artifact",
+          severity: "info",
+          affectedPath: "_speclite-output/2-planning-artifacts/prd",
+          details: { artifactType: "prd", reason: "not-yet-produced" },
+        }),
+        expect.objectContaining({
+          issueId: "artifact-path.missing-required-artifact",
+          severity: "info",
+          affectedPath: "_speclite-output/4-implementation-artifacts/stories",
+          details: { artifactType: "story", reason: "not-yet-produced" },
+        }),
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps missing contracted artifacts as no-artifacts-found once the artifact root holds artifacts", async () => {
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-artifact-real-gap-"));
+
+    try {
+      await mkdir(path.join(tempRoot, "_speclite-output/2-planning-artifacts/prd"), { recursive: true });
+      await mkdir(path.join(tempRoot, "_speclite-output/4-implementation-artifacts/stories"), {
+        recursive: true,
+      });
+      await writeFile(
+        path.join(tempRoot, "_speclite-output/2-planning-artifacts/prd/prd.md"),
+        "---\nworkflowType: create-prd\nsourceSkill: speclite-create-prd\ngeneratedAt: 2026-06-02T00:00:00.000Z\n---\n# PRD\n",
+        "utf8",
+      );
+
+      const result = await validateArtifactPaths({
+        projectRoot: tempRoot,
+        configuredRoot: "_speclite-output",
+        defaultOutputPaths: [
+          { artifactType: "prd", defaultOutputPath: "_speclite-output/2-planning-artifacts/prd" },
+          { artifactType: "story", defaultOutputPath: "_speclite-output/4-implementation-artifacts/stories" },
+        ],
+      });
+
+      expect(result.issues).toEqual([
+        expect.objectContaining({
+          issueId: "artifact-path.missing-required-artifact",
+          severity: "warning",
+          affectedPath: "_speclite-output/4-implementation-artifacts/stories",
+          details: { artifactType: "story", reason: "no-artifacts-found" },
+        }),
+      ]);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
+  });
 });

@@ -426,14 +426,22 @@ export async function planRepair(input: {
       artifactRoot: context.artifactRoot,
       artifactRoots: context.artifactRoots,
     });
-    if (entry.ownership === "installer-owned" && classification.ownership === "workflow-owned") {
+    // Repair treats registered protected ownership the same way normal update planning does:
+    // a planned skip, not a conflict. Only unknown ownership keeps blocking repair.
+    const protectedOwnership = entry.ownership !== "installer-owned"
+      ? entry.ownership
+      : classification.ownership === "human-owned" || classification.ownership === "workflow-owned"
+        ? classification.ownership
+        : undefined;
+
+    if (protectedOwnership !== undefined) {
       actions.push({
         affectedPath: entry.path,
-        ownership: "workflow-owned",
+        ownership: protectedOwnership,
         ...(currentHash === undefined ? {} : { currentHash }),
         expectedHash: entry.hash,
         action: "skip",
-        reason: "workflow-owned",
+        reason: protectedOwnership,
       });
       continue;
     }

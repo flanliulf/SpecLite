@@ -54,13 +54,16 @@ SpecLite 是 local-first CLI control plane。它会把 canonical skill package�
 
 - `_speclite/custom/*.toml`
 - `_speclite/custom/*.user.toml`
+- `.gitignore`
 
 这些 path 的 `protected` 状态为 `true`。SpecLite 可以读取它们来解析 project/user customization，但不能把它们当成 installer-owned output 重新生成。
+
+Fresh install 会按 `SPEC 03` 创建 `_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` stub 和 gitignore entry，并把它们以 `ownership: "human-owned"` 登记进 files index。它们从创建那一刻起就属于人工维护范围，因此是 expected pristine install state，不是异常。
 
 在命令行为上：
 
 - `update` 遇到 human-owned action 会 `skip`。
-- `repair` 不会把 human-owned drift 当作可自动恢复项。
+- `repair` 同样把 human-owned path 计划为 `skip`（`reason: "human-owned"`），不会把它当作可自动恢复项，也不会因此产生 conflict 或阻断其余 installer-owned drift 的修复。
 - `uninstall` 遇到 human-owned path 会 `preserve`。
 
 这条边界保护的是用户意图。即使 installer 能读懂这些 TOML，也不能假设自己有权重写它们。
@@ -83,7 +86,7 @@ SpecLite 是 local-first CLI control plane。它会把 canonical skill package�
 在命令行为上：
 
 - `update` 遇到 workflow-owned action 会 `skip`。
-- `repair` 不会自动重建 workflow 产物。
+- `repair` 同样把 workflow-owned path 计划为 `skip`（`reason: "workflow-owned"`），不会自动重建 workflow 产物，也不会产生 conflict。
 - `uninstall` 不会自动删除 workflow-owned path，而是要求 manual action。
 
 ## Lifecycle Matrix（生命周期矩阵）
@@ -91,9 +94,9 @@ SpecLite 是 local-first CLI control plane。它会把 canonical skill package�
 | Ownership | `update` | `update --repair` | `uninstall` | Rationale |
 |---|---|---|---|---|
 | `installer-owned` | 可生成 `create`、`update`、`skip` 或 `conflict` action | 可恢复安全证明的 drift | 可自动 `remove` | 属于 installer 管理范围，但仍受 hash、source evidence、conflict 和授权约束。 |
-| `human-owned` | `skip` | 不自动修复 | `preserve` | 团队人工维护，installer 可读取但不可重写。 |
-| `workflow-owned` | `skip` | 不自动修复 | `manual-action` | 过程产物记录真实研发历史，删除或修改需要人工判断。 |
-| `unknown` | protected | protected | `manual-action` | 无法证明 owner 时保守处理。 |
+| `human-owned` | `skip` | `skip`（不自动修复，不产生 conflict） | `preserve` | 团队人工维护，installer 可读取但不可重写。 |
+| `workflow-owned` | `skip` | `skip`（不自动修复，不产生 conflict） | `manual-action` | 过程产物记录真实研发历史，删除或修改需要人工判断。 |
+| `unknown` | `conflict` | `conflict` | `manual-action` | 无法证明 owner 时保守处理，并阻断自动写入。 |
 
 ## Safety Gates（安全门禁）
 
@@ -113,6 +116,8 @@ SpecLite 是 local-first CLI control plane。它会把 canonical skill package�
 `validate` 的 file integrity 规则会重新分类 files index entries。如果 files index 记录某个 entry 是 `installer-owned`，但 runtime 分类发现它落在 `human-owned` 或 `workflow-owned` 边界内，系统会报告 `file-integrity.unsafe-overwrite-risk`。
 
 这个检查用于发现旧 manifest、错误迁移或路径配置变化造成的危险状态。它把潜在覆盖风险暴露为 validation issue，而不是让后续 update 继续写入。
+
+反方向的检查是 `file-integrity.unknown-ownership`：只有当 entry 记录为 `human-owned` 或 `workflow-owned`，但 runtime 分类无法为该 path 建立任何已声明的 ownership（结果为 `unknown`）时才报告。安装器合法登记的 protected entry（`_speclite/custom/*.toml` stub、`.gitignore`、artifact root 下的 workflow 产物）分类结果与记录一致，因此 pristine install 不会产生该 issue。
 
 ## Common Misreadings（常见误解）
 

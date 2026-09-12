@@ -443,6 +443,7 @@ export const GovernanceReportMetricsSchema = z
     artifactPresenceRate: RatioMetricSchema,
     validatePassRate: RatioMetricSchema,
     openGapCount: z.number().int().nonnegative(),
+    notYetProducedCount: z.number().int().nonnegative(),
   })
   .strict();
 

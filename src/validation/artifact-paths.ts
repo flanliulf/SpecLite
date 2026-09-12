@@ -45,6 +45,7 @@ export async function validateArtifactPaths(input: {
   const validatedPaths = new Set<string>([input.configuredRoot]);
   for (const root of input.artifactRoots ?? []) validatedPaths.add(root.resolvedRoot);
   const artifactChecks: ArtifactPathCheck[] = [];
+  let discoveredArtifactCount = 0;
 
   for (const contract of checks) {
     const artifactRootEvidence = findArtifactRootEvidence({
@@ -70,6 +71,7 @@ export async function validateArtifactPaths(input: {
       );
     }
     const contractArtifacts = dedupeDiscoveredArtifacts(artifacts);
+    discoveredArtifactCount += contractArtifacts.length;
     const contractIssueStartIndex = issues.length;
 
     if (contractArtifacts.length === 0) {
@@ -117,8 +119,12 @@ export async function validateArtifactPaths(input: {
     });
   }
 
+  const notYetProduced =
+    discoveredArtifactCount === 0 &&
+    (await directoryExists(path.join(input.projectRoot, input.configuredRoot)));
+
   return {
-    issues,
+    issues: notYetProduced ? issues.map(markNotYetProducedArtifactIssue) : issues,
     validatedPaths: [...validatedPaths],
     artifactChecks: artifactChecks.sort((left, right) =>
       left.defaultOutputPath.localeCompare(right.defaultOutputPath) ||
@@ -360,6 +366,36 @@ function createMissingArtifactIssue(input: {
     impact: "A contracted workflow artifact output path contains no discoverable artifacts.",
     suggestedNextStep: "Run the workflow that writes the contracted artifact before treating this process artifact as covered.",
   };
+}
+
+/**
+ * Downgrades "no artifacts found" reports to "not yet produced" when the artifact root exists but the
+ * project has not produced any workflow artifact at all. A pristine installation is not a process gap.
+ */
+function markNotYetProducedArtifactIssue(issue: ValidationIssue): ValidationIssue {
+  if (
+    issue.issueId !== "artifact-path.missing-required-artifact" ||
+    issue.component !== "governance-report:artifact-contract" ||
+    issue.details?.reason !== "no-artifacts-found"
+  ) {
+    return issue;
+  }
+
+  return {
+    ...issue,
+    severity: "info",
+    details: { ...issue.details, reason: "not-yet-produced" },
+    impact: "A contracted workflow artifact has not been produced yet in this installation.",
+    suggestedNextStep: "Run the workflow that writes the contracted artifact when this phase starts.",
+  };
+}
+
+async function directoryExists(absolutePath: string): Promise<boolean> {
+  try {
+    return (await stat(absolutePath)).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

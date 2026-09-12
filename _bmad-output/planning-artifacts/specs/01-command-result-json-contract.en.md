@@ -448,7 +448,9 @@ type UpdatePlan = {
 type RepairPlan = {
   actions: Array<{
     affectedPath: string;
-    ownership: "installer-owned";
+    // "restore-canonical" and "regenerate" may only be "installer-owned";
+    // "human-owned" and "workflow-owned" may only appear on action: "skip"
+    ownership: "installer-owned" | "human-owned" | "workflow-owned";
     currentHash?: string;
     expectedHash: string;
     action: "restore-canonical" | "regenerate" | "skip";
@@ -464,7 +466,7 @@ type RepairPlan = {
 
 Every path in public projection types must follow the Path Policy in this SPEC. This includes `resolvedRoot` when it refers to a target project path, `lockPath`, `targetPath`, `specliteRoot`, `artifactRoot`, `manifestPath`, `affectedPath`, and any future public path field.
 
-`UpdatePlan` and `RepairPlan` describe planned effects, not execution logs. `RepairPlan` may only include installer-owned actions; human-owned custom files and workflow-owned artifacts must not appear as repairable actions.
+`UpdatePlan` and `RepairPlan` describe planned effects, not execution logs. `restore-canonical` and `regenerate` in `RepairPlan` may only be used for installer-owned paths; human-owned custom files and workflow-owned artifacts must not appear as repairable actions and may only appear as `action: "skip"` carrying `reason: "human-owned"` or `reason: "workflow-owned"`.
 
 Planning model boundaries:
 
@@ -475,7 +477,9 @@ Planning model boundaries:
 | `RepairPlan` | This SPEC | Public `update --repair --json` projection | Planned installer-owned repair effects visible to automation; not an execution log. |
 | `changedPaths` / `skippedPaths` | This SPEC | Public command result fields | Actual apply result for the current command only. Empty when `writeAuthorized === false`. |
 
-Normal `update` must treat installer-owned drift as a conflict; interactive confirmation or `--yes` for normal `update` only authorizes conflict-free planned update writes and must not convert a drift conflict into a repair action. Drift may be repaired only when the command is `update --repair` and repair writes are explicitly authorized through interactive confirmation or `--yes`. In `update --repair`, installer-owned drift that can be safely restored or regenerated from the resolved canonical source and installer templates should become a `repairPlan.actions[]` entry, not a `conflicts[]` entry. `conflicts[]` in repair output is reserved for blockers that cannot be safely repaired, such as human-owned or workflow-owned paths, unknown ownership, missing source evidence, or unsupported repair.
+Normal `update` must treat installer-owned drift as a conflict; interactive confirmation or `--yes` for normal `update` only authorizes conflict-free planned update writes and must not convert a drift conflict into a repair action. Drift may be repaired only when the command is `update --repair` and repair writes are explicitly authorized through interactive confirmation or `--yes`. In `update --repair`, installer-owned drift that can be safely restored or regenerated from the resolved canonical source and installer templates should become a `repairPlan.actions[]` entry, not a `conflicts[]` entry. `conflicts[]` in repair output is reserved for blockers that cannot be safely repaired, such as unknown ownership, path escape, missing source evidence, or unsupported repair.
+
+Protected ownership is not itself a repair blocker. For human-owned and workflow-owned entries already registered in the files index, `update --repair` must behave the same as normal `update`: it must emit `action: "skip"` in `repairPlan.actions[]` (with `reason` of `human-owned` or `workflow-owned`) and must not emit a `conflicts[]` entry. Protected paths legitimately created by the installer during fresh install (for example `_speclite/custom/config.toml`, `_speclite/custom/config.user.toml`, and `.gitignore`) must therefore not block installer-owned drift repair on a pristine installation. When repair writes are authorized, those skip actions must appear in `skippedPaths` and their content must not be rewritten. `unknown` ownership (including path escape and any path whose ownership cannot be established from the manifest or files index) must still remain a `conflicts[]` blocker.
 
 `conflicts` describe planning diagnostics, not apply execution results. They do not depend on write authorization. Dry-run output and output with `writeAuthorized === false` must still include discovered conflicts so automation can detect blockers before applying writes. `conflicts` must not be interpreted as paths that failed during the current apply phase.
 

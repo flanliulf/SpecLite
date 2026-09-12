@@ -1357,7 +1357,7 @@ describe("update ownership planning", () => {
     }
   });
 
-  it("keeps protected and source-unsafe repair candidates as conflicts instead of repair actions", async () => {
+  it("skips protected repair candidates and keeps only source-unsafe candidates as conflicts", async () => {
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), "speclite-repair-protected-conflicts-"));
 
     try {
@@ -1389,11 +1389,24 @@ describe("update ownership planning", () => {
       const parsed = RepairCommandResultSchema.parse(outcome.result);
 
       expect(outcome.exitCode).toBe(1);
-      expect(parsed.data.repairPlan.actions).toEqual([]);
+      expect(parsed.data.repairPlan.actions).toEqual([
+        expect.objectContaining({
+          affectedPath: "_speclite-output/report.md",
+          ownership: "workflow-owned",
+          action: "skip",
+          reason: "workflow-owned",
+        }),
+        expect.objectContaining({
+          affectedPath: "_speclite/custom/config.toml",
+          ownership: "human-owned",
+          action: "skip",
+          reason: "human-owned",
+        }),
+      ]);
       expect(parsed.issues).toEqual([
         expect.objectContaining({
           issueId: "update.conflicts",
-          details: { conflictCount: 4 },
+          details: { conflictCount: 2 },
         }),
       ]);
       expect(parsed.data.conflicts).toEqual([
@@ -1403,19 +1416,9 @@ describe("update ownership planning", () => {
           reason: "unknown-ownership",
         }),
         expect.objectContaining({
-          affectedPath: "_speclite-output/report.md",
-          ownership: "workflow-owned",
-          reason: "workflow-owned",
-        }),
-        expect.objectContaining({
           affectedPath: "_speclite/config.toml",
           ownership: "installer-owned",
           reason: "missing-source-evidence",
-        }),
-        expect.objectContaining({
-          affectedPath: "_speclite/custom/config.toml",
-          ownership: "human-owned",
-          reason: "human-owned",
         }),
       ]);
       await expect(readFile(path.join(tempRoot, "_speclite/config.toml"), "utf8")).resolves.toBe(

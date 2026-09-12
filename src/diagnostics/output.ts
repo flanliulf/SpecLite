@@ -727,6 +727,7 @@ export function renderGovernanceReportHumanOutput(result: GovernanceReportComman
     `- artifactPresenceRate=${formatRatioMetric(result.data.metrics.artifactPresenceRate)}`,
     `- validatePassRate=${formatRatioMetric(result.data.metrics.validatePassRate)}`,
     `- openGapCount=${result.data.metrics.openGapCount}`,
+    `- notYetProducedCount=${result.data.metrics.notYetProducedCount}`,
     "Gaps",
   ];
 

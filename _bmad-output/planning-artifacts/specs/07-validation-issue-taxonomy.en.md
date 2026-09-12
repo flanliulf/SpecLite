@@ -255,6 +255,7 @@ Default severity:
 
 - `error` when workflow output cannot be written
 - `warning` when optional artifact path is missing but workflow can continue
+- `info` when a contracted artifact has simply not been produced yet rather than an existing process showing a gap
 
 Reserved MVP issue ids:
 
@@ -263,9 +264,19 @@ Reserved MVP issue ids:
 - `artifact-path.missing-required-directory`
 - `artifact-path.unwritable-directory`
 - `artifact-path.fixture-write-failed`
+- `artifact-path.missing-required-artifact`
 - `artifact-path.missing-required-metadata`
 - `artifact-path.invalid-required-metadata`
 - `artifact-path.prd-validation-report-exists`
+
+`artifact-path.missing-required-artifact` is used when no workflow artifact is found under a contracted artifact output path. It must distinguish "not yet produced" from "missing", and must keep the same `issueId` and the same `affectedPath` in both states:
+
+| State | Condition | `severity` | `details.reason` |
+| --- | --- | --- | --- |
+| Not yet produced | The resolved artifact root directory exists and no workflow artifact is currently found anywhere under that artifact root. | `info` | `not-yet-produced` |
+| Missing | Other workflow artifacts already exist under the artifact root, but no artifact is found under this contract's output path. | `warning` | `no-artifacts-found` |
+
+`not-yet-produced` means a pristine install or a workflow that has not run yet, and must not be interpreted as a process gap; `validate` must therefore not emit a warning or error for these entries after a pristine fresh install. `no-artifacts-found` means the project is already producing workflow artifacts while this contract remains uncovered, which is a real process gap. `reason: "missing-required-config"` produced by `artifact-root-resolver` is neither of these two states and keeps its existing semantics and severity. Details must stay deterministic: only `artifactType` and the stable `reason` are allowed; absolute path, home directory, timestamp, stack trace, or random values must not appear.
 
 `artifact-path.prd-validation-report-exists` is the blocking issue for an existing same-day `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` before the first PRD validation report or progress write. Severity is `error`, continuation is `block`, `affectedPath` is the exact project-relative target, details use `reason: "prd-validation-report-exists"`, and `suggestedNextStep` is exactly `保留并移走或删除既有报告后重新运行`. The producer must not reuse matching content, overwrite, append, truncate, delete, create suffix/temp reports, or mutate progress.
 
@@ -300,6 +311,8 @@ Reserved MVP issue ids:
 - `file-integrity.case-conflict`
 - `file-integrity.executable-bit-mismatch`
 - `file-integrity.stale-temp-file`
+
+`file-integrity.unknown-ownership` is used only for a files index entry inside the installer-controlled space whose ownership cannot be established. The decision must reuse the ownership model path classification: the issue is reported only when the entry `ownership` is not `installer-owned` and the classification result for that path is `unknown` (including path escape and any path that belongs to no declared human-owned custom path, installer-owned path, or workflow artifact root). Protected entries legitimately registered by the installer must not trigger it: an entry whose files index `ownership` is `human-owned` or `workflow-owned` and whose path classification returns an equally protected ownership (for example `_speclite/custom/*.toml` with `artifactKind: "project-custom-stub"`, `.gitignore` with `artifactKind: "gitignore"`, and workflow-owned entries under the workflow artifact root) is expected pristine install state and must stay issue-free. An entry recorded as `installer-owned` but classified as protected is still covered by `file-integrity.unsafe-overwrite-risk` and must not be remapped to this issue.
 
 ### `operation-lock`
 

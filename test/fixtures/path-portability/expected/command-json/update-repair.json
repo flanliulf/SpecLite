@@ -11,7 +11,7 @@
       "severity": "error",
       "component": "update-command",
       "details": {
-        "conflictCount": 2
+        "conflictCount": 1
       },
       "impact": "Update planning found one or more path-level conflicts.",
       "suggestedNextStep": "Inspect the conflict details before authorizing update writes."
@@ -30,6 +30,14 @@
           "currentHash": "sha256:current",
           "expectedHash": "sha256:expected",
           "action": "restore-canonical"
+        },
+        {
+          "affectedPath": "_speclite/custom/config.toml",
+          "ownership": "human-owned",
+          "currentHash": "sha256:current",
+          "expectedHash": "sha256:current",
+          "action": "skip",
+          "reason": "human-owned"
         }
       ]
     },
@@ -40,11 +48,6 @@
         "affectedPath": "_speclite/_config/manifest.yaml",
         "ownership": "installer-owned",
         "reason": "missing-source-evidence"
-      },
-      {
-        "affectedPath": "_speclite/custom/config.toml",
-        "ownership": "human-owned",
-        "reason": "human-owned"
       }
     ],
     "requiresConfirmation": true,

@@ -284,16 +284,6 @@ describe("PRD validation report path contract", () => {
       expect(updateConflictReportPaths).toEqual([]);
       await assertReportSnapshot(projectRoot, names, beforeSnapshot);
 
-      const currentFilesIndex = JSON.parse(
-        await readFile(path.join(projectRoot, "_speclite/_config/files-index.json"), "utf8"),
-      ) as { entries: Array<{ path: string; ownership: string }> };
-      currentFilesIndex.entries = currentFilesIndex.entries.filter(
-        (entry) => entry.ownership !== "human-owned",
-      );
-      await writeFile(
-        path.join(projectRoot, "_speclite/_config/files-index.json"),
-        `${JSON.stringify(currentFilesIndex, null, 2)}\n`,
-      );
       const repairableMirrorPath = path.join(
         projectRoot,
         ".agents/skills/speclite-validate-prd/scripts/prd-validation-report-operation.mjs",

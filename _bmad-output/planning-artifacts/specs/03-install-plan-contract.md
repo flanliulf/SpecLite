@@ -297,6 +297,8 @@ Operation locks 应在 controlled success 或 controlled failure 后释放。Pro
 
 如果缺少 source evidence 或 canonical baseline，planner 必须产生带 `reason: "missing-source-evidence"` 的 conflict，而不是 repair action。
 
+Repair planning 对 protected ownership 的处理必须与普通 update planning 一致。Files index 中已登记的 human-owned 与 workflow-owned entries 是 planned skip，不是 repair blocker：planner 必须产生 `action: "skip"` 加 `reason: "human-owned"` 或 `reason: "workflow-owned"`，不得产生 conflict，也不得因此把 `writeAuthorized` 降级。由 fresh install 按本 SPEC `Human-Owned TOML Stubs（人工维护 TOML Stub）` 创建的 `_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` 与 gitignore entry 同样适用该规则，因此 pristine installation 上的 installer-owned drift 必须可以被 repair。只有 unknown ownership、path escape、missing source evidence 和 unsupported repair 才是 repair conflict。
+
 ## Target Status Mapping（目标状态映射）
 
 Target status vocabulary 按 layer 区分：

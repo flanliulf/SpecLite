@@ -642,7 +642,9 @@ type UpdatePlan = {
 type RepairPlan = {
   actions: Array<{
     affectedPath: string;
-    ownership: "installer-owned";
+    // "restore-canonical" 与 "regenerate" 只能是 "installer-owned"；
+    // "human-owned" 与 "workflow-owned" 只能出现在 action: "skip" 上
+    ownership: "installer-owned" | "human-owned" | "workflow-owned";
     currentHash?: string;
     expectedHash: string;
     action: "restore-canonical" | "regenerate" | "skip";
@@ -697,7 +699,7 @@ Human-readable install Ready Summary 必须在 `Key paths` 中展示 legacy `Art
 
 Public projection types 中的每个 path 都必须遵循本 SPEC 的 Path Policy。这包括在引用 target project path 时的 `resolvedRoot`、`lockPath`、`targetPath`、`specliteRoot`、`artifactRoot`、`manifestPath`、`affectedPath`，以及任何未来 public path field。
 
-`UpdatePlan` 和 `RepairPlan` 描述 planned effects，不是 execution logs。`RepairPlan` 只能包含 installer-owned actions；human-owned custom files 和 workflow-owned artifacts 不得作为 repairable actions 出现。
+`UpdatePlan` 和 `RepairPlan` 描述 planned effects，不是 execution logs。`RepairPlan` 的 `restore-canonical` 与 `regenerate` 只能用于 installer-owned paths；human-owned custom files 和 workflow-owned artifacts 不得作为 repairable actions 出现，只能作为 `action: "skip"` 并携带 `reason: "human-owned"` 或 `reason: "workflow-owned"`。
 
 `DoctorCommandData.externalAccesses` 必须复用 `_bmad-output/planning-artifacts/specs/03-install-plan-contract.md` 的 `ExternalAccess` shape。`doctor` 默认不访问 remote source；当用户请求 freshness / provenance revalidation 时，必须先输出 pending 或 confirmed external access intent。`confirmationState: "pending"` 时 command 不得执行 external access，且必须产生 blocking `source-integrity` issue。
 
@@ -716,7 +718,9 @@ Planning model boundaries：
 | `UninstallPlan` | 本 SPEC | Public `uninstall --json` projection | 对 automation 可见的 installer-owned removal plan；protected paths 不删除。 |
 | `changedPaths` / `skippedPaths` | 本 SPEC | Public command result fields | 仅表示当前 command 的 actual apply result。当 `writeAuthorized === false` 时为空。 |
 
-Normal `update` 必须将 installer-owned drift 视为 conflict；普通 `update` 的 interactive confirmation 或 `--yes` 只授权无 conflict 的 planned update writes，不得把 drift conflict 转成 repair action。只有 command 为 `update --repair`，且 repair writes 通过 interactive confirmation 或 `--yes` 显式授权时，才可以修复 drift。在 `update --repair` 中，可以从 resolved canonical source 和 installer templates 安全 restore 或 regenerate 的 installer-owned drift 应成为 `repairPlan.actions[]` entry，而不是 `conflicts[]` entry。Repair output 中的 `conflicts[]` 保留给无法安全 repair 的 blockers，例如 human-owned 或 workflow-owned paths、unknown ownership、missing source evidence 或 unsupported repair。
+Normal `update` 必须将 installer-owned drift 视为 conflict；普通 `update` 的 interactive confirmation 或 `--yes` 只授权无 conflict 的 planned update writes，不得把 drift conflict 转成 repair action。只有 command 为 `update --repair`，且 repair writes 通过 interactive confirmation 或 `--yes` 显式授权时，才可以修复 drift。在 `update --repair` 中，可以从 resolved canonical source 和 installer templates 安全 restore 或 regenerate 的 installer-owned drift 应成为 `repairPlan.actions[]` entry，而不是 `conflicts[]` entry。Repair output 中的 `conflicts[]` 保留给无法安全 repair 的 blockers，例如 unknown ownership、path escape、missing source evidence 或 unsupported repair。
+
+Protected ownership 本身不是 repair blocker。`update --repair` 对 files index 中已登记的 human-owned 与 workflow-owned entries 必须与普通 `update` 保持一致：产生 `repairPlan.actions[]` 中的 `action: "skip"`（`reason` 为 `human-owned` 或 `workflow-owned`），不得产生 `conflicts[]` entry。安装器在 fresh install 中合法创建的 protected paths（例如 `_speclite/custom/config.toml`、`_speclite/custom/config.user.toml` 与 `.gitignore`）因此不得阻断 pristine installation 上的 installer-owned drift repair。当 repair writes 被授权时，这些 skip actions 必须出现在 `skippedPaths` 中，且其内容不得被改写。`unknown` ownership（包括 path escape 和无法从 manifest 或 files index 建立 ownership 的 path）仍必须保持为 `conflicts[]` blocker。
 
 `conflicts` 描述 planning diagnostics，不是 apply execution results。它们不依赖 write authorization。Dry-run output 和 `writeAuthorized === false` 的 output 仍必须包含 discovered conflicts，以便 automation 在 applying writes 前检测 blockers。`conflicts` 不得被解释为当前 apply phase 中失败的 paths。
 

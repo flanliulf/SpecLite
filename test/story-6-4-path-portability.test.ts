@@ -92,7 +92,26 @@ describe("Story 6.4 path-portability fixture", () => {
       const validate = ValidateCommandResultSchema.parse(JSON.parse(validateResult.stdout));
 
       expect(update.status).toBe("success");
-      expect(repair.status).toBe("failure");
+      // A pristine install has no repair blocker: the installer-registered human-owned stubs and the
+      // gitignore entry are planned skips, not conflicts.
+      expect(repair.status).toBe("success");
+      expect(repair.data.conflicts).toEqual([]);
+      expect(repair.data.repairPlan.actions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            affectedPath: "_speclite/custom/config.toml",
+            ownership: "human-owned",
+            action: "skip",
+            reason: "human-owned",
+          }),
+          expect.objectContaining({
+            affectedPath: ".gitignore",
+            ownership: "human-owned",
+            action: "skip",
+            reason: "human-owned",
+          }),
+        ]),
+      );
       expect(validate.status).toBe("failure");
       expect([
         installResult.exitCode,
@@ -102,7 +121,7 @@ describe("Story 6.4 path-portability fixture", () => {
         updateResult.exitCode,
         repairResult.exitCode,
         validateResult.exitCode,
-      ]).toEqual([0, 0, 0, 0, 0, 1, 1]);
+      ]).toEqual([0, 0, 0, 0, 0, 0, 1]);
 
       expect(install.command).toBe("install");
       expect(install.status).toBe("success");
@@ -241,20 +260,23 @@ describe("Story 6.4 path-portability fixture", () => {
       ownership: "installer-owned",
       action: "restore-canonical",
     });
-    expect(repair.data.conflicts).toEqual(
+    expect(repair.data.repairPlan.actions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           affectedPath: "_speclite/custom/config.toml",
           ownership: "human-owned",
+          action: "skip",
           reason: "human-owned",
-        }),
-        expect.objectContaining({
-          affectedPath: "_speclite/_config/manifest.yaml",
-          ownership: "installer-owned",
-          reason: "missing-source-evidence",
         }),
       ]),
     );
+    expect(repair.data.conflicts).toEqual([
+      expect.objectContaining({
+        affectedPath: "_speclite/_config/manifest.yaml",
+        ownership: "installer-owned",
+        reason: "missing-source-evidence",
+      }),
+    ]);
     expect(resolveConfig).toMatchObject({ "core.project_name": "Path Portability" });
     expect(resolveCustomization).toMatchObject({ "workflow.on_complete": "team" });
     expect(warnings[0]).toMatchObject({
