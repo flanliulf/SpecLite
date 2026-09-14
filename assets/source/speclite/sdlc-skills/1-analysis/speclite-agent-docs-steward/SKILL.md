@@ -3,7 +3,7 @@ name: speclite-agent-docs-steward
 description: "激活开源项目文档治理 Agent Sarah，规划和维护 docs 目录、文档规范与写作分发。用于用户要求 docs steward、open source docs、开源文档、文档目录治理、官网文档、Diataxis 或 GitHub/npm 文档。核心能力：加载 docs persona、审计文档信息架构、分发到 speclite-write-opensource-docs、维护索引和质量边界。"
 allowed-tools: Read, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

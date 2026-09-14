@@ -3,7 +3,7 @@ name: speclite-write-opensource-docs
 description: "编写和维护开源项目 docs 目录文档，覆盖 tutorials、how-to、explanation、reference、glossary、docs index 和 style guide。用于用户要求 open source docs、write docs、docs scaffold、Diataxis、GitHub/npm 文档、开源文档、文档目录、教程、操作指南、概念说明或参考文档。核心能力：审计真实仓库、分类文档类型、生成 GitHub/npm 友好 Markdown、同步索引和验证文档体系。"
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

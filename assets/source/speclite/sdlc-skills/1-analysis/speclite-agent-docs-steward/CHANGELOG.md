@@ -2,6 +2,12 @@
 
 本文件记录 `speclite-agent-docs-steward` 的版本变更。
 
+## [1.1.0] - 2026-09-13
+
+### Changed（变更）
+
+- `references/docs-style-guide-baseline.md` 同步 SpecLite `docs/_STYLE_GUIDE.md` 的新规则：标题数量与单元格长度上限、本机绝对路径禁令、Research Note、Draft / Moved 标记、生成说明页脚、Related Documents 表头，以及以 `docs:check` 职责表替换原目标命令清单；示例文档名同步为 `tutorials/first-install-walkthrough.md` 与 `explanation/speclite-modules.md`。
+
 ## [1.0.0] - 2026-06-11
 
 ### 新增
