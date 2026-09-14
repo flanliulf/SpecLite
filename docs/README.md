@@ -24,7 +24,7 @@
 | [`index.md`](index.md) | 文档读者 | 提供公开文档首页、核心主题和分类导航。 |
 | [`_STYLE_GUIDE.md`](_STYLE_GUIDE.md) | 文档作者与 reviewer | 规定语言、标题、Markdown、文档类型模板和目标校验方式。 |
 | [`quick-start.md`](quick-start.md) | npm package 使用者 | npm package 携带的 Distribution Entrypoint（发布入口），覆盖安装、验证、排错和必要维护。 |
-| [`tutorials/quick-start.md`](tutorials/quick-start.md) | 首次学习者 | 按 preview、authorization、status、output、JSON、maintenance 顺序完成首次学习路径。 |
+| [`tutorials/first-install-walkthrough.md`](tutorials/first-install-walkthrough.md) | 首次学习者 | 按 preview、authorization、status、output、JSON、maintenance 顺序完成首次安装学习路径。 |
 
 维护者不应把完整文档清单同时复制到 `README.md` 和 `index.md`。新增页面的读者导航归 `index.md` 与各子目录 `index.md` 管理，`README.md` 只维护分类规则和治理状态。
 
@@ -51,7 +51,9 @@ docs/
 │   ├── skills/
 │   │   └── index.md
 │   └── glossary/
-│       └── index.md
+│       ├── index.md
+│       └── epics/
+│           └── index.md
 ├── glossary/
 └── presentations/
     └── index.md
@@ -68,6 +70,7 @@ docs/
 | [`reference/specs/`](reference/specs/index.md) | Normative Specification | “公共 schema、字段或行为契约必须遵守什么？” | 只承载已稳定且对实现与消费者具有规范效力的契约；实现 schema、fixtures 和 tests 是 executable anchors。 |
 | [`reference/skills/`](reference/skills/index.md) | Skill Catalog | “有哪些 Skill，它们位于哪里、属于什么阶段？” | 只维护 catalog、边界和路由；完整 activation 与 workflow 仍以对应 `SKILL.md` 为准。 |
 | [`reference/glossary/`](reference/glossary/index.md) | Glossary | “这个术语的短定义是什么？” | 每个术语保持 1-2 句；需要长篇解释时链接到 `explanation/` 或其他 Reference。 |
+| [`reference/glossary/epics/`](reference/glossary/epics/index.md) | Process Glossary | “某个 Epic 规划文档里的术语原本指什么？” | 由 `speclite-terminology-governance` 从规划产物生成的过程派生术语表；只登记在子索引，不进入读者主题索引，不作为 public contract 事实来源。 |
 | [`glossary/`](glossary/glossary.md) | Legacy Compatibility | “旧术语入口在哪里？” | 兼容旧链接，不再作为新 glossary 的默认落点；新增术语统一进入 `reference/glossary/`。 |
 | [`presentations/`](presentations/index.md) | Supplementary Public Material | “是否有适合演示、分享或发布的可视化材料？” | 保存独立演示产物及其局部资源，不替代主要公开文档或规范性说明；关键结论必须能追溯到正式文档。 |
 
@@ -169,10 +172,13 @@ docs/
 | Area | Current State | Follow-up |
 |---|---|---|
 | Active indexes | `tutorials/`、`how-to/`、`explanation/`、`reference/`、`reference/specs/`、`reference/skills/`、`reference/glossary/` 只索引达到最低可发布标准的正文。 | 新增文档时继续执行最近父索引更新。 |
-| Legacy glossary | [`glossary/glossary.md`](glossary/glossary.md) 和 4 个旧页面是 Frozen Compatibility surface，并指向主要术语表与详细文档。 | 旧路径只维护跳转和必要兼容说明；新增术语进入 `reference/glossary/`。 |
-| Long-form glossary pages | Runtime boundaries 与 IDE discovery 长文已迁入 `explanation/`；file ownership 与 workflow artifact 分别链接到详细 Explanation / Reference。 | 避免旧路径和主要公开文档双写同一事实。 |
-| Draft pages | `explanation/` 下 2 篇、`how-to/` 下 1 篇、`reference/` 下 2 篇仍是 Draft，共 5 篇，已移出读者索引；`tutorials/` 当前没有 Draft。 | 达到最低可发布标准后再恢复索引；扩写前先确认规范性说明或 executable evidence。 |
+| Legacy glossary | [`glossary/glossary.md`](glossary/glossary.md) 和 4 个旧页面是 Frozen Compatibility surface，并指向主要术语表与详细文档。 | 旧路径只维护跳转，不得新增小节或第二份正文；新增术语进入 `reference/glossary/`。 |
+| Long-form glossary pages | Runtime boundaries 与 IDE discovery 长文已迁入 `explanation/`；file ownership 与 workflow artifact 分别链接到详细 Explanation / Reference；Flow Gate handoff 的误区辨析已拆入 `explanation/flow-gate-handoff-pitfalls.md`。 | 避免旧路径和主要公开文档双写同一事实。 |
+| Draft pages | 当前没有 Draft。`explanation/review-chain-and-flow-gate.md` 与 `explanation/canonical-methodology-framework.md` 因主题已被规范性说明与 Reference 覆盖而退役；`how-to/customize-a-skill.md`、`reference/validation-issues.md`、`reference/skills/core-skills.md` 已补全并恢复索引。 | 新增 Draft 时按 `_STYLE_GUIDE.md` 标记并移出索引；达到最低可发布标准后再恢复。 |
+| Moved entries | `reference/codex-claude-code-session-reference.md`、`reference/flow-gate-handoff-contract.md`、`explanation/ide-specific-discovery-metadata.md`、`tutorials/quick-start.md` 是 Moved 兼容页，只保留指向新位置的链接。 | 兼容页不承载正文；确认无外部引用后可删除。 |
+| Process glossaries | Epic 1–11 过程术语表已移入 `reference/glossary/epics/`，由子索引登记。 | 新增 Epic 术语表时只更新子索引。 |
 | Related-document links | 主要公开正文已按任务、概念和契约关系补齐 `Related Documents（相关文档）`；`docs:check` 校验结构存在。 | Reviewer 继续判断关系语义是否真实，不为对称机械增加反向链接。 |
+| Docs tooling | `docs:check` 已覆盖根 `README.md` 链接与 package 边界、Markdown 风格规则、最近父索引登记、Moved / Frozen 兼容页形态与生成说明页脚格式。 | 新增规则时同步更新 `_STYLE_GUIDE.md` 的 Docs Tooling 表。 |
 | Presentations | [`presentations/index.md`](presentations/index.md) 与 deck README 提供补充材料入口、适用范围和事实来源。 | 新增 deck 时同步登记 catalog 与主要公开文档。 |
 | Public path portability | [`index.md`](index.md) 的 migrated material 已改为 repository-neutral 项目标识，不再暴露本机绝对路径。 | 后续新增公开文档继续使用相对路径、公开 URL 或 repository-neutral 标识。 |
 
@@ -184,7 +190,7 @@ docs/
 2. 从 CLI implementation、schema、tests、fixtures 或 canonical source 核对事实，不凭历史过程文档补全当前 contract。
 3. 更新正文与最近父索引；核心主题同步更新 [`index.md`](index.md)。
 4. 补齐带关系类型的 `Related Documents（相关文档）`，检查任务链、概念链和 contract 链。
-5. 运行 `npm run docs:check`，校验链接、fragment、索引可达性、package 边界、Draft 状态和必要关系。
+5. 运行 `npm run docs:check`，校验链接、fragment、索引可达性、最近父索引、package 边界、Draft / Moved 状态、Markdown 风格规则和必要关系。
 6. 运行 `git diff --check`。
 
 ## Review Checklist（评审清单）
