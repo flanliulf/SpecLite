@@ -3,7 +3,7 @@ name: speclite-terminology-governance
 description: "Extract, normalize, and govern project terminology from planning and implementation-intent documents. Use when users ask for 'Epic glossary', 'terminology governance', '术语表', '提取英文术语', '统一术语', or '领域术语候选'. Core capabilities: provenance-aware extraction, Chinese naming, cross-artifact conflict detection, human-readable glossary projection, and DDD candidate handoff."
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -23,7 +23,7 @@ metadata:
 [Workflow]
     Read `references/terminology-governance-workflow.md` for the complete workflow.
 
-    Step 1: Confirm `source_documents`, mode, `glossary_root`, and write authorization. If no output is specified, inspect the project documentation policy, then fall back to `.specskills/output/speclite-terminology-governance/` if the location remains unresolved.
+    Step 1: Confirm `source_documents`, mode, `glossary_root`, and write authorization. If no output is specified, inspect the project documentation policy, then fall back to `{project_knowledge}/glossary/`, where `{project_knowledge}` is the `resolvedRoot` returned by `speclite resolve artifact-roots --project-root {project-root}`.
 
     Step 2: Establish provenance by source responsibility, extract candidates section by section, then classify, name, define, and normalize them using `references/term-taxonomy-and-promotion.md`.
 

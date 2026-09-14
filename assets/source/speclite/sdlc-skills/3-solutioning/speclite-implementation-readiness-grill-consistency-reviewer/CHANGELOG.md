@@ -4,9 +4,11 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
-## [Unreleased] - 2026-09-12
+## [1.1.0] - 2026-09-13
 
 ### Changed（变更）
+
+- Target Documents 中 PRD / Architecture / Epics 的读取路径从字面 `_speclite-output/planning-artifacts/...` 改为 `speclite resolve artifact-documents --subject ...` 的 `consumedPaths`，与 SPEC 09 的 whole / sharded 发现契约对齐。
 
 - 依 Story 11.10 inventory B4 用户裁决：SKILL zh/en、prompt-library、workflow 中"内建 grill-with-docs 协议"改为"内建追问协议（源自 grill-with-docs 方法，不依赖 `speclite-grill-with-docs` Skill）"，消除与 canonical Skill ID 的歧义；历史 CHANGELOG 条目不改。
 

@@ -1133,7 +1133,7 @@
       ],
       "artifactContract": {
         "artifactType": "retrospective",
-        "defaultOutputPath": "_speclite-output/4-implementation-artifacts",
+        "defaultOutputPath": "_speclite-output/4-implementation-artifacts/retrospectives",
         "requiredMetadata": [
           "workflowType",
           "sourceSkill",
@@ -1334,7 +1334,16 @@
           "activationTarget": ".agents/skills/speclite-domain-modeling/SKILL.md",
           "status": "mapped"
         }
-      ]
+      ],
+      "artifactContract": {
+        "artifactType": "domain-model-context-and-adrs",
+        "defaultOutputPath": "_speclite-output/3-solutioning-artifacts/architecture",
+        "requiredMetadata": [
+          "workflowType",
+          "sourceSkill",
+          "generatedAt"
+        ]
+      }
     },
     {
       "schemaVersion": "speclite.phase-coverage.v1",

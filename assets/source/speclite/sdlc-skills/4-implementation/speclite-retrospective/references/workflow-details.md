@@ -322,7 +322,7 @@ David (Developer): "We'll get to all of it. But first, let me load the previous 
 <action>Calculate previous epic number: {{prev_epic_num}} = {{epic_number}} - 1</action>
 
 <check if="{{prev_epic_num}} >= 1">
-  <action>Search for previous retrospectives using pattern: {implementation_artifacts}/epic-{{prev_epic_num}}-retro-*.md</action>
+  <action>Search for previous retrospectives using pattern: {implementation_artifacts}/retrospectives/epic-{{prev_epic_num}}-retro-*.md (also accept legacy {implementation_artifacts}/epic-{{prev_epic_num}}-retro-*.md read-only)</action>
 
   <check if="previous retrospectives found">
     <output>
@@ -1363,7 +1363,7 @@ David (Developer): "See you all when prep work is done. Meeting adjourned!"
 
 <step n="11" goal="Save Retrospective and Update Sprint Status">
 
-<action>Ensure retrospectives folder exists: {implementation_artifacts}</action>
+<action>Ensure retrospectives folder exists: {implementation_artifacts}/retrospectives</action>
 <action>Create folder if it doesn't exist</action>
 
 <action>Generate comprehensive retrospective summary document including:</action>
@@ -1383,11 +1383,11 @@ David (Developer): "See you all when prep work is done. Meeting adjourned!"
 - Commitments and next steps
 
 <action>Format retrospective document as readable markdown with clear sections</action>
-<action>Set filename: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md</action>
+<action>Set filename: {implementation_artifacts}/retrospectives/epic-{{epic_number}}-retro-{date}.md</action>
 <action>Save retrospective document</action>
 
 <output>
-✅ Retrospective document saved: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md
+✅ Retrospective document saved: {implementation_artifacts}/retrospectives/epic-{{epic_number}}-retro-{date}.md
 </output>
 
 <action>Update {sprint_status_file} to mark retrospective as completed</action>
@@ -1427,7 +1427,7 @@ Retrospective document was saved successfully, but {sprint_status_file} may need
 
 - Epic {{epic_number}}: {{epic_title}} reviewed
 - Retrospective Status: completed
-- Retrospective saved: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md
+- Retrospective saved: {implementation_artifacts}/retrospectives/epic-{{epic_number}}-retro-{date}.md
 
 **Commitments Made:**
 
@@ -1437,7 +1437,7 @@ Retrospective document was saved successfully, but {sprint_status_file} may need
 
 **Next Steps:**
 
-1. **Review retrospective summary**: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md
+1. **Review retrospective summary**: {implementation_artifacts}/retrospectives/epic-{{epic_number}}-retro-{date}.md
 
 2. **Execute preparation sprint** (Est: {{prep_days}} days)
    - Complete {{critical_count}} critical path items

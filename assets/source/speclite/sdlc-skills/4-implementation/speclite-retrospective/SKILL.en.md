@@ -3,7 +3,7 @@ name: speclite-retrospective
 description: "Runs the SpecLite Retrospective workflow to review an Epic or sprint and capture reusable lessons. Use when the user asks for retrospective, retro, epic retrospective, sprint review, or delivery lessons. Capable of config-driven activation, related artifact discovery, step-file orchestration, retrospective `.md` output, and completion handoff."
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

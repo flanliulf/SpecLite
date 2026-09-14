@@ -2,6 +2,13 @@
 
 本文件记录 `speclite-terminology-governance` 的版本变更。
 
+## [1.1.0] - 2026-09-13
+
+### Changed（变更）
+
+- 未指定 `glossary_root` 时的 fallback 从 `.specskills/output/speclite-terminology-governance/` 改为 SPEC 09 的 `{project_knowledge}/glossary/`，并要求通过 `speclite resolve artifact-roots` 取 `resolvedRoot`。
+- `module-help.csv` 的 output-location 同步为 `{project_knowledge}/glossary`。
+
 ## [1.0.0] - 2026-08-24
 
 ### Added（新增）

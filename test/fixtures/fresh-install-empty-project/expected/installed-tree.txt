@@ -277,6 +277,7 @@
 .agents/skills/speclite-create-technical-solution-document/scripts/validate_technical_solution.py
 .agents/skills/speclite-create-ux-design/
 .agents/skills/speclite-create-ux-design/CHANGELOG.md
+.agents/skills/speclite-create-ux-design/scripts/
 .agents/skills/speclite-create-ux-design/SKILL.md
 .agents/skills/speclite-create-ux-design/assets/
 .agents/skills/speclite-create-ux-design/assets/ux-design-template.md
@@ -661,6 +662,8 @@
 .agents/skills/speclite-terminology-governance/scripts/validate_glossary.py
 .agents/skills/speclite-validate-prd/
 .agents/skills/speclite-validate-prd/CHANGELOG.md
+.agents/skills/speclite-validate-prd/scripts/
+.agents/skills/speclite-validate-prd/scripts/prd-validation-report-operation.mjs
 .agents/skills/speclite-validate-prd/SKILL.md
 .agents/skills/speclite-validate-prd/config.toml.example
 .agents/skills/speclite-validate-prd/customize.toml
@@ -983,6 +986,7 @@
 .claude/skills/speclite-create-technical-solution-document/scripts/validate_technical_solution.py
 .claude/skills/speclite-create-ux-design/
 .claude/skills/speclite-create-ux-design/CHANGELOG.md
+.claude/skills/speclite-create-ux-design/scripts/
 .claude/skills/speclite-create-ux-design/SKILL.md
 .claude/skills/speclite-create-ux-design/assets/
 .claude/skills/speclite-create-ux-design/assets/ux-design-template.md
@@ -1367,6 +1371,8 @@
 .claude/skills/speclite-terminology-governance/scripts/validate_glossary.py
 .claude/skills/speclite-validate-prd/
 .claude/skills/speclite-validate-prd/CHANGELOG.md
+.claude/skills/speclite-validate-prd/scripts/
+.claude/skills/speclite-validate-prd/scripts/prd-validation-report-operation.mjs
 .claude/skills/speclite-validate-prd/SKILL.md
 .claude/skills/speclite-validate-prd/config.toml.example
 .claude/skills/speclite-validate-prd/customize.toml

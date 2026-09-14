@@ -3,7 +3,7 @@ name: speclite-retrospective
 description: "执行 SpecLite Retrospective workflow，复盘 Epic 或 sprint 并沉淀经验。用于用户要求 retrospective、retro、运行复盘、epic retrospective 或总结交付。核心能力：配置驱动激活、发现相关产物、按步骤编排、生成复盘 `.md` 并交接完成。"
 allowed-tools: Read, Write, Bash, Grep, Glob, WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

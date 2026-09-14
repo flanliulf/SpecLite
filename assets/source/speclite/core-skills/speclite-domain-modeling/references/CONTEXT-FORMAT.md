@@ -2,7 +2,15 @@
 
 ## Structure
 
+Every `CONTEXT.md` and `CONTEXT-MAP.md` starts with SpecLite artifact metadata frontmatter so that `speclite validate` can recognise it as a workflow artifact. `sourceSkill` must stay `speclite-domain-modeling`; refresh `generatedAt` (a `Date.toISOString()` UTC value) whenever the file is rewritten.
+
 ```md
+---
+workflowType: domain-model-context
+sourceSkill: speclite-domain-modeling
+generatedAt: 2026-01-01T00:00:00.000Z
+---
+
 # {Context Name}
 
 {One or two sentence description of what this context is and why it exists.}
@@ -24,6 +32,7 @@ _Avoid_: Client, buyer, account
 
 ## Rules
 
+- **Keep the frontmatter.** The three metadata keys are required by the SpecLite artifact contract; never drop them when editing the glossary body.
 - **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others under `_Avoid_`.
 - **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
 - **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
@@ -31,11 +40,17 @@ _Avoid_: Client, buyer, account
 
 ## Single vs multi-context repos
 
-**Single context (most repos):** One `CONTEXT.md` at `_speclite-output/planning-artifacts/architecture/CONTEXT.md`.
+**Single context (most repos):** One `CONTEXT.md` at `{solutioning_artifacts}/architecture/CONTEXT.md`.
 
-**Multiple contexts:** A `CONTEXT-MAP.md` at `_speclite-output/planning-artifacts/architecture/CONTEXT-MAP.md` lists the contexts, where they live, and how they relate to each other:
+**Multiple contexts:** A `CONTEXT-MAP.md` at `{solutioning_artifacts}/architecture/CONTEXT-MAP.md` lists the contexts, where they live, and how they relate to each other:
 
 ```md
+---
+workflowType: domain-model-context-map
+sourceSkill: speclite-domain-modeling
+generatedAt: 2026-01-01T00:00:00.000Z
+---
+
 # Context Map
 
 ## Contexts
@@ -53,8 +68,8 @@ _Avoid_: Client, buyer, account
 
 The skill infers which structure applies:
 
-- If `_speclite-output/planning-artifacts/architecture/CONTEXT-MAP.md` exists, read it to find contexts
-- If only `_speclite-output/planning-artifacts/architecture/CONTEXT.md` exists, single context
-- If neither exists, create `_speclite-output/planning-artifacts/architecture/CONTEXT.md` lazily when the first term is resolved
+- If `{solutioning_artifacts}/architecture/CONTEXT-MAP.md` exists, read it to find contexts
+- If only `{solutioning_artifacts}/architecture/CONTEXT.md` exists, single context
+- If neither exists, create `{solutioning_artifacts}/architecture/CONTEXT.md` lazily when the first term is resolved
 
 When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.

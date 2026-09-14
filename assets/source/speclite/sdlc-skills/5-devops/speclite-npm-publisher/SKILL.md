@@ -3,7 +3,7 @@ name: speclite-npm-publisher
 description: "Publish open-source Node.js packages to npm with evidence-based release gates. Use when user mentions 'npm publish', 'release to npm', 'Node package release', 'bugfix 后发布', 'feature 后发布', 'npm 发布', 'Node 项目发布', '发 npm 包', package.json, npm pack, npx verification, registry auth, OTP, scoped package, GitHub push, or public package release. Capable of package metadata auditing, SemVer bump planning, version occupancy checks, commit/push gating, hook guardrails, official registry authentication, tarball install smoke tests, safe semi-automated publish, and post-publish propagation troubleshooting."
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -54,7 +54,7 @@ metadata:
     - 不复用已发布版本号，不为绕过发布错误回退版本，也不为了通过门禁改变核心功能需求。
     - Claude/Codex hooks 只负责 deterministic 防护和阻断，不替代 SemVer 决策、发布报告、人工 OTP 或 postpublish 判断。
     - 本 Skill 负责发布执行；README 和发布文档专项审查可配合 `npm-release-docs-checker`。
-    - 生成的发布报告写入 `.specskills/output/devops/speclite-npm-publisher/`，不得散落到项目根目录。
+    - 生成的发布报告写入 `{devops_artifacts}/npm-releases/`（`{devops_artifacts}` 取 `speclite resolve artifact-roots --project-root {project-root}` 的 `resolvedRoot`），不得散落到项目根目录。
 
 [Generation Metadata（生成信息）]
     本 Skill 由 speclite-skill-creator 自动生成。如需修改，必须同步更新 SKILL.md 与 SKILL.en.md，并同步 `assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher/` 与实际安装副本，或通过 skills-upgrade 管理版本。

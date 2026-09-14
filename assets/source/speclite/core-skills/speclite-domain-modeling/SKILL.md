@@ -3,7 +3,7 @@ name: speclite-domain-modeling
 description: Build and sharpen a project's domain model. Use when the user wants to pin down domain terminology or a ubiquitous language, record an architectural decision, or when another skill needs to maintain the domain model.
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -14,13 +14,14 @@ metadata:
 
 ## File structure（文件结构）
 
+`{solutioning_artifacts}` 是 SDLC solutioning artifact root。写入前先运行 `speclite resolve artifact-roots --project-root {project-root}`，取 `solutioning_artifacts` 的 `resolvedRoot`（fresh install 默认 `_speclite-output/3-solutioning-artifacts`），并记录 `resolutionMode`；不要手写路径，也不要迁移旧位置的既有文件。
+
 大多数仓库只有一个 context：
 
 ```
 /
-├── _speclite-output/
-│   └── planning-artifacts/
-│       └── architecture/
+├── {solutioning_artifacts}/
+│   └── architecture/
 │           ├── CONTEXT.md
 │           └── adr/
 │               ├── 0001-event-sourced-orders.md
@@ -28,13 +29,12 @@ metadata:
 └── src/
 ```
 
-如果 `_speclite-output/planning-artifacts/architecture/` 下存在 `CONTEXT-MAP.md`，该仓库就有多个 contexts。该 map 指向每个 context 所在的位置：
+如果 `{solutioning_artifacts}/architecture/` 下存在 `CONTEXT-MAP.md`，该仓库就有多个 contexts。该 map 指向每个 context 所在的位置：
 
 ```
 /
-├── _speclite-output/
-│   └── planning-artifacts/
-│       └── architecture/
+├── {solutioning_artifacts}/
+│   └── architecture/
 │           ├── CONTEXT-MAP.md
 │           └── adr/                          ← system-wide decisions
 └── src/
@@ -44,7 +44,7 @@ metadata:
         └── CONTEXT.md
 ```
 
-延迟创建文件——仅在有内容可写时才创建。如果不存在 `CONTEXT.md`，就在第一个术语确定时创建。如果不存在 `_speclite-output/planning-artifacts/architecture/adr/`，就在需要第一个 ADR 时创建。
+延迟创建文件——仅在有内容可写时才创建。如果不存在 `CONTEXT.md`，就在第一个术语确定时创建。如果不存在 `{solutioning_artifacts}/architecture/adr/`，就在需要第一个 ADR 时创建。
 
 ## During the session（会话期间）
 
@@ -65,6 +65,8 @@ metadata:
 当用户说明某事如何运作时，检查代码是否与之相符。如果发现矛盾，就指出来：“你的代码会取消整个 Orders，但你刚才说 partial cancellation 是可行的——哪一个才是正确的？”
 
 ### Update CONTEXT.md inline（即时更新 CONTEXT.md）
+
+每次写入 `CONTEXT.md`、`CONTEXT-MAP.md` 或 ADR 时保留文件开头的 artifact metadata frontmatter（`workflowType`、`sourceSkill: speclite-domain-modeling`、ISO `generatedAt`），并在重写时刷新 `generatedAt`；缺少 frontmatter 的文件会被 `speclite validate` 报 `artifact-path.missing-required-metadata`。
 
 术语一旦确定，就立即更新 `CONTEXT.md`。不要批量处理——在术语确定时随即记录。使用 [CONTEXT-FORMAT.md](./references/CONTEXT-FORMAT.md) 中的格式。
 

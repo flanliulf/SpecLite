@@ -3,7 +3,7 @@ name: speclite-domain-modeling
 description: Build and sharpen a project's domain model. Use when the user wants to pin down domain terminology or a ubiquitous language, record an architectural decision, or when another skill needs to maintain the domain model.
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -14,13 +14,14 @@ Actively build and sharpen the project's domain model as you design. This is the
 
 ## File structure
 
+`{solutioning_artifacts}` is the SDLC solutioning artifact root. Before writing, run `speclite resolve artifact-roots --project-root {project-root}` and use the `resolvedRoot` of `solutioning_artifacts` (fresh installs default to `_speclite-output/3-solutioning-artifacts`), recording its `resolutionMode`; never hand-write the path or migrate files that already live elsewhere.
+
 Most repos have a single context:
 
 ```
 /
-├── _speclite-output/
-│   └── planning-artifacts/
-│       └── architecture/
+├── {solutioning_artifacts}/
+│   └── architecture/
 │           ├── CONTEXT.md
 │           └── adr/
 │               ├── 0001-event-sourced-orders.md
@@ -28,13 +29,12 @@ Most repos have a single context:
 └── src/
 ```
 
-If a `CONTEXT-MAP.md` exists at `_speclite-output/planning-artifacts/architecture/`, the repo has multiple contexts. The map points to where each one lives:
+If a `CONTEXT-MAP.md` exists at `{solutioning_artifacts}/architecture/`, the repo has multiple contexts. The map points to where each one lives:
 
 ```
 /
-├── _speclite-output/
-│   └── planning-artifacts/
-│       └── architecture/
+├── {solutioning_artifacts}/
+│   └── architecture/
 │           ├── CONTEXT-MAP.md
 │           └── adr/                          ← system-wide decisions
 └── src/
@@ -44,7 +44,7 @@ If a `CONTEXT-MAP.md` exists at `_speclite-output/planning-artifacts/architectur
         └── CONTEXT.md
 ```
 
-Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `_speclite-output/planning-artifacts/architecture/adr/` exists, create it when the first ADR is needed.
+Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `{solutioning_artifacts}/architecture/adr/` exists, create it when the first ADR is needed.
 
 ## During the session
 
@@ -65,6 +65,8 @@ When domain relationships are being discussed, stress-test them with specific sc
 When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
 
 ### Update CONTEXT.md inline
+
+Keep the artifact metadata frontmatter (`workflowType`, `sourceSkill: speclite-domain-modeling`, ISO `generatedAt`) at the top of every `CONTEXT.md`, `CONTEXT-MAP.md` and ADR you write, refreshing `generatedAt` on rewrite; files without it are reported by `speclite validate` as `artifact-path.missing-required-metadata`.
 
 When a term is resolved, update `CONTEXT.md` right there. Don't batch these up — capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./references/CONTEXT-FORMAT.md).
 

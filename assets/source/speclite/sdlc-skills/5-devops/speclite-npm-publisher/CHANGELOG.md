@@ -4,6 +4,12 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [Semantic Versioning](https://semver.org/)。
 
+## [1.2.0] - 2026-09-13
+
+### Changed
+
+- 发布报告与 release gate sentinel 的位置从 legacy `.specskills/output/devops/speclite-npm-publisher/` 改为 SPEC 09 的 `{devops_artifacts}/npm-releases/`，与 `module.yaml` 预创建目录和 `module-help.csv` 声明对齐。
+
 ## [1.1.0] - 2026-06-12
 
 ### Added

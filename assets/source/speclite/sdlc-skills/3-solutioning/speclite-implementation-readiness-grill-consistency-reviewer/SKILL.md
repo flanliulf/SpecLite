@@ -3,7 +3,7 @@ name: speclite-implementation-readiness-grill-consistency-reviewer
 description: "Review PRD, UX, Architecture and Epics for implementation-readiness consistency. Use when user asks IR grill, consistency review, grill with docs, implementation readiness cross-doc check, PRD/UX/Architecture/Epics alignment, 一致性审查, 实施就绪, 多轮 grill, 文档对齐. Capable of strict-serial rounds, targeted fixes, evidence recording, and exit gating."
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.1"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---

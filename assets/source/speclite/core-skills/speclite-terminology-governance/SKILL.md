@@ -3,7 +3,7 @@ name: speclite-terminology-governance
 description: "Extract, normalize, and govern project terminology from planning and implementation-intent documents. Use when users ask for 'Epic glossary', 'terminology governance', '术语表', '提取英文术语', '统一术语', or '领域术语候选'. Core capabilities: provenance-aware extraction, Chinese naming, cross-artifact conflict detection, human-readable glossary projection, and DDD candidate handoff."
 allowed-tools: Read, Write, Bash, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "fancyliu"
   catalog: "speclite"
 ---
@@ -23,7 +23,7 @@ metadata:
 [Workflow（执行流程）]
     完整流程见 `references/terminology-governance-workflow.md`。
 
-    Step 1：确认 `source_documents`、目标模式、`glossary_root` 和写入授权；未指定输出位置时先读取项目文档规范，仍无法确定则使用 `.specskills/output/speclite-terminology-governance/`。
+    Step 1：确认 `source_documents`、目标模式、`glossary_root` 和写入授权；未指定输出位置时先读取项目文档规范，仍无法确定则使用 `{project_knowledge}/glossary/`；`{project_knowledge}` 取 `speclite resolve artifact-roots --project-root {project-root}` 返回的 `resolvedRoot`。
 
     Step 2：按来源职责建立 provenance，逐节提取候选，并依据 `references/term-taxonomy-and-promotion.md` 分类、翻译、定义和归一。
 

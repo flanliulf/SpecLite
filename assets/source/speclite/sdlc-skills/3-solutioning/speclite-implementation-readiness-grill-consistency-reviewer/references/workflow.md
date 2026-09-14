@@ -8,10 +8,10 @@
 
 优先读取目标项目的 canonical planning artifacts：
 
-- PRD：`_speclite-output/planning-artifacts/prd/index.md` 及同目录 shard；若未 shard，则读取 PRD whole doc。
-- Architecture：`_speclite-output/planning-artifacts/architecture/index.md` 及同目录 shard；若未 shard，则读取 whole doc。
+- PRD：运行 `speclite resolve artifact-documents --subject prd --project-root {project-root}`，只读取其 `consumedPaths`（whole 为 `{planning_artifacts}/prd/prd.md`，sharded 为同目录 `index.md` 声明的 shards）；`continuation=block` 时 HALT，不得自行择一或混合。
+- Architecture：运行 `speclite resolve artifact-documents --subject architecture --project-root {project-root}`，只读取其 `consumedPaths`（whole 为 `{solutioning_artifacts}/architecture/architecture.md`）；existing install 缺 `solutioning_artifacts` 时 resolver 会报告 Planning fallback 与 `legacy-compatible`，不迁移文件。
 - UX：通过 Planning root resolver evidence 优先读取 `{planning_artifacts}/ux/ux-design-specification.md`；仅在 canonical 缺失时读取 exact legacy `{planning_artifacts}/ux-design-specification.md`。记录 `resolvedRoot`、`resolutionMode`、`actualConsumedPath`，按需读取同一 UX boundary 内的 direction、wireframe、design-system、screenshot 与 asset outputs；不得迁移 legacy artifact 或读取 project-root 外的 relative reference。
-- Epics / Stories：`_speclite-output/planning-artifacts/epics/index.md` 及各 Epic shard。
+- Epics / Stories：运行 `speclite resolve artifact-documents --subject epics --project-root {project-root}`，只读取其 `consumedPaths`（whole 为 `{planning_artifacts}/epics/epics.md`）；Story 文件位于 `{implementation_artifacts}/stories/`。
 - Shared contracts：目标项目的 UX / route contract、requirements inventory、coverage map、StoryGateRule 或等价 normalized gate 文档。
 - Gate reports：`implementation-readiness-report-*.md`、`review-gates-report.md`、`spec-consistency-report.md`、`prototype-gate-report.md`、validation report。
 - Context docs：`CONTEXT.md`、`CONTEXT-MAP.md` 或其他用户指定的讨论、背景与领域资料。

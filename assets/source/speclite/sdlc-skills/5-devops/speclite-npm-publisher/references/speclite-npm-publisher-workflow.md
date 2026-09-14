@@ -438,7 +438,7 @@ npm view "$name@$version" version --registry https://registry.npmjs.org/ >/dev/n
 git rev-parse --abbrev-ref --symbolic-full-name @{upstream} >/dev/null
 ```
 
-项目可以用本地 sentinel 记录最近一次 release gate，例如 `.specskills/output/devops/speclite-npm-publisher/release-check.json`。如果没有 sentinel，不应让 hook 伪造通过；应提示执行 `npm run release:check`。
+项目可以用本地 sentinel 记录最近一次 release gate，例如 `{devops_artifacts}/npm-releases/release-check.json`。如果没有 sentinel，不应让 hook 伪造通过；应提示执行 `npm run release:check`。
 
 ### Post-edit / Stop Warnings（编辑后或停止前提醒）
 
@@ -489,7 +489,7 @@ Hooks 不应绕过 npm security key、browser confirmation、password 或 OTP。
 发布审计或发布完成后，如用户要求报告，写入：
 
 ```text
-.specskills/output/devops/speclite-npm-publisher/<package-name>-<version>-release-report.md
+{devops_artifacts}/npm-releases/<package-name>-<version>-release-report.md
 ```
 
 报告至少包含：

@@ -20,7 +20,7 @@
 
 1. 展开 `source_documents`，记录每个实际文件和 artifact type。
 2. 读取项目 `AGENTS.md`、文档 style guide、现有 glossary index 和相邻页面。
-3. 确定 `glossary_root`：用户输入 > 项目文档规范 > 已有 glossary root > `.specskills/output/speclite-terminology-governance/`。
+3. 确定 `glossary_root`：用户输入 > 项目文档规范 > 已有 glossary root > `{project_knowledge}/glossary/`（`{project_knowledge}` 来自 `speclite resolve artifact-roots --project-root {project-root}` 的 `resolvedRoot`）。
 4. 记录 process analysis root：`.specskills/docs/analysis/speclite-terminology-governance/`。
 5. 列出预期 touched files；公开 index 是独立导航写入面。
 

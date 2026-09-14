@@ -62,7 +62,7 @@
       "canonicalSkillId": "speclite-agent-docs-steward",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-agent-docs-steward",
-      "canonicalPackageHash": "sha256:7c9889ead44b8c57c7fd4e73dc5840160c5cf7422ce3fff9743c993313240b45",
+      "canonicalPackageHash": "sha256:d22cb3de575249be97b51bf6fbda77f203152dbfa736b230436d21fde8e783ec",
       "installedTargets": [
         "claude",
         "agents"
@@ -426,7 +426,7 @@
       "canonicalSkillId": "speclite-domain-modeling",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-domain-modeling",
-      "canonicalPackageHash": "sha256:5d173f478750a76bc71f837d6503511a0ff5f4be52abe87ef5488f70e6feb9f8",
+      "canonicalPackageHash": "sha256:30a80e851eeba4a3c0c2098043b7541187b7db6c115a8ec4a0a62d7b4534ea33",
       "installedTargets": [
         "claude",
         "agents"
@@ -642,7 +642,7 @@
       ],
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/3-solutioning/speclite-implementation-readiness-grill-consistency-reviewer",
-      "canonicalPackageHash": "sha256:d3bf1e85303666a91f418ec46db7c4b5fbbe22f043786c261e6f796b7ebcc308",
+      "canonicalPackageHash": "sha256:3eef8696cb47b679af117eda468ff7add6b7df1366569a1b39a561e3fabb34fe",
       "installedTargets": [
         "claude",
         "agents"
@@ -684,7 +684,7 @@
       "canonicalSkillId": "speclite-npm-publisher",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/5-devops/speclite-npm-publisher",
-      "canonicalPackageHash": "sha256:8e5466369eba0a144080139ad526d63ff5ad0116a2b83136223cacd3362b8050",
+      "canonicalPackageHash": "sha256:8f902c60a1212e35408aa2c3d0cc8d877fede7f2fe53d3397e7b7f0085e05ffc",
       "installedTargets": [
         "claude",
         "agents"
@@ -782,7 +782,7 @@
       "canonicalSkillId": "speclite-retrospective",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/4-implementation/speclite-retrospective",
-      "canonicalPackageHash": "sha256:c1c901095f6763886e40a302d7f315b2fe5a7d3c2695fb9616093fcc289ac221",
+      "canonicalPackageHash": "sha256:f9e4ed72e54f031189527dbfb6101542deb4c821fd9ccc720b1fa1e60beedb11",
       "installedTargets": [
         "claude",
         "agents"
@@ -936,7 +936,7 @@
       "canonicalSkillId": "speclite-terminology-governance",
       "moduleId": "core",
       "sourcePackagePath": "assets/source/speclite/core-skills/speclite-terminology-governance",
-      "canonicalPackageHash": "sha256:aa4cb11de8c8d29e6274c22e1514d61cb3b8c79adf2d3b6067b4a41c9dce8d49",
+      "canonicalPackageHash": "sha256:3ada797ef8fda5bd87d7bb975280afbedcd57ebb3d7dc83ac2a2ce6d19890caf",
       "installedTargets": [
         "claude",
         "agents"
@@ -964,7 +964,7 @@
       "canonicalSkillId": "speclite-write-opensource-docs",
       "moduleId": "sdlc",
       "sourcePackagePath": "assets/source/speclite/sdlc-skills/1-analysis/speclite-write-opensource-docs",
-      "canonicalPackageHash": "sha256:ba8fddfd7c37ab0194c99ad0b7990208bf17a358f03fd56e886db3d91419e783",
+      "canonicalPackageHash": "sha256:67c62132baa7b6cd3f7271c0adb7a43a705c60f2caede1d47c75c5cd11658b14",
       "installedTargets": [
         "claude",
         "agents"
