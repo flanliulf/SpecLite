@@ -119,8 +119,8 @@
 
 | Relationship | Document |
 |---|---|
-| Flow Gate handoff 术语 | [`flow-gate-handoff.md`](flow-gate-handoff.md) |
-| CI 与企业自动化 | [`../../how-to/ci-enterprise-automation.md`](../../how-to/ci-enterprise-automation.md) |
-| 治理报告操作指南 | [`../../how-to/process-governance-report.md`](../../how-to/process-governance-report.md) |
-| CommandResult 参考 | [`../command-result-json.md`](../command-result-json.md) |
-| 文件所有权术语 | [`file-ownership.md`](file-ownership.md) |
+| Flow Gate handoff 术语 | [`../flow-gate-handoff.md`](../flow-gate-handoff.md) |
+| CI 与企业自动化 | [`../../../how-to/ci-enterprise-automation.md`](../../../how-to/ci-enterprise-automation.md) |
+| 治理报告操作指南 | [`../../../how-to/process-governance-report.md`](../../../how-to/process-governance-report.md) |
+| CommandResult 参考 | [`../../command-result-json.md`](../../command-result-json.md) |
+| 文件所有权术语 | [`../file-ownership.md`](../file-ownership.md) |

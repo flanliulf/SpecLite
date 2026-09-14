@@ -181,8 +181,8 @@
 
 | Relationship | Document |
 |---|---|
-| Canonical source 布局 | [`../canonical-source-layout.md`](../canonical-source-layout.md) |
-| Canonical source 治理 | [`../canonical-source-governance.md`](../canonical-source-governance.md) |
-| SpecLite modules 解释 | [`../../explanation/speclite-modules.md`](../../explanation/speclite-modules.md) |
-| Runtime layout | [`../runtime-layout.md`](../runtime-layout.md) |
-| Skill catalogs | [`../skills/index.md`](../skills/index.md) |
+| Canonical source 布局 | [`../../canonical-source-layout.md`](../../canonical-source-layout.md) |
+| Canonical source 治理 | [`../../canonical-source-governance.md`](../../canonical-source-governance.md) |
+| SpecLite modules 解释 | [`../../../explanation/speclite-modules.md`](../../../explanation/speclite-modules.md) |
+| Runtime layout | [`../../runtime-layout.md`](../../runtime-layout.md) |
+| Skill catalogs | [`../../skills/index.md`](../../skills/index.md) |

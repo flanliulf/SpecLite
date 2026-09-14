@@ -15,9 +15,10 @@
 
 ## Related Documents（相关文档）
 
-| Topic | Link |
+| Relationship | Document |
 |---|---|
-| 所有权分类、命令行为与示例 | [`../../explanation/file-ownership-model.md`](../../explanation/file-ownership-model.md) |
+| 所有权矩阵（唯一源定义） | [`../ownership-matrix.md`](../ownership-matrix.md) |
+| 所有权模型解释 | [`../../explanation/file-ownership-model.md`](../../explanation/file-ownership-model.md) |
 | Runtime 三层边界 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
 | Runtime layout | [`../runtime-layout.md`](../runtime-layout.md) |
 | Workflow artifact 术语 | [`workflow-artifact.md`](workflow-artifact.md) |

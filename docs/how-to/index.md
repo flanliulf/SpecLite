@@ -13,3 +13,4 @@ How-To 文档用于帮助已有基础的用户完成一个明确任务。
 | [`manage-installed-project.md`](manage-installed-project.md) | 使用 `list`、`init`、`doctor`、`sync`、`uninstall` 和 `governance-report` 管理已安装项目。 |
 | [`ci-enterprise-automation.md`](ci-enterprise-automation.md) | 在 CI 和企业自动化中安全消费 `--json` 输出。 |
 | [`process-governance-report.md`](process-governance-report.md) | 生成流程治理覆盖报告并读取覆盖指标。 |
+| [`customize-a-skill.md`](customize-a-skill.md) | 为已安装 Skill 添加团队级或个人级 customization 并验证合并结果。 |

@@ -12,7 +12,7 @@
 |---|---|
 | [`tutorials/speclite-orientation.md`](tutorials/speclite-orientation.md) | 面向初学者的 10–15 分钟全景导览，先理解职责、概念和学习路线。 |
 | [`tutorials/speclite-developer-training.md`](tutorials/speclite-developer-training.md) | 面向讲师和学习者的 13 篇材料、3 小时培训组织与验收清单。 |
-| [`tutorials/quick-start.md`](tutorials/quick-start.md) | 按顺序理解安装预览、写入授权、状态检查和输出边界的学习教程。 |
+| [`tutorials/first-install-walkthrough.md`](tutorials/first-install-walkthrough.md) | 按顺序完成首次安装预览、写入授权、状态检查和输出边界的学习教程。 |
 | [`quick-start.md`](quick-start.md) | npm package 携带的 Distribution Entrypoint（发布入口），覆盖安装、验证、排错和必要维护。 |
 
 ## Documentation Types（文档类型）
@@ -35,8 +35,9 @@
 |---|---|
 | 新开发者全景导览 | [`tutorials/speclite-orientation.md`](tutorials/speclite-orientation.md) |
 | 13 篇开发者入门培训 | [`tutorials/speclite-developer-training.md`](tutorials/speclite-developer-training.md) |
-| 安装和首次使用 | [`tutorials/quick-start.md`](tutorials/quick-start.md) |
+| 安装和首次使用 | [`tutorials/first-install-walkthrough.md`](tutorials/first-install-walkthrough.md) |
 | npm package 自包含快速开始 | [`quick-start.md`](quick-start.md) |
+| 安装 SpecLite | [`how-to/install-speclite.md`](how-to/install-speclite.md) |
 | 安装验证 | [`how-to/validate-installation.md`](how-to/validate-installation.md) |
 | Installed Skill 首次调用 | [`how-to/use-installed-skills.md`](how-to/use-installed-skills.md) |
 | 第一次 brownfield baseline | [`tutorials/first-brownfield-project.md`](tutorials/first-brownfield-project.md) |
@@ -44,21 +45,33 @@
 | 已安装项目治理命令 | [`how-to/manage-installed-project.md`](how-to/manage-installed-project.md) |
 | CI 和企业自动化 | [`how-to/ci-enterprise-automation.md`](how-to/ci-enterprise-automation.md) |
 | 流程治理覆盖报告 | [`how-to/process-governance-report.md`](how-to/process-governance-report.md) |
+| 自定义 Skill | [`how-to/customize-a-skill.md`](how-to/customize-a-skill.md) |
 | CLI 命令参考 | [`reference/cli.md`](reference/cli.md) |
+| 安装默认值 | [`reference/install-defaults.md`](reference/install-defaults.md) |
 | CLI human output 覆盖矩阵 | [`reference/cli-human-output-matrix.md`](reference/cli-human-output-matrix.md) |
 | CommandResult JSON | [`reference/command-result-json.md`](reference/command-result-json.md) |
 | CommandResult JSON 规范性说明 | [`reference/specs/command-result-json-contract.md`](reference/specs/command-result-json-contract.md) |
+| validation issue 参考 | [`reference/validation-issues.md`](reference/validation-issues.md) |
+| config 与 customization | [`reference/config-and-customization.md`](reference/config-and-customization.md) |
+| Flow Gate 交接契约（规范性说明） | [`reference/specs/flow-gate-handoff-contract.md`](reference/specs/flow-gate-handoff-contract.md) |
+| Flow Gate 交接常见误区 | [`explanation/flow-gate-handoff-pitfalls.md`](explanation/flow-gate-handoff-pitfalls.md) |
 | runtime layout | [`reference/runtime-layout.md`](reference/runtime-layout.md) |
 | workflow artifact layout | [`reference/workflow-artifact-layout.md`](reference/workflow-artifact-layout.md) |
 | workflow artifact 术语 | [`reference/glossary/workflow-artifact.md`](reference/glossary/workflow-artifact.md) |
 | canonical source layout | [`reference/canonical-source-layout.md`](reference/canonical-source-layout.md) |
 | canonical source governance | [`reference/canonical-source-governance.md`](reference/canonical-source-governance.md) |
+| core skill catalog | [`reference/skills/core-skills.md`](reference/skills/core-skills.md) |
+| SDLC workflow catalog | [`reference/skills/sdlc-workflows.md`](reference/skills/sdlc-workflows.md) |
 | optional ecosystem skill catalog | [`reference/skills/ecosystem-skills.md`](reference/skills/ecosystem-skills.md) |
 | 文件所有权模型 | [`explanation/file-ownership-model.md`](explanation/file-ownership-model.md) |
+| 所有权矩阵 | [`reference/ownership-matrix.md`](reference/ownership-matrix.md) |
 | 文件所有权边界术语 | [`reference/glossary/file-ownership.md`](reference/glossary/file-ownership.md) |
 | local-first control plane | [`explanation/local-first-control-plane.md`](explanation/local-first-control-plane.md) |
 | runtime boundaries | [`explanation/runtime-boundaries.md`](explanation/runtime-boundaries.md) |
+| IDE-specific discovery metadata | [`explanation/ide-discovery-metadata.md`](explanation/ide-discovery-metadata.md) |
 | Skill 分类与 SDLC 入口选择 | [`explanation/skill-taxonomy-and-sdlc.md`](explanation/skill-taxonomy-and-sdlc.md) |
+| SDLC 五阶段定义 | [`reference/sdlc-phases.md`](reference/sdlc-phases.md) |
+| Agent 名录 | [`reference/skills/agent-roster.md`](reference/skills/agent-roster.md) |
 | SpecLite Agent 体系 | [`explanation/speclite-agents.md`](explanation/speclite-agents.md) |
 | SpecLite Module 体系 | [`explanation/speclite-modules.md`](explanation/speclite-modules.md) |
 | SpecLite Workflow 体系 | [`explanation/speclite-workflows.md`](explanation/speclite-workflows.md) |

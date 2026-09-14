@@ -1,4 +1,6 @@
-# Codex and Claude Code Sessions（Codex 与 Claude Code 会话参考）
+# Codex and Claude Code Sessions（Codex 与 Claude Code 会话调研）
+
+> Status: Research Note（调研笔记）。本文记录的是外部工具在本机的可观察行为与候选设计，不是 SpecLite 的 public contract；其中的版本号与路径以记录日期为准，可能随外部工具升级失效。
 
 本文记录本机 Codex 与 Claude Code CLI 会话的标识、transcript 定位、恢复入口和 deep link 边界，供后续开发跨 Agent 会话索引、只读检索、诊断和恢复功能时查阅。
 
@@ -254,6 +256,6 @@ claude --help
 
 | Relationship | Document |
 |---|---|
-| 本地优先设计背景 | [`../explanation/local-first-control-plane.md`](../explanation/local-first-control-plane.md) |
-| SpecLite runtime 目录边界 | [`runtime-layout.md`](runtime-layout.md) |
-| SpecLite config 与本地覆盖 | [`config-and-customization.md`](config-and-customization.md) |
+| 本地优先设计背景 | [`local-first-control-plane.md`](local-first-control-plane.md) |
+| SpecLite runtime 目录边界 | [`../reference/runtime-layout.md`](../reference/runtime-layout.md) |
+| SpecLite config 与本地覆盖 | [`../reference/config-and-customization.md`](../reference/config-and-customization.md) |

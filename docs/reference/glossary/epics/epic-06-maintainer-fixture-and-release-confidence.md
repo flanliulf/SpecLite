@@ -153,8 +153,8 @@
 
 | Relationship | Document |
 |---|---|
-| 安装验证指南 | [`../../how-to/validate-installation.md`](../../how-to/validate-installation.md) |
-| Canonical source 治理 | [`../canonical-source-governance.md`](../canonical-source-governance.md) |
-| Workflow artifact 术语 | [`workflow-artifact.md`](workflow-artifact.md) |
-| Runtime layout | [`../runtime-layout.md`](../runtime-layout.md) |
-| CommandResult 参考 | [`../command-result-json.md`](../command-result-json.md) |
+| 安装验证指南 | [`../../../how-to/validate-installation.md`](../../../how-to/validate-installation.md) |
+| Canonical source 治理 | [`../../canonical-source-governance.md`](../../canonical-source-governance.md) |
+| Workflow artifact 术语 | [`../workflow-artifact.md`](../workflow-artifact.md) |
+| Runtime layout | [`../../runtime-layout.md`](../../runtime-layout.md) |
+| CommandResult 参考 | [`../../command-result-json.md`](../../command-result-json.md) |

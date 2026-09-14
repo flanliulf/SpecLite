@@ -134,8 +134,8 @@
 
 | Relationship | Document |
 |---|---|
-| IDE discovery 深入术语 | [`ide-discovery.md`](ide-discovery.md) |
-| Skill 使用指南 | [`../../how-to/use-installed-skills.md`](../../how-to/use-installed-skills.md) |
-| 配置与 customization 参考 | [`../config-and-customization.md`](../config-and-customization.md) |
-| Workflow artifact 基础术语 | [`workflow-artifact.md`](workflow-artifact.md) |
-| Runtime 边界解释 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
+| IDE discovery 深入术语 | [`../ide-discovery.md`](../ide-discovery.md) |
+| Skill 使用指南 | [`../../../how-to/use-installed-skills.md`](../../../how-to/use-installed-skills.md) |
+| 配置与 customization 参考 | [`../../config-and-customization.md`](../../config-and-customization.md) |
+| Workflow artifact 基础术语 | [`../workflow-artifact.md`](../workflow-artifact.md) |
+| Runtime 边界解释 | [`../../../explanation/runtime-boundaries.md`](../../../explanation/runtime-boundaries.md) |

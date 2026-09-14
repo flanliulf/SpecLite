@@ -145,8 +145,8 @@
 
 | Relationship | Document |
 |---|---|
-| 安装操作指南 | [`../../how-to/install-speclite.md`](../../how-to/install-speclite.md) |
-| Runtime 边界解释 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
-| IDE discovery 术语 | [`ide-discovery.md`](ide-discovery.md) |
-| 文件所有权术语 | [`file-ownership.md`](file-ownership.md) |
-| CLI 参考 | [`../cli.md`](../cli.md) |
+| 安装操作指南 | [`../../../how-to/install-speclite.md`](../../../how-to/install-speclite.md) |
+| Runtime 边界解释 | [`../../../explanation/runtime-boundaries.md`](../../../explanation/runtime-boundaries.md) |
+| IDE discovery 术语 | [`../ide-discovery.md`](../ide-discovery.md) |
+| 文件所有权术语 | [`../file-ownership.md`](../file-ownership.md) |
+| CLI 参考 | [`../../cli.md`](../../cli.md) |

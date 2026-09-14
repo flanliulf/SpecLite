@@ -137,8 +137,8 @@
 
 | Relationship | Document |
 |---|---|
-| 安装指南 | [`../../how-to/install-speclite.md`](../../how-to/install-speclite.md) |
-| 更新与修复指南 | [`../../how-to/update-and-repair.md`](../../how-to/update-and-repair.md) |
-| Runtime 边界术语 | [`runtime-boundaries.md`](runtime-boundaries.md) |
-| Validation issues | [`../validation-issues.md`](../validation-issues.md) |
-| Canonical source 布局 | [`../canonical-source-layout.md`](../canonical-source-layout.md) |
+| 安装指南 | [`../../../how-to/install-speclite.md`](../../../how-to/install-speclite.md) |
+| 更新与修复指南 | [`../../../how-to/update-and-repair.md`](../../../how-to/update-and-repair.md) |
+| Runtime 边界术语 | [`../runtime-boundaries.md`](../runtime-boundaries.md) |
+| Validation issues | [`../../validation-issues.md`](../../validation-issues.md) |
+| Canonical source 布局 | [`../../canonical-source-layout.md`](../../canonical-source-layout.md) |

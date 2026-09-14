@@ -127,6 +127,10 @@ Goal orchestrator：
 - 只有 v2 report 和允许继续的 foundation / closure metadata 才能进入 `speclite-dev-story`。
 - 不得用 Markdown prose、历史摘要或直接读取 source index 替代 gate report metadata。
 
+## Freshness Policy（时效策略）
+
+`flow-gate-enforcement` hook 与 `speclite-dev-story` 检查 kickoff report 的 `generatedAt` 是否仍在 freshness 窗口内。当前实现的窗口是 30 天（`src/hooks/flow-gate-enforcement.ts` 的 `MAX_METADATA_AGE_DAYS`）；该值由 hook 实现定义，尚未写入 SPEC 09。超出窗口的 report 视为 stale，下游应重新运行 `speclite-flow-gate`。
+
 ## Recommended Implementation Follow-ups（推荐实施后续）
 
 1. 在 `speclite-flow-gate` workflow 中增加 source refs 完整性规则：report refs 中的文件路径必须存在；不存在时输出 `DECISION_NEEDED`。
@@ -143,7 +147,7 @@ Goal orchestrator：
 
 | Relationship | Document |
 |---|---|
-| Flow Gate 术语 | [`glossary/flow-gate-handoff.md`](glossary/flow-gate-handoff.md) |
-| Workflow artifact layout | [`workflow-artifact-layout.md`](workflow-artifact-layout.md) |
-| Workflow 体系解释 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) |
-| Process governance 操作 | [`../how-to/process-governance-report.md`](../how-to/process-governance-report.md) |
+| Flow Gate 术语 | [`../glossary/flow-gate-handoff.md`](../glossary/flow-gate-handoff.md) |
+| Workflow artifact layout | [`../workflow-artifact-layout.md`](../workflow-artifact-layout.md) |
+| Workflow 体系解释 | [`../../explanation/speclite-workflows.md`](../../explanation/speclite-workflows.md) |
+| Process governance 操作 | [`../../how-to/process-governance-report.md`](../../how-to/process-governance-report.md) |

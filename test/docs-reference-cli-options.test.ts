@@ -42,7 +42,7 @@ describe("docs/reference CLI option parity", () => {
       [
         "README.md",
         "docs/quick-start.md",
-        "docs/tutorials/quick-start.md",
+        "docs/tutorials/first-install-walkthrough.md",
         "docs/how-to/install-speclite.md",
         "docs/reference/runtime-layout.md",
         "docs/reference/canonical-source-layout.md",
@@ -89,7 +89,7 @@ describe("docs/reference CLI option parity", () => {
 });
 
 function documentedOptionsFor(reference: string, heading: string): string[] {
-  const section = new RegExp(`^## ${heading} Options[^\\n]*\\n([\\s\\S]*?)(?=^## )`, "m").exec(reference)?.[1];
+  const section = new RegExp(`^#{2,3} ${heading} Options[^\\n]*\\n([\\s\\S]*?)(?=^#{2,3} )`, "m").exec(reference)?.[1];
   if (section === undefined) {
     throw new Error(`Missing ${heading} Options section in docs/reference/cli.md`);
   }

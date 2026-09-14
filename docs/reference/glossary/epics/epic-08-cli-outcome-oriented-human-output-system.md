@@ -178,8 +178,8 @@
 
 | Relationship | Document |
 |---|---|
-| CLI 参考 | [`../cli.md`](../cli.md) |
-| Human output 矩阵 | [`../cli-human-output-matrix.md`](../cli-human-output-matrix.md) |
-| CommandResult JSON | [`../command-result-json.md`](../command-result-json.md) |
-| 安装指南 | [`../../how-to/install-speclite.md`](../../how-to/install-speclite.md) |
-| Validation issues | [`../validation-issues.md`](../validation-issues.md) |
+| CLI 参考 | [`../../cli.md`](../../cli.md) |
+| Human output 矩阵 | [`../../cli-human-output-matrix.md`](../../cli-human-output-matrix.md) |
+| CommandResult JSON | [`../../command-result-json.md`](../../command-result-json.md) |
+| 安装指南 | [`../../../how-to/install-speclite.md`](../../../how-to/install-speclite.md) |
+| Validation issues | [`../../validation-issues.md`](../../validation-issues.md) |

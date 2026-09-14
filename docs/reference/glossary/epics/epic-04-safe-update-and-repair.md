@@ -119,8 +119,8 @@
 
 | Relationship | Document |
 |---|---|
-| 更新与修复指南 | [`../../how-to/update-and-repair.md`](../../how-to/update-and-repair.md) |
-| 文件所有权术语 | [`file-ownership.md`](file-ownership.md) |
-| 配置与 customization 参考 | [`../config-and-customization.md`](../config-and-customization.md) |
-| Validation issues | [`../validation-issues.md`](../validation-issues.md) |
-| Runtime 边界解释 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
+| 更新与修复指南 | [`../../../how-to/update-and-repair.md`](../../../how-to/update-and-repair.md) |
+| 文件所有权术语 | [`../file-ownership.md`](../file-ownership.md) |
+| 配置与 customization 参考 | [`../../config-and-customization.md`](../../config-and-customization.md) |
+| Validation issues | [`../../validation-issues.md`](../../validation-issues.md) |
+| Runtime 边界解释 | [`../../../explanation/runtime-boundaries.md`](../../../explanation/runtime-boundaries.md) |

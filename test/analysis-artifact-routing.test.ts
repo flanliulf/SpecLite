@@ -528,7 +528,7 @@ describe("Analysis artifact routing", () => {
       "README.md",
       "docs/explanation/local-first-control-plane.md",
       "docs/explanation/runtime-boundaries.md",
-      "docs/reference/glossary/epic-09-installed-runtime-activation-contract-hardening.md",
+      "docs/reference/glossary/epics/epic-09-installed-runtime-activation-contract-hardening.md",
     ];
 
     for (const relativePath of publicResolverDocs) {

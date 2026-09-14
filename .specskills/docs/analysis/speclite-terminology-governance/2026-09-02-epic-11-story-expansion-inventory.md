@@ -9,7 +9,7 @@
 | Mode | `story`（Story Expansion） |
 | Source scope | `_bmad-output/implementation-artifacts/stories/11-*.md`，共 10 个 Story |
 | Source status | 10/10 均为 `ready-for-dev`；只证明 planned intent 与 acceptance contract |
-| Public projection | `docs/reference/glossary/epic-11-phase-aligned-workflow-artifact-governance.md` |
+| Public projection | `docs/reference/glossary/epics/epic-11-phase-aligned-workflow-artifact-governance.md` |
 | Index action | 无；既有 `docs/reference/glossary/index.md` 已包含 Epic 11 链接 |
 | Domain candidate handoff | 未请求，不生成 |
 

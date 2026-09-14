@@ -1,4 +1,4 @@
-# IDE-Specific Discovery Metadata（IDE 特定发现元数据）
+# IDE Discovery Metadata（IDE 发现元数据）
 
 IDE-specific discovery metadata 是 SpecLite 为目标 IDE 生成的安装态索引、入口路径或平台配置。它帮助 IDE 和 CLI 发现、展示、验证或调用已安装 Skill，但不重新定义 canonical Skill 的语义。
 

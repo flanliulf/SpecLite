@@ -1,6 +1,6 @@
 # IDE Discovery Glossary（IDE 发现术语表）
 
-本文提供 IDE Skill entry 与 installed discovery metadata 的短定义。完整解释见 [`../../explanation/ide-specific-discovery-metadata.md`](../../explanation/ide-specific-discovery-metadata.md)。
+本文提供 IDE Skill entry 与 installed discovery metadata 的短定义。完整解释见 [`../../explanation/ide-discovery-metadata.md`](../../explanation/ide-discovery-metadata.md)。
 
 ## Terms（术语）
 
@@ -19,7 +19,7 @@
 
 | Topic | Link |
 |---|---|
-| IDE discovery 完整解释 | [`../../explanation/ide-specific-discovery-metadata.md`](../../explanation/ide-specific-discovery-metadata.md) |
+| IDE discovery 完整解释 | [`../../explanation/ide-discovery-metadata.md`](../../explanation/ide-discovery-metadata.md) |
 | Runtime 三层边界 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
 | Runtime layout | [`../runtime-layout.md`](../runtime-layout.md) |
 | Agent 体系 | [`../../explanation/speclite-agents.md`](../../explanation/speclite-agents.md) |

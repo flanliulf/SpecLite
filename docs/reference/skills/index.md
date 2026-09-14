@@ -6,6 +6,8 @@
 
 | 文档 | 说明 |
 |---|---|
+| [`agent-roster.md`](agent-roster.md) | 七个 role activation Agent 的唯一源定义。 |
+| [`core-skills.md`](core-skills.md) | required baseline core skills catalog。 |
 | [`sdlc-workflows.md`](sdlc-workflows.md) | SDLC workflow skills catalog。 |
 | [`ecosystem-skills.md`](ecosystem-skills.md) | optional ecosystem extension skills catalog。 |
 | [`support-skills.md`](support-skills.md) | support skills catalog。 |

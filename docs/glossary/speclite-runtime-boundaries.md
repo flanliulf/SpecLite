@@ -10,8 +10,4 @@
 
 新增引用应优先指向以上主要公开文档；本路径仅用于保持旧链接可用。
 
-## Python Resolver Compatibility（Python Resolver 兼容说明）
-
-`_speclite/scripts/resolve_*.py` 只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 Skill activation path。
-
-已安装 Skill 的唯一默认 resolver 是 Node CLI：`speclite resolve config` 和 `speclite resolve customization`。正常激活不应回退到 Python scripts；需要迁移或排查时再把它们作为 compatibility assets 检查。
+兼容说明（测试所必需的最小说明）：`_speclite/scripts/resolve_*.py` 只是 legacy compatibility assets，用于迁移与排查，不是默认 Skill activation path；已安装 Skill 的唯一默认 resolver 是 Node CLI 的 `speclite resolve config`、`speclite resolve customization` 等命令，完整清单见 [`../reference/cli.md`](../reference/cli.md)。

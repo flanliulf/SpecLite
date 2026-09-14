@@ -7,6 +7,6 @@
 | Legacy Entry | Primary Glossary | Detailed Document |
 |---|---|---|
 | [`file-ownership-boundaries.md`](file-ownership-boundaries.md) | [`../reference/glossary/file-ownership.md`](../reference/glossary/file-ownership.md) | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
-| [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md) | [`../reference/glossary/ide-discovery.md`](../reference/glossary/ide-discovery.md) | [`../explanation/ide-specific-discovery-metadata.md`](../explanation/ide-specific-discovery-metadata.md) |
+| [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md) | [`../reference/glossary/ide-discovery.md`](../reference/glossary/ide-discovery.md) | [`../explanation/ide-discovery-metadata.md`](../explanation/ide-discovery-metadata.md) |
 | [`speclite-runtime-boundaries.md`](speclite-runtime-boundaries.md) | [`../reference/glossary/runtime-boundaries.md`](../reference/glossary/runtime-boundaries.md) | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
 | [`workflow-artifact.md`](workflow-artifact.md) | [`../reference/glossary/workflow-artifact.md`](../reference/glossary/workflow-artifact.md) | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |

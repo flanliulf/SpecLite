@@ -7,6 +7,7 @@
 | 规范性说明 | Scope | Executable Anchor |
 |---|---|---|
 | [`command-result-json-contract.md`](command-result-json-contract.md) | `CommandResult` envelope、状态、退出码、路径、兼容性和公共 payload 边界。 | `src/diagnostics/command-result-schema.ts` |
+| [`flow-gate-handoff-contract.md`](flow-gate-handoff-contract.md) | Flow Gate report frontmatter、foundation handoff source index 与 hook / downstream workflow 的交接契约。 | `src/hooks/flow-gate-enforcement.ts`、`test/flow-gate-hook-runner.test.ts` |
 
 ## Admission Rules（收录规则）
 

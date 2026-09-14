@@ -1,4 +1,4 @@
-# Quick Start Tutorial（快速开始教程）
+# First Install Walkthrough（首次安装演练）
 
 本教程是学习导向入口，带你按顺序完成一次 SpecLite 安装、验证和首次使用。完成后，你会知道哪些命令只是读取状态，哪些命令会写入项目文件，以及如何在人工阅读输出和自动化 JSON 之间切换。
 
@@ -78,16 +78,7 @@ speclite install "$PROJECT_ROOT" --yes
 speclite install "$PROJECT_ROOT" --yes
 ```
 
-默认安装使用：
-
-| Item | Default |
-|---|---|
-| Source | `bundled` |
-| Modules | `core`、`sdlc` |
-| Optional ecosystem modules | 不自动选择 |
-| Config mode | `quick` |
-| IDE targets | `claude`、`agents` |
-| Human output locale | `zh-CN` |
+默认安装使用 bundled source、`core` + `sdlc` modules、`quick` config mode、`claude` + `agents` IDE targets 与 `zh-CN` human output，不自动选择 ecosystem modules。完整默认值与规则以 [`../reference/install-defaults.md`](../reference/install-defaults.md) 为唯一源定义。
 
 本教程继续使用默认 `core` + `sdlc` 路径。需要自定义 Module、config 或 IDE targets 时，改用 interactive install：
 

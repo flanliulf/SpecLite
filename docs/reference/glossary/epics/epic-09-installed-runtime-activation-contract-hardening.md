@@ -153,8 +153,8 @@
 
 | Relationship | Document |
 |---|---|
-| Runtime 边界解释 | [`../../explanation/runtime-boundaries.md`](../../explanation/runtime-boundaries.md) |
-| 配置与 customization | [`../config-and-customization.md`](../config-and-customization.md) |
-| IDE discovery 术语 | [`ide-discovery.md`](ide-discovery.md) |
-| Runtime layout | [`../runtime-layout.md`](../runtime-layout.md) |
-| Skill 使用指南 | [`../../how-to/use-installed-skills.md`](../../how-to/use-installed-skills.md) |
+| Runtime 边界解释 | [`../../../explanation/runtime-boundaries.md`](../../../explanation/runtime-boundaries.md) |
+| 配置与 customization | [`../../config-and-customization.md`](../../config-and-customization.md) |
+| IDE discovery 术语 | [`../ide-discovery.md`](../ide-discovery.md) |
+| Runtime layout | [`../../runtime-layout.md`](../../runtime-layout.md) |
+| Skill 使用指南 | [`../../../how-to/use-installed-skills.md`](../../../how-to/use-installed-skills.md) |

@@ -122,8 +122,8 @@
 
 | Relationship | Document |
 |---|---|
-| 验证操作指南 | [`../../how-to/validate-installation.md`](../../how-to/validate-installation.md) |
-| Validation issue 参考 | [`../validation-issues.md`](../validation-issues.md) |
-| CommandResult 参考 | [`../command-result-json.md`](../command-result-json.md) |
-| Runtime 边界术语 | [`runtime-boundaries.md`](runtime-boundaries.md) |
-| 文件所有权术语 | [`file-ownership.md`](file-ownership.md) |
+| 验证操作指南 | [`../../../how-to/validate-installation.md`](../../../how-to/validate-installation.md) |
+| Validation issue 参考 | [`../../validation-issues.md`](../../validation-issues.md) |
+| CommandResult 参考 | [`../../command-result-json.md`](../../command-result-json.md) |
+| Runtime 边界术语 | [`../runtime-boundaries.md`](../runtime-boundaries.md) |
+| 文件所有权术语 | [`../file-ownership.md`](../file-ownership.md) |
