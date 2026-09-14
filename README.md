@@ -10,11 +10,13 @@ SpecLite 的 `assets/source/speclite/` 不是普通文档集合，而是一整�
 - 开发者：需要理解 CLI、runtime、manifest、validation 和 IDE adapter 的实现者。
 - 维护者：负责维护 canonical skills、fixtures、发布包和企业落地质量的人。
 
+公开文档体系的导航入口是 [docs/index.md](https://github.com/flanliulf/SpecLite/blob/main/docs/index.md)。使用者从随 npm package 发布的 [docs/quick-start.md](docs/quick-start.md) 开始；开发者从 `docs/index.md` 的 Read First 开始；维护者阅读 `docs/README.md` 与 `docs/_STYLE_GUIDE.md`。
+
 ## What SpecLite Provides（SpecLite 提供什么）
 
 SpecLite 提供的不是单个 prompt、单份 README 或零散 skill 文件，而是一套可治理的 AI Coding 方法论运行结构：
 
-- `core-skills/`：多个 workflow 共享的基础能力，例如帮助、头脑风暴、文档索引、文档拆分和评审辅助。
+- `core-skills/`：多个 workflow 共享的基础能力，例如帮助、头脑风暴、文档索引、文档拆分、评审辅助、领域建模和术语治理。
 - `sdlc-skills/`：按研发生命周期组织的方法论能力，覆盖分析、计划、方案设计、实现和 DevOps 发布阶段。
 - `ecosystems/<category>/<id>/`：optional ecosystem modules，用于 React、Vue、Java / Spring Boot、Node.js、Python、npm package、CLI tool、documentation-only project 等具体技术生态或项目形态的 SpecLite Skill package selection。
 - `support-skills/`：用于创建、迁移、检查和对齐 SpecLite canonical skill 源定义。
@@ -126,7 +128,7 @@ speclite install /path/to/project --yes --interactive
 
 interactive mode 会按 `ecosystem category -> id` 引导选择，例如先选 `frontend` / `backend` / `other`，再选 `react`、`java-springboot` 或 `npm-package`。选择 ecosystem modules 是推荐但非 mandatory；skip 是合法路径。
 
-`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies。
+`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies（Node.js、Python 等生态同理），只把被选择的 SpecLite Skill packages 投影到 `.claude/skills/`、`.agents/skills/` 和 `_speclite/_config/*` indexes。
 
 ## CLI Commands（命令）
 
@@ -146,12 +148,14 @@ interactive mode 会按 `ecosystem category -> id` 引导选择，例如先选 `
 | `speclite resolve config` | Runtime support command，用于解析项目 config；默认 stdout 保持 pure JSON，可显式加 `--human` 查看排查用 support output。 |
 | `speclite resolve customization` | Runtime support command，用于解析 skill customization；默认 stdout 保持 pure JSON，可显式加 `--human` 查看排查用 support output。 |
 | `speclite resolve artifact-roots` | Runtime support command，用于按 lifecycle 解析 SPEC 09 effective artifact roots、resolution mode 与 provenance；默认 stdout 保持 pure JSON。 |
+| `speclite resolve artifact-documents` | Runtime support command，用于解析 PRD / Epics / Architecture 的 whole / sharded document shape 与 `consumedPaths`；只读，默认 stdout 保持 pure JSON。 |
+| `speclite resolve cr-directory` | Runtime support command，用于按 Story ID 解析唯一 Code Review 目录（`crDir`、`compatibilityMode`）；只读，默认 stdout 保持 pure JSON。 |
 
-`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。未传 `--human` 时，missing key 仍输出 `{}`、exit code 为 `0`、stderr 为空，确保自动化和 installed skills 依赖的 contract 不变。已安装 Skill 激活前必须能在当前 AI 会话 `PATH` 中执行 `speclite`；不可用时应暴露或安装 Node CLI 后重试，不回退 Python resolver 或单独读取 `_speclite/config.toml`。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](docs/how-to/manage-installed-project.md)。
+`resolve` 属于 runtime support API surface，主要服务已安装 skills，不是普通使用者的首要命令入口。未传 `--human` 时，missing key 仍输出 `{}`、exit code 为 `0`、stderr 为空，确保自动化和 installed skills 依赖的 contract 不变。已安装 Skill 激活前必须能在当前 AI 会话 `PATH` 中执行 `speclite`；不可用时应暴露或安装 Node CLI 后重试，不回退 Python resolver 或单独读取 `_speclite/config.toml`。安装后的治理和维护命令见 [docs/how-to/manage-installed-project.md](https://github.com/flanliulf/SpecLite/blob/main/docs/how-to/manage-installed-project.md)。
 
 ## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
 
-Fresh install 会把 `_speclite/scripts/resolve_*.py` 写入目标项目，并在 `files-index.json` 中标记为 `runtime-compat-script`。这些 Python scripts 只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 Skill activation path，也不是默认 CLI resolver runtime dependency。已安装 skills 的唯一默认 resolver 是 Node CLI：`speclite resolve config`、`speclite resolve customization` 和 `speclite resolve artifact-roots`。
+Fresh install 会把 `_speclite/scripts/resolve_*.py` 写入目标项目，并在 `files-index.json` 中标记为 `runtime-compat-script`。这些 Python scripts 只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 Skill activation path，也不是默认 CLI resolver runtime dependency。已安装 skills 的唯一默认 resolver 是 Node CLI：`speclite resolve config`、`speclite resolve customization`、`speclite resolve artifact-roots`、`speclite resolve artifact-documents` 和 `speclite resolve cr-directory`。
 
 `install` 的默认 human-readable output 使用 `zh-CN`。`speclite install /path/to/project --yes` 是默认无交互安装；需要自定义 modules、config 或 IDE targets 时使用 `--yes --interactive`。安全预览会展示 target project、目标路径和命令执行目录，并让 `Next Actions` 使用可从原执行目录复制的 target。英文输出可用 `--locale en-US` 或 `SPECLITE_LOCALE=en-US`，JSON 输出不受 locale 影响，也不包含 human-only 的目标绝对路径上下文。
 
@@ -159,7 +163,7 @@ Fresh install 会把 `_speclite/scripts/resolve_*.py` 写入目标项目，并�
 
 SpecLite 的默认策略是保守写入、可审查变更：
 
-- `--dry-run` 只生成 plan，不写文件。
+- `--dry-run` 只生成 plan，不写文件；它适用于 `init`、`update`、`sync` 和 `uninstall`。`install` 不带 `--yes` 本身就是只读 preflight。
 - `install` 不带 `--yes` 只执行 target preflight，不进入后续 source/module/config/write 阶段。
 - `--yes` 只表示 command-level write authorization，不表示接受 unverified source 或 policy rejection。
 - `init`、`sync` 和 `uninstall` 在未授权时只生成 plan；带 `--yes` 才执行非冲突写入或移除。
@@ -197,6 +201,8 @@ npm run release:check
 | `npm run build` | 使用 `tsup` 构建 CLI。 |
 | `npm run dev` | 通过 `tsx src/bin/speclite.ts` 运行开发入口。 |
 | `npm test` | 运行 Vitest 测试。 |
+| `npm run docs:check` | 校验 `docs/` 的链接、fragment、索引可达性、package 边界、Draft 状态和必要关系。 |
+| `npm run release:packaging-check` | 只执行 packaging manifest 与打包边界检查，需先 `npm run build`。 |
 | `npm run release:verify` | 构建并执行 packaging check，不运行测试。 |
 | `npm run release:check` | 构建、运行 Vitest 并执行 packaging check，作为 publish 前门禁。 |
 
@@ -212,9 +218,11 @@ npm run release:check
 
 涉及 skill package、manifest、fixture、runtime path、validation issue model 或 release packaging 的变更，应同步检查对应 specs、fixtures 和 packaging verification。Optional ecosystem modules 不改变 default install guarantee；default fixture count 与 selected ecosystem fixture matrix 应分别维护。
 
-CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/cli-human-output-matrix.md](docs/reference/cli-human-output-matrix.md)。
+CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/cli-human-output-matrix.md](https://github.com/flanliulf/SpecLite/blob/main/docs/reference/cli-human-output-matrix.md)。本节与 Developer Workflow 面向仓库贡献者；只使用 npm package 的读者可跳过。
 
 ## Roadmap（后续迭代路线）
+
+以下是产品与 canonical source 的迭代路线；公开文档体系自身的整理项见 [docs/README.md](https://github.com/flanliulf/SpecLite/blob/main/docs/README.md) 的 Current Migration State（当前迁移状态）。
 
 - [ ] 优化 canonical source skills 目录结构，包括输出 Artifacts 目录、文档命名规范和顺序可读性等。
 - [ ] 支持既有项目多次迭代的 `_speclite-output` 体系。

@@ -4,7 +4,7 @@
 
 本文适用于携带该文件的 package version，不手工写死版本号。仓库 `main` 上的完整文档可能描述尚未发布的变化；已发布版本的使用者应优先以 package 内本文、当前 CLI help 和 package metadata 为准。
 
-本文以“可以直接复制执行”为主，不承担完整的学习叙事，也不依赖未进入 npm package 的其他 `docs/` 页面。仓库文档中的 `tutorials/quick-start.md` 负责按步骤讲解 preview、write authorization、human output 和 JSON boundary。
+本文以“可以直接复制执行”为主，不承担完整的学习叙事，也不依赖未进入 npm package 的其他 `docs/` 页面。仓库文档中的 `tutorials/first-install-walkthrough.md` 负责按步骤讲解 preview、write authorization、human output 和 JSON boundary。
 
 SpecLite 不是普通文档包。它是一套面向企业级生产项目的 AI Coding 落地方法论，通过 CLI 安装到本地项目后，会生成 runtime、IDE skill mirrors、manifest/index 和过程产物目录，让团队可以在多个 AI IDE 中使用一致的工作流入口。
 
@@ -178,7 +178,7 @@ speclite install /path/to/project --yes --interactive
 
 交互会按 `ecosystem category -> id` 引导选择：先选 `frontend`、`backend`、`other` 或 skip，再选择具体 id，例如 `react`、`vue`、`java-springboot`、`nodejs`、`python`、`npm-package`、`cli-tool` 或 `documentation-only`。选择这些 optional ecosystem modules 是推荐但非 mandatory；skip 后仍会安装默认 `core` + `sdlc`。
 
-Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer。SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies；它只把被选择的 SpecLite Skill packages 投影到 `.claude/skills/`、`.agents/skills/` 和 `_speclite/_config/*` indexes。
+Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies（Node.js、Python 等生态同理），只把被选择的 SpecLite Skill packages 投影到 `.claude/skills/`、`.agents/skills/` 和 `_speclite/_config/*` indexes。
 
 ## Install Into Project（安装到项目）
 
@@ -196,7 +196,7 @@ speclite install /path/to/project --json --yes
 
 默认安装使用 bundled source，也就是随当前 CLI 包携带的 `assets/source/speclite/` 方法论源包。安装过程会选择官方模块、初始化配置、创建 runtime 结构、写入 IDE mirrors、生成 manifest/index，并执行 ReadyCheck。
 
-默认模块和目标包括：
+默认模块和目标如下（仓库文档中的唯一源定义是 `docs/reference/install-defaults.md`；本文为随包发布的自包含摘录）：
 
 | Item | Default |
 |---|---|
@@ -239,22 +239,31 @@ speclite validate /path/to/project --json
 
 `validate` 会检查 installed-state、runtime path、manifest/index、IDE mirrors、source integrity、file ownership 等安装健康度相关问题。
 
-human-readable output 的稳定骨架是 `Outcome`、`Summary`、`Scope`、`Issues` 和 `Next Actions`。下面是无颜色、可复制、不会暴露本机路径的示例形态：
+human-readable output 的稳定骨架是 `Outcome`、`Summary`、`Scope`、`State`、`Issues`、`Evidence` 和 `Next Actions`，默认语言为 `zh-CN`，可用 `--locale en-US` 切换。下面是无颜色、可复制、不会暴露本机路径的节选示例：
 
 ```text
 SpecLite status
-Outcome: not-installed
+Outcome（结果）: not-installed
 
-Summary
-Completed: yes
-Writes: no project files changed
-User action: required
+Summary（摘要）
+- 完成状态：已完成
+- 写入状态：未写入项目文件
+- 用户动作：需要
+installed-state summary 显示该项目尚未安装 SpecLite。
 
-Issues:
-- No issues
+Scope（范围）
+targetProject=example-project
+projectRoot=.
 
-Next Actions / Next actions:
-- Run `speclite install <target>` to configure this project.
+State（状态）
+高层健康：not-configured
+manifest 状态：missing
+
+Issues（问题）
+- 无问题
+
+Next Actions（下一步）
+- 运行 `speclite install <target>` 配置该项目。
 ```
 
 docs 示例只用于解释人类输出；自动化和 contract 判断请使用 `--json`。

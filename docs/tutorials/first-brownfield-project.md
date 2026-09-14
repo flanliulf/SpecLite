@@ -35,7 +35,7 @@
 开始前确认：
 
 - 已安装 Node.js `>=22` 和可直接执行的 `speclite` CLI。
-- 已按 [`quick-start.md`](quick-start.md) 将 SpecLite 安装到训练仓库。
+- 已按 [`first-install-walkthrough.md`](first-install-walkthrough.md) 将 SpecLite 安装到训练仓库。
 - 默认 `core` + `sdlc` Module 已安装；本实验不要求 optional ecosystem Module。
 - SpecLite installed projection 已纳入训练仓库基线，当前 Git worktree 干净。
 - 你正在支持 `.claude/skills/` 或 `.agents/skills/` 的 AI IDE 中打开该仓库。
@@ -236,7 +236,7 @@ git status --short --untracked-files=all
 
 | Relationship | Document |
 |---|---|
-| 安装与首次验证前置教程 | [`quick-start.md`](quick-start.md) |
+| 安装与首次验证前置教程 | [`first-install-walkthrough.md`](first-install-walkthrough.md) |
 | Installed Skill 调用方式 | [`../how-to/use-installed-skills.md`](../how-to/use-installed-skills.md) |
 | 安装健康检查 | [`../how-to/validate-installation.md`](../how-to/validate-installation.md) |
 | Workflow 概念与执行边界 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) |

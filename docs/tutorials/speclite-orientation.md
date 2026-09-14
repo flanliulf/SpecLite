@@ -2,7 +2,7 @@
 
 本文是一份面向初次接触 SpecLite 的开发者导览。预计阅读时间为 10–15 分钟。读完后，你应能解释 SpecLite 在项目中的作用，区分 Module、Skill、Agent、Workflow 与 Artifact，并知道安装后应该从哪里开始。
 
-如果你准备立即安装，请继续阅读 [`quick-start.md`](quick-start.md)；本文先建立使用 SpecLite 所需的最小心智模型。
+如果你准备立即安装，请继续阅读 [`first-install-walkthrough.md`](first-install-walkthrough.md)；本文先建立使用 SpecLite 所需的最小心智模型。
 
 ## What SpecLite Is（SpecLite 是什么）
 
@@ -101,7 +101,7 @@ CLI 命令管理安装状态，不直接替你执行 PRD、Architecture 或 Code
 
 下面是一条适合初学者的最短路径：
 
-1. 按 [`quick-start.md`](quick-start.md) 完成安装、`status` 和 `validate`。
+1. 按 [`first-install-walkthrough.md`](first-install-walkthrough.md) 完成安装、`status` 和 `validate`。
 2. 在目标项目根目录打开支持 installed Skill 发现的 AI IDE。
 3. 调用 installed `speclite-help`，说明当前目标并让它依据本地 catalog、配置和已有产物推荐下一步。
 4. 如果任务仍需要角色判断，激活合适的 Agent；如果目标和输入已经明确，直接调用对应 Workflow。
@@ -125,7 +125,7 @@ CLI 命令管理安装状态，不直接替你执行 PRD、Architecture 或 Code
 
 完成本导览后，建议按以下顺序继续：
 
-1. [`quick-start.md`](quick-start.md)：实际安装并验证目标项目。
+1. [`first-install-walkthrough.md`](first-install-walkthrough.md)：实际安装并验证目标项目。
 2. [`../how-to/use-installed-skills.md`](../how-to/use-installed-skills.md)：在 AI IDE 中发现并调用 installed Skill。
 3. [`../explanation/skill-taxonomy-and-sdlc.md`](../explanation/skill-taxonomy-and-sdlc.md)：根据任务选择 CLI、Agent 或 Workflow。
 4. [`../reference/skills/sdlc-workflows.md`](../reference/skills/sdlc-workflows.md)：按 SDLC 阶段查询具体 Workflow。
@@ -145,7 +145,7 @@ CLI 命令管理安装状态，不直接替你执行 PRD、Architecture 或 Code
 | Relationship | Document |
 |---|---|
 | 成套培训：13 篇材料与验收 | [`speclite-developer-training.md`](speclite-developer-training.md) |
-| 下一步：安装与校验 | [`quick-start.md`](quick-start.md) |
+| 下一步：安装与校验 | [`first-install-walkthrough.md`](first-install-walkthrough.md) |
 | 下一步：调用 installed Skill | [`../how-to/use-installed-skills.md`](../how-to/use-installed-skills.md) |
 | 概念：local-first control plane | [`../explanation/local-first-control-plane.md`](../explanation/local-first-control-plane.md) |
 | 概念：运行边界 | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |

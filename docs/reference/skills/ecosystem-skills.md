@@ -16,7 +16,7 @@
 
 Interactive install 使用 `ecosystem category -> id` 两级选择；`frontend`、`backend`、`other` 都可以 skip。`--yes`、`--json` 和 default no-prompt install 不会自动选择 ecosystem modules。
 
-Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer。选择 React / Vue / Java / npm package ecosystem module 只安装对应 SpecLite Skill package；不会安装 React / Vue / Java / npm package runtime dependencies。
+Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies（Node.js、Python 等生态同理），只把被选择的 SpecLite Skill packages 投影到 `.claude/skills/`、`.agents/skills/` 和 `_speclite/_config/*` indexes。
 
 ## Frontend（前端）
 

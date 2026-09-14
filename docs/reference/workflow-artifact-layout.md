@@ -30,20 +30,20 @@ SpecLite 的 source、runtime projection 和 workflow artifacts 分属三个层�
 
 ## Configuration Mapping（配置映射）
 
-默认输出路径由 Core 与 SDLC Module 组合得到：
+默认输出路径由 Core 与 SDLC Module 组合得到。本表是七个 workflow-owned filesystem planes 的唯一源定义，其它文档的目录表以本表为准：
 
 | Config Key | Default Value | Purpose |
 |---|---|---|
-| `core.output_folder` | `{project-root}/_speclite-output` | 兼容 display root 和 fresh artifact root 默认值的共同前缀。 |
+| `core.output_folder` | `_speclite-output` | 兼容 display root 和 fresh artifact root 默认值的共同前缀。 |
 | `core.brainstorming_artifacts` | `{output_folder}/0-brainstorming-artifacts` | Brainstorming session 与发散探索产物。 |
 | `modules.sdlc.analysis_artifacts` | `{output_folder}/1-analysis-artifacts` | Product Brief、Research、PRFAQ 等 analysis 产物。 |
 | `modules.sdlc.planning_artifacts` | `{output_folder}/2-planning-artifacts` | PRD、UX、Epics 等 planning 产物。 |
 | `modules.sdlc.solutioning_artifacts` | `{output_folder}/3-solutioning-artifacts` | Architecture、Specs、implementation readiness 等 solutioning 产物。 |
-| `modules.sdlc.implementation_artifacts` | `{output_folder}/4-implementation-artifacts` | Sprint、Story、Flow Gate、Review、QA 与 Retrospective 产物。 |
-| `modules.sdlc.devops_artifacts` | `{output_folder}/5-devops-artifacts` | CI/CD、deployment 与 release 产物。 |
+| `modules.sdlc.implementation_artifacts` | `{output_folder}/4-implementation-artifacts` | Sprint、Story、Flow Gate、Review、QA、Retrospective 与 Quick Dev 产物。 |
+| `modules.sdlc.devops_artifacts` | `{output_folder}/5-devops-artifacts` | CI/CD、deployment 与 npm release 产物。 |
 | `modules.sdlc.project_knowledge` | `{output_folder}/project-knowledge-base` | Brownfield baseline、长期项目知识和 TSD 等 Project Knowledge 产物。 |
 
-> Note: Fresh install 中 `{project_knowledge}` 默认解析到 `_speclite-output/project-knowledge-base/`。`docs/` 是 Public Documentation plane；公开文档可以引用 Project Knowledge，但二者不是同一个默认目录。
+> Note: `core.brainstorming_artifacts` 虽然位于 `[core]`，但它的交互式提问与其余六个 root 一起定义在 SDLC Module 的 `module.yaml` 中，只在 `--yes --interactive` 且选中 `sdlc` 时出现；未选中时使用默认值。Fresh install 中 `{project_knowledge}` 默认解析到 `_speclite-output/project-knowledge-base/`。`docs/` 是 Public Documentation plane；公开文档可以引用 Project Knowledge，但二者不是同一个默认目录。
 
 ## Default Directory Tree（默认目录树）
 
@@ -124,17 +124,18 @@ _speclite-output/
 │   │           └── EXPERIMENT_NOTES.md
 │   ├── cr-rules/                               # 安装时预创建
 │   │   └── cr-todo-backlog.md
-│   ├── retrospectives/                         # 安装时预创建；见“当前差异”
+│   ├── retrospectives/                         # 安装时预创建
+│   │   └── epic-{N}-retro-{date}.md
 │   ├── tests/
 │   │   └── test-summary.md
 │   ├── spec-{slug}.md
 │   ├── deferred-work.md
-│   ├── epic-{N}-context.md
-│   └── epic-{N}-retro-{date}.md
+│   └── epic-{N}-context.md
 ├── 5-devops-artifacts/                         # 安装时预创建
 │   ├── ci-cd/                                  # 安装时预创建的保留目录
 │   ├── deployments/                            # 安装时预创建的保留目录
-│   └── npm-releases/                           # 安装时预创建；见“当前差异”
+│   └── npm-releases/                           # 安装时预创建
+│       └── <package-name>-<version>-release-report.md
 └── project-knowledge-base/                     # 安装时预创建
     ├── brownfield/                             # 安装时预创建
     │   ├── baseline/                           # 安装时预创建
@@ -156,19 +157,23 @@ _speclite-output/
 | Path or Pattern | Producer Skill | Creation and Maintenance |
 |---|---|---|
 | `{brainstorming_artifacts}/brainstorming-session-{date}-{time}.md` | `speclite-brainstorming` | 每次 session 按时间创建或续写；输出根来自 `speclite resolve artifact-roots` 的 `brainstorming_artifacts`，不属于 `planning-artifacts/`。 |
-| `project-context.md` | `speclite-generate-project-context` | 在输出根目录创建，跨迭代持续维护 AI agent 需要的项目规则。 |
-| `1-analysis-artifacts/research/*.md` | `speclite-domain-research`、`speclite-market-research`、`speclite-technical-research` | 按研究类型、主题和日期新增；可读取 `{project_knowledge}`，但不把 research 输出写入 Project Knowledge 或 Public Documentation。 |
-| `1-analysis-artifacts/product-brief/product-brief-*.md` | `speclite-product-brief` | 主 brief 分阶段增量维护；distillate 按用户选择创建在同一 subject directory。 |
-| `1-analysis-artifacts/prfaq/prfaq-*.md` | `speclite-prfaq` | 主 PRFAQ 跨 stage 增量维护；完成时生成 distillate 到同一 subject directory。 |
-| `planning-artifacts/brownfield-planning-brief.md`、`candidate-change-slices.md`、`feature-entry-points.md` | `speclite-brownfield-context-builder` | 条件生成 planning handoff，也可按配置写入 `{brownfield_output}/planning/`；主要 baseline 默认位于 `{project_knowledge}/brownfield/`。 |
-| `planning-artifacts/prd/prd.md` | `speclite-create-prd`、`speclite-edit-prd` | Canonical whole PRD；sharded shape 使用同目录 `index.md` 与声明 shards。 |
-| `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` | `speclite-validate-prd` | 每次 invocation 仅生成一次标准日期并锁定 exact path。Private `scripts/prd-validation-report-operation.mjs` 在任何 report/progress/temp/suffix write 前做 read-only probe，并在 commit-time 重验后以 `wx` 创建。Existing target 使用 `artifact-path.prd-validation-report-exists` 阻断，无论内容相同与否都不 overwrite、append、truncate、delete、reuse 或 suffix，不更新 progress；人工处置为“保留并移走或删除既有报告后重新运行”。Legacy names 仅原位 historical discovery，install/update/repair 不迁移。 |
-| `{planning_artifacts}/ux/ux-design-specification.md` | `speclite-create-ux-design` | 增量维护 UX 主规格；`{planning_artifacts}/ux/ux-color-themes.html` 与 `{planning_artifacts}/ux/ux-design-directions.html` 是条件生成的视觉化派生产物，`{planning_artifacts}/ux/design-system/` 按需创建。Canonical existing/new target 必须物理落在 real UX owner。每次 exclusive create 使用 private `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-file --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{target}" --source "{source-file}"`，on-demand mkdir 使用同一 script 的 exact `create-directory` flags；该 binding 不是 public `speclite` CLI。它在 commit-time 检查 physical owner 与 nearest existing ancestor 后立即执行。stdout 必须恰一个 JSON；non-zero、invalid JSON 或 `ok !== true` 必须 HALT，且不得推进 frontmatter/progress/append target。Existing legacy `{planning_artifacts}/ux-design-specification.md` 及 sibling 仅在 real Planning owner 内只读发现并原位继续，不由 install/update/repair 迁移。Markdown duplicate definition 采用 first-definition-wins；local-ish HTML attribute raw value 含 `&` 时在 strip/decode 前 fail closed，external scheme 与 literal fragment/query-only 除外。任一 resolver/candidate/frontmatter/reference 门禁失败时保持空消费、空 append target 与零 artifact/progress mutation。 |
-| `solutioning-artifacts/architecture/architecture.md` | `speclite-create-architecture` | Canonical whole Architecture；只有用户选择 Continue 后才追加并推进 frontmatter。 |
-| `planning-artifacts/epics/epics.md` | `speclite-create-epics-and-stories` | Canonical whole Epics；sharded shape 使用同目录 `index.md` 与声明 shards。 |
+| `{output_folder}/project-context.md` | `speclite-generate-project-context` | 在输出根目录创建，跨迭代持续维护 AI agent 需要的项目规则。 |
+| `{analysis_artifacts}/research/*.md` | `speclite-domain-research`、`speclite-market-research`、`speclite-technical-research` | 按研究类型、主题和日期新增；可读取 `{project_knowledge}`，但不把 research 输出写入 Project Knowledge 或 Public Documentation。 |
+| `{analysis_artifacts}/product-brief/product-brief-*.md` | `speclite-product-brief` | 主 brief 分阶段增量维护；distillate 按用户选择创建在同一 subject directory。 |
+| `{analysis_artifacts}/prfaq/prfaq-*.md` | `speclite-prfaq` | 主 PRFAQ 跨 stage 增量维护；完成时生成 distillate 到同一 subject directory。 |
+| `{planning_artifacts}/brownfield-planning-brief.md`、`candidate-change-slices.md`、`feature-entry-points.md` | `speclite-brownfield-context-builder` | 条件生成 planning handoff，也可按配置写入 `{brownfield_output}/planning/`；主要 baseline 默认位于 `{project_knowledge}/brownfield/`。 |
+| `{planning_artifacts}/prd/prd.md` | `speclite-create-prd`、`speclite-edit-prd` | Canonical whole PRD；sharded shape 使用同目录 `index.md` 与声明 shards。 |
+| `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md` | `speclite-validate-prd` | 每次 invocation 只生成一次日期并锁定 exact path；private `scripts/prd-validation-report-operation.mjs` 以 exclusive create 写入。同日目标已存在时用 `artifact-path.prd-validation-report-exists` 阻断，人工处置为“保留并移走或删除既有报告后重新运行”；legacy report 原位可发现，不迁移。 |
+| `{planning_artifacts}/ux/ux-design-specification.md` | `speclite-create-ux-design` | 增量维护 UX 主规格；`{planning_artifacts}/ux/ux-color-themes.html` 与 `{planning_artifacts}/ux/ux-design-directions.html` 是条件生成的视觉化派生产物，`{planning_artifacts}/ux/design-system/` 按需创建。写入由 Skill-private `scripts/ux-artifact-operation.mjs` 执行，见下文写入规约。 |
+| `{solutioning_artifacts}/architecture/architecture.md` | `speclite-create-architecture` | Canonical whole Architecture；只有用户选择 Continue 后才追加并推进 frontmatter。 |
+| `{planning_artifacts}/epics/epics.md` | `speclite-create-epics-and-stories` | Canonical whole Epics；sharded shape 使用同目录 `index.md` 与声明 shards。 |
 | `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/implementation-readiness-report-{yyyy-MM-dd}.md` | `speclite-implementation-readiness-check` | 日期化 readiness snapshot；`{solutioning_artifacts}` 只取 artifact-root resolver 的 `resolvedRoot`，basename 保持不变。 |
 | `{solutioning_artifacts}/implementation-readiness-report/grill-consistency/**` | `speclite-implementation-readiness-grill-consistency-reviewer` | 每轮新增 `round-{N}` 记录，`summary.md` 用于阶段性汇总。`explicit-config` 与 `legacy-compatible` 均服从 resolver；resolver block/error 时 HALT 且 zero artifact write。旧 Planning readiness / `ir-grill/` artifacts 只读原位发现，不迁移。 |
-| `planning-artifacts/sprint-change-proposal-{date}.md` | `speclite-correct-course` | 日期化重大变更提案。 |
+| `{planning_artifacts}/sprint-change-proposal-{date}.md` | `speclite-correct-course` | 日期化重大变更提案。 |
+
+PRD validation report 写入规约：`speclite-validate-prd` 的 Skill-private report operation script（位于该 Skill 的 `scripts/`）在任何 report / progress / temp / suffix write 前做 read-only probe，并在 commit-time 重验后以 `wx` exclusive create 写入。同日目标已存在时，无论内容是否相同都不 overwrite、append、truncate、delete、reuse 或加 suffix，也不更新 progress。旧命名的报告仅作 historical discovery 原位保留，install / update / repair 不迁移。
+
+UX artifact 写入规约：canonical target 必须物理落在 real UX owner 内。每次 exclusive create 使用 `node "{skill-root}/scripts/ux-artifact-operation.mjs" create-file --project-root "{project-root}" --planning-root "{planning_artifacts}" --target "{target}" --source "{source-file}"`，on-demand mkdir 使用同一 script 的 `create-directory` flags；该 binding 不是 public `speclite` CLI，并在 commit-time 检查 physical owner 与 nearest existing ancestor 后立即执行。stdout 必须恰为一个 JSON；non-zero、invalid JSON 或 `ok !== true` 必须 HALT，且不得推进 frontmatter / progress / append target。Legacy `{planning_artifacts}/ux-design-specification.md` 及 sibling 只在 real Planning owner 内只读发现并原位继续，不由 install / update / repair 迁移。Markdown duplicate definition 采用 first-definition-wins；local-ish HTML attribute raw value 含 `&` 时在 strip / decode 前 fail closed，external scheme 与 literal fragment / query-only 除外。任一 resolver / candidate / frontmatter / reference 门禁失败时保持空消费、空 append target 与零 artifact / progress mutation。
 
 Agent 写作、Mermaid、文档校验和部分 ecosystem auditor 的输出位置可由用户指定。它们可以写入 `{planning_artifacts}`，但没有统一固定文件名，不应据此增加虚构的必选子目录。
 
@@ -188,7 +193,7 @@ Agent 写作、Mermaid、文档校验和部分 ecosystem auditor 的输出位置
 | `spec-{slug}.md` | `speclite-quick-dev` | Quick Dev 的 living spec，随实现流程推进状态。 |
 | `deferred-work.md` | `speclite-quick-dev` | 条件追加延期事项，跨 Quick Dev 任务保留。 |
 | `epic-{N}-context.md` | `speclite-quick-dev` | 可重建 cache；planning artifacts 更新后可能失效。 |
-| `epic-{N}-retro-{date}.md` | `speclite-retrospective` | Epic 完成后的日期化复盘 snapshot。 |
+| `retrospectives/epic-{N}-retro-{date}.md` | `speclite-retrospective` | Epic 完成后的日期化复盘 snapshot；读取历史复盘时兼容 legacy 根目录位置，只读不迁移。 |
 
 SR / CR 目录中的 `.tmp/` 只保存审查中间数据，并应在审查完成时清理。CR `.tmp/` 必须位于同一 resolved `code-reviews/{story-id}-code-review/` 内，不得按 title/slug 建第二目录。唯一 unfinished legacy-only run 使用 `legacy-resume` 原位续写；canonical+unfinished legacy 或多个 unfinished legacy 使用 shared `cr-directory.ambiguous-resume-root` 在任何 artifact/goal/progress/tracker write 前阻断。Legacy directory 不自动迁移、重命名或删除。
 
@@ -198,9 +203,9 @@ SR / CR 目录中的 `.tmp/` 只保存审查中间数据，并应在审查完成
 
 ## DevOps Artifacts（DevOps 产物）
 
-SDLC Module 会预创建 `devops-artifacts/`、`ci-cd/`、`deployments/` 和 `npm-releases/`，为发布与运维 Workflow 提供稳定落点。
+SDLC Module 会预创建 `{devops_artifacts}/` 及其下的 `ci-cd/`、`deployments/` 和 `npm-releases/`，为发布与运维 Workflow 提供稳定落点。
 
-当前只有 `speclite-npm-publisher` 在 help catalog 中声明 `{devops_artifacts}/npm-releases`。`ci-cd/` 和 `deployments/` 目前是保留目录，不能仅凭目录存在推断已有 canonical producer。
+当前只有 `speclite-npm-publisher` 写入 `{devops_artifacts}/npm-releases/`（`<package-name>-<version>-release-report.md` 与可选的 `release-check.json` sentinel）。`ci-cd/` 和 `deployments/` 目前是保留目录，不能仅凭目录存在推断已有 canonical producer。
 
 Selected ecosystem modules 可能把审计报告写入 `{devops_artifacts}` 或 `{planning_artifacts}`，也可能写入 `{project_knowledge}`。只有显式选择并运行对应 ecosystem Skill 后，相关文件才会出现。
 
@@ -210,9 +215,9 @@ Selected ecosystem modules 可能把审计报告写入 `{devops_artifacts}` 或 
 
 | Path | Consumer | Contract |
 |---|---|---|
-| `implementation-artifacts/foundation-handoff/source-index.json` | `speclite-flow-gate` | Project-provided input；也可用 Story / Epic 显式引用替代。 |
-| `planning-artifacts/speclite-workflow-status.yaml` | `speclite-code-review-06-finalizer` | Updater-only path；存在时更新，不存在时跳过，当前未发现 canonical creator。 |
-| `flow-gates/{story-key}-story-kickoff-gate.md` | `flow-gate-enforcement` Hook | 报告由 `speclite-flow-gate` 生成；Hook 只读取 frontmatter，不生成报告，也不推进状态。 |
+| `{implementation_artifacts}/foundation-handoff/source-index.json` | `speclite-flow-gate` | Project-provided input；也可用 Story / Epic 显式引用替代。 |
+| `{planning_artifacts}/speclite-workflow-status.yaml` | `speclite-code-review-06-finalizer` | Updater-only path；存在时更新，不存在时跳过，当前未发现 canonical creator。 |
+| `{implementation_artifacts}/flow-gates/{story-key}-story-kickoff-gate.md` | `flow-gate-enforcement` Hook | 报告由 `speclite-flow-gate` 生成；Hook 只读取 frontmatter，不生成报告，也不推进状态。 |
 
 同理，Agent activation Skills、`speclite-sprint-status`、editorial review helpers 和 checkpoint 类 Skills 可能主要读取、汇总或原位修改已有内容，不一定创建新的 artifact subtree。
 
@@ -240,28 +245,13 @@ Selected ecosystem modules 可能把审计报告写入 `{devops_artifacts}` 或 
 
 | Area | Declared Layout | Current Skill Behavior |
 |---|---|---|
-| Retrospective | `module.yaml` 预创建 `implementation-artifacts/retrospectives/`，CR / SR config 也引用该目录。 | `speclite-retrospective` 当前写入 `implementation-artifacts/epic-{N}-retro-{date}.md` 根目录。 |
-| npm release report | `module.yaml` 与 `module-help.csv` 声明 `devops-artifacts/npm-releases/`。 | `speclite-npm-publisher` 当前仍写入 legacy `.specskills/output/devops/speclite-npm-publisher/<package-name>-<version>-release-report.md`，因此 `npm-releases/` 暂无已对齐的 canonical writer。 |
 | PRD validation historical compatibility | Catalog 与 producer 已将新报告固定为 `{planning_artifacts}/prd/prd-validate-report-{yyyy-MM-dd}.md`。 | 旧 basename 仅作 historical evidence 可发现且原位保留，不是 active producer default。 |
 
-`review-artifacts/` 和 `research-artifacts/` 有时用于描述概念分类，但它们不是当前 `module.yaml` 声明的默认顶层目录。默认实际结构是：research、Product Brief 和 PRFAQ 位于 `1-analysis-artifacts/` 的对应 subject directory，SR / CR 位于 `implementation-artifacts/` 下。
+`review-artifacts/` 和 `research-artifacts/` 有时用于描述概念分类，但它们不是当前 `module.yaml` 声明的默认顶层目录。默认实际结构是：research、Product Brief 和 PRFAQ 位于 `{analysis_artifacts}/` 的对应 subject directory，SR / CR 位于 `{implementation_artifacts}/` 下。
 
-## Related Documents（相关文档）
+## Canonical Anchors（规范锚点）
 
-| Topic | Link |
-|---|---|
-| 安装后的 runtime、IDE mirrors 与 Hook 布局 | [`runtime-layout.md`](runtime-layout.md) |
-| canonical source 目录与 Module 边界 | [`canonical-source-layout.md`](canonical-source-layout.md) |
-| SDLC Skills 的阶段与输出 catalog | [`skills/sdlc-workflows.md`](skills/sdlc-workflows.md) |
-| installer-owned、human-owned、workflow-owned 保护模型 | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
-| Workflow 的渐进式披露与执行边界 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) |
-| Workflow artifact 术语 | [`glossary/workflow-artifact.md`](glossary/workflow-artifact.md) |
-| Runtime 三层边界 | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
-| Flow Gate 与 downstream handoff 契约 | [`flow-gate-handoff-contract.md`](flow-gate-handoff-contract.md) |
-
-主要 canonical anchors：
-
-`support-skills/**` 属于 SpecLite canonical source 维护工具，不是目标项目默认 selected runtime module，因此不构成本文的 `_speclite-output/` 目录条目。
+本文的事实来源是以下 canonical source 文件；`support-skills/**` 属于 SpecLite canonical source 维护工具，不是目标项目默认 selected runtime module，因此不构成本文的 `_speclite-output/` 目录条目。
 
 - `assets/source/speclite/core-skills/module.yaml`
 - `assets/source/speclite/core-skills/module-help.csv`
@@ -271,3 +261,18 @@ Selected ecosystem modules 可能把审计报告写入 `{devops_artifacts}` 或 
 - `assets/source/speclite/sdlc-skills/**/SKILL.md`
 - `assets/source/speclite/ecosystems/**/SKILL.md`
 - `assets/source/speclite/ecosystems/**/module-help.csv`
+
+## Related Documents（相关文档）
+
+| Relationship | Document |
+|---|---|
+| 安装后的 runtime、IDE mirrors 与 Hook 布局 | [`runtime-layout.md`](runtime-layout.md) |
+| canonical source 目录与 Module 边界 | [`canonical-source-layout.md`](canonical-source-layout.md) |
+| SDLC Skills 的阶段与输出 catalog | [`skills/sdlc-workflows.md`](skills/sdlc-workflows.md) |
+| Core Skills catalog | [`skills/core-skills.md`](skills/core-skills.md) |
+| validation issue 参考 | [`validation-issues.md`](validation-issues.md) |
+| installer-owned、human-owned、workflow-owned 保护模型 | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
+| Workflow 的渐进式披露与执行边界 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) |
+| Workflow artifact 术语 | [`glossary/workflow-artifact.md`](glossary/workflow-artifact.md) |
+| Runtime 三层边界 | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) |
+| Flow Gate 与 downstream handoff 契约 | [`specs/flow-gate-handoff-contract.md`](specs/flow-gate-handoff-contract.md) |

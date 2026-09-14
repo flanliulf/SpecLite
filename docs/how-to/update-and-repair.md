@@ -25,24 +25,38 @@ NO_COLOR=1 speclite validate "$PROJECT_ROOT"
 NO_COLOR=1 speclite update "$PROJECT_ROOT"
 ```
 
-典型 human-readable output 会包含：
+典型 human-readable output（默认 `zh-CN`，`Evidence` 中逐文件的 plan entry 已省略）：
 
 ```text
 SpecLite update
-Outcome: plan-ready
+Outcome（结果）: plan-ready
 
-Summary
-Completed: yes
-Writes: no project files changed
-User action: required
-Presentation profile: Operation (key-value)
+Summary（摘要）
+- 完成状态：已完成
+- 写入状态：未写入项目文件
+- 用户动作：需要
+update plan 已生成，尚未写入项目文件。
+命令状态：success
+模式：update
+输出形式：证据 (compact-table)
+plan 状态：plan-ready
 
-Issues:
-- No issues
+Scope（范围）
+targetProject=example-project
 
-Next Actions / Next actions:
-- Review the update plan, then run `speclite update <target> --yes`.
+State（状态）
+授权状态
+requiresConfirmation=true
+writeAuthorized=false
+尚未授权写入。确认 plan 后运行 speclite update <target> --yes 授权 non-conflicting planned update writes。
+无 conflict
+
+Evidence（证据）
+update plan / planned effects（计划影响）
+- affectedPath=.agents/skills/speclite-help/SKILL.md; ownership=installer-owned; action=skip; currentHash=sha256:…; expectedHash=sha256:…; reason=unchanged; nextAction=无需操作。
 ```
+
+没有任何 drift 时，`update --repair` 会返回 `no-op`，`requiresConfirmation=false`，且不需要 `--yes`。
 
 ## Authorize Update Writes（授权更新写入）
 
@@ -83,19 +97,22 @@ Repair plan 会把 human-owned custom files 和 workflow-owned artifacts 列为 
 
 ```text
 SpecLite update
-Outcome: blocked-by-conflict
+Outcome（结果）: blocked-by-conflict
 
-Summary
-Completed: no
-Writes: no project files changed
-User action: required
+Summary（摘要）
+- 完成状态：未完成
+- 写入状态：未写入项目文件
+- 用户动作：需要
+conflict 阻止写入授权；普通 --yes 不能绕过 conflict。
 
-Issues:
-[error] severity=error category=update issueId=update.conflicts affectedPath=_speclite/config.toml
+Issues（问题）
+[error] severity=error category=update issueId=update.conflicts details=conflictCount=1;...
 
-Next Actions / Next actions:
-- Resolve the blocker before authorizing writes.
+Next Actions（下一步）
+- 先修复 blocker（affectedPath=<path>; reason=<reason>）。
 ```
+
+`update.conflicts` 的 `data.conflicts[]` 会给出每个 conflict 的 `affectedPath`、`ownership` 与 `reason`（例如 `unknown-ownership`、`missing-source-evidence`），含义见 [`../reference/validation-issues.md`](../reference/validation-issues.md)。
 
 docs 示例只解释人类输出。脚本、CI 和 gate 判断应使用 `speclite update "$PROJECT_ROOT" --json`、`speclite validate "$PROJECT_ROOT" --json` 以及 `CommandResult` schema。
 
@@ -106,4 +123,5 @@ docs 示例只解释人类输出。脚本、CI 和 gate 判断应使用 `speclit
 | CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
 | JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
 | 文件所有权解释 | [`../explanation/file-ownership-model.md`](../explanation/file-ownership-model.md) |
+| issue id 与 reason code 参考 | [`../reference/validation-issues.md`](../reference/validation-issues.md) |
 | 安装验证 | [`validate-installation.md`](validate-installation.md) |

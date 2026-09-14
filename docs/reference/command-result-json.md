@@ -34,7 +34,7 @@
 
 | `command` | CLI Invocation | `data` focus |
 |---|---|---|
-| `install` | `speclite install --json` | 安装计划、写入授权、changed/skipped paths、source evidence、config 和 ReadyCheck 结果。 |
+| `install` | `speclite install --json` | `sourceDescriptor`、`manifestVersion`、`installedModules`、`ideTargets`、`paths` 与 install step lifecycle（`completedSteps` / `pendingSteps`）。写入授权与 ReadyCheck 结果通过 `outcome`、`issues` 和 `nextActions` 表达，不使用 `changedPaths` 等 mutation fields。 |
 | `init` | `speclite init --json` | `initPlan.actions`、installed-state summary、changed/skipped paths、conflicts、step lifecycle 和 write authorization。 |
 | `list` | `speclite list --json` | canonical modules、skills、IDE targets、versions 和 installed-state summary。 |
 | `status` | `speclite status --json` | lightweight installed-state summary，例如 `highLevelHealth`。 |
@@ -78,13 +78,13 @@ Outcome-oriented human output 不改变 `CommandResult` JSON contract。Human re
 
 | Field | Used by | Meaning |
 |---|---|---|
-| `requiresConfirmation` | `install`、`init`、`update`、`sync`、`uninstall`、`update.repair` | 当前结果是否需要显式授权后才能写入或移除。 |
-| `writeAuthorized` | `install`、`init`、`update`、`sync`、`uninstall`、`update.repair` | 本次命令是否已获得 command-level write authorization。 |
-| `changedPaths` | `install`、`init`、`update`、`sync`、`update.repair` | 本次已写入或更新的 project-relative paths。 |
+| `requiresConfirmation` | `init`、`update`、`sync`、`uninstall`、`update.repair` | 当前结果是否需要显式授权后才能写入或移除。 |
+| `writeAuthorized` | `init`、`update`、`sync`、`uninstall`、`update.repair` | 本次命令是否已获得 command-level write authorization。 |
+| `changedPaths` | `init`、`update`、`sync`、`update.repair` | 本次已写入或更新的 project-relative paths。 |
 | `removedPaths` | `uninstall` | 本次已移除的 installer-owned project-relative paths。 |
-| `skippedPaths` | `install`、`init`、`update`、`sync`、`update.repair` | 计划中跳过的 project-relative paths。 |
+| `skippedPaths` | `init`、`update`、`sync`、`update.repair` | 计划中跳过的 project-relative paths。 |
 | `conflicts` | `init`、`update`、`sync`、`update.repair` | 阻止自动写入的 path-level conflicts。 |
-| `completedSteps` / `failedStep` / `pendingSteps` | `init`、`update`、`sync`、`uninstall` | 失败或分阶段执行时的 lifecycle evidence。 |
+| `completedSteps` / `failedStep` / `pendingSteps` | `install`（仅 `completedSteps` / `pendingSteps`）、`init`、`update`、`sync`、`uninstall` | 失败或分阶段执行时的 lifecycle evidence。 |
 
 `--dry-run` 或缺少 `--yes` 时，写入类命令应产生 plan，并保持 mutation fields 为空数组或未授权状态。
 

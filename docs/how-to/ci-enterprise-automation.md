@@ -31,7 +31,7 @@ CI 判断必须遵守三层语义：
 
 ## Locale And Human Output（语言与人类输出）
 
-当前 CLI 中，`install`、`status`、`validate`、`update` 和 `resolve --human` 都有完整的 human-readable output。CI 仍然只读取 JSON。
+当前 CLI 中，`install`、`status`、`validate`、`update`（含 `--repair`）和 `resolve config|artifact-roots|customization --human` 输出 outcome-oriented human-readable output；`init`、`list`、`doctor`、`sync`、`uninstall`、`governance-report` 仍是以 `Status:` 开头的 legacy human output。CI 仍然只读取 JSON。
 
 | Input | CI expectation |
 |---|---|
@@ -137,8 +137,8 @@ Conflict 示例：
     "conflicts": [
       {
         "affectedPath": ".agents/skills/speclite-help/SKILL.md",
-        "ownership": "human-owned",
-        "reason": "human-owned"
+        "ownership": "unknown",
+        "reason": "unknown-ownership"
       },
       {
         "affectedPath": "_speclite/config.toml",
@@ -158,7 +158,7 @@ Epic 7 新增的治理命令同样使用 `CommandResult` envelope，但不要把
 
 | Command | Automation use | Boundary |
 |---|---|---|
-| `speclite doctor --json` | 读取 richer diagnostics 和 `externalAccesses`。 | 不替代 `validate --json` 的 local-only contract；remote revalidation 需要 `--revalidate-source --yes`。 |
+| `speclite doctor --json` | 读取 richer diagnostics 和 `externalAccesses`。 | 不替代 `validate --json` 的 local-only contract；`--revalidate-source` 只投影 external access intent，未加 `--yes` 时报 `source-integrity.external-access-not-authorized`，当前版本即使授权也不执行远程访问。 |
 | `speclite sync --json` | 读取 `syncPlan.actions`、`changedPaths`、`conflicts` 和 write authorization。 | 不等价于 `update --repair`。 |
 | `speclite uninstall --json` | 读取 `uninstallPlan.actions`、`removedPaths`、`preservedPaths` 和 write authorization。 | 只移除 installer-owned paths。 |
 | `speclite init --json` | 读取 config init plan、conflicts 和 step lifecycle。 | 不静默覆盖 human-owned custom files。 |

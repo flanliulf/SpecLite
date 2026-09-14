@@ -19,7 +19,7 @@ docs 示例不是 contract source；`CommandResult` JSON contract、issue model�
 | Dimension | Rule |
 |---|---|
 | ANSI color | `NO_COLOR=1`、CI、non-TTY 输出不得依赖颜色表达唯一语义；fixture 或 docs 示例不得包含 ANSI escape。 |
-| terminal width | `columns < 80` 必须降级到 key-value block；测试使用语义断言，不依赖整段 brittle snapshot。 |
+| terminal width | renderer 按 `HumanOutputOptions.columns` 选择 `key-value`（`< 80`）、`compact-table`（`< 120`）或 `full-table`；CLI 入口当前不探测终端宽度，固定使用默认 `columns=100` 即 `compact-table`。测试使用语义断言，不依赖整段 brittle snapshot。 |
 | timestamps | human fixture 不记录 wall-clock timestamp；需要时间时使用固定 fixture 值或删除字段。 |
 | platform path | docs 和 fixture 使用 project-relative POSIX paths、`<project-root>` 或 `targetProject=example-project`，不得包含本机绝对路径。 |
 
@@ -29,9 +29,11 @@ Human output 先按 command intent 选择 presentation profile，再按 outcome 
 
 | Profile | Commands | Section strategy |
 |---|---|---|
-| Operation | `install`、`init`、`update`、`update --repair`、`sync`、`uninstall` | 优先展示 `Summary`、`Scope`、`State / Authorization`、`Plan / Evidence`、`Issues / Conflicts`、`Next Actions`，适合会写入或准备写入的命令。 |
-| Diagnostic | `status`、`validate`、`doctor` | `Issues` 靠近关键 state；存在 error/critical issue 时，不得把问题列表深埋在长 evidence 后。 |
-| Report / Support | `list`、`governance-report`、`resolve config --human`、`resolve artifact-roots --human`、`resolve artifact-documents --human`、`resolve cr-directory --human`、`resolve customization --human` | 使用 `Results`、`Metrics`、`Gaps`、`Artifacts` 或 `Evidence` 中最贴近任务的主体 section，不强制输出空洞 `State`。 |
+| Operation | `install`、`update`、`update --repair`（已迁移）；`init`、`sync`、`uninstall`（映射已定义，renderer 未迁移） | 优先展示 `Summary`、`Scope`、`State / Authorization`、`Plan / Evidence`、`Issues / Conflicts`、`Next Actions`，适合会写入或准备写入的命令。 |
+| Diagnostic | `status`、`validate`（已迁移）；`doctor`（映射已定义，renderer 未迁移） | `Issues` 靠近关键 state；存在 error/critical issue 时，不得把问题列表深埋在长 evidence 后。 |
+| Report / Support | `resolve config --human`、`resolve artifact-roots --human`、`resolve customization --human`（已迁移）；`list`、`governance-report`、`resolve artifact-documents --human`、`resolve cr-directory --human`（未迁移） | 使用 `Results`、`Metrics`、`Gaps`、`Artifacts` 或 `Evidence` 中最贴近任务的主体 section，不强制输出空洞 `State`。 |
+
+> Note: Epic 8 的 outcome-oriented human output 只覆盖 `install`、`update`、`update --repair`、`status`、`validate` 与三个 `resolve --human`；`init`、`list`、`doctor`、`sync`、`uninstall`、`governance-report` 当前仍输出以 `Status:` 开头、无 locale 的 legacy human output。上表对它们的 profile 是既定映射，不是已实现状态；迁移完成前，它们不进入本矩阵的 command/outcome 行。
 
 ## Install Migration Sample（Install 迁移样例）
 
@@ -46,7 +48,7 @@ Summary（摘要）
 - 当前含义：安全预览已完成；尚未执行安装写入。
 
 Scope（范围）
-- 目标项目：noi
+- 目标项目：example-project
 - 目标路径：<absolute-target-path>
 - 项目根目录：.
 - 命令执行目录：<command-cwd>
@@ -83,7 +85,7 @@ Next Actions（下一步）
 
 该 absolute target context 仅属于 human presentation；JSON output 不得因此新增 human-only field，也不得暴露本机绝对 target path。
 
-相对跨目录 target 也必须保持可复制。例如用户从 SpecLite 仓库执行 `speclite install ../noi` 时，human `Next Actions` 应继续使用 `../noi --yes` 和 `../noi --yes --interactive`，不得把 target 降级为 `noi`。JSON 仍只保留 public display identifier 和 project-relative paths，不暴露 resolved absolute target。
+相对跨目录 target 也必须保持可复制。例如用户从 SpecLite 仓库执行 `speclite install ../example-project` 时，human `Next Actions` 应继续使用 `../example-project --yes` 和 `../example-project --yes --interactive`，不得把 target 降级为 `example-project`。JSON 仍只保留 public display identifier 和 project-relative paths，不暴露 resolved absolute target。
 
 ## Interactive Install Config Review（交互式安装配置复核）
 
@@ -102,8 +104,8 @@ Step 3 的 final pre-write review 必须在写入确认前展示配置值：
 
 ```text
 Config values（配置值）
-Project name: noi
-User display name: Fancyliu
+Project name: example-project
+User display name: Example User
 Languages: communication=Chinese, document=Chinese
 Artifact root: _speclite-output
 ```
@@ -139,8 +141,8 @@ Artifact root: _speclite-output
 | `status` | `not-installed` | `test/status-command.test.ts`; `test/cli-human-output-matrix.test.ts` | no human-only `not-installed` JSON field | `docs/quick-start.md`; `docs/how-to/install-speclite.md` | fixture or semantic assertion: install next action |
 | `status` | `partial` | `test/status-command.test.ts` | `highLevelHealth=partial` remains public JSON value | `docs/how-to/validate-installation.md` | fixture or semantic assertion: inspect IDE targets then validate |
 | `status` | `failed` | `test/status-command.test.ts` | `highLevelHealth=failed` remains public JSON value | `docs/how-to/validate-installation.md` | fixture or semantic assertion: inspect manifest/source evidence |
-| `status` | `stale` | `test/status-command.test.ts` | reserved human outcome is not currently produced by public JSON | TODO: add docs example only when a producer exists | fixture or semantic assertion: TODO, do not fake coverage |
-| `status` | `unknown` | `test/status-command.test.ts` | reserved human outcome is not currently produced by public JSON | TODO: add docs example only when a producer exists | fixture or semantic assertion: TODO, do not fake coverage |
+| `status` | `stale` | `test/status-command.test.ts` | reserved human outcome is not currently produced by public JSON | 无 docs 示例：当前没有 producer，不伪造覆盖 | fixture or semantic assertion: 无；reserved outcome 出现 producer 后再补 |
+| `status` | `unknown` | `test/status-command.test.ts` | reserved human outcome is not currently produced by public JSON | 无 docs 示例：当前没有 producer，不伪造覆盖 | fixture or semantic assertion: 无；reserved outcome 出现 producer 后再补 |
 | `validate` | `valid` | `test/validate-command.test.ts` | JSON decisions use issue counts and checked categories | `README.md`; `docs/quick-start.md`; `docs/how-to/validate-installation.md` | fixture or semantic assertion: no issues and validation flow |
 | `validate` | `valid-with-warnings` | `test/validate-command.test.ts` | warning/info counts remain JSON source | `docs/how-to/validate-installation.md` | fixture or semantic assertion: warning next actions |
 | `validate` | `invalid` | `test/validate-command.test.ts`; `test/cli-human-output-matrix.test.ts` | blocking issue counts remain JSON source | `docs/how-to/validate-installation.md`; `docs/quick-start.md` troubleshooting | fixture or semantic assertion: sorted Issues, key-value fallback |

@@ -55,16 +55,7 @@ speclite install /path/to/project
 speclite install /path/to/project --yes
 ```
 
-`--yes` 表示 command-level write authorization。当前默认安装会使用：
-
-| Item | Default |
-|---|---|
-| Modules | `core`、`sdlc` |
-| Optional ecosystem modules | 不自动选择 |
-| Config mode | `quick` |
-| IDE targets | `claude`、`agents` |
-| Source type | `bundled` |
-| Human-readable locale | `zh-CN` |
+`--yes` 表示 command-level write authorization。默认安装使用 bundled source、`core` + `sdlc` modules、`quick` config mode、`claude` + `agents` IDE targets 与 `zh-CN` human output，不自动选择 ecosystem modules；完整默认值与规则以 [`../reference/install-defaults.md`](../reference/install-defaults.md) 为唯一源定义。
 
 安装成功后，中文 Ready Summary 会展示 selected modules、config mode、IDE targets、key paths 和 next actions。
 
@@ -88,7 +79,7 @@ speclite install /path/to/project --yes --interactive
 
 Ecosystem selection 使用 `ecosystem category -> id` 两级提示：先选择 `frontend`、`backend`、`other` 或 skip，再选择具体 id，例如 `react`、`vue`、`java-springboot`、`nodejs`、`python`、`npm-package`、`cli-tool` 或 `documentation-only`。选择 ecosystem modules 是推荐但非 mandatory，skip 是合法路径。
 
-`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies。被选择的 ecosystem module 只会把对应 SpecLite Skill package 投影到 selected IDE mirrors 和 `_speclite/_config/*` indexes，未选择的 ecosystem modules 保持 source-only。
+`--yes`、`--json`、default no-prompt install 不会自动选择 ecosystem modules。Ecosystem modules 是 SpecLite optional Skill package selection，不是项目依赖安装器、不是 package manager、不是 UI framework installer；SpecLite 不会安装 React / Vue / Java / npm package runtime dependencies（Node.js、Python 等生态同理），只把被选择的 SpecLite Skill packages 投影到 `.claude/skills/`、`.agents/skills/` 和 `_speclite/_config/*` indexes。未选择的 ecosystem modules 保持 source-only。
 
 在 interactive mode 中，`quick` 与 `detailed` 都会要求输入用户显示名 `user_name`。`quick` 只要求这个必填个人字段，其他项目名、语言和路径使用 defaults；`detailed` 继续允许逐项确认或调整其他配置。空 `user_name` 会重新提示，不会静默写入 `SpecLite`。
 
@@ -128,18 +119,18 @@ speclite validate /path/to/project --json
 | Path | Purpose |
 |---|---|
 | `_speclite/` | SpecLite metadata/control hub。 |
-| `_speclite-output/0-brainstorming-artifacts/` | brainstorming workflow artifacts 默认输出面。 |
-| `_speclite-output/1-analysis-artifacts/` | product brief、research、PRFAQ 等 analysis artifacts 默认输出面。 |
-| `_speclite-output/2-planning-artifacts/` | PRD、UX、Epics 等 planning artifacts 默认输出面。 |
-| `_speclite-output/3-solutioning-artifacts/` | Architecture、Specs、implementation readiness 等 solutioning artifacts 默认输出面。 |
-| `_speclite-output/4-implementation-artifacts/` | Stories、Flow Gates、Reviews、Retrospectives 等 implementation artifacts 默认输出面。 |
-| `_speclite-output/5-devops-artifacts/` | CI/CD、deployment、npm release 等 devops artifacts 默认输出面。 |
-| `_speclite-output/project-knowledge-base/` | Brownfield baseline、长期项目知识和 TSD 等 Project Knowledge 默认输出面。 |
+| `_speclite-output/0-brainstorming-artifacts/` | Brainstorming session 与发散探索产物。 |
+| `_speclite-output/1-analysis-artifacts/` | Product Brief、Research、PRFAQ 等 analysis 产物。 |
+| `_speclite-output/2-planning-artifacts/` | PRD、UX、Epics 等 planning 产物。 |
+| `_speclite-output/3-solutioning-artifacts/` | Architecture、Specs、implementation readiness 等 solutioning 产物。 |
+| `_speclite-output/4-implementation-artifacts/` | Sprint、Story、Flow Gate、Review、QA、Retrospective 与 Quick Dev 产物。 |
+| `_speclite-output/5-devops-artifacts/` | CI/CD、deployment 与 npm release 产物。 |
+| `_speclite-output/project-knowledge-base/` | Brownfield baseline、长期项目知识和 TSD 等 Project Knowledge 产物。 |
 | `.claude/skills/` | Claude Code skill mirror。 |
 | `.agents/skills/` | Generic agent skill mirror。 |
 | `_speclite/_config/manifest.yaml` | installed-state projection，包含 `paths.artifactRoots[]` 七 root manifest projection。 |
 
-Public Documentation（公开文档）仍使用目标项目的 `docs/` 信息架构，由 docs workflow 按需维护；它与 Project Knowledge（`project_knowledge`）默认输出面分离。
+Public Documentation（公开文档）仍使用目标项目的 `docs/` 信息架构，由 docs workflow 按需维护；它与 Project Knowledge（`project_knowledge`）默认输出面分离。七个 plane 的 config key 与用途以 [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) 为唯一源定义。
 
 ## Examples（示例）
 
@@ -212,7 +203,7 @@ Next Actions（下一步）
 
 | Relationship | Document |
 |---|---|
-| 学习型教程 | [`../tutorials/quick-start.md`](../tutorials/quick-start.md) |
+| 学习型教程 | [`../tutorials/first-install-walkthrough.md`](../tutorials/first-install-walkthrough.md) |
 | 安装验证 | [`validate-installation.md`](validate-installation.md) |
 | CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
 | Runtime layout | [`../reference/runtime-layout.md`](../reference/runtime-layout.md) |

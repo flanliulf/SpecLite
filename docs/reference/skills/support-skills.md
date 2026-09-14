@@ -12,6 +12,8 @@
 | `speclite-agent-lint` | 只读检查 Agent 定义包的 `[agent]`、persona、菜单、prompt 引用和 runtime 残留。 | 否 |
 | `speclite-canonical-source-governance-runner` | 在 hook 提醒 canonical source 变化后执行分类、影响面矩阵、D1/D2 决策记录、定点修订和 strict checker 收口。 | 否 |
 | `speclite-check-canonical-source-change` | 在 canonical source 变更后检查 root counts、ecosystem category/package totals、`module-help.csv`、hooks、fixtures、docs 和 packaging manifest 派生一致性。 | 否 |
+| `speclite-html-ppt-generator` | 用内置模板、主题与 validator 生成 SpecLite-owned 单文件 HTML PPT。 | 否 |
+| `speclite-docs-intro-ppt-creator` | 基于事实材料规划叙事，调用 `speclite-html-ppt-generator` 生成 `docs/presentations/` 下的介绍型 deck。 | 否 |
 
 ## Boundaries（边界）
 

@@ -39,7 +39,7 @@ Canonical source 回答“可以安装什么”。Module selection 再决定“�
 - `update --repair` 只能依据 source evidence 修复可恢复的 installer-owned drift。
 - 人工修改 mirror 不会改变 canonical source，只会制造 installed-state drift。
 
-IDE-specific discovery metadata 与 self-contained Skill 内容的区别见 [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md)。
+IDE-specific discovery metadata 与 self-contained Skill 内容的区别见 [`ide-discovery-metadata.md`](ide-discovery-metadata.md)。
 
 ## Control Hub（控制中心）
 
@@ -117,4 +117,4 @@ Bundled source 中存在某个 Module，不表示目标项目已经安装它。I
 | Workflow artifact 目录与生命周期 | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |
 | Config 与 customization | [`../reference/config-and-customization.md`](../reference/config-and-customization.md) |
 | File ownership model | [`file-ownership-model.md`](file-ownership-model.md) |
-| IDE discovery metadata | [`ide-specific-discovery-metadata.md`](ide-specific-discovery-metadata.md) |
+| IDE discovery metadata | [`ide-discovery-metadata.md`](ide-discovery-metadata.md) |

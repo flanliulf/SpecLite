@@ -133,13 +133,7 @@ flowchart LR
   Analysis --> Planning --> Solutioning --> Implementation --> DevOps
 ```
 
-| 阶段 | 主要问题 | 典型 Workflow | 典型产物 |
-|---|---|---|---|
-| Analysis（分析） | 当前系统、用户、市场或领域的事实是什么？ | brownfield baseline、domain / market / technical research、Product Brief、PRFAQ。 | research、baseline、planning handoff、brief。 |
-| Planning（规划） | 要解决什么问题，范围和用户体验是什么？ | create / edit / validate PRD、UX design。 | PRD、validation report、UX specification。 |
-| Solutioning（方案） | 如何实现，工作如何拆分，是否具备实现条件？ | Architecture、Epics and Stories、Story Review、implementation readiness。 | Architecture、Epics、Stories、review 与 readiness report。 |
-| Implementation（实现） | 如何逐项实现、测试、检查并安全收口？ | Sprint Planning、Flow Gate、Create Story、Dev Story、Code Review、QA、Retrospective。 | sprint tracker、Story、gate、代码与 review evidence。 |
-| DevOps（DevOps） | 如何验证并执行发布？ | npm publisher 等发布 Workflow。 | release gate 与 publishing report。 |
+每个阶段回答的问题、职责、典型 Workflow 与典型产物见 [`../reference/sdlc-phases.md`](../reference/sdlc-phases.md)；选择入口时先判断当前任务处在哪个问题上，再进入对应阶段的 Skill catalog。
 
 阶段是一种发现和排序方式，不是要求每个任务都从 Analysis 开始。Brownfield 项目可以先建立 baseline 再进入 Planning；已有明确 Story 的任务可以从 Implementation 开始；小型明确变更可以使用 Quick Dev，并按实际风险增加 review 或 checkpoint。
 

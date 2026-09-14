@@ -59,4 +59,4 @@ JSON 输出位于 `data.metrics`，完整 envelope 遵循 [`../reference/command
 | CLI 参数参考 | [`../reference/cli.md`](../reference/cli.md) |
 | JSON 消费者参考 | [`../reference/command-result-json.md`](../reference/command-result-json.md) |
 | Workflow artifact layout | [`../reference/workflow-artifact-layout.md`](../reference/workflow-artifact-layout.md) |
-| Flow Gate handoff 契约 | [`../reference/flow-gate-handoff-contract.md`](../reference/flow-gate-handoff-contract.md) |
+| Flow Gate handoff 契约 | [`../reference/specs/flow-gate-handoff-contract.md`](../reference/specs/flow-gate-handoff-contract.md) |

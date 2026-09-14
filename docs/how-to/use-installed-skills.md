@@ -245,7 +245,7 @@ Claude target 排查时，把 `--skill` 路径改为 `$PROJECT_ROOT/.claude/skil
 
 | Relationship | Document |
 |---|---|
-| 前置教程 | [`Quick Start Tutorial（快速开始教程）`](../tutorials/quick-start.md) |
+| 前置教程 | [`First Install Walkthrough（首次安装演练）`](../tutorials/first-install-walkthrough.md) |
 | 安装操作 | [`Install SpecLite（安装 SpecLite）`](install-speclite.md) |
 | 安装校验 | [`Validate Installation（验证安装）`](validate-installation.md) |
 | 故障修复 | [`Update and Repair（更新与修复）`](update-and-repair.md) |

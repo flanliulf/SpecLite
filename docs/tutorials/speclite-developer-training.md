@@ -77,7 +77,7 @@ git status --short
 | 1 | [`speclite-orientation.md`](speclite-orientation.md) | 建立产品全景、核心术语和学习地图。 | 讲师快速导览，学员完成术语口述。 | 8 min | 能回答“SpecLite 是什么、不是什么”。 |
 | 2 | [`../explanation/runtime-boundaries.md`](../explanation/runtime-boundaries.md) | 建立 canonical source、installed runtime projection、workflow artifact repository 三层模型。 | 结合安装前后的目录树讲解。 | 8 min | 能把常见路径放到正确层级。 |
 | 3 | [`../explanation/speclite-modules.md`](../explanation/speclite-modules.md) | 理解 Module 是安装、配置和索引边界，以及 `core`、`sdlc`、ecosystem 的选择关系。 | 选讲 Module shape、installation model；用三类 Module 卡片归类。 | 8 min | 能解释默认 `core + sdlc`、ecosystem selected-only 和 dependency closure。 |
-| 4 | [`quick-start.md`](quick-start.md) | 完成安全安装、状态检查和基础验证。 | 第一段动手实验。 | 22 min | `status`、`validate` 和 PATH 检查均有明确结果。 |
+| 4 | [`first-install-walkthrough.md`](first-install-walkthrough.md) | 完成安全安装、状态检查和基础验证。 | 第一段动手实验。 | 22 min | `status`、`validate` 和 PATH 检查均有明确结果。 |
 | 5 | [`../explanation/skill-taxonomy-and-sdlc.md`](../explanation/skill-taxonomy-and-sdlc.md) | 区分 CLI、Module、Skill、Agent、Workflow、Artifact 和 support Skill。 | 聚焦入口决策表，完成任务选择题。 | 10 min | 面对任务时能说明为什么选择某类入口。 |
 | 6 | [`../explanation/speclite-agents.md`](../explanation/speclite-agents.md) | 认识 7 个 Agent persona、持续身份、菜单和 Workflow 分发职责。 | 用 persona 卡匹配需求发现、文档、PM、UX、Architecture 和实现任务。 | 8 min | 能选择合适 persona，并说明 Agent 不替代 Workflow。 |
 | 7 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) | 理解 Workflow package、渐进式披露，以及编号 1-5 的 SDLC 生命周期。 | 用五阶段泳道和任务卡讲解，可按任务跳过不需要的阶段。 | 12 min | 能把任务映射到正确阶段，并说明 Workflow 的输入、步骤、产物和验证。 |
@@ -94,15 +94,17 @@ persona 匹配必须覆盖 Alice（Business Analyst）、Taylor（Technical Writ
 
 ### Lifecycle Focus（生命周期教学重点）
 
-| Order | Canonical Directory | Catalog Phase | Classroom Focus |
-|---:|---|---|---|
-| 1 | `1-analysis/` | `1-analysis` | 理解用户、领域、市场和 existing system 事实，包括 brownfield baseline。 |
-| 2 | `2-plan-workflows/` | `2-planning` | 定义产品范围、需求和用户体验；目录名与 catalog phase 是两个不同技术标识。 |
-| 3 | `3-solutioning/` | `3-solutioning` | 形成 Architecture、Epics/Stories，并检查 Story 与 implementation readiness。 |
-| 4 | `4-implementation/` | `4-implementation` | 计划和执行 Story、测试、Flow Gate、Code Review、QA 与 Retrospective。 |
-| 5 | `5-devops/` | `5-devops` | 进入发布与运维；当前公开 SDLC catalog 已落地的具体 Workflow 是 `speclite-npm-publisher`。 |
+阶段的目录名、catalog phase、职责与典型产物以 [`../reference/sdlc-phases.md`](../reference/sdlc-phases.md) 为准；课堂只强调每个阶段的教学重点：
 
-Canonical directory identifier 不带前导零，因此应写 `1-analysis/` 至 `5-devops/`，不能把 `01-analysis` 当作真实路径。五个阶段是发现、排序和交接模型，不要求每个任务机械走完整链路。
+| Order | Phase | Classroom Focus |
+|---:|---|---|
+| 1 | Analysis | 理解用户、领域、市场和 existing system 事实，包括 brownfield baseline。 |
+| 2 | Planning | 定义产品范围、需求和用户体验；提醒学员目录名 `2-plan-workflows/` 与 catalog phase `2-planning` 是两个不同技术标识。 |
+| 3 | Solutioning | 形成 Architecture、Epics/Stories，并检查 Story 与 implementation readiness。 |
+| 4 | Implementation | 计划和执行 Story、测试、Flow Gate、Code Review、QA 与 Retrospective。 |
+| 5 | DevOps | 进入发布与运维；当前已落地的具体 Workflow 是 `speclite-npm-publisher`。 |
+
+五个阶段是发现、排序和交接模型，不要求每个任务机械走完整链路。
 
 总材料时间为 161 分钟。加上 10 分钟休息和 9 分钟结课验收，完整课程仍为 180 分钟。
 
@@ -199,7 +201,7 @@ Canonical directory identifier 不带前导零，因此应写 `1-analysis/` 至 
 | Module 安装与配置边界 | [`../explanation/speclite-modules.md`](../explanation/speclite-modules.md) |
 | Agent persona 与分发职责 | [`../explanation/speclite-agents.md`](../explanation/speclite-agents.md) |
 | Workflow package 与五阶段生命周期 | [`../explanation/speclite-workflows.md`](../explanation/speclite-workflows.md) |
-| 首次安装实验 | [`quick-start.md`](quick-start.md) |
+| 首次安装实验 | [`first-install-walkthrough.md`](first-install-walkthrough.md) |
 | 首次 brownfield 实验 | [`first-brownfield-project.md`](first-brownfield-project.md) |
 | 文档分类与维护规则 | [`../README.md`](../README.md) |
 | 写作与发布规范 | [`../_STYLE_GUIDE.md`](../_STYLE_GUIDE.md) |

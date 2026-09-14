@@ -27,12 +27,17 @@ speclite <command> [options] [target-directory]
 | `speclite governance-report [target-directory]` | 从 installed-state evidence 生成只读流程治理覆盖报告。 |
 | `speclite resolve config` | 输出 raw merged runtime config JSON，保留 `--key` 对 merged config 的选择语义。 |
 | `speclite resolve artifact-roots` | 输出 resolver-backed artifact root JSON，包含 `resolvedRoot`、`resolutionMode`、`provenance`/source evidence 和 stable diagnostics。 |
+| `speclite resolve artifact-documents` | 输出 PRD / Epics / Architecture 的 whole / sharded document discovery JSON（`actualConsumedPath`、`consumedPaths`、`discoveryShape`、`ambiguityStatus`、`continuation`）；只读。 |
 | `speclite resolve cr-directory` | 输出 Story-ID-only Code Review 目录解析 JSON（`crDir`、`compatibilityMode`、`legacyCrDirs`）；只读，供 CR runner 与 CR01–06 消费。 |
 | `speclite resolve customization` | 输出解析后的 skill customization JSON。 |
 
 `resolve` 是 runtime support API surface，主要给已安装 skills 和工具调用使用。
 
-## Install Options（安装参数）
+## Command Options（命令参数）
+
+各命令的参数按命令分列；`[target-directory]` 位置参数默认为当前目录。
+
+### Install Options（安装参数）
 
 ```sh
 speclite install [options] [target-directory]
@@ -64,7 +69,7 @@ Human-readable install output 默认 locale 为 `zh-CN`。解析顺序是 `--loc
 
 Locale 只影响自然语言，不改变 `CommandResult` JSON、exit code、issue ordering、path normalization、manifest/index 内容或 fixture stable JSON comparison。
 
-## Init Options（初始化参数）
+### Init Options（初始化参数）
 
 ```sh
 speclite init [options] [target-directory]
@@ -78,7 +83,7 @@ speclite init [options] [target-directory]
 
 `init` 用于创建或重建 `_speclite/config.toml`、`_speclite/config.user.toml`、`_speclite/custom/config.toml` 和 `_speclite/custom/config.user.toml` 的计划。它会读取现有 manifest/files index，并保护 human-owned custom files，不会静默覆盖。
 
-## List Options（列表参数）
+### List Options（列表参数）
 
 ```sh
 speclite list [options] [target-directory]
@@ -90,7 +95,7 @@ speclite list [options] [target-directory]
 
 `list` 同时返回 canonical package 侧的 modules、skills、IDE targets、版本，以及目标项目中可读取的 installed-state projection。
 
-## Status Options（状态参数）
+### Status Options（状态参数）
 
 ```sh
 speclite status [options] [target-directory]
@@ -101,7 +106,7 @@ speclite status [options] [target-directory]
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
 | `--locale <locale>` | 设置 human-readable status output 的 locale：`zh-CN` 或 `en-US`。 |
 
-## Validate Options（校验参数）
+### Validate Options（校验参数）
 
 ```sh
 speclite validate [options] [target-directory]
@@ -112,7 +117,7 @@ speclite validate [options] [target-directory]
 | `--json` | 输出 machine-readable `CommandResult` JSON。 |
 | `--locale <locale>` | 设置 human-readable validate output 的 locale：`zh-CN` 或 `en-US`。 |
 
-## Doctor Options（诊断参数）
+### Doctor Options（诊断参数）
 
 ```sh
 speclite doctor [options] [target-directory]
@@ -126,7 +131,7 @@ speclite doctor [options] [target-directory]
 
 未带 `--revalidate-source` 时，`doctor` 只基于本地 validation evidence 产生诊断。带 `--revalidate-source` 但未带 `--yes` 时，命令会停止在 external access authorization gate。
 
-## Update Options（更新参数）
+### Update Options（更新参数）
 
 ```sh
 speclite update [options] [target-directory]
@@ -140,7 +145,7 @@ speclite update [options] [target-directory]
 | `--yes` | 授权 non-conflicting planned update writes。 |
 | `--locale <locale>` | 设置 human-readable update output 的 locale：`zh-CN` 或 `en-US`。 |
 
-## Sync Options（同步参数）
+### Sync Options（同步参数）
 
 ```sh
 speclite sync [options] [target-directory]
@@ -154,7 +159,7 @@ speclite sync [options] [target-directory]
 
 `sync` 复用 update planning 的 source-to-mirror reconciliation 语义，但 command id 和 output data 为 `sync`。它不等价于 `update --repair`，也不会隐藏执行 repair。
 
-## Uninstall Options（卸载参数）
+### Uninstall Options（卸载参数）
 
 ```sh
 speclite uninstall [options] [target-directory]
@@ -168,7 +173,7 @@ speclite uninstall [options] [target-directory]
 
 `uninstall` 根据 files index 和 ownership model 移除 installer-owned paths，保留 human-owned 与 workflow-owned paths。移除后仍应人工检查 preserved paths。
 
-## Governance Report Options（治理报告参数）
+### Governance Report Options（治理报告参数）
 
 ```sh
 speclite governance-report [options] [target-directory]
@@ -180,7 +185,7 @@ speclite governance-report [options] [target-directory]
 
 `governance-report` 是只读命令，基于 manifest、phase coverage、workflow artifact contract 和 validate evidence 计算流程治理覆盖指标。它不评价文档内容质量或人工 review 充分性。
 
-## Resolve Options（解析参数）
+### Resolve Options（解析参数）
 
 解析项目 config：
 
@@ -195,6 +200,7 @@ speclite resolve config --project-root /path/to/project --key core.project_name 
 | `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。 |
 | `--key <dottedKey>` | 选择 merged config 中的 dotted key。可重复。 |
 | `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+| `--locale <locale>` | `--human` 输出的语言：`zh-CN` 或 `en-US`；不影响 machine stdout。 |
 
 `resolve config` 输出的是 raw merged config；它不会为缺失的 artifact root 合成 legacy fallback，也不会改变现有 `--key` 语义。需要消费 SPEC 09 root resolver 结果时，使用 `resolve artifact-roots`。
 
@@ -211,6 +217,7 @@ speclite resolve artifact-roots --project-root /path/to/project --lifecycle fres
 | `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。 |
 | `--lifecycle <existing|fresh>` | 选择 artifact root resolver lifecycle；默认 `existing`。 |
 | `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+| `--locale <locale>` | `--human` 输出的语言：`zh-CN` 或 `en-US`；不影响 machine stdout。 |
 
 Machine stdout 使用 `speclite.resolve.artifact-roots.v1` payload，顶层包含 `schemaVersion`、`lifecycle`、`roots[]` 和 `configSources`。`roots[]` 条目直接来自 SPEC 09 resolver projection，包含 `field`、`configPath`、`placeholder`、`resolvedRoot`、`resolutionMode`、`plane`、`ownership` 和 `contractRefs`。Missing/invalid roots 仍通过 stderr `ValidationIssue` JSON Lines 报告，并保持 project-relative POSIX path 与 redaction 约束。
 
@@ -222,7 +229,16 @@ speclite resolve artifact-documents --subject epics --project-root /path/to/proj
 speclite resolve artifact-documents --subject architecture --project-root /path/to/project --human
 ```
 
-`--subject` 必须是 `prd`、`epics` 或 `architecture`；`--selection whole|sharded` 只作用于当前 invocation。Machine stdout 始终返回 `speclite.resolve.artifact-documents.v1` evidence，包括 block result；block 同时以 stderr `ValidationIssue` JSON Line 和 exit code `1` 表达。Consumers 只加载 `consumedPaths`，不得自行定义 precedence。命令只读，不创建、迁移或修改 artifacts/progress。
+| Option | Description |
+|---|---|
+| `--subject <prd|epics|architecture>` | 必填。要解析的 governed subject。 |
+| `--selection <whole|sharded>` | 只作用于当前 invocation 的 shape selection，不持久化。 |
+| `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。 |
+| `--lifecycle <existing|fresh>` | 传给 artifact root resolver 的 lifecycle；默认 `existing`。 |
+| `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+| `--locale <locale>` | `--human` 输出的语言：`zh-CN` 或 `en-US`；不影响 machine stdout。 |
+
+`--subject` 必须是 `prd`、`epics` 或 `architecture`；`--selection whole|sharded` 只作用于当前 invocation。Machine stdout 始终返回 `speclite.resolve.artifact-documents.v1` evidence，包括 document-level block result（artifact root 本身无法解析时例外：stdout 为空，只在 stderr 输出 `ValidationIssue` 并 exit `1`）；block 同时以 stderr `ValidationIssue` JSON Line 和 exit code `1` 表达。Consumers 只加载 `consumedPaths`，不得自行定义 precedence。命令只读，不创建、迁移或修改 artifacts/progress。
 
 `index.md` 支持 inline 与 reference-style local Markdown links。Destination 会先剥离 query/fragment，再单次 percent-decode，并做 portable path、subject containment 和 readability 校验；external scheme 与 network links 不作为 shard。Malformed、undefined reference-style 或 unsupported local-ish destinations 会以 `artifact-path.broken-shard-reference` block，并在 details 中记录 `referenceKind`。Canonical whole 或 canonical `index.md` 自身 symlink escape 使用 `artifact-path.symlink-escape` block；index self-link 会被排除，不会重复出现在 `consumedPaths`。
 
@@ -235,7 +251,15 @@ speclite resolve cr-directory --story-id 11.9 --review-series main --project-roo
 speclite resolve cr-directory --story-id 11-9 --review-series restart --project-root /path/to/project --human
 ```
 
-`--story-id` 只接受规范 numeric identity `N.N` 或 `N-N`，统一输出 `N-N`；`--review-series` 必须匹配 `^[a-z0-9][a-z0-9-]{0,31}$`。Machine stdout 始终返回 `speclite.resolve.cr-directory.v1` evidence（`crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyCrDirs`、`roundEvidence`、`continuation`、`issues`），包括 block result；block 同时以 stderr CR-local issue JSON Line（`cr-directory.ambiguous-resume-root`、`cr-directory.invalid-story-id`、`cr-directory.invalid-review-series`、`cr-directory.invalid-implementation-artifacts`、`cr-directory.symlink-escape`、`cr-directory.unreadable-candidate`）和 exit code `1` 表达；候选路径不是可读目录时以 `unreadable-candidate` 阻断而非抛异常。判定只看 `{implementation_artifacts}/code-reviews/` 下的目录名与候选目录直接子文件名，不读取产物内容；命令只读，不创建、迁移或修改任何目录。
+| Option | Description |
+|---|---|
+| `--story-id <storyId>` | 必填。规范 numeric Story id：`N.N` 或 `N-N`。 |
+| `--review-series <reviewSeries>` | 必填。review series token，例如 `main`。 |
+| `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。 |
+| `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+| `--locale <locale>` | `--human` 输出的语言：`zh-CN` 或 `en-US`；不影响 machine stdout。 |
+
+`--story-id` 只接受规范 numeric identity `N.N` 或 `N-N`，统一输出 `N-N`；`--review-series` 必须匹配 `^[a-z0-9][a-z0-9-]{0,31}$`。Machine stdout 始终返回 `speclite.resolve.cr-directory.v1` evidence（`schemaVersion`、`ok`、`storyId`、`reviewSeries`、`crDir`、`canonicalCrDir`、`compatibilityMode`、`legacyCrDirs`、`roundEvidence`、`continuation`、`issues`），包括 directory-level block result（`implementation_artifacts` root 本身无法解析时例外：stdout 为空，只在 stderr 输出 issue 并 exit `1`）；block 同时以 stderr CR-local issue JSON Line（`cr-directory.ambiguous-resume-root`、`cr-directory.invalid-story-id`、`cr-directory.invalid-review-series`、`cr-directory.invalid-implementation-artifacts`、`cr-directory.symlink-escape`、`cr-directory.unreadable-candidate`）和 exit code `1` 表达；候选路径不是可读目录时以 `unreadable-candidate` 阻断而非抛异常。判定只看 `{implementation_artifacts}/code-reviews/` 下的目录名与候选目录直接子文件名，不读取产物内容；命令只读，不创建、迁移或修改任何目录。
 
 解析 skill customization：
 
@@ -251,12 +275,13 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 | `--project-root <projectRoot>` | 包含 `_speclite` 的项目根目录。Installed Skill activation 必须显式传入；省略只保留为 CLI compatibility fallback，不作为推荐运行契约。 |
 | `--key <dottedKey>` | 选择 merged customization 中的 dotted key。可重复。 |
 | `--human` | 显式输出 human-readable support frame。未传入时 stdout 仍只输出 resolved JSON object。 |
+| `--locale <locale>` | `--human` 输出的语言：`zh-CN` 或 `en-US`；不影响 machine stdout。 |
 
 默认 resolve output 是 runtime support machine contract：stdout 只包含 resolved JSON object，stderr 只包含 `ValidationIssue` JSON Lines diagnostics。Missing key 默认仍输出 `{}`、exit code 为 `0`、stderr 为空。Installed Skill 激活前必须确认当前 AI 会话 `PATH` 中存在 `speclite`；不可用时应 HALT 并暴露或安装 Node CLI 后重试，不得回退 Python resolver 或单独读取 `_speclite/config.toml`。`--human` 只用于人工排查，会把结果渲染为 `Outcome`、`Summary`、`Scope`、`Evidence`、`Issues` 和 `Next Actions`；其中 `source path` 表示 selected dotted key 或 resolver source 的 effective source，`unresolved` 只适用于显式 human mode。
 
 ## Python Resolver Compatibility Assets（Python Resolver 兼容资产）
 
-`_speclite/scripts/resolve_*.py` 可能存在于已安装项目中，并以 `runtime-compat-script` 记录在 `files-index.json`。这些文件只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 activation resolver，也不是默认 CLI resolver runtime dependency。正常 installed Skill activation 的唯一默认 resolver surface 是 Node CLI 的 `speclite resolve config`、`speclite resolve artifact-roots`、`speclite resolve artifact-documents` 与 `speclite resolve customization`；文档和脚本不应建议用户在默认激活路径中运行 Python resolver。
+`_speclite/scripts/resolve_*.py` 可能存在于已安装项目中，并以 `runtime-compat-script` 记录在 `files-index.json`。这些文件只用于 legacy compatibility、migration aid 和 troubleshooting，不是默认 activation resolver，也不是默认 CLI resolver runtime dependency。正常 installed Skill activation 的唯一默认 resolver surface 是 Node CLI 的 `speclite resolve config`、`speclite resolve artifact-roots`、`speclite resolve artifact-documents`、`speclite resolve cr-directory` 与 `speclite resolve customization`；文档和脚本不应建议用户在默认激活路径中运行 Python resolver。
 
 ## Output Modes（输出模式）
 
@@ -264,7 +289,7 @@ speclite resolve customization --skill /path/to/project/.agents/skills/speclite-
 |---|---|---|
 | Human-readable | 默认 | 面向终端阅读。`install` 默认中文，支持 `--locale en-US`。 |
 | JSON | `--json` | 面向脚本和工具。使用 `CommandResult` contract。 |
-| Resolve support | `resolve ... --human` | 适用于 `resolve config`、`resolve artifact-roots`、`resolve artifact-documents` 和 `resolve customization`。默认 resolve 不使用 `CommandResult`，stdout 保持 pure JSON。 |
+| Resolve support | `resolve ... --human` | 适用于 `resolve config`、`resolve artifact-roots`、`resolve artifact-documents`、`resolve cr-directory` 和 `resolve customization`。默认 resolve 不使用 `CommandResult`，stdout 保持 pure JSON。 |
 
 Human-readable output 可以包含分阶段 heading、key-value block、summary 和 next actions。JSON output 不应被 locale 影响。
 
@@ -272,9 +297,11 @@ Human-readable output 会按 command intent 选择 presentation profile：
 
 | Profile | Commands | Notes |
 |---|---|---|
-| Operation | `install`、`init`、`update`、`update --repair`、`sync`、`uninstall` | 优先展示写入意图、scope、state / authorization、plan / evidence、issues / conflicts 和 next actions。 |
-| Diagnostic | `status`、`validate`、`doctor` | 让 issues 靠近关键 state；error / critical issue 不应被深埋在长 evidence 之后。 |
-| Report / Support | `list`、`governance-report`、`resolve ... --human` | 使用 results、metrics、gaps、artifacts 或 evidence 等更贴近任务的主体 section。 |
+| Operation | `install`、`update`、`update --repair` | 优先展示写入意图、scope、state / authorization、plan / evidence、issues / conflicts 和 next actions。`init`、`sync`、`uninstall` 已映射到本 profile，但 renderer 尚未迁移。 |
+| Diagnostic | `status`、`validate` | 让 issues 靠近关键 state；error / critical issue 不应被深埋在长 evidence 之后。`doctor` 已映射，renderer 尚未迁移。 |
+| Report / Support | `resolve config --human`、`resolve artifact-roots --human`、`resolve customization --human` | 使用 results、metrics、gaps、artifacts 或 evidence 等更贴近任务的主体 section。`list`、`governance-report` 与其余 `resolve --human` 已映射，renderer 尚未迁移。 |
+
+尚未迁移的命令当前输出以 `Status:` 开头的 legacy human output，不支持 `--locale`；自动化仍应只消费 `--json`。
 
 ## Human Output Flows（人类输出流程）
 

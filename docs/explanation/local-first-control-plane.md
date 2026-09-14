@@ -118,7 +118,7 @@ Control plane 可以验证 mirrors 和 manifest 是否一致，但不评价人�
 
 | Topic | Document |
 |---|---|
-| 首次安装教程 | [`../tutorials/quick-start.md`](../tutorials/quick-start.md) |
+| 首次安装教程 | [`../tutorials/first-install-walkthrough.md`](../tutorials/first-install-walkthrough.md) |
 | CLI 参数和输出模式 | [`../reference/cli.md`](../reference/cli.md) |
 | Human output 覆盖矩阵 | [`../reference/cli-human-output-matrix.md`](../reference/cli-human-output-matrix.md) |
 | JSON contract | [`../reference/command-result-json.md`](../reference/command-result-json.md) |

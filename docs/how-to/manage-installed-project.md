@@ -68,7 +68,7 @@ speclite doctor /path/to/project
 speclite doctor /path/to/project --json
 ```
 
-`doctor` 默认复用 local validation evidence。需要远程 freshness/provenance revalidation 时，必须显式请求并授权：
+`doctor` 默认复用 local validation evidence。`--revalidate-source` 会把远程 freshness/provenance revalidation 作为 external access intent 写入 `data.externalAccesses`；未加 `--yes` 时命令停止并报 `source-integrity.external-access-not-authorized`。当前版本在授权后仍只执行本地 validation，远程 revalidation 的实际执行尚未实现：
 
 ```sh
 speclite doctor /path/to/project --revalidate-source --yes
@@ -144,7 +144,7 @@ speclite governance-report /path/to/project --json
 - `requiresConfirmation`
 - `writeAuthorized`
 - `changedPaths` 或 `removedPaths`
-- `conflicts`
+- `conflicts`（`uninstall` 没有该字段）
 - `completedSteps` / `failedStep` / `pendingSteps`
 
 自动化不要解析 human-readable output，也不要把 `summary` 当作稳定 contract。字段细节见 [`../reference/command-result-json.md`](../reference/command-result-json.md)。
