@@ -1,6 +1,6 @@
 {
   "name": "@fancyliu/speclite",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "SpecLite local-first CLI control plane.",
   "license": "MIT",
   "keywords": [

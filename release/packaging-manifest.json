@@ -4,7 +4,7 @@
   "source": "npm-pack-dry-run-json",
   "packageJson": {
     "name": "@fancyliu/speclite",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "bin": {
       "speclite": "dist/bin/speclite.js"
     },
@@ -20,7 +20,7 @@
       "CHANGELOG.md"
     ]
   },
-  "packageHash": "sha256:b53f376ff79dd7404844e6873a9856ca01181972529f7707e8ccfee046f47575",
+  "packageHash": "sha256:ccd129282f0e434028f946a6b3ab6b4b999700c5bd5ed358851b46089aa6cff6",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",

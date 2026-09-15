@@ -816,7 +816,7 @@ async function writeIdeDriftInstalledState(projectRoot: string): Promise<void> {
       "sourceDescriptor:",
       '  sourceType: "local"',
       '  channel: "stable"',
-      '  version: "0.4.0"',
+      '  version: "0.4.1"',
       '  resolvedRoot: "fixture-source"',
       '  contentHash: "sha256:fixture-source"',
       "  integrityEvidence:",

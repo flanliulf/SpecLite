@@ -10,6 +10,17 @@
 
 尚无未发布变更。
 
+## [0.4.1] - 2026-09-15
+
+### Added
+
+- 新增根目录 `CHANGELOG.md`，按 Keep a Changelog 补齐 0.1.0 至 0.4.0 全部版本迭代内容，并随 npm package 发布（75c3c18）。
+
+### Changed
+
+- README Roadmap 按 0.3.0 到 0.4.0 的实际交付拆分已完成与剩余子项，并增加 CHANGELOG 入口（75c3c18）。
+- `package.json.files` 加入 `CHANGELOG.md`，`release/packaging-manifest.json` 随之重算（75c3c18）。
+
 ## [0.4.0] - 2026-09-15
 
 本版本完成 Epic 9（Story 9.3）、Epic 10（生态模块治理）与 Epic 11（Artifact Root 统一），并重组公开文档体系。旧安装通过 `speclite update --yes` 升级；所有产物位置变更均不做静默迁移，旧位置产物原位保留。
@@ -167,7 +178,8 @@
 - 新增 `docs/quick-start.md` 安装与首次使用指南（2d6ba44）。
 - 新增术语表、文档索引与 MVP 契约 / 规划产物文档集（6e3d4e4、5b2c7a4、8836241）。
 
-[Unreleased]: https://github.com/flanliulf/SpecLite/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/flanliulf/SpecLite/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/flanliulf/SpecLite/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/flanliulf/SpecLite/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/flanliulf/SpecLite/compare/d810174...v0.3.0
 [0.2.0]: https://github.com/flanliulf/SpecLite/compare/ec71e3f...d810174
