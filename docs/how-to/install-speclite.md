@@ -112,6 +112,34 @@ speclite status /path/to/project --json
 speclite validate /path/to/project --json
 ```
 
+### Step 6: Commit and Ignore（提交与忽略）
+
+安装写入的 `_speclite/`、`.claude/skills/`、`.agents/skills/`、`.claude/settings.json` 和 `.codex/hooks.json` 需要提交给团队共享。installer 只向 `.gitignore` 写入两条 user config 规则，其余忽略规则需要在安装完成后人工追加：
+
+```gitignore
+# SpecLite transient state
+_speclite/.lock
+_speclite/.speclite-tmp-*
+_speclite/_config/.update-journal.json
+
+# Claude Code personal state
+.claude/settings.local.json
+
+# Codex: keep only the SpecLite hook config
+.codex/*
+!.codex/hooks.json
+```
+
+`.gitignore` 是 human-owned，追加规则不会触发 drift，也不会被 update、repair 或 uninstall 重写。追加后确认忽略生效再提交：
+
+```sh
+git check-ignore -v .codex/auth.json _speclite/config.user.toml
+git add -A
+git commit -m "chore: install speclite"
+```
+
+逐路径的提交边界以 [`../reference/runtime-layout.md`](../reference/runtime-layout.md) 的 Commit Guidance 列为唯一源定义。
+
 ## What You Get（你会得到什么）
 
 成功安装后，目标项目至少应出现：

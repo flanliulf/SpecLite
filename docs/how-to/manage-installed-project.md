@@ -108,6 +108,8 @@ speclite uninstall /path/to/project --yes
 
 `uninstall` 只移除 files index 和 ownership model 判定为 installer-owned 的路径。human-owned 和 workflow-owned paths 会进入 `preservedPaths` 或 manual action，不会被静默删除。
 
+`.gitignore` 和 `_speclite/custom/*.toml` 属于 human-owned，卸载后保留，因此安装后追加的忽略规则在重装时继续生效。`uninstall` 只删除文件，不删除已空的目录；`.claude/skills/`、`.agents/skills/` 与 `_speclite/hooks/` 下会残留空目录，git 不跟踪它们，也不影响重装。
+
 卸载后应人工检查：
 
 - `removedPaths`

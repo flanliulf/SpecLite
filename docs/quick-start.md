@@ -214,6 +214,7 @@ speclite install /path/to/project --json --yes
 - 从配置好的 IDE 中打开 `.claude/skills` 或 `.agents/skills` 下的 skills。
 - 运行 `speclite status` 查看 installed-state summary。
 - 运行 `speclite validate` 做更深入的本地校验。
+- 安装写入的 `_speclite/`、skill mirrors 与 hook config 需要提交；installer 只在 `.gitignore` 写入两条 user config 规则，transient state（`_speclite/.lock`、`_speclite/_config/.update-journal.json`）、`.claude/settings.local.json` 与 `.codex/` 下除 `hooks.json` 之外的内容需人工追加忽略。
 
 ## Verify Installation（验证安装）
 

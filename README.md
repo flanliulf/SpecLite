@@ -58,7 +58,7 @@ flowchart LR
 
 ## Quick Start（快速开始）
 
-详细安装和首次使用指南见 [docs/quick-start.md](docs/quick-start.md)。
+详细安装和首次使用指南见 [docs/quick-start.md](docs/quick-start.md)。安装后哪些文件提交、哪些加入 `.gitignore`，见 [docs/how-to/install-speclite.md](https://github.com/flanliulf/SpecLite/blob/main/docs/how-to/install-speclite.md) 的 Step 6。
 
 通过 npm 使用已发布包：
 
