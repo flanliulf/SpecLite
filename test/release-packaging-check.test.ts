@@ -28,7 +28,7 @@ describe("Story 6.7 release packaging gate", () => {
 
     expect(packageJson).toMatchObject({
       name: "@fancyliu/speclite",
-      version: "0.3.0",
+      version: "0.4.0",
       license: "MIT",
       bin: {
         speclite: "dist/bin/speclite.js",
@@ -78,7 +78,7 @@ describe("Story 6.7 release packaging gate", () => {
         "package.json",
         JSON.stringify({
           name: "@fancyliu/speclite",
-          version: "0.3.0",
+          version: "0.4.0",
           license: "MIT",
           bin: {
             speclite: "dist/bin/speclite.js",
@@ -400,7 +400,7 @@ function createPackFiles(paths: string[]): Array<{ path: string; size: number }>
 function createPackageJson(): Record<string, unknown> {
   return {
     name: "@fancyliu/speclite",
-    version: "0.3.0",
+    version: "0.4.0",
     license: "MIT",
     bin: {
       speclite: "dist/bin/speclite.js",
