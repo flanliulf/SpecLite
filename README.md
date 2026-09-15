@@ -10,7 +10,7 @@ SpecLite 的 `assets/source/speclite/` 不是普通文档集合，而是一整�
 - 开发者：需要理解 CLI、runtime、manifest、validation 和 IDE adapter 的实现者。
 - 维护者：负责维护 canonical skills、fixtures、发布包和企业落地质量的人。
 
-公开文档体系的导航入口是 [docs/index.md](https://github.com/flanliulf/SpecLite/blob/main/docs/index.md)。使用者从随 npm package 发布的 [docs/quick-start.md](docs/quick-start.md) 开始；开发者从 `docs/index.md` 的 Read First 开始；维护者阅读 `docs/README.md` 与 `docs/_STYLE_GUIDE.md`。
+公开文档体系的导航入口是 [docs/index.md](https://github.com/flanliulf/SpecLite/blob/main/docs/index.md)。使用者从随 npm package 发布的 [docs/quick-start.md](docs/quick-start.md) 开始；开发者从 `docs/index.md` 的 Read First 开始；维护者阅读 `docs/README.md` 与 `docs/_STYLE_GUIDE.md`。各版本的变更记录见随 npm package 发布的 [CHANGELOG.md](CHANGELOG.md)。
 
 ## What SpecLite Provides（SpecLite 提供什么）
 
@@ -224,14 +224,21 @@ CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/
 
 以下是产品与 canonical source 的迭代路线；公开文档体系自身的整理项见 [docs/README.md](https://github.com/flanliulf/SpecLite/blob/main/docs/README.md) 的 Current Migration State（当前迁移状态）。
 
-- [ ] 优化 canonical source skills 目录结构，包括输出 Artifacts 目录、文档命名规范和顺序可读性等。
+- [x] 统一 workflow 输出 Artifacts 目录：SPEC 09 七类 artifact root、带阶段序号的默认目录与 `speclite resolve artifact-roots` 已在 0.4.0 交付。
+- [ ] 优化 canonical source skills 自身的目录分层与顺序可读性，并建立跨 Skill 的产物文件命名规范（0.4.0 仅固化 PRD validation report 与 Implementation Readiness report 两类文件名）。
 - [ ] 支持既有项目多次迭代的 `_speclite-output` 体系。
 - [ ] 支持微服务体系的跨多仓库迭代开发体系。
-- [ ] 将 Grill 能力无痕融合到核心流程 Skills，并增强 debugging 等核心能力 Skills。
-- [ ] 遵循新的 doc system 体系，重构 canonical source skills。
-- [ ] 增强既有项目的 project knowledge 体系。
-- [ ] 整体优化 UX 体系。
+- [x] 补齐 Grill 方法论 Skill 资产（`speclite-grilling`、`speclite-grill-with-docs`、Implementation Readiness grill consistency reviewer），并完成全量 grill 引用盘点与治理裁决。
+- [ ] 将 Grill 追问协议无痕嵌入 PRD、Architecture、Story、Dev 等核心流程 Skills 的工作流步骤。
+- [ ] 增强 debugging 等核心能力 Skills。
+- [x] 建立公开文档体系：Diataxis 分层、`docs:check` 门禁、`docs/_STYLE_GUIDE.md`、唯一源定义页与 Moved 兼容页已在 0.4.0 交付。
+- [ ] 按已建立的 doc system 规范重构 canonical source skills 自身的文档结构。
+- [x] 为 project knowledge 建立独立 artifact root（`{project_knowledge}`）并接入 `speclite-terminology-governance` 术语治理。
+- [ ] 增强既有项目的 project knowledge 生产与维护能力（project context、brownfield context、document project 的知识产出结构与增量更新）。
+- [x] UX 产物归集到 `{planning_artifacts}/ux/` 并建立 fail-closed 写入边界。
+- [ ] 整体优化 UX 方法论体系；治理命令的 CLI human output 统一由 Epic 13 覆盖。
 - [ ] 支持测试架构体系模块（TEA）。
 - [ ] 支持 CI/CD 能力。
 - [ ] 支持代码工程化风格能力，以及代码简化和代码重构 skills。
-- [ ] 支持企业级定制化代码规范，以及实现风险左移的流程。
+- [x] 流程门禁左移：Story kickoff Flow Gate 强制、v2 handoff 契约与 SR / CR 有界收敛已在 0.4.0 交付。
+- [ ] 支持企业级定制化代码规范，并在 CR 与 dev 阶段可执行校验。

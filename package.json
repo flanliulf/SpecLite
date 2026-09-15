@@ -27,7 +27,8 @@
     "assets/source/speclite/",
     "docs/quick-start.md",
     "package.json",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

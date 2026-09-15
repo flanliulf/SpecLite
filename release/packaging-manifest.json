@@ -16,10 +16,11 @@
       "assets/source/speclite/",
       "docs/quick-start.md",
       "package.json",
-      "README.md"
+      "README.md",
+      "CHANGELOG.md"
     ]
   },
-  "packageHash": "sha256:af3a4763e79fa91d07a2efa889c06b9297f63284b8be0055f80038b095bfa74c",
+  "packageHash": "sha256:b53f376ff79dd7404844e6873a9856ca01181972529f7707e8ccfee046f47575",
   "files": [
     "assets/source/README.md",
     "assets/source/speclite/canonical-data-variant-policy.json",
@@ -741,6 +742,7 @@
     "assets/source/speclite/support-skills/speclite-skill-lint/scripts/test_skill_tools.py",
     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.en.md",
     "assets/source/speclite/support-skills/speclite-skill-lint/SKILL.md",
+    "CHANGELOG.md",
     "dist/bin/speclite.d.ts",
     "dist/bin/speclite.js",
     "dist/bin/speclite.js.map",
