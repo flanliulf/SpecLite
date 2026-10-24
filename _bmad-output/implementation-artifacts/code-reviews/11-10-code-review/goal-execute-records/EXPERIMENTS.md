@@ -67,3 +67,17 @@
 - 改动：Story 文件 G113 归 compatibility 并入 AC7 单列（Compatibility 6→7）；B2/B4/B5 引用的 9 条 entry Rec 标 `confirm → resolved`；条目表引言注明回查基准 HEAD 3cc1ba9；计数同步；Change Log 1.5。
 - 审查：fresh 独立审查者首轮 FAIL（我误改 G003 而非 G113；G043/G046 裁决文字与 §C 不符；引言对 G042 不精确），修正后复验 PASS（计数重算、G113 依据、raw sha 复现、resolved 文字与 §C 一致、docs:check）。
 - 边界：只改 Story 文件；canonical 面未动。
+
+## 2026-10-24 — Epic Completion Audit（Epic 完成审计）
+
+- 执行项：`goal-orchestrator-epic-story-code-review-runner` 续跑完成审计；源码基线为 `31e632e`。以当前仓库为准，不恢复已被 11.9 restart 取代的旧流程。
+- 开发与状态证据：十个 Story 正文均为 `done`，各含实现与验收记录；tracker 中 Epic 11、11.1–11.10、retrospective 均为 `done`。当前 tracker 的未提交改动属于 Epic 12/13，不纳入本次提交。
+- CR 审计：逐 Story 读取 latest review/evaluation、CR04/05/06 日志与规则/TODO 产物。11.1 r3、11.2 r3、11.3 r3、11.4 r7、11.5 r8、11.6 r5、11.7 r8、11.8 r4 为双 PASS；11.9 restart r3 与 11.10 main r3 的 review 均完成三层审查，evaluation 为 `PASS_WITH_DEFERRED_TODOS`，CR06 为 `DONE`。既有 fix 后均有后续 review/evaluation；没有把 fixer 输出直接作为通过证据。
+- 收口证据：11.3/11.4/11.8/11.9/11.10 的 finalizer report 存在；其余 Story 使用当时的 Story 正文与 CR06 日志，不补造历史 v2 report。11.9/11.10 的 review、evaluation、CR04、CR05、completion gate 共十个原始文件 SHA-256 与绑定记录一致。十份 completion gate 的 target/storyKey 均精确匹配；11.5–11.8 为历史 `PASS_EQUIVALENT`，其余为 `PASS`。
+- Epic 门禁与提交：`epic-11-completion-gate.md` 为 `PASS`；`17633f5` 保存门禁，`219f6f5` 将 Epic 标为 done，`0aaf3c2` 保存 retrospective。11.9 restart 收口提交为 `22909c8`；11.10 CR06 提交为 `7ce8161`，docs follow-up 提交为 `ec3f3a0`。
+- Inventory：重数 Story 11.10 表格得到 269 行、269 个唯一 ID，G001–G269 连续；用户确认与后续修正已写入 Change Log。历史扫描基线保持不变，本次不把当前树重新扫描结果冒充当时的 raw evidence。最终交付提供 [Story 11.10 inventory](../../../stories/11-10-inventory-all-grill-related-skill-references-for-human-confirmation.md)。
+- 日志修正：11.1 父 checklist 未勾选、11.5 漏记 CR06、11.8 状态栏仍为 review、11.10 计划与备注仍等待确认。仅据已存在证据补齐这些记录；未修改 source/tests/canonical、历史 CR 结论或 TODO 裁决。
+- 验证尝试 1：在 `/tmp/speclite-epic11-audit.TAX6yo` 的 HEAD 副本中 build 通过，测试为 719 passed / 12 failed / 4 todo；失败来自工具启动错误、系统 Python 的 Xcode license 提示及临时路径被 local-source integrity 拒绝。后续 docs/packaging 因 `&&` 未执行。不将此轮记为通过。
+- 验证尝试 2：重新从同一 HEAD 导出到 `/Users/fancyliu/Repos/speclite-audit.0xbDKG`，复用现有 node_modules，PATH 优先 `/Users/fancyliu/.pyenv/versions/3.12.13/bin` 与 `/opt/homebrew/bin`。未改测试或产品代码。`npm run build` PASS；`npm test` 为 68 files / 731 passed / 0 failed / 4 todo；`npm run docs:check` 为 80 files PASS；`npm run release:packaging-check` PASS。构建和 manifest 写入只发生在隔离副本。
+- Git 范围：暂存区原为空；保留既有 AGENTS、sprint-status、Epic 12/13 planning 相关七项变更及 ignored 文件。全树 `git diff --check` 报既有 `story-candidates-2026-09-13.md` 第 38–39 行 Markdown 尾随空格，本次日志路径的 scoped check 通过，不改范围外文件。
+- 下一步：按 `git-commit-convention` 将本次日志修正按 Story 分组为中文本地提交；不 push。保留非阻塞 TODO，不宣称全部 backlog 已解决。
