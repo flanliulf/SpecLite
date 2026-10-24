@@ -29,7 +29,7 @@
 - [x] Step 3：Reviewer Round 1/2 发现并关闭两项 P1；Reviewer Round 3 已通过，新 findings 为 0。
 - [x] Step 4：Evaluator Round 1/2 授权两项 P1；Evaluator Round 3 已通过，新 findings/TODO/用户决策点均为 0。
 - [x] Step 5：Fixer Round 1 完成 provenance P1；Fixer Round 2 完成 stale anchor P1。两轮均在 evaluator 授权范围内并追加 fix record。
-- [ ] Step 6：Reviewer 与 Evaluator 双通过后，严格串行执行 CR04 rules extractor、CR05 TODO tracker、CR06 finalizer。
+- [x] Step 6：Reviewer 与 Evaluator 双通过后，严格串行执行 CR04 rules extractor、CR05 TODO tracker、CR06 finalizer（2026-10-24 按下列已完成子项补齐父项勾选）。
   - [x] CR04 rules extractor：已完成 record-only；新增 `CR-API-34`，并将 stale anchor 复现归并到既有 `CR-API-13`，未修改全局文档。
   - [x] CR05 TODO tracker：已完成 extract/check；所有 11-1 CR 产物均明确 TODO 0，未新增 backlog 条目。
   - [x] CR06 finalizer：已完成；Story 11.1 与 sprint tracker 均同步为 `done`，`bmm-workflow-status.yaml` 不存在按规则跳过。
