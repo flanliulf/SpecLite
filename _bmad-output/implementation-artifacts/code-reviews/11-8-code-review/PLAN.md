@@ -7,7 +7,7 @@
 ## Current Status（当前状态）
 
 - Story 11.1–11.7 与 tracker 均为 `done`；11.7 latest Round 8 双 PASS 且 CR04/05/06 已完成。
-- Story 11.8 Development已完成：kickoff=`PASS`、completion=`PASS_EQUIVALENT`、Story/tracker=`review`，无Owner Gate。
+- Story 11.8 已收口：kickoff=`PASS`、completion=`PASS_EQUIVALENT`、Round 4 Reviewer/Evaluator 双 PASS、CR04/05/06 完成、Story/tracker=`done`（2026-10-24 按既有 finalizer 与执行记录同步状态栏）。
 - Stable diagnostic唯一关闭：old-ID redirect不生成deprecation issue；modified old package复用`file-integrity.hash-mismatch`并由`update.conflicts`汇总。
 - External drawer/zip、workspace mirrors与fixed-count drift继续隔离。
 
