@@ -247,3 +247,9 @@
 - TODO状态：open；未修改candidate scan实现，也未预判in-bound/outbound/broken/nonregular target语义。
 - Closeout条件：latest Round8双PASS、CR04规则与CR05 TODO已齐；下一步CR06只需核验gate identity、Story/tracker状态与验证证据。
 - 用户介入点：无。严格进入CR06。
+
+## 2026-10-24 — Closeout Reconciliation（收口对账）
+
+- 判断：以上“下一步 CR06”是历史断点，不是当前待办。Story 的 completion evidence 与 Change Log 1.1 已记录 CR06 完成，当前 Story/tracker 为 `done`。
+- 决策：按既有证据补齐三份日志；保留旧轮次记录与 `PASS_EQUIVALENT` 的历史限制，不伪造独立 finalizer report，不重跑已结束的 CR。
+- 范围：只改本 Story 的进度日志；`TODO-016` 不在本次修复范围。

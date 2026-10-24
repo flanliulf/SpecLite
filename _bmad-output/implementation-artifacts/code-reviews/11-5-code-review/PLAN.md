@@ -8,7 +8,7 @@
 
 - Epic：11 — Phase-aligned Workflow Artifact Governance（阶段对齐的 Workflow Artifact 治理）
 - 当前 Story：11.5 — Govern Planning And Solutioning Documents As Whole And Sharded Artifacts（治理 Planning 与 Solutioning 文档的整篇与分片产物）
-- 当前轮次：CR Reviewer Round 2
+- 当前轮次：Round 8 CR closeout 已完成（2026-10-24 对账）。
 
 ## Preflight Evidence（前置审计证据）
 
@@ -24,12 +24,12 @@
 - [x] Step 1：初始化`PLAN.md`、`EXPERIMENTS.md`、`EXPERIMENT_NOTES.md`。
 - [x] Step 2：fresh development recovery已完成owner contract、shared resolver、producer/consumer与fixtures；kickoff PASS、completion PASS_EQUIVALENT、Story/tracker为review。
 - [x] Step 3：Reviewer/Evaluator Round8双PASS（0 P0/P1，1 P2 defer）。
-- [ ] Step 4：CR04与CR05已完成（P2=`TODO-016`）；下一步CR06。
-- [ ] Step 5：Story/tracker done与日志完整后，才进入Story11.6。
+- [x] Step 4：CR04、CR05、CR06 已完成；P2 已登记为 `TODO-016`。
+- [x] Step 5：Story/tracker 为 `done`；2026-10-24 补齐三份日志中遗漏的 CR06 记录。
 
 ## Current Status（当前状态）
 
-Reviewer/Evaluator Round8双PASS，CR04已新增三条规则，CR05已将candidate symlink taxonomy P2登记为`TODO-016`（open）。下一步fresh CR06核验全部completion gates并更新Story/tracker；完成前不得进入11.6。
+Reviewer/Evaluator Round 8 双 PASS，CR04 规则与 CR05 `TODO-016` 已登记。Story 正文的 completion evidence 和 2026-09-04 Change Log 1.1 已记录 CR06 完成；Story 与 tracker 均为 `done`。2026-10-24 对账仅补齐日志，不重新执行 CR06，不改变历史 `PASS_EQUIVALENT` 的验证边界。
 
 ## Termination Conditions（终止条件）
 

@@ -300,3 +300,11 @@
 - Boundaries：记录current fail-closed/空消费/零mutation、future Owner target matrix与acceptance；默认不新增stable ID、不扩通用filesystem taxonomy，未写成resolved。
 - 验证：open统计7→8且与摘要一致、TODO ID唯一、diff与canonical warn/strict PASS。
 - 下一步判断：进入fresh CR06 finalizer。
+
+## 2026-10-24 — Closeout Reconciliation（收口对账）
+
+- Story ID：11.5；轮次：Round 8。执行项：goal runner completion audit，不是新一轮 CR06。
+- 原因：本日志停在 CR05，但 Story 正文已记录 CR06 完成，计划状态未同步。
+- 证据：`../../stories/11-5-govern-planning-and-solutioning-documents-as-whole-and-sharded-artifacts.md` 的 completion evidence 与 2026-09-04 Change Log 1.1；Round 8 review/evaluation；CR04 规则；CR05 `TODO-016`；exact target 的 completion gate `PASS_EQUIVALENT`；当前 Story/tracker 均为 `done`。
+- 结果：补齐既有 CR06 的记录，不重新执行历史步骤。Story 正文记录的 focused/related `123/123`、docs、canonical warn/strict 属于当时的验证，不冒称本次重跑。
+- 下一步判断：Story 11.5 已完成；保留非阻塞 `TODO-016`，不扩展 candidate scan。
