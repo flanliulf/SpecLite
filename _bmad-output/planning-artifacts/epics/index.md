@@ -53,6 +53,20 @@ readinessRevision:
     - "../ux-install-cli-interaction-spec-2026-06-12.md"
     - "../implementation-readiness-report-2026-09-01.md"
     - "./index.md"
+candidateRevision:
+  changeRequest: "epic-12-13-story-candidates-2026-09-13"
+  status: "complete"
+  confirmedAt: "2026-09-15"
+  completedAt: "2026-09-15"
+  inputDocuments:
+    - "../story-candidates-2026-09-13.md"
+    - "../../implementation-artifacts/epic-11-retro-2026-09-12.md"
+    - "../../implementation-artifacts/epic-8-retro-2026-07-06.md"
+    - "../../implementation-artifacts/cr-rules/cr-todo-backlog.md"
+    - "../specs/07-validation-issue-taxonomy.md"
+    - "../specs/09-sdlc-workflow-lifecycle-contract.md"
+    - "./index.md"
+    - "../../implementation-artifacts/sprint-status.yaml"
 ---
 
 # SpecLite Epic Breakdown（SpecLite Epic 拆解）
@@ -79,6 +93,8 @@ readinessRevision:
     - [Epic 9: Installed Runtime Activation Contract Hardening（已安装 Runtime 激活契约收口）](./03-epic-listepic-列表.md#epic-9-installed-runtime-activation-contract-hardening已安装-runtime-激活契约收口)
     - [Epic 10: Canonical Source Ecosystem Module Governance（Canonical Source 生态模块治理）](./03-epic-listepic-列表.md#epic-10-canonical-source-ecosystem-module-governancecanonical-source-生态模块治理)
     - [Epic 11: Phase-Aligned Workflow Artifact Governance（阶段对齐的 Workflow Artifact 治理）](./03-epic-listepic-列表.md#epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理)
+    - [Epic 12: Owning Contract And Hook Platform Alignment（Owning Contract 与 Hook 平台对齐）](./03-epic-listepic-列表.md#epic-12-owning-contract-and-hook-platform-alignmentowning-contract-与-hook-平台对齐)
+    - [Epic 13: Governance Command Outcome-Oriented Human Output（治理命令 Outcome 导向人类输出）](./03-epic-listepic-列表.md#epic-13-governance-command-outcome-oriented-human-output治理命令-outcome-导向人类输出)
   - [Epic 1: Project Installation Onboarding（项目安装引导）](./04-epic-1-project-installation-onboarding项目安装引导.md)
     - [Story 1.1: CLI Install Entry And Runtime Guard（CLI 安装入口与运行时守卫）](./04-epic-1-project-installation-onboarding项目安装引导.md#story-11-cli-install-entry-and-runtime-guardcli-安装入口与运行时守卫)
     - [Story 1.2: Project Target Directory Resolution And Existing Install Detection（项目目标目录解析与既有安装检测）](./04-epic-1-project-installation-onboarding项目安装引导.md#story-12-project-target-directory-resolution-and-existing-install-detection项目目标目录解析与既有安装检测)
@@ -160,3 +176,12 @@ readinessRevision:
     - [Story 11.8: Rename and Relocate Implementation Readiness Skills（更名并迁移 Implementation Readiness Skills）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-118-rename-and-relocate-implementation-readiness-skills更名并迁移-implementation-readiness-skills)
     - [Story 11.9: Normalize Code Review Artifact Directories by Story ID（按 Story ID 统一 Code Review Artifact 目录）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-119-normalize-code-review-artifact-directories-by-story-id按-story-id-统一-code-review-artifact-目录)
     - [Story 11.10: Inventory All Grill-Related Skill References for Human Confirmation（盘点全部 Grill 相关 Skill 引用供人工确认）](./14-epic-11-phase-aligned-workflow-artifact-governance阶段对齐的-workflow-artifact-治理.md#story-1110-inventory-all-grill-related-skill-references-for-human-confirmation盘点全部-grill-相关-skill-引用供人工确认)
+  - [Epic 12: Owning Contract And Hook Platform Alignment（Owning Contract 与 Hook 平台对齐）](./15-epic-12-owning-contract-and-hook-platform-alignmentowning-contract-与-hook-平台对齐.md)
+    - [Story 12.1: Flow Gate Report v2 Contract Ratification And Gate Precedence（Flow Gate Report v2 契约追认与 Gate 优先级裁决）](./15-epic-12-owning-contract-and-hook-platform-alignmentowning-contract-与-hook-平台对齐.md#story-121-flow-gate-report-v2-contract-ratification-and-gate-precedenceflow-gate-report-v2-契约追认与-gate-优先级裁决)
+    - [Story 12.2: Fixture Write Failed Issue Ownership Closure（Fixture Write Failed Issue 归属收口）](./15-epic-12-owning-contract-and-hook-platform-alignmentowning-contract-与-hook-平台对齐.md#story-122-fixture-write-failed-issue-ownership-closurefixture-write-failed-issue-归属收口)
+    - [Story 12.3: Hook Platform Contract Hardening（Hook 平台契约收口）](./15-epic-12-owning-contract-and-hook-platform-alignmentowning-contract-与-hook-平台对齐.md#story-123-hook-platform-contract-hardeninghook-平台契约收口)
+    - [Story 12.4: Module-Scoped Canonical Source Hook Projection（按 Module 投影 Canonical Source Hook）](./15-epic-12-owning-contract-and-hook-platform-alignmentowning-contract-与-hook-平台对齐.md#story-124-module-scoped-canonical-source-hook-projection按-module-投影-canonical-source-hook)
+  - [Epic 13: Governance Command Outcome-Oriented Human Output（治理命令 Outcome 导向人类输出）](./16-epic-13-governance-command-outcome-oriented-human-output治理命令-outcome-导向人类输出.md)
+    - [Story 13.1: Severity-Aware Validate Next Actions（按 Severity 生成的 Validate Next Actions）](./16-epic-13-governance-command-outcome-oriented-human-output治理命令-outcome-导向人类输出.md#story-131-severity-aware-validate-next-actions按-severity-生成的-validate-next-actions)
+    - [Story 13.2: Read-Only Governance Command Outcome Output（只读治理命令 Outcome 输出）](./16-epic-13-governance-command-outcome-oriented-human-output治理命令-outcome-导向人类输出.md#story-132-read-only-governance-command-outcome-output只读治理命令-outcome-输出)
+    - [Story 13.3: Mutating Governance Command Outcome Output（写入型治理命令 Outcome 输出）](./16-epic-13-governance-command-outcome-oriented-human-output治理命令-outcome-导向人类输出.md#story-133-mutating-governance-command-outcome-output写入型治理命令-outcome-输出)

@@ -1,5 +1,5 @@
 # generated: 2026-05-24 17:39:27 CST
-# last_updated: 2026-09-12 13:27 CST
+# last_updated: 2026-09-15 CST
 # project: SpecLite
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,6 +36,8 @@
 # - Epic 7 is tracked as Post-MVP backlog and is not part of the MVP implementation gate.
 # - Epic 11 is strict-serial: 11.1 -> 11.10. Do not move multiple Epic 11 stories to in-progress.
 # - Each Epic 11 story requires SPEC 09 story-kickoff and story-completion Flow Gates.
+# - Epic 12: 12.1 / 12.2 independent; 12.3 -> 12.4 serial. Epic 13 is strict-serial: 13.1 -> 13.2 -> 13.3. Epic 12 and 13 may run in parallel.
+# - Epic 12 / 13 stories require SPEC 09 story-kickoff and story-completion Flow Gates; new stories must carry Threat Model & Non-Goals (A11-1).
 
 generated: 2026-05-24 17:39:27 CST
 last_updated: 2026-09-12 13:27 CST
@@ -152,3 +154,18 @@ development_status:
   11-9-normalize-code-review-artifact-directories-by-story-id: done
   11-10-inventory-all-grill-related-skill-references-for-human-confirmation: done
   epic-11-retrospective: done
+
+  # Owning contract and hook platform alignment (story-candidates-2026-09-13 SC-3/4/5 + module-scoped hook projection, retro A11-3).
+  epic-12: backlog
+  12-1-flow-gate-report-v2-contract-ratification-and-gate-precedence: backlog
+  12-2-fixture-write-failed-issue-ownership-closure: backlog
+  12-3-hook-platform-contract-hardening: backlog
+  12-4-module-scoped-canonical-source-hook-projection: backlog
+  epic-12-retrospective: optional
+
+  # Governance command outcome-oriented human output (story-candidates-2026-09-13 SC-1/2 + TODO-011). Strict serial: 13.1 -> 13.3.
+  epic-13: backlog
+  13-1-severity-aware-validate-next-actions: backlog
+  13-2-read-only-governance-command-outcome-output: backlog
+  13-3-mutating-governance-command-outcome-output: backlog
+  epic-13-retrospective: optional

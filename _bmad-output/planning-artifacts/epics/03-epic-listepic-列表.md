@@ -97,3 +97,23 @@ SpecLite 维护者可以把持续新增的技术生态源定义放入 `assets/so
 **兼容 guard：** Fresh install 使用新 fields 与新默认路径；existing install 已配置的 artifact roots 继续权威，缺少新增 fields 时使用明确且可观测的 `legacy-compatible` fallback。Producer/consumer 必须记录实际 resolved root 与 consumed path；普通 install/update/repair 不得移动、复制、重命名、删除或重写 workflow-owned artifacts。目标项目 `docs/` 保持 Primary Public Document（主要公开文档）定位，workflow 产生的 project knowledge 默认位于 `_speclite-output/project-knowledge-base/`。
 
 **覆盖 FR / NFR / UX：** FR13a, FR23b, FR23c, FR23d, FR23e, FR23f, FR23g, FR66a, NFR14a, NFR40f, UX-DR3, UX-DR7, UX-DR8, UX-DR15
+
+## Epic 12: Owning Contract And Hook Platform Alignment（Owning Contract 与 Hook 平台对齐）
+
+SpecLite 维护者与 AI IDE 使用者可以依赖"owning SPEC 与已发布实现一致"的 lifecycle / issue / hook 契约：SPEC 09 追认已实现的 Flow Gate report v2 与 gate precedence，SPEC 07 不再保留无产出点的 issue id，installer 生成的 hook 命令在 Claude Code 与 Codex 上只依赖两家平台文档化的行为，并且 canonical source hook 只投影到真正拥有 protected surface 的项目。
+
+**实施范围：** Corrective planning Epic。来源为 `story-candidates-2026-09-13.md` 的 SC-3、SC-4、SC-5 与 module-scoped hook projection 候选，以及 Epic 11 retro `A11-3`。Story 12.1 / 12.2 独立，Story 12.3 → 12.4 serial。
+
+**MVP guard：** 不改变 Flow Gate 判定规则、mode / result 枚举、canonical hook warning-only 语义、hook 事件集合与 matcher、`CommandResult` JSON contract 或 `speclite resolve` contract。SPEC 变更先于实现落地；改变 installer-owned hook config 内容前必须先登记 recognized legacy shape。
+
+**覆盖 FR / NFR / UX：** FR35b, FR35c, FR36, FR39, FR41b, FR41c, FR66, FR71a, NFR14, NFR17, NFR17a, NFR28b, NFR32f, SPEC 03 repair eligibility, SPEC 07 issue taxonomy ownership, SPEC 09 lifecycle contract ownership
+
+## Epic 13: Governance Command Outcome-Oriented Human Output（治理命令 Outcome 导向人类输出）
+
+项目维护者、工具链维护者与 AI IDE 使用者可以在 `init`、`list`、`doctor`、`sync`、`uninstall`、`governance-report` 六个 Post-MVP 治理命令上获得与 Epic 8 同一套 outcome-oriented、中文默认、可扫描、下一步明确的 human-readable output，并且 `validate` 的 Next Actions 只反映需要人处理的 severity。
+
+**实施范围：** Corrective planning Epic。来源为 `story-candidates-2026-09-13.md` 的 SC-1、SC-2 与 CR `TODO-011`。Story 13.1 → 13.2 → 13.3 strict serial；Epic 8 retro `A7-2` 对 Post-MVP 命令的排除到本 Epic 解除。
+
+**MVP guard：** 只重构 human-readable presentation、message catalog 与 Next Actions 生成；不改变六个命令的 core behavior、`CommandResult` JSON contract、exit code、issue ordering 或 fixture stable JSON comparison。`nextActions` 内容变更必须先确认为 `speclite.command-result.v1` 内的 compatible change 并同步 fixture expected outputs。
+
+**覆盖 FR / NFR / UX：** FR35a, FR35b, FR72, FR73, FR74, FR75, FR76, FR78, NFR35b, NFR35b-11, NFR35b-12, NFR35b-13, NFR35b-14, UX-DR1, UX-DR2, UX-DR5, UX-DR9, UX-DR10, UX-DR11, UX-DR13
