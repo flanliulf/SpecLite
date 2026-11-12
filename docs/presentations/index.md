@@ -7,6 +7,7 @@
 | Presentation | Audience | Source Documents |
 |---|---|---|
 | [`canonical-source-governance/`](canonical-source-governance/README.md) | SpecLite 维护者、架构师与方法论贡献者 | canonical source layout、governance、runtime boundaries |
+| [`speclite-concepts-primer/`](speclite-concepts-primer/README.md)（分享稿：[`speaker-script.md`](speclite-concepts-primer/speaker-script.md)） | 研发工程师、架构师、技术负责人与项目交付负责人；不要求用过 SpecLite | orientation、skill taxonomy and SDLC、SDLC phases、agent roster、file ownership model、quick start |
 
 ## Maintenance Rules（维护规则）
 
