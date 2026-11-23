@@ -72,6 +72,8 @@ Epic 11 建立并可被后续 Epic 依赖的实现锚点：
 
 ## Recommended Next Action（推荐下一步）
 
+2026-11-23 交接链接补录（TODO-028）：[Story 11.10 Grill 引用清单](../stories/11-10-inventory-all-grill-related-skill-references-for-human-confirmation.md)。
+
 经用户授权后将 `sprint-status.yaml` 的 `epic-11` 置为 `done`；可选运行 `epic-11-retrospective`。下一 Epic kickoff 前须以本报告为 predecessor completion evidence。
 
 ---
