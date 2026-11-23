@@ -34,7 +34,7 @@
 
 1. 先查看远端新增提交，再将其中与本计划有关的候选事项纳入范围核对。不要直接把旧工作区规划当作最新全集。
 2. 核对 `story-candidates-2026-09-13.md`、Epic 12／13、`epics/index.md`、Epic list 和 `sprint-status.yaml`。为已进入 Epic 的候选补充对应关系，修正“尚未进入 sprint-status”的过期说明。
-3. 对账 CR TODO：`TODO-010` 对应 Story 12.3，`TODO-011` 对应 Story 13.3；`TODO-013`／`TODO-014` 保留为独立 artifact root 契约决策。核验 `TODO-028` 的交付证据后，再决定是否关闭。
+3. 对账 CR TODO。既有 `TODO-010` 归 12.3，`TODO-011` 归 13.3。2026-11-23 已按 Story 11.10 AC8 关闭 `TODO-028`。Epic 11 其余事项按下节安排。
 4. 逐项检查 Story 的验收标准、契约归属、依赖和 Threat Model & Non-Goals。后者用于界定要处理的威胁及明确排除的范围。
 5. 按明确范围提交规划。保留业务源码、个人配置和其他任务的改动。
 
@@ -66,6 +66,40 @@ Epic 12 的硬依赖为 `12.3 → 12.4`。Epic 13 按 `13.1 → 13.2 → 13.3` �
 
 优先推进 12.1 是治理建议，不新增其他 Story 对它的代码级依赖。Epic 11 retrospective 的 `A11-3` 要求在下一个 Story kickoff 前裁决 gate 优先级；Epic 12 草案又把该裁决列为 12.1 的交付物。fresh IR 和 12.1 kickoff 必须明确这一起步条件，不能仅凭本文绕过已有门禁。
 
+## Epic 11 Follow-up Plan（Epic 11 剩余待办执行计划）
+
+2026-11-23 核对基线为 `0927168`。Epic 12／13 规划已在 `7ce557e` 提交，七个 Story 均为 `backlog`。全库 CR 台账现有 14 项 open，其中 11 项来自 Epic 11。旧方案的 `TODO-018` 至 `TODO-022` 已由 11.9 重启取代。以下 Story 名称供立项使用，正式编号在排期时分配。
+
+### Existing Story Assignments（并入现有 Story）
+
+| 承接方 | 执行安排 | 验收与范围 |
+|---|---|---|
+| Epic 12 · 12.1 | 优先执行回顾行动 `A11-3`。在 fresh IR／kickoff 明确本次以现行 SPEC 09 进场，由 12.1 交付新的门禁顺序。同步应用 `A11-5`。 | SPEC 09 明确 completion gate、finalizer 和 tracker 的先后，顺序违规有稳定诊断。12.1 的静态断言附反向用例。全项目 reviewer 检查项另按下文验收。 |
+| Epic 12 · 12.3／12.4 | 12.3 已承接历史 `TODO-010`，12.4 等 12.3 completion gate 通过。两者修改安装 fixture 时检查 `A11-2` 是否已触发。 | 验证 hook 配置缺失时的可操作提示及安装投影。若发现依赖 Skill 总数的断言，按下文测试维护项处理。 |
+| Epic 13 · 13.1 → 13.2 → 13.3 | 沿既有依赖执行，13.3 已承接历史 `TODO-011`。涉及公开输出文档时应用 `A11-6`。 | 13.3 验收写入失败时的 Step State。Epic 13 的交付范围是治理命令的人类可读输出。 |
+
+`TODO-010`、`TODO-011` 来自更早的 Epic。逐项对照后，Epic 11 剩余 11 个 CR TODO 均归下表。Epic 12 正文明示 `TODO-013`、`TODO-014` 由后续 artifact root 契约工作裁决。
+
+### Delivery Queue（执行顺序与关闭条件）
+
+表中顺序是建议排期。T1／T2／T3 和 P2 沿用台账原值。“下次触及”以对应组件为触发条件，不改变 12.1、12.2 的独立性或 Epic 13 的串行顺序。
+
+| 顺序与原优先级 | 归属与事项 | 前置条件及完成证据 |
+|---|---|---|
+| 1 · 下次触及 CR 目录解析时优先，T1／T2／T3 | **独立 Story：CR 目录选择与续跑。** Amelia 合并处理 `TODO-023`、`TODO-024`、`TODO-025`（`A11-4`）。同一 Story 的 runner 文档任务承接 T3 的 `TODO-026`、`TODO-027`。 | 先确定合法目录、失效链接及链接形式的 summary／finalizer 如何计入轮次。验收目录边界检查与实际访问一致，失效候选得到约定结果，已完成／未完成判定有测试。再对照该规则检查 runner：先定位再写记录；同一 series 多个已关闭旧目录时停止并请求裁决。以 fresh review／evaluation 逐条复核五个指纹；保留按名称解析的职责边界。 |
+| 2 · 下次契约评审，P2 | **独立 Story：产物根目录与旧 Story 兼容契约。** Winston 牵头，分别裁决 `TODO-013`、`TODO-014`。 | 两项决策独立。逐项记录受保护命名空间是否可作 root、单文件及仅有元数据的旧 Story 是否受支持。若维持现状，引用 SPEC 和兼容测试关闭对应项；若改变行为，先确定 SPEC 09／诊断归属，再以 focused test 验证配置、发现与原位兼容。 |
+| 2 · 下次修改 missing-index 分支前，P2 | **独立 Story：分片文档候选识别。** Winston 与 Amelia 承接 `TODO-016`。 | 由文档发现契约 owner 先裁决链接目标的分类和诊断优先级。测试覆盖可读文件、越界、失效链接及非普通文件；缺 index 时仅判断候选、零消费、零写入，有 index 时只按声明发现。与 CR 目录解析可独立排期。 |
+| 3 · 公开路由文档维护，P2 | **独立 Story：工作流路由文档与 UX 输入一致性。** Paige 与 Amelia 承接 `TODO-012`、`TODO-017`。 | 先核对当前文档位置和各行实际 producer／updater。确认 Architecture 重复 step 的归属后，对齐保留的副本与生效的 UX 精确路径，验证安装投影。再逐行对照文档与当前行为，记录仍需 owner 裁决的路由；完成 docs 检查。可先处理与 UX 无关的行。 |
+| 3 · 证据维护窗口，P2 | **独立维护任务：11.4 历史扫描对账。** Dana 承接 `TODO-015`，无需单立产品 Story，可与其他工作并行。 | 在历史基线复原命令、表达式、范围、排除项和分组计数。若无法复原，保存可重跑的新审计并注明旧 `575` 的替代关系。由另一人按记录重跑后关闭。 |
+
+### Retrospective Actions（回顾行动归属）
+
+- **工作流维护。** Winston／Amelia 在下一个 resolver 或 validation Story kickoff 使用 `A11-1` 核对威胁模型；需要新增模板或自动门禁时，作为独立工作流维护 Story 验收缺失章节的诊断。Dana 在 12.1 执行 `A11-5` 的反向用例，并单独核验 reviewer 清单已覆盖此项。Paige／Dana 将 `A11-6` 用于上述文档工作及涉及公开文档的 12／13 Story，在 dev 完成前记录授权范围、旧措辞扫描与 docs 检查结果。
+- **测试维护。** `A11-2` 由 Amelia／Dana 在下次调整 canonical Skill 数量或重生成 fixture 时承接。若固定计数仍存在，单列测试维护任务，以 source tree 推导预期值，并验证增减一个 Skill 时只报告实际 manifest／fixture 差异。
+- **产品立项。** `A11-7` 由 John／Winston 在 backlog 整理时复核上表归属。11.10 B3 保留为**独立 Grill 治理 Story 候选**；先裁决两个 standalone Skill 的定位和现有调用方去向。选择调整时再立项，并验收调用关系、双语入口及兼容路径；选择保留时记录产品裁决即可。
+
+每个执行方在对应验收通过后把证据回填到 [CR TODO 台账](../implementation-artifacts/cr-rules/cr-todo-backlog.md)，逐项关闭。规划归属、开始实施、解决待办分别记录。
+
 ## Verification And Follow-ups（验证与后续事项）
 
 - **契约一致性：** 已知差异是 SPEC 09 声明 report v1，而 hook 要求 v2。12.1 应先确认 owning SPEC，再同步消费者。
@@ -88,4 +122,4 @@ Epic 12 的硬依赖为 `12.3 → 12.4`。Epic 13 按 `13.1 → 13.2 → 13.3` �
 | [CHANGELOG](../../CHANGELOG.md) | 已记录的版本变更；发布成功须另查 registry。 |
 | [Docs directory guide](../../docs/README.md) | 过程计划归 `_bmad-output/`，不接入公开文档导航。 |
 
-截至整理时，Epic 12／13 正文仅存在于未跟踪的工作区文件；步骤 2 完成后，才能将其作为已提交的交接材料。
+原始规划快照见 Evidence Baseline；Epic 12／13 当前的已提交规划见 [Epic index](epics/index.md)，待办归属见上方 2026-11-23 执行计划。
