@@ -224,19 +224,19 @@ CLI human-readable output 的 outcome/test/docs 覆盖矩阵见 [docs/reference/
 
 以下是产品与 canonical source 的迭代路线；公开文档体系自身的整理项见 [docs/README.md](https://github.com/flanliulf/SpecLite/blob/main/docs/README.md) 的 Current Migration State（当前迁移状态）。
 
-- [x] 统一 workflow 输出 Artifacts 目录：SPEC 09 七类 artifact root、带阶段序号的默认目录与 `speclite resolve artifact-roots` 已在 0.4.0 交付。
-- [ ] 优化 canonical source skills 自身的目录分层与顺序可读性，并建立跨 Skill 的产物文件命名规范（0.4.0 仅固化 PRD validation report 与 Implementation Readiness report 两类文件名）。
-- [ ] 支持既有项目多次迭代的 `_speclite-output` 体系。
+- [x] 统一工作流产物目录。0.4.0 按 SPEC 09 配置七类产物根目录，新安装会创建默认目录，各阶段目录带顺序编号。用 `speclite resolve artifact-roots` 查询实际路径，用 `speclite resolve artifact-documents` 查找整篇或分片的 PRD、Epics 和 Architecture 文档，用 `speclite resolve cr-directory` 按 Story ID 定位代码审查目录。
+- [ ] 完善跨 Skill 的产物文件命名规范，使 canonical source 中 Skill 的目录层级和执行顺序更易读。Epic 11 已统一 PRD 验证报告和 Implementation Readiness 报告的文件命名，其余产物命名与 Skill 源目录整理待完成。
+- [ ] 支持既有项目在 `_speclite-output` 中组织、选择和接续多轮迭代的产物。Epic 11 已支持沿用项目配置的根目录、查找旧布局，并在更新时原位保留历史产物。
 - [ ] 支持微服务体系的跨多仓库迭代开发体系。
-- [x] 补齐 Grill 方法论 Skill 资产（`speclite-grilling`、`speclite-grill-with-docs`、Implementation Readiness grill consistency reviewer），并完成全量 grill 引用盘点与治理裁决。
-- [ ] 将 Grill 追问协议无痕嵌入 PRD、Architecture、Story、Dev 等核心流程 Skills 的工作流步骤。
+- [x] 交付 `speclite-grilling`、`speclite-grill-with-docs` 和 Implementation Readiness Grill 一致性审查 Skill。Epic 11 逐条核对了 269 条 Grill 引用，并按裁决修正 Skill 调用名、输出名称和依赖说明。
+- [ ] 将 Grill 追问嵌入 PRD、Architecture、Story 和 Dev 各自的工作流步骤。Implementation Readiness 的一致性审查已内建这套协议，四类核心工作流的接入仍待完成。
 - [ ] 增强 debugging 等核心能力 Skills。
 - [x] 建立公开文档体系：Diataxis 分层、`docs:check` 门禁、`docs/_STYLE_GUIDE.md`、唯一源定义页与 Moved 兼容页已在 0.4.0 交付。
 - [ ] 按已建立的 doc system 规范重构 canonical source skills 自身的文档结构。
-- [x] 为 project knowledge 建立独立 artifact root（`{project_knowledge}`）并接入 `speclite-terminology-governance` 术语治理。
-- [ ] 增强既有项目的 project knowledge 生产与维护能力（project context、brownfield context、document project 的知识产出结构与增量更新）。
-- [x] UX 产物归集到 `{planning_artifacts}/ux/` 并建立 fail-closed 写入边界。
-- [ ] 整体优化 UX 方法论体系；治理命令的 CLI human output 统一由 Epic 13 覆盖。
+- [x] 为项目知识建立独立根目录 `{project_knowledge}`。当用户和项目文档规范都未指定术语表位置时，`speclite-terminology-governance` 将术语表写入解析后的 `{project_knowledge}/glossary/`。
+- [ ] 完善既有项目的知识生产与维护。下一步是明确 project context、brownfield context、document project 各自产出哪些知识文档，以及后续迭代如何增量更新这些文档。
+- [x] 将 UX 产物和 `design-system/` 归集到 `{planning_artifacts}/ux/`。创建产物时检查目标路径并阻断越界写入，旧位置的 UX 产物仍可查找。
+- [ ] 优化 UX 方法论与工作流。UX 产物的存放和写入保护已完成。治理命令的 CLI 人类可读输出已单独列入 Epic 13 规划。
 - [ ] 支持测试架构体系模块（TEA）。
 - [ ] 支持 CI/CD 能力。
 - [ ] 支持代码工程化风格能力，以及代码简化和代码重构 skills。
